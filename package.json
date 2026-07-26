@@ -1,0 +1,19 @@
+{
+  "name": "tehilim",
+  "version": "1.0.0",
+  "description": "Tehilim - Hebrew Psalms Application",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^1.1.0"
+  },
+  "keywords": [
+    "tehilim",
+    "psalms",
+    "hebrew"
+  ],
+  "author": "",
+  "license": "ISC"
+}
