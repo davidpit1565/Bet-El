@@ -104,7 +104,7 @@ body::before{ /* subtle starfield/texture */
 
 /* ================= HOME ================= */
 .hero{text-align:center;padding:18px 0 6px}
-.hero-logo{width:190px;max-width:56vw;height:auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,.6));
+.hero-logo{width:190px;max-width:56vw;height:auto;
   animation:rise .9s var(--ease) both}
 @keyframes rise{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
 .hero-sub{font-family:var(--font-sacred);font-size:15px;color:var(--muted);letter-spacing:3px;margin-top:2px}
@@ -198,11 +198,11 @@ body::before{ /* subtle starfield/texture */
 .chapter-title{text-align:center;font-family:var(--font-sacred);font-size:30px;font-weight:700;margin:20px 0 6px}
 .chapter-title .num{color:var(--gold)}
 .chapter-cap{text-align:center;color:var(--muted);font-size:12px;letter-spacing:2px;margin-bottom:12px}
-.psalm-body{font-family:var(--font-sacred);font-size:calc(21px * var(--fs-scale));line-height:2.05;
-  text-align:justify;color:var(--ink);padding:4px 2px}
-.verse{margin:0}
-.verse .vn{display:inline-block;font-size:.62em;color:var(--verse-num);font-weight:700;
-  vertical-align:.15em;margin-left:6px;font-family:var(--font-ui)}
+.psalm-body{font-family:var(--font-sacred);font-size:calc(21px * var(--fs-scale));line-height:2.0;text-align:justify;
+  text-align:justify;color:var(--ink);padding:4px 2px;direction:rtl;unicode-bidi:bidi-override}
+.verse{margin:0;display:inline;word-spacing:.15em;letter-spacing:.3px}
+
+  vertical-align:.15em;margin-right:6px;font-family:var(--font-ui);order:-1}
 
 /* prayer block */
 .prayer{background:var(--panel-2);border:var(--glass-border);border-radius:var(--radius);
@@ -372,6 +372,8 @@ body::before{ /* subtle starfield/texture */
   .topbar{padding-top:calc(16px + env(safe-area-inset-top))}
   .bottom-nav{padding-bottom:calc(env(safe-area-inset-bottom) + 4px)}
 }
+
+[data-lang="he"] .psalm-body{direction:rtl;unicode-bidi:bidi-override}
 /* clearer bottom nav */
 .bottom-nav{border-top:1px solid var(--line-strong)}
 [data-theme="light"] .bottom-nav{background:#fbf6ea;box-shadow:0 -8px 24px -14px rgba(80,60,20,.35)}
@@ -571,6 +573,273 @@ input,select,button{max-width:100%;box-sizing:border-box}
   font-family:var(--font-ui);font-size:13px;background:var(--panel)}
 .zmanim-soon svg{width:16px;height:16px;flex:none;opacity:.7}
 
+/* ===== UPGRADES CSS ===== */
+
+/* Upgrade 1: Zohar card */
+.zohar-card {
+  background: linear-gradient(135deg, rgba(215, 165, 48, 0.08) 0%, rgba(215, 165, 48, 0.04) 100%);
+  border: 1px solid var(--accent-light);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+  font-family: var(--font-serif);
+}
+.zohar-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.zohar-content {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.zohar-parsha {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Upgrade 2: TTS buttons */
+
+/* Upgrade 8: Search */
+.search-panel {
+  padding: 12px;
+}
+.search-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: 8px;
+}
+.search-tab {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+}
+.search-tab.active {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.search-results {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.search-result-item {
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  border-right: 3px solid var(--accent);
+  background: var(--panel);
+  font-size: 13px;
+}
+.search-result-item:hover {
+  background: var(--panel-hover);
+}
+.search-result-ref {
+  font-weight: 600;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Upgrade 9: Stats */
+.stats-panel {
+  padding: 12px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* Upgrade 10: Lists */
+.lists-panel {
+  padding: 12px;
+}
+.list-item {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: var(--panel);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-right: 3px solid var(--accent);
+}
+.list-item:hover {
+  background: var(--panel-hover);
+}
+.list-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.list-delete, .list-chapter-remove {
+  cursor: pointer;
+  color: #ff6b6b;
+  opacity: 0.6;
+  font-size: 13px;
+}
+.list-delete:hover, .list-chapter-remove:hover {
+  opacity: 1;
+}
+.list-new-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* ===== END UPGRADES ===== */
+
+/* === UPGRADES CSS === */
+
+/* Verse actions (TTS + Share) */
+
+/* Settings sections */
+.settings-section {
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.settings-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+/* Search */
+.search-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.search-tab {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  background: var(--panel-hover);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.search-tab.active {
+  background: var(--accent);
+  color: var(--bg);
+}
+.search-results {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.search-result-item {
+  padding: 6px;
+  margin-bottom: 4px;
+  background: var(--panel-hover);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.search-result-item:hover {
+  background: rgba(215, 165, 48, 0.15);
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stat-card {
+  background: var(--panel-hover);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+}
+.stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Lists */
+.list-new-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  width: 100%;
+}
+.list-item {
+  padding: 8px 10px;
+  background: var(--panel-hover);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.list-item:hover {
+  background: rgba(215, 165, 48, 0.15);
+}
+.list-delete {
+  color: #ff6b6b;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* === END UPGRADES === */
 </style>
 </head>
 <body>
@@ -815,8 +1084,9 @@ function hebDateShort(hd){ return heNum(hd.getDate())+' '+monthNameHe(hd); }
 
 /* ---------- settings ---------- */
 const ZMANIM_LIVE = false; // times temporarily disabled pending updated formulas
-const MEMORIAL = ['אֲבִישַׁי בֶּן יִשָּׂשכָר','יִשָּׂשכָר בֶּן אֲבִישַׁי','נָדָב יְהוּדָה בֶּן אֲבִישַׁי'];
-function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
+const MEMORIAL = {'row1':['יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן','אֲבִישַׁי בֶּן יִשָּׂשכָר'],'row2':['נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
+function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.row1.join(' · ')}<br>${MEMORIAL.row2.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
+if(typeof history !== 'undefined' && history.scrollRestoration) history.scrollRestoration = 'manual';
 const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00' };
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); }
@@ -1015,7 +1285,14 @@ function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div
 /* ================= ROUTER ================= */
 const app = document.getElementById('app');
 let TAB='home';
-function go(tab){ TAB=tab; render(); document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab)); window.scrollTo({top:0}); }
+function go(tab){ 
+  TAB=tab; 
+  render(); 
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab)); 
+  window.scrollTo(0,0);
+  requestAnimationFrame(()=>window.scrollTo(0,0));
+  setTimeout(()=>window.scrollTo(0,0), 50);
+}
 function render(){
   if(TAB==='home') renderHome();
   else if(TAB==='tehillim') renderTehillim();
@@ -1163,7 +1440,7 @@ function openReader(chapters, opt){
   opt=opt||{};
   let idx=0; if(opt.start){ const p=chapters.indexOf(opt.start); if(p>=0) idx=p; }
   RD={ chapters:chapters.slice(), idx, daily:!!opt.daily, hd:opt.hd||currentHDate(), verse:(opt.verse!=null?opt.verse:null) };
-  TAB='reader'; renderReader(); window.scrollTo({top:0});
+  TAB='reader'; renderReader(); window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); setTimeout(()=>window.scrollTo(0,0), 50);
 }
 function prayerBlock(which){
   const pr=P[which]; if(!pr) return '';
@@ -1182,7 +1459,7 @@ function vNum(n){ return S.lang==='he'?heNum(n):String(n); }
 function chapterHTML(ch){
   const trv=langText(ch);
   const verses=trv||T[ch]||[];
-  const body=verses.map((v,i)=>`<span class="verse${trv?' latin':''}"><span class="vn">${vNum(i+1)}</span>${v}</span> `).join('');
+  const body=verses.map((v,i)=>`<span class="verse${trv?' latin':''}">${v}</span> `).join('');
   return `<div class="chapter" data-ch="${ch}">
     <div class="chapter-title">מִזְמוֹר <span class="num">${heNum(ch)}</span></div>
     <div class="chapter-cap">פֶּרֶק ${ch} · ${verses.length} פְּסוּקִים</div>
@@ -1213,6 +1490,11 @@ function renderContinuous(chs,hd){
   requestAnimationFrame(()=>{ window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); });
 }
 function renderReader(){
+  // Scroll to top immediately and with delay for all browsers
+  window.scrollTo(0,0);
+  requestAnimationFrame(()=>window.scrollTo(0,0));
+  setTimeout(()=>window.scrollTo(0,0), 50);
+
   const ch=RD.chapters[RD.idx]; setLast(ch);
   const first=RD.idx===0, last=RD.idx===RD.chapters.length-1;
   const total=RD.chapters.length;
@@ -1271,7 +1553,7 @@ function wireReader(){
   app.querySelectorAll('[data-prayer]').forEach(pb=>{
     pb.querySelector('[data-ptoggle]').onclick=()=>pb.classList.toggle('collapsed');
   });
-  const prev=document.getElementById('rPrev'); if(prev) prev.onclick=()=>{ if(RD.idx>0){ markRead(RD.chapters[RD.idx]); RD.idx--; renderReader(); window.scrollTo({top:0}); } };
+  const prev=document.getElementById('rPrev'); if(prev) prev.onclick=()=>{ if(RD.idx>0){ markRead(RD.chapters[RD.idx]); RD.idx--; renderReader(); window.scrollTo(0,0); setTimeout(()=>window.scrollTo(0,0), 50); } };
   const next=document.getElementById('rNext'); if(next) next.onclick=()=>{
     markRead(RD.chapters[RD.idx]); RD.idx++; renderReader(); window.scrollTo({top:0});
   };
@@ -1551,7 +1833,7 @@ function shareSheet(title, text, opts){
   ov.querySelector('[data-wa]').onclick=()=>{ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank'); close(); };
   ov.querySelector('[data-copy]').onclick=()=>{ copyText(text).then(()=>toast('הֻעְתַּק לַלּוּחַ')); close(); };
   const nat=ov.querySelector('[data-native]'); if(nat) nat.onclick=()=>{ const d={title,text}; if(url)d.url=url; navigator.share(d).catch(()=>{}); close(); };
-  const ib=ov.querySelector('[data-img]'); if(ib) ib.onclick=()=>{ close(); shareImage(imgCh); };
+  
 }
 async function tehillimImage(ch){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
