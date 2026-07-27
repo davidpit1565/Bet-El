@@ -396,6 +396,44 @@ function checkNotification(){
 .modal .m-crown{color:var(--gold);margin-bottom:8px}.modal .m-crown svg{width:56px;height:56px;filter:drop-shadow(0 6px 14px rgba(212,175,95,.5))}
 .modal .close-x{position:absolute;top:14px;left:14px;background:none;border:none;color:var(--muted);cursor:pointer}
 .modal .close-x svg{width:20px;height:20px}
+/* ---- special "Shefa" praise: upgraded, distinct look ---- */
+.modal.modal-special{background:linear-gradient(160deg,var(--panel-solid) 50%,rgba(212,175,95,.16));
+  border:1.5px solid rgba(212,175,95,.7);padding:34px 24px;
+  box-shadow:0 0 0 1px rgba(212,175,95,.3),0 24px 60px rgba(184,134,11,.4),var(--card-shadow);
+  animation:pop .5s var(--ease), shefaGlow 2.2s ease-in-out infinite;overflow:hidden}
+.modal.modal-special::before{content:'';position:absolute;inset:-2px;border-radius:24px;padding:2px;
+  background:conic-gradient(from 0deg,#b8860b,#e6c874,#fff8e0,#e6c874,#b8860b,#e6c874,#b8860b);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;animation:ringSpin 4s linear infinite;opacity:.85}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+@keyframes shefaGlow{0%,100%{box-shadow:0 0 0 1px rgba(212,175,95,.3),0 24px 60px rgba(184,134,11,.4)}50%{box-shadow:0 0 0 1px rgba(212,175,95,.65),0 24px 75px rgba(212,175,95,.65)}}
+.modal .m-crown-special{margin-bottom:12px;position:relative;display:inline-flex;align-items:center;justify-content:center;z-index:1}
+.modal .m-crown-special::before{content:'';position:absolute;width:110px;height:110px;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(230,200,116,.55) 8deg,transparent 16deg,
+    transparent 40deg,rgba(230,200,116,.55) 48deg,transparent 56deg,
+    transparent 80deg,rgba(230,200,116,.55) 88deg,transparent 96deg,
+    transparent 120deg,rgba(230,200,116,.55) 128deg,transparent 136deg,
+    transparent 160deg,rgba(230,200,116,.55) 168deg,transparent 176deg,
+    transparent 200deg,rgba(230,200,116,.55) 208deg,transparent 216deg,
+    transparent 240deg,rgba(230,200,116,.55) 248deg,transparent 256deg,
+    transparent 280deg,rgba(230,200,116,.55) 288deg,transparent 296deg,
+    transparent 320deg,rgba(230,200,116,.55) 328deg,transparent 336deg);
+  border-radius:50%;animation:raysSpin 6s linear infinite;z-index:-1}
+@keyframes raysSpin{to{transform:rotate(360deg)}}
+.modal .m-crown-special svg{width:76px;height:76px;filter:drop-shadow(0 8px 22px rgba(212,175,95,.8));
+  animation:iconPulse 1.6s ease-in-out infinite}
+@keyframes iconPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.modal .special-title{font-size:34px;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(90deg,#b8860b,#fff8e0,#b8860b,#e6c874,#b8860b);
+  -webkit-background-clip:text;background-clip:text;color:transparent;background-size:300% auto;
+  animation:shineText 2.4s linear infinite}
+@keyframes shineText{0%{background-position:0% center}100%{background-position:300% center}}
+.modal .special-title .sp-sparkle{-webkit-text-fill-color:var(--gold);color:var(--gold);font-size:20px;
+  animation:sparkleTwinkle 1.4s ease-in-out infinite}
+.modal .special-title .sp2{animation-delay:.25s}
+.modal .special-title .sp3{animation-delay:.5s}
+.modal .special-title .sp4{animation-delay:.75s}
+@keyframes sparkleTwinkle{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 
 /* confetti */
 .confetti{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
@@ -1457,9 +1495,11 @@ function isRead(ch){ return readSet().has(ch); }
 /* ---------- rotating praise on daily completion ---------- */
 const PRAISES=[
   {t:'יִישַׁר כֹּחֲךָ', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>תִּזְכֶּה לְמִצְווֹת!'},
+  {t:'שְׁפָעוֹת', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>יִשְׁפְּעוּ עָלֶיךָ שְׁפָעוֹת שֶׁל בְּרָכָה, הַצְלָחָה וְשָׁלוֹם!', special:true},
   {t:'אַשְׁרֶיךָ', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>אַשְׁרֶיךָ בָּעוֹלָם הַזֶּה וְטוֹב לָךְ בָּעוֹלָם הַבָּא!'},
   {t:'כָּל הַכָּבוֹד', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>כָּל הַכָּבוֹד עַל הַהַתְמָדָה!'},
   {t:'חֲזַק וֶאֱמַץ', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>חֲזַק וֶאֱמַץ לְהַמְשִׁיךְ כָּכָה!'},
+  {t:'שְׁפָעוֹת', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>יִשְׁפְּעוּ עָלֶיךָ שְׁפָעוֹת שֶׁל בְּרָכָה, הַצְלָחָה וְשָׁלוֹם!', special:true},
   {t:'תִּזְכֶּה לְמִצְווֹת', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>תִּזְכֶּה לְמִצְווֹת רַבּוֹת!'},
   {t:'תָּבוֹא עָלֶיךָ בְּרָכָה', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>תָּבוֹא עָלֶיךָ בְּרָכָה!'},
   {t:'בָּרוּךְ תִּהְיֶה', p:'סִיַּמְתָּ אֶת קְרִיאַת הַתְּהִלִּים שֶׁל הַיּוֹם.<br>בָּרוּךְ תִּהְיֶה מִן הַשָּׁמַיִם!'}
@@ -2430,12 +2470,13 @@ function openCityPicker(){
 function celebrate(kind){
   const grand = kind==='grand';
   const pr = grand ? null : nextPraise();
-  confetti(grand?90:45);
+  const special = !grand && pr.special;
+  confetti(grand?90:(special?130:45));
   const ov=document.createElement('div'); ov.className='overlay';
-  ov.innerHTML=`<div class="modal">
+  ov.innerHTML=`<div class="modal${special?' modal-special':''}">
     <button class="close-x" data-close>${I.x}</button>
-    <div class="m-crown">${I.star}</div>
-    <h3 class="gold-text">${grand?'חֲזַק חֲזַק וְנִתְחַזֵּק':pr.t}</h3>
+    <div class="m-crown${special?' m-crown-special':''}">${special?I.flame:I.star}</div>
+    <h3 class="gold-text${special?' special-title':''}">${special?`<span class="sp-sparkle sp1">✦</span><span class="sp-sparkle sp2">✦</span> ${pr.t} <span class="sp-sparkle sp3">✦</span><span class="sp-sparkle sp4">✦</span>`:(grand?'חֲזַק חֲזַק וְנִתְחַזֵּק':pr.t)}</h3>
     <p>${grand?'סִיַּמְתָּ אֶת כָּל סֵפֶר הַתְּהִלִּים לְחֹדֶשׁ זֶה!<br>תְּהִי מִשְׁנָתְךָ לְעִלּוּי וּלְבְרָכָה.':pr.p}</p>
     <button class="btn btn-gold" data-close><span>${I.heart}</span><span>אָמֵן</span></button>
   </div>`;
