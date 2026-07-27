@@ -2492,6 +2492,10 @@ try{
   }
 }catch(e){}
 
+// Expose functions referenced by inline onclick="..." HTML attributes (these run in global scope)
+window.go = go;
+window.openPrayer = openPrayer;
+
 })();
 </script>
 </body>
