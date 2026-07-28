@@ -2233,7 +2233,7 @@ function renderSettings(){
   document.getElementById('shareApp').onclick=shareApp;
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
   document.getElementById('bkExport').onclick=()=>{
-    const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl'];
+    const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
     const data={}; keys.forEach(k=>{const v=localStorage.getItem(k); if(v!=null)data[k]=v;});
     const blob=new Blob([JSON.stringify({app:'betel-tehillim',v:1,data})],{type:'application/json'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -2286,7 +2286,7 @@ function renderSettings(){
   // share backup
   const bks=document.getElementById('bkShare');
   if(bks) bks.onclick=()=>{
-    const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl'];
+    const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
     const data={}; keys.forEach(k=>{const v=localStorage.getItem(k);if(v!=null)data[k]=v;});
     const text=JSON.stringify({app:'betel-tehillim',v:1,data});
     if(navigator.share) navigator.share({title:'גיבוי תהילים בית אל',text}).catch(()=>{});
