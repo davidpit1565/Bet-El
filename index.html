@@ -1014,6 +1014,21 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ach-section-title{font-family:var(--font-sacred);font-size:14px;color:var(--gold);letter-spacing:1px;margin:18px 4px 8px}
 .ach-section-title:first-of-type{margin-top:0}
 
+/* ---- shnayim mikra ---- */
+.sm-week-card{background:linear-gradient(135deg,var(--gold-soft,rgba(212,175,95,.16)),transparent);border:1px solid var(--glass-border);border-radius:16px;padding:16px;margin-bottom:16px;cursor:pointer}
+.sm-week-tag{font-size:12px;color:var(--muted);margin-bottom:4px}
+.sm-week-name{font-family:var(--font-sacred);font-size:22px;color:var(--gold)}
+.sm-book-title{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin:16px 4px 6px}
+.sm-book-title:first-of-type{margin-top:4px}
+.sm-parsha-row{padding:12px 14px;border-radius:12px;background:var(--glass-bg);border:1px solid var(--glass-border);margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sm-aliyah-head{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--glass-border)}
+.sm-aliyah-head:first-of-type{margin-top:4px}
+.sm-verse-row{margin-bottom:14px}
+.sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
+.sm-he{font-size:calc(17px*var(--fs-scale,1));line-height:1.9}
+.sm-targum{font-size:calc(14px*var(--fs-scale,1));line-height:1.8;color:var(--muted);margin-top:2px}
+.sm-loading{text-align:center;padding:60px 20px;color:var(--muted)}
+.sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 </style>
 </head>
 <body>
@@ -1368,7 +1383,8 @@ function openPrayer(prayerKey){
   forceScrollTop();
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:false, notifTime:'08:00' };
+const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:false, notifTime:'08:00', autoTheme:false };
+function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); }
 /* ---------- i18n ---------- */
@@ -1474,6 +1490,18 @@ function applySettings(){
   document.documentElement.style.setProperty('--fs-scale', S.fontScale);
   const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', S.theme==='dark'?'#080d19':'#efe6d2');
 }
+function applyAutoTheme(){
+  if(!S.autoTheme) return;
+  const now=new Date();
+  let want;
+  try{
+    const z=zmanimFor(now), sr=z.sunrise(), ss=z.sunset();
+    want = (sr && ss) ? ((now<sr || now>=ss) ? 'dark' : 'light') : null;
+  }catch(e){ want=null; }
+  if(!want){ const h=now.getHours(); want=(h>=19||h<6)?'dark':'light'; }
+  if(S.theme!==want){ S.theme=want; saveS(); applySettings(); }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') applyAutoTheme(); });
 
 /* ---------- location ---------- */
 const FALLBACK = { lat:51.2194, lon:4.4025, tz:'Europe/Brussels', name:'אנטוורפן, בלגיה', auto:false };
@@ -1486,6 +1514,58 @@ function requestGPS(cb){
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC', name:'המיקום הנוכחי שלך', auto:true };
     saveLoc(); cb&&cb(true);
   }, ()=>{ cb&&cb(false); }, {enableHighAccuracy:false, timeout:8000, maximumAge:3600000});
+}
+/* ---------- shnayim mikra (parashat hashavua) ---------- */
+const PARSHA_HE_NAMES = {"Bereshit":"בְּרֵאשִׁית","Noach":"נֹחַ","Lech-Lecha":"לֶךְ־לְךָ","Vayera":"וַיֵּרָא","Chayei Sara":"חַיֵּי שָֹרָה","Toldot":"תּוֹלְדוֹת","Vayetzei":"וַיֵּצֵא","Vayishlach":"וַיִּשְׁלַח","Vayeshev":"וַיֵּשֶׁב","Miketz":"מִקֵּץ","Vayigash":"וַיִּגַּשׁ","Vayechi":"וַיְחִי","Shemot":"שְׁמוֹת","Vaera":"וָאֵרָא","Bo":"בֹּא","Beshalach":"בְּשַׁלַּח","Yitro":"יִתְרוֹ","Mishpatim":"מִשְׁפָּטִים","Terumah":"תְּרוּמָה","Tetzaveh":"תְּצַוֶּה","Ki Tisa":"כִּי תִשָּׂא","Vayakhel":"וַיַּקְהֵל","Pekudei":"פְקוּדֵי","Vayikra":"וַיִּקְרָא","Tzav":"צַו","Shmini":"שְּׁמִינִי","Tazria":"תַזְרִיעַ","Metzora":"מְצֹרָע","Achrei Mot":"אַחֲרֵי מוֹת","Kedoshim":"קְדֹשִׁים","Emor":"אֱמוֹר","Behar":"בְּהַר","Bechukotai":"בְּחֻקֹּתַי","Bamidbar":"בְּמִדְבַּר","Nasso":"נָשׂא","Beha'alotcha":"בְּהַעֲלֹתְךָ","Sh'lach":"שְׁלַח־לְךָ","Korach":"קֹרַח","Chukat":"חֻקַּת","Balak":"בָּלָק","Pinchas":"פִּינְחָס","Matot":"מַטּוֹת","Masei":"מַסְעֵי","Devarim":"דְּבָרִים","Vaetchanan":"וָאֶתְחַנַּן","Eikev":"עֵקֶב","Re'eh":"רְאֵה","Shoftim":"שׁוֹפְטִים","Ki Teitzei":"כִּי־תֵצֵא","Ki Tavo":"כִּי־תָבוֹא","Nitzavim":"נִצָּבִים","Vayeilech":"וַיֵּלֶךְ","Ha'azinu":"הַאֲזִינוּ","Vezot Haberakhah":"וְזֹאת הַבְּרָכָה","Vayakhel-Pekudei":"וַיַּקְהֵל־פְקוּדֵי","Tazria-Metzora":"תַזְרִיעַ־מְצֹרָע","Achrei Mot-Kedoshim":"אַחֲרֵי מוֹת־קְדֹשִׁים","Behar-Bechukotai":"בְּהַר־בְּחֻקֹּתַי","Chukat-Balak":"חֻקַּת־בָּלָק","Matot-Masei":"מַטּוֹת־מַסְעֵי","Nitzavim-Vayeilech":"נִצָּבִים־וַיֵּלֶךְ"};
+const BOOK_HE_NAMES = {Genesis:'בְּרֵאשִׁית',Exodus:'שְׁמוֹת',Leviticus:'וַיִּקְרָא',Numbers:'בְּמִדְבַּר',Deuteronomy:'דְּבָרִים'};
+let TORAH=null, HAFTARAH=null, LEYNING=null;
+let smLoadPromise=null;
+function ensureShnayimData(){
+  if(TORAH) return Promise.resolve();
+  if(smLoadPromise) return smLoadPromise;
+  smLoadPromise = Promise.all([
+    fetch('data/torah-data.json').then(r=>r.json()),
+    fetch('data/haftarah-data.json').then(r=>r.json()),
+    fetch('data/leyning-data.json').then(r=>r.json()),
+  ]).then(([t,h,l])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; });
+  return smLoadPromise;
+}
+function parshaKeyForDate(dateObj){
+  try{
+    const il=/Jerusalem/.test(LOC.tz);
+    const day=dateObj.getDay();
+    const sat=new Date(dateObj); sat.setDate(dateObj.getDate()+(6-day)); sat.setHours(12,0,0,0);
+    const start=new Date(sat); start.setDate(sat.getDate()-1);
+    const end=new Date(sat); end.setDate(sat.getDate()+1);
+    const evs=HebrewCalendar.calendar({start,end,sedrot:true,il,location:hebLocation()});
+    const ev=evs.find(e=>/^Parashat /.test(e.getDesc?e.getDesc():''));
+    return ev ? ev.getDesc().replace('Parashat ','').trim() : null;
+  }catch(e){ return null; }
+}
+function currentParshaKey(){ return parshaKeyForDate(new Date()); }
+function parseVref(s){ const [c,v]=s.split(':').map(Number); return {c,v}; }
+function versesInRange(book,b,e){
+  const {c:c1,v:v1}=parseVref(b), {c:c2,v:v2}=parseVref(e);
+  const out=[];
+  for(let c=c1;c<=c2;c++){
+    const chapArr=TORAH[book][c-1];
+    const startV=(c===c1)?v1:1, endV=(c===c2)?v2:chapArr.length;
+    for(let v=startV; v<=endV; v++) out.push({c,v,he:chapArr[v-1][0],targum:chapArr[v-1][1]});
+  }
+  return out;
+}
+function haftarahVerses(h){
+  const list=Array.isArray(h)?h:[h];
+  const out=[];
+  list.forEach(seg=>{
+    const {c:c1,v:v1}=parseVref(seg.b), {c:c2,v:v2}=parseVref(seg.e);
+    for(let c=c1;c<=c2;c++){
+      const chapArr=(HAFTARAH[seg.k]||{})[c]||[];
+      const startV=(c===c1)?v1:1, endV=(c===c2)?v2:chapArr.length;
+      for(let v=startV; v<=endV; v++) if(chapArr[v-1]!=null) out.push({c,v,he:chapArr[v-1],book:seg.k});
+    }
+  });
+  return out;
 }
 function hebLocation(){
   const il = /Jerusalem/.test(LOC.tz);
@@ -1647,6 +1727,9 @@ function render(){
   else if(TAB==='calendar') renderCalendar();
   else if(TAB==='prayers') renderPrayersList();
   else if(TAB==='prayerReader') renderPrayerReader();
+  else if(TAB==='smList') renderShnayimList();
+  else if(TAB==='smReader') renderShnayimReader();
+  else if(TAB==='smHaftarah') renderShnayimHaftarah();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='achievements') renderAchievements();
   tr(app);
@@ -1674,6 +1757,7 @@ function renderHome(){
   const todayYahr=todaysYahrzeits();
   const rangeLabel = range[0]===range[1] ? ('פֶּרֶק '+heNum(range[0])) : ('פְּרָקִים '+heNum(range[0])+' – '+heNum(range[1]));
   const ded=dedicationLine(); const last=getLast();
+  const weekParshaKey=currentParshaKey();
   app.innerHTML = `
   ${topbar('בית אל')}
   <div class="view">
@@ -1712,6 +1796,10 @@ function renderHome(){
       <button class="btn btn-gold" id="startBtn">${I.play}<span>${readInPortion&&readInPortion<chs.length?'הַמְשֵׁךְ בַּקְּרִיאָה':'הַתְחֵל קְרִיאָה'}</span></button>
     </div>
 
+    ${weekParshaKey?`<div class="sm-week-card" id="homeParshaCard">
+      <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ</div>
+      <div class="sm-week-name">${PARSHA_HE_NAMES[weekParshaKey]||weekParshaKey}</div>
+    </div>`:''}
     <div class="quick-grid">
       <div class="q-tile" data-nav="tehillim"><div class="qi">${I.book}</div><div class="qt">כָּל הַתְּהִלִּים</div><div class="qd">ק״נ פְּרָקִים לְעִיּוּן</div></div>
       <div class="q-tile" data-nav="calendar"><div class="qi">${I.cal}</div><div class="qt">לוּחַ זְמַנִּים</div><div class="qd">זְמַנֵּי הַיּוֹם וְהֶחָג</div></div>
@@ -1721,6 +1809,7 @@ function renderHome(){
   </div>`;
   document.getElementById('startBtn').onclick=()=>renderContinuous(chs,hd);
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
+  const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
   const lc=document.getElementById('locChip'); if(lc) lc.onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַזְּמַנִּים לְפִי מִקּוּמְךָ':'לֹא הִתְקַבְּלָה הַרְשָׁאָה'); if(TAB==='home') render(); }); };
 }
 
@@ -1876,7 +1965,7 @@ function renderContinuous(chs,hd){
   </div>`;
   document.getElementById('rBack').onclick=()=>go('home');
   forceScrollTop();
-  document.getElementById('flowDone').onclick=()=>{ chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
+  document.getElementById('flowDone').onclick=()=>{ haptic(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
   tr(app);
   document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);
   requestAnimationFrame(()=>{ window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); });
@@ -1945,7 +2034,7 @@ function wireReader(){
     markRead(RD.chapters[RD.idx]); RD.idx++; renderReader(); forceScrollTop();
   };
   const done=document.getElementById('rDone'); if(done) done.onclick=()=>{
-    markRead(RD.chapters[RD.idx]); finishReading();
+    haptic(); markRead(RD.chapters[RD.idx]); finishReading();
   };
   // tools
   document.getElementById('tMinus').onclick=()=>changeFont(-0.1);
@@ -2155,8 +2244,13 @@ function renderPrayersList(){
     app.innerHTML = `
     ${topbar('תְּפִלּוֹת')}
     <div class="view">
-      <div class="empty-note" style="padding:60px 20px;text-align:center">
-        <div style="font-size:15px;line-height:1.8">הַתְּפִלּוֹת הַנּוֹסָפוֹת יוֹפִיעוּ כָּאן בְּקָרוֹב<br>בְּנֻסָּח מְדֻיָּק וּמְנֻקָּד</div>
+      <div class="prayers-list">
+        <div class="prayer-row" onclick="go('smList')">
+          <span class="prayer-row-title">שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם</span>
+        </div>
+      </div>
+      <div class="empty-note" style="padding:40px 20px;text-align:center">
+        <div style="font-size:15px;line-height:1.8">שְׁאָר הַתְּפִלּוֹת הַנּוֹסָפוֹת יוֹפִיעוּ כָּאן בְּקָרוֹב<br>בְּנֻסָּח מְדֻיָּק וּמְנֻקָּד</div>
       </div>
       ${ornament()}
     </div>`;
@@ -2167,6 +2261,9 @@ function renderPrayersList(){
   ${topbar('תְּפִלּוֹת')}
   <div class="view">
     <div class="prayers-list">
+      <div class="prayer-row" onclick="go('smList')">
+        <span class="prayer-row-title">שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם</span>
+      </div>
       ${ready.map(([key, p]) => `
         <div class="prayer-row" onclick="openPrayer('${key}')">
           <span class="prayer-row-title">${p.title}</span>
@@ -2208,6 +2305,148 @@ function renderPrayerReader(){
   tr(app);
 }
 
+/* ================= SHNAYIM MIKRA ================= */
+let SM = { key:null };
+function smStreakData(){ try{return JSON.parse(localStorage.getItem('betel_sm_streak')||'{"count":0,"best":0,"last":null}');}catch(e){return{count:0,best:0,last:null};} }
+function smMarkDone(key){
+  const d=smStreakData(); const today=civilToday().toISOString().slice(0,10);
+  if(d.last!==today){ d.count=(d.last && isYesterday(d.last))?d.count+1:1; d.best=Math.max(d.best,d.count); d.last=today; localStorage.setItem('betel_sm_streak',JSON.stringify(d)); }
+  const done=JSON.parse(localStorage.getItem('betel_sm_done')||'[]'); if(!done.includes(key)){ done.push(key); localStorage.setItem('betel_sm_done',JSON.stringify(done)); }
+}
+function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
+function smIsDone(key){ try{return JSON.parse(localStorage.getItem('betel_sm_done')||'[]').includes(key);}catch(e){return false;} }
+function openShnayim(key){ SM={key}; go('smReader'); }
+function renderShnayimList(){
+  app.innerHTML=`${topbar('שְׁנַיִם מִקְרָא')}<div class="view"><div class="sm-loading">${I.clock}<div style="margin-top:10px">טוֹעֵן אֶת הַתּוֹרָה וְהַתַּרְגּוּם…</div></div></div>`;
+  ensureShnayimData().then(()=>{ if(TAB==='smList') drawShnayimList(); });
+}
+function drawShnayimList(){
+  const weekKey=currentParshaKey();
+  const individual=Object.keys(LEYNING).filter(k=>LEYNING[k].parsha.length===1);
+  const byBook={};
+  individual.forEach(k=>{ const b=LEYNING[k].book; (byBook[b]=byBook[b]||[]).push(k); });
+  const books=['Genesis','Exodus','Leviticus','Numbers','Deuteronomy'];
+  app.innerHTML=`
+  ${topbar('שְׁנַיִם מִקְרָא')}
+  <div class="view">
+    ${weekKey&&LEYNING[weekKey]?`<div class="sm-week-card" id="smWeekCard">
+      <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ · לְלֹא גְּלִילָה</div>
+      <div class="sm-week-name">${LEYNING[weekKey].heName}</div>
+    </div>`:''}
+    <div class="search-box">${I.search}<input id="smSearch" placeholder="חִפּוּשׂ פָּרָשָׁה…"/></div>
+    <div class="sm-search-hint">אוֹ הַקְלֵד סֵפֶר וּמַרְאֵה מָקוֹם, לְמָשָׁל: בראשית 1:1</div>
+    <div id="smRefResult"></div>
+    <div id="smList">
+      ${books.map(b=>`<div class="sm-book-title">${BOOK_HE_NAMES[b]}</div>${(byBook[b]||[]).map(k=>`<div class="sm-parsha-row" data-k="${k}"><span>${LEYNING[k].heName}</span>${smIsDone(k)?I.check:I.chev}</div>`).join('')}`).join('')}
+    </div>
+    ${ornament()}
+  </div>`;
+  const wc=document.getElementById('smWeekCard'); if(wc) wc.onclick=()=>openShnayim(weekKey);
+  app.querySelectorAll('.sm-parsha-row').forEach(r=>r.onclick=()=>openShnayim(r.dataset.k));
+  const search=document.getElementById('smSearch');
+  const refResult=document.getElementById('smRefResult');
+  search.oninput=()=>{
+    const q=search.value.trim();
+    const list=document.getElementById('smList');
+    refResult.innerHTML='';
+    const ref=parseSmRefQuery(q);
+    if(ref){
+      const k=findParshaContaining(ref.book,ref.ch,ref.vs);
+      refResult.innerHTML = k
+        ? `<div class="sm-parsha-row" id="smRefHit"><span>${LEYNING[k].heName} · ${heNum(ref.ch)}:${heNum(ref.vs)}</span>${I.chev}</div>`
+        : `<div class="sm-search-hint">לֹא נִמְצָא מַרְאֵה מָקוֹם כָּזֶה</div>`;
+      const hit=document.getElementById('smRefHit'); if(hit) hit.onclick=()=>openShnayim(k);
+      list.querySelectorAll('.sm-parsha-row,.sm-book-title').forEach(el=>el.style.display='none');
+      return;
+    }
+    if(!q){ list.querySelectorAll('.sm-parsha-row,.sm-book-title').forEach(el=>el.style.display=''); return; }
+    list.querySelectorAll('.sm-book-title').forEach(t=>t.style.display='none');
+    list.querySelectorAll('.sm-parsha-row').forEach(r=>{
+      const k=r.dataset.k, he=LEYNING[k].heName;
+      const match = he.includes(q) || k.toLowerCase().includes(q.toLowerCase());
+      r.style.display = match?'':'none';
+    });
+  };
+  tr(app);
+}
+const SM_BOOK_NAMES={'בראשית':'Genesis','שמות':'Exodus','ויקרא':'Leviticus','במדבר':'Numbers','דברים':'Deuteronomy',
+  'genesis':'Genesis','exodus':'Exodus','leviticus':'Leviticus','numbers':'Numbers','deuteronomy':'Deuteronomy'};
+function parseSmRefQuery(q){
+  const m=q.match(/^([֐-׿a-zA-Z]+)\s+(\d+)\s*[:.,]\s*(\d+)$/);
+  if(!m) return null;
+  const book=SM_BOOK_NAMES[m[1].trim().toLowerCase()]||SM_BOOK_NAMES[m[1].trim()];
+  if(!book) return null;
+  return {book, ch:+m[2], vs:+m[3]};
+}
+function findParshaContaining(book,ch,vs){
+  for(const [k,e] of Object.entries(LEYNING)){
+    if(e.parsha.length!==1 || e.book!==book) continue;
+    for(const range of e.aliyot){
+      if(!range) continue;
+      const {c:c1,v:v1}=parseVref(range[0]), {c:c2,v:v2}=parseVref(range[1]);
+      const afterStart = ch>c1 || (ch===c1 && vs>=v1);
+      const beforeEnd = ch<c2 || (ch===c2 && vs<=v2);
+      if(afterStart && beforeEnd) return k;
+    }
+  }
+  return null;
+}
+function smAliyotHTML(entry){
+  let html='';
+  for(let n=1;n<=7;n++){
+    const range=entry.aliyot[n-1]; if(!range) continue;
+    const verses=versesInRange(entry.book,range[0],range[1]);
+    html+=`<div class="sm-aliyah-head">עֲלִיָּה ${heNum(n)}${n===7&&entry.maftir?' (כּוֹלֵל מַפְטִיר)':''}</div>`;
+    html+=verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div><div class="sm-targum">${v.targum||''}</div></div>`).join('');
+  }
+  return html;
+}
+function renderShnayimReader(){
+  if(!SM.key){ return renderShnayimList(); }
+  if(!LEYNING){
+    app.innerHTML=`${topbar('שְׁנַיִם מִקְרָא')}<div class="view"><div class="sm-loading">${I.clock}<div style="margin-top:10px">טוֹעֵן…</div></div></div>`;
+    ensureShnayimData().then(()=>{ if(TAB==='smReader') renderShnayimReader(); });
+    return;
+  }
+  const entry=LEYNING[SM.key];
+  if(!entry){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('smList'); }
+  app.innerHTML=`
+  <div class="topbar" style="justify-content:space-between">
+    <button class="icon-btn" onclick="go('smList')">${I.prev}</button>
+    <div class="tb-title gold-text">${entry.heName}</div>
+    <div style="width:34px"></div>
+  </div>
+  <div class="view prayer-reader-page">
+    ${smAliyotHTML(entry)}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+      <button class="btn btn-gold" id="smDone">${I.check}<span>סִיַּמְתִּי אֶת קְרִיאַת הַפָּרָשָׁה</span></button>
+      ${entry.haft?`<button class="btn btn-ghost" id="smHaft"><span>${I.book}</span><span>קְרִיאַת הַהַפְטָרָה</span></button>`:''}
+    </div>
+    <div style="height:60px"></div>
+  </div>`;
+  document.getElementById('smDone').onclick=()=>{ haptic(); smMarkDone(SM.key); toast('יִישֶׁר כֹּחַ! נִרְשַׁם'); };
+  const hb=document.getElementById('smHaft'); if(hb) hb.onclick=()=>go('smHaftarah');
+  tr(app); forceScrollTop();
+}
+function renderShnayimHaftarah(){
+  if(!SM.key||!LEYNING) return renderShnayimList();
+  const entry=LEYNING[SM.key];
+  const seg = entry.seph || entry.haft;
+  const verses=haftarahVerses(seg);
+  app.innerHTML=`
+  <div class="topbar" style="justify-content:space-between">
+    <button class="icon-btn" onclick="go('smReader')">${I.prev}</button>
+    <div class="tb-title gold-text">הַפְטָרַת ${entry.heName}</div>
+    <div style="width:34px"></div>
+  </div>
+  <div class="view prayer-reader-page">
+    ${entry.seph?'<div class="sm-search-hint">לְפִי נֹסַח סְפָרַדִּי</div>':''}
+    ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div></div>`).join('')}
+    <div style="height:60px"></div>
+  </div>`;
+  tr(app); forceScrollTop();
+}
+
 /* ================= SETTINGS ================= */
 function renderSettings(){
   const notifPerm=(typeof Notification!=='undefined')?Notification.permission:'denied';
@@ -2220,6 +2459,10 @@ function renderSettings(){
         <div class="toggle ${S.theme==='dark'?'on':''}" id="tgTheme"></div></div>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.text}</span><div><div class="si-t">גֹּדֶל הַגּוּפָן</div><div class="si-d">הַגְדָּלָה / הַקְטָנָה שֶׁל הַטֶּקְסְט</div></div></div>
         <div class="stepper"><button id="fsMinus">−</button><span class="v" id="fsVal">${Math.round(S.fontScale*100)}%</span><button id="fsPlus">+</button></div></div>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.text}</span><div><div class="si-t">מַצַּב קְרִיאָה לַקְּשִׁישִׁים</div><div class="si-d">הַגְדָּלַת הַטֶּקְסְט בְּלַחְיצָה אַחַת</div></div></div>
+        <div class="toggle ${S.fontScale>=1.25?'on':''}" id="tgElder"></div></div>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.moon}</span><div><div class="si-t">מַצַּב כֵּהֶה אוֹטוֹמָטִי לְפִי שְׁקִיעָה</div><div class="si-d">מַעֲבָר עֵדִין לְמַצַּב כֵּהֶה בֵּין שְׁקִיעָה לִזְרִיחָה בְּמִקּוּמְךָ</div></div></div>
+        <div class="toggle ${S.autoTheme?'on':''}" id="tgAutoTheme"></div></div>
     </div>
 
     <div class="set-group">
@@ -2298,6 +2541,7 @@ function renderSettings(){
       <h3>שִׁתּוּף</h3>
       <div class="set-item" id="bkShare" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">שְׁתֵּף גִּבּוּי</div><div class="si-d">וָאטְסְאַפּ · מֵייל · הֵעָרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
+      <div class="set-item" id="appQR" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">קוֹד QR לָאַפְּלִיקַצְיָה</div><div class="si-d">לְהַצְגָה וּשְׁתּוּף מְהִירִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkExport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">גִּבּוּי לְקֹבֶץ</div><div class="si-d">שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkImport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">שִׁחְזוּר מִגִּבּוּי</div><div class="si-d">טְעִינַת קֹבֶץ גִּבּוּי קַיָּם</div></div></div>${I.chev}</div>
       <div class="set-item" id="resetProg" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">אִפּוּס מַעֲקַב הַיּוֹם</div><div class="si-d">נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ</div></div></div></div>
@@ -2314,6 +2558,9 @@ function renderSettings(){
   document.getElementById('useGPS').onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן לְפִי GPS':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderSettings(); }); };
   document.getElementById('pickCity').onclick=openCityPicker;
   document.getElementById('shareApp').onclick=shareApp;
+  document.getElementById('appQR').onclick=showAppQR;
+  document.getElementById('tgElder').onclick=()=>{ S.fontScale=(S.fontScale>=1.25)?1:1.3; saveS(); applySettings(); renderSettings(); };
+  document.getElementById('tgAutoTheme').onclick=()=>{ S.autoTheme=!S.autoTheme; saveS(); if(S.autoTheme) applyAutoTheme(); renderSettings(); };
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
   document.getElementById('bkExport').onclick=()=>{
     const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
@@ -2524,6 +2771,31 @@ function shareApp(){
   const text='📖 אפליקציית התהילים של קהילת בית אל\nתהילים יומי, לוח עברי וזמני היום:\n'+url;
   shareSheet('שִׁתּוּף הָאַפְּלִיקַצְיָה', text, {url});
 }
+function showAppQR(){
+  const url=location.href.split('#')[0];
+  const qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=280x280&data='+encodeURIComponent(url);
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML=`<div class="modal" style="max-width:340px;text-align:center">
+    <button class="close-x" data-close>${I.x}</button>
+    <div class="m-crown">${I.share}</div>
+    <h3 style="font-size:18px;margin-bottom:12px">קוֹד QR לָאַפְּלִיקַצְיָה</h3>
+    <img src="${qrSrc}" alt="QR" width="220" height="220" style="border-radius:12px;margin:0 auto 14px;display:block"/>
+    <p style="font-size:13px;opacity:.75;margin-bottom:14px">סְרִיקָה תִּפְתַּח אֶת הָאַפְּלִיקַצְיָה</p>
+    ${navigator.share?`<button class="btn btn-gold" data-share style="width:100%"><span>${I.share}</span><span>שַׁתֵּף</span></button>`:''}
+  </div>`;
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();
+  ov.querySelector('[data-close]').onclick=close; ov.onclick=e=>{if(e.target===ov)close();};
+  const sb=ov.querySelector('[data-share]');
+  if(sb) sb.onclick=async()=>{
+    try{
+      const resp=await fetch(qrSrc); const blob=await resp.blob();
+      const file=new File([blob],'tehilim-qr.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file],title:'תהילים בית אל',text:url});
+      else await navigator.share({title:'תהילים בית אל',url});
+    }catch(e){}
+  };
+}
 function openCityPicker(){
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal city-modal">
@@ -2551,6 +2823,7 @@ function openCityPicker(){
 
 /* ================= CELEBRATION ================= */
 function celebrate(kind){
+  haptic(25);
   const grand = kind==='grand';
   const pr = grand ? null : nextPraise();
   const special = !grand && pr.special;
@@ -2593,13 +2866,14 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.wrench]];
+  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
   nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===(TAB||'home')?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
   tr(nav);
 }
 applySettings();
+applyAutoTheme();
 applyLang();
 buildNav();
 render();
