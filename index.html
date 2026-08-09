@@ -1368,7 +1368,8 @@ function openPrayer(prayerKey){
   forceScrollTop();
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:false, notifTime:'08:00' };
+const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:false, notifTime:'08:00', autoTheme:false };
+function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); }
 /* ---------- i18n ---------- */
@@ -1474,6 +1475,13 @@ function applySettings(){
   document.documentElement.style.setProperty('--fs-scale', S.fontScale);
   const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', S.theme==='dark'?'#080d19':'#efe6d2');
 }
+function applyAutoTheme(){
+  if(!S.autoTheme) return;
+  const h=new Date().getHours();
+  const want = (h>=19 || h<6) ? 'dark' : 'light';
+  if(S.theme!==want){ S.theme=want; saveS(); applySettings(); }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') applyAutoTheme(); });
 
 /* ---------- location ---------- */
 const FALLBACK = { lat:51.2194, lon:4.4025, tz:'Europe/Brussels', name:'אנטוורפן, בלגיה', auto:false };
@@ -1876,7 +1884,7 @@ function renderContinuous(chs,hd){
   </div>`;
   document.getElementById('rBack').onclick=()=>go('home');
   forceScrollTop();
-  document.getElementById('flowDone').onclick=()=>{ chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
+  document.getElementById('flowDone').onclick=()=>{ haptic(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
   tr(app);
   document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);
   requestAnimationFrame(()=>{ window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); });
@@ -1945,7 +1953,7 @@ function wireReader(){
     markRead(RD.chapters[RD.idx]); RD.idx++; renderReader(); forceScrollTop();
   };
   const done=document.getElementById('rDone'); if(done) done.onclick=()=>{
-    markRead(RD.chapters[RD.idx]); finishReading();
+    haptic(); markRead(RD.chapters[RD.idx]); finishReading();
   };
   // tools
   document.getElementById('tMinus').onclick=()=>changeFont(-0.1);
@@ -2220,6 +2228,10 @@ function renderSettings(){
         <div class="toggle ${S.theme==='dark'?'on':''}" id="tgTheme"></div></div>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.text}</span><div><div class="si-t">גֹּדֶל הַגּוּפָן</div><div class="si-d">הַגְדָּלָה / הַקְטָנָה שֶׁל הַטֶּקְסְט</div></div></div>
         <div class="stepper"><button id="fsMinus">−</button><span class="v" id="fsVal">${Math.round(S.fontScale*100)}%</span><button id="fsPlus">+</button></div></div>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.text}</span><div><div class="si-t">מַצַּב קְרִיאָה לַקְּשִׁישִׁים</div><div class="si-d">הַגְדָּלַת הַטֶּקְסְט בְּלַחְיצָה אַחַת</div></div></div>
+        <div class="toggle ${S.fontScale>=1.25?'on':''}" id="tgElder"></div></div>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.moon}</span><div><div class="si-t">מַצַּב כֵּהֶה אוֹטוֹמָטִי בָּעֶרֶב</div><div class="si-d">מַעֲבָר עֵדִין לְמַצַּב כֵּהֶה בְּשְׁעוֹת הַעֶרֶב</div></div></div>
+        <div class="toggle ${S.autoTheme?'on':''}" id="tgAutoTheme"></div></div>
     </div>
 
     <div class="set-group">
@@ -2298,6 +2310,7 @@ function renderSettings(){
       <h3>שִׁתּוּף</h3>
       <div class="set-item" id="bkShare" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">שְׁתֵּף גִּבּוּי</div><div class="si-d">וָאטְסְאַפּ · מֵייל · הֵעָרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
+      <div class="set-item" id="appQR" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">קוֹד QR לָאַפְּלִיקַצְיָה</div><div class="si-d">לְהַצְגָה וּשְׁתּוּף מְהִירִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkExport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">גִּבּוּי לְקֹבֶץ</div><div class="si-d">שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkImport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">שִׁחְזוּר מִגִּבּוּי</div><div class="si-d">טְעִינַת קֹבֶץ גִּבּוּי קַיָּם</div></div></div>${I.chev}</div>
       <div class="set-item" id="resetProg" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">אִפּוּס מַעֲקַב הַיּוֹם</div><div class="si-d">נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ</div></div></div></div>
@@ -2314,6 +2327,9 @@ function renderSettings(){
   document.getElementById('useGPS').onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן לְפִי GPS':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderSettings(); }); };
   document.getElementById('pickCity').onclick=openCityPicker;
   document.getElementById('shareApp').onclick=shareApp;
+  document.getElementById('appQR').onclick=showAppQR;
+  document.getElementById('tgElder').onclick=()=>{ S.fontScale=(S.fontScale>=1.25)?1:1.3; saveS(); applySettings(); renderSettings(); };
+  document.getElementById('tgAutoTheme').onclick=()=>{ S.autoTheme=!S.autoTheme; saveS(); if(S.autoTheme) applyAutoTheme(); renderSettings(); };
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
   document.getElementById('bkExport').onclick=()=>{
     const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
@@ -2524,6 +2540,31 @@ function shareApp(){
   const text='📖 אפליקציית התהילים של קהילת בית אל\nתהילים יומי, לוח עברי וזמני היום:\n'+url;
   shareSheet('שִׁתּוּף הָאַפְּלִיקַצְיָה', text, {url});
 }
+function showAppQR(){
+  const url=location.href.split('#')[0];
+  const qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=280x280&data='+encodeURIComponent(url);
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML=`<div class="modal" style="max-width:340px;text-align:center">
+    <button class="close-x" data-close>${I.x}</button>
+    <div class="m-crown">${I.share}</div>
+    <h3 style="font-size:18px;margin-bottom:12px">קוֹד QR לָאַפְּלִיקַצְיָה</h3>
+    <img src="${qrSrc}" alt="QR" width="220" height="220" style="border-radius:12px;margin:0 auto 14px;display:block"/>
+    <p style="font-size:13px;opacity:.75;margin-bottom:14px">סְרִיקָה תִּפְתַּח אֶת הָאַפְּלִיקַצְיָה</p>
+    ${navigator.share?`<button class="btn btn-gold" data-share style="width:100%"><span>${I.share}</span><span>שַׁתֵּף</span></button>`:''}
+  </div>`;
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();
+  ov.querySelector('[data-close]').onclick=close; ov.onclick=e=>{if(e.target===ov)close();};
+  const sb=ov.querySelector('[data-share]');
+  if(sb) sb.onclick=async()=>{
+    try{
+      const resp=await fetch(qrSrc); const blob=await resp.blob();
+      const file=new File([blob],'tehilim-qr.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file],title:'תהילים בית אל',text:url});
+      else await navigator.share({title:'תהילים בית אל',url});
+    }catch(e){}
+  };
+}
 function openCityPicker(){
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal city-modal">
@@ -2551,6 +2592,7 @@ function openCityPicker(){
 
 /* ================= CELEBRATION ================= */
 function celebrate(kind){
+  haptic(25);
   const grand = kind==='grand';
   const pr = grand ? null : nextPraise();
   const special = !grand && pr.special;
@@ -2600,6 +2642,7 @@ function buildNav(){
   tr(nav);
 }
 applySettings();
+applyAutoTheme();
 applyLang();
 buildNav();
 render();
