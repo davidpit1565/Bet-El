@@ -32,24 +32,24 @@
 /* ---- DARK (default) ---- */
 :root,[data-theme="dark"]{
   --bg:#080d19; --bg-grad:radial-gradient(120% 90% at 50% -10%,#16224a 0%,#0b1226 42%,#070b16 100%);
-  --panel:rgba(22,33,63,.62); --panel-solid:#121c38; --panel-2:rgba(30,44,82,.55);
-  --ink:#f6f1e4; --ink-soft:#cdd6ec; --muted:#8593b6;
+  --panel:rgba(22,33,63,.62); --panel-solid:#121c38; --panel-2:rgba(30,44,82,.55); --panel-hover:rgba(30,44,82,.55);
+  --ink:#f6f1e4; --ink-soft:#cdd6ec; --muted:#8593b6; --text:var(--ink);
   --line:rgba(212,175,95,.20); --line-strong:rgba(212,175,95,.42);
   --card-shadow:0 18px 44px -20px rgba(0,0,0,.85),0 2px 0 rgba(255,255,255,.03) inset;
-  --glass-border:1px solid rgba(212,175,95,.22);
+  --glass-border:1px solid rgba(212,175,95,.22); --glass-bg:rgba(22,33,63,.4);
   --verse-num:var(--gold);
   --overlay:rgba(6,10,20,.72);
 }
 /* ---- LIGHT (parchment) ---- */
 [data-theme="light"]{
   --bg:#efe6d2; --bg-grad:radial-gradient(120% 90% at 50% -10%,#fbf5e6 0%,#f0e6d0 55%,#e7dcc2 100%);
-  --panel:rgba(255,252,244,.78); --panel-solid:#fbf6ea; --panel-2:rgba(247,239,223,.8);
-  --ink:#22314e; --ink-soft:#3c4a66; --muted:#8a7f66;
+  --panel:rgba(255,252,244,.78); --panel-solid:#fbf6ea; --panel-2:rgba(247,239,223,.8); --panel-hover:rgba(247,239,223,.8);
+  --ink:#22314e; --ink-soft:#3c4a66; --muted:#8a7f66; --text:var(--ink);
   --line:rgba(150,116,44,.28); --line-strong:rgba(150,116,44,.5);
   --gold:#9a7526; --gold-bright:#c69a3c;
   --gold-grad:linear-gradient(135deg,#8a651c 0%,#c49a3d 45%,#e6c874 55%,#9a7526 100%);
   --card-shadow:0 16px 40px -22px rgba(80,60,20,.5),0 1px 0 rgba(255,255,255,.6) inset;
-  --glass-border:1px solid rgba(150,116,44,.32);
+  --glass-border:1px solid rgba(150,116,44,.32); --glass-bg:rgba(255,252,244,.55);
   --verse-num:#a67c22;
   --overlay:rgba(60,48,24,.5);
 }
@@ -324,7 +324,7 @@ function checkNotification(){
 .dd-portion{text-align:center;margin:12px 0;padding:12px;background:var(--panel-2);border-radius:14px;border:var(--glass-border)}
 .dd-portion .lbl{font-size:11px;color:var(--muted);letter-spacing:.5px}
 .dd-portion .val{font-family:var(--font-sacred);font-size:18px;font-weight:700;color:var(--ink);margin-top:2px}
-.dd-portion .val:hover{color:var(--gold)}
+@media (hover:hover){.dd-portion .val:hover{color:var(--gold)}}
 
 /* zmanim list */
 .zmanim-list{margin-top:6px}
@@ -466,7 +466,7 @@ function checkNotification(){
 .city-list{overflow-y:auto;flex:1;margin:0 -4px}
 .city-row{display:flex;align-items:center;justify-content:space-between;padding:13px 12px;border-radius:12px;cursor:pointer;transition:.15s var(--ease)}
 .city-row:active{transform:scale(.98)}
-.city-row:hover{background:var(--panel-2)}
+@media (hover:hover){.city-row:hover{background:var(--panel-2)}}
 .city-row .cn{font-family:var(--font-sacred);font-size:17px;font-weight:700}
 .city-row .cc{font-size:12px;color:var(--muted)}
 
@@ -570,7 +570,7 @@ function checkNotification(){
 /* reader tools FAB */
 .reader-tools{transition:all .25s var(--ease)}
 .reader-tools .rt-fab{display:none;width:48px;height:48px;border-radius:50%;border:1px solid var(--line-strong);
-  background:var(--panel-2);color:var(--gold);box-shadow:var(--shadow);cursor:pointer;align-items:center;justify-content:center}
+  background:var(--panel-2);color:var(--gold);box-shadow:var(--card-shadow);cursor:pointer;align-items:center;justify-content:center}
 .reader-tools .rt-fab svg{width:20px;height:20px}
 .reader-tools .rt-panel{display:flex;align-items:center;gap:4px}
 .reader-tools.collapsed{background:transparent;border:none;box-shadow:none;padding:0;backdrop-filter:none}
@@ -675,7 +675,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayers-list{display:flex;flex-direction:column;gap:2px}
 .prayer-row{display:flex;align-items:center;justify-content:space-between;background:var(--panel);
   border:1px solid var(--line);border-radius:10px;padding:16px 18px;cursor:pointer;transition:.2s var(--ease);margin-bottom:8px}
-.prayer-row:hover{background:var(--panel-hover)}
+.prayer-row:active{transform:scale(.98)}
+@media (hover:hover){.prayer-row:hover{background:var(--panel-hover)}}
 .prayer-row svg{width:16px;height:16px;flex:none;color:var(--gold)}
 .prayer-row-title{font-family:var(--font-sacred);font-size:17px;font-weight:700;color:var(--text)}
 
@@ -696,273 +697,6 @@ input,select,button{max-width:100%;box-sizing:border-box}
   font-family:var(--font-ui);letter-spacing:.2px}
 .prayer-para:last-child{border:none;margin-bottom:0}
 
-/* ===== UPGRADES CSS ===== */
-
-/* Upgrade 1: Zohar card */
-.zohar-card {
-  background: linear-gradient(135deg, rgba(215, 165, 48, 0.08) 0%, rgba(215, 165, 48, 0.04) 100%);
-  border: 1px solid var(--accent-light);
-  border-radius: 12px;
-  padding: 16px;
-  margin: 12px 0;
-  text-align: center;
-  font-family: var(--font-serif);
-}
-.zohar-label {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
-}
-.zohar-content {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-.zohar-parsha {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* Upgrade 2: TTS buttons */
-
-/* Upgrade 8: Search */
-.search-panel {
-  padding: 12px;
-}
-.search-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--line-soft);
-  padding-bottom: 8px;
-}
-.search-tab {
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  background: transparent;
-  color: var(--text-secondary);
-  border: none;
-}
-.search-tab.active {
-  color: var(--accent);
-  border-bottom: 2px solid var(--accent);
-}
-.search-results {
-  max-height: 300px;
-  overflow-y: auto;
-}
-.search-result-item {
-  padding: 8px;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  cursor: pointer;
-  border-right: 3px solid var(--accent);
-  background: var(--panel);
-  font-size: 13px;
-}
-.search-result-item:hover {
-  background: var(--panel-hover);
-}
-.search-result-ref {
-  font-weight: 600;
-  color: var(--accent);
-  display: block;
-  margin-bottom: 2px;
-}
-
-/* Upgrade 9: Stats */
-.stats-panel {
-  padding: 12px;
-}
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.stat-card {
-  background: var(--panel);
-  border: 1px solid var(--line-soft);
-  border-radius: 8px;
-  padding: 14px;
-  text-align: center;
-}
-.stat-number {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
-  font-family: var(--font-mono);
-}
-.stat-label {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 6px;
-}
-
-/* Upgrade 10: Lists */
-.lists-panel {
-  padding: 12px;
-}
-.list-item {
-  padding: 10px 12px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  background: var(--panel);
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-right: 3px solid var(--accent);
-}
-.list-item:hover {
-  background: var(--panel-hover);
-}
-.list-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.list-delete, .list-chapter-remove {
-  cursor: pointer;
-  color: #ff6b6b;
-  opacity: 0.6;
-  font-size: 13px;
-}
-.list-delete:hover, .list-chapter-remove:hover {
-  opacity: 1;
-}
-.list-new-btn {
-  background: var(--accent);
-  color: var(--bg);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  margin-bottom: 12px;
-  font-weight: 600;
-}
-
-/* ===== END UPGRADES ===== */
-
-/* === UPGRADES CSS === */
-
-/* Verse actions (TTS + Share) */
-
-/* Settings sections */
-.settings-section {
-  background: var(--panel);
-  border: 1px solid var(--line-soft);
-  border-radius: 8px;
-  padding: 14px;
-  margin-bottom: 14px;
-}
-.settings-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--accent);
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-/* Search */
-.search-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-.search-tab {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  background: var(--panel-hover);
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-.search-tab.active {
-  background: var(--accent);
-  color: var(--bg);
-}
-.search-results {
-  max-height: 300px;
-  overflow-y: auto;
-}
-.search-result-item {
-  padding: 6px;
-  margin-bottom: 4px;
-  background: var(--panel-hover);
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.search-result-item:hover {
-  background: rgba(215, 165, 48, 0.15);
-}
-
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.stat-card {
-  background: var(--panel-hover);
-  border-radius: 6px;
-  padding: 10px;
-  text-align: center;
-}
-.stat-number {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--accent);
-}
-.stat-label {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-/* Lists */
-.list-new-btn {
-  background: var(--accent);
-  color: var(--bg);
-  border: none;
-  padding: 8px 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  width: 100%;
-}
-.list-item {
-  padding: 8px 10px;
-  background: var(--panel-hover);
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.list-item:hover {
-  background: rgba(215, 165, 48, 0.15);
-}
-.list-delete {
-  color: #ff6b6b;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-/* === END UPGRADES === */
 
 /* ---- streak (#5) ---- */
 .streak-chip{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(184,134,11,.15),rgba(230,200,116,.06));border:1px solid var(--glass-border);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--gold);margin:8px auto 0;cursor:default}
@@ -2325,7 +2059,6 @@ function smMarkDone(key){
 function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
 function smIsDone(key){ try{return JSON.parse(localStorage.getItem('betel_sm_done')||'[]').includes(key);}catch(e){return false;} }
 function individualParshaKeys(){ return Object.keys(LEYNING).filter(k=>LEYNING[k].parsha.length===1); }
-function smNeighbor(key,dir){ const keys=individualParshaKeys(); const i=keys.indexOf(key); if(i<0) return null; const j=i+dir; return keys[j]!=null?keys[j]:null; }
 function openShnayim(key){ SM={key,n:1,mode:'torah'}; go('smReader'); }
 function smSkeleton(){
   return `<div class="skel-wrap">
@@ -2436,28 +2169,19 @@ function findParshaContaining(book,ch,vs){
 }
 function smStepNext(){
   const entry=LEYNING[SM.key];
-  if(SM.mode==='haftarah'){
-    const nk=smNeighbor(SM.key,1);
-    if(nk){ SM={key:nk,n:1,mode:'torah'}; } else { toast('זוֹ הַפָּרָשָׁה הָאַחֲרוֹנָה'); return; }
-  } else if(SM.n<7){
-    SM.n++;
-  } else if(entry.haft){
-    SM.mode='haftarah';
-  } else {
-    const nk=smNeighbor(SM.key,1);
-    if(nk){ SM={key:nk,n:1,mode:'torah'}; } else { toast('זוֹ הַפָּרָשָׁה הָאַחֲרוֹנָה'); return; }
+  if(SM.mode!=='haftarah'){
+    if(SM.n<7){ SM.n++; }
+    else if(entry.haft){ SM.mode='haftarah'; }
   }
   renderShnayimReader(); forceScrollTop();
 }
 function smStepPrev(){
   if(SM.mode==='haftarah'){ SM.mode='torah'; }
   else if(SM.n>1){ SM.n--; }
-  else {
-    const pk=smNeighbor(SM.key,-1);
-    if(pk){ const pe=LEYNING[pk]; SM={key:pk,n:7,mode:pe.haft?'haftarah':'torah'}; }
-    else { toast('זוֹ הַפָּרָשָׁה הָרִאשׁוֹנָה'); return; }
-  }
   renderShnayimReader(); forceScrollTop();
+}
+function smFinish(){
+  haptic(); smMarkDone(SM.key); celebrate('daily','הַפָּרָשָׁה');
 }
 function renderShnayimReader(){
   if(!SM.key){ return renderShnayimList(); }
@@ -2482,15 +2206,15 @@ function renderShnayimReader(){
     tag = 'עלייה '+heNum(n)+(n===7&&entry.maftir?' (מפטיר)':'');
     pct = Math.round((n/7)*100);
   }
-  const canGoNext = isHaft ? !!smNeighbor(SM.key,1) : true;
-  const canGoPrev = isHaft ? true : (n>1 || !!smNeighbor(SM.key,-1));
+  const isLastPage = isHaft || (n===7 && !entry.haft);
+  const canGoPrev = isHaft || n>1;
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
       <div class="reader-top">
         <button class="icon-btn" id="smBack">${I.prev}</button>
         <div class="reader-title">${entry.heName}</div>
-        <button class="icon-btn ${smIsDone(SM.key)?'fav-on':''}" id="smDoneBtn">${I.check}</button>
+        <div style="width:42px"></div>
       </div>
       <div class="sm-aliyah-tag">${stripNik(entry.heName)} · ${tag}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
@@ -2500,14 +2224,16 @@ function renderShnayimReader(){
     </div>
     <div class="reader-nav">
       <button class="rnav-btn" id="smPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
-      <button class="rnav-btn" id="smNext" ${canGoNext?'':'disabled'}><span>הַבָּא</span>${I.next}</button>
+      ${isLastPage
+        ? `<button class="rnav-btn done" id="smDone">${I.check}<span>סִיַּמְתִּי אֶת הַפָּרָשָׁה</span></button>`
+        : `<button class="rnav-btn" id="smNext"><span>הַבָּא</span>${I.next}</button>`}
     </div>
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('smBack').onclick=()=>go('smList');
-  document.getElementById('smDoneBtn').onclick=()=>{ haptic(); smMarkDone(SM.key); celebrate('daily','הַפָּרָשָׁה'); };
   const prevBtn=document.getElementById('smPrev'); if(!prevBtn.disabled) prevBtn.onclick=smStepPrev;
-  const nextBtn=document.getElementById('smNext'); if(!nextBtn.disabled) nextBtn.onclick=smStepNext;
+  const nextBtn=document.getElementById('smNext'); if(nextBtn) nextBtn.onclick=smStepNext;
+  const doneBtn=document.getElementById('smDone'); if(doneBtn) doneBtn.onclick=smFinish;
   tr(app);
 }
 
