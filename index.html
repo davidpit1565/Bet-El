@@ -1477,8 +1477,13 @@ function applySettings(){
 }
 function applyAutoTheme(){
   if(!S.autoTheme) return;
-  const h=new Date().getHours();
-  const want = (h>=19 || h<6) ? 'dark' : 'light';
+  const now=new Date();
+  let want;
+  try{
+    const z=zmanimFor(now), sr=z.sunrise(), ss=z.sunset();
+    want = (sr && ss) ? ((now<sr || now>=ss) ? 'dark' : 'light') : null;
+  }catch(e){ want=null; }
+  if(!want){ const h=now.getHours(); want=(h>=19||h<6)?'dark':'light'; }
   if(S.theme!==want){ S.theme=want; saveS(); applySettings(); }
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') applyAutoTheme(); });
@@ -2230,7 +2235,7 @@ function renderSettings(){
         <div class="stepper"><button id="fsMinus">−</button><span class="v" id="fsVal">${Math.round(S.fontScale*100)}%</span><button id="fsPlus">+</button></div></div>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.text}</span><div><div class="si-t">מַצַּב קְרִיאָה לַקְּשִׁישִׁים</div><div class="si-d">הַגְדָּלַת הַטֶּקְסְט בְּלַחְיצָה אַחַת</div></div></div>
         <div class="toggle ${S.fontScale>=1.25?'on':''}" id="tgElder"></div></div>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.moon}</span><div><div class="si-t">מַצַּב כֵּהֶה אוֹטוֹמָטִי בָּעֶרֶב</div><div class="si-d">מַעֲבָר עֵדִין לְמַצַּב כֵּהֶה בְּשְׁעוֹת הַעֶרֶב</div></div></div>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.moon}</span><div><div class="si-t">מַצַּב כֵּהֶה אוֹטוֹמָטִי לְפִי שְׁקִיעָה</div><div class="si-d">מַעֲבָר עֵדִין לְמַצַּב כֵּהֶה בֵּין שְׁקִיעָה לִזְרִיחָה בְּמִקּוּמְךָ</div></div></div>
         <div class="toggle ${S.autoTheme?'on':''}" id="tgAutoTheme"></div></div>
     </div>
 
@@ -2635,7 +2640,7 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.wrench]];
+  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
   nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===(TAB||'home')?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
