@@ -1018,17 +1018,18 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-week-card{background:linear-gradient(135deg,var(--gold-soft,rgba(212,175,95,.16)),transparent);border:1px solid var(--glass-border);border-radius:16px;padding:16px;margin-bottom:16px;cursor:pointer}
 .sm-week-tag{font-size:12px;color:var(--muted);margin-bottom:4px}
 .sm-week-name{font-family:var(--font-sacred);font-size:22px;color:var(--gold)}
-.sm-book-title{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin:16px 4px 6px}
-.sm-book-title:first-of-type{margin-top:4px}
-.sm-parsha-row{padding:12px 14px;border-radius:12px;background:var(--glass-bg);border:1px solid var(--glass-border);margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.sm-aliyah-head{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--glass-border)}
-.sm-aliyah-head:first-of-type{margin-top:4px}
-.sm-verse-row{margin-bottom:14px}
+.sm-verse-row{margin-bottom:18px}
 .sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
-.sm-he{font-size:calc(17px*var(--fs-scale,1));line-height:1.9}
-.sm-targum{font-size:calc(14px*var(--fs-scale,1));line-height:1.8;color:var(--muted);margin-top:2px}
-.sm-loading{text-align:center;padding:60px 20px;color:var(--muted)}
+.sm-he{font-family:var(--font-sacred);font-size:calc(21px*var(--fs-scale,1));line-height:2.0;text-align:justify}
+.sm-targum{font-family:var(--font-sacred);font-size:calc(16px*var(--fs-scale,1));line-height:1.9;color:var(--muted);margin-top:4px;text-align:justify}
+.skel-wrap{padding:8px 2px}
+.skel-line{height:16px;border-radius:6px;margin-bottom:12px;background:linear-gradient(90deg,var(--line) 25%,var(--panel-hover) 50%,var(--line) 75%);background-size:200% 100%;animation:skelShimmer 1.4s ease-in-out infinite}
+.skel-line.w60{width:60%}.skel-line.w80{width:80%}.skel-line.w100{width:100%}.skel-line.w40{width:40%}
+.skel-line.tall{height:26px;margin-bottom:18px}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.skel-line{animation:none;opacity:.6}}
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
+.sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -1729,7 +1730,6 @@ function render(){
   else if(TAB==='prayerReader') renderPrayerReader();
   else if(TAB==='smList') renderShnayimList();
   else if(TAB==='smReader') renderShnayimReader();
-  else if(TAB==='smHaftarah') renderShnayimHaftarah();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='achievements') renderAchievements();
   tr(app);
@@ -2246,7 +2246,7 @@ function renderPrayersList(){
     <div class="view">
       <div class="prayers-list">
         <div class="prayer-row" onclick="go('smList')">
-          <span class="prayer-row-title">שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם</span>
+          <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
         </div>
       </div>
       <div class="empty-note" style="padding:40px 20px;text-align:center">
@@ -2262,7 +2262,7 @@ function renderPrayersList(){
   <div class="view">
     <div class="prayers-list">
       <div class="prayer-row" onclick="go('smList')">
-        <span class="prayer-row-title">שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם</span>
+        <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
       </div>
       ${ready.map(([key, p]) => `
         <div class="prayer-row" onclick="openPrayer('${key}')">
@@ -2306,7 +2306,7 @@ function renderPrayerReader(){
 }
 
 /* ================= SHNAYIM MIKRA ================= */
-let SM = { key:null };
+let SM = { key:null, n:1, mode:'torah' };
 function smStreakData(){ try{return JSON.parse(localStorage.getItem('betel_sm_streak')||'{"count":0,"best":0,"last":null}');}catch(e){return{count:0,best:0,last:null};} }
 function smMarkDone(key){
   const d=smStreakData(); const today=civilToday().toISOString().slice(0,10);
@@ -2315,34 +2315,41 @@ function smMarkDone(key){
 }
 function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
 function smIsDone(key){ try{return JSON.parse(localStorage.getItem('betel_sm_done')||'[]').includes(key);}catch(e){return false;} }
-function openShnayim(key){ SM={key}; go('smReader'); }
+function individualParshaKeys(){ return Object.keys(LEYNING).filter(k=>LEYNING[k].parsha.length===1); }
+function smNeighbor(key,dir){ const keys=individualParshaKeys(); const i=keys.indexOf(key); if(i<0) return null; const j=i+dir; return keys[j]!=null?keys[j]:null; }
+function openShnayim(key){ SM={key,n:1,mode:'torah'}; go('smReader'); }
+function smSkeleton(){
+  return `<div class="skel-wrap">
+    <div class="skel-line tall w40"></div>
+    ${[0,1,2,3,4,5].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div><div class="skel-line w60"></div>`).join('')}
+  </div>`;
+}
 function renderShnayimList(){
-  app.innerHTML=`${topbar('שְׁנַיִם מִקְרָא')}<div class="view"><div class="sm-loading">${I.clock}<div style="margin-top:10px">טוֹעֵן אֶת הַתּוֹרָה וְהַתַּרְגּוּם…</div></div></div>`;
+  app.innerHTML=`${topbar('שניים מקרא')}<div class="view">${smSkeleton()}</div>`;
   ensureShnayimData().then(()=>{ if(TAB==='smList') drawShnayimList(); });
 }
 function drawShnayimList(){
   const weekKey=currentParshaKey();
-  const individual=Object.keys(LEYNING).filter(k=>LEYNING[k].parsha.length===1);
+  const individual=individualParshaKeys();
   const byBook={};
   individual.forEach(k=>{ const b=LEYNING[k].book; (byBook[b]=byBook[b]||[]).push(k); });
   const books=['Genesis','Exodus','Leviticus','Numbers','Deuteronomy'];
   app.innerHTML=`
-  ${topbar('שְׁנַיִם מִקְרָא')}
+  ${topbar('שניים מקרא')}
   <div class="view">
     ${weekKey&&LEYNING[weekKey]?`<div class="sm-week-card" id="smWeekCard">
-      <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ · לְלֹא גְּלִילָה</div>
+      <div class="sm-week-tag">פרשת השבוע</div>
       <div class="sm-week-name">${LEYNING[weekKey].heName}</div>
     </div>`:''}
-    <div class="search-box">${I.search}<input id="smSearch" placeholder="חִפּוּשׂ פָּרָשָׁה…"/></div>
-    <div class="sm-search-hint">אוֹ הַקְלֵד סֵפֶר וּמַרְאֵה מָקוֹם, לְמָשָׁל: בראשית 1:1</div>
+    <div class="search-box">${I.search}<input id="smSearch" placeholder="חיפוש פרשה, או ספר ומראה מקום כמו בראשית 1:1"/></div>
     <div id="smRefResult"></div>
-    <div id="smList">
-      ${books.map(b=>`<div class="sm-book-title">${BOOK_HE_NAMES[b]}</div>${(byBook[b]||[]).map(k=>`<div class="sm-parsha-row" data-k="${k}"><span>${LEYNING[k].heName}</span>${smIsDone(k)?I.check:I.chev}</div>`).join('')}`).join('')}
+    <div class="prayers-list" id="smList">
+      ${books.map(b=>`<div class="ach-section-title">${stripNik(BOOK_HE_NAMES[b])}</div>${(byBook[b]||[]).map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${stripNik(LEYNING[k].heName)}</span>${smIsDone(k)?I.check:I.chev}</div>`).join('')}`).join('')}
     </div>
     ${ornament()}
   </div>`;
   const wc=document.getElementById('smWeekCard'); if(wc) wc.onclick=()=>openShnayim(weekKey);
-  app.querySelectorAll('.sm-parsha-row').forEach(r=>r.onclick=()=>openShnayim(r.dataset.k));
+  app.querySelectorAll('#smList .prayer-row').forEach(r=>r.onclick=()=>openShnayim(r.dataset.k));
   const search=document.getElementById('smSearch');
   const refResult=document.getElementById('smRefResult');
   search.oninput=()=>{
@@ -2353,15 +2360,16 @@ function drawShnayimList(){
     if(ref){
       const k=findParshaContaining(ref.book,ref.ch,ref.vs);
       refResult.innerHTML = k
-        ? `<div class="sm-parsha-row" id="smRefHit"><span>${LEYNING[k].heName} · ${heNum(ref.ch)}:${heNum(ref.vs)}</span>${I.chev}</div>`
+        ? `<div class="prayer-row" id="smRefHit"><span class="prayer-row-title">${stripNik(LEYNING[k].heName)} · ${heNum(ref.ch)}:${heNum(ref.vs)}</span>${I.chev}</div>`
         : `<div class="sm-search-hint">לֹא נִמְצָא מַרְאֵה מָקוֹם כָּזֶה</div>`;
       const hit=document.getElementById('smRefHit'); if(hit) hit.onclick=()=>openShnayim(k);
-      list.querySelectorAll('.sm-parsha-row,.sm-book-title').forEach(el=>el.style.display='none');
+      list.style.display='none';
       return;
     }
-    if(!q){ list.querySelectorAll('.sm-parsha-row,.sm-book-title').forEach(el=>el.style.display=''); return; }
-    list.querySelectorAll('.sm-book-title').forEach(t=>t.style.display='none');
-    list.querySelectorAll('.sm-parsha-row').forEach(r=>{
+    list.style.display='';
+    if(!q){ list.querySelectorAll('.prayer-row,.ach-section-title').forEach(el=>el.style.display=''); return; }
+    list.querySelectorAll('.ach-section-title').forEach(t=>t.style.display='none');
+    list.querySelectorAll('.prayer-row').forEach(r=>{
       const k=r.dataset.k, he=LEYNING[k].heName;
       const match = he.includes(q) || k.toLowerCase().includes(q.toLowerCase());
       r.style.display = match?'':'none';
@@ -2391,60 +2399,81 @@ function findParshaContaining(book,ch,vs){
   }
   return null;
 }
-function smAliyotHTML(entry){
-  let html='';
-  for(let n=1;n<=7;n++){
-    const range=entry.aliyot[n-1]; if(!range) continue;
-    const verses=versesInRange(entry.book,range[0],range[1]);
-    html+=`<div class="sm-aliyah-head">עֲלִיָּה ${heNum(n)}${n===7&&entry.maftir?' (כּוֹלֵל מַפְטִיר)':''}</div>`;
-    html+=verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div><div class="sm-targum">${v.targum||''}</div></div>`).join('');
+function smStepNext(){
+  const entry=LEYNING[SM.key];
+  if(SM.mode==='haftarah'){
+    const nk=smNeighbor(SM.key,1);
+    if(nk){ SM={key:nk,n:1,mode:'torah'}; } else { toast('זוֹ הַפָּרָשָׁה הָאַחֲרוֹנָה'); return; }
+  } else if(SM.n<7){
+    SM.n++;
+  } else if(entry.haft){
+    SM.mode='haftarah';
+  } else {
+    const nk=smNeighbor(SM.key,1);
+    if(nk){ SM={key:nk,n:1,mode:'torah'}; } else { toast('זוֹ הַפָּרָשָׁה הָאַחֲרוֹנָה'); return; }
   }
-  return html;
+  renderShnayimReader(); forceScrollTop();
+}
+function smStepPrev(){
+  if(SM.mode==='haftarah'){ SM.mode='torah'; }
+  else if(SM.n>1){ SM.n--; }
+  else {
+    const pk=smNeighbor(SM.key,-1);
+    if(pk){ const pe=LEYNING[pk]; SM={key:pk,n:7,mode:pe.haft?'haftarah':'torah'}; }
+    else { toast('זוֹ הַפָּרָשָׁה הָרִאשׁוֹנָה'); return; }
+  }
+  renderShnayimReader(); forceScrollTop();
 }
 function renderShnayimReader(){
   if(!SM.key){ return renderShnayimList(); }
   if(!LEYNING){
-    app.innerHTML=`${topbar('שְׁנַיִם מִקְרָא')}<div class="view"><div class="sm-loading">${I.clock}<div style="margin-top:10px">טוֹעֵן…</div></div></div>`;
+    app.innerHTML=`${topbar('שניים מקרא')}<div class="view">${smSkeleton()}</div>`;
     ensureShnayimData().then(()=>{ if(TAB==='smReader') renderShnayimReader(); });
     return;
   }
   const entry=LEYNING[SM.key];
   if(!entry){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('smList'); }
+  const isHaft = SM.mode==='haftarah';
+  const n = SM.n||1;
+  let verses, tag, pct;
+  if(isHaft){
+    const seg = entry.seph || entry.haft;
+    verses = haftarahVerses(seg).map(v=>({c:v.c,v:v.v,he:v.he,targum:null}));
+    tag = 'הפטרה' + (entry.seph?' · נוסח ספרדי':'');
+    pct = 100;
+  } else {
+    const range=entry.aliyot[n-1];
+    verses = versesInRange(entry.book, range[0], range[1]);
+    tag = 'עלייה '+heNum(n)+(n===7&&entry.maftir?' (מפטיר)':'');
+    pct = Math.round((n/7)*100);
+  }
+  const canGoNext = isHaft ? !!smNeighbor(SM.key,1) : true;
+  const canGoPrev = isHaft ? true : (n>1 || !!smNeighbor(SM.key,-1));
   app.innerHTML=`
-  <div class="topbar" style="justify-content:space-between">
-    <button class="icon-btn" onclick="go('smList')">${I.prev}</button>
-    <div class="tb-title gold-text">${entry.heName}</div>
-    <div style="width:34px"></div>
-  </div>
-  <div class="view prayer-reader-page">
-    ${smAliyotHTML(entry)}
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
-      <button class="btn btn-gold" id="smDone">${I.check}<span>סִיַּמְתִּי אֶת קְרִיאַת הַפָּרָשָׁה</span></button>
-      ${entry.haft?`<button class="btn btn-ghost" id="smHaft"><span>${I.book}</span><span>קְרִיאַת הַהַפְטָרָה</span></button>`:''}
+  <div class="reader view">
+    <div class="reader-head">
+      <div class="reader-top">
+        <button class="icon-btn" id="smBack">${I.prev}</button>
+        <div class="reader-title">${entry.heName}</div>
+        <button class="icon-btn ${smIsDone(SM.key)?'fav-on':''}" id="smDoneBtn">${I.check}</button>
+      </div>
+      <div class="sm-aliyah-tag">${stripNik(entry.heName)} · ${tag}</div>
+      <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
-    <div style="height:60px"></div>
+    <div class="sm-verses">
+      ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')}
+    </div>
+    <div class="reader-nav">
+      <button class="rnav-btn" id="smPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
+      <button class="rnav-btn" id="smNext" ${canGoNext?'':'disabled'}><span>הַבָּא</span>${I.next}</button>
+    </div>
+    <div style="height:26px"></div>
   </div>`;
-  document.getElementById('smDone').onclick=()=>{ haptic(); smMarkDone(SM.key); toast('יִישֶׁר כֹּחַ! נִרְשַׁם'); };
-  const hb=document.getElementById('smHaft'); if(hb) hb.onclick=()=>go('smHaftarah');
-  tr(app); forceScrollTop();
-}
-function renderShnayimHaftarah(){
-  if(!SM.key||!LEYNING) return renderShnayimList();
-  const entry=LEYNING[SM.key];
-  const seg = entry.seph || entry.haft;
-  const verses=haftarahVerses(seg);
-  app.innerHTML=`
-  <div class="topbar" style="justify-content:space-between">
-    <button class="icon-btn" onclick="go('smReader')">${I.prev}</button>
-    <div class="tb-title gold-text">הַפְטָרַת ${entry.heName}</div>
-    <div style="width:34px"></div>
-  </div>
-  <div class="view prayer-reader-page">
-    ${entry.seph?'<div class="sm-search-hint">לְפִי נֹסַח סְפָרַדִּי</div>':''}
-    ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div></div>`).join('')}
-    <div style="height:60px"></div>
-  </div>`;
-  tr(app); forceScrollTop();
+  document.getElementById('smBack').onclick=()=>go('smList');
+  document.getElementById('smDoneBtn').onclick=()=>{ haptic(); smMarkDone(SM.key); toast('יִישֶׁר כֹּחַ! נִרְשַׁם'); };
+  const prevBtn=document.getElementById('smPrev'); if(!prevBtn.disabled) prevBtn.onclick=smStepPrev;
+  const nextBtn=document.getElementById('smNext'); if(!nextBtn.disabled) nextBtn.onclick=smStepNext;
+  tr(app);
 }
 
 /* ================= SETTINGS ================= */
