@@ -386,10 +386,10 @@ function checkNotification(){
              transform .26s cubic-bezier(.4,0,.68,.06),
              filter .26s cubic-bezier(.4,0,.68,.06),
              visibility .26s}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative}
-.nav-item svg{width:24px;height:24px;transition:.2s var(--ease)}
-.nav-item span{font-size:11px;font-weight:700}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative;padding:4px 2px;min-width:0}
+.nav-item svg{width:22px;height:22px;flex:none;transition:.2s var(--ease)}
+.nav-item span{font-size:10.5px;font-weight:700;white-space:nowrap;letter-spacing:.1px;line-height:1}
 .nav-item.on{color:var(--gold)}
 .nav-item.on svg{transform:translateY(-2px);filter:drop-shadow(0 3px 6px rgba(212,175,95,.5))}
 .nav-item.on::before{content:"";position:absolute;top:9px;width:34px;height:34px;border-radius:12px;
@@ -483,7 +483,6 @@ function checkNotification(){
 .nav-fade{position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav-h) + 45px + env(safe-area-inset-bottom));
   z-index:39;pointer-events:none;background:linear-gradient(to top,var(--bg) 35%,transparent)}
 [data-theme="light"] .bottom-nav{background:#fbf6ea;box-shadow:0 -8px 24px -14px rgba(80,60,20,.35)}
-.nav-item span{letter-spacing:.2px}
 
 /* compact daily card */
 .daily-card{margin-top:14px;text-align:right;padding:16px 16px 15px}
@@ -631,10 +630,6 @@ function checkNotification(){
 .conv-row .fld-select,.conv-row .fld-input{padding:8px 9px;font-size:13px}
 .conv-out{margin-top:10px;font-size:14px;line-height:1.7}
 .conv-out b{font-size:16px}
-/* nav bar clarity when installed */
-.nav-item{padding:4px 0 2px;gap:3px}
-.nav-item svg{width:21px;height:21px}
-.nav-item span{font-size:10.5px;line-height:1}
 /* global oversize guard inside cards */
 .card-title svg{width:17px;height:17px}
 /* ===== v4: overflow hardening + dedication redesign + memorial ===== */
@@ -1017,9 +1012,14 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ach-section-title:first-of-type{margin-top:0}
 
 /* ---- shnayim mikra ---- */
-.sm-week-card{background:linear-gradient(135deg,var(--gold-soft,rgba(212,175,95,.16)),transparent);border:1px solid var(--glass-border);border-radius:16px;padding:16px;margin-bottom:16px;cursor:pointer}
-.sm-week-tag{font-size:12px;color:var(--muted);margin-bottom:4px}
-.sm-week-name{font-family:var(--font-sacred);font-size:22px;color:var(--gold)}
+.sm-week-card{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(212,175,95,.16),rgba(212,175,95,.03));border:1px solid var(--glass-border);border-radius:16px;padding:14px 16px;margin-bottom:16px;cursor:pointer}
+.sm-week-icon{width:44px;height:44px;border-radius:12px;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;flex:none;color:#2a1e05;box-shadow:0 6px 16px -6px rgba(184,134,11,.6)}
+.sm-week-icon svg{width:22px;height:22px}
+.sm-week-text{flex:1;min-width:0}
+.sm-week-tag{font-size:12px;color:var(--muted);margin-bottom:2px}
+.sm-week-name{font-family:var(--font-sacred);font-size:21px;color:var(--gold)}
+.sm-week-chev{flex:none;color:var(--muted)}
+.sm-week-chev svg{width:18px;height:18px}
 .sm-verse-row{margin-bottom:18px}
 .sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
 .sm-he{font-family:var(--font-sacred);font-size:calc(21px*var(--fs-scale,1));line-height:2.0;text-align:justify}
@@ -2330,33 +2330,38 @@ function renderShnayimList(){
   app.innerHTML=`${topbar('שניים מקרא')}<div class="view">${smSkeleton()}</div>`;
   ensureShnayimData().then(()=>{ if(TAB==='smList') drawShnayimList(); });
 }
+let SML = { book:null };
 function drawShnayimList(){
+  if(SML.book) return drawShnayimBookList();
   const weekKey=currentParshaKey();
-  const individual=individualParshaKeys();
-  const byBook={};
-  individual.forEach(k=>{ const b=LEYNING[k].book; (byBook[b]=byBook[b]||[]).push(k); });
   const books=['Genesis','Exodus','Leviticus','Numbers','Deuteronomy'];
   app.innerHTML=`
   ${topbar('שניים מקרא')}
   <div class="view">
     ${weekKey&&LEYNING[weekKey]?`<div class="sm-week-card" id="smWeekCard">
-      <div class="sm-week-tag">פרשת השבוע</div>
-      <div class="sm-week-name">${LEYNING[weekKey].heName}</div>
+      <div class="sm-week-icon">${I.scroll}</div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">פרשת השבוע</div>
+        <div class="sm-week-name">${LEYNING[weekKey].heName}</div>
+      </div>
+      <span class="sm-week-chev">${I.chev}</span>
     </div>`:''}
     <div class="search-box">${I.search}<input id="smSearch" placeholder="חיפוש פרשה, או ספר ומראה מקום כמו בראשית 1:1"/></div>
     <div id="smRefResult"></div>
+    <div class="prayers-list" id="smSearchResults" style="display:none"></div>
     <div class="prayers-list" id="smList">
-      ${books.map(b=>`<div class="ach-section-title">${stripNik(BOOK_HE_NAMES[b])}</div>${(byBook[b]||[]).map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${stripNik(LEYNING[k].heName)}</span>${smIsDone(k)?I.check:I.chev}</div>`).join('')}`).join('')}
+      ${books.map(b=>`<div class="prayer-row" data-book="${b}"><span class="prayer-row-title">${stripNik(BOOK_HE_NAMES[b])}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
   const wc=document.getElementById('smWeekCard'); if(wc) wc.onclick=()=>openShnayim(weekKey);
-  app.querySelectorAll('#smList .prayer-row').forEach(r=>r.onclick=()=>openShnayim(r.dataset.k));
+  app.querySelectorAll('#smList .prayer-row').forEach(r=>r.onclick=()=>{ SML.book=r.dataset.book; drawShnayimList(); });
   const search=document.getElementById('smSearch');
   const refResult=document.getElementById('smRefResult');
+  const booksList=document.getElementById('smList');
+  const searchResults=document.getElementById('smSearchResults');
   search.oninput=()=>{
     const q=search.value.trim();
-    const list=document.getElementById('smList');
     refResult.innerHTML='';
     const ref=parseSmRefQuery(q);
     if(ref){
@@ -2365,18 +2370,39 @@ function drawShnayimList(){
         ? `<div class="prayer-row" id="smRefHit"><span class="prayer-row-title">${stripNik(LEYNING[k].heName)} · ${heNum(ref.ch)}:${heNum(ref.vs)}</span>${I.chev}</div>`
         : `<div class="sm-search-hint">לֹא נִמְצָא מַרְאֵה מָקוֹם כָּזֶה</div>`;
       const hit=document.getElementById('smRefHit'); if(hit) hit.onclick=()=>openShnayim(k);
-      list.style.display='none';
+      booksList.style.display='none'; searchResults.style.display='none';
       return;
     }
-    list.style.display='';
-    if(!q){ list.querySelectorAll('.prayer-row,.ach-section-title').forEach(el=>el.style.display=''); return; }
-    list.querySelectorAll('.ach-section-title').forEach(t=>t.style.display='none');
-    list.querySelectorAll('.prayer-row').forEach(r=>{
-      const k=r.dataset.k, he=LEYNING[k].heName;
-      const match = he.includes(q) || k.toLowerCase().includes(q.toLowerCase());
-      r.style.display = match?'':'none';
+    if(!q){ booksList.style.display=''; searchResults.style.display='none'; searchResults.innerHTML=''; return; }
+    booksList.style.display='none';
+    searchResults.style.display='';
+    const qPlain=stripNik(q);
+    const matches=individualParshaKeys().filter(k=>{
+      const he=stripNik(LEYNING[k].heName);
+      return he.includes(qPlain) || k.toLowerCase().includes(q.toLowerCase());
     });
+    searchResults.innerHTML = matches.map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${stripNik(LEYNING[k].heName)}</span>${I.chev}</div>`).join('') || `<div class="sm-search-hint">לֹא נִמְצְאוּ תּוֹצָאוֹת</div>`;
+    searchResults.querySelectorAll('.prayer-row').forEach(r=>r.onclick=()=>openShnayim(r.dataset.k));
   };
+  tr(app);
+}
+function drawShnayimBookList(){
+  const book=SML.book;
+  const keys=individualParshaKeys().filter(k=>LEYNING[k].book===book);
+  app.innerHTML=`
+  <div class="topbar" style="justify-content:space-between">
+    <button class="icon-btn" id="smBackToBooks">${I.prev}</button>
+    <div class="tb-title gold-text">${stripNik(BOOK_HE_NAMES[book])}</div>
+    <div style="width:34px"></div>
+  </div>
+  <div class="view">
+    <div class="prayers-list">
+      ${keys.map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${stripNik(LEYNING[k].heName)}</span>${smIsDone(k)?I.check:I.chev}</div>`).join('')}
+    </div>
+    ${ornament()}
+  </div>`;
+  document.getElementById('smBackToBooks').onclick=()=>{ SML.book=null; drawShnayimList(); };
+  app.querySelectorAll('.prayer-row').forEach(r=>r.onclick=()=>openShnayim(r.dataset.k));
   tr(app);
 }
 const SM_BOOK_NAMES={'בראשית':'Genesis','שמות':'Exodus','ויקרא':'Leviticus','במדבר':'Numbers','דברים':'Deuteronomy',
