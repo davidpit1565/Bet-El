@@ -1022,7 +1022,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
 .sm-he{font-family:var(--font-sacred);font-size:calc(21px*var(--fs-scale,1));line-height:2.0;text-align:justify}
 .sm-targum{font-family:var(--font-sacred);font-size:calc(16px*var(--fs-scale,1));line-height:1.9;color:var(--muted);margin-top:4px;text-align:justify}
-.sm-loading{text-align:center;padding:60px 20px;color:var(--muted)}
+.skel-wrap{padding:8px 2px}
+.skel-line{height:16px;border-radius:6px;margin-bottom:12px;background:linear-gradient(90deg,var(--line) 25%,var(--panel-hover) 50%,var(--line) 75%);background-size:200% 100%;animation:skelShimmer 1.4s ease-in-out infinite}
+.skel-line.w60{width:60%}.skel-line.w80{width:80%}.skel-line.w100{width:100%}.skel-line.w40{width:40%}
+.skel-line.tall{height:26px;margin-bottom:18px}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.skel-line{animation:none;opacity:.6}}
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 </style>
@@ -2313,8 +2318,14 @@ function smIsDone(key){ try{return JSON.parse(localStorage.getItem('betel_sm_don
 function individualParshaKeys(){ return Object.keys(LEYNING).filter(k=>LEYNING[k].parsha.length===1); }
 function smNeighbor(key,dir){ const keys=individualParshaKeys(); const i=keys.indexOf(key); if(i<0) return null; const j=i+dir; return keys[j]!=null?keys[j]:null; }
 function openShnayim(key){ SM={key,n:1,mode:'torah'}; go('smReader'); }
+function smSkeleton(){
+  return `<div class="skel-wrap">
+    <div class="skel-line tall w40"></div>
+    ${[0,1,2,3,4,5].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div><div class="skel-line w60"></div>`).join('')}
+  </div>`;
+}
 function renderShnayimList(){
-  app.innerHTML=`${topbar('שניים מקרא')}<div class="view"><div class="sm-loading">${I.clock}<div style="margin-top:10px">טוֹעֵן אֶת הַתּוֹרָה וְהַתַּרְגּוּם…</div></div></div>`;
+  app.innerHTML=`${topbar('שניים מקרא')}<div class="view">${smSkeleton()}</div>`;
   ensureShnayimData().then(()=>{ if(TAB==='smList') drawShnayimList(); });
 }
 function drawShnayimList(){
@@ -2416,7 +2427,7 @@ function smStepPrev(){
 function renderShnayimReader(){
   if(!SM.key){ return renderShnayimList(); }
   if(!LEYNING){
-    app.innerHTML=`${topbar('שניים מקרא')}<div class="view"><div class="sm-loading">${I.clock}<div style="margin-top:10px">טוֹעֵן…</div></div></div>`;
+    app.innerHTML=`${topbar('שניים מקרא')}<div class="view">${smSkeleton()}</div>`;
     ensureShnayimData().then(()=>{ if(TAB==='smReader') renderShnayimReader(); });
     return;
   }
