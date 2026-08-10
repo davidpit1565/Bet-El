@@ -1006,6 +1006,8 @@ const I = {
   trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h10v6a5 5 0 0 1-10 0z"/><path d="M12 14v4M9 21h6M4 3v3a3 3 0 0 0 3 3M20 3v3a3 3 0 0 1-3 3"/></svg>',
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M7 11l5 5 5-5M4 20h16"/></svg>',
   cert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21l4-3 4 3M8 7h8M8 11h5"/></svg>',
+  candle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2c1.5 1.8 2 2.8 2 3.6a2 2 0 1 1-4 0c0-.8.5-1.8 2-3.6z"/><rect x="9" y="8" width="6" height="12" rx="1"/><path d="M9 12h6"/></svg>',
+  moon2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.4 6.4 0 0 0 10.5 10.5z"/><path d="M17.5 5l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z"/></svg>',
 };
 
 /* ---------- Hebrew helpers ---------- */
@@ -1511,6 +1513,13 @@ function renderHome(){
     </div>
     ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>יוֹם הַיָּאהְרְצַיְיט · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
+    ${(function(){ if(hd.getDay()!==5) return ''; const st=shabbatTimes(hd); if(!st.candle&&!st.havdala) return '';
+      return `<div class="shabbat-times shabbat-home">
+        <div class="card-title"><span class="zi">${I.candle}</span>עֶרֶב שַׁבָּת קֹדֶש</div>
+        ${st.candle?`<div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>`:''}
+        ${st.havdala?`<div class="sb-row"><span class="zi">${I.moon2}</span><span class="zname">צֵאת הַשַּׁבָּת</span><span class="ztime gold-text">${fmtTime(st.havdala)}</span></div>`:''}
+      </div>`;
+    })()}
     ${dedHTML('')}
     ${!LOC.auto?`<div style="text-align:center;margin-top:8px"><button id="locChip" class="loc-chip">${I.loc}<span>עֲדְכֵּן מִקּוּם לַזְּמַנִּים</span></button></div>`:''}
 
@@ -1959,10 +1968,6 @@ function renderDayDetail(hd, events){
       <div class="dd-portion" style="flex:1" data-open="${mRange[0]},${mRange[1]}"><div class="lbl">קְרִיאָה חָדְשִׁית</div><div class="val">${heNum(mRange[0])}–${heNum(mRange[1])}</div></div>
       <div class="dd-portion" style="flex:1" data-open="${wRange[0]},${wRange[1]}"><div class="lbl">קְרִיאָה שְׁבוּעִית</div><div class="val">${heNum(wRange[0])}–${heNum(wRange[1])}</div></div>
     </div>
-    ${(function(){const st=shabbatTimes(hd); if(!st.candle&&!st.havdala) return ''; return `<div class="shabbat-times">
-      ${st.candle?`<div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>`:''}
-      ${st.havdala?`<div class="sb-row"><span class="zi">${I.moon2}</span><span class="zname">צֵאת הַשַּׁבָּת / חַג</span><span class="ztime gold-text">${fmtTime(st.havdala)}</span></div>`:''}
-    </div>`;})()}
     ${ZMANIM_LIVE?`<div class="loc-line">${I.loc}<span>${LOC.name}</span></div>
     <div class="zmanim-list">
       ${zlist.map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${z.label}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
@@ -1971,6 +1976,10 @@ function renderDayDetail(hd, events){
       ${zlist.filter(z=>ZMANIM_READY.includes(z.key)).map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${z.label}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
     </div>
     <div class="zmanim-soon">${I.clock}<span>שְׁאָר הַזְּמַנִּים יִתְעַדְכְּנוּ בְּקָרוֹב</span></div>`}
+    ${(function(){const st=shabbatTimes(hd); if(!st.candle&&!st.havdala) return ''; return `<div class="shabbat-times">
+      ${st.candle?`<div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>`:''}
+      ${st.havdala?`<div class="sb-row"><span class="zi">${I.moon2}</span><span class="zname">צֵאת הַשַּׁבָּת / חַג</span><span class="ztime gold-text">${fmtTime(st.havdala)}</span></div>`:''}
+    </div>`;})()}
   </div>`;
   el.querySelectorAll('[data-open]').forEach(d=>d.onclick=()=>{ const [a,b]=d.dataset.open.split(',').map(Number); openReader(chaptersOf([a,b]),{daily:false}); });
 }
@@ -2774,6 +2783,11 @@ function sharePrayer(key){
 window.sharePrayer = sharePrayer;
 
 })();
+</script>
+<script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+  }
 </script>
 <script>
   window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
