@@ -1155,6 +1155,7 @@ function tr(node){
   const dict=I18N[S.lang]; if(!dict) return;
   const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
   let n; while(n=walker.nextNode()){
+    if(n.parentElement && n.parentElement.closest('.notranslate')) continue;
     const t=n.nodeValue.trim(); if(!t) continue;
     if(dict[t]!=null){ n.nodeValue=n.nodeValue.replace(t,dict[t]); continue; }
     // partial: replace known phrases inside mixed strings
@@ -1445,10 +1446,15 @@ function renderHome(){
     </div>
     ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>יוֹם הַיָּאהְרְצַיְיט · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
-    ${(function(){ if(hd.getDay()!==5) return ''; const st=shabbatTimes(hd); if(!st.candle&&!st.havdala) return '';
+    ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.scroll}<span>רֹאשׁ חֹדֶשׁ · <b>אַל תִּשְׁכַּח לְהַזְכִּיר יַעֲלֶה וְיָבֹא</b></span></div>`:''}
+    ${(function(){
+      const st=shabbatTimes(hd); if(!st.candle) return '';
+      const title = st.chanukahNight ? `חֲנוּכָּה · נֵר ${heNum(st.chanukahNight)}`
+        : st.label ? st.label
+        : (hd.getDay()===5 ? 'עֶרֶב שַׁבָּת קֹדֶש' : 'הַדְלָקַת נֵרוֹת');
       return `<div class="shabbat-times shabbat-home">
-        <div class="card-title"><span class="zi">${I.candle}</span>עֶרֶב שַׁבָּת קֹדֶש</div>
-        ${st.candle?`<div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>`:''}
+        <div class="card-title"><span class="zi">${I.candle}</span>${title}</div>
+        <div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>
         ${st.havdala?`<div class="sb-row"><span class="zi">${I.moon2}</span><span class="zname">צֵאת הַשַּׁבָּת</span><span class="ztime gold-text">${fmtTime(st.havdala)}</span></div>`:''}
       </div>`;
     })()}
@@ -1613,7 +1619,7 @@ function prayerBlock(which){
   const body=pr.paras.map(p=>`<p>${p}</p>`).join('');
   return `<div class="prayer collapsed" data-prayer>
     <div class="prayer-title">${pr.title}</div>
-    <div class="pbody">${body}</div>
+    <div class="pbody notranslate">${body}</div>
     <div class="prayer-toggle" data-ptoggle>${I.chev}<span>הַצֵּג / הַסְתֵּר</span></div>
   </div>`;
 }
@@ -1629,7 +1635,7 @@ function chapterHTML(ch){
   return `<div class="chapter" data-ch="${ch}">
     <div class="chapter-title">מִזְמוֹר <span class="num">${heNum(ch)}</span></div>
     <div class="chapter-cap">פֶּרֶק ${ch} · ${verses.length} פְּסוּקִים</div>
-    <div class="psalm-body">${body}</div>
+    <div class="psalm-body notranslate">${body}</div>
   </div>`;
 }
 function renderContinuous(chs,hd){
@@ -1748,10 +1754,26 @@ function shabbatTimes(hd){
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
     const il=/Jerusalem/.test(LOC.tz);
     const evs=HebrewCalendar.calendar({start:s,end:e,candlelighting:true,location:hebLocation(),il,locale:'he'});
-    let candle=null,havdala=null;
-    evs.forEach(ev=>{ const d=(ev.getDesc&&ev.getDesc())||''; const t=ev.eventTime; if(!t)return; if(/Candle/i.test(d)) candle=t; else if(/Havdalah/i.test(d)) havdala=t; });
-    return {candle,havdala};
-  }catch(err){ return {candle:null,havdala:null}; }
+    let candle=null,havdala=null,chanukahNight=null,label=null;
+    const CHAG_EREV = 1|1048576; // @hebcal/core flags.CHAG | flags.EREV
+    evs.forEach(ev=>{
+      const d=(ev.getDesc&&ev.getDesc())||''; const t=ev.eventTime; const f=ev.getFlags?ev.getFlags():0;
+      const chMatch=/^Chanukah: (\d+)/i.exec(d);
+      if(chMatch){ chanukahNight=+chMatch[1]; if(t) candle=t; return; }
+      if(t && /Candle/i.test(d)){ candle=t; return; }
+      if(t && /Havdalah/i.test(d)){ havdala=t; return; }
+      if(!t && (f&CHAG_EREV) && !label) label=ev.render('he');
+    });
+    return {candle,havdala,chanukahNight,label};
+  }catch(err){ return {candle:null,havdala:null,chanukahNight:null,label:null}; }
+}
+function isRoshChodeshToday(hd){
+  try{
+    const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
+    const il=/Jerusalem/.test(LOC.tz);
+    const evs=HebrewCalendar.calendar({start:s,end:e,il,locale:'he'});
+    return evs.some(ev=>/^Rosh Chodesh/i.test((ev.getDesc&&ev.getDesc())||''));
+  }catch(err){ return false; }
 }
 function wireConverter(){
   const hMonths=(y)=>{ const n=HDate.monthsInYear?HDate.monthsInYear(y):((y*7+1)%19<7?13:12); const out=[]; for(let m=1;m<=n;m++){ out.push({v:m, t:monthNameHe(new HDate(1,m,y))}); } return out; };
@@ -1983,7 +2005,7 @@ function renderPrayerReader(){
       <div class="prayer-reader-title">${p.title}</div>
     </div>
     <div class="prayer-reader-divider"></div>
-    <div class="prayer-reader-text">
+    <div class="prayer-reader-text notranslate">
       ${fullText}
     </div>
     <div style="height:80px"></div>
@@ -2162,7 +2184,7 @@ function renderShnayimReader(){
       <div class="sm-aliyah-tag">${stripNik(entry.heName)} · ${tag}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
-    <div class="sm-verses">
+    <div class="sm-verses notranslate">
       ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span>${!isHaft?'<span class="sm-tag-badge">מקרא · קריאה כפולה</span>':''}<div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')}
     </div>
     <div class="reader-nav">
