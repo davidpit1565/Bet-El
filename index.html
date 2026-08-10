@@ -518,6 +518,7 @@ function checkNotification(){
 
 /* reader fav button */
 .icon-btn.fav-on{color:var(--gold);background:rgba(212,175,95,.14)}
+.autoscroll-btn.on{color:var(--gold);background:rgba(212,175,95,.14);border-radius:50%}
 
 /* form fields (dedication + reminder) */
 .fld-select,.fld-input,.time-input{width:100%;font-family:var(--font-ui);font-size:14px;color:var(--ink);
@@ -758,6 +759,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-verse-row{margin-bottom:18px}
 .sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
 .sm-he{font-family:var(--font-sacred);font-size:calc(21px*var(--fs-scale,1));line-height:2.0;text-align:justify}
+.sm-he+.sm-he{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
 .sm-targum{font-family:var(--font-sacred);font-size:calc(16px*var(--fs-scale,1));line-height:1.9;color:var(--muted);margin-top:4px;text-align:justify}
 .sm-tag-badge{display:inline-block;font-size:10.5px;font-weight:700;color:var(--gold);background:rgba(212,175,95,.14);border-radius:6px;padding:2px 8px;margin-bottom:6px}
 .sm-tag-badge.sm-targum-tag{margin-top:10px;display:block;width:fit-content}
@@ -880,6 +882,7 @@ const I = {
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>',
   crown:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-2 12H5L3 8z" opacity=".95"/><circle cx="3" cy="7" r="1.4"/><circle cx="21" cy="7" r="1.4"/><circle cx="12" cy="3.5" r="1.6"/></svg>',
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
   next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>',
   prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
@@ -1396,7 +1399,22 @@ function go(tab){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab)); 
   forceScrollTop();
 }
+let autoScrollTimer=null;
+function stopAutoScroll(){
+  if(autoScrollTimer){ clearInterval(autoScrollTimer); autoScrollTimer=null; }
+  document.querySelectorAll('.autoscroll-btn.on').forEach(b=>b.classList.remove('on'));
+}
+function toggleAutoScroll(btn){
+  if(autoScrollTimer){ stopAutoScroll(); btn.innerHTML=I.play; return; }
+  btn.classList.add('on'); btn.innerHTML=I.pause;
+  autoScrollTimer=setInterval(()=>{
+    const b=document.body;
+    if((b.scrollTop+b.clientHeight)>=(b.scrollHeight-4)){ stopAutoScroll(); btn.innerHTML=I.play; return; }
+    b.scrollTop+=1;
+  },50);
+}
 function render(){
+  stopAutoScroll();
   if(TAB==='home') renderHome();
   else if(TAB==='tehillim') renderTehillim();
   else if(TAB==='calendar') renderCalendar();
@@ -1663,6 +1681,7 @@ function renderContinuous(chs,hd){
   requestAnimationFrame(()=>{ window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); });
 }
 function renderReader(){
+  stopAutoScroll();
   const ch=RD.chapters[RD.idx]; setLast(ch);
   const first=RD.idx===0, last=RD.idx===RD.chapters.length-1;
   const total=RD.chapters.length;
@@ -1704,6 +1723,7 @@ function renderReader(){
       <button id="tPlus">${I.aplus}</button>
       <div class="sep"></div>
       <button id="tTheme">${S.theme==='dark'?I.sun:I.moon}</button>
+      <button class="autoscroll-btn" id="tAutoScroll">${I.play}</button>
       <button id="tHome">${I.home}</button>
     </div>
   </div>`;
@@ -1732,6 +1752,7 @@ function wireReader(){
   document.getElementById('tMinus').onclick=()=>changeFont(-0.1);
   document.getElementById('tPlus').onclick=()=>changeFont(0.1);
   document.getElementById('tTheme').onclick=()=>{ toggleTheme(); document.getElementById('tTheme').innerHTML=S.theme==='dark'?I.sun:I.moon; };
+  document.getElementById('tAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   tr(app);
   if(RD && RD.verse!=null){ const vs=app.querySelectorAll('.chapter .verse'); const el=vs[RD.verse]; if(el){ el.classList.add('vhi'); setTimeout(()=>{ try{el.scrollIntoView({block:'center'});}catch(e){} },60); setTimeout(()=>el.classList.remove('vhi'),2600); } RD.verse=null; }
 }
@@ -2149,6 +2170,7 @@ function smFinish(){
   haptic(); smMarkDone(SM.key); celebrate('daily','הַפָּרָשָׁה');
 }
 function renderShnayimReader(){
+  stopAutoScroll();
   if(!SM.key){ return renderShnayimList(); }
   if(!LEYNING){
     app.innerHTML=`${topbar('שניים מקרא')}<div class="view">${smSkeleton()}</div>`;
@@ -2179,13 +2201,13 @@ function renderShnayimReader(){
       <div class="reader-top">
         <button class="icon-btn" id="smBack">${I.prev}</button>
         <div class="reader-title">${entry.heName}</div>
-        <div style="width:42px"></div>
+        <button class="icon-btn autoscroll-btn" id="smAutoScroll">${I.play}</button>
       </div>
       <div class="sm-aliyah-tag">${stripNik(entry.heName)} · ${tag}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
     <div class="sm-verses notranslate">
-      ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span>${!isHaft?'<span class="sm-tag-badge">מקרא · קריאה כפולה</span>':''}<div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')}
+      ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${!isHaft?`<div class="sm-he">${v.he}</div>`:''}${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')}
     </div>
     <div class="reader-nav">
       <button class="rnav-btn" id="smPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
@@ -2196,6 +2218,7 @@ function renderShnayimReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('smBack').onclick=()=>go('smList');
+  document.getElementById('smAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const prevBtn=document.getElementById('smPrev'); if(!prevBtn.disabled) prevBtn.onclick=smStepPrev;
   const nextBtn=document.getElementById('smNext'); if(nextBtn) nextBtn.onclick=smStepNext;
   const doneBtn=document.getElementById('smDone'); if(doneBtn) doneBtn.onclick=smFinish;
