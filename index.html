@@ -1644,7 +1644,9 @@ function renderTehillim(){
     results.querySelectorAll('.res-prayer').forEach(b=>b.onclick=()=>openPrayer(b.dataset.key));
   }
   function apply(){
-    const q=document.getElementById('psSearch').value.trim();
+    const el=document.getElementById('psSearch');
+    if(!el) return;
+    const q=el.value.trim();
     if(!q){ drawGrid(''); return; }
     if(/^[0-9]+$/.test(q)) drawGrid(q); else searchVerses(q);
   }
