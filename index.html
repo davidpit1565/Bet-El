@@ -1691,13 +1691,13 @@ function chapterHTML(ch){
   </div>`;
 }
 function renderContinuous(chs,hd){
-  TAB='reader'; RD=null;
+  TAB='reader'; RD=null; stopAutoScroll();
   app.innerHTML=`
   <div class="reader-head">
     <div class="reader-top">
       <button class="icon-btn" id="rBack">${I.prev}</button>
       <div class="reader-title">קְרִיאַת הַיּוֹם</div>
-      <span style="width:38px"></span>
+      <button class="icon-btn autoscroll-btn" id="flowAutoScroll">${I.play}</button>
     </div>
   </div>
   ${dedHTML('reader-ded')}
@@ -1709,7 +1709,8 @@ function renderContinuous(chs,hd){
   </div>`;
   document.getElementById('rBack').onclick=()=>go('home');
   forceScrollTop();
-  document.getElementById('flowDone').onclick=()=>{ haptic(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
+  document.getElementById('flowAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
+  document.getElementById('flowDone').onclick=()=>{ haptic(); stopAutoScroll(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
   tr(app);
   document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);
   requestAnimationFrame(()=>{ window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); });
@@ -2323,9 +2324,11 @@ function renderZoharReader(){
     </div>
     <div class="reader-nav">
       <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
-      ${ZH.day<ZOHAR.length
-        ? `<button class="rnav-btn" id="zhNext"><span>הַבָּא</span>${I.next}</button>`
-        : `<button class="rnav-btn done" id="zhDone">${I.check}<span>סִיַּמְתִּי אֶת הַתִּיקּוּן</span></button>`}
+      ${!zoharDone().includes(entry.day)
+        ? `<button class="rnav-btn done" id="zhDone">${I.check}<span>סִיַּמְתִּי אֶת הַתִּיקּוּן</span></button>`
+        : ZH.day<ZOHAR.length
+          ? `<button class="rnav-btn" id="zhNext"><span>הַבָּא</span>${I.next}</button>`
+          : `<button class="rnav-btn done" id="zhDone2">${I.check}<span>סִיַּמְתִּי אֶת הַתִּיקּוּן</span></button>`}
     </div>
     <div style="height:26px"></div>
   </div>`;
@@ -2333,7 +2336,8 @@ function renderZoharReader(){
   document.getElementById('zhAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const prevBtn=document.getElementById('zhPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>zhStep(-1);
   const nextBtn=document.getElementById('zhNext'); if(nextBtn) nextBtn.onclick=()=>zhStep(1);
-  const doneBtn=document.getElementById('zhDone'); if(doneBtn) doneBtn.onclick=()=>{ haptic(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); };
+  const doneBtn2=document.getElementById('zhDone2'); if(doneBtn2) doneBtn2.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); go('zoharList'); };
+  const doneBtn=document.getElementById('zhDone'); if(doneBtn) doneBtn.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); if(ZH.day<ZOHAR.length){ zhStep(1); } else { go('zoharList'); } };
   tr(app);
 }
 
