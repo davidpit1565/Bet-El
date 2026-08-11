@@ -930,6 +930,7 @@ const I = {
   cert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21l4-3 4 3M8 7h8M8 11h5"/></svg>',
   candle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2c1.5 1.8 2 2.8 2 3.6a2 2 0 1 1-4 0c0-.8.5-1.8 2-3.6z"/><rect x="9" y="8" width="6" height="12" rx="1"/><path d="M9 12h6"/></svg>',
   moon2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.4 6.4 0 0 0 10.5 10.5z"/><path d="M17.5 5l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z"/></svg>',
+  zoharFlame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c1 3-3.5 4.3-3.5 8.2A3.5 3.5 0 0 0 12 15a3.5 3.5 0 0 0 3.5-3.8C15.5 8.5 11.3 7 12 3z"/><path d="M4.5 12l1.6.5-1.6.5M19.5 12l-1.6.5 1.6.5M8 20.5h8" stroke-width="1.2"/></svg>',
 };
 
 /* ---------- Hebrew helpers ---------- */
@@ -1208,6 +1209,20 @@ function ensureShnayimData(){
   ]).then(([t,h,l])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; });
   return smLoadPromise;
 }
+let ZOHAR=null, zoharLoadPromise=null;
+function ensureZoharData(){
+  if(ZOHAR) return Promise.resolve();
+  if(zoharLoadPromise) return zoharLoadPromise;
+  zoharLoadPromise = fetch('data/tikkunei-hazohar-data.json').then(r=>r.json()).then(d=>{ ZOHAR=d; });
+  return zoharLoadPromise;
+}
+// 40-day Tikkunei HaZohar cycle: 1-29 Elul (month 6) -> cycle day 1-29, 1-10 Tishrei (month 7) -> cycle day 30-39
+function zoharCycleDay(hd){
+  const m=hd.getMonth();
+  if(m===6) return hd.getDate();
+  if(m===7 && hd.getDate()<=10) return 29+hd.getDate();
+  return null;
+}
 function parshaKeyForDate(dateObj){
   try{
     const il=/Jerusalem/.test(LOC.tz);
@@ -1422,6 +1437,8 @@ function render(){
   else if(TAB==='prayerReader') renderPrayerReader();
   else if(TAB==='smList') renderShnayimList();
   else if(TAB==='smReader') renderShnayimReader();
+  else if(TAB==='zoharList') renderZoharList();
+  else if(TAB==='zoharReader') renderZoharReader();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='achievements') renderAchievements();
   tr(app);
@@ -1500,6 +1517,17 @@ function renderHome(){
       <button class="btn btn-gold" id="startBtn">${I.play}<span>${readInPortion&&readInPortion<chs.length?'הַמְשֵׁךְ בַּקְּרִיאָה':'הַתְחֵל קְרִיאָה'}</span></button>
     </div>
 
+    ${(function(){
+      const cd=zoharCycleDay(hd); if(!cd) return '';
+      return `<div class="sm-week-card" id="homeZoharCard">
+        <div class="sm-week-icon">${I.zoharFlame}</div>
+        <div class="sm-week-text">
+          <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר · יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
+          <div class="sm-week-name">${ZOHAR&&ZOHAR[cd-1]?ZOHAR[cd-1].hebDate:''}</div>
+        </div>
+        <span class="sm-week-chev">${I.chev}</span>
+      </div>`;
+    })()}
     ${weekParshaKey?`<div class="sm-week-card" id="homeParshaCard">
       <div class="sm-week-icon">${I.scroll}</div>
       <div class="sm-week-text">
@@ -1518,6 +1546,12 @@ function renderHome(){
   document.getElementById('startBtn').onclick=()=>renderContinuous(chs,hd);
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
   const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
+  const hzc=document.getElementById('homeZoharCard');
+  if(hzc){
+    const cd=zoharCycleDay(hd);
+    hzc.onclick=()=>openZohar(cd);
+    if(!ZOHAR) ensureZoharData().then(()=>{ if(TAB==='home') render(); });
+  }
   const lc=document.getElementById('locChip'); if(lc) lc.onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַזְּמַנִּים לְפִי מִקּוּמְךָ':'לֹא הִתְקַבְּלָה הַרְשָׁאָה'); if(TAB==='home') render(); }); };
 }
 
@@ -1977,6 +2011,9 @@ function renderPrayersList(){
         <div class="prayer-row" onclick="go('smList')">
           <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
         </div>
+        <div class="prayer-row" onclick="go('zoharList')">
+          <span class="prayer-row-title">תיקוני הזוהר</span>
+        </div>
       </div>
       <div class="empty-note" style="padding:40px 20px;text-align:center">
         <div style="font-size:15px;line-height:1.8">שְׁאָר הַתְּפִלּוֹת הַנּוֹסָפוֹת יוֹפִיעוּ כָּאן בְּקָרוֹב<br>בְּנֻסָּח מְדֻיָּק וּמְנֻקָּד</div>
@@ -1992,6 +2029,9 @@ function renderPrayersList(){
     <div class="prayers-list">
       <div class="prayer-row" onclick="go('smList')">
         <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
+      </div>
+      <div class="prayer-row" onclick="go('zoharList')">
+        <span class="prayer-row-title">תיקוני הזוהר</span>
       </div>
       ${ready.map(([key, p]) => `
         <div class="prayer-row" onclick="openPrayer('${key}')">
@@ -2222,6 +2262,78 @@ function renderShnayimReader(){
   const prevBtn=document.getElementById('smPrev'); if(!prevBtn.disabled) prevBtn.onclick=smStepPrev;
   const nextBtn=document.getElementById('smNext'); if(nextBtn) nextBtn.onclick=smStepNext;
   const doneBtn=document.getElementById('smDone'); if(doneBtn) doneBtn.onclick=smFinish;
+  tr(app);
+}
+
+/* ================= TIKKUNEI HAZOHAR ================= */
+let ZH = { day:null };
+function openZohar(day){ ZH={day}; go('zoharReader'); }
+function zoharDone(){ try{return JSON.parse(localStorage.getItem('betel_zohar_done')||'[]');}catch(e){return [];} }
+function zoharMarkDone(day){
+  const done=zoharDone(); if(!done.includes(day)){ done.push(day); localStorage.setItem('betel_zohar_done',JSON.stringify(done)); }
+}
+function renderZoharList(){
+  app.innerHTML=`${topbar('תיקוני הזוהר')}<div class="view">${smSkeleton()}</div>`;
+  ensureZoharData().then(()=>{ if(TAB==='zoharList') drawZoharList(); });
+}
+function drawZoharList(){
+  const hd=currentHDate();
+  const todayCd=zoharCycleDay(hd);
+  const done=zoharDone();
+  app.innerHTML=`
+  ${topbar('תיקוני הזוהר')}
+  <div class="view">
+    <div class="empty-note" style="padding:14px 4px;text-align:center"><div style="font-size:13px;line-height:1.8">מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר</div></div>
+    <div class="prayers-list">
+      ${ZOHAR.map(d=>`<div class="prayer-row" data-day="${d.day}"><span class="prayer-row-title">יוֹם ${heNum(d.day)} · ${d.hebDate}${d.day===todayCd?' · הַיּוֹם':''}</span>${done.includes(d.day)?I.check:I.chev}</div>`).join('')}
+    </div>
+    ${ornament()}
+  </div>`;
+  app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openZohar(+r.dataset.day));
+  tr(app);
+}
+function zhStep(delta){
+  const n=ZH.day+delta;
+  if(n<1||n>ZOHAR.length) return;
+  ZH.day=n; renderZoharReader(); forceScrollTop();
+}
+function renderZoharReader(){
+  stopAutoScroll();
+  if(!ZH.day) return renderZoharList();
+  if(!ZOHAR){
+    app.innerHTML=`${topbar('תיקוני הזוהר')}<div class="view">${smSkeleton()}</div>`;
+    ensureZoharData().then(()=>{ if(TAB==='zoharReader') renderZoharReader(); });
+    return;
+  }
+  const entry=ZOHAR[ZH.day-1];
+  const pct=Math.round((ZH.day/ZOHAR.length)*100);
+  app.innerHTML=`
+  <div class="reader view">
+    <div class="reader-head">
+      <div class="reader-top">
+        <button class="icon-btn" id="zhBack">${I.prev}</button>
+        <div class="reader-title">תִּיקּוּנֵי הַזֹּהַר</div>
+        <button class="icon-btn autoscroll-btn" id="zhAutoScroll">${I.play}</button>
+      </div>
+      <div class="sm-aliyah-tag">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${entry.hebDate}</div>
+      <div class="reader-progress"><i style="width:${pct}%"></i></div>
+    </div>
+    <div class="prayer-reader-text notranslate">
+      ${entry.text.map(p=>`<div class="prayer-para">${p}</div>`).join('')}
+    </div>
+    <div class="reader-nav">
+      <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
+      ${ZH.day<ZOHAR.length
+        ? `<button class="rnav-btn" id="zhNext"><span>הַבָּא</span>${I.next}</button>`
+        : `<button class="rnav-btn done" id="zhDone">${I.check}<span>סִיַּמְתִּי אֶת הַתִּיקּוּן</span></button>`}
+    </div>
+    <div style="height:26px"></div>
+  </div>`;
+  document.getElementById('zhBack').onclick=()=>go('zoharList');
+  document.getElementById('zhAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
+  const prevBtn=document.getElementById('zhPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>zhStep(-1);
+  const nextBtn=document.getElementById('zhNext'); if(nextBtn) nextBtn.onclick=()=>zhStep(1);
+  const doneBtn=document.getElementById('zhDone'); if(doneBtn) doneBtn.onclick=()=>{ haptic(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); };
   tr(app);
 }
 
