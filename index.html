@@ -2856,5 +2856,20 @@ window.sharePrayer = sharePrayer;
   window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/speed-insights/script.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyC-_4GaF_IMR_Xy5d6LEFAT_1lvygCcfRQ",
+    authDomain: "bet-el-e6812.firebaseapp.com",
+    projectId: "bet-el-e6812",
+    storageBucket: "bet-el-e6812.firebasestorage.app",
+    messagingSenderId: "307340594758",
+    appId: "1:307340594758:web:893ce10350a975e0624447",
+    measurementId: "G-W1XQQLTHFC"
+  };
+  const firebaseApp = initializeApp(firebaseConfig);
+  getAnalytics(firebaseApp);
+</script>
 </body>
 </html>
