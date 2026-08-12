@@ -511,7 +511,6 @@ function checkNotification(){
 /* dedication line */
 .ded-line{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 2px;
   color:var(--gold);font-family:var(--font-sacred);font-size:15px;font-weight:700;text-align:center}
-.ded-line svg{width:16px;height:16px;flex:none;opacity:.85}
 .reader-ded{margin:14px 2px 4px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;
   background:var(--panel);backdrop-filter:blur(8px);font-size:14px}
 .ded-preview{display:flex;align-items:center;gap:8px;color:var(--gold);font-family:var(--font-sacred);
@@ -1410,7 +1409,7 @@ function dedLines(){ return dedList().map(d=>dedLabel(d.t)+' '+d.n); }
 function dedicationLine(){
   const L=dedLines(); return L.length?L.join(' · '):'';
 }
-function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div class="ded-line ${cls||''}">${I.heart}<div class="ded-multi">${L.map(x=>`<span>${x}</span>`).join('')}</div></div>`; }
+function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div class="ded-line ${cls||''}"><div class="ded-multi">${L.map(x=>`<span>${x}</span>`).join('')}</div></div>`; }
 
 /* ================= ROUTER ================= */
 const app = document.getElementById('app');
