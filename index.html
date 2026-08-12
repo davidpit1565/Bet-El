@@ -667,10 +667,17 @@ input,select,button{max-width:100%;box-sizing:border-box}
   color:var(--muted);font-size:12.5px;line-height:1.9;opacity:.85}
 .memorial span{font-size:11px;letter-spacing:.5px}
 [data-theme="dark"] .memorial{color:#8d97ad}
-.visit-counter{margin:10px auto 0;text-align:center;font-family:var(--font-sacred);
-  color:var(--muted);font-size:12px;opacity:.8;display:flex;align-items:center;justify-content:center;gap:6px}
-.visit-counter svg{width:14px;height:14px;flex:none}
-.visit-counter b{color:var(--gold);font-weight:800;font-size:13px}
+.stats-row{display:flex;gap:10px;margin:14px 4px 0}
+.stat-card{flex:1;background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;
+  padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stat-card .sc-info{display:flex;flex-direction:column}
+.stat-card .sc-num{font-size:21px;font-weight:800;color:var(--ink);font-family:var(--font-ui);line-height:1.15}
+.stat-card .sc-label{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-sacred)}
+.stat-card .sc-badge{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.stat-card .sc-badge svg{width:17px;height:17px}
+.stat-card .sc-badge.gold{background:var(--gold-grad);color:#2a1e05}
+.stat-card .sc-badge.live{background:rgba(58,214,125,.16);color:#2ea364}
+.stat-card .sc-badge.live svg{width:10px;height:10px;filter:drop-shadow(0 0 4px rgba(58,214,125,.7))}
 .zmanim-soon{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;
   padding:16px 14px;border:1px dashed var(--line-strong);border-radius:13px;color:var(--muted);
   font-family:var(--font-ui);font-size:13px;background:var(--panel)}
@@ -928,6 +935,8 @@ const I = {
   zMoonHigh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.5 13.2A8.2 8.2 0 1 1 10.8 3.5a6.6 6.6 0 0 0 9.7 9.7z"/><circle cx="18.5" cy="6" r=".9" fill="currentColor" stroke="none"/><circle cx="15" cy="3.5" r=".6" fill="currentColor" stroke="none"/></svg>',
   scroll:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h12v14a3 3 0 0 1-3 3H6a3 3 0 0 0 3-3V3z"/><path d="M9 7h6M9 11h6"/></svg>',
   heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20s-7-4.7-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.3-7 10-7 10z"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M15.3 14.3c2.4.4 4.2 2.4 4.2 5"/></svg>',
+  liveDot:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="currentColor"/></svg>',
   bookmark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   bookmarkOn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></svg>',
@@ -1550,11 +1559,15 @@ function renderHome(){
       <div class="q-tile" data-nav="calendar"><div class="qi">${I.cal}</div><div class="qt">לוּחַ זְמַנִּים</div><div class="qd">זְמַנֵּי הַיּוֹם וְהֶחָג</div></div>
     </div>
     ${memorialHTML()}
-    <div class="visit-counter" id="visitCounter">${I.book}<span>קוֹרְאִים בִּקְּרוּ כָּאן · <b id="visitCount">–</b></span></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">קוֹרְאִים</span></div><span class="sc-badge gold">${I.users}</span></div>
+      <div class="stat-card"><div class="sc-info"><span class="sc-num" id="liveCount">–</span><span class="sc-label">מְחֻבָּרִים כָּעֵת</span></div><span class="sc-badge live">${I.liveDot}</span></div>
+    </div>
     ${ornament()}
   </div>`;
   document.getElementById('startBtn').onclick=()=>renderContinuous(chs,hd);
   if(window.__paintVisitCount) window.__paintVisitCount();
+  if(window.__paintLiveCount) window.__paintLiveCount();
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
   const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
   const hzc=document.getElementById('homeZoharCard');
@@ -2866,6 +2879,7 @@ window.sharePrayer = sharePrayer;
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
   import { getFirestore, doc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getDatabase, ref, push, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
   const firebaseConfig = {
     apiKey: "AIzaSyC-_4GaF_IMR_Xy5d6LEFAT_1lvygCcfRQ",
     authDomain: "bet-el-e6812.firebaseapp.com",
@@ -2873,7 +2887,8 @@ window.sharePrayer = sharePrayer;
     storageBucket: "bet-el-e6812.firebasestorage.app",
     messagingSenderId: "307340594758",
     appId: "1:307340594758:web:893ce10350a975e0624447",
-    measurementId: "G-W1XQQLTHFC"
+    measurementId: "G-W1XQQLTHFC",
+    databaseURL: "https://bet-el-e6812-default-rtdb.europe-west1.firebasedatabase.app"
   };
   const firebaseApp = initializeApp(firebaseConfig);
   getAnalytics(firebaseApp);
@@ -2898,6 +2913,27 @@ window.sharePrayer = sharePrayer;
       try { await setDoc(visitsRef, { count: 1 }); } catch (e2) {}
     }
   })();
+
+  // Live "currently online" presence (Realtime Database)
+  try {
+    const rtdb = getDatabase(firebaseApp);
+    const presenceListRef = ref(rtdb, 'presence');
+    window.__paintLiveCount = function(){
+      const el = document.getElementById('liveCount');
+      if(el && window.__liveCount != null) el.textContent = window.__liveCount.toLocaleString('he-IL');
+    };
+    onValue(presenceListRef, (snap) => {
+      window.__liveCount = snap.numChildren();
+      window.__paintLiveCount();
+    });
+    onValue(ref(rtdb, '.info/connected'), (snap) => {
+      if(snap.val() === true){
+        const myRef = push(presenceListRef);
+        onDisconnect(myRef).remove();
+        set(myRef, true);
+      }
+    });
+  } catch (e) {}
 </script>
 </body>
 </html>
