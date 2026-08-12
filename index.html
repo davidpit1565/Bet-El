@@ -168,6 +168,7 @@ body::before{ /* subtle starfield/texture */
 .q-tile .qi{color:var(--gold)}.q-tile .qi svg{width:24px;height:24px}
 .q-tile .qt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
 .q-tile .qd{font-size:12px;color:var(--muted)}
+.q-tile-wide{grid-column:1/-1;flex-direction:row;align-items:center;gap:14px}
 
 /* ================= TEHILLIM GRID ================= */
 .section-head{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 14px}
@@ -914,6 +915,7 @@ const I = {
   next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>',
   prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+  tracker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3v3h6V3"/><path d="M8.5 12.5l2 2 4-4.5"/><path d="M8 17.5h8"/></svg>',
   chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
   share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>',
@@ -1484,6 +1486,7 @@ function render(){
   else if(TAB==='zoharReader') renderZoharReader();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='achievements') renderAchievements();
+  else if(TAB==='tracker') renderTracker();
   tr(app);
 }
 
@@ -1503,7 +1506,6 @@ function renderHome(){
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
   const read=readSet(); const readInPortion=chs.filter(c=>read.has(c)).length;
-  const pct = chs.length? readInPortion/chs.length : 0;
   const nz=nextZmanText();
   const streak=getStreak();
   const todayYahr=todaysYahrzeits();
@@ -1541,19 +1543,10 @@ function renderHome(){
 
     <div class="card daily-card">
       <div class="daily-head">
-        <div class="ring small">
-          <svg width="52" height="52" viewBox="0 0 52 52">
-            <defs><linearGradient id="goldgrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#b8860b"/><stop offset=".5" stop-color="#e6c874"/><stop offset="1" stop-color="#c9a24b"/></linearGradient></defs>
-            <circle class="bg" cx="26" cy="26" r="22" fill="none" stroke-width="4"/>
-            <circle class="fg" cx="26" cy="26" r="22" fill="none" stroke-width="4" stroke-dasharray="${2*Math.PI*22}" stroke-dashoffset="${(2*Math.PI*22)*(1-pct)}"/>
-          </svg>
-          <div class="lbl">${readInPortion}/${chs.length}</div>
-        </div>
         <div class="daily-info">
           <div class="daily-tag">${S.division==='weekly'?'קְרִיאַת הַיּוֹם · '+DOW_HE[hd.getDay()]:'קְרִיאַת הַיּוֹם · '+heNum(hd.getDate())+' לַחֹדֶשׁ'}</div>
           <div class="daily-range">${rangeLabel}</div>
-          <div class="daily-count">${chs.length} פְּרָקִים${readInPortion? ' · '+readInPortion+' נִקְרְאוּ':''}</div>
+          <div class="daily-count">${chs.length} פְּרָקִים</div>
           ${streak.count>1?`<div class="streak-chip">${I.flame}<span>${heNum(streak.count)} יָמִים רְצוּפִים${streak.best>streak.count?' · 🏆 '+heNum(streak.best):''}</span></div>`:''}
         </div>
       </div>
@@ -1582,6 +1575,7 @@ function renderHome(){
     <div class="quick-grid">
       <div class="q-tile" data-nav="tehillim"><div class="qi">${I.book}</div><div class="qt">כָּל הַתְּהִלִּים</div><div class="qd">ק״נ פְּרָקִים לְעִיּוּן</div></div>
       <div class="q-tile" data-nav="calendar"><div class="qi">${I.cal}</div><div class="qt">לוּחַ זְמַנִּים</div><div class="qd">זְמַנֵּי הַיּוֹם וְהֶחָג</div></div>
+      <div class="q-tile q-tile-wide" data-nav="tracker"><div class="qi">${I.tracker}</div><div class="qt">מַעֲקַב קְרִיאָה</div><div class="qd">תְּהִלִּים · תִּיקּוּנֵי הַזֹּהַר · שְׁנַיִם מִקְרָא</div></div>
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">מִשְׁתַּמְּשִׁים</span></div><span class="sc-badge gold">${I.users}</span></div>
@@ -1602,6 +1596,69 @@ function renderHome(){
     if(!ZOHAR) ensureZoharData().then(()=>{ if(TAB==='home') render(); });
   }
   const lc=document.getElementById('locChip'); if(lc) lc.onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַזְּמַנִּים לְפִי מִקּוּמְךָ':'לֹא הִתְקַבְּלָה הַרְשָׁאָה'); if(TAB==='home') render(); }); };
+}
+
+/* ================= READING TRACKER ================= */
+function renderTracker(){
+  const hd=currentHDate();
+  const range=portionFor(hd); const chs=chaptersOf(range);
+  const read=readSet(); const readInPortion=chs.filter(c=>read.has(c)).length;
+  const tehillimDone = chs.length>0 && readInPortion>=chs.length;
+
+  const cd=zoharCycleDay(hd);
+  if(cd && !ZOHAR){
+    app.innerHTML=`${topbar('מַעֲקַב קְרִיאָה','home')}<div class="view">${smSkeleton()}</div>`;
+    ensureZoharData().then(()=>{ if(TAB==='tracker') renderTracker(); });
+    return;
+  }
+  const zoharDoneToday = cd ? zoharDone().includes(cd) : false;
+  const zoharTotalDone = zoharDone().length;
+
+  const weekParshaKey=currentParshaKey();
+  const parshaDone = weekParshaKey ? smIsDone(weekParshaKey) : false;
+
+  const sections = [true, !!cd, !!weekParshaKey].filter(Boolean).length;
+  const doneCount = (tehillimDone?1:0) + (cd&&zoharDoneToday?1:0) + (weekParshaKey&&parshaDone?1:0);
+
+  app.innerHTML=`
+  ${topbar('מַעֲקַב קְרִיאָה','home')}
+  <div class="view">
+    <div class="ach-stats-row">
+      <div class="ach-stat"><div class="as-n">${doneCount}/${sections}</div><div class="as-l">הֻשְׁלְמוּ</div></div>
+    </div>
+
+    <div class="sm-week-card" id="trackTehillim">
+      <div class="sm-week-icon">${I.book}</div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">תְּהִלִּים · קְרִיאַת הַיּוֹם</div>
+        <div class="sm-week-name">${readInPortion}/${chs.length} פְּרָקִים${tehillimDone?' · הוּשְׁלַם':''}</div>
+      </div>
+      <span class="sm-week-chev">${tehillimDone?I.check:I.chev}</span>
+    </div>
+
+    ${cd?`<div class="sm-week-card" id="trackZohar">
+      <div class="sm-week-icon">${I.zoharFlame}</div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר · יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
+        <div class="sm-week-name">${zoharDoneToday?'הוּשְׁלַם הַיּוֹם':'עֲדַיִן לֹא הוּשְׁלַם'} · ${zoharTotalDone}/${ZOHAR?ZOHAR.length:40} בַּמַּחְזוֹר</div>
+      </div>
+      <span class="sm-week-chev">${zoharDoneToday?I.check:I.chev}</span>
+    </div>`:''}
+
+    ${weekParshaKey?`<div class="sm-week-card" id="trackShnayim">
+      <div class="sm-week-icon">${I.scroll}</div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">שְׁנַיִם מִקְרָא · פָּרָשַׁת הַשָּׁבוּעַ</div>
+        <div class="sm-week-name">${PARSHA_HE_NAMES[weekParshaKey]||weekParshaKey}${parshaDone?' · הוּשְׁלְמָה':' · עֲדַיִן לֹא הוּשְׁלְמָה'}</div>
+      </div>
+      <span class="sm-week-chev">${parshaDone?I.check:I.chev}</span>
+    </div>`:''}
+    ${ornament()}
+  </div>`;
+  document.getElementById('trackTehillim').onclick=()=>renderContinuous(chs,hd);
+  const tz=document.getElementById('trackZohar'); if(tz) tz.onclick=()=>openZohar(cd);
+  const ts=document.getElementById('trackShnayim'); if(ts) ts.onclick=()=>openShnayim(weekParshaKey);
+  tr(app);
 }
 
 /* ================= TEHILLIM GRID ================= */
