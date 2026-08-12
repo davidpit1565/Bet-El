@@ -2372,9 +2372,6 @@ function renderZoharReader(){
       </div>
       ${entry.pdf?`<a class="zh-pdf-link" href="${entry.pdf}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>`:''}
     </div>`:''}
-    <div class="prayer-reader-text notranslate">
-      ${entry.text.map(p=>`<div class="prayer-para">${p}</div>`).join('')}
-    </div>
     <div class="reader-nav">
       <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
       ${!zoharDone().includes(entry.day)
@@ -2925,8 +2922,8 @@ window.sharePrayer = sharePrayer;
     if(snap.exists()){ lastVisitCount = snap.data().count || 0; window.__paintVisitCount(); }
   }, () => {});
   (async () => {
-    if(sessionStorage.getItem('betel_visit_counted')) return;
-    sessionStorage.setItem('betel_visit_counted', '1');
+    if(localStorage.getItem('betel_visit_counted')) return;
+    localStorage.setItem('betel_visit_counted', '1');
     try {
       await updateDoc(visitsRef, { count: increment(1) });
     } catch (e) {
