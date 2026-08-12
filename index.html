@@ -667,6 +667,10 @@ input,select,button{max-width:100%;box-sizing:border-box}
   color:var(--muted);font-size:12.5px;line-height:1.9;opacity:.85}
 .memorial span{font-size:11px;letter-spacing:.5px}
 [data-theme="dark"] .memorial{color:#8d97ad}
+.visit-counter{margin:10px auto 0;text-align:center;font-family:var(--font-sacred);
+  color:var(--muted);font-size:12px;opacity:.8;display:flex;align-items:center;justify-content:center;gap:6px}
+.visit-counter svg{width:14px;height:14px;flex:none}
+.visit-counter b{color:var(--gold);font-weight:800;font-size:13px}
 .zmanim-soon{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;
   padding:16px 14px;border:1px dashed var(--line-strong);border-radius:13px;color:var(--muted);
   font-family:var(--font-ui);font-size:13px;background:var(--panel)}
@@ -1546,9 +1550,11 @@ function renderHome(){
       <div class="q-tile" data-nav="calendar"><div class="qi">${I.cal}</div><div class="qt">לוּחַ זְמַנִּים</div><div class="qd">זְמַנֵּי הַיּוֹם וְהֶחָג</div></div>
     </div>
     ${memorialHTML()}
+    <div class="visit-counter" id="visitCounter">${I.book}<span>קוֹרְאִים בִּקְּרוּ כָּאן · <b id="visitCount">–</b></span></div>
     ${ornament()}
   </div>`;
   document.getElementById('startBtn').onclick=()=>renderContinuous(chs,hd);
+  if(window.__paintVisitCount) window.__paintVisitCount();
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
   const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
   const hzc=document.getElementById('homeZoharCard');
@@ -2859,6 +2865,7 @@ window.sharePrayer = sharePrayer;
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+  import { getFirestore, doc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   const firebaseConfig = {
     apiKey: "AIzaSyC-_4GaF_IMR_Xy5d6LEFAT_1lvygCcfRQ",
     authDomain: "bet-el-e6812.firebaseapp.com",
@@ -2870,6 +2877,27 @@ window.sharePrayer = sharePrayer;
   };
   const firebaseApp = initializeApp(firebaseConfig);
   getAnalytics(firebaseApp);
+
+  // Public visit counter (Firestore stats/visits), shown on the home page
+  const db = getFirestore(firebaseApp);
+  const visitsRef = doc(db, "stats", "visits");
+  let lastVisitCount = null;
+  window.__paintVisitCount = function(){
+    const el = document.getElementById('visitCount');
+    if(el && lastVisitCount != null) el.textContent = lastVisitCount.toLocaleString('he-IL');
+  };
+  onSnapshot(visitsRef, (snap) => {
+    if(snap.exists()){ lastVisitCount = snap.data().count || 0; window.__paintVisitCount(); }
+  }, () => {});
+  (async () => {
+    if(sessionStorage.getItem('betel_visit_counted')) return;
+    sessionStorage.setItem('betel_visit_counted', '1');
+    try {
+      await updateDoc(visitsRef, { count: increment(1) });
+    } catch (e) {
+      try { await setDoc(visitsRef, { count: 1 }); } catch (e2) {}
+    }
+  })();
 </script>
 </body>
 </html>
