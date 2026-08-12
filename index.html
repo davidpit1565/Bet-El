@@ -197,10 +197,10 @@ body::before{ /* subtle starfield/texture */
 .reader-title{font-family:var(--font-sacred);font-size:20px;font-weight:700;text-align:center;flex:1}
 .reader-progress{height:3px;background:var(--line);border-radius:3px;margin-top:10px;overflow:hidden}
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
-.zh-pdf-embed{margin:12px 16px 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:var(--panel)}
-.zh-pdf-canvas{max-height:70vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;padding:6px}
-.zh-pdf-canvas img{display:block;width:100%;height:auto;margin-bottom:6px;border-radius:4px}
-.zh-pdf-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border-top:1px solid var(--line-strong);color:var(--gold-deep);font-family:var(--font-sacred);font-size:13px;font-weight:700;text-decoration:none}
+.zh-pdf-embed{margin:12px 0 0}
+.zh-pdf-canvas{background:#fff;border-radius:8px}
+.zh-pdf-canvas img{display:block;width:100%;height:auto;margin:0 auto 6px;border-radius:4px}
+.zh-pdf-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;margin-top:6px;border:1px solid var(--line-strong);border-radius:12px;color:var(--gold-deep);font-family:var(--font-sacred);font-size:13px;font-weight:700;text-decoration:none}
 .zh-pdf-link svg{width:16px;height:16px;flex:none}
 
 .chapter{animation:fade .4s var(--ease)}
@@ -1463,9 +1463,8 @@ function stopAutoScroll(){
 }
 function toggleAutoScroll(btn){
   if(autoScrollTimer){ stopAutoScroll(); btn.innerHTML=I.play; return; }
-  const pdfCanvas=document.querySelector('.zh-pdf-canvas');
-  const target=pdfCanvas||document.body;
-  const interval=pdfCanvas?110:50;
+  const target=document.body;
+  const interval=document.querySelector('.zh-pdf-canvas')?110:50;
   btn.classList.add('on'); btn.innerHTML=I.pause;
   autoScrollTimer=setInterval(()=>{
     if((target.scrollTop+target.clientHeight)>=(target.scrollHeight-4)){ stopAutoScroll(); btn.innerHTML=I.play; return; }
