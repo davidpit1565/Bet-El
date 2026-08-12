@@ -2940,7 +2940,12 @@ window.sharePrayer = sharePrayer;
       if(el && window.__liveCount != null) el.textContent = window.__liveCount.toLocaleString('he-IL');
     };
     onValue(presenceListRef, (snap) => {
-      window.__liveCount = snap.numChildren();
+      try {
+        window.__liveCount = typeof snap.numChildren === 'function' ? snap.numChildren() : Object.keys(snap.val() || {}).length;
+      } catch (err) {
+        console.error('[betel presence] could not read snapshot:', err);
+        window.__liveCount = 0;
+      }
       window.__paintLiveCount();
     }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
     onValue(ref(rtdb, '.info/connected'), (snap) => {

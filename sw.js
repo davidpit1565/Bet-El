@@ -1,4 +1,4 @@
-const CACHE = 'betel-tehilim-v1';
+const CACHE = 'betel-tehilim-v2';
 const SHELL = ['./', './index.html'];
 
 self.addEventListener('install', e => {
@@ -20,7 +20,11 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)
-        .then(res => { caches.open(CACHE).then(c => c.put(req, res.clone())); return res; })
+        .then(res => {
+          const resCopy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, resCopy));
+          return res;
+        })
         .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
     );
     return;
@@ -29,7 +33,10 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(req).then(cached => {
       const network = fetch(req).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(req, res.clone()));
+        if (res.ok) {
+          const resCopy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, resCopy));
+        }
         return res;
       }).catch(() => cached);
       return cached || network;
