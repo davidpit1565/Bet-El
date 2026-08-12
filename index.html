@@ -686,6 +686,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .stat-card .sc-badge.gold{background:var(--gold-grad);color:#2a1e05;box-shadow:0 0 0 4px rgba(212,175,95,.14),0 4px 14px rgba(184,134,11,.4)}
 .stat-card .sc-badge.live{background:rgba(58,214,125,.16);color:#2ea364;box-shadow:0 0 0 4px rgba(58,214,125,.1),0 4px 14px rgba(46,163,100,.25)}
 .stat-card .sc-badge.live svg{width:10px;height:10px;filter:drop-shadow(0 0 4px rgba(58,214,125,.7));animation:pulse 2s infinite}
+.stat-card.flash .sc-badge{animation:statFlash .7s ease}
+@keyframes statFlash{0%{transform:scale(1)}35%{transform:scale(1.18)}100%{transform:scale(1)}}
 .zmanim-soon{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;
   padding:16px 14px;border:1px dashed var(--line-strong);border-radius:13px;color:var(--muted);
   font-family:var(--font-ui);font-size:13px;background:var(--panel)}
@@ -2937,7 +2939,14 @@ window.sharePrayer = sharePrayer;
     const presenceListRef = ref(rtdb, 'presence');
     window.__paintLiveCount = function(){
       const el = document.getElementById('liveCount');
-      if(el && window.__liveCount != null) el.textContent = window.__liveCount.toLocaleString('he-IL');
+      if(!el || window.__liveCount == null) return;
+      const changed = window.__lastPaintedLiveCount != null && window.__lastPaintedLiveCount !== window.__liveCount;
+      el.textContent = window.__liveCount.toLocaleString('he-IL');
+      window.__lastPaintedLiveCount = window.__liveCount;
+      if(changed){
+        const card = el.closest('.stat-card');
+        if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
+      }
     };
     onValue(presenceListRef, (snap) => {
       try {
