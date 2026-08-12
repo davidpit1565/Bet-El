@@ -768,7 +768,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ach-section-title:first-of-type{margin-top:0}
 
 /* ---- shnayim mikra ---- */
-.sm-week-card{display:flex;align-items:center;gap:14px;background:var(--panel);border:var(--glass-border);border-radius:16px;padding:16px;margin-bottom:16px;cursor:pointer;backdrop-filter:blur(12px);box-shadow:var(--card-shadow)}
+.sm-week-card{display:flex;align-items:center;gap:14px;background:var(--panel);border:var(--glass-border);border-radius:16px;padding:16px;margin-top:16px;margin-bottom:16px;cursor:pointer;backdrop-filter:blur(12px);box-shadow:var(--card-shadow)}
 .sm-week-card:active{transform:scale(.98)}
 .sm-week-icon{width:44px;height:44px;border-radius:12px;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;flex:none;color:#2a1e05;box-shadow:0 6px 16px -6px rgba(184,134,11,.6)}
 .sm-week-icon svg{width:22px;height:22px}
@@ -1249,11 +1249,12 @@ function ensureZoharData(){
   zoharLoadPromise = fetch('data/tikkunei-hazohar-data.json').then(r=>r.json()).then(d=>{ ZOHAR=d; });
   return zoharLoadPromise;
 }
-// 40-day Tikkunei HaZohar cycle: 1-29 Elul (month 6) -> cycle day 1-29, 1-10 Tishrei (month 7) -> cycle day 30-39
+// 40-day Tikkunei HaZohar cycle: 30 Av (month 5) -> cycle day 1, 1-29 Elul (month 6) -> cycle day 2-30, 1-10 Tishrei (month 7) -> cycle day 31-40
 function zoharCycleDay(hd){
   const m=hd.getMonth();
-  if(m===6) return hd.getDate();
-  if(m===7 && hd.getDate()<=10) return 29+hd.getDate();
+  if(m===5 && hd.getDate()===30) return 1;
+  if(m===6) return 1+hd.getDate();
+  if(m===7 && hd.getDate()<=10) return 30+hd.getDate();
   return null;
 }
 function parshaKeyForDate(dateObj){
