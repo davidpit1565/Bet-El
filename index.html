@@ -197,9 +197,7 @@ body::before{ /* subtle starfield/texture */
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
 .zh-pdf-embed{margin:12px 16px 0;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:var(--panel)}
 .zh-pdf-canvas{max-height:70vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff;padding:6px}
-.zh-pdf-canvas canvas{display:block;width:100%!important;height:auto!important;margin-bottom:6px;border-radius:4px}
-.zh-pdf-canvas .skel-wrap{padding:10px}
-.zh-pdf-error{padding:22px 14px;text-align:center;color:var(--muted);font-family:var(--font-sacred);font-size:13px}
+.zh-pdf-canvas img{display:block;width:100%;height:auto;margin-bottom:6px;border-radius:4px}
 .zh-pdf-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border-top:1px solid var(--line-strong);color:var(--gold-deep);font-family:var(--font-sacred);font-size:13px;font-weight:700;text-decoration:none}
 .zh-pdf-link svg{width:16px;height:16px;flex:none}
 
@@ -1107,7 +1105,7 @@ en:{
  'שִׁתּוּף':'Share','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'Share as designed image','שְׁלַח בְּוָואטְסְאַפּ':'Send via WhatsApp','הַעֲתֵק טֶקְסְט':'Copy text','שִׁתּוּף בַּמַּכְשִׁיר…':'Share via device…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Continuous reading, one page','רָצוּף':'continuous','גִּבּוּי לְקֹבֶץ':'Backup to file','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Save progress, favorites & settings','שִׁחְזוּר מִגִּבּוּי':'Restore from backup','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Load an existing backup file','אֵין הַקְדָּשׁוֹת עֲדַיִן':'No dedications yet','הַזֵּן שֵׁם':'Enter a name','הַהַקְדָּשָׁה נוֹסְפָה':'Dedication added','לִרְפוּאַת':'For the healing of','לְעִלּוּי נִשְׁמַת':'In memory of','לְהַצְלָחַת':'For the success of','לְזִוּוּג הָגוּן':'For a worthy match','לִזְכוּת':'In merit of',
  'עֲלוֹת הַשַּׁחַר':'Dawn (Alot)','זְמַן טַלִּית וּתְפִלִּין':'Talit & Tefillin','הָנֵץ הַחַמָּה':'Sunrise','סוֹף זְמַן שְׁמַע':'Latest Shema','סוֹף זְמַן תְּפִלָּה':'Latest Tefilla','חֲצוֹת הַיּוֹם':'Midday','מִנְחָה גְּדוֹלָה':'Mincha Gedola','מִנְחָה קְטַנָּה':'Mincha Ketana','פְּלַג הַמִּנְחָה':'Plag HaMincha','שְׁקִיעַת הַחַמָּה':'Sunset','צֵאת הַכּוֹכָבִים':'Nightfall (Tzeit)','חֲצוֹת הַלַּיְלָה':'Midnight',
- 'קוֹרְאִים':'Readers','מְחֻבָּרִים כָּעֵת':'Online now','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Open vocalized source (PDF)','לֹא נִיתָּן לִטְעֹן אֶת קֹבֶץ ה-PDF כָּעֵת':'Could not load the PDF file right now'
+ 'קוֹרְאִים':'Readers','מְחֻבָּרִים כָּעֵת':'Online now','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Open vocalized source (PDF)'
 },
 ru:{
  'בַּיִת':'Главная','דף הבית':'Главная','תהילים':'Теилим','לוח שנה':'Календарь','תפילות':'Молитвы','תפילות נוספות':'Дополнительные молитвы','הגדרות':'Настройки','תְּהִלִּים':'Теилим','לוּחַ':'Календарь','הַגְדָּרוֹת':'Настройки','תְּפִלּוֹת':'Молитвы','תְּפִלּוֹת נוֹסְפוֹת':'Дополнительные молитвы',
@@ -1133,7 +1131,7 @@ ru:{
  'שִׁתּוּף':'Поделиться','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'Как красивая картинка','שְׁלַח בְּוָואטְסְאַפּ':'Отправить в WhatsApp','הַעֲתֵק טֶקְסְט':'Копировать текст','שִׁתּוּף בַּמַּכְשִׁיר…':'Через устройство…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Непрерывное чтение на одной странице','רָצוּף':'подряд','גִּבּוּי לְקֹבֶץ':'Резервная копия в файл','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Сохранить прогресс, избранное и настройки','שִׁחְזוּר מִגִּבּוּי':'Восстановить из копии','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Загрузить файл копии','אֵין הַקְדָּשׁוֹת עֲדַיִן':'Пока нет посвящений','הַזֵּן שֵׁם':'Введите имя','הַהַקְדָּשָׁה נוֹסְפָה':'Посвящение добавлено','לִרְפוּאַת':'Об исцелении','לְעִלּוּי נִשְׁמַת':'В память о','לְהַצְלָחַת':'Об успехе','לְזִוּוּג הָגוּן':'О достойной паре','לִזְכוּת':'В заслугу',
  'עֲלוֹת הַשַּׁחַר':'Рассвет (Алот)','זְמַן טַלִּית וּתְפִלִּין':'Талит и тфилин','הָנֵץ הַחַמָּה':'Восход','סוֹף זְמַן שְׁמַע':'Конец Шма','סוֹף זְמַן תְּפִלָּה':'Конец Тфилы','חֲצוֹת הַיּוֹם':'Полдень','מִנְחָה גְּדוֹלָה':'Минха гдола','מִנְחָה קְטַנָּה':'Минха ктана','פְּלַג הַמִּנְחָה':'Плаг а-минха','שְׁקִיעַת הַחַמָּה':'Закат','צֵאת הַכּוֹכָבִים':'Выход звёзд','חֲצוֹת הַלַּיְלָה':'Полночь',
- 'קוֹרְאִים':'Читатели','מְחֻבָּרִים כָּעֵת':'Сейчас онлайн','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Открыть огласованный источник (PDF)','לֹא נִיתָּן לִטְעֹן אֶת קֹבֶץ ה-PDF כָּעֵת':'Не удалось загрузить PDF-файл'
+ 'קוֹרְאִים':'Читатели','מְחֻבָּרִים כָּעֵת':'Сейчас онлайн','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Открыть огласованный источник (PDF)'
 },
 ka:{
  'בַּיִת':'მთავარი','דף הבית':'მთავარი','תהילים':'თეილიმი','לוח שנה':'კალენდარი','תפילות':'ლოცვები','תפילות נוספות':'დამატებითი ლოცვები','הגדרות':'პარამეტრები','תְּהִלִּים':'თეილიმი','לוּחַ':'კალენდარი','הַגְדָּרוֹת':'პარამეტრები','תְּפִלּוֹת':'ლოცვები','תְּפִלּוֹת נוֹסְפוֹת':'დამატებითი ლოცვები',
@@ -1159,7 +1157,7 @@ ka:{
  'שִׁתּוּף':'გაზიარება','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'ლამაზი სურათით','שְׁלַח בְּוָואטְסְאַפּ':'WhatsApp-ით გაგზავნა','הַעֲתֵק טֶקְסְט':'ტექსტის კოპირება','שִׁתּוּף בַּמַּכְשִׁיר…':'მოწყობილობით…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'უწყვეტი კითხვა ერთ გვერდზე','רָצוּף':'უწყვეტი','גִּבּוּי לְקֹבֶץ':'სარეზერვო ასლი ფაილში','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'პროგრესის, რჩეულების და პარამეტრების შენახვა','שִׁחְזוּר מִגִּבּוּי':'აღდგენა ასლიდან','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'არსებული ასლის ჩატვირთვა','אֵין הַקְדָּשׁוֹת עֲדַיִן':'ჯერ არ არის მიძღვნები','הַזֵּן שֵׁם':'შეიყვანე სახელი','הַהַקְדָּשָׁה נוֹסְפָה':'მიძღვნა დაემატა','לִרְפוּאַת':'განკურნებისთვის:','לְעִלּוּי נִשְׁמַת':'სულის ხსოვნისთვის:','לְהַצְלָחַת':'წარმატებისთვის:','לְזִוּוּג הָגוּן':'ღირსეული წყვილისთვის:','לִזְכוּת':'სასარგებლოდ:',
  'עֲלוֹת הַשַּׁחַר':'განთიადი (ალოთ)','זְמַן טַלִּית וּתְפִלִּין':'ტალითი და თფილინი','הָנֵץ הַחַמָּה':'მზის ამოსვლა','סוֹף זְמַן שְׁמַע':'შმას ბოლო დრო','סוֹף זְמַן תְּפִלָּה':'თფილას ბოლო დრო','חֲצוֹת הַיּוֹם':'შუადღე','מִנְחָה גְּדוֹלָה':'მინხა გდოლა','מִנְחָה קְטַנָּה':'მინხა ქტანა','פְּלַג הַמִּנְחָה':'პლაგ ა-მინხა','שְׁקִיעַת הַחַמָּה':'მზის ჩასვლა','צֵאת הַכּוֹכָבִים':'ვარსკვლავების გამოჩენა','חֲצוֹת הַלַּיְלָה':'შუაღამე',
- 'קוֹרְאִים':'მკითხველები','מְחֻבָּרִים כָּעֵת':'ახლა ონლაინში','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'გახსენით ვოკალიზებული წყარო (PDF)','לֹא נִיתָּן לִטְעֹן אֶת קֹבֶץ ה-PDF כָּעֵת':'PDF ფაილის ჩატვირთვა ვერ მოხერხდა'
+ 'קוֹרְאִים':'მკითხველები','מְחֻבָּרִים כָּעֵת':'ახლა ონლაინში','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'გახსენით ვოკალიზებული წყარო (PDF)'
 },
 fr:{
  'בַּיִת':'Accueil','דף הבית':'Accueil','תהילים':'Tehilim','לוח שנה':'Calendrier','תפילות':'Prières','תפילות נוספות':'Prières supplémentaires','הגדרות':'Paramètres','תְּהִלִּים':'Tehilim','לוּחַ':'Calendrier','הַגְדָּרוֹת':'Paramètres','תְּפִלּוֹת':'Prières','תְּפִלּוֹת נוֹסְפוֹת':'Prières supplémentaires',
@@ -1185,7 +1183,7 @@ fr:{
  'שִׁתּוּף':'Partage','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'Partager comme image','שְׁלַח בְּוָואטְסְאַפּ':'Envoyer via WhatsApp','הַעֲתֵק טֶקְסְט':'Copier le texte','שִׁתּוּף בַּמַּכְשִׁיר…':'Partager via l’appareil…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Lecture continue sur une page','רָצוּף':'continu','גִּבּוּי לְקֹבֶץ':'Sauvegarde dans un fichier','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Enregistrer progression, favoris et paramètres','שִׁחְזוּר מִגִּבּוּי':'Restaurer depuis une sauvegarde','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Charger un fichier de sauvegarde','אֵין הַקְדָּשׁוֹת עֲדַיִן':'Aucune dédicace pour le moment','הַזֵּן שֵׁם':'Entrez un nom','הַהַקְדָּשָׁה נוֹסְפָה':'Dédicace ajoutée','לִרְפוּאַת':'Pour la guérison de','לְעִלּוּי נִשְׁמַת':'À la mémoire de','לְהַצְלָחַת':'Pour la réussite de','לְזִוּוּג הָגוּן':'Pour un conjoint digne','לִזְכוּת':'En mérite de',
  'עֲלוֹת הַשַּׁחַר':'Aube (Alot)','זְמַן טַלִּית וּתְפִלִּין':'Talit et Tefilin','הָנֵץ הַחַמָּה':'Lever du soleil','סוֹף זְמַן שְׁמַע':'Fin du Chéma','סוֹף זְמַן תְּפִלָּה':'Fin de la Tefila','חֲצוֹת הַיּוֹם':'Midi','מִנְחָה גְּדוֹלָה':'Mincha Guedola','מִנְחָה קְטַנָּה':'Mincha Ketana','פְּלַג הַמִּנְחָה':'Plag HaMincha','שְׁקִיעַת הַחַמָּה':'Coucher du soleil','צֵאת הַכּוֹכָבִים':'Sortie des étoiles (Tzeit)','חֲצוֹת הַלַּיְלָה':'Minuit',
- 'קוֹרְאִים':'Lecteurs','מְחֻבָּרִים כָּעֵת':'En ligne','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Ouvrir la source vocalisée (PDF)','לֹא נִיתָּן לִטְעֹן אֶת קֹבֶץ ה-PDF כָּעֵת':'Impossible de charger le fichier PDF pour le moment'
+ 'קוֹרְאִים':'Lecteurs','מְחֻבָּרִים כָּעֵת':'En ligne','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Ouvrir la source vocalisée (PDF)'
 }};
 function tr(node){
   if(S.lang==='he') return;
@@ -2368,9 +2366,11 @@ function renderZoharReader(){
       <div class="sm-aliyah-tag">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${entry.hebDate}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
-    ${entry.pdf?`<div class="zh-pdf-embed">
-      <div class="zh-pdf-canvas" id="zhPdfCanvas">${smSkeleton()}</div>
-      <a class="zh-pdf-link" href="${entry.pdf}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>
+    ${entry.pageCount?`<div class="zh-pdf-embed">
+      <div class="zh-pdf-canvas">
+        ${Array.from({length:entry.pageCount},(_,i)=>`<img src="${entry.pagesDir}/p-${String(i+1).padStart(2,'0')}.jpg" alt="${entry.hebDate} · עַמּוּד ${heNum(i+1)}" loading="${i<2?'eager':'lazy'}">`).join('')}
+      </div>
+      ${entry.pdf?`<a class="zh-pdf-link" href="${entry.pdf}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>`:''}
     </div>`:''}
     <div class="prayer-reader-text notranslate">
       ${entry.text.map(p=>`<div class="prayer-para">${p}</div>`).join('')}
@@ -2391,18 +2391,6 @@ function renderZoharReader(){
   const nextBtn=document.getElementById('zhNext'); if(nextBtn) nextBtn.onclick=()=>zhStep(1);
   const doneBtn2=document.getElementById('zhDone2'); if(doneBtn2) doneBtn2.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); go('zoharList'); };
   const doneBtn=document.getElementById('zhDone'); if(doneBtn) doneBtn.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); if(ZH.day<ZOHAR.length){ zhStep(1); } else { go('zoharList'); } };
-  if(entry.pdf){
-    const pdfCanvas=document.getElementById('zhPdfCanvas');
-    if(pdfCanvas){
-      let tries=0;
-      const tryRender=()=>{
-        if(window.__renderZoharPdf){ window.__renderZoharPdf(entry.pdf, pdfCanvas); return; }
-        if(++tries>20){ pdfCanvas.innerHTML='<div class="zh-pdf-error">לֹא נִיתָּן לִטְעֹן אֶת קֹבֶץ ה-PDF כָּעֵת</div>'; return; }
-        setTimeout(tryRender,300);
-      };
-      tryRender();
-    }
-  }
   tr(app);
 }
 
@@ -2907,32 +2895,6 @@ window.sharePrayer = sharePrayer;
   window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/speed-insights/script.js"></script>
-<script type="module">
-  import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs";
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs";
-  window.__renderZoharPdf = async function(url, containerEl){
-    containerEl.innerHTML = '';
-    const dpr = window.devicePixelRatio || 1;
-    try {
-      const pdf = await pdfjsLib.getDocument(url).promise;
-      const containerWidth = containerEl.clientWidth || 340;
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const baseViewport = page.getViewport({ scale: 1 });
-        const scale = (containerWidth / baseViewport.width) * dpr;
-        const viewport = page.getViewport({ scale });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        containerEl.appendChild(canvas);
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-      }
-    } catch (e) {
-      containerEl.innerHTML = '<div class="zh-pdf-error">לֹא נִיתָּן לִטְעֹן אֶת קֹבֶץ ה-PDF כָּעֵת</div>';
-      console.error('[betel zohar pdf]', e);
-    }
-  };
-</script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
