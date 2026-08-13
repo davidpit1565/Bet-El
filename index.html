@@ -768,6 +768,15 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-week-name{font-family:var(--font-sacred);font-size:21px;color:var(--gold)}
 .sm-week-chev{flex:none;color:var(--muted)}
 .sm-week-chev svg{width:18px;height:18px}
+
+/* ---- reading tracker: progress rings + completion flourish ---- */
+.tr-ring{background:conic-gradient(var(--gold) calc(var(--pct)*3.6deg), rgba(120,120,120,.22) 0);box-shadow:none;padding:4px}
+.tr-ring-inner{width:100%;height:100%;border-radius:50%;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;color:#2a1e05}
+.tr-ring-inner svg{width:20px;height:20px}
+.sm-week-card.tr-done{box-shadow:0 8px 22px -6px rgba(230,200,116,.5),var(--card-shadow)}
+@keyframes trCelebratePop{0%{transform:scale(1)}35%{transform:scale(1.05)}60%{transform:scale(.985)}100%{transform:scale(1)}}
+@keyframes trCelebrateGlow{0%{box-shadow:0 0 0 0 rgba(230,200,116,.6)}70%{box-shadow:0 0 0 26px rgba(230,200,116,0)}100%{box-shadow:0 0 0 0 rgba(230,200,116,0)}}
+.sm-week-card.tr-celebrate{animation:trCelebratePop .5s ease-out 1, trCelebrateGlow 1.2s ease-out 1}
 .sm-verse-row{margin-bottom:18px}
 .sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
 .sm-he{font-family:var(--font-sacred);font-size:calc(21px*var(--fs-scale,1));line-height:2.0;text-align:justify}
@@ -986,7 +995,7 @@ function hebDateShort(hd){ return heNum(hd.getDate())+' '+monthNameHe(hd); }
 /* ---------- settings ---------- */
 const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending updated formulas
 const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed times, ready to reveal now
-const MEMORIAL = {'row1':['יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן','אֲבִישַׁי בֶּן יִשָּׂשכָר'],'row2':['נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
+const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
 function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.row1.join(' · ')}<br>${MEMORIAL.row2.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
@@ -1561,11 +1570,20 @@ function renderHome(){
 }
 
 /* ================= READING TRACKER ================= */
+function trCelebrate(key, done){
+  const k='betel_trcel_'+key;
+  if(!done){ localStorage.removeItem(k); return false; }
+  if(localStorage.getItem(k)==='1') return false;
+  localStorage.setItem(k,'1');
+  return true;
+}
 function renderTracker(){
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
   const read=readSet(); const readInPortion=chs.filter(c=>read.has(c)).length;
   const tehillimDone = chs.length>0 && readInPortion>=chs.length;
+  const tehillimPct = chs.length ? Math.round(readInPortion/chs.length*100) : 0;
+  const tehillimCel = trCelebrate('te_'+progKey(), tehillimDone);
 
   const cd=zoharCycleDay(hd);
   if(cd && !ZOHAR){
@@ -1575,9 +1593,11 @@ function renderTracker(){
   }
   const zoharDoneToday = cd ? zoharDone().includes(cd) : false;
   const zoharTotalDone = zoharDone().length;
+  const zoharCel = cd ? trCelebrate('zo_'+progKey(), zoharDoneToday) : false;
 
   const weekParshaKey=currentParshaKey();
   const parshaDone = weekParshaKey ? smIsDone(weekParshaKey) : false;
+  const parshaCel = weekParshaKey ? trCelebrate('sm_'+weekParshaKey, parshaDone) : false;
 
   const sections = [true, !!cd, !!weekParshaKey].filter(Boolean).length;
   const doneCount = (tehillimDone?1:0) + (cd&&zoharDoneToday?1:0) + (weekParshaKey&&parshaDone?1:0);
@@ -1589,8 +1609,8 @@ function renderTracker(){
       <div class="ach-stat"><div class="as-n">${doneCount}/${sections}</div><div class="as-l">הֻשְׁלְמוּ</div></div>
     </div>
 
-    <div class="sm-week-card" id="trackTehillim">
-      <div class="sm-week-icon">${I.book}</div>
+    <div class="sm-week-card ${tehillimDone?'tr-done':''} ${tehillimCel?'tr-celebrate':''}" id="trackTehillim">
+      <div class="sm-week-icon tr-ring" style="--pct:${tehillimPct}"><span class="tr-ring-inner">${tehillimDone?I.check:I.book}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">תְּהִלִּים · קְרִיאַת הַיּוֹם</div>
         <div class="sm-week-name">${readInPortion}/${chs.length} פְּרָקִים${tehillimDone?' · הוּשְׁלַם':''}</div>
@@ -1598,8 +1618,8 @@ function renderTracker(){
       <span class="sm-week-chev">${tehillimDone?I.check:I.chev}</span>
     </div>
 
-    ${cd?`<div class="sm-week-card" id="trackZohar">
-      <div class="sm-week-icon">${I.zoharFlame}</div>
+    ${cd?`<div class="sm-week-card ${zoharDoneToday?'tr-done':''} ${zoharCel?'tr-celebrate':''}" id="trackZohar">
+      <div class="sm-week-icon tr-ring" style="--pct:${zoharDoneToday?100:0}"><span class="tr-ring-inner">${zoharDoneToday?I.check:I.zoharFlame}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר · יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
         <div class="sm-week-name">${zoharDoneToday?'הוּשְׁלַם הַיּוֹם':'עֲדַיִן לֹא הוּשְׁלַם'} · ${zoharTotalDone}/${ZOHAR?ZOHAR.length:40} בַּמַּחְזוֹר</div>
@@ -1607,8 +1627,8 @@ function renderTracker(){
       <span class="sm-week-chev">${zoharDoneToday?I.check:I.chev}</span>
     </div>`:''}
 
-    ${weekParshaKey?`<div class="sm-week-card" id="trackShnayim">
-      <div class="sm-week-icon">${I.scroll}</div>
+    ${weekParshaKey?`<div class="sm-week-card ${parshaDone?'tr-done':''} ${parshaCel?'tr-celebrate':''}" id="trackShnayim">
+      <div class="sm-week-icon tr-ring" style="--pct:${parshaDone?100:0}"><span class="tr-ring-inner">${parshaDone?I.check:I.scroll}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">שְׁנַיִם מִקְרָא · פָּרָשַׁת הַשָּׁבוּעַ</div>
         <div class="sm-week-name">${PARSHA_HE_NAMES[weekParshaKey]||weekParshaKey}${parshaDone?' · הוּשְׁלְמָה':' · עֲדַיִן לֹא הוּשְׁלְמָה'}</div>
@@ -2448,6 +2468,7 @@ function renderSettings(){
         </select></div>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${S.division==='weekly'?'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)':'חָדְשִׁי (5 פְּרָקִים לְיוֹם)'}</div></div></div>
         <div class="seg"><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
+      <div class="set-item" id="settingsTracker" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.tracker}</span><div><div class="si-t">מַעֲקַב קְרִיאָה</div><div class="si-d">תְּהִלִּים · תִּיקּוּנֵי הַזֹּהַר · שְׁנַיִם מִקְרָא</div></div></div>${I.chev}</div>
     </div>
 
     <div class="set-group">
@@ -2526,6 +2547,7 @@ function renderSettings(){
   document.getElementById('useGPS').onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן לְפִי GPS':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderSettings(); }); };
   document.getElementById('shareApp').onclick=shareApp;
   document.getElementById('shareAppQR').onclick=shareQR;
+  document.getElementById('settingsTracker').onclick=()=>go('tracker');
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
   document.getElementById('bkExport').onclick=()=>{
     const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
