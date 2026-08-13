@@ -904,6 +904,7 @@ const I = {
   prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
   tracker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3v3h6V3"/><path d="M8.5 12.5l2 2 4-4.5"/><path d="M8 17.5h8"/></svg>',
+  qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><rect x="14.5" y="3.5" width="6" height="6" rx="1"/><rect x="3.5" y="14.5" width="6" height="6" rx="1"/><path d="M14.5 14.5h3v3h-3zM19.5 14.5v3M14.5 19.5h3M17.5 17.5h.01"/></svg>',
   chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
   share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>',
@@ -1801,6 +1802,7 @@ function renderReader(){
         <div style="display:flex;gap:6px">
           <button class="icon-btn ${isFav(ch)?'fav-on':''}" id="rFav">${isFav(ch)?I.bookmarkOn:I.bookmark}</button>
           <button class="icon-btn" id="rShare">${I.share}</button>
+          <button class="icon-btn" id="rShareQR">${I.qr}</button>
         </div>
       </div>
       <div class="reader-progress"><i style="width:${RD.daily?(((RD.idx+1)/total)*100):((ch/150)*100)}%"></i></div>
@@ -1838,6 +1840,7 @@ function wireReader(){
   const rtl_=document.getElementById('rTools');
   document.getElementById('tFab').onclick=()=>rtl_.classList.toggle('collapsed');
   document.getElementById('rShare').onclick=()=>shareChapter(RD.chapters[RD.idx]);
+  document.getElementById('rShareQR').onclick=shareQR;
   const fv=document.getElementById('rFav'); if(fv) fv.onclick=()=>{ toggleFav(RD.chapters[RD.idx]); const on=isFav(RD.chapters[RD.idx]); fv.classList.toggle('fav-on',on); fv.innerHTML=on?I.bookmarkOn:I.bookmark; toast(on?'נוֹסַף לַמּוּעֲדָפִים':'הוּסַר מֵהַמּוּעֲדָפִים'); };
   // prayer toggles
   app.querySelectorAll('[data-prayer]').forEach(pb=>{
@@ -2127,7 +2130,10 @@ function renderPrayerReader(){
   <div class="topbar" style="justify-content:space-between">
     <button class="icon-btn" onclick="go('prayers')">${I.prev}<span style="display:none">חזור</span></button>
     <div class="tb-title">${p.title}</div>
-    <button class="icon-btn" onclick="sharePrayer('${PR.prayer}')">${I.share}<span style="display:none">שתף</span></button>
+    <div style="display:flex;gap:6px">
+      <button class="icon-btn" onclick="sharePrayer('${PR.prayer}')">${I.share}<span style="display:none">שתף</span></button>
+      <button class="icon-btn" onclick="shareQR()">${I.qr}<span style="display:none">קוד QR</span></button>
+    </div>
   </div>
   <div class="view prayer-reader-page">
     <div class="prayer-reader-header">
@@ -2502,7 +2508,8 @@ function renderSettings(){
 
     <div class="set-group">
       <h3>שִׁתּוּף</h3>
-      <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה, כְּטֶקְסְט אוֹ קוֹד QR</div></div></div>${I.chev}</div>
+      <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
+      <div class="set-item" id="shareAppQR" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.qr}</span><div><div class="si-t">שַׁתֵּף קוֹד QR</div><div class="si-d">תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkExport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">גִּבּוּי לְקֹבֶץ</div><div class="si-d">שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkImport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">שִׁחְזוּר מִגִּבּוּי</div><div class="si-d">טְעִינַת קֹבֶץ גִּבּוּי קַיָּם</div></div></div>${I.chev}</div>
       <div class="set-item" id="resetProg" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">אִפּוּס מַעֲקַב הַיּוֹם</div><div class="si-d">נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ</div></div></div></div>
@@ -2518,6 +2525,7 @@ function renderSettings(){
   app.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{ S.division=b.dataset.div; saveS(); renderSettings(); });
   document.getElementById('useGPS').onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן לְפִי GPS':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderSettings(); }); };
   document.getElementById('shareApp').onclick=shareApp;
+  document.getElementById('shareAppQR').onclick=shareQR;
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
   document.getElementById('bkExport').onclick=()=>{
     const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
@@ -2573,118 +2581,31 @@ function toggleTheme(){ S.theme=S.theme==='dark'?'light':'dark'; saveS(); applyS
 
 /* ================= ACHIEVEMENTS PAGE (#10) ================= */
 /* ================= SHARE ================= */
-function copyText(t){ try{ if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t); }catch(e){}
-  return new Promise(res=>{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand('copy');}catch(e){} ta.remove(); res(); }); }
-function shareSheet(title, text, opts){
-  opts=opts||{}; const url=opts.url, imgCh=opts.imgCh, imgGen=opts.imgGen;
-  const ov=document.createElement('div'); ov.className='overlay';
-  const hasNative = !!navigator.share;
-  const hasImg = imgCh || imgGen;
-  ov.innerHTML=`<div class="modal" style="max-width:360px">
-    <button class="close-x" data-close>${I.x}</button>
-    <div class="m-crown" style="margin-bottom:2px">${I.share}</div>
-    <h3 style="font-size:20px;margin-bottom:16px">${title}</h3>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      ${hasImg?`<button class="btn btn-gold" data-img><span>${I.image}</span><span>${opts.imgLabel||'שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת'}</span></button>`:''}
-      <button class="btn ${hasImg?'btn-ghost':'btn-gold'}" data-wa><span>${I.share}</span><span>שְׁלַח בְּוָואטְסְאַפּ</span></button>
-      <button class="btn btn-ghost" data-copy><span>הַעֲתֵק טֶקְסְט</span></button>
-      ${hasNative?`<button class="btn btn-ghost" data-native><span>שִׁתּוּף בַּמַּכְשִׁיר…</span></button>`:''}
-    </div>
-  </div>`;
-  document.body.appendChild(ov);
-  const close=()=>ov.remove();
-  ov.querySelector('[data-close]').onclick=close; ov.onclick=e=>{if(e.target===ov)close();};
-  ov.querySelector('[data-wa]').onclick=()=>{ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank'); close(); };
-  ov.querySelector('[data-copy]').onclick=()=>{ copyText(text).then(()=>toast('הֻעְתַּק לַלּוּחַ')); close(); };
-  const nat=ov.querySelector('[data-native]'); if(nat) nat.onclick=()=>{ const d={title,text}; if(url)d.url=url; navigator.share(d).catch(()=>{}); close(); };
-  const ib=ov.querySelector('[data-img]'); if(ib) ib.onclick=()=>{ close(); if(imgGen) shareGeneratedImage(imgGen, opts.imgName||'beit-el.png', opts.imgTitle||title); else shareImage(imgCh); };
-}
-async function tehillimImage(ch){
-  try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
-  const dark = { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
-  const th=dark; // image always premium dark card
-  const verses=T[ch]||[];
-  const W=1080, mx=96, maxW=W-mx*2;
-  const bodyFont=w=>`700 ${w}px "Frank Ruhl Libre","David Libre",serif`;
-  const numFontS='700 26px "Heebo",sans-serif';
-  const FS=36, lineH=60, spaceExtra=2;
-  const mc=document.createElement('canvas').getContext('2d');
-  // build token stream
-  const toks=[];
-  verses.forEach((v,i)=>{ toks.push({t:heNum(i+1)+'.',gold:true}); v.split(/\s+/).forEach(w=>toks.push({t:w,gold:false})); });
-  mc.font=bodyFont(FS); const spaceW=mc.measureText(' ').width+spaceExtra;
-  // layout pass -> list of lines [{tokens,}], compute height
-  function layout(ctx){
-    const lines=[]; let line=[]; let x=maxW;
-    toks.forEach(tok=>{ ctx.font=tok.gold?numFontS:bodyFont(FS); const w=ctx.measureText(tok.t).width; tok.w=w;
-      const need=w+(line.length?spaceW:0);
-      if(x-need<0 && line.length){ lines.push(line); line=[]; x=maxW; }
-      line.push(tok); x-=(w+spaceW);
-    });
-    if(line.length) lines.push(line);
-    return lines;
+function shareDirect(title, text){
+  if(navigator.share){
+    navigator.share({title, text}).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      const t=document.createElement('div');
+      t.textContent='הַטֶּקְסְט הֹעֻתַּק';
+      t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:9999';
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(),2000);
+    }).catch(()=>{});
   }
-  const lines=layout(mc);
-  const headerH=430; // logo+title+ornament
-  const bodyH=lines.length*lineH;
-  const footerH=120;
-  const H=Math.max(1080, headerH+bodyH+footerH+80);
-  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
-  const ctx=cv.getContext('2d');
-  // bg gradient
-  const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,th.bg1); g.addColorStop(1,th.bg2);
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  // gold frame
-  ctx.strokeStyle=th.line; ctx.lineWidth=3; ctx.strokeRect(30,30,W-60,H-60);
-  ctx.strokeStyle='rgba(230,200,116,.18)'; ctx.lineWidth=1; ctx.strokeRect(44,44,W-88,H-88);
-  // logo
-  await new Promise(res=>{ const im=new Image(); im.onload=()=>{ const lw=200, lh=im.height*(lw/im.width); ctx.drawImage(im,(W-lw)/2,70,lw,lh); res(); }; im.onerror=res; im.src=LOGO; });
-  // title
-  ctx.textAlign='center'; ctx.fillStyle=th.gold; ctx.font='900 66px "Frank Ruhl Libre",serif';
-  ctx.fillText('תְּהִלִּים · פֶּרֶק '+heNum(ch), W/2, 340);
-  // ornament divider
-  ctx.strokeStyle=th.line; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(mx,392); ctx.lineTo(W-mx,392); ctx.stroke();
-  ctx.fillStyle=th.gold; ctx.font='30px serif'; ctx.fillText('✦', W/2, 402);
-  // body RTL
-  ctx.textAlign='right'; let y=headerH+30;
-  lines.forEach(line=>{ let x=W-mx;
-    line.forEach(tok=>{ ctx.font=tok.gold?numFontS:bodyFont(FS); ctx.fillStyle=tok.gold?th.gold:th.cream;
-      ctx.fillText(tok.t, x, y); x-=(tok.w+spaceW); });
-    y+=lineH;
-  });
-  // footer
-  ctx.textAlign='center'; ctx.fillStyle=th.goldDeep; ctx.font='700 34px "Frank Ruhl Libre",serif';
-  ctx.fillText('קְהִלַּת בֵּית אֵ-ל', W/2, H-70);
-  return cv;
-}
-async function shareImage(ch){
-  toast('מֵכִין תְּמוּנָה…');
-  try{
-    const cv=await tehillimImage(ch);
-    cv.toBlob(async blob=>{
-      if(!blob){ toast('שְׁגִיאָה בְּיִצִּירַת תְּמוּנָה'); return; }
-      const file=new File([blob],'tehillim-'+ch+'.png',{type:'image/png'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        try{ await navigator.share({files:[file],title:'תהילים פרק '+heNum(ch)}); }catch(e){}
-      } else {
-        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='תהילים-פרק-'+heNum(ch)+'.png'; document.body.appendChild(a); a.click(); a.remove();
-        toast('הַתְּמוּנָה נִשְׁמְרָה');
-      }
-    },'image/png');
-  }catch(e){ toast('שְׁגִיאָה בְּיִצִּירַת תְּמוּנָה'); }
 }
 function shareChapter(ch){
   const verses=T[ch]||[];
   const text='תהילים · פרק '+heNum(ch)+'\n\n'+verses.join('\n');
-  shareSheet('שִׁתּוּף פֶּרֶק '+heNum(ch), text, {imgCh:ch});
+  shareDirect('שִׁתּוּף פֶּרֶק '+heNum(ch), text);
 }
 function shareApp(){
   const url=location.href.split('#')[0];
   const text='📖 אפליקציית התהילים של קהילת בית אל\nתהילים יומי, לוח עברי וזמני היום:\n'+url;
-  shareSheet('שִׁתּוּף הָאַפְּלִיקַצְיָה', text, {
-    url, imgGen:appQrImage, imgName:'beit-el-tehilim-qr.png', imgTitle:'תהילים בית אל',
-    imgLabel:'קוֹד QR מְעֻצָּב לְשִׁתּוּף'
-  });
+  shareDirect('שִׁתּוּף הָאַפְּלִיקַצְיָה', text);
+}
+function shareQR(){
+  shareGeneratedImage(appQrImage, 'beit-el-tehilim-qr.png', 'תהילים בית אל');
 }
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
@@ -2873,6 +2794,7 @@ function sharePrayer(key){
   }
 }
 window.sharePrayer = sharePrayer;
+window.shareQR = shareQR;
 
 })();
 </script>
