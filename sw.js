@@ -1,5 +1,5 @@
-const CACHE = 'betel-tehilim-v2';
-const SHELL = ['./', './index.html'];
+const CACHE = 'betel-tehilim-v3';
+const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

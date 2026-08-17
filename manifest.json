@@ -1,0 +1,17 @@
+{
+  "name": "תהילים · בית אל",
+  "short_name": "תהילים",
+  "description": "אפליקציית התהילים של קהילת בית אל — תהילים יומי, תיקוני הזוהר, שניים מקרא, לוח זמנים ומעקב קריאה",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#efe6d2",
+  "theme_color": "#efe6d2",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
