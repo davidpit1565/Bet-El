@@ -199,7 +199,12 @@ body::before{ /* subtle starfield/texture */
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
 .zh-pdf-embed{margin:12px 0 0}
 .zh-pdf-canvas{background:#fff;border-radius:8px}
+.zh-page-wrap{position:relative;border-radius:10px;transition:background-color .3s}
+.zh-page-wrap.sm-flash{background-color:rgba(212,175,95,.35)}
 .zh-pdf-canvas img{display:block;width:100%;height:auto;margin:0 auto 6px;border-radius:4px}
+.zh-mark-btn{position:absolute;top:8px;left:8px;background:rgba(20,16,8,.55);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#e6c874;cursor:pointer}
+.zh-mark-btn.on{color:var(--gold);background:rgba(20,16,8,.75)}
+.zh-mark-btn svg{width:17px;height:17px}
 .zh-pdf-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;margin-top:6px;border:1px solid var(--line-strong);border-radius:12px;color:var(--gold-deep);font-family:var(--font-sacred);font-size:13px;font-weight:700;text-decoration:none}
 .zh-pdf-link svg{width:16px;height:16px;flex:none}
 
@@ -244,61 +249,6 @@ body::before{ /* subtle starfield/texture */
 .reader-tools button svg{width:19px;height:19px}
 .reader-tools .sep{width:1px;background:var(--line);margin:6px 2px}
 .reader-tools .fs-val{font-family:var(--font-sacred);font-weight:700;font-size:13px;display:grid;place-items:center;min-width:30px;color:var(--ink-soft)}
-
-/* ===== #7 DEDICATION CERTIFICATE ===== */
-async function generateCertificate(){
-  const lines=dedLines();
-  if(!lines.length){ toast('הוֹסֵף הַקְדָּשָׁה תְּחִלָּה'); go('settings'); return; }
-  const W=1200,H=800;
-  const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  // background
-  ctx.fillStyle='#0d1b2a'; ctx.fillRect(0,0,W,H);
-  // gold borders
-  [[8,8,W-16,H-16,5],[18,18,W-36,H-36,1.5],[22,22,W-44,H-44,.8]].forEach(([x,y,w,h,lw])=>{
-    ctx.strokeStyle='#c9a24b'; ctx.lineWidth=lw; ctx.strokeRect(x,y,w,h);
-  });
-  // corner diamonds
-  const diamond=(x,y,r)=>{ ctx.beginPath(); ctx.moveTo(x,y-r); ctx.lineTo(x+r,y); ctx.lineTo(x,y+r); ctx.lineTo(x-r,y); ctx.closePath(); ctx.fillStyle='#c9a24b'; ctx.fill(); };
-  [[40,40],[W-40,40],[40,H-40],[W-40,H-40]].forEach(([x,y])=>diamond(x,y,7));
-  // logo
-  await new Promise(res=>{ const img=new Image(); img.onload=()=>{ try{ctx.drawImage(img,W/2-70,30,140,175);}catch(e){} res(); }; img.onerror=res; img.src=LOGO; });
-  // title
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle='#e6c874'; ctx.font='bold 48px serif'; ctx.fillText('הַקְדָּשָׁה',W/2,240);
-  // decorative line
-  const gl=ctx.createLinearGradient(200,0,W-200,0); gl.addColorStop(0,'transparent'); gl.addColorStop(.3,'#c9a24b'); gl.addColorStop(.7,'#c9a24b'); gl.addColorStop(1,'transparent');
-  ctx.strokeStyle=gl; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(180,265); ctx.lineTo(W-180,265); ctx.stroke();
-  // dedication lines
-  ctx.fillStyle='#f0e8d0'; ctx.font='30px serif';
-  lines.forEach((line,i)=>ctx.fillText(line,W/2,310+i*46));
-  // date + community
-  ctx.fillStyle='rgba(201,162,75,.75)'; ctx.font='22px serif';
-  ctx.fillText(hebDateStr(currentHDate()),W/2,H-100);
-  ctx.fillText('קְהַל בֵּית אֵ-ל · אַנְטְוֶורְפֶּן',W/2,H-60);
-  // bottom line
-  ctx.strokeStyle=gl; ctx.beginPath(); ctx.moveTo(180,H-120); ctx.lineTo(W-180,H-120); ctx.stroke();
-  // download
-  const a=document.createElement('a'); a.download='betel-dedication.png';
-  a.href=canvas.toDataURL('image/png'); a.click();
-  toast('✓ הַתְּעוּדָה הוֹרְדָה');
-}
-
-/* ===== #2 NOTIFICATIONS ===== */
-function checkNotification(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
-  const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-  if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
-  const todayStr=now.toISOString().slice(0,10);
-  if(localStorage.getItem('betel_notif_sent')===todayStr) return;
-  try{
-    const hd=currentHDate(),range=portionFor(hd),chs=chaptersOf(range),read=readSet();
-    const left=chs.length-chs.filter(c=>read.has(c)).length;
-    if(left<=0) return;
-    localStorage.setItem('betel_notif_sent',todayStr);
-    new Notification('תְּהִלִּים בֵּית אֵ-ל',{body:'זְמַן תְּהִלִּים! '+left+' פְּרָקִים לְהַשְׁלָמָה',dir:'rtl',lang:'he'});
-  }catch(e){}
-}
 
 /* ================= CALENDAR ================= */
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px}
@@ -776,8 +726,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @keyframes trCelebratePop{0%{transform:scale(1)}35%{transform:scale(1.05)}60%{transform:scale(.985)}100%{transform:scale(1)}}
 @keyframes trCelebrateGlow{0%{box-shadow:0 0 0 0 rgba(230,200,116,.6)}70%{box-shadow:0 0 0 26px rgba(230,200,116,0)}100%{box-shadow:0 0 0 0 rgba(230,200,116,0)}}
 .sm-week-card.tr-celebrate{animation:trCelebratePop .5s ease-out 1, trCelebrateGlow 1.2s ease-out 1}
-.sm-verse-row{margin-bottom:18px}
+.sm-verse-row{margin-bottom:18px;border-radius:10px;transition:background-color .3s}
+.sm-verse-row.sm-flash{background-color:rgba(212,175,95,.22)}
 .sm-vnum{display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-inline-end:6px;font-variant-numeric:tabular-nums}
+.sm-mark-btn{background:none;border:none;padding:2px;cursor:pointer;color:var(--muted);vertical-align:middle}
+.sm-mark-btn svg{width:16px;height:16px}
+.sm-mark-btn.on{color:var(--gold)}
 .sm-he{font-family:var(--font-sacred);font-size:calc(21px*var(--fs-scale,1));line-height:2.0;text-align:justify}
 .sm-he+.sm-he{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
 .sm-targum{font-family:var(--font-sacred);font-size:calc(16px*var(--fs-scale,1));line-height:1.9;color:var(--muted);margin-top:4px;text-align:justify}
@@ -957,7 +911,6 @@ const I = {
   flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3c0 4.5-4 6-4 10a4 4 0 0 0 8 0c0-3-2-4.5-2-7.5-1.5 2-2 3-3.5 3.5C11.5 7.5 12 5 12 3z"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h10v6a5 5 0 0 1-10 0z"/><path d="M12 14v4M9 21h6M4 3v3a3 3 0 0 0 3 3M20 3v3a3 3 0 0 1-3 3"/></svg>',
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M7 11l5 5 5-5M4 20h16"/></svg>',
-  cert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21l4-3 4 3M8 7h8M8 11h5"/></svg>',
   candle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2c1.5 1.8 2 2.8 2 3.6a2 2 0 1 1-4 0c0-.8.5-1.8 2-3.6z"/><rect x="9" y="8" width="6" height="12" rx="1"/><path d="M9 12h6"/></svg>',
   moon2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.4 6.4 0 0 0 10.5 10.5z"/><path d="M17.5 5l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z"/></svg>',
   zoharFlame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c1 3-3.5 4.3-3.5 8.2A3.5 3.5 0 0 0 12 15a3.5 3.5 0 0 0 3.5-3.8C15.5 8.5 11.3 7 12 3z"/><path d="M4.5 12l1.6.5-1.6.5M19.5 12l-1.6.5 1.6.5M8 20.5h8" stroke-width="1.2"/></svg>',
@@ -2173,6 +2126,16 @@ function renderPrayerReader(){
 
 /* ================= SHNAYIM MIKRA ================= */
 let SM = { key:null, n:1, mode:'torah' };
+function smBookmarkGet(){ try{ return JSON.parse(localStorage.getItem('betel_sm_bookmark')||'null'); }catch(e){ return null; } }
+function smBookmarkSet(bm){ localStorage.setItem('betel_sm_bookmark', JSON.stringify(bm)); }
+function smBookmarkClear(){ localStorage.removeItem('betel_sm_bookmark'); }
+let SM_SCROLL_TO=null;
+function smGoToBookmark(){
+  const bm=smBookmarkGet(); if(!bm) return;
+  SM={key:bm.key, n:bm.n, mode:bm.mode};
+  SM_SCROLL_TO={c:bm.c, v:bm.v};
+  go('smReader');
+}
 function smStreakData(){ try{return JSON.parse(localStorage.getItem('betel_sm_streak')||'{"count":0,"best":0,"last":null}');}catch(e){return{count:0,best:0,last:null};} }
 function smMarkDone(key){
   const d=smStreakData(); const today=civilToday().toISOString().slice(0,10);
@@ -2198,9 +2161,19 @@ function drawShnayimList(){
   if(SML.book) return drawShnayimBookList();
   const weekKey=currentParshaKey();
   const books=['Genesis','Exodus','Leviticus','Numbers','Deuteronomy'];
+  const bm=smBookmarkGet();
+  const bmEntry = bm && LEYNING[bm.key];
   app.innerHTML=`
   ${topbar('שניים מקרא','prayers')}
   <div class="view">
+    ${bmEntry?`<div class="sm-week-card" id="smBookmarkCard">
+      <div class="sm-week-icon">${I.bookmarkOn}</div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">הַמָּקוֹם שֶׁסִּמַּנְתָּ</div>
+        <div class="sm-week-name">${stripNik(bmEntry.heName)} · ${heNum(bm.c)}:${heNum(bm.v)}</div>
+      </div>
+      <span class="sm-week-chev">${I.chev}</span>
+    </div>`:''}
     ${weekKey&&LEYNING[weekKey]?`<div class="sm-week-card" id="smWeekCard">
       <div class="sm-week-icon">${I.scroll}</div>
       <div class="sm-week-text">
@@ -2218,6 +2191,7 @@ function drawShnayimList(){
     ${ornament()}
   </div>`;
   const wc=document.getElementById('smWeekCard'); if(wc) wc.onclick=()=>openShnayim(weekKey);
+  const bmc=document.getElementById('smBookmarkCard'); if(bmc) bmc.onclick=smGoToBookmark;
   app.querySelectorAll('#smList .prayer-row').forEach(r=>r.onclick=()=>{ SML.book=r.dataset.book; drawShnayimList(); });
   const search=document.getElementById('smSearch');
   const refResult=document.getElementById('smRefResult');
@@ -2348,7 +2322,10 @@ function renderShnayimReader(){
       </div>
     </div>
     <div class="sm-verses notranslate">
-      ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${!isHaft?`<div class="sm-he">${v.he}</div>`:''}${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')}
+      ${verses.map(v=>{
+        const bm=smBookmarkGet(); const marked = !!bm && bm.key===SM.key && bm.mode===SM.mode && bm.c===v.c && bm.v===v.v;
+        return `<div class="sm-verse-row" data-c="${v.c}" data-v="${v.v}"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><button class="sm-mark-btn ${marked?'on':''}" data-c="${v.c}" data-v="${v.v}">${marked?I.bookmarkOn:I.bookmark}</button><div class="sm-he">${v.he}</div>${!isHaft?`<div class="sm-he">${v.he}</div>`:''}${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`;
+      }).join('')}
     </div>
     <div class="reader-nav">
       <button class="rnav-btn" id="smPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
@@ -2368,6 +2345,20 @@ function renderShnayimReader(){
     if(c.dataset.n==='haft'){ SM.mode='haftarah'; } else { SM.mode='torah'; SM.n=+c.dataset.n; }
     renderShnayimReader(); forceScrollTop();
   });
+  app.querySelectorAll('.sm-mark-btn').forEach(b=>b.onclick=()=>{
+    const c=+b.dataset.c, v=+b.dataset.v;
+    const bm=smBookmarkGet();
+    const isSame = bm && bm.key===SM.key && bm.mode===SM.mode && bm.c===c && bm.v===v;
+    haptic();
+    if(isSame){ smBookmarkClear(); toast('הַסִּמּוּן הוּסַר'); }
+    else { smBookmarkSet({key:SM.key, mode:SM.mode, n:SM.n, c, v}); toast('סֻמַּן הַמָּקוֹם'); }
+    renderShnayimReader();
+  });
+  if(SM_SCROLL_TO){
+    const row=app.querySelector(`.sm-verse-row[data-c="${SM_SCROLL_TO.c}"][data-v="${SM_SCROLL_TO.v}"]`);
+    SM_SCROLL_TO=null;
+    if(row){ setTimeout(()=>{ row.scrollIntoView({block:'center'}); row.classList.add('sm-flash'); setTimeout(()=>row.classList.remove('sm-flash'),1800); },50); }
+  }
   tr(app);
 }
 
@@ -2378,6 +2369,16 @@ function zoharDone(){ try{return JSON.parse(localStorage.getItem('betel_zohar_do
 function zoharMarkDone(day){
   const done=zoharDone(); if(!done.includes(day)){ done.push(day); localStorage.setItem('betel_zohar_done',JSON.stringify(done)); }
 }
+function zoharBookmarkGet(){ try{ return JSON.parse(localStorage.getItem('betel_zohar_bookmark')||'null'); }catch(e){ return null; } }
+function zoharBookmarkSet(bm){ localStorage.setItem('betel_zohar_bookmark', JSON.stringify(bm)); }
+function zoharBookmarkClear(){ localStorage.removeItem('betel_zohar_bookmark'); }
+let ZH_SCROLL_TO=null;
+function zoharGoToBookmark(){
+  const bm=zoharBookmarkGet(); if(!bm) return;
+  ZH={day:bm.day};
+  ZH_SCROLL_TO=bm.page;
+  go('zoharReader');
+}
 function renderZoharList(){
   app.innerHTML=`${topbar('תיקוני הזוהר','prayers')}<div class="view">${smSkeleton()}</div>`;
   ensureZoharData().then(()=>{ if(TAB==='zoharList') drawZoharList(); });
@@ -2386,9 +2387,19 @@ function drawZoharList(){
   const hd=currentHDate();
   const todayCd=zoharCycleDay(hd);
   const done=zoharDone();
+  const zbm=zoharBookmarkGet();
+  const zbmEntry = zbm && ZOHAR[zbm.day-1];
   app.innerHTML=`
   ${topbar('תיקוני הזוהר','prayers')}
   <div class="view">
+    ${zbmEntry?`<div class="sm-week-card" id="zhBookmarkCard">
+      <div class="sm-week-icon">${I.bookmarkOn}</div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">הַמָּקוֹם שֶׁסִּמַּנְתָּ</div>
+        <div class="sm-week-name">יוֹם ${heNum(zbmEntry.day)} · עַמּוּד ${heNum(zbm.page+1)}</div>
+      </div>
+      <span class="sm-week-chev">${I.chev}</span>
+    </div>`:''}
     <div class="empty-note" style="padding:14px 4px;text-align:center"><div style="font-size:13px;line-height:1.8">מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר</div></div>
     <div class="prayers-list">
       ${ZOHAR.map(d=>`<div class="prayer-row" data-day="${d.day}"><span class="prayer-row-title">יוֹם ${heNum(d.day)} · ${d.hebDate}${d.day===todayCd?' · הַיּוֹם':''}</span>${done.includes(d.day)?I.check:I.chev}</div>`).join('')}
@@ -2396,6 +2407,7 @@ function drawZoharList(){
     ${ornament()}
   </div>`;
   app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openZohar(+r.dataset.day));
+  const zbmc=document.getElementById('zhBookmarkCard'); if(zbmc) zbmc.onclick=zoharGoToBookmark;
   tr(app);
 }
 function zhStep(delta){
@@ -2426,7 +2438,13 @@ function renderZoharReader(){
     </div>
     ${entry.pageCount?`<div class="zh-pdf-embed">
       <div class="zh-pdf-canvas">
-        ${Array.from({length:entry.pageCount},(_,i)=>`<img src="${entry.pagesDir}/p-${String(i+1).padStart(2,'0')}.jpg" alt="${entry.hebDate} · עַמּוּד ${heNum(i+1)}" loading="${i<2?'eager':'lazy'}">`).join('')}
+        ${Array.from({length:entry.pageCount},(_,i)=>{
+          const zbm=zoharBookmarkGet(); const marked = !!zbm && zbm.day===entry.day && zbm.page===i;
+          return `<div class="zh-page-wrap" data-page="${i}">
+            <img src="${entry.pagesDir}/p-${String(i+1).padStart(2,'0')}.jpg" alt="${entry.hebDate} · עַמּוּד ${heNum(i+1)}" loading="${i<2?'eager':'lazy'}">
+            <button class="zh-mark-btn ${marked?'on':''}" data-page="${i}">${marked?I.bookmarkOn:I.bookmark}</button>
+          </div>`;
+        }).join('')}
       </div>
       ${entry.pdf?`<a class="zh-pdf-link" href="${entry.pdf}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>`:''}
     </div>`:''}
@@ -2446,6 +2464,20 @@ function renderZoharReader(){
   const nextBtn=document.getElementById('zhNext'); if(nextBtn) nextBtn.onclick=()=>zhStep(1);
   const doneBtn2=document.getElementById('zhDone2'); if(doneBtn2) doneBtn2.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); go('zoharList'); };
   const doneBtn=document.getElementById('zhDone'); if(doneBtn) doneBtn.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); if(ZH.day<ZOHAR.length){ zhStep(1); } else { go('zoharList'); } };
+  app.querySelectorAll('.zh-mark-btn').forEach(b=>b.onclick=()=>{
+    const page=+b.dataset.page;
+    const zbm=zoharBookmarkGet();
+    const isSame = zbm && zbm.day===entry.day && zbm.page===page;
+    haptic();
+    if(isSame){ zoharBookmarkClear(); toast('הַסִּמּוּן הוּסַר'); }
+    else { zoharBookmarkSet({day:entry.day, page}); toast('סֻמַּן הַמָּקוֹם'); }
+    renderZoharReader();
+  });
+  if(ZH_SCROLL_TO!=null){
+    const pageWrap=app.querySelector(`.zh-page-wrap[data-page="${ZH_SCROLL_TO}"]`);
+    ZH_SCROLL_TO=null;
+    if(pageWrap){ setTimeout(()=>{ pageWrap.scrollIntoView({block:'center'}); pageWrap.classList.add('sm-flash'); setTimeout(()=>pageWrap.classList.remove('sm-flash'),1800); },50); }
+  }
   tr(app);
 }
 
@@ -2526,11 +2558,6 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
-      <h3>תְּעוּדַת הַקְדָּשָׁה</h3>
-      <div class="set-item" id="genCert" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.cert}</span><div><div class="si-t">הוֹרֵד תְּעוּדַת הַקְדָּשָׁה</div><div class="si-d">תְּמוּנָה לְשִׁתּוּף בַּמִּשְׁפָּחָה</div></div></div>${I.download}</div>
-    </div>
-
-    <div class="set-group">
       <h3>שִׁתּוּף</h3>
       <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
       <div class="set-item" id="shareAppQR" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.qr}</span><div><div class="si-t">שַׁתֵּף קוֹד QR</div><div class="si-d">תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה</div></div></div>${I.chev}</div>
@@ -2598,9 +2625,6 @@ function renderSettings(){
   };
   const nt=document.getElementById('notifTime');
   if(nt) nt.onchange=()=>{ S.notifTime=nt.value; saveS(); };
-  // certificate
-  const gc=document.getElementById('genCert');
-  if(gc) gc.onclick=()=>generateCertificate();
 }
 function toggleTheme(){ S.theme=S.theme==='dark'?'light':'dark'; saveS(); applySettings(); }
 
@@ -2783,7 +2807,23 @@ render();
   document.addEventListener('scroll', raf, {passive:true, capture:true});
   window.addEventListener('scroll', raf, {passive:true});
 })();
+function checkNotification(){
+  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
+  if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
+  const todayStr=now.toISOString().slice(0,10);
+  if(localStorage.getItem('betel_notif_sent')===todayStr) return;
+  try{
+    const hd=currentHDate(),range=portionFor(hd),chs=chaptersOf(range),read=readSet();
+    const left=chs.length-chs.filter(c=>read.has(c)).length;
+    if(left<=0) return;
+    localStorage.setItem('betel_notif_sent',todayStr);
+    new Notification('תְּהִלִּים בֵּית אֵ-ל',{body:'זְמַן תְּהִלִּים! '+left+' פְּרָקִים לְהַשְׁלָמָה',dir:'rtl',lang:'he'});
+  }catch(e){}
+}
 try{checkNotification();}catch(e){}
+setInterval(()=>{ try{checkNotification();}catch(e){} }, 60000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} } });
 try{
   if(navigator.geolocation){
     const ask=()=>requestGPS(ok=>{ if(ok&&TAB!=='reader') render(); });
