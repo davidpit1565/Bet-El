@@ -1237,7 +1237,7 @@ function requestGPS(cb){
 /* ---------- shnayim mikra (parashat hashavua) ---------- */
 const PARSHA_HE_NAMES = {"Bereshit":"בְּרֵאשִׁית","Noach":"נֹחַ","Lech-Lecha":"לֶךְ־לְךָ","Vayera":"וַיֵּרָא","Chayei Sara":"חַיֵּי שָׂרָה","Toldot":"תּוֹלְדוֹת","Vayetzei":"וַיֵּצֵא","Vayishlach":"וַיִּשְׁלַח","Vayeshev":"וַיֵּשֶׁב","Miketz":"מִקֵּץ","Vayigash":"וַיִּגַּשׁ","Vayechi":"וַיְחִי","Shemot":"שְׁמוֹת","Vaera":"וָאֵרָא","Bo":"בֹּא","Beshalach":"בְּשַׁלַּח","Yitro":"יִתְרוֹ","Mishpatim":"מִשְׁפָּטִים","Terumah":"תְּרוּמָה","Tetzaveh":"תְּצַוֶּה","Ki Tisa":"כִּי תִשָּׂא","Vayakhel":"וַיַּקְהֵל","Pekudei":"פְקוּדֵי","Vayikra":"וַיִּקְרָא","Tzav":"צַו","Shmini":"שְּׁמִינִי","Tazria":"תַזְרִיעַ","Metzora":"מְצֹרָע","Achrei Mot":"אַחֲרֵי מוֹת","Kedoshim":"קְדֹשִׁים","Emor":"אֱמוֹר","Behar":"בְּהַר","Bechukotai":"בְּחֻקֹּתַי","Bamidbar":"בְּמִדְבַּר","Nasso":"נָשׂא","Beha'alotcha":"בְּהַעֲלֹתְךָ","Sh'lach":"שְׁלַח־לְךָ","Korach":"קֹרַח","Chukat":"חֻקַּת","Balak":"בָּלָק","Pinchas":"פִּינְחָס","Matot":"מַטּוֹת","Masei":"מַסְעֵי","Devarim":"דְּבָרִים","Vaetchanan":"וָאֶתְחַנַּן","Eikev":"עֵקֶב","Re'eh":"רְאֵה","Shoftim":"שׁוֹפְטִים","Ki Teitzei":"כִּי־תֵצֵא","Ki Tavo":"כִּי־תָבוֹא","Nitzavim":"נִצָּבִים","Vayeilech":"וַיֵּלֶךְ","Ha'azinu":"הַאֲזִינוּ","Vezot Haberakhah":"וְזֹאת הַבְּרָכָה","Vayakhel-Pekudei":"וַיַּקְהֵל־פְקוּדֵי","Tazria-Metzora":"תַזְרִיעַ־מְצֹרָע","Achrei Mot-Kedoshim":"אַחֲרֵי מוֹת־קְדֹשִׁים","Behar-Bechukotai":"בְּהַר־בְּחֻקֹּתַי","Chukat-Balak":"חֻקַּת־בָּלָק","Matot-Masei":"מַטּוֹת־מַסְעֵי","Nitzavim-Vayeilech":"נִצָּבִים־וַיֵּלֶךְ"};
 const BOOK_HE_NAMES = {Genesis:'בְּרֵאשִׁית',Exodus:'שְׁמוֹת',Leviticus:'וַיִּקְרָא',Numbers:'בְּמִדְבַּר',Deuteronomy:'דְּבָרִים'};
-let TORAH=null, HAFTARAH=null, LEYNING=null;
+let TORAH=null, HAFTARAH=null, LEYNING=null, TORAH_TRANSLIT={};
 let smLoadPromise=null;
 function ensureShnayimData(){
   if(TORAH) return Promise.resolve();
@@ -1246,7 +1246,8 @@ function ensureShnayimData(){
     fetch('data/torah-data.json').then(r=>r.json()),
     fetch('data/haftarah-data.json').then(r=>r.json()),
     fetch('data/leyning-data.json').then(r=>r.json()),
-  ]).then(([t,h,l])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; });
+    fetch('data/torah-fr.json').then(r=>r.json()).catch(()=>({})),
+  ]).then(([t,h,l,fr])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr}; });
   return smLoadPromise;
 }
 let ZOHAR=null, zoharLoadPromise=null;
@@ -1281,10 +1282,15 @@ function parseVref(s){ const [c,v]=s.split(':').map(Number); return {c,v}; }
 function versesInRange(book,b,e){
   const {c:c1,v:v1}=parseVref(b), {c:c2,v:v2}=parseVref(e);
   const out=[];
+  const trBook = TORAH_TRANSLIT[S.lang] && TORAH_TRANSLIT[S.lang][book];
   for(let c=c1;c<=c2;c++){
     const chapArr=TORAH[book][c-1];
+    const trChapArr = trBook && trBook[c-1];
     const startV=(c===c1)?v1:1, endV=(c===c2)?v2:chapArr.length;
-    for(let v=startV; v<=endV; v++) out.push({c,v,he:chapArr[v-1][0],targum:chapArr[v-1][1]});
+    for(let v=startV; v<=endV; v++){
+      const pair = trChapArr ? trChapArr[v-1] : chapArr[v-1];
+      out.push({c,v,he:pair[0],targum:pair[1]});
+    }
   }
   return out;
 }
