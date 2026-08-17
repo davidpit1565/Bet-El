@@ -112,7 +112,6 @@ body::before{ /* subtle starfield/texture */
 .hero-logo{width:190px;max-width:56vw;height:auto;
   animation:rise .9s var(--ease) both}
 @keyframes rise{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
-.hero-sub{font-family:var(--font-sacred);font-size:15px;color:var(--muted);letter-spacing:3px;margin-top:2px}
 
 .date-band{display:flex;flex-direction:column;align-items:center;gap:3px;margin:6px 0 4px}
 .date-heb{font-family:var(--font-sacred);font-size:26px;font-weight:700;letter-spacing:.5px}
@@ -1488,7 +1487,6 @@ function renderHome(){
   <div class="view">
     <div class="hero">
       <img class="hero-logo" src="${LOGO}" alt="בית אל"/>
-      <div class="hero-sub">תְּהִלִּים</div>
     </div>
     <div class="date-band">
       <div class="greeting">${greeting()}</div>
