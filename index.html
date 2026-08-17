@@ -1266,7 +1266,8 @@ function ensureShnayimData(){
     fetch('data/haftarah-data.json').then(r=>r.json()),
     fetch('data/leyning-data.json').then(r=>r.json()),
     fetch('data/torah-fr.json').then(r=>r.json()).catch(()=>({})),
-  ]).then(([t,h,l,fr])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr}; });
+    fetch('data/torah-en.json').then(r=>r.json()).catch(()=>({})),
+  ]).then(([t,h,l,fr,en])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr,en}; });
   return smLoadPromise;
 }
 let ZOHAR=null, zoharLoadPromise=null;
