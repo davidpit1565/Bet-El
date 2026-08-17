@@ -937,12 +937,58 @@ function forceScrollTop(){
   });
 }
 const MONTHS_HE = {1:'ניסן',2:'אייר',3:'סיון',4:'תמוז',5:'אב',6:'אלול',7:'תשרי',8:'חשון',9:'כסלו',10:'טבת',11:'שבט',12:'אדר',13:'אדר ב׳'};
+const MONTHS_EN = {1:'Nisan',2:'Iyar',3:'Sivan',4:'Tammuz',5:'Av',6:'Elul',7:'Tishrei',8:'Cheshvan',9:'Kislev',10:'Tevet',11:'Shevat',12:'Adar',13:'Adar II'};
+const MONTHS_FR = {1:'Nissan',2:'Iyar',3:'Sivan',4:'Tamouz',5:'Av',6:'Éloul',7:'Tichri',8:'Hèchvan',9:'Kislev',10:'Tévét',11:'Chevat',12:'Adar',13:'Adar II'};
+const MONTHS_RU = {1:'Нисан',2:'Ияр',3:'Сиван',4:'Таммуз',5:'Ав',6:'Элул',7:'Тишрей',8:'Хешван',9:'Кислев',10:'Тевет',11:'Шват',12:'Адар',13:'Адар II'};
+const MONTHS_KA = {1:'ნისანი',2:'იარი',3:'სივანი',4:'თამუზი',5:'აბი',6:'ელული',7:'თიშრეი',8:'ხეშვანი',9:'ქისლევი',10:'თევეთი',11:'შვატი',12:'ადარი',13:'ადარ II'};
 const DOW_HE = ['יום ראשון','יום שני','יום שלישי','יום רביעי','יום חמישי','יום שישי','שבת קודש'];
+const DOW_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Shabbat'];
+const DOW_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Chabbat'];
+const DOW_RU = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Шаббат'];
+const DOW_KA = ['კვირა','ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი'];
 const DOW_SHORT = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+const DOW_SHORT_EN = ['S','M','T','W','T','F','S'];
+const DOW_SHORT_FR = ['D','L','M','M','J','V','S'];
+const DOW_SHORT_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const DOW_SHORT_KA = ['კვ','ორ','სმ','ოთ','ხთ','პრ','შბ'];
+function dowShort(i){
+  if(S.lang==='fr') return DOW_SHORT_FR[i];
+  if(S.lang==='ru') return DOW_SHORT_RU[i];
+  if(S.lang==='ka') return DOW_SHORT_KA[i];
+  if(S.lang==='en') return DOW_SHORT_EN[i];
+  return DOW_SHORT[i];
+}
+function dowName(hd){
+  const d=hd.getDay();
+  if(S.lang==='fr') return DOW_FR[d];
+  if(S.lang==='ru') return DOW_RU[d];
+  if(S.lang==='ka') return DOW_KA[d];
+  if(S.lang==='en') return DOW_EN[d];
+  return DOW_HE[d];
+}
 function monthNameHe(hd){ let m=hd.getMonth(); if(m===12 && hd.isLeapYear()) return 'אדר א׳'; return MONTHS_HE[m]||hd.getMonthName(); }
-function heNum(n){ return n===0?'0':gematriya(n); }
-function hebDateStr(hd){ return heNum(hd.getDate())+' '+monthNameHe(hd)+' '+heNum(hd.getFullYear()); }
-function hebDateShort(hd){ return heNum(hd.getDate())+' '+monthNameHe(hd); }
+function monthName(hd){
+  if(!S.lang || S.lang==='he') return monthNameHe(hd);
+  const table={en:MONTHS_EN,fr:MONTHS_FR,ru:MONTHS_RU,ka:MONTHS_KA}[S.lang];
+  if(!table) return monthNameHe(hd);
+  let m=hd.getMonth();
+  if(m===12 && hd.isLeapYear()) return {en:'Adar I',fr:'Adar I',ru:'Адар I',ka:'ადარ I'}[S.lang];
+  return table[m]||monthNameHe(hd);
+}
+function heNum(n){ if(n===0) return '0'; return (!S.lang||S.lang==='he') ? gematriya(n) : String(n); }
+function hebDateStr(hd){ return heNum(hd.getDate())+' '+monthName(hd)+' '+heNum(hd.getFullYear()); }
+function hebDateShort(hd){ return heNum(hd.getDate())+' '+monthName(hd); }
+const HEB_DAY_STR_TO_NUM = {"א'":1,"ב'":2,"ג'":3,"ד'":4,"ה'":5,"ו'":6,"ז'":7,"ח'":8,"ט'":9,"י'":10,'י"א\'':11,'י"ב\'':12,'י"ג\'':13,'י"ד\'':14,'ט"ו\'':15,'ט"ז\'':16,'י"ז\'':17,'י"ח\'':18,'י"ט\'':19,"כ'":20,'כ"א\'':21,'כ"ב\'':22,'כ"ג\'':23,'כ"ד\'':24,'כ"ה\'':25,'כ"ו\'':26,'כ"ז\'':27,'כ"ח\'':28,'כ"ט\'':29,"ל'":30};
+const HE_MONTH_NAME_TO_NUM = Object.fromEntries(Object.entries(MONTHS_HE).map(([k,v])=>[v,+k]));
+function localizeHebDateStr(str){
+  if(!str || !S.lang || S.lang==='he') return str;
+  const sp = str.indexOf(' ');
+  if(sp<0) return str;
+  const dayNum=HEB_DAY_STR_TO_NUM[str.slice(0,sp)], monthNum=HE_MONTH_NAME_TO_NUM[str.slice(sp+1)];
+  const table={en:MONTHS_EN,fr:MONTHS_FR,ru:MONTHS_RU,ka:MONTHS_KA}[S.lang];
+  if(!dayNum || !monthNum || !table) return str;
+  return heNum(dayNum)+' '+(table[monthNum]||str.slice(sp+1));
+}
 
 /* ---------- settings ---------- */
 const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending updated formulas
@@ -1068,7 +1114,7 @@ en:{
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Continuous reading, one page','רָצוּף':'continuous','גִּבּוּי לְקֹבֶץ':'Backup to file','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Save progress, favorites & settings','שִׁחְזוּר מִגִּבּוּי':'Restore from backup','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Load an existing backup file','אֵין הַקְדָּשׁוֹת עֲדַיִן':'No dedications yet','הַזֵּן שֵׁם':'Enter a name','הַהַקְדָּשָׁה נוֹסְפָה':'Dedication added','לִרְפוּאַת':'For the healing of','לְעִלּוּי נִשְׁמַת':'In memory of','לְהַצְלָחַת':'For the success of','לְזִוּוּג הָגוּן':'For a worthy match','לִזְכוּת':'In merit of',
  'עֲלוֹת הַשַּׁחַר':'Dawn (Alot)','זְמַן טַלִּית וּתְפִלִּין':'Talit & Tefillin','הָנֵץ הַחַמָּה':'Sunrise','סוֹף זְמַן שְׁמַע':'Latest Shema','סוֹף זְמַן תְּפִלָּה':'Latest Tefilla','חֲצוֹת הַיּוֹם':'Midday','מִנְחָה גְּדוֹלָה':'Mincha Gedola','מִנְחָה קְטַנָּה':'Mincha Ketana','פְּלַג הַמִּנְחָה':'Plag HaMincha','שְׁקִיעַת הַחַמָּה':'Sunset','צֵאת הַכּוֹכָבִים':'Nightfall (Tzeit)','חֲצוֹת הַלַּיְלָה':'Midnight',
  'מִשְׁתַּמְּשִׁים':'Users','מְחֻבָּרִים כָּעֵת':'Online now','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Open vocalized source (PDF)',
-'סדר התרת נדרים וקללות':'Seder hatarat nedarim vekelalot','אגרת הרמב"ן':'Iggeret haramban','פיטום הקטורת':'Pitum haketoret','עשרת הזכירות':'Asseret hazechirot','שלוש עשרה עיקרים':'Shlosha asar ikkarim','פרק שירה':'Perek shira','אנא בכח':'Ana bekoach','אשת חיל':'Eshet chayil','תפילת השל"ה על הבנים':'Tefilat hashela al habanim','פתח אליהו':'Petach eliyahu','תפילת הדרך':'Tefilat haderech','שניים מקרא':'Shnayim Mikra','תיקוני הזוהר':'Tikkune HaZohar','שניים מקרא ואחד תרגום':'Shnayim Mikra veEchad Targum','הפטרה':'Haftarah','הַפְטָרָה':'Haftarah',' · נוסח ספרדי':' · Nusach Sephardi','עלייה ':'Aliyah ',' (מפטיר)':' (Maftir)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'The place you marked','פָּרָשַׁת הַשָּׁבוּעַ':'Parashat HaShavua',},
+'סדר התרת נדרים וקללות':'Seder hatarat nedarim vekelalot','אגרת הרמב"ן':'Iggeret haramban','פיטום הקטורת':'Pitum haketoret','עשרת הזכירות':'Asseret hazechirot','שלוש עשרה עיקרים':'Shlosha asar ikkarim','פרק שירה':'Perek shira','אנא בכח':'Ana bekoach','אשת חיל':'Eshet chayil','תפילת השל"ה על הבנים':'Tefilat hashela al habanim','פתח אליהו':'Petach eliyahu','תפילת הדרך':'Tefilat haderech','שניים מקרא':'Shnayim Mikra','תיקוני הזוהר':'Tikkune HaZohar','שניים מקרא ואחד תרגום':'Shnayim Mikra veEchad Targum','הפטרה':'Haftarah','הַפְטָרָה':'Haftarah',' · נוסח ספרדי':' · Nusach Sephardi','עלייה ':'Aliyah ',' (מפטיר)':' (Maftir)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'The place you marked','פָּרָשַׁת הַשָּׁבוּעַ':'Parashat HaShavua','חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…':'Search chapter (number) or word in the verses…','חיפוש פרשה, או ספר ומראה מקום כמו בראשית 1:1':'Search parsha, or book and reference like Genesis 1:1','שֵׁם, לְמָשָׁל: יוֹסֵף בֶּן שָׂרָה':'Name, e.g.: Yosef ben Sarah','שֵׁם הַנִּפְטָר / הַנִּפְטֶרֶת':'Name of the deceased','תִּיקּוּנֵי הַזֹּהַר':'Tikkune HaZohar','לְמִנְיַן הָאַרְבָּעִים':'of the 40-day cycle','עַמּוּד':'page','קְרִיאָה חָדְשִׁית':'Monthly reading','קְרִיאָה שְׁבוּעִית':'Weekly reading','עֶרֶב שַׁבָּת קֹדֶש':'Erev Shabbat','חֲנוּכָּה':'Chanukah','נֵר ':'Candle ','ת.נ.צ.ב.ה':'May their soul be bound in the bond of everlasting life','תְּצוּגָה':'Display','חָדְשִׁי':'Monthly','שְׁבוּעִי':'Weekly','מַעֲקַב קְרִיאָה':'Reading Tracker','שְׁנַיִם מִקְרָא':'Shnayim Mikra','הֻשְׁלְמוּ':'Completed','עֲדַיִן לֹא הוּשְׁלַם':'Not yet completed','בַּמַּחְזוֹר':'in the cycle','עֲדַיִן לֹא הוּשְׁלְמָה':'not yet completed','לְזֶרַע שֶׁל קַיָּמָא':'For lasting children','לְפַרְנָסָה טוֹבָה':'For a good livelihood','לִשְׁלוֹם בַּיִת':'For peace in the home','לַאֲרִיכוּת יָמִים וְשָׁנִים טוֹבוֹת':'For long, good days and years','הוֹסֵף הַקְדָּשָׁה':'Add dedication','יָאהְרְצַיְיט · זִכָּרוֹן':'Yahrzeit · Memorial','אֵין זִכְרוֹנוֹת עֲדַיִן':'No memorials yet','הוֹסֵף יָאהְרְצַיְיט':'Add Yahrzeit','תִּזְכּוֹרֶת יוֹמִית':'Daily Reminder','הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה':'Reading reminder notification','מֻפְעָל':'Activated','לֹא הֻפְעַל':'Not activated','שַׁתֵּף קוֹד QR':'Share QR code','תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה':'Designed image for scanning','מֶרְכַּז ק״ק הַסְּפָרַדִּים · בֵּית אֵ-ל':'Merkaz K"K HaSepharadim · Beit-El','פרק':'Chapter','נֵץ הַחַמָּה':'Sunrise','קְפֹץ לְתַאֲרִיךְ':'Jump to date','קְפֹץ':'Jump','שְׁאָר הַזְּמַנִּים יִתְעַדְכְּנוּ בְּקָרוֹב':'Remaining times will be updated soon','אנטוורפן, בלגיה':'Antwerp, Belgium','המיקום הנוכחי שלך':'Your current location','מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר':'The custom of the 40 days from Rosh Chodesh Elul until Yom Kippur','סִיַּמְתִּי אֶת הַתִּיקּוּן':'I completed the Tikkun',},
 ru:{
  'בַּיִת':'Главная','דף הבית':'Главная','תהילים':'Теилим','לוח שנה':'Календарь','תפילות':'Молитвы','תפילות נוספות':'Дополнительные молитвы','הגדרות':'Настройки','תְּהִלִּים':'Теилим','לוּחַ':'Календарь','הַגְדָּרוֹת':'Настройки','תְּפִלּוֹת':'Молитвы','תְּפִלּוֹת נוֹסְפוֹת':'Дополнительные молитвы',
  'סֵפֶר תְּהִלִּים':'Книга Теилим','לוּחַ עִבְרִי':'Еврейский календарь',
@@ -1094,7 +1140,7 @@ ru:{
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Непрерывное чтение на одной странице','רָצוּף':'подряд','גִּבּוּי לְקֹבֶץ':'Резервная копия в файл','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Сохранить прогресс, избранное и настройки','שִׁחְזוּר מִגִּבּוּי':'Восстановить из копии','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Загрузить файл копии','אֵין הַקְדָּשׁוֹת עֲדַיִן':'Пока нет посвящений','הַזֵּן שֵׁם':'Введите имя','הַהַקְדָּשָׁה נוֹסְפָה':'Посвящение добавлено','לִרְפוּאַת':'Об исцелении','לְעִלּוּי נִשְׁמַת':'В память о','לְהַצְלָחַת':'Об успехе','לְזִוּוּג הָגוּן':'О достойной паре','לִזְכוּת':'В заслугу',
  'עֲלוֹת הַשַּׁחַר':'Рассвет (Алот)','זְמַן טַלִּית וּתְפִלִּין':'Талит и тфилин','הָנֵץ הַחַמָּה':'Восход','סוֹף זְמַן שְׁמַע':'Конец Шма','סוֹף זְמַן תְּפִלָּה':'Конец Тфилы','חֲצוֹת הַיּוֹם':'Полдень','מִנְחָה גְּדוֹלָה':'Минха гдола','מִנְחָה קְטַנָּה':'Минха ктана','פְּלַג הַמִּנְחָה':'Плаг а-минха','שְׁקִיעַת הַחַמָּה':'Закат','צֵאת הַכּוֹכָבִים':'Выход звёзд','חֲצוֹת הַלַּיְלָה':'Полночь',
  'מִשְׁתַּמְּשִׁים':'Пользователи','מְחֻבָּרִים כָּעֵת':'Сейчас онлайн','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Открыть огласованный источник (PDF)',
-'סדר התרת נדרים וקללות':'Седер гатарат недарим векелалот','אגרת הרמב"ן':'Иггерет гарамбан','פיטום הקטורת':'Питум гакеторет','עשרת הזכירות':'Ассерет газехирот','שלוש עשרה עיקרים':'Шлоша асар иккарим','פרק שירה':'Перек шира','אנא בכח':'Ана бекоах','אשת חיל':'Ешет хайил','תפילת השל"ה על הבנים':'Тефилат гашела ал габаним','פתח אליהו':'Петах елийагу','תפילת הדרך':'Тефилат гадерех','שניים מקרא':'Шнайим микра','תיקוני הזוהר':'Тиккуне газогар','שניים מקרא ואחד תרגום':'Шнайим микра веехад таргум','הפטרה':'Гафтара','הַפְטָרָה':'Гафтара',' · נוסח ספרדי':' · Нусах сепгаради','עלייה ':'Алийа ',' (מפטיר)':' (мафтир)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'Гамаком шесиманта','פָּרָשַׁת הַשָּׁבוּעַ':'Парашат гашавуа',},
+'סדר התרת נדרים וקללות':'Седер гатарат недарим векелалот','אגרת הרמב"ן':'Иггерет гарамбан','פיטום הקטורת':'Питум гакеторет','עשרת הזכירות':'Ассерет газехирот','שלוש עשרה עיקרים':'Шлоша асар иккарим','פרק שירה':'Перек шира','אנא בכח':'Ана бекоах','אשת חיל':'Ешет хайил','תפילת השל"ה על הבנים':'Тефилат гашела ал габаним','פתח אליהו':'Петах елийагу','תפילת הדרך':'Тефилат гадерех','שניים מקרא':'Шнайим микра','תיקוני הזוהר':'Тиккуне газогар','שניים מקרא ואחד תרגום':'Шнайим микра веехад таргум','הפטרה':'Гафтара','הַפְטָרָה':'Гафтара',' · נוסח ספרדי':' · Нусах сепгаради','עלייה ':'Алийа ',' (מפטיר)':' (мафтир)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'Гамаком шесиманта','פָּרָשַׁת הַשָּׁבוּעַ':'Парашат гашавуа','חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…':'Поиск главы (номер) или слова в стихах…','חיפוש פרשה, או ספר ומראה מקום כמו בראשית 1:1':'Поиск главы (параши), или книги и ссылки, например Бытие 1:1','שֵׁם, לְמָשָׁל: יוֹסֵף בֶּן שָׂרָה':'Имя, например: Йосеф бен Сара','שֵׁם הַנִּפְטָר / הַנִּפְטֶרֶת':'Имя усопшего/усопшей','תִּיקּוּנֵי הַזֹּהַר':'Тиккуне газогар','לְמִנְיַן הָאַרְבָּעִים':'из 40-дневного цикла','עַמּוּד':'страница','קְרִיאָה חָדְשִׁית':'Ежемесячное чтение','קְרִיאָה שְׁבוּעִית':'Еженедельное чтение','עֶרֶב שַׁבָּת קֹדֶש':'Канун Шаббата','חֲנוּכָּה':'Ханука','נֵר ':'Свеча ','ת.נ.צ.ב.ה':'Да будет его душа связана узами вечной жизни','תְּצוּגָה':'Отображение','חָדְשִׁי':'Ежемесячно','שְׁבוּעִי':'Еженедельно','מַעֲקַב קְרִיאָה':'Трекер чтения','שְׁנַיִם מִקְרָא':'Шнайим микра','הֻשְׁלְמוּ':'Завершено','עֲדַיִן לֹא הוּשְׁלַם':'Ещё не завершено','בַּמַּחְזוֹר':'в цикле','עֲדַיִן לֹא הוּשְׁלְמָה':'ещё не завершена','לְזֶרַע שֶׁל קַיָּמָא':'За потомство, которое будет жить','לְפַרְנָסָה טוֹבָה':'За хороший заработок','לִשְׁלוֹם בַּיִת':'За мир в доме','לַאֲרִיכוּת יָמִים וְשָׁנִים טוֹבוֹת':'За долгие и добрые дни и годы','הוֹסֵף הַקְדָּשָׁה':'Добавить посвящение','יָאהְרְצַיְיט · זִכָּרוֹן':'Йорцайт · Память','אֵין זִכְרוֹנוֹת עֲדַיִן':'Пока нет памятных дат','הוֹסֵף יָאהְרְצַיְיט':'Добавить йорцайт','תִּזְכּוֹרֶת יוֹמִית':'Ежедневное напоминание','הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה':'Уведомление-напоминание о чтении','מֻפְעָל':'Включено','לֹא הֻפְעַל':'Выключено','שַׁתֵּף קוֹד QR':'Поделиться QR-кодом','תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה':'Оформленное изображение для сканирования','מֶרְכַּז ק״ק הַסְּפָרַדִּים · בֵּית אֵ-ל':'Меркaз К"К а-Сфарадим · Бейт-Эль','פרק':'Глава','נֵץ הַחַמָּה':'Восход','קְפֹץ לְתַאֲרִיךְ':'Перейти к дате','קְפֹץ':'Перейти','שְׁאָר הַזְּמַנִּים יִתְעַדְכְּנוּ בְּקָרוֹב':'Остальные времена скоро обновятся','אנטוורפן, בלגיה':'Антверпен, Бельгия','המיקום הנוכחי שלך':'Ваше текущее местоположение','מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר':'Обычай 40 дней от Рош Ходеш Элул до Йом Кипура','סִיַּמְתִּי אֶת הַתִּיקּוּן':'Я завершил(а) Тиккун',},
 ka:{
  'בַּיִת':'მთავარი','דף הבית':'მთავარი','תהילים':'თეილიმი','לוח שנה':'კალენდარი','תפילות':'ლოცვები','תפילות נוספות':'დამატებითი ლოცვები','הגדרות':'პარამეტრები','תְּהִלִּים':'თეილიმი','לוּחַ':'კალენდარი','הַגְדָּרוֹת':'პარამეტრები','תְּפִלּוֹת':'ლოცვები','תְּפִלּוֹת נוֹסְפוֹת':'დამატებითი ლოცვები',
  'סֵפֶר תְּהִלִּים':'თეილიმის წიგნი','לוּחַ עִבְרִי':'ებრაული კალენდარი',
@@ -1120,7 +1166,7 @@ ka:{
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'უწყვეტი კითხვა ერთ გვერდზე','רָצוּף':'უწყვეტი','גִּבּוּי לְקֹבֶץ':'სარეზერვო ასლი ფაილში','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'პროგრესის, რჩეულების და პარამეტრების შენახვა','שִׁחְזוּר מִגִּבּוּי':'აღდგენა ასლიდან','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'არსებული ასლის ჩატვირთვა','אֵין הַקְדָּשׁוֹת עֲדַיִן':'ჯერ არ არის მიძღვნები','הַזֵּן שֵׁם':'შეიყვანე სახელი','הַהַקְדָּשָׁה נוֹסְפָה':'მიძღვნა დაემატა','לִרְפוּאַת':'განკურნებისთვის:','לְעִלּוּי נִשְׁמַת':'სულის ხსოვნისთვის:','לְהַצְלָחַת':'წარმატებისთვის:','לְזִוּוּג הָגוּן':'ღირსეული წყვილისთვის:','לִזְכוּת':'სასარგებლოდ:',
  'עֲלוֹת הַשַּׁחַר':'განთიადი (ალოთ)','זְמַן טַלִּית וּתְפִלִּין':'ტალითი და თფილინი','הָנֵץ הַחַמָּה':'მზის ამოსვლა','סוֹף זְמַן שְׁמַע':'შმას ბოლო დრო','סוֹף זְמַן תְּפִלָּה':'თფილას ბოლო დრო','חֲצוֹת הַיּוֹם':'შუადღე','מִנְחָה גְּדוֹלָה':'მინხა გდოლა','מִנְחָה קְטַנָּה':'მინხა ქტანა','פְּלַג הַמִּנְחָה':'პლაგ ა-მინხა','שְׁקִיעַת הַחַמָּה':'მზის ჩასვლა','צֵאת הַכּוֹכָבִים':'ვარსკვლავების გამოჩენა','חֲצוֹת הַלַּיְלָה':'შუაღამე',
  'מִשְׁתַּמְּשִׁים':'მომხმარებლები','מְחֻבָּרִים כָּעֵת':'ახლა ონლაინში','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'გახსენით ვოკალიზებული წყარო (PDF)',
-'סדר התרת נדרים וקללות':'სედერ ჰათარათ ნედარიმ ვეკელალოთ','אגרת הרמב"ן':'იგგერეთ ჰარამბან','פיטום הקטורת':'პითუმ ჰაკეთორეთ','עשרת הזכירות':'ასსერეთ ჰაზეხიროთ','שלוש עשרה עיקרים':'შლოშა ასარ იკკარიმ','פרק שירה':'პერეკ შირა','אנא בכח':'ანა ბეკოახ','אשת חיל':'ეშეთ ხაიილ','תפילת השל"ה על הבנים':'თეფილათ ჰაშელა ალ ჰაბანიმ','פתח אליהו':'პეთახ ელიიაჰუ','תפילת הדרך':'თეფილათ ჰადერეხ','שניים מקרא':'შნაიიმ მიკრა','תיקוני הזוהר':'თიკკუნე ჰაზოჰარ','שניים מקרא ואחד תרגום':'შნაიიმ მიკრა ვეეხად თარგუმ','הפטרה':'ჰაფთარა','הַפְטָרָה':'ჰაფთარა',' · נוסח ספרדי':' · ნუსახ სეპჰარადი','עלייה ':'ალიია ',' (מפטיר)':' (მაფთირ)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'ჰამაკომ შესიმანთა','פָּרָשַׁת הַשָּׁבוּעַ':'პარაშათ ჰაშავუა',},
+'סדר התרת נדרים וקללות':'სედერ ჰათარათ ნედარიმ ვეკელალოთ','אגרת הרמב"ן':'იგგერეთ ჰარამბან','פיטום הקטורת':'პითუმ ჰაკეთორეთ','עשרת הזכירות':'ასსერეთ ჰაზეხიროთ','שלוש עשרה עיקרים':'შლოშა ასარ იკკარიმ','פרק שירה':'პერეკ შირა','אנא בכח':'ანა ბეკოახ','אשת חיל':'ეშეთ ხაიილ','תפילת השל"ה על הבנים':'თეფილათ ჰაშელა ალ ჰაბანიმ','פתח אליהו':'პეთახ ელიიაჰუ','תפילת הדרך':'თეფილათ ჰადერეხ','שניים מקרא':'შნაიიმ მიკრა','תיקוני הזוהר':'თიკკუნე ჰაზოჰარ','שניים מקרא ואחד תרגום':'შნაიიმ მიკრა ვეეხად თარგუმ','הפטרה':'ჰაფთარა','הַפְטָרָה':'ჰაფთარა',' · נוסח ספרדי':' · ნუსახ სეპჰარადი','עלייה ':'ალიია ',' (מפטיר)':' (მაფთირ)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'ჰამაკომ შესიმანთა','פָּרָשַׁת הַשָּׁבוּעַ':'პარაშათ ჰაშავუა','חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…':'ძებნა თავი (ნომერი) ან სიტყვა ლექსებში…','חיפוש פרשה, או ספר ומראה מקום כמו בראשית 1:1':'ძებნა კვირის კვეთა, ან წიგნი და მისამართი, მაგ. დაბადება 1:1','שֵׁם, לְמָשָׁל: יוֹסֵף בֶּן שָׂרָה':'სახელი, მაგ.: იოსეფ ბენ სარა','שֵׁם הַנִּפְטָר / הַנִּפְטֶרֶת':'გარდაცვლილის სახელი','תִּיקּוּנֵי הַזֹּהַר':'თიკკუნე ჰაზოჰარ','לְמִנְיַן הָאַרְבָּעִים':'40-დღიანი ციკლიდან','עַמּוּד':'გვერდი','קְרִיאָה חָדְשִׁית':'ყოველთვიური კითხვა','קְרִיאָה שְׁבוּעִית':'ყოველკვირეული კითხვა','עֶרֶב שַׁבָּת קֹדֶש':'შაბათის წინა დღე','חֲנוּכָּה':'ხანუკა','נֵר ':'სანთელი ','ת.נ.צ.ב.ה':'მისი სული საუკუნო ცხოვრების კავშირს დაუკავშირდეს','תְּצוּגָה':'ჩვენება','חָדְשִׁי':'ყოველთვიური','שְׁבוּעִי':'ყოველკვირეული','מַעֲקַב קְרִיאָה':'კითხვის თვალყურის დევნება','שְׁנַיִם מִקְרָא':'შნაიიმ მიკრა','הֻשְׁלְמוּ':'დასრულებულია','עֲדַיִן לֹא הוּשְׁלַם':'ჯერ არ არის დასრულებული','בַּמַּחְזוֹר':'ციკლში','עֲדַיִן לֹא הוּשְׁלְמָה':'ჯერ არ არის დასრულებული','לְזֶרַע שֶׁל קַיָּמָא':'შვილებისთვის, რომლებიც იცოცხლებენ','לְפַרְנָסָה טוֹבָה':'კარგი შემოსავლისთვის','לִשְׁלוֹם בַּיִת':'ოჯახური მშვიდობისთვის','לַאֲרִיכוּת יָמִים וְשָׁנִים טוֹבוֹת':'ხანგრძლივი და კეთილი დღეებისა და წლებისთვის','הוֹסֵף הַקְדָּשָׁה':'დამატება მიძღვნა','יָאהְרְצַיְיט · זִכָּרוֹן':'იორცაიტი · ხსოვნა','אֵין זִכְרוֹנוֹת עֲדַיִן':'ჯერ არ არის ხსოვნები','הוֹסֵף יָאהְרְצַיְיט':'დაამატე იორცაიტი','תִּזְכּוֹרֶת יוֹמִית':'ყოველდღიური შეხსენება','הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה':'კითხვის შეხსენების შეტყობინება','מֻפְעָל':'ჩართულია','לֹא הֻפְעַל':'არ არის ჩართული','שַׁתֵּף קוֹד QR':'QR კოდის გაზიარება','תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה':'დიზაინის სურათი სკანირებისთვის','מֶרְכַּז ק״ק הַסְּפָרַדִּים · בֵּית אֵ-ל':'მერკაზ კ"კ ჰასეფარადიმ · ბეთ-ელ','פרק':'თავი','נֵץ הַחַמָּה':'მზის ამოსვლა','קְפֹץ לְתַאֲרִיךְ':'გადასვლა თარიღზე','קְפֹץ':'გადასვლა','שְׁאָר הַזְּמַנִּים יִתְעַדְכְּנוּ בְּקָרוֹב':'დანარჩენი დროები მალე განახლდება','אנטוורפן, בלגיה':'ანტვერპენი, ბელგია','המיקום הנוכחי שלך':'თქვენი მიმდინარე მდებარეობა','מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר':'40 დღის წესი როშ ხოდეშ ელულიდან იომ კიპურამდე','סִיַּמְתִּי אֶת הַתִּיקּוּן':'დავასრულე თიკუნი',},
 fr:{
  'בַּיִת':'Accueil','דף הבית':'Accueil','תהילים':'Tehilim','לוח שנה':'Calendrier','תפילות':'Prières','תפילות נוספות':'Prières supplémentaires','הגדרות':'Paramètres','תְּהִלִּים':'Tehilim','לוּחַ':'Calendrier','הַגְדָּרוֹת':'Paramètres','תְּפִלּוֹת':'Prières','תְּפִלּוֹת נוֹסְפוֹת':'Prières supplémentaires',
  'סֵפֶר תְּהִלִּים':'Livre des Tehilim','לוּחַ עִבְרִי':'Calendrier hébraïque',
@@ -1146,7 +1192,7 @@ fr:{
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Lecture continue sur une page','רָצוּף':'continu','גִּבּוּי לְקֹבֶץ':'Sauvegarde dans un fichier','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Enregistrer progression, favoris et paramètres','שִׁחְזוּר מִגִּבּוּי':'Restaurer depuis une sauvegarde','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Charger un fichier de sauvegarde','אֵין הַקְדָּשׁוֹת עֲדַיִן':'Aucune dédicace pour le moment','הַזֵּן שֵׁם':'Entrez un nom','הַהַקְדָּשָׁה נוֹסְפָה':'Dédicace ajoutée','לִרְפוּאַת':'Pour la guérison de','לְעִלּוּי נִשְׁמַת':'À la mémoire de','לְהַצְלָחַת':'Pour la réussite de','לְזִוּוּג הָגוּן':'Pour un conjoint digne','לִזְכוּת':'En mérite de',
  'עֲלוֹת הַשַּׁחַר':'Aube (Alot)','זְמַן טַלִּית וּתְפִלִּין':'Talit et Tefilin','הָנֵץ הַחַמָּה':'Lever du soleil','סוֹף זְמַן שְׁמַע':'Fin du Chéma','סוֹף זְמַן תְּפִלָּה':'Fin de la Tefila','חֲצוֹת הַיּוֹם':'Midi','מִנְחָה גְּדוֹלָה':'Mincha Guedola','מִנְחָה קְטַנָּה':'Mincha Ketana','פְּלַג הַמִּנְחָה':'Plag HaMincha','שְׁקִיעַת הַחַמָּה':'Coucher du soleil','צֵאת הַכּוֹכָבִים':'Sortie des étoiles (Tzeit)','חֲצוֹת הַלַּיְלָה':'Minuit',
  'מִשְׁתַּמְּשִׁים':'Utilisateurs','מְחֻבָּרִים כָּעֵת':'En ligne','פְּתַח מָקוֹר מְנֻקָּד (PDF)':'Ouvrir la source vocalisée (PDF)',
-'סדר התרת נדרים וקללות':'Sédér hatarat nédarim vékélalot','אגרת הרמב"ן':'Igguérét haramban','פיטום הקטורת':'Pitoum hakétorét','עשרת הזכירות':'Assérét hazékhirot','שלוש עשרה עיקרים':'Chlocha assar ikkarim','פרק שירה':'Pérék chira','אנא בכח':'Ana békoakh','אשת חיל':'Échét khayil','תפילת השל"ה על הבנים':'Téfilat hachéla al habanim','פתח אליהו':'Pétakh éliyahou','תפילת הדרך':'Téfilat hadérékh','שניים מקרא':'Chnayim mikra','תיקוני הזוהר':'Tikkouné hazohar','שניים מקרא ואחד תרגום':'Chnayim mikra véékhad targoum','הפטרה':'Haftara','הַפְטָרָה':'Haftara',' · נוסח ספרדי':' · Noussakh sépharadi','עלייה ':'Aliya ',' (מפטיר)':' (maftir)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'Hamakom chéssimanta','פָּרָשַׁת הַשָּׁבוּעַ':'Parachat hachavoua',}};
+'סדר התרת נדרים וקללות':'Sédér hatarat nédarim vékélalot','אגרת הרמב"ן':'Igguérét haramban','פיטום הקטורת':'Pitoum hakétorét','עשרת הזכירות':'Assérét hazékhirot','שלוש עשרה עיקרים':'Chlocha assar ikkarim','פרק שירה':'Pérék chira','אנא בכח':'Ana békoakh','אשת חיל':'Échét khayil','תפילת השל"ה על הבנים':'Téfilat hachéla al habanim','פתח אליהו':'Pétakh éliyahou','תפילת הדרך':'Téfilat hadérékh','שניים מקרא':'Chnayim mikra','תיקוני הזוהר':'Tikkouné hazohar','שניים מקרא ואחד תרגום':'Chnayim mikra véékhad targoum','הפטרה':'Haftara','הַפְטָרָה':'Haftara',' · נוסח ספרדי':' · Noussakh sépharadi','עלייה ':'Aliya ',' (מפטיר)':' (maftir)','הַמָּקוֹם שֶׁסִּמַּנְתָּ':'Hamakom chéssimanta','פָּרָשַׁת הַשָּׁבוּעַ':'Parachat hachavoua','חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…':'Rechercher un chapitre (numéro) ou un mot dans les versets…','חיפוש פרשה, או ספר ומראה מקום כמו בראשית 1:1':'Rechercher une paracha, ou livre et référence comme Genèse 1:1','שֵׁם, לְמָשָׁל: יוֹסֵף בֶּן שָׂרָה':'Nom, par exemple : Yossef ben Sarah','שֵׁם הַנִּפְטָר / הַנִּפְטֶרֶת':'Nom du défunt / de la défunte','תִּיקּוּנֵי הַזֹּהַר':'Tikkouné hazohar','לְמִנְיַן הָאַרְבָּעִים':'du cycle de 40 jours','עַמּוּד':'page','קְרִיאָה חָדְשִׁית':'Lecture mensuelle','קְרִיאָה שְׁבוּעִית':'Lecture hebdomadaire','עֶרֶב שַׁבָּת קֹדֶש':'Veille de Chabbat','חֲנוּכָּה':'Hanouka','נֵר ':'Bougie ','ת.נ.צ.ב.ה':'Que son âme soit liée au faisceau de la vie éternelle','תְּצוּגָה':'Affichage','חָדְשִׁי':'Mensuel','שְׁבוּעִי':'Hebdomadaire','מַעֲקַב קְרִיאָה':'Suivi de lecture','שְׁנַיִם מִקְרָא':'Chnayim mikra','הֻשְׁלְמוּ':'Terminé','עֲדַיִן לֹא הוּשְׁלַם':'Pas encore terminé','בַּמַּחְזוֹר':'dans le cycle','עֲדַיִן לֹא הוּשְׁלְמָה':'pas encore terminée','לְזֶרַע שֶׁל קַיָּמָא':'Pour une descendance qui perdure','לְפַרְנָסָה טוֹבָה':'Pour une bonne subsistance','לִשְׁלוֹם בַּיִת':'Pour la paix du foyer','לַאֲרִיכוּת יָמִים וְשָׁנִים טוֹבוֹת':'Pour de longs et bons jours et années','הוֹסֵף הַקְדָּשָׁה':'Ajouter une dédicace','יָאהְרְצַיְיט · זִכָּרוֹן':'Yahrzeit · Mémoire','אֵין זִכְרוֹנוֹת עֲדַיִן':'Aucun souvenir pour le moment','הוֹסֵף יָאהְרְצַיְיט':'Ajouter un Yahrzeit','תִּזְכּוֹרֶת יוֹמִית':'Rappel quotidien','הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה':'Notification de rappel de lecture','מֻפְעָל':'Activé','לֹא הֻפְעַל':'Non activé','שַׁתֵּף קוֹד QR':'Partager le code QR','תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה':'Image conçue pour le scan','מֶרְכַּז ק״ק הַסְּפָרַדִּים · בֵּית אֵ-ל':'Merkaz K"K HaSepharadim · Beit-El','פרק':'Chapitre','נֵץ הַחַמָּה':'Lever du soleil','קְפֹץ לְתַאֲרִיךְ':'Aller à une date','קְפֹץ':'Aller','שְׁאָר הַזְּמַנִּים יִתְעַדְכְּנוּ בְּקָרוֹב':'Les autres horaires seront bientôt mis à jour','אנטוורפן, בלגיה':'Anvers, Belgique','המיקום הנוכחי שלך':'Votre position actuelle','מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר':'La coutume des 40 jours depuis Roch \'Hodech Eloul jusqu\'à Yom Kippour','סִיַּמְתִּי אֶת הַתִּיקּוּן':'J\'ai terminé le Tikkoun',}};
 function tr(node){
   if(S.lang==='he') return;
   const dict=I18N[S.lang]; if(!dict) return;
@@ -1201,6 +1247,15 @@ function parshaName(key){
 }
 const PARSHA_KA_NAMES={"Bereshit":"ბერეშით","Noach":"ნოახ","Lech-Lecha":"ლეხ-ლეხა","Vayera":"ვაიიერა","Chayei Sara":"ხაიიე სარა","Toldot":"თოლდოთ","Vayetzei":"ვაიიეწე","Vayishlach":"ვაიიიშლახ","Vayeshev":"ვაიიეშევ","Miketz":"მიკკეწ","Vayigash":"ვაიიიგგაშ","Vayechi":"ვაიხი","Shemot":"შემოთ","Vaera":"ვაერა","Bo":"ბო","Beshalach":"ბეშალლახ","Yitro":"იითრო","Mishpatim":"მიშპათიმ","Terumah":"თერუმა","Tetzaveh":"თეწავვე","Ki Tisa":"კი თისსა","Vayakhel":"ვაიიაკჰელ","Pekudei":"ფეკუდე","Vayikra":"ვაიიიკრა","Tzav":"წავ","Shmini":"შემინი","Tazria":"თაზრია","Metzora":"მეწორა","Achrei Mot":"ახარე მოთ","Kedoshim":"კედოშიმ","Emor":"ემორ","Behar":"ბეჰარ","Bechukotai":"ბეხუკკოთაი","Bamidbar":"ბემიდბარ","Nasso":"ნას","Beha'alotcha":"ბეჰაალოთხა","Sh'lach":"შელახ-ლეხა","Korach":"კორახ","Chukat":"ხუკკათ","Balak":"ბალაკ","Pinchas":"პინხას","Matot":"მათთოთ","Masei":"მასე","Devarim":"დევარიმ","Vaetchanan":"ვაეთხანნან","Eikev":"ეკევ","Re'eh":"რეე","Shoftim":"შოფთიმ","Ki Teitzei":"კი-თეწე","Ki Tavo":"კი-თავო","Nitzavim":"ნიწწავიმ","Vayeilech":"ვაიიელეხ","Ha'azinu":"ჰააზინუ","Vezot Haberakhah":"ვეზოთ ჰაბბერახა","Vayakhel-Pekudei":"ვაიიაკჰელ-ფეკუდე","Tazria-Metzora":"თაზრია-მეწორა","Achrei Mot-Kedoshim":"ახარე მოთ-კედოშიმ","Behar-Bechukotai":"ბეჰარ-ბეხუკკოთაი","Chukat-Balak":"ხუკკათ-ბალაკ","Matot-Masei":"მათთოთ-მასე","Nitzavim-Vayeilech":"ნიწწავიმ-ვაიიელეხ"};
 const BOOK_HE_NAMES = {Genesis:'בְּרֵאשִׁית',Exodus:'שְׁמוֹת',Leviticus:'וַיִּקְרָא',Numbers:'בְּמִדְבַּר',Deuteronomy:'דְּבָרִים'};
+const BOOK_PARSHA_KEY = {Genesis:'Bereshit',Exodus:'Shemot',Leviticus:'Vayikra',Numbers:'Bamidbar',Deuteronomy:'Devarim'};
+function bookName(book){
+  if(!book) return book;
+  if(S.lang==='en') return book;
+  if(S.lang==='fr') return PARSHA_FR_NAMES[BOOK_PARSHA_KEY[book]]||book;
+  if(S.lang==='ru') return PARSHA_RU_NAMES[BOOK_PARSHA_KEY[book]]||book;
+  if(S.lang==='ka') return PARSHA_KA_NAMES[BOOK_PARSHA_KEY[book]]||book;
+  return stripNik(BOOK_HE_NAMES[book]);
+}
 let TORAH=null, HAFTARAH=null, LEYNING=null, TORAH_TRANSLIT={};
 let smLoadPromise=null;
 function ensureShnayimData(){
@@ -1461,7 +1516,7 @@ function renderHome(){
     <div class="date-band">
       <div class="greeting">${greeting()}</div>
       <div class="date-heb">${hebDateStr(hd)}</div>
-      <div class="date-greg">${DOW_HE[hd.getDay()]} · ${new Date().toLocaleDateString('en-GB')}</div>
+      <div class="date-greg">${dowName(hd)} · ${new Date().toLocaleDateString('en-GB')}</div>
     </div>
     ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>יוֹם הַיָּאהְרְצַיְיט · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
@@ -1483,7 +1538,7 @@ function renderHome(){
     <div class="card daily-card">
       <div class="daily-head">
         <div class="daily-info">
-          <div class="daily-tag">${S.division==='weekly'?'קְרִיאַת הַיּוֹם · '+DOW_HE[hd.getDay()]:'קְרִיאַת הַיּוֹם · '+heNum(hd.getDate())+' לַחֹדֶשׁ'}</div>
+          <div class="daily-tag">${S.division==='weekly'?'קְרִיאַת הַיּוֹם · '+dowName(hd):'קְרִיאַת הַיּוֹם · '+heNum(hd.getDate())+' לַחֹדֶשׁ'}</div>
           <div class="daily-range">${rangeLabel}</div>
           <div class="daily-count">${chs.length} פְּרָקִים</div>
           ${streak.count>1?`<div class="streak-chip">${I.flame}<span>${heNum(streak.count)} יָמִים רְצוּפִים${streak.best>streak.count?' · 🏆 '+heNum(streak.best):''}</span></div>`:''}
@@ -1498,7 +1553,7 @@ function renderHome(){
         <div class="sm-week-icon">${I.zoharFlame}</div>
         <div class="sm-week-text">
           <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר · יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
-          <div class="sm-week-name">${ZOHAR&&ZOHAR[cd-1]?ZOHAR[cd-1].hebDate:''}</div>
+          <div class="sm-week-name">${ZOHAR&&ZOHAR[cd-1]?localizeHebDateStr(ZOHAR[cd-1].hebDate):''}</div>
         </div>
         <span class="sm-week-chev">${I.chev}</span>
       </div>`;
@@ -1644,6 +1699,7 @@ function renderTehillim(){
     if(!items.length){ grid.innerHTML='<div class="empty-note">אֵין פְּרָקִים לְהַצִּיג</div>'; return; }
     // render first chunk synchronously for instant paint, rest progressively (perf, #9)
     const CHUNK=30;
+    const chW=(!S.lang||S.lang==='he')?'פרק':((I18N[S.lang]&&I18N[S.lang]['פרק'])||'פרק');
     const renderChunk=(start)=>{
       const frag=document.createDocumentFragment();
       const end=Math.min(start+CHUNK, items.length);
@@ -1651,7 +1707,7 @@ function renderTehillim(){
         const i=items[k]; const g=heNum(i);
         const cell=document.createElement('div');
         cell.className='ps-cell'+(read.has(i)?' read':'')+(isFav(i)?' fav':'');
-        cell.innerHTML=`<div class="check">${I.check}</div>${isFav(i)?'<div class="starmark">'+I.bookmarkOn+'</div>':''}<div class="n">${g}</div><div class="g">פרק ${i}</div>`;
+        cell.innerHTML=`<div class="check">${I.check}</div>${isFav(i)?'<div class="starmark">'+I.bookmarkOn+'</div>':''}<div class="n">${g}</div><div class="g">${chW} ${i}</div>`;
         cell.onclick=()=>openReader(all150,{daily:false,start:i});
         frag.appendChild(cell);
       }
@@ -1734,7 +1790,7 @@ function langText(ch){
   const m={ru:window.TEHILLIM_RU,ka:window.TEHILLIM_KA,en:window.TEHILLIM_EN,fr:window.TEHILLIM_FR};
   const t=m[S.lang]; return (t&&t[ch])||null;
 }
-function vNum(n){ return S.lang==='he'?heNum(n):String(n); }
+function vNum(n){ return heNum(n); }
 function chapterHTML(ch){
   const trv=langText(ch);
   const verses=trv||T[ch]||[];
@@ -1889,7 +1945,7 @@ function isRoshChodeshToday(hd){
   }catch(err){ return false; }
 }
 function wireConverter(){
-  const hMonths=(y)=>{ const n=HDate.monthsInYear?HDate.monthsInYear(y):((y*7+1)%19<7?13:12); const out=[]; for(let m=1;m<=n;m++){ out.push({v:m, t:monthNameHe(new HDate(1,m,y))}); } return out; };
+  const hMonths=(y)=>{ const n=HDate.monthsInYear?HDate.monthsInYear(y):((y*7+1)%19<7?13:12); const out=[]; for(let m=1;m<=n;m++){ out.push({v:m, t:monthName(new HDate(1,m,y))}); } return out; };
   const d=document.getElementById('cvDay'), m=document.getElementById('cvMon'), y=document.getElementById('cvYear'), out=document.getElementById('cvOut');
   const today=currentHDate();
   function fillY(){ y.innerHTML=''; for(let yy=today.getFullYear()-120; yy<=today.getFullYear()+120; yy++){ const o=document.createElement('option'); o.value=yy; o.textContent=heNum(yy); y.appendChild(o);} y.value=today.getFullYear(); }
@@ -1914,7 +1970,7 @@ function nextHoliday(){
     const il=/Jerusalem/.test(LOC.tz);
     const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
     const majors=/(רֹאשׁ הַשָּׁנָה|כִּפּוּר|סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת|חֲנֻכָּה|פּוּרִים|פֶּסַח|שָׁבוּעוֹת|בְּאָב|בָּעֹמֶר|בִּשְׁבָט)/;
-    for(const ev of evs){ const d=ev.getDate(); if(d.abs()<=today.abs()) continue; const nm=ev.render('he'); if(majors.test(nm)) return {name:nm, days:d.abs()-today.abs()}; }
+    for(const ev of evs){ const d=ev.getDate(); if(d.abs()<=today.abs()) continue; const nm=ev.render('he'); if(majors.test(nm)) return {name:(S.lang==='he'?nm:ev.render('en')), days:d.abs()-today.abs()}; }
   }catch(err){}
   return null;
 }
@@ -1929,7 +1985,7 @@ function renderCalendar(){
   const evMap={};
   try{
     const evs=HebrewCalendar.calendar({start:gStart,end:gEnd,sedrot:true,il:/Jerusalem/.test(LOC.tz),locale:'he',noModern:false});
-    evs.forEach(e=>{ const d=e.getDate(); const key=d.getDate()+'-'+d.getMonth(); (evMap[key]=evMap[key]||[]).push(e.render('he')); });
+    evs.forEach(e=>{ const d=e.getDate(); const key=d.getDate()+'-'+d.getMonth(); (evMap[key]=evMap[key]||[]).push(S.lang==='he'?e.render('he'):e.render('en')); });
   }catch(e){}
   const selDay = (CAL.sel && CAL.sel.m===CAL.m && CAL.sel.y===CAL.y)? CAL.sel.d : (today.getMonth()===CAL.m&&today.getFullYear()===CAL.y? today.getDate():1);
   // build grid
@@ -1948,7 +2004,7 @@ function renderCalendar(){
   <div class="view">
     <div class="cal-head">
       <button class="cal-nav" id="calPrevM">${I.prev}</button>
-      <div class="cal-month"><div class="m">${monthNameHe(first)}</div><div class="y">${heNum(CAL.y)}</div></div>
+      <div class="cal-month"><div class="m">${monthName(first)}</div><div class="y">${heNum(CAL.y)}</div></div>
       <button class="cal-nav" id="calNextM">${I.next}</button>
     </div>
     <div class="cal-actions-row">
@@ -1964,7 +2020,7 @@ function renderCalendar(){
       <button class="btn btn-gold" id="jmpGo" style="margin-top:10px">${I.check}<span>קְפֹץ</span></button>
     </div>
     ${(function(){const nh=nextHoliday(); return nh?`<div class="next-hol">${I.star||I.cal}<span>הֶחָג הַקָּרוֹב · <b>${nh.name}</b> · בְּעוֹד ${heNum(nh.days)} ${nh.days===1?'יוֹם':'יָמִים'}</span></div>`:'';})()}
-    <div class="cal-grid">${DOW_SHORT.map(d=>`<div class="cal-dow">${d}</div>`).join('')}${cells}</div>
+    <div class="cal-grid">${DOW_SHORT.map((d,i)=>`<div class="cal-dow">${dowShort(i)}</div>`).join('')}${cells}</div>
     <div id="dayDetail"></div>
 
     <div class="card conv-card">
@@ -2008,7 +2064,7 @@ function wireCalJump(){
   };
 }
 function fillJumpSelects(){
-  const hMonths=(y)=>{ const n=HDate.monthsInYear?HDate.monthsInYear(y):((y*7+1)%19<7?13:12); const out=[]; for(let m=1;m<=n;m++){ out.push({v:m, t:monthNameHe(new HDate(1,m,y))}); } return out; };
+  const hMonths=(y)=>{ const n=HDate.monthsInYear?HDate.monthsInYear(y):((y*7+1)%19<7?13:12); const out=[]; for(let m=1;m<=n;m++){ out.push({v:m, t:monthName(new HDate(1,m,y))}); } return out; };
   const d=document.getElementById('jmpDay'), m=document.getElementById('jmpMon'), y=document.getElementById('jmpYear');
   const today=currentHDate();
   y.innerHTML=''; for(let yy=today.getFullYear()-120; yy<=today.getFullYear()+120; yy++){ const o=document.createElement('option'); o.value=yy; o.textContent=heNum(yy); y.appendChild(o); }
@@ -2028,7 +2084,7 @@ function renderDayDetail(hd, events){
   if(isToday){ const nx=zlist.find(z=>z.date&&z.date>now); if(nx)nextKey=nx.key; }
   el.innerHTML=`
   <div class="day-detail card">
-    <div class="dd-date">${DOW_HE[hd.getDay()]} · ${heNum(hd.getDate())} ${monthNameHe(hd)}</div>
+    <div class="dd-date">${dowName(hd)} · ${heNum(hd.getDate())} ${monthName(hd)}</div>
     <div class="dd-greg">${g.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     ${events.length?`<div class="dd-events">${events.map(e=>`<span class="dd-event">${e}</span>`).join('')}</div>`:''}
     <div style="display:flex;gap:10px">
@@ -2188,7 +2244,7 @@ function drawShnayimList(){
     ${weekKey&&LEYNING[weekKey]?`<div class="sm-week-card" id="smWeekCard">
       <div class="sm-week-icon">${I.scroll}</div>
       <div class="sm-week-text">
-        <div class="sm-week-tag">פרשת השבוע</div>
+        <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ</div>
         <div class="sm-week-name">${parshaName(weekKey)}</div>
       </div>
       <span class="sm-week-chev">${I.chev}</span>
@@ -2197,7 +2253,7 @@ function drawShnayimList(){
     <div id="smRefResult"></div>
     <div class="prayers-list" id="smSearchResults" style="display:none"></div>
     <div class="prayers-list" id="smList">
-      ${books.map(b=>`<div class="prayer-row" data-book="${b}"><span class="prayer-row-title">${stripNik(BOOK_HE_NAMES[b])}</span>${I.chev}</div>`).join('')}
+      ${books.map(b=>`<div class="prayer-row" data-book="${b}"><span class="prayer-row-title">${bookName(b)}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -2240,7 +2296,7 @@ function drawShnayimBookList(){
   app.innerHTML=`
   <div class="topbar" style="justify-content:space-between">
     <button class="icon-btn" id="smBackToBooks">${I.prev}</button>
-    <div class="tb-title gold-text">${stripNik(BOOK_HE_NAMES[book])}</div>
+    <div class="tb-title gold-text">${bookName(book)}</div>
     <div style="width:34px"></div>
   </div>
   <div class="view">
@@ -2413,7 +2469,7 @@ function drawZoharList(){
     </div>`:''}
     <div class="empty-note" style="padding:14px 4px;text-align:center"><div style="font-size:13px;line-height:1.8">מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר</div></div>
     <div class="prayers-list">
-      ${ZOHAR.map(d=>`<div class="prayer-row" data-day="${d.day}"><span class="prayer-row-title">יוֹם ${heNum(d.day)} · ${d.hebDate}${d.day===todayCd?' · הַיּוֹם':''}</span>${done.includes(d.day)?I.check:I.chev}</div>`).join('')}
+      ${ZOHAR.map(d=>`<div class="prayer-row" data-day="${d.day}"><span class="prayer-row-title">יוֹם ${heNum(d.day)} · ${localizeHebDateStr(d.hebDate)}${d.day===todayCd?' · הַיּוֹם':''}</span>${done.includes(d.day)?I.check:I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -2444,7 +2500,7 @@ function renderZoharReader(){
         <div class="reader-title">תִּיקּוּנֵי הַזֹּהַר</div>
         <button class="icon-btn autoscroll-btn" id="zhAutoScroll">${I.play}</button>
       </div>
-      <div class="sm-aliyah-tag">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${entry.hebDate}</div>
+      <div class="sm-aliyah-tag">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${localizeHebDateStr(entry.hebDate)}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
     ${entry.pageCount?`<div class="zh-pdf-embed">
@@ -2555,7 +2611,7 @@ function renderSettings(){
       <div class="yahr-form">
         <input class="yahr-name-in" id="yahrName" placeholder="שֵׁם הַנִּפְטָר / הַנִּפְטֶרֶת"/>
         <div class="yahr-selects">
-          <select id="yahrMonth">${HEB_MONTHS_HE.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}</select>
+          <select id="yahrMonth">${HEB_MONTHS_HE.map((m,i)=>`<option value="${i+1}">${(S.lang&&S.lang!=='he')?(({en:MONTHS_EN,fr:MONTHS_FR,ru:MONTHS_RU,ka:MONTHS_KA}[S.lang]||{})[i+1]||m):m}</option>`).join('')}</select>
           <select id="yahrDay">${[...Array(30)].map((_,i)=>`<option value="${i+1}">${heNum(i+1)}</option>`).join('')}</select>
         </div>
         <button class="btn btn-gold" id="yahrAdd">${I.plus}<span>הוֹסֵף יָאהְרְצַיְיט</span></button>
