@@ -462,7 +462,7 @@ function checkNotification(){
 /* toast */
 .toast{position:fixed;bottom:calc(var(--nav-h) + 20px);left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--panel-solid);border:1px solid var(--line-strong);color:var(--ink);padding:12px 20px;
-  border-radius:999px;font-size:14px;z-index:70;opacity:0;transition:.3s var(--ease);box-shadow:var(--card-shadow);white-space:nowrap}
+  border-radius:999px;font-size:14px;z-index:70;opacity:0;pointer-events:none;transition:.3s var(--ease);box-shadow:var(--card-shadow);white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .hidden{display:none!important}
