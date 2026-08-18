@@ -2716,6 +2716,7 @@ function renderSettings(){
   };
   const nt=document.getElementById('notifTime');
   if(nt) nt.onchange=()=>{ S.notifTime=nt.value; saveS(); };
+  tr(app);
 }
 function toggleTheme(){ S.theme=S.theme==='dark'?'light':'dark'; saveS(); applySettings(); }
 
