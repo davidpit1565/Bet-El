@@ -744,8 +744,8 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @media (prefers-reduced-motion: reduce){.skel-line{animation:none;opacity:.6}}
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
-.sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
-.ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.sm-aliyah-tag{font-family:var(--font-sacred);font-size:19px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:5px;letter-spacing:.01em;line-height:1.5}
+.ck-source{font-family:var(--font-sacred);font-size:15px;font-weight:600;color:var(--gold,#b8963f);opacity:1;text-align:center;letter-spacing:.01em;margin:0 0 10px;padding:0 8px;line-height:1.7}
 .ck-grp{font-family:var(--font-sacred);font-size:12px;color:var(--gold,#b8963f);margin:14px 4px 6px;letter-spacing:.05em}
 .ck-today{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10));cursor:pointer}
 .ck-today-tag{font-family:var(--font-sacred);font-size:11px;color:var(--gold,#b8963f);letter-spacing:.08em}
@@ -758,14 +758,32 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-resume-btns{display:flex;gap:6px}
 .ck-resume-btn{font-family:var(--font-sacred);font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-resume-btn.primary{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
-.ck-teh-head{font-family:var(--font-sacred);font-size:14px;color:var(--gold,#b8963f);text-align:center;margin:14px 0 6px;letter-spacing:.04em}
-.ck-comm-bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
-.ck-comm-btn{font-family:var(--font-sacred);font-size:12px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
+.sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
+.sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
+.sm-aliyah-chip.ck-arrow:disabled{opacity:.3}
+.ck-partial{font-size:12px;font-weight:400;opacity:.75}
+.ck-comm-none{opacity:.6;font-size:14px}
+.ck-daynav-wrap{display:flex;align-items:center;gap:6px;margin:0 0 8px}
+.ck-daynav{flex:1;min-width:0;overflow-x:auto;padding:2px 2px 0;justify-content:flex-start}
+.ck-daynav-wrap .ck-arrow{flex:none}
+.sm-aliyah-chip.ck-daychip{min-width:38px;font-family:var(--font-sacred);font-size:14px}
+.ck-viewdate{font-family:var(--font-sacred);font-size:12px;color:var(--muted);text-align:center;margin:0 0 8px;opacity:.85}
+.ck-yearbar{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 12px}
+.ck-yr-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line-strong);background:var(--panel);color:var(--ink-soft);cursor:pointer}
+.ck-yr-btn svg{width:16px;height:16px}
+.ck-yr-btn:disabled{opacity:.3;cursor:default}
+.ck-yr-now{font-family:var(--font-sacred);font-size:13px;color:var(--gold,#b8963f)}
+.sm-verse-row.ck-nonum{padding-right:0}
+.ck-comm-body{font-size:16px;line-height:2.05;margin-bottom:8px}
+.ck-comm-body:last-child{margin-bottom:0}
+.ck-teh-head{font-family:var(--font-sacred);font-size:18px;font-weight:700;color:var(--gold,#b8963f);text-align:center;margin:20px 0 10px;letter-spacing:.03em}
+.ck-comm-bar{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0 2px}
+.ck-comm-btn{font-family:var(--font-sacred);font-size:15px;font-weight:600;padding:6px 18px;border-radius:999px;border:1.5px solid var(--gold,#b8963f);background:transparent;color:var(--gold,#b8963f);cursor:pointer;transition:.15s}
 .ck-comm-btn.on{background:var(--gold-soft,rgba(190,150,70,.14));color:var(--ink);border-color:var(--gold,#b8963f)}
 .ck-comm-panel{display:none}
 .ck-comm-panel.open{display:block;margin:8px 0 2px;padding:10px 12px;border-radius:10px;background:var(--card-2,rgba(0,0,0,.03));border:1px solid var(--line)}
-.ck-comm-title{font-family:var(--font-sacred);font-size:12px;color:var(--gold,#b8963f);margin-bottom:6px}
-.ck-comm-text{font-family:var(--font-sacred);font-size:15px;line-height:2;margin-bottom:8px}
+.ck-comm-title{font-family:var(--font-sacred);font-size:15px;font-weight:700;color:var(--gold,#b8963f);margin-bottom:8px}
+.ck-comm-text{font-family:var(--font-sacred);font-size:16px;line-height:2.05;margin-bottom:10px}
 .ck-comm-text:last-child{margin-bottom:0}
 .sm-aliyah-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .sm-aliyah-nav::-webkit-scrollbar{display:none}
@@ -1528,20 +1546,56 @@ function ensureChokIndex(){
   return chokLoadPromise;
 }
 function chokSlug(en){ return en.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+/* Seven weeks of the year read two parshiot at once. Chok LeYisrael has a
+   week of study for each of them, so a doubled week is both: the tracks tied
+   to the parasha run one after the other, while the tracks that go by the
+   calendar - Tehillim, Rambam, Zohar, the daf - run once, as on any day. */
+function ckSplitPair(key){
+  const i=(key||'').lastIndexOf('-');
+  return i>0 ? [key.slice(0,i), key.slice(i+1)] : [key];
+}
+function ckKeysOf(key){
+  if(!key||!CHOK) return [];
+  if(CHOK.schedule[key]) return [key];
+  return ckSplitPair(key).filter(k=>CHOK.schedule[k]);
+}
+function ckWeekReady(key){ const ks=ckKeysOf(key); return ks.length>0 && ks.every(k=>CHOK_WEEK[k]); }
 function ensureChokWeek(key){
-  if(CHOK_WEEK[key]) return Promise.resolve();
-  return fetch('data/chok-leyisrael/'+chokSlug(key)+'.json').then(r=>r.json())
-    .then(d=>{ CHOK_WEEK[key]=d; });
+  return ensureChokIndex().then(()=>Promise.all(ckKeysOf(key).map(k=>{
+    if(CHOK_WEEK[k]) return null;
+    return fetch('data/chok-leyisrael/'+chokSlug(k)+'.json').then(r=>r.json())
+      .then(d=>{ CHOK_WEEK[k]=d; });
+  })));
 }
 function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
-    .then(()=>ensureCycDay(currentHDate()));
+    .then(()=>ensureCycDay(ckViewHDate()));
+}
+/* A few weeks of the year have no weekly parasha of their own - the Shabbat
+   of Chol HaMoed. Chok LeYisrael does not pause for them: it goes on to the
+   portion after the one last read, which is how וְזֹאת הַבְּרָכָה is reached
+   between Ha'azinu and Bereshit. */
+function ckWeekKeyFor(dd){
+  const k=parshaKeyForDate(dd);
+  if(k) return k;
+  if(!CHOK) return null;
+  // count forward to the next week that has one and step back through the
+  // list, so the week that runs into Simchat Torah is וְזֹאת הַבְּרָכָה
+  for(let w=1;w<=5;w++){
+    const next=parshaKeyForDate(addDays(dd,7*w));
+    if(!next) continue;
+    const ks=ckKeysOf(next), first=ks[0]||next;
+    const i=CHOK.parshiot.indexOf(first);
+    if(i>=0){ const n=CHOK.parshiot.length; return CHOK.parshiot[((i-w)%n+n)%n]; }
+  }
+  return null;
 }
 /* which parsha week and which weekday slot the given civil date falls in */
 function chokSlotFor(dateObj){
-  const key=parshaKeyForDate(dateObj);
-  if(!key||!CHOK||!CHOK.schedule[key]) return null;
-  const d=dateObj.getDay();               // 0=Sun .. 6=Sat
+  const dd = dateObj || chokDayDate();
+  const key=ckWeekKeyFor(dd);
+  if(!key||!CHOK||!ckKeysOf(key).length) return null;
+  const d=dd.getDay();                    // 0=Sun .. 6=Sat
   if(d===6) return null;                  // Shabbat has no Chok LeYisrael portion
   return {key, day:CHOK_DAYS[d], dayIdx:d};
 }
@@ -1580,6 +1634,10 @@ function chokBundleSegs(key,refs){
   return out;
 }
 /* same segments, but carried as verses so a commentary can hang off each one */
+function ckTargumFor(book,c,v){
+  const t=((ckCommFor(book+' '+c+':'+v))||{}).targum;
+  return (t&&t.length)?t.join(' '):null;
+}
 function chokVerseSegs(key,refs){
   const b=CHOK_WEEK[key]||{}, out=[];
   (refs||[]).forEach(r=>{
@@ -1588,7 +1646,7 @@ function chokVerseSegs(key,refs){
     if(!p){ segs.forEach(t=>out.push({he:t})); return; }
     let c=p.c1, v=p.v1;
     segs.forEach(t=>{
-      out.push({book:p.book, c, v, he:t});
+      out.push({book:p.book, c, v, he:t, targum:ckTargumFor(p.book,c,v)});
       v++;
       if(c<p.c2 && v>(HAFTARAH&&HAFTARAH[p.book]&&HAFTARAH[p.book][c]?HAFTARAH[p.book][c].length:0)){ c++; v=1; }
     });
@@ -1596,59 +1654,139 @@ function chokVerseSegs(key,refs){
   return out;
 }
 /* The app's own daily Tehillim portion, read in its place inside the order. */
-function chokTehillimVerses(){
+function chokTehillimVerses(hd){
   const T=window.TEHILLIM; if(!T) return [];
   const out=[];
-  chaptersOf(portionFor(currentHDate())).forEach(ch=>{
+  chaptersOf(portionFor(hd||chokDayHDate())).forEach(ch=>{
     (T[ch]||[]).forEach((he,i)=>out.push({ch, v:i+1, he}));
   });
   return out;
 }
 
+/* a commentary presented as its own section, each comment under the verse it
+   belongs to, rather than folded into the verse's bar */
+function chokCommVerses(verses, who){
+  const out=[];
+  (verses||[]).forEach(v=>{
+    if(!v.book||!v.c||!v.v) return;
+    const segs=((ckCommFor(v.book+' '+v.c+':'+v.v))||{})[who];
+    if(segs&&segs.length) out.push({c:v.c, v:v.v, book:v.book, segs});
+  });
+  return out;
+}
+
+/* Sections that are continuous prose rather than numbered units. The Zohar is
+   read as a running page, not as lettered pieces. */
+const CK_NO_NUM={zohar:1, musar:1};
+
 /* the sections shown for a given weekday, in study order */
 function chokSectionsFor(key,day){
-  const wk=CHOK.schedule[key];
+  const keys=ckKeysOf(key);
+  if(!keys.length) return [];
+  const hd=ckViewHDate(), my=chokMishnahYear(hd);
   if(day==='night'){
-    const t=chokTorahVerses(wk.night&&wk.night.tzeruf);
-    return t.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items:t,kind:'torah',refs:(wk.night&&wk.night.tzeruf)||[]}]:[];
+    let items=[], refs=[];
+    keys.forEach(k=>{
+      const t=((CHOK.schedule[k]||{}).night||{}).tzeruf;
+      refs=refs.concat(t||[]); items=items.concat(chokTorahVerses(t));
+    });
+    return items.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items,kind:'torah',refs}]:[];
   }
-  const d=wk[day];
-  const hd=currentHDate(), my=chokMishnahYear(hd);
-  const list=[];
-  const wkb=CHOK_WEEK[key]||{}, lab=wkb._labels||{}, mrf=wkb._mrefs||{};
-  const joinFor=(map,refs)=>{ let o=[]; (refs||[]).forEach(r=>{ if(map[r]) o=o.concat(map[r]); }); return o.length?o:null; };
-  const push=(k,he,items,kind,note,refs)=>{ if(items&&items.length) list.push({key:k,he,items,kind,note,refs:refs||[],tags:joinFor(lab,refs),ids:joinFor(mrf,refs)}); };
-  push('torah','תּוֹרָה', chokTorahVerses(d.torah), 'torah', null, d.torah);
-  if(day==='fri'){
-    const h=(d.haftarah_seph||[])[0];
-    if(h) push('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah);
+  const list=[], slot={};
+  /* one section per kind, however many parshiot feed it */
+  const add=(k,he,items,kind,note,refs,pk)=>{
+    if(!items||!items.length) return;
+    const wkb=CHOK_WEEK[pk]||{}, lab=wkb._labels||{}, mrf=wkb._mrefs||{};
+    const joinFor=map=>{
+      let o=[]; (refs||[]).forEach(r=>{ if(map[r]) o=o.concat(map[r]); });
+      if(!o.length) return null;
+      while(o.length<items.length) o.push('');
+      return o.slice(0,items.length);
+    };
+    const tags=joinFor(lab), ids=joinFor(mrf);
+    const ex=slot[k];
+    if(ex){
+      const pad=a=>{ while(a.length<ex.items.length) a.push(''); return a; };
+      if(tags||ex.tags) ex.tags=pad(ex.tags||[]).concat(tags||new Array(items.length).fill(''));
+      if(ids||ex.ids)   ex.ids =pad(ex.ids ||[]).concat(ids ||new Array(items.length).fill(''));
+      ex.items=ex.items.concat(items);
+      ex.refs=(ex.refs||[]).concat(refs||[]);
+      return;
+    }
+    const e={key:k,he,items,kind,note,refs:(refs||[]).slice(),tags,ids};
+    slot[k]=e; list.push(e);
+  };
+  keys.forEach(pk=>{
+    const d=(CHOK.schedule[pk]||{})[day];
+    if(!d) return;
+    const tv=chokTorahVerses(d.torah);
+    add('torah','תּוֹרָה', tv, 'torah', null, d.torah, pk);
+    add('ohc','אוֹר הַחַיִּים', chokCommVerses(tv,'ohc'), 'comm', null, d.torah, pk);
+    if(day==='fri'){
+      const h=(d.haftarah_seph||[])[0];
+      if(h) add('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah, pk);
+    } else {
+      add('neviim','נְבִיאִים', chokVerseSegs(pk,d.neviim), 'verse', null, d.neviim, pk);
+      add('ketuvim','כְּתוּבִים', chokVerseSegs(pk,d.ketuvim), 'verse', null, d.ketuvim, pk);
+    }
+  });
+  add('tehillim','תְּהִלִּים', chokTehillimVerses(hd), 'tehillim', null, [], keys[0]);
+  keys.forEach(pk=>{
+    const d=(CHOK.schedule[pk]||{})[day];
+    if(!d) return;
+    const mref=(d.mishnah_cycle||[])[my]||[];
+    add('mishnah','מִשְׁנָה', chokBundleSegs(pk,mref), 'text', null, mref, pk);
+  });
+  if(CYC&&CYC.daf){
+    const gi=ckCycleIndex(CYC.daf,hd), items=ckDafItems(gi);
+    if(items.length) list.push({key:'gemara',he:'גְּמָרָא',kind:'daf',items,refs:[],dIdx:gi});
   } else {
-    push('neviim','נְבִיאִים', chokVerseSegs(key,d.neviim), 'verse', null, d.neviim);
-    push('ketuvim','כְּתוּבִים', chokVerseSegs(key,d.ketuvim), 'verse', null, d.ketuvim);
+    keys.forEach(pk=>{
+      const d=(CHOK.schedule[pk]||{})[day];
+      if(d) add('gemara','גְּמָרָא', chokBundleSegs(pk,d.gemara), 'text', null, d.gemara, pk);
+    });
   }
-  push('tehillim','תְּהִלִּים', chokTehillimVerses(), 'tehillim');
-  const mref=(d.mishnah_cycle||[])[my]||[];
-  push('mishnah','מִשְׁנָה', chokBundleSegs(key,mref), 'text', null, mref);
-  push('gemara','גְּמָרָא', chokBundleSegs(key,d.gemara), 'text', null, d.gemara);
   if(CYC){
     const zi=ckCycleIndex(CYC.zohar,hd);
-    push('zohar','זֹהַר', ckCycleSegs('zohar',zi), 'text');
+    add('zohar','זֹהַר', ckCycleSegs('zohar',zi), 'text', null, [], keys[0]);
     const ri=ckRambamIndexes(hd);
     let rs=[]; ri.forEach(i=>{ rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))); });
     if(rs.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'rambam',items:rs,refs:[],rIdx:ri});
   } else {
-    push('zohar','זֹהַר', chokBundleSegs(key,d.zohar), 'text', null, d.zohar);
-    push('halacha','הֲלָכָה', chokBundleSegs(key,d.halacha), 'text', null, d.halacha);
+    keys.forEach(pk=>{
+      const d=(CHOK.schedule[pk]||{})[day];
+      if(!d) return;
+      add('zohar','זֹהַר', chokBundleSegs(pk,d.zohar), 'text', null, d.zohar, pk);
+      add('halacha','הֲלָכָה', chokBundleSegs(pk,d.halacha), 'text', null, d.halacha, pk);
+    });
   }
-  push('musar','מוּסָר', chokBundleSegs(key,d.musar), 'text', 'אֵין מַהֲדוּרָה מְנֻקֶּדֶת', d.musar);
+  keys.forEach(pk=>{
+    const d=(CHOK.schedule[pk]||{})[day];
+    if(d) add('musar','מוּסָר', chokBundleSegs(pk,d.musar), 'text', 'אֵין מַהֲדוּרָה מְנֻקֶּדֶת', d.musar, pk);
+  });
   return list;
 }
 
 /* ---------- source labels ---------- */
 /* Sefaria's heTitle carries the work's own name; the framing words are ours. */
+/* The names of the works carry nikud, so a prefix is matched on the letters
+   alone and then cut from the pointed string, vowels and all. The maqaf is
+   left out of the marks - it separates words, as in כִּי־תֵצֵא. */
+const CK_NIK=/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g;
+function ckBare(x){ return (x||'').replace(CK_NIK,''); }
+function ckCutPrefix(s,bare){
+  if(ckBare(s).indexOf(bare)!==0) return s;
+  let seen=0, i=0;
+  while(i<s.length && seen<bare.length){ if(!s[i].match(CK_NIK)) seen++; i++; }
+  while(i<s.length && s[i].match(CK_NIK)) i++;
+  return s.slice(i).replace(/^\s+/,'');
+}
 function chokWorkName(base){
-  const n=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||base;
-  return n.replace(/^משנה תורה,\s*/,'').replace(/^משנה\s+/,'').replace(/^ספר הזהר$/,'זֹהַר');
+  let n=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||base;
+  if(ckBare(n)==='ספר הזהר') return 'זֹהַר';
+  n=ckCutPrefix(n,'משנה תורה,');
+  n=ckCutPrefix(n,'משנה ');
+  return n;
 }
 const CK_DASH='־';
 function ckRange(a,b){ return a===b?heNum(a):heNum(a)+CK_DASH+heNum(b); }
@@ -1696,7 +1834,7 @@ function chokRefLabel(ref, sec){
     const base=m[1];
     if(sec==='zohar'){
       const he=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||'';
-      const name=(!he||/^ספר הזהר$/.test(he))?base.replace(/^Zohar( Chadash)?,?\s*/,''):he;
+      const name=(!he||ckBare(he)==='ספר הזהר')?base.replace(/^Zohar( Chadash)?,?\s*/,''):he;
       const pre=/^Zohar Chadash/.test(base)?'זֹהַר חָדָשׁ · ':'זֹהַר · ';
       return pre+name+' · '+ckRange(+m[2], m[3]?+m[3]:+m[2]);
     }
@@ -1705,10 +1843,18 @@ function chokRefLabel(ref, sec){
   return ref;
 }
 function chokSourceLine(sec){
-  if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,currentHDate()));
+  if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,ckViewHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
+  if(CYC&&sec.kind==='daf'){
+    const rec=ckDafRec(sec.dIdx)||{};
+    return ckDafLabel(sec.dIdx)+(rec.src?'  ·  '+rec.src:'');
+  }
+  if(sec.kind==='comm'){
+    const refs=(sec.refs||[]).map(r=>chokRefLabel(r,'torah')).filter(Boolean);
+    return (refs.length?refs.join('  ·  '):'');
+  }
   if(sec.key==='tehillim'){
-    const r=portionFor(currentHDate());
+    const r=portionFor(ckViewHDate());
     return 'סֵפֶר תְּהִלִּים · '+(r[0]===r[1]?'פֶּרֶק '+heNum(r[0]):'פְּרָקִים '+heNum(r[0])+CK_DASH+heNum(r[1]));
   }
   const refs=(sec.refs||[]).map(r=>chokRefLabel(r,sec.key)).filter(Boolean);
@@ -1719,18 +1865,64 @@ function chokSourceLine(sec){
 /* Opens under the verse it belongs to, on the same screen. One panel per row;
    tapping the open commentary again closes it. */
 const CK_COMM = {
-  rashi: {he:'רַשִׁ״י',        on:['torah','neviim','ketuvim','haftarah','tzeruf']},
-  ohc:   {he:'אוֹר הַחַיִּים', on:['torah','tzeruf']},
-  bart:  {he:'בַּרְטֶנוּרָא',  on:['mishnah']},
+  rashi:  {he:'רַשִׁ״י',           on:['torah','neviim','ketuvim','haftarah','tzeruf']},
+  mdavid: {he:'מְצוּדַת דָּוִד',   on:['neviim','ketuvim','haftarah'], partial:1},
+  mzion:  {he:'מְצוּדַת צִיּוֹן',  on:['neviim','ketuvim','haftarah'], partial:1},
+  bart:   {he:'בַּרְטֶנוּרָא',     on:['mishnah']},
+  steinsaltz: {he:'בֵּאוּר שְׁטַיינְזַלְץ', on:['gemara'], partial:1, daf:1},
+  dashi:      {he:'רַשִׁ״י',                on:['gemara'], partial:1, daf:1},
 };
-function ckCommFor(id){ return ((CHOK_WEEK[CK.key]||{})._comm||{})[id]||null; }
+/* Steinsaltz and Rashi come from the daf's own blocks, not the week's bundle,
+   and three tractates call the commentary beside them by another name. */
+const CK_DAF_W={steinsaltz:'steinsaltz', dashi:'rashi'};
+function ckDafId(id){
+  const m=/^daf:(\d+):([ab]):(\d+)$/.exec(id||'');
+  return m?{i:+m[1], side:m[2], ix:+m[3]}:null;
+}
+function ckDafCommFor(id){
+  const a=ckDafId(id); if(!a) return null;
+  const rec=(DAF_C[ckDafBlock(a.i)]||{})[String(a.i)];
+  if(!rec) return null;
+  const out={};
+  const st=((rec.steinsaltz||{})[a.side]||[])[a.ix];
+  if(st) out.steinsaltz=[st];
+  const rs=((rec.rashi||{})[a.side]||[])[a.ix];
+  if(rs&&rs.length) out.dashi=rs;
+  return out;
+}
+function ckCommLabel(w,id){
+  const a=ckDafId(id);
+  if(a){
+    const rec=ckDafRec(a.i)||{};
+    const lbl=(rec.lbl||{})[CK_DAF_W[w]];
+    if(lbl) return lbl;
+  }
+  return CK_COMM[w].he;
+}
+function ckCommFor(id){
+  if(/^daf:/.test(id||'')) return ckDafCommFor(id);
+  // a doubled week keeps a bundle per parasha, so look in each of them
+  const ks=ckKeysOf(CK.key);
+  for(let i=0;i<ks.length;i++){
+    const c=((CHOK_WEEK[ks[i]]||{})._comm||{})[id];
+    if(c) return c;
+  }
+  return null;
+}
 function ckCommBar(id, sec){
-  const c=ckCommFor(id);
-  if(!c) return '';
-  const btns=Object.keys(CK_COMM).filter(w=>CK_COMM[w].on.indexOf(sec)>=0 && (c[w]||[]).length);
+  let btns;
+  if(/^daf:/.test(id||'')){
+    const a=ckDafId(id), rec=a?ckDafRec(a.i):null;
+    // the daf's commentary is not loaded yet, so offer whatever the page has
+    btns=Object.keys(CK_COMM).filter(w=>CK_COMM[w].daf && (!rec||!rec.no||rec.no.indexOf(CK_DAF_W[w])<0));
+  } else {
+    const c=ckCommFor(id);
+    if(!c) return '';
+    btns=Object.keys(CK_COMM).filter(w=>!CK_COMM[w].daf && CK_COMM[w].on.indexOf(sec)>=0 && (c[w]||[]).length);
+  }
   if(!btns.length) return '';
   return `<div class="ck-comm-bar">${btns.map(w=>
-    `<button class="ck-comm-btn" data-id="${id}" data-w="${w}">${CK_COMM[w].he}</button>`).join('')}</div>
+    `<button class="ck-comm-btn" data-id="${id}" data-w="${w}">${ckCommLabel(w,id)}</button>`).join('')}</div>
     <div class="ck-comm-panel" data-panel="${id}"></div>`;
 }
 function ckToggleComm(btn){
@@ -1741,14 +1933,56 @@ function ckToggleComm(btn){
   const already = panel.dataset.open===w;
   bar.querySelectorAll('.ck-comm-btn').forEach(b=>b.classList.remove('on'));
   if(already){ panel.innerHTML=''; panel.dataset.open=''; panel.classList.remove('open'); return; }
-  const segs=(ckCommFor(id)||{})[w]||[];
-  panel.innerHTML=`<div class="ck-comm-title">${CK_COMM[w].he}</div>`+
-    segs.map(t=>`<div class="ck-comm-text">${t}</div>`).join('');
-  panel.dataset.open=w; panel.classList.add('open');
-  btn.classList.add('on');
-  tr(panel);
+  const draw=()=>{
+    const segs=(ckCommFor(id)||{})[w]||[];
+    const title=`<div class="ck-comm-title">${ckCommLabel(w,id)}${CK_COMM[w].partial?' <span class="ck-partial">· מְנֻקָּד חֶלְקִית</span>':''}</div>`;
+    panel.innerHTML=title+(segs.length
+      ? segs.map(t=>`<div class="ck-comm-text">${t}</div>`).join('')
+      : `<div class="ck-comm-text ck-comm-none">אֵין כָּאן פֵּרוּשׁ עַל הַקֶּטַע הַזֶּה</div>`);
+    panel.dataset.open=w; panel.classList.add('open');
+    btn.classList.add('on');
+    tr(panel);
+  };
+  const a=ckDafId(id);
+  if(a && !DAF_C[ckDafBlock(a.i)]){
+    panel.innerHTML='<div class="ck-comm-text ck-comm-none">טוֹעֵן…</div>';
+    panel.classList.add('open');
+    ensureDafComm(a.i).then(()=>{ if(app.contains(panel)) draw(); });
+    return;
+  }
+  draw();
 }
 
+
+
+/* ---------- the quick-tools button, on every screen ---------- */
+/* Font size, light/dark, auto-scroll and home. It already existed inside the
+   Tehillim reader; this is the same control, lifted out so every page has it. */
+function toolsFab(opts){
+  opts=opts||{};
+  return `<div class="reader-tools collapsed" id="gTools">
+    <button class="rt-fab" id="gFab">${I.text}</button>
+    <div class="rt-panel">
+      <button id="gMinus">${I.aminus}</button>
+      <div class="fs-val" id="gFs">${Math.round(S.fontScale*100)}</div>
+      <button id="gPlus">${I.aplus}</button>
+      <div class="sep"></div>
+      <button id="gTheme">${S.theme==='dark'?I.sun:I.moon}</button>
+      ${opts.scroll?`<button class="autoscroll-btn" id="gAutoScroll">${I.play}</button>`:''}
+      <button id="gHome">${I.home}</button>
+    </div>
+  </div>`;
+}
+function wireToolsFab(){
+  const box=document.getElementById('gTools'); if(!box) return;
+  const fab=document.getElementById('gFab');
+  if(fab) fab.onclick=()=>box.classList.toggle('collapsed');
+  const mi=document.getElementById('gMinus'); if(mi) mi.onclick=()=>{ changeFont(-0.1); const v=document.getElementById('gFs'); if(v) v.textContent=Math.round(S.fontScale*100); };
+  const pl=document.getElementById('gPlus');  if(pl) pl.onclick=()=>{ changeFont(0.1);  const v=document.getElementById('gFs'); if(v) v.textContent=Math.round(S.fontScale*100); };
+  const th=document.getElementById('gTheme'); if(th) th.onclick=()=>{ toggleTheme(); th.innerHTML=S.theme==='dark'?I.sun:I.moon; };
+  const as=document.getElementById('gAutoScroll'); if(as) as.onclick=e=>toggleAutoScroll(e.currentTarget);
+  const hm=document.getElementById('gHome'); if(hm) hm.onclick=()=>go('home');
+}
 
 /* ---------- the date-driven cycles: Rambam and Zohar ---------- */
 /* Both run by the calendar, Shabbat included, so their position is a day count
@@ -1765,14 +1999,71 @@ function ensureCycBlock(kind,b){
   if(CYC_BLOCK[k]) return Promise.resolve();
   return fetch('data/chok-'+kind+'/'+b+'.json').then(r=>r.json()).then(d=>{ CYC_BLOCK[k]=d; });
 }
+/* The daf is what the day needs; Steinsaltz and Rashi sit behind a button, so
+   they are only fetched once a button is pressed. */
+let DAF_C={}, dafCPending={};
+function ckDafBlock(i){ return Math.floor(i/(CYC.daf.block||20)); }
+function ensureDafComm(i){
+  const b=ckDafBlock(i);
+  if(DAF_C[b]) return Promise.resolve();
+  if(!dafCPending[b]) dafCPending[b]=fetch('data/chok-daf-c/'+b+'.json').then(r=>r.json())
+    .then(d=>{ DAF_C[b]=d; }).catch(()=>{ DAF_C[b]={}; });
+  return dafCPending[b];
+}
 /* absolute day number of a yyyy-mm-dd anchor, so the offset is plain arithmetic */
 function ckAbsOf(iso){
   const [y,m,d]=iso.split('-').map(Number);
   return new HDate(new Date(y,m-1,d)).abs();
 }
+/* Chok LeYisrael turns over at sunrise - not at sunset, which is when the
+   Hebrew date rolls, and not at midnight. Before netz the day still belongs to
+   the portion just gone, so every section of it counts days from netz. */
+function chokDayDate(){
+  const now=new Date(), base=civilToday();
+  try{
+    const nz=zmanimFor(base).sunrise();
+    if(nz && now < nz) return addDays(base,-1);
+  }catch(e){}
+  return base;
+}
+function chokDayHDate(){ return new HDate(chokDayDate()); }
+/* Reading Tuesday's portion on a Thursday should show Tuesday's Zohar, and
+   reading a parasha of another year should show that year's. So the cycles
+   are asked about the day on the screen, not about today: the parasha and
+   the weekday give the date, and the year says which time round. */
+function ckCurYear(){ return chokDayHDate().getFullYear(); }
+function ckWeekSunday(key,hyear){
+  try{
+    const il=/Jerusalem/.test(LOC.tz);
+    const start=new HDate(1,7,hyear).greg(), end=new HDate(1,7,hyear+1).greg();
+    const evs=HebrewCalendar.calendar({start,end,sedrot:true,il,location:hebLocation()});
+    for(const e of evs){
+      const desc=e.getDesc?e.getDesc():'';
+      if(!/^Parashat /.test(desc)) continue;
+      const k=desc.replace('Parashat ','').trim();
+      if(k===key || ckSplitPair(k).indexOf(key)>=0){
+        const sat=e.getDate().greg();
+        const sun=new Date(sat.getFullYear(),sat.getMonth(),sat.getDate()-6);
+        return sun;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+function ckViewDate(){
+  if(!CK.key) return chokDayDate();
+  const y=CK.year||ckCurYear();
+  // a week can straddle Rosh Hashanah, so look either side before giving up
+  const sun=ckWeekSunday(CK.key,y)||ckWeekSunday(CK.key,y+1)||ckWeekSunday(CK.key,y-1);
+  if(!sun) return chokDayDate();
+  const di = CK.day==='night' ? 4 : Math.max(0, CHOK_DAYS.indexOf(CK.day));
+  return addDays(sun,di);
+}
+function ckViewHDate(){ return new HDate(ckViewDate()); }
+function ckCivilAbs(){ return chokDayHDate().abs(); }
 function ckCycleIndex(cfg,hd){
   const n=cfg.order.length;
-  const i=cfg.anchorIndex + (hd.abs() - ckAbsOf(cfg.anchorDate));
+  const i=cfg.anchorIndex + ((hd?hd.abs():ckCivilAbs()) - ckAbsOf(cfg.anchorDate));
   return ((i%n)+n)%n;                       // the cycle simply starts again
 }
 function ckBlockOf(i){ return Math.floor(i/CYC.block); }
@@ -1781,15 +2072,16 @@ function ckBlockOf(i){ return Math.floor(i/CYC.block); }
 function ckRambamTrack(){ return S.rambamTrack==='year' ? 3 : 1; }
 function ckRambamIndexes(hd){
   const cfg=CYC.rambam, per=ckRambamTrack(), n=cfg.order.length;
-  const day=ckCycleIndex({order:cfg.order,anchorIndex:cfg.anchorIndex,anchorDate:cfg.anchorDate},hd);
-  const start=per===1 ? day : (day*3)%n;
+  const elapsed = (hd?hd.abs():ckCivilAbs()) - ckAbsOf(cfg.anchorDate);
+  const base = per===1 ? cfg.anchorIndex : (cfg.anchorIndex3!=null?cfg.anchorIndex3:cfg.anchorIndex);
+  const start = ((base + elapsed*per) % n + n) % n;
   const out=[];
   for(let k=0;k<per;k++) out.push((start+k)%n);
   return out;
 }
 function ckRambamName(book){
   const he=(CYC.rambam.heNames||{})[book]||book;
-  return he.replace(/^משנה תורה,\s*/,'');
+  return ckCutPrefix(he,'משנה תורה,');
 }
 function ckRambamLabel(idxs){
   return idxs.map(i=>{
@@ -1797,11 +2089,35 @@ function ckRambamLabel(idxs){
     return ckRambamName(e.book)+' · פֶּרֶק '+heNum(e.ch);
   }).join('  ·  ');
 }
+/* Daf Yomi HaOlami: a whole daf a day, in the order of the Shas, from the
+   published cycle. Three of its tractates are not Bavli - Shekalim is learnt
+   from the Yerushalmi, Kinnim and Middot are Mishnah - and those carry their
+   own source line and their own name for the commentary beside them. */
+function ckDafEntry(i){ return CYC.daf.order[i]; }
+function ckDafRec(i){ return (CYC_BLOCK['daf/'+ckDafBlock(i)]||{})[String(i)]||null; }
+function ckDafName(t){ return (CYC.daf.heNames||{})[t]||t; }
+const CK_AMUD={a:'ע״א', b:'ע״ב'};
+function ckDafLabel(i){
+  const e=ckDafEntry(i);
+  return 'מַסֶּכֶת '+ckDafName(e.t)+' · דַּף '+heNum(e.daf);
+}
+/* every segment of the day, each carrying the address its commentary hangs on */
+function ckDafItems(i){
+  const rec=ckDafRec(i); if(!rec) return [];
+  const e=ckDafEntry(i), out=[];
+  ['a','b'].forEach(side=>{
+    const segs=(rec.g||{})[side]; if(!segs||!segs.length) return;
+    // Shekalim, Kinnim and Middot are not divided into amudim
+    if(!e.whole) out.push({head:'דַּף '+heNum(e.daf)+' · '+CK_AMUD[side]});
+    segs.forEach((t,ix)=>out.push({t, id:'daf:'+i+':'+side+':'+ix, n:ix+1}));
+  });
+  return out;
+}
 /* Zohar: one Vilna amud a day, named by volume, daf and side */
 function ckZoharLabel(i){
   const e=CYC.zohar.order[i];
   const part=(CYC.zohar.heParts||{})[e.part]||e.part;
-  const vol=['','א','ב','ג'][e.vol]||e.vol;
+  const vol=['','א׳','ב׳','ג׳'][e.vol]||e.vol;
   let s='זֹהַר · '+part+' · חֵלֶק '+vol+' · דַּף '+heNum(e.daf)+' · '+e.side;
   if(e.split) s+='  ·  '+heNum(e.split[0])+' מִתּוֹךְ '+heNum(e.split[1]);
   return s;
@@ -1812,12 +2128,23 @@ function ckCycleSegs(kind,i){
   const ref=CYC.rambam.order[i].ref;
   return b[ref]||[];
 }
+/* whether the blocks this day needs are already here - moving to another day
+   of the week, or to another year, moves the cycles with it, and the reader
+   must wait for those blocks before it draws */
+function ckCycReady(hd){
+  if(!CYC) return false;
+  hd=hd||ckViewHDate();
+  if(CYC.daf && !CYC_BLOCK['daf/'+ckDafBlock(ckCycleIndex(CYC.daf,hd))]) return false;
+  if(!CYC_BLOCK['zohar/'+ckBlockOf(ckCycleIndex(CYC.zohar,hd))]) return false;
+  return ckRambamIndexes(hd).every(i=>CYC_BLOCK['rambam/'+ckBlockOf(i)]);
+}
 /* load exactly the blocks the day needs */
 function ensureCycDay(hd){
   return ensureCycles().then(()=>{
     const need=new Set();
     ckRambamIndexes(hd).forEach(i=>need.add('rambam/'+ckBlockOf(i)));
     need.add('zohar/'+ckBlockOf(ckCycleIndex(CYC.zohar,hd)));
+    if(CYC.daf) need.add('daf/'+ckDafBlock(ckCycleIndex(CYC.daf,hd)));
     return Promise.all([...need].map(k=>{
       const [kind,b]=k.split('/');
       return ensureCycBlock(kind,+b);
@@ -1886,6 +2213,12 @@ function ckNorm(x){
     .replace(/[־\-:.,·]/g,' ')
     .replace(/\s+/g,' ').trim();
 }
+/* Nikud sources spell some names defectively - חֻלִּין where a search typed
+   plene would read חולין - so a word of three letters or more is also matched
+   with its ו stripped from both sides, which brings the two spellings
+   together. The י is left alone: it also marks tens in a numeral (קי״ט,
+   ק״ט), and dropping it would let a chapter search match the wrong chapter. */
+function ckSkel(s){ return (s||'').replace(/ו/g,''); }
 /* Hebrew numeral -> number, so "פרק י" and "פרק 10" both work */
 const CK_GEM={א:1,ב:2,ג:3,ד:4,ה:5,ו:6,ז:7,ח:8,ט:9,י:10,כ:20,ל:30,מ:40,נ:50,ס:60,ע:70,פ:80,צ:90,ק:100,ר:200,ש:300,ת:400};
 function ckNum(tok){
@@ -1916,6 +2249,13 @@ function ckBuildIndex(){
             label:chokRefLabel(r,'mishnah'), group:'מִשְׁנָה',
             s:ckNorm('משנה '+chokRefLabel(r,'mishnah')), key:k, day:d});
         }));
+        // Reshit Chokhmah, by gate and chapter
+        ((CHOK.schedule[k][d]||{}).musar||[]).forEach(r=>{
+          if(seen[r]) return; seen[r]=1;
+          const lab=chokRefLabel(r,'musar');
+          out.push({t:'unit', kind:'musar', ref:r, label:lab, group:'מוּסָר',
+            s:ckNorm('מוסר ראשית חכמה '+lab), key:k, day:d});
+        });
       });
     });
   }
@@ -1923,9 +2263,15 @@ function ckBuildIndex(){
     CYC.rambam.order.forEach((e,i)=>out.push({t:'unit', kind:'rambam', i,
       label:ckRambamName(e.book)+' · פֶּרֶק '+heNum(e.ch), group:'רַמְבַּ״ם',
       s:ckNorm('רמבם רמב״ם משנה תורה '+((CYC.rambam.sefarim||{})[e.book]||'')+' '+ckRambamName(e.book)+' פרק '+e.ch+' '+heNum(e.ch))}));
+    if(CYC.daf) CYC.daf.order.forEach((e,i)=>{
+      const nm=ckDafName(e.t);
+      out.push({t:'unit', kind:'daf', i,
+        label:'מַסֶּכֶת '+nm+' · דַּף '+heNum(e.daf), group:'גְּמָרָא',
+        s:ckNorm('גמרא תלמוד דף יומי מסכת '+nm+' דף '+e.daf+' '+heNum(e.daf))});
+    });
     CYC.zohar.order.forEach((e,i)=>{
       const part=(CYC.zohar.heParts||{})[e.part]||e.part;
-      const vol=['','א','ב','ג'][e.vol]||e.vol;
+      const vol=['','א׳','ב׳','ג׳'][e.vol]||e.vol;
       out.push({t:'unit', kind:'zohar', i,
         label:'זֹהַר · '+part+' · חֵלֶק '+vol+' · דַּף '+heNum(e.daf)+' · '+e.side, group:'זֹהַר',
         s:ckNorm('זוהר '+part+' חלק '+vol+' דף '+e.daf+' '+heNum(e.daf)+' '+e.side)});
@@ -1943,6 +2289,7 @@ function ckBuildIndex(){
     out.push({t:'sm', key:k, label:'שְׁנַיִם מִקְרָא · '+parshaName(k), group:'שְׁנַיִם מִקְרָא',
       s:ckNorm(parshaName(k))});
   });
+  out.forEach(e=>{ e.sk=ckSkel(e.s); });
   CK_INDEX=out;
   return out;
 }
@@ -1963,7 +2310,10 @@ function ckSearch(q){
   const hits=[];
   for(const e of ckBuildIndex()){
     let ok=true;
-    for(const w of words){ if(e.s.indexOf(w)<0){ ok=false; break; } }
+    for(const w of words){
+      const found = w.length>=3 ? e.sk.indexOf(ckSkel(w))>=0 : e.s.indexOf(w)>=0;
+      if(!found){ ok=false; break; }
+    }
     if(ok&&nums.length){
       ok=nums.every(x=>new RegExp('(^| )'+x+'( |$)').test(e.s));
     }
@@ -1974,22 +2324,23 @@ function ckSearch(q){
 
 /* when the cycle next reaches this position */
 function ckNextDate(cfg,i){
-  const n=cfg.order.length, hd=currentHDate();
-  const cur=ckCycleIndex(cfg,hd);
+  const n=cfg.order.length;
+  const cur=ckCycleIndex(cfg,chokDayHDate());
   const delta=((i-cur)%n+n)%n;
-  const d=new HDate(hd.abs()+delta);
-  return {delta, hd:d};
+  return {delta, hd:new HDate(ckCivilAbs()+delta)};
 }
 function ckWhenLine(kind,i){
   if(!CYC) return '';
-  const cfg = kind==='rambam' ? CYC.rambam : CYC.zohar;
+  const cfg = kind==='rambam' ? CYC.rambam : kind==='daf' ? CYC.daf : CYC.zohar;
   const w=ckNextDate(cfg,i);
-  if(kind==='rambam' && ckRambamTrack()===3){
-    // three a day: the chapter's day is its index divided by three
-    const day=Math.floor(i/3), cur=ckCycleIndex(cfg,currentHDate());
-    const n=cfg.order.length, delta=((day*3-cur)%n+n)%n;
-    const d=new HDate(currentHDate().abs()+Math.floor(delta/3));
-    return delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(d.renderGematriya(true));
+  if(kind==='rambam'){
+    const per=ckRambamTrack(), n=cfg.order.length, hd=chokDayHDate();
+    const today=ckRambamIndexes(hd);
+    if(today.indexOf(i)>=0) return 'נִלְמָד הַיּוֹם';
+    const base=today[0];
+    const ahead=Math.ceil((((i-base)%n+n)%n)/per);
+    const d=new HDate(ckCivilAbs()+ahead);
+    return 'יִלָּמֵד בְּ'+localizeHebDateStr(d.renderGematriya(true));
   }
   return w.delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(w.hd.renderGematriya(true));
 }
@@ -2037,12 +2388,15 @@ function renderChokSearch(){
 function renderChokUnit(){
   const e=CKS.unit;
   if(!e) return go('chokBooks');
-  const load = e.kind==='mishnah' ? ensureChokData(e.key) : ensureCycDay(currentHDate());
+  const load = (e.kind==='mishnah'||e.kind==='musar') ? ensureChokData(e.key) : ensureCycDay(chokDayHDate());
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokSearch')}<div class="view">${smSkeleton()}</div>`;
   load.then(()=>{
     if(TAB!=='chokUnit') return;
     let segs=[], when='';
     if(e.kind==='mishnah'){ segs=chokBundleSegs(e.key,[e.ref]); when='שָׁנָה '+heNum(e.year)+' בְּמַחֲזוֹר הַמִּשְׁנָה'; }
+    else if(e.kind==='musar'){ segs=chokBundleSegs(e.key,[e.ref]); when='אֵין מַהֲדוּרָה מְנֻקֶּדֶת'; }
+    else if(e.kind==='daf'){ return ensureCycBlock('daf',ckDafBlock(e.i))
+      .then(()=>drawUnit(ckDafItems(e.i).filter(x=>x.t!==undefined).map(x=>x.t), ckWhenLine('daf',e.i))); }
     else if(e.kind==='rambam'){ return ensureCycBlock('rambam',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
     else if(e.kind==='zohar'){ return ensureCycBlock('zohar',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
     drawUnit(segs,when);
@@ -2086,14 +2440,30 @@ function ckParshiotOf(book){
   return CHOK.parshiot.filter(k=>ckBookOf(k)===book);
 }
 function ckTodayLine(){
-  const slot=chokSlotFor(new Date());
+  const slot=chokSlotFor();
   if(!slot) return null;
   return {key:slot.key, day:slot.day,
           text:'פָּרָשַׁת '+parshaName(slot.key)+' · '+chokRowLabel(slot.day,slot.dayIdx)};
 }
 
 /* ---------- week list ---------- */
-let CK={key:null, day:null, sec:0};
+let CK={key:null, day:null, sec:0, year:null};
+const CHOK_DAY_SHORT={sun:'א׳',mon:'ב׳',tue:'ג׳',wed:'ד׳',thu:'ה׳',night:'לֵיל ו׳',fri:'ו׳'};
+/* Chok LeYisrael has been kept this way for far longer than the app, so the
+   years reach back as far as the app knows how to place a parasha. */
+const CK_YEAR_MIN=5784, CK_YEAR_MAX=5830;
+function ckYear(){ return CK.year||ckCurYear(); }
+function ckYearHe(y){ return heNum(y%1000)+' לִפְרַט קָטָן'; }
+/* stepping past Friday goes on to the next week, and past Sunday back a week */
+function ckStepDay(dir){
+  const i=CHOK_ROWS.findIndex(r=>r[0]===CK.day);
+  const j=i+dir;
+  if(j>=0 && j<CHOK_ROWS.length) return {key:CK.key, day:CHOK_ROWS[j][0], year:ckYear()};
+  const list=CHOK.parshiot, first=ckKeysOf(CK.key)[0]||CK.key;
+  const p=list.indexOf(first)+dir;
+  if(p<0||p>=list.length) return null;
+  return {key:list[p], day:CHOK_ROWS[dir>0?0:CHOK_ROWS.length-1][0], year:ckYear()};
+}
 function renderChokBooks(){
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}<div class="view">${smSkeleton()}</div>`;
   ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureCycles()).then(()=>{
@@ -2116,7 +2486,7 @@ function renderChokBooks(){
       ${ornament()}
     </div>`;
     const tc=document.getElementById('ckTodayCard');
-    if(tc) tc.onclick=()=>openChok(t.key,t.day);
+    if(tc) tc.onclick=()=>openChok(t.key,t.day,null);
     const so=document.getElementById('ckSearchOpen');
     if(so) so.onclick=()=>{ CKS.q=''; go('chokSearch'); };
     app.querySelectorAll('#app .prayer-row[data-book]').forEach(r=>r.onclick=()=>{
@@ -2129,38 +2499,49 @@ function renderChokParshiot(){
   if(!CHOK||!CK.book) return renderChokBooks();
   const b=CK_BOOKS.find(x=>x.en===CK.book)||CK_BOOKS[0];
   const list=ckParshiotOf(CK.book);
-  const today=chokSlotFor(new Date());
+  const today=chokSlotFor();
   app.innerHTML=`
   ${topbar(b.he,'chokBooks')}
   <div class="view">
+    <div class="ck-yearbar">
+      <button class="ck-yr-btn" data-yd="-1" ${ckYear()>CK_YEAR_MIN?'':'disabled'}>${I.prev}</button>
+      <span class="ck-yr-now">שְׁנַת ${ckYearHe(ckYear())}</span>
+      <button class="ck-yr-btn" data-yd="1" ${ckYear()<CK_YEAR_MAX?'':'disabled'}>${I.next}</button>
+    </div>
     <div class="prayers-list">
       ${list.map(k=>`<div class="prayer-row" data-key="${k}">
-        <span class="prayer-row-title">${parshaName(k)}${today&&today.key===k?' · הַשָּׁבוּעַ':''}</span>${I.chev}</div>`).join('')}
+        <span class="prayer-row-title">${parshaName(k)}${today&&ckKeysOf(today.key).indexOf(k)>=0?' · הַשָּׁבוּעַ':''}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
   app.querySelectorAll('#app .prayer-row[data-key]').forEach(r=>r.onclick=()=>{
     CK.key=r.dataset.key; go('chokList');
   });
+  app.querySelectorAll('.ck-yr-btn').forEach(b=>b.onclick=()=>{
+    const ny=ckYear()+(+b.dataset.yd);
+    if(ny<CK_YEAR_MIN||ny>CK_YEAR_MAX) return;
+    CK.year=ny; renderChokParshiot();
+  });
   tr(app);
 }
 function renderChokList(){
-  const key0=parshaKeyForDate(new Date());
+  const key0=ckWeekKeyFor(chokDayDate());
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}<div class="view">${smSkeleton()}</div>`;
   ensureChokIndex().then(()=>{
     if(TAB!=='chokList') return;
     const key=CK.key||key0;
-    if(!key||!CHOK.schedule[key]){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('chokBooks'); }
+    if(!key||!ckKeysOf(key).length){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('chokBooks'); }
     CK.key=key;
     drawChokList();
   });
 }
 function drawChokList(){
   const key=CK.key, wk=CHOK.schedule[key];
-  const today=chokSlotFor(new Date());
-  const hd=currentHDate(), my=chokMishnahYear(hd);
-  const i=CHOK.parshiot.indexOf(key);
+  const today=chokSlotFor();
+  const hd=chokDayHDate(), my=chokMishnahYear(hd);
+  const i=CHOK.parshiot.indexOf(ckKeysOf(key)[0]||key);
   const miss=chokMissedSlots();
+  const y=ckYear(), vd=CK.day?null:null;
   app.innerHTML=`
   ${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}
   <div class="view">
@@ -2174,12 +2555,12 @@ function drawChokList(){
     </div>`:''}
     <div class="sm-week-card" id="ckWeekCard">
       <div class="sm-week-text">
-        <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ</div>
+        <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ · שְׁנַת ${ckYearHe(y)}</div>
         <div class="sm-week-name">${parshaName(key)}</div>
       </div>
       <div class="sm-aliyah-nav" style="margin:0">
-        <button class="sm-aliyah-chip" id="ckPrevWk" ${i>0?'':'disabled'}>${I.prev}</button>
-        <button class="sm-aliyah-chip" id="ckNextWk" ${i<CHOK.parshiot.length-1?'':'disabled'}>${I.next}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="ckPrevWk" ${i>0?'':'disabled'} aria-label="הַקּוֹדֶמֶת">${I.prev}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="ckNextWk" ${i<CHOK.parshiot.length-1?'':'disabled'} aria-label="הַבָּאָה">${I.next}</button>
       </div>
     </div>
     <div class="prayers-list">
@@ -2192,23 +2573,33 @@ function drawChokList(){
         </div>`;
       }).join('')}
     </div>
+    <div class="ck-yearbar">
+      <button class="ck-yr-btn" data-yd="-1" ${y>CK_YEAR_MIN?'':'disabled'}>${I.prev}</button>
+      <span class="ck-yr-now">שְׁנַת ${ckYearHe(y)}</span>
+      <button class="ck-yr-btn" data-yd="1" ${y<CK_YEAR_MAX?'':'disabled'}>${I.next}</button>
+    </div>
     <div class="empty-note" style="padding:14px 4px;text-align:center">
       <div style="font-size:13px;line-height:1.8">מִשְׁנָה · שָׁנָה ${heNum(my+1)} מִתּוֹךְ ${heNum(3)} שֶׁל סֵדֶר הַמִּשְׁנָיוֹת</div>
     </div>
     ${ornament()}
   </div>`;
-  app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openChok(key,r.dataset.day));
+  app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openChok(key,r.dataset.day,CK.year));
   const p=document.getElementById('ckPrevWk'), n=document.getElementById('ckNextWk');
-  if(p&&!p.disabled) p.onclick=()=>{ CK.key=CHOK.parshiot[i-1]; drawChokList(); };
-  if(n&&!n.disabled) n.onclick=()=>{ CK.key=CHOK.parshiot[i+1]; drawChokList(); };
+  if(p&&!p.disabled) p.onclick=()=>{ CK.key=CHOK.parshiot[i-1]; ensureChokWeek(CK.key).then(drawChokList); };
+  if(n&&!n.disabled) n.onclick=()=>{ CK.key=CHOK.parshiot[i+1]; ensureChokWeek(CK.key).then(drawChokList); };
+  app.querySelectorAll('.ck-yr-btn').forEach(b=>b.onclick=()=>{
+    const ny=ckYear()+(+b.dataset.yd);
+    if(ny<CK_YEAR_MIN||ny>CK_YEAR_MAX) return;
+    CK.year=ny; drawChokList();
+  });
   const mk=document.getElementById('ckMakeupCard');
   if(mk) mk.onclick=()=>{ const m=miss[0]; openChok(m.key,m.day); };
   CK.book=ckBookOf(key)||CK.book;
   tr(app);
 }
-function openChok(key,day){
+function openChok(key,day,year){
   const bm=ckBmGet(key,day);
-  CK={key,day,sec:0,resumeTo:bm,showResume:!!bm};
+  CK={key,day,sec:0,year:year||null,resumeTo:bm,showResume:!!bm};
   go('chokReader');
 }
 
@@ -2216,7 +2607,7 @@ function openChok(key,day){
 function renderChokReader(){
   stopAutoScroll();
   if(!CK.key||!CK.day) return renderChokList();
-  if(!CHOK||!CHOK_WEEK[CK.key]||!TORAH){
+  if(!CHOK||!ckWeekReady(CK.key)||!TORAH||!ckCycReady()){
     app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokList')}<div class="view">${smSkeleton()}</div>`;
     ensureChokData(CK.key).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
     return;
@@ -2238,11 +2629,24 @@ function renderChokReader(){
     const head=(i===0||items[i-1].i!==x.i)?`<div class="ck-teh-head">${ckRambamName(e.book)} · פֶּרֶק ${heNum(e.ch)}</div>`:'';
     return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(i+1)}</span><div class="sm-he">${x.t}</div></div>`;
   }).join('');
-  const body = s.kind==='rambam' ? ramBody(s.items)
+  const dafBody=items=>items.map(x=>
+    x.head!==undefined
+      ? `<div class="ck-teh-head">${x.head}</div>`
+      : `<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.n)}</span><div class="sm-he">${x.t}</div>${ckCommBar(x.id,'gemara')}</div>`
+  ).join('');
+  const commBody=items=>items.map(x=>
+    `<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.c)}:${heNum(x.v)}</span>`+
+    x.segs.map(t=>`<div class="sm-he ck-comm-body">${t}</div>`).join('')+`</div>`).join('');
+  const body = s.kind==='daf' ? dafBody(s.items)
+    : s.kind==='comm' ? commBody(s.items)
+    : s.kind==='rambam' ? ramBody(s.items)
     : s.kind==='tehillim' ? tehBody(s.items)
     : (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
     ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}${ckCommBar(vid(v),s.key)}</div>`).join('')
-    : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`).join('');
+    : s.items.map((t,ix)=>{
+        const tag=(s.tags&&s.tags[ix])||(CK_NO_NUM[s.key]?'':heNum(ix+1));
+        return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
+      }).join('');
   const srcLine=chokSourceLine(s);
   app.innerHTML=`
   <div class="reader view">
@@ -2252,7 +2656,15 @@ function renderChokReader(){
         <div class="reader-title">${parshaName(CK.key)}</div>
         <button class="icon-btn autoscroll-btn" id="ckAutoScroll">${I.play}</button>
       </div>
+      <div class="ck-daynav-wrap">
+        <button class="sm-aliyah-chip ck-arrow" id="ckDayPrev" ${ckStepDay(-1)?'':'disabled'} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
+        <div class="sm-aliyah-nav ck-daynav">
+          ${CHOK_ROWS.map(([d])=>`<button class="sm-aliyah-chip ck-daychip${d===CK.day?' on':''}" data-jday="${d}">${CHOK_DAY_SHORT[d]}</button>`).join('')}
+        </div>
+        <button class="sm-aliyah-chip ck-arrow" id="ckDayNext" ${ckStepDay(1)?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
+      </div>
       <div class="sm-aliyah-tag">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
+      <div class="ck-viewdate">${localizeHebDateStr(ckViewHDate().renderGematriya(true))}</div>
       ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       ${s.kind==='rambam'?`<div class="ck-track">
         <button class="ck-track-btn ${ckRambamTrack()===1?'on':''}" data-track="three">שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם</button>
@@ -2280,6 +2692,15 @@ function renderChokReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('ckBack').onclick=()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); };
+  const jump=t=>{ if(!t) return; try{ckTrackPosition();}catch(e){} openChok(t.key,t.day,t.year); };
+  const dp=document.getElementById('ckDayPrev'); if(dp&&!dp.disabled) dp.onclick=()=>jump(ckStepDay(-1));
+  const dn2=document.getElementById('ckDayNext'); if(dn2&&!dn2.disabled) dn2.onclick=()=>jump(ckStepDay(1));
+  app.querySelectorAll('.ck-daychip[data-jday]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.jday===CK.day) return;
+    jump({key:CK.key, day:b.dataset.jday, year:ckYear()});
+  });
+  const onChip=app.querySelector('.ck-daychip.on');
+  if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
   document.getElementById('ckAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK.sec--; renderChokReader(); forceScrollTop(); };
   const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK.sec++; renderChokReader(); forceScrollTop(); };
@@ -2289,7 +2710,7 @@ function renderChokReader(){
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   app.querySelectorAll('.ck-track-btn').forEach(b=>b.onclick=()=>{
     S.rambamTrack=b.dataset.track; saveS();
-    ensureCycDay(currentHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
+    ensureCycDay(ckViewHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
   });
   const rg=document.getElementById('ckResumeGo'); if(rg) rg.onclick=ckResume;
   const rn=document.getElementById('ckResumeNew'); if(rn) rn.onclick=ckRestart;
@@ -2351,7 +2772,7 @@ function chokCheckReminders(){
     try{ sunset=zmanimFor(civilToday()).sunset(); }catch(e){}
     if(sunset && now>=sunset){
       localStorage.setItem('betel_chok_night_notif',todayStr);
-      const key=parshaKeyForDate(now);
+      const key=ckWeekKeyFor(now);
       if(key && !chokIsDone(key,'night')){
         try{ new Notification('חוֹק לְיִשְׂרָאֵל',{body:'לֵיל שִׁשִּׁי · צֵרוּף יִהִוִהִ',dir:'rtl',lang:'he'}); }catch(e){}
       }
@@ -2388,8 +2809,27 @@ function render(){
   else if(TAB==='chokReader') renderChokReader();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='tracker') renderTracker();
+  mountToolsFab();
   tr(app);
 }
+/* The reader carries its own copy, so only add ours where it is absent.
+   Screens that fetch their data replace the view after render() has returned,
+   which would wipe the button - so watch the view instead of mounting once,
+   and every screen gets it, including ones added later. */
+function mountToolsFab(){
+  if(TAB==='reader'||document.getElementById('gTools')) return;
+  if(!app.firstChild) return;
+  const scroll = /Reader|chokUnit/.test(TAB);
+  app.insertAdjacentHTML('beforeend', toolsFab({scroll}));
+  wireToolsFab();
+}
+let fabTimer=null;
+try{
+  new MutationObserver(()=>{
+    clearTimeout(fabTimer);
+    fabTimer=setTimeout(()=>{ try{ mountToolsFab(); }catch(e){} }, 40);
+  }).observe(app, {childList:true});
+}catch(e){}
 
 /* ================= HOME ================= */
 function greeting(){ const h=new Date().getHours();
@@ -3774,21 +4214,24 @@ render();
   }
   lastY = getY();
   function onScroll(){
-    const nav = document.querySelector('.bottom-nav');
+    const nav = document.querySelector('.bottom-nav') || document.createElement('div');
     ticking = false;
-    if(!nav) return;
     const y = getY();
     const dy = y - lastY;
-    if(y < 40){
-      nav.classList.remove('nav-hidden');
-    } else if(dy > THRESHOLD){
-      nav.classList.add('nav-hidden');
-    } else if(dy < -THRESHOLD){
-      nav.classList.remove('nav-hidden');
-    }
+    const tools=document.getElementById('gTools');
+    const set=hide=>{
+      nav.classList.toggle('nav-hidden', hide);
+      if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
+    };
+    if(y < 40){ set(false); }
+    else if(dy > THRESHOLD){ set(true); }
+    else if(dy < -THRESHOLD){ set(false); }
     lastY = y;
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(()=>{ nav.classList.remove('nav-hidden'); }, 1400);
+    hideTimer = setTimeout(()=>{
+      nav.classList.remove('nav-hidden');
+      const t=document.getElementById('gTools'); if(t) t.classList.remove('nav-hidden');
+    }, 1400);
   }
   const raf = ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(onScroll); } };
   document.addEventListener('scroll', raf, {passive:true, capture:true});
