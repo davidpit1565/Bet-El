@@ -746,6 +746,9 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 .ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.ck-today{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10));cursor:pointer}
+.ck-today-tag{font-family:var(--font-sacred);font-size:11px;color:var(--gold,#b8963f);letter-spacing:.08em}
+.ck-today-name{font-family:var(--font-sacred);font-size:15px;flex:1;text-align:center}
 .ck-track{display:flex;gap:6px;justify-content:center;margin:0 0 8px}
 .ck-track-btn{font-family:var(--font-sacred);font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-track-btn.on{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
@@ -1869,15 +1872,83 @@ function ckRestart(){
   CK.sec=0; renderChokReader(); forceScrollTop();
 }
 
+
+/* ---------- browse: five books, then parasha, then day ---------- */
+const CK_BOOKS=[
+  {en:'Genesis',     he:'בְּרֵאשִׁית'},
+  {en:'Exodus',      he:'שְׁמוֹת'},
+  {en:'Leviticus',   he:'וַיִּקְרָא'},
+  {en:'Numbers',     he:'בְּמִדְבַּר'},
+  {en:'Deuteronomy', he:'דְּבָרִים'},
+];
+/* which chumash each parasha belongs to, from the leyning data we already ship */
+function ckBookOf(key){ const e=LEYNING&&LEYNING[key]; return e?e.book:null; }
+function ckParshiotOf(book){
+  if(!CHOK) return [];
+  return CHOK.parshiot.filter(k=>ckBookOf(k)===book);
+}
+function ckTodayLine(){
+  const slot=chokSlotFor(new Date());
+  if(!slot) return null;
+  return {key:slot.key, day:slot.day,
+          text:'פָּרָשַׁת '+parshaName(slot.key)+' · '+chokRowLabel(slot.day,slot.dayIdx)};
+}
+
 /* ---------- week list ---------- */
 let CK={key:null, day:null, sec:0};
+function renderChokBooks(){
+  app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}<div class="view">${smSkeleton()}</div>`;
+  ensureChokIndex().then(()=>ensureShnayimData()).then(()=>{
+    if(TAB!=='chokBooks') return;
+    const t=ckTodayLine();
+    app.innerHTML=`
+    ${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}
+    <div class="view">
+      ${t?`<div class="ck-today" id="ckTodayCard">
+        <div class="ck-today-tag">הַיּוֹם</div>
+        <div class="ck-today-name">${t.text}</div>
+        <span class="sm-week-chev">${I.chev}</span>
+      </div>`:''}
+      <div class="prayers-list">
+        ${CK_BOOKS.map(b=>`<div class="prayer-row" data-book="${b.en}">
+          <span class="prayer-row-title">${b.he}</span>${I.chev}</div>`).join('')}
+      </div>
+      ${ornament()}
+    </div>`;
+    const tc=document.getElementById('ckTodayCard');
+    if(tc) tc.onclick=()=>openChok(t.key,t.day);
+    app.querySelectorAll('#app .prayer-row[data-book]').forEach(r=>r.onclick=()=>{
+      CK.book=r.dataset.book; go('chokParshiot');
+    });
+    tr(app);
+  });
+}
+function renderChokParshiot(){
+  if(!CHOK||!CK.book) return renderChokBooks();
+  const b=CK_BOOKS.find(x=>x.en===CK.book)||CK_BOOKS[0];
+  const list=ckParshiotOf(CK.book);
+  const today=chokSlotFor(new Date());
+  app.innerHTML=`
+  ${topbar(b.he,'chokBooks')}
+  <div class="view">
+    <div class="prayers-list">
+      ${list.map(k=>`<div class="prayer-row" data-key="${k}">
+        <span class="prayer-row-title">${parshaName(k)}${today&&today.key===k?' · הַשָּׁבוּעַ':''}</span>${I.chev}</div>`).join('')}
+    </div>
+    ${ornament()}
+  </div>`;
+  app.querySelectorAll('#app .prayer-row[data-key]').forEach(r=>r.onclick=()=>{
+    CK.key=r.dataset.key; go('chokList');
+  });
+  tr(app);
+}
 function renderChokList(){
   const key0=parshaKeyForDate(new Date());
-  app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}<div class="view">${smSkeleton()}</div>`;
+  app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}<div class="view">${smSkeleton()}</div>`;
   ensureChokIndex().then(()=>{
     if(TAB!=='chokList') return;
     const key=CK.key||key0;
-    if(!key||!CHOK.schedule[key]){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('prayers'); }
+    if(!key||!CHOK.schedule[key]){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('chokBooks'); }
     CK.key=key;
     drawChokList();
   });
@@ -1889,7 +1960,7 @@ function drawChokList(){
   const i=CHOK.parshiot.indexOf(key);
   const miss=chokMissedSlots();
   app.innerHTML=`
-  ${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}
+  ${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}
   <div class="view">
     ${miss.length?`<div class="sm-week-card" id="ckMakeupCard">
       <div class="sm-week-icon">${I.bookmarkOn}</div>
@@ -1930,6 +2001,7 @@ function drawChokList(){
   if(n&&!n.disabled) n.onclick=()=>{ CK.key=CHOK.parshiot[i+1]; drawChokList(); };
   const mk=document.getElementById('ckMakeupCard');
   if(mk) mk.onclick=()=>{ const m=miss[0]; openChok(m.key,m.day); };
+  CK.book=ckBookOf(key)||CK.book;
   tr(app);
 }
 function openChok(key,day){
@@ -2106,6 +2178,8 @@ function render(){
   else if(TAB==='smReader') renderShnayimReader();
   else if(TAB==='zoharList') renderZoharList();
   else if(TAB==='zoharReader') renderZoharReader();
+  else if(TAB==='chokBooks') renderChokBooks();
+  else if(TAB==='chokParshiot') renderChokParshiot();
   else if(TAB==='chokList') renderChokList();
   else if(TAB==='chokReader') renderChokReader();
   else if(TAB==='settings') renderSettings();
@@ -2763,7 +2837,7 @@ function renderPrayersList(){
         <div class="prayer-row" onclick="go('zoharList')">
           <span class="prayer-row-title">תיקוני הזוהר</span>
         </div>
-        <div class="prayer-row" onclick="go('chokList')">
+        <div class="prayer-row" onclick="go('chokBooks')">
           <span class="prayer-row-title">חוק לישראל</span>
         </div>
       </div>
@@ -2785,7 +2859,7 @@ function renderPrayersList(){
       <div class="prayer-row" onclick="go('zoharList')">
         <span class="prayer-row-title">תיקוני הזוהר</span>
       </div>
-      <div class="prayer-row" onclick="go('chokList')">
+      <div class="prayer-row" onclick="go('chokBooks')">
         <span class="prayer-row-title">חוק לישראל</span>
       </div>
       ${ready.map(([key, p]) => `
