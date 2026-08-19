@@ -761,6 +761,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
 .sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
 .sm-aliyah-chip.ck-arrow:disabled{opacity:.3}
+.ck-partial{font-size:12px;font-weight:400;opacity:.75}
 .sm-verse-row.ck-nonum{padding-right:0}
 .ck-comm-body{font-size:16px;line-height:2.05;margin-bottom:8px}
 .ck-comm-body:last-child{margin-bottom:0}
@@ -1587,6 +1588,10 @@ function chokBundleSegs(key,refs){
   return out;
 }
 /* same segments, but carried as verses so a commentary can hang off each one */
+function ckTargumFor(book,c,v){
+  const t=((ckCommFor(book+' '+c+':'+v))||{}).targum;
+  return (t&&t.length)?t.join(' '):null;
+}
 function chokVerseSegs(key,refs){
   const b=CHOK_WEEK[key]||{}, out=[];
   (refs||[]).forEach(r=>{
@@ -1595,7 +1600,7 @@ function chokVerseSegs(key,refs){
     if(!p){ segs.forEach(t=>out.push({he:t})); return; }
     let c=p.c1, v=p.v1;
     segs.forEach(t=>{
-      out.push({book:p.book, c, v, he:t});
+      out.push({book:p.book, c, v, he:t, targum:ckTargumFor(p.book,c,v)});
       v++;
       if(c<p.c2 && v>(HAFTARAH&&HAFTARAH[p.book]&&HAFTARAH[p.book][c]?HAFTARAH[p.book][c].length:0)){ c++; v=1; }
     });
@@ -1748,8 +1753,10 @@ function chokSourceLine(sec){
 /* Opens under the verse it belongs to, on the same screen. One panel per row;
    tapping the open commentary again closes it. */
 const CK_COMM = {
-  rashi: {he:'רַשִׁ״י',       on:['torah','neviim','ketuvim','haftarah','tzeruf']},
-  bart:  {he:'בַּרְטֶנוּרָא', on:['mishnah']},
+  rashi:  {he:'רַשִׁ״י',           on:['torah','neviim','ketuvim','haftarah','tzeruf']},
+  mdavid: {he:'מְצוּדַת דָּוִד',   on:['neviim','ketuvim','haftarah'], partial:1},
+  mzion:  {he:'מְצוּדַת צִיּוֹן',  on:['neviim','ketuvim','haftarah'], partial:1},
+  bart:   {he:'בַּרְטֶנוּרָא',     on:['mishnah']},
 };
 function ckCommFor(id){ return ((CHOK_WEEK[CK.key]||{})._comm||{})[id]||null; }
 function ckCommBar(id, sec){
@@ -1770,7 +1777,7 @@ function ckToggleComm(btn){
   bar.querySelectorAll('.ck-comm-btn').forEach(b=>b.classList.remove('on'));
   if(already){ panel.innerHTML=''; panel.dataset.open=''; panel.classList.remove('open'); return; }
   const segs=(ckCommFor(id)||{})[w]||[];
-  panel.innerHTML=`<div class="ck-comm-title">${CK_COMM[w].he}</div>`+
+  panel.innerHTML=`<div class="ck-comm-title">${CK_COMM[w].he}${CK_COMM[w].partial?' <span class="ck-partial">· מְנֻקָּד חֶלְקִית</span>':''}</div>`+
     segs.map(t=>`<div class="ck-comm-text">${t}</div>`).join('');
   panel.dataset.open=w; panel.classList.add('open');
   btn.classList.add('on');
