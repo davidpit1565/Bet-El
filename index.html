@@ -763,7 +763,9 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-aliyah-chip.ck-arrow:disabled{opacity:.3}
 .ck-partial{font-size:12px;font-weight:400;opacity:.75}
 .ck-comm-none{opacity:.6;font-size:14px}
-.ck-daynav{padding-bottom:6px;justify-content:center}
+.ck-daynav-wrap{display:flex;align-items:center;gap:6px;margin:0 0 8px}
+.ck-daynav{flex:1;min-width:0;overflow-x:auto;padding:2px 2px 0;justify-content:flex-start}
+.ck-daynav-wrap .ck-arrow{flex:none}
 .sm-aliyah-chip.ck-daychip{min-width:38px;font-family:var(--font-sacred);font-size:14px}
 .ck-viewdate{font-family:var(--font-sacred);font-size:12px;color:var(--muted);text-align:center;margin:0 0 8px;opacity:.85}
 .ck-yearbar{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 12px}
@@ -2654,9 +2656,11 @@ function renderChokReader(){
         <div class="reader-title">${parshaName(CK.key)}</div>
         <button class="icon-btn autoscroll-btn" id="ckAutoScroll">${I.play}</button>
       </div>
-      <div class="sm-aliyah-nav ck-daynav">
+      <div class="ck-daynav-wrap">
         <button class="sm-aliyah-chip ck-arrow" id="ckDayPrev" ${ckStepDay(-1)?'':'disabled'} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
-        ${CHOK_ROWS.map(([d])=>`<button class="sm-aliyah-chip ck-daychip${d===CK.day?' on':''}" data-jday="${d}">${CHOK_DAY_SHORT[d]}</button>`).join('')}
+        <div class="sm-aliyah-nav ck-daynav">
+          ${CHOK_ROWS.map(([d])=>`<button class="sm-aliyah-chip ck-daychip${d===CK.day?' on':''}" data-jday="${d}">${CHOK_DAY_SHORT[d]}</button>`).join('')}
+        </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckDayNext" ${ckStepDay(1)?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
       </div>
       <div class="sm-aliyah-tag">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
@@ -2695,6 +2699,8 @@ function renderChokReader(){
     if(b.dataset.jday===CK.day) return;
     jump({key:CK.key, day:b.dataset.jday, year:ckYear()});
   });
+  const onChip=app.querySelector('.ck-daychip.on');
+  if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
   document.getElementById('ckAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK.sec--; renderChokReader(); forceScrollTop(); };
   const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK.sec++; renderChokReader(); forceScrollTop(); };
