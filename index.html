@@ -1569,10 +1569,29 @@ function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
     .then(()=>ensureCycDay(ckViewHDate()));
 }
+/* A few weeks of the year have no weekly parasha of their own - the Shabbat
+   of Chol HaMoed. Chok LeYisrael does not pause for them: it goes on to the
+   portion after the one last read, which is how וְזֹאת הַבְּרָכָה is reached
+   between Ha'azinu and Bereshit. */
+function ckWeekKeyFor(dd){
+  const k=parshaKeyForDate(dd);
+  if(k) return k;
+  if(!CHOK) return null;
+  // count forward to the next week that has one and step back through the
+  // list, so the week that runs into Simchat Torah is וְזֹאת הַבְּרָכָה
+  for(let w=1;w<=5;w++){
+    const next=parshaKeyForDate(addDays(dd,7*w));
+    if(!next) continue;
+    const ks=ckKeysOf(next), first=ks[0]||next;
+    const i=CHOK.parshiot.indexOf(first);
+    if(i>=0){ const n=CHOK.parshiot.length; return CHOK.parshiot[((i-w)%n+n)%n]; }
+  }
+  return null;
+}
 /* which parsha week and which weekday slot the given civil date falls in */
 function chokSlotFor(dateObj){
   const dd = dateObj || chokDayDate();
-  const key=parshaKeyForDate(dd);
+  const key=ckWeekKeyFor(dd);
   if(!key||!CHOK||!ckKeysOf(key).length) return null;
   const d=dd.getDay();                    // 0=Sun .. 6=Sat
   if(d===6) return null;                  // Shabbat has no Chok LeYisrael portion
@@ -1880,7 +1899,13 @@ function ckCommLabel(w,id){
 }
 function ckCommFor(id){
   if(/^daf:/.test(id||'')) return ckDafCommFor(id);
-  return ((CHOK_WEEK[CK.key]||{})._comm||{})[id]||null;
+  // a doubled week keeps a bundle per parasha, so look in each of them
+  const ks=ckKeysOf(CK.key);
+  for(let i=0;i<ks.length;i++){
+    const c=((CHOK_WEEK[ks[i]]||{})._comm||{})[id];
+    if(c) return c;
+  }
+  return null;
 }
 function ckCommBar(id, sec){
   let btns;
@@ -2080,7 +2105,8 @@ function ckDafItems(i){
   const e=ckDafEntry(i), out=[];
   ['a','b'].forEach(side=>{
     const segs=(rec.g||{})[side]; if(!segs||!segs.length) return;
-    out.push({head: e.whole ? null : 'דַּף '+heNum(e.daf)+' · '+CK_AMUD[side]});
+    // Shekalim, Kinnim and Middot are not divided into amudim
+    if(!e.whole) out.push({head:'דַּף '+heNum(e.daf)+' · '+CK_AMUD[side]});
     segs.forEach((t,ix)=>out.push({t, id:'daf:'+i+':'+side+':'+ix, n:ix+1}));
   });
   return out;
@@ -2471,7 +2497,7 @@ function renderChokParshiot(){
   tr(app);
 }
 function renderChokList(){
-  const key0=parshaKeyForDate(new Date());
+  const key0=ckWeekKeyFor(chokDayDate());
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}<div class="view">${smSkeleton()}</div>`;
   ensureChokIndex().then(()=>{
     if(TAB!=='chokList') return;
@@ -2576,7 +2602,7 @@ function renderChokReader(){
     return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(i+1)}</span><div class="sm-he">${x.t}</div></div>`;
   }).join('');
   const dafBody=items=>items.map(x=>
-    x.head!=null&&x.t===undefined
+    x.head!==undefined
       ? `<div class="ck-teh-head">${x.head}</div>`
       : `<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.n)}</span><div class="sm-he">${x.t}</div>${ckCommBar(x.id,'gemara')}</div>`
   ).join('');
@@ -2714,7 +2740,7 @@ function chokCheckReminders(){
     try{ sunset=zmanimFor(civilToday()).sunset(); }catch(e){}
     if(sunset && now>=sunset){
       localStorage.setItem('betel_chok_night_notif',todayStr);
-      const key=parshaKeyForDate(now);
+      const key=ckWeekKeyFor(now);
       if(key && !chokIsDone(key,'night')){
         try{ new Notification('חוֹק לְיִשְׂרָאֵל',{body:'לֵיל שִׁשִּׁי · צֵרוּף יִהִוִהִ',dir:'rtl',lang:'he'}); }catch(e){}
       }
