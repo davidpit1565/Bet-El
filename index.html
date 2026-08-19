@@ -746,6 +746,11 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 .ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.ck-resume{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:9px 12px;border-radius:10px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
+.ck-resume-text{font-family:var(--font-sacred);font-size:13px;display:flex;align-items:center;gap:6px}
+.ck-resume-btns{display:flex;gap:6px}
+.ck-resume-btn{font-family:var(--font-sacred);font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.ck-resume-btn.primary{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
 .ck-teh-head{font-family:var(--font-sacred);font-size:14px;color:var(--gold,#b8963f);text-align:center;margin:14px 0 6px;letter-spacing:.04em}
 .ck-comm-bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
 .ck-comm-btn{font-family:var(--font-sacred);font-size:12px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
@@ -1726,6 +1731,55 @@ function ckToggleComm(btn){
   tr(panel);
 }
 
+
+/* ---------- where you stopped ---------- */
+/* Tracked as you read, so stopping needs no action. Opening the day only
+   offers to resume - it never clears the mark - and there is always a way
+   back to the start, so it cannot strand you. Marking the day done clears it. */
+function ckBmAll(){ try{ return JSON.parse(localStorage.getItem('betel_chok_bm')||'{}'); }catch(e){ return {}; } }
+function ckBmGet(key,day){ return ckBmAll()[chokDoneKey(key,day)]||null; }
+function ckBmSet(key,day,sec,seg){
+  const a=ckBmAll(); a[chokDoneKey(key,day)]={sec,seg}; 
+  try{ localStorage.setItem('betel_chok_bm',JSON.stringify(a)); }catch(e){}
+}
+function ckBmClear(key,day){
+  const a=ckBmAll(); delete a[chokDoneKey(key,day)];
+  try{ localStorage.setItem('betel_chok_bm',JSON.stringify(a)); }catch(e){}
+}
+/* the topmost verse still on screen is where the reader is */
+function ckTrackPosition(){
+  if(TAB!=='chokReader'||!CK.key||!CK.day) return;
+  const rows=app.querySelectorAll('.sm-verse-row');
+  if(!rows.length) return;
+  let seg=0;
+  for(let i=0;i<rows.length;i++){
+    if(rows[i].getBoundingClientRect().bottom>90){ seg=i; break; }
+    seg=i;
+  }
+  ckBmSet(CK.key,CK.day,CK.sec,seg);
+}
+let ckTrackTimer=null;
+function ckTrackScroll(){
+  clearTimeout(ckTrackTimer);
+  ckTrackTimer=setTimeout(()=>{ try{ ckTrackPosition(); }catch(e){} }, 400);
+}
+function ckResume(){
+  const bm=CK.resumeTo; CK.resumeTo=null; CK.showResume=false;
+  if(!bm) return;
+  CK.sec=bm.sec||0;
+  renderChokReader();
+  setTimeout(()=>{
+    const rows=app.querySelectorAll('.sm-verse-row');
+    const el=rows[Math.min(bm.seg||0, rows.length-1)];
+    if(el) el.scrollIntoView({block:'center'});
+  },60);
+}
+function ckRestart(){
+  CK.resumeTo=null; CK.showResume=false;
+  ckBmClear(CK.key,CK.day);
+  CK.sec=0; renderChokReader(); forceScrollTop();
+}
+
 /* ---------- week list ---------- */
 let CK={key:null, day:null, sec:0};
 function renderChokList(){
@@ -1790,7 +1844,8 @@ function drawChokList(){
   tr(app);
 }
 function openChok(key,day){
-  CK={key,day,sec:0};
+  const bm=ckBmGet(key,day);
+  CK={key,day,sec:0,resumeTo:bm,showResume:!!bm};
   go('chokReader');
 }
 
@@ -1835,6 +1890,13 @@ function renderChokReader(){
         ${secs.map((x,ix)=>`<button class="sm-aliyah-chip ${ix===CK.sec?'on':''}" data-sec="${ix}">${x.he}</button>`).join('')}
       </div>
     </div>
+    ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
+      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs[CK.resumeTo.sec]||secs[0]).he}</b></div>
+      <div class="ck-resume-btns">
+        <button class="ck-resume-btn primary" id="ckResumeGo">הַמְשֵׁךְ מִשָּׁם</button>
+        <button class="ck-resume-btn" id="ckResumeNew">מֵהַתְחָלָה</button>
+      </div>
+    </div>`:''}
     <div class="sm-verses notranslate">${body}</div>
     <div class="reader-nav">
       <button class="rnav-btn" id="ckPrev" ${CK.sec>0?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
@@ -1844,14 +1906,17 @@ function renderChokReader(){
     </div>
     <div style="height:26px"></div>
   </div>`;
-  document.getElementById('ckBack').onclick=()=>go('chokList');
+  document.getElementById('ckBack').onclick=()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); };
   document.getElementById('ckAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK.sec--; renderChokReader(); forceScrollTop(); };
   const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK.sec++; renderChokReader(); forceScrollTop(); };
   const dn=document.getElementById('ckDone');
-  if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
-  app.querySelectorAll('.sm-aliyah-chip[data-sec]').forEach(b=>b.onclick=()=>{ CK.sec=+b.dataset.sec; renderChokReader(); forceScrollTop(); });
+  if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); ckBmClear(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
+  app.querySelectorAll('.sm-aliyah-chip[data-sec]').forEach(b=>b.onclick=()=>{ CK.sec=+b.dataset.sec; CK.showResume=false; ckBmSet(CK.key,CK.day,CK.sec,0); renderChokReader(); forceScrollTop(); });
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
+  const rg=document.getElementById('ckResumeGo'); if(rg) rg.onclick=ckResume;
+  const rn=document.getElementById('ckResumeNew'); if(rn) rn.onclick=ckRestart;
+  document.addEventListener('scroll', ckTrackScroll, {passive:true, capture:true});
   tr(app);
 }
 
