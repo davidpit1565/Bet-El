@@ -1591,9 +1591,9 @@ function chokSectionsFor(key,day){
   const d=wk[day];
   const hd=currentHDate(), my=chokMishnahYear(hd);
   const list=[];
-  const lab=(CHOK_WEEK[key]||{})._labels||{};
-  const tagsFor=refs=>{ let o=[]; (refs||[]).forEach(r=>{ if(lab[r]) o=o.concat(lab[r]); }); return o.length?o:null; };
-  const push=(k,he,items,kind,note,refs)=>{ if(items&&items.length) list.push({key:k,he,items,kind,note,refs:refs||[],tags:tagsFor(refs)}); };
+  const wkb=CHOK_WEEK[key]||{}, lab=wkb._labels||{}, mrf=wkb._mrefs||{};
+  const joinFor=(map,refs)=>{ let o=[]; (refs||[]).forEach(r=>{ if(map[r]) o=o.concat(map[r]); }); return o.length?o:null; };
+  const push=(k,he,items,kind,note,refs)=>{ if(items&&items.length) list.push({key:k,he,items,kind,note,refs:refs||[],tags:joinFor(lab,refs),ids:joinFor(mrf,refs)}); };
   push('torah','תּוֹרָה', chokTorahVerses(d.torah), 'torah', null, d.torah);
   if(day==='fri'){
     const h=(d.haftarah_seph||[])[0];
@@ -1797,7 +1797,7 @@ function renderChokReader(){
   const vid=v=>(v.book&&v.c&&v.v)?`${v.book} ${v.c}:${v.v}`:'';
   const body = (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
     ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}${ckCommBar(vid(v),s.key)}</div>`).join('')
-    : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div></div>`).join('');
+    : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`).join('');
   const srcLine=chokSourceLine(s);
   app.innerHTML=`
   <div class="reader view">
