@@ -761,6 +761,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
 .sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
 .sm-aliyah-chip.ck-arrow:disabled{opacity:.3}
+.sm-verse-row.ck-nonum{padding-right:0}
 .ck-comm-body{font-size:16px;line-height:2.05;margin-bottom:8px}
 .ck-comm-body:last-child{margin-bottom:0}
 .ck-teh-head{font-family:var(--font-sacred);font-size:18px;font-weight:700;color:var(--gold,#b8963f);text-align:center;margin:20px 0 10px;letter-spacing:.03em}
@@ -1540,13 +1541,14 @@ function ensureChokWeek(key){
 }
 function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
-    .then(()=>ensureCycDay(currentHDate()));
+    .then(()=>ensureCycDay(chokDayHDate()));
 }
 /* which parsha week and which weekday slot the given civil date falls in */
 function chokSlotFor(dateObj){
-  const key=parshaKeyForDate(dateObj);
+  const dd = dateObj || chokDayDate();
+  const key=parshaKeyForDate(dd);
   if(!key||!CHOK||!CHOK.schedule[key]) return null;
-  const d=dateObj.getDay();               // 0=Sun .. 6=Sat
+  const d=dd.getDay();                    // 0=Sun .. 6=Sat
   if(d===6) return null;                  // Shabbat has no Chok LeYisrael portion
   return {key, day:CHOK_DAYS[d], dayIdx:d};
 }
@@ -1604,7 +1606,7 @@ function chokVerseSegs(key,refs){
 function chokTehillimVerses(){
   const T=window.TEHILLIM; if(!T) return [];
   const out=[];
-  chaptersOf(portionFor(currentHDate())).forEach(ch=>{
+  chaptersOf(portionFor(chokDayHDate())).forEach(ch=>{
     (T[ch]||[]).forEach((he,i)=>out.push({ch, v:i+1, he}));
   });
   return out;
@@ -1622,6 +1624,10 @@ function chokCommVerses(verses, who){
   return out;
 }
 
+/* Sections that are continuous prose rather than numbered units. The Zohar is
+   read as a running page, not as lettered pieces. */
+const CK_NO_NUM={zohar:1, musar:1};
+
 /* the sections shown for a given weekday, in study order */
 function chokSectionsFor(key,day){
   const wk=CHOK.schedule[key];
@@ -1630,7 +1636,7 @@ function chokSectionsFor(key,day){
     return t.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items:t,kind:'torah',refs:(wk.night&&wk.night.tzeruf)||[]}]:[];
   }
   const d=wk[day];
-  const hd=currentHDate(), my=chokMishnahYear(hd);
+  const hd=chokDayHDate(), my=chokMishnahYear(hd);
   const list=[];
   const wkb=CHOK_WEEK[key]||{}, lab=wkb._labels||{}, mrf=wkb._mrefs||{};
   const joinFor=(map,refs)=>{ let o=[]; (refs||[]).forEach(r=>{ if(map[r]) o=o.concat(map[r]); }); return o.length?o:null; };
@@ -1731,7 +1737,7 @@ function chokSourceLine(sec){
     return (refs.length?refs.join('  ·  '):'');
   }
   if(sec.key==='tehillim'){
-    const r=portionFor(currentHDate());
+    const r=portionFor(chokDayHDate());
     return 'סֵפֶר תְּהִלִּים · '+(r[0]===r[1]?'פֶּרֶק '+heNum(r[0]):'פְּרָקִים '+heNum(r[0])+CK_DASH+heNum(r[1]));
   }
   const refs=(sec.refs||[]).map(r=>chokRefLabel(r,sec.key)).filter(Boolean);
@@ -1822,10 +1828,19 @@ function ckAbsOf(iso){
   const [y,m,d]=iso.split('-').map(Number);
   return new HDate(new Date(y,m-1,d)).abs();
 }
-/* Daf Yomi, Rambam Yomi and the Zohar cycle are published against the civil
-   day, so they advance at midnight rather than at sunset - currentHDate()
-   rolls at sunset and would put the whole evening a day ahead. */
-function ckCivilAbs(){ return new HDate(civilToday()).abs(); }
+/* Chok LeYisrael turns over at sunrise - not at sunset, which is when the
+   Hebrew date rolls, and not at midnight. Before netz the day still belongs to
+   the portion just gone, so every section of it counts days from netz. */
+function chokDayDate(){
+  const now=new Date(), base=civilToday();
+  try{
+    const nz=zmanimFor(base).sunrise();
+    if(nz && now < nz) return addDays(base,-1);
+  }catch(e){}
+  return base;
+}
+function chokDayHDate(){ return new HDate(chokDayDate()); }
+function ckCivilAbs(){ return chokDayHDate().abs(); }
 function ckCycleIndex(cfg,hd){
   const n=cfg.order.length;
   const i=cfg.anchorIndex + (ckCivilAbs() - ckAbsOf(cfg.anchorDate));
@@ -2032,7 +2047,7 @@ function ckSearch(q){
 /* when the cycle next reaches this position */
 function ckNextDate(cfg,i){
   const n=cfg.order.length;
-  const cur=ckCycleIndex(cfg,currentHDate());
+  const cur=ckCycleIndex(cfg,chokDayHDate());
   const delta=((i-cur)%n+n)%n;
   return {delta, hd:new HDate(ckCivilAbs()+delta)};
 }
@@ -2041,7 +2056,7 @@ function ckWhenLine(kind,i){
   const cfg = kind==='rambam' ? CYC.rambam : CYC.zohar;
   const w=ckNextDate(cfg,i);
   if(kind==='rambam'){
-    const per=ckRambamTrack(), n=cfg.order.length, hd=currentHDate();
+    const per=ckRambamTrack(), n=cfg.order.length, hd=chokDayHDate();
     const today=ckRambamIndexes(hd);
     if(today.indexOf(i)>=0) return 'נִלְמָד הַיּוֹם';
     const base=today[0];
@@ -2095,7 +2110,7 @@ function renderChokSearch(){
 function renderChokUnit(){
   const e=CKS.unit;
   if(!e) return go('chokBooks');
-  const load = e.kind==='mishnah' ? ensureChokData(e.key) : ensureCycDay(currentHDate());
+  const load = e.kind==='mishnah' ? ensureChokData(e.key) : ensureCycDay(chokDayHDate());
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokSearch')}<div class="view">${smSkeleton()}</div>`;
   load.then(()=>{
     if(TAB!=='chokUnit') return;
@@ -2144,7 +2159,7 @@ function ckParshiotOf(book){
   return CHOK.parshiot.filter(k=>ckBookOf(k)===book);
 }
 function ckTodayLine(){
-  const slot=chokSlotFor(new Date());
+  const slot=chokSlotFor();
   if(!slot) return null;
   return {key:slot.key, day:slot.day,
           text:'פָּרָשַׁת '+parshaName(slot.key)+' · '+chokRowLabel(slot.day,slot.dayIdx)};
@@ -2187,7 +2202,7 @@ function renderChokParshiot(){
   if(!CHOK||!CK.book) return renderChokBooks();
   const b=CK_BOOKS.find(x=>x.en===CK.book)||CK_BOOKS[0];
   const list=ckParshiotOf(CK.book);
-  const today=chokSlotFor(new Date());
+  const today=chokSlotFor();
   app.innerHTML=`
   ${topbar(b.he,'chokBooks')}
   <div class="view">
@@ -2215,8 +2230,8 @@ function renderChokList(){
 }
 function drawChokList(){
   const key=CK.key, wk=CHOK.schedule[key];
-  const today=chokSlotFor(new Date());
-  const hd=currentHDate(), my=chokMishnahYear(hd);
+  const today=chokSlotFor();
+  const hd=chokDayHDate(), my=chokMishnahYear(hd);
   const i=CHOK.parshiot.indexOf(key);
   const miss=chokMissedSlots();
   app.innerHTML=`
@@ -2304,7 +2319,10 @@ function renderChokReader(){
     : s.kind==='tehillim' ? tehBody(s.items)
     : (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
     ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}${ckCommBar(vid(v),s.key)}</div>`).join('')
-    : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`).join('');
+    : s.items.map((t,ix)=>{
+        const tag=(s.tags&&s.tags[ix])||(CK_NO_NUM[s.key]?'':heNum(ix+1));
+        return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
+      }).join('');
   const srcLine=chokSourceLine(s);
   app.innerHTML=`
   <div class="reader view">
@@ -2351,7 +2369,7 @@ function renderChokReader(){
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   app.querySelectorAll('.ck-track-btn').forEach(b=>b.onclick=()=>{
     S.rambamTrack=b.dataset.track; saveS();
-    ensureCycDay(currentHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
+    ensureCycDay(chokDayHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
   });
   const rg=document.getElementById('ckResumeGo'); if(rg) rg.onclick=ckResume;
   const rn=document.getElementById('ckResumeNew'); if(rn) rn.onclick=ckRestart;
