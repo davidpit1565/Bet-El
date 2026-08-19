@@ -1,4 +1,4 @@
-const CACHE = 'betel-tehilim-v4';
+const CACHE = 'betel-tehilim-v5';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
