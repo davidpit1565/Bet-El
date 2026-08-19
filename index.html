@@ -746,6 +746,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 .ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.ck-grp{font-family:var(--font-sacred);font-size:12px;color:var(--gold,#b8963f);margin:14px 4px 6px;letter-spacing:.05em}
 .ck-today{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10));cursor:pointer}
 .ck-today-tag{font-family:var(--font-sacred);font-size:11px;color:var(--gold,#b8963f);letter-spacing:.08em}
 .ck-today-name{font-family:var(--font-sacred);font-size:15px;flex:1;text-align:center}
@@ -1873,6 +1874,203 @@ function ckRestart(){
 }
 
 
+/* ---------- one search box for the whole app ---------- */
+/* Type anything - a parasha, a tractate and chapter, a Rambam halacha, a daf of
+   Zohar, a chapter of Tehillim, a prayer - and go straight there. Learning by
+   content rather than by date is the point: "רמב״ם טהרה פרק י" should land on
+   that chapter, and also say when the cycle reaches it. */
+let CKS={q:'', unit:null};
+function ckNorm(x){
+  return (x||'').replace(/[֑-ׇ]/g,'')
+    .replace(/['"׳״]/g,'')            // part of a numeral - dropping them keeps קי״ט one token
+    .replace(/[־\-:.,·]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+/* Hebrew numeral -> number, so "פרק י" and "פרק 10" both work */
+const CK_GEM={א:1,ב:2,ג:3,ד:4,ה:5,ו:6,ז:7,ח:8,ט:9,י:10,כ:20,ל:30,מ:40,נ:50,ס:60,ע:70,פ:80,צ:90,ק:100,ר:200,ש:300,ת:400};
+function ckNum(tok){
+  if(/^\d+$/.test(tok)) return +tok;
+  if(!tok||!/^[א-ת]+$/.test(tok)) return null;
+  let n=0;
+  for(const c of tok){ if(!(c in CK_GEM)) return null; n+=CK_GEM[c]; }
+  return n||null;
+}
+/* every addressable place in the app, built once */
+let CK_INDEX=null;
+function ckBuildIndex(){
+  if(CK_INDEX) return CK_INDEX;
+  const out=[];
+  if(CHOK){
+    CHOK.parshiot.forEach(k=>{
+      CHOK_ROWS.forEach(([d,di])=>out.push({
+        t:'chok', label:'פָּרָשַׁת '+parshaName(k)+' · '+chokRowLabel(d,di),
+        group:'חוֹק לְיִשְׂרָאֵל', s:ckNorm('פרשת '+parshaName(k)+' '+chokRowLabel(d,di)), key:k, day:d}));
+    });
+    // the Mishnah of the three-year cycle, by tractate and chapter
+    const seen={};
+    Object.keys(CHOK.schedule).forEach(k=>{
+      CHOK_DAYS.forEach(d=>{
+        ((CHOK.schedule[k][d]||{}).mishnah_cycle||[]).forEach((yr,yi)=>yr.forEach(r=>{
+          if(seen[r]) return; seen[r]=1;
+          out.push({t:'unit', kind:'mishnah', ref:r, year:yi+1,
+            label:chokRefLabel(r,'mishnah'), group:'מִשְׁנָה',
+            s:ckNorm('משנה '+chokRefLabel(r,'mishnah')), key:k, day:d});
+        }));
+      });
+    });
+  }
+  if(CYC){
+    CYC.rambam.order.forEach((e,i)=>out.push({t:'unit', kind:'rambam', i,
+      label:ckRambamName(e.book)+' · פֶּרֶק '+heNum(e.ch), group:'רַמְבַּ״ם',
+      s:ckNorm('רמבם רמב״ם משנה תורה '+((CYC.rambam.sefarim||{})[e.book]||'')+' '+ckRambamName(e.book)+' פרק '+e.ch+' '+heNum(e.ch))}));
+    CYC.zohar.order.forEach((e,i)=>{
+      const part=(CYC.zohar.heParts||{})[e.part]||e.part;
+      const vol=['','א','ב','ג'][e.vol]||e.vol;
+      out.push({t:'unit', kind:'zohar', i,
+        label:'זֹהַר · '+part+' · חֵלֶק '+vol+' · דַּף '+heNum(e.daf)+' · '+e.side, group:'זֹהַר',
+        s:ckNorm('זוהר '+part+' חלק '+vol+' דף '+e.daf+' '+heNum(e.daf)+' '+e.side)});
+    });
+  }
+  for(let i=1;i<=150;i++) out.push({t:'teh', ch:i, label:'תְּהִלִּים · פֶּרֶק '+heNum(i),
+    group:'תְּהִלִּים', s:ckNorm('תהילים תהלים מזמור פרק '+i+' '+heNum(i))});
+  if(typeof PRAYERS_EXTRA!=='undefined') Object.keys(PRAYERS_EXTRA).forEach(k=>{
+    if(!PRAYERS_EXTRA[k].ready) return;
+    out.push({t:'prayer', key:k, label:PRAYERS_EXTRA[k].title, group:'תְּפִלּוֹת',
+      s:ckNorm(PRAYERS_EXTRA[k].title)});
+  });
+  if(typeof LEYNING!=='undefined'&&LEYNING) Object.keys(LEYNING).forEach(k=>{
+    if(!LEYNING[k].parsha||LEYNING[k].parsha.length!==1) return;
+    out.push({t:'sm', key:k, label:'שְׁנַיִם מִקְרָא · '+parshaName(k), group:'שְׁנַיִם מִקְרָא',
+      s:ckNorm(parshaName(k))});
+  });
+  CK_INDEX=out;
+  return out;
+}
+/* Only read a token as a numeral when a counter word introduces it - otherwise
+   every Hebrew word is a valid gematria and 'ברכות' comes out as 628. */
+const CK_COUNTER=/^(פרק|פרקים|דף|דפים|עמוד|משנה|משניות|סימן|הלכה|הלכות|חלק|מזמור)$/;
+function ckSearch(q){
+  const n=ckNorm(q);
+  if(n.length<2) return [];
+  const toks=n.split(' ').filter(Boolean);
+  const nums=[], words=[];
+  toks.forEach((t,i)=>{
+    const after = i>0 && CK_COUNTER.test(toks[i-1]);
+    const v = (after||/^\d+$/.test(t)) ? ckNum(t) : null;
+    if(v!=null && (after || /^\d+$/.test(t))) nums.push(v);
+    else words.push(t);
+  });
+  const hits=[];
+  for(const e of ckBuildIndex()){
+    let ok=true;
+    for(const w of words){ if(e.s.indexOf(w)<0){ ok=false; break; } }
+    if(ok&&nums.length){
+      ok=nums.every(x=>new RegExp('(^| )'+x+'( |$)').test(e.s));
+    }
+    if(ok){ hits.push(e); if(hits.length>=400) break; }
+  }
+  return hits;
+}
+
+/* when the cycle next reaches this position */
+function ckNextDate(cfg,i){
+  const n=cfg.order.length, hd=currentHDate();
+  const cur=ckCycleIndex(cfg,hd);
+  const delta=((i-cur)%n+n)%n;
+  const d=new HDate(hd.abs()+delta);
+  return {delta, hd:d};
+}
+function ckWhenLine(kind,i){
+  if(!CYC) return '';
+  const cfg = kind==='rambam' ? CYC.rambam : CYC.zohar;
+  const w=ckNextDate(cfg,i);
+  if(kind==='rambam' && ckRambamTrack()===3){
+    // three a day: the chapter's day is its index divided by three
+    const day=Math.floor(i/3), cur=ckCycleIndex(cfg,currentHDate());
+    const n=cfg.order.length, delta=((day*3-cur)%n+n)%n;
+    const d=new HDate(currentHDate().abs()+Math.floor(delta/3));
+    return delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(d.renderGematriya(true));
+  }
+  return w.delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(w.hd.renderGematriya(true));
+}
+function ckOpenHit(e){
+  if(e.t==='chok') return openChok(e.key,e.day);
+  if(e.t==='teh') return openReader([e.ch],{start:e.ch});
+  if(e.t==='prayer') return openPrayer(e.key);
+  if(e.t==='sm'){ SM={key:e.key,mode:'aliyah',n:1}; return go('smReader'); }
+  if(e.t==='unit'){ CKS.unit=e; return go('chokUnit'); }
+}
+function renderChokSearch(){
+  const q=CKS.q||'';
+  app.innerHTML=`
+  ${topbar('חִפּוּשׂ','chokBooks')}
+  <div class="view">
+    <div class="search-box">${I.search}<input id="ckQ" value="${q.replace(/"/g,'&quot;')}"
+      placeholder="פָּרָשָׁה · מַסֶּכֶת וּפֶרֶק · רַמְבַּ״ם · דַּף זֹהַר · תְּהִלִּים · תְּפִלָּה"/></div>
+    <div id="ckResults"></div>
+    ${ornament()}
+  </div>`;
+  const inp=document.getElementById('ckQ');
+  const draw=()=>{
+    CKS.q=inp.value;
+    const box=document.getElementById('ckResults');
+    if(ckNorm(CKS.q).length<2){ box.innerHTML=`<div class="empty-note" style="padding:30px 16px;text-align:center;font-size:14px;line-height:1.9">כָּתְבוּ שֵׁם פָּרָשָׁה, מַסֶּכֶת וּפֶרֶק,<br>הִלְכוֹת רַמְבַּ״ם, דַּף זֹהַר אוֹ פֶּרֶק תְּהִלִּים</div>`; return; }
+    const hits=ckSearch(CKS.q);
+    if(!hits.length){ box.innerHTML=`<div class="empty-note" style="padding:30px 16px;text-align:center">לֹא נִמְצָא</div>`; return; }
+    const groups={};
+    hits.forEach(h=>{ (groups[h.group]=groups[h.group]||[]).push(h); });
+    box.innerHTML=Object.keys(groups).map(g=>`
+      <div class="ck-grp">${g} · ${heNum(groups[g].length)}</div>
+      <div class="prayers-list">${groups[g].slice(0,25).map((h,ix)=>
+        `<div class="prayer-row" data-g="${g}" data-i="${ix}"><span class="prayer-row-title">${h.label}</span>${I.chev}</div>`).join('')}
+      </div>`).join('');
+    box.querySelectorAll('.prayer-row').forEach(r=>r.onclick=()=>{
+      ckOpenHit(groups[r.dataset.g][+r.dataset.i]);
+    });
+    tr(box);
+  };
+  inp.oninput=draw; draw();
+  setTimeout(()=>inp.focus(),50);
+  tr(app);
+}
+/* a single unit, opened straight from search */
+function renderChokUnit(){
+  const e=CKS.unit;
+  if(!e) return go('chokBooks');
+  const load = e.kind==='mishnah' ? ensureChokData(e.key) : ensureCycDay(currentHDate());
+  app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokSearch')}<div class="view">${smSkeleton()}</div>`;
+  load.then(()=>{
+    if(TAB!=='chokUnit') return;
+    let segs=[], when='';
+    if(e.kind==='mishnah'){ segs=chokBundleSegs(e.key,[e.ref]); when='שָׁנָה '+heNum(e.year)+' בְּמַחֲזוֹר הַמִּשְׁנָה'; }
+    else if(e.kind==='rambam'){ return ensureCycBlock('rambam',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
+    else if(e.kind==='zohar'){ return ensureCycBlock('zohar',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
+    drawUnit(segs,when);
+  });
+  function drawUnit(segs,when){
+    app.innerHTML=`
+    <div class="reader view">
+      <div class="reader-head">
+        <div class="reader-top">
+          <button class="icon-btn" id="cuBack">${I.prev}</button>
+          <div class="reader-title">${e.group}</div>
+          <button class="icon-btn autoscroll-btn" id="cuAuto">${I.play}</button>
+        </div>
+        <div class="sm-aliyah-tag">${e.label}</div>
+        ${when?`<div class="ck-source">${when}</div>`:''}
+      </div>
+      <div class="sm-verses notranslate">
+        ${(segs||[]).map((t,i)=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(i+1)}</span><div class="sm-he">${t}</div></div>`).join('')
+          || `<div class="empty-note" style="padding:30px;text-align:center">אֵין טֶקְסְט</div>`}
+      </div>
+      <div style="height:26px"></div>
+    </div>`;
+    document.getElementById('cuBack').onclick=()=>go('chokSearch');
+    document.getElementById('cuAuto').onclick=ev=>toggleAutoScroll(ev.currentTarget);
+    tr(app);
+  }
+}
+
 /* ---------- browse: five books, then parasha, then day ---------- */
 const CK_BOOKS=[
   {en:'Genesis',     he:'בְּרֵאשִׁית'},
@@ -1898,7 +2096,7 @@ function ckTodayLine(){
 let CK={key:null, day:null, sec:0};
 function renderChokBooks(){
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}<div class="view">${smSkeleton()}</div>`;
-  ensureChokIndex().then(()=>ensureShnayimData()).then(()=>{
+  ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureCycles()).then(()=>{
     if(TAB!=='chokBooks') return;
     const t=ckTodayLine();
     app.innerHTML=`
@@ -1909,6 +2107,8 @@ function renderChokBooks(){
         <div class="ck-today-name">${t.text}</div>
         <span class="sm-week-chev">${I.chev}</span>
       </div>`:''}
+      <div class="search-box" id="ckSearchOpen" style="cursor:pointer">${I.search}
+        <input readonly placeholder="חִפּוּשׂ בְּכָל הָאַפְּלִיקַצְיָה" style="pointer-events:none"/></div>
       <div class="prayers-list">
         ${CK_BOOKS.map(b=>`<div class="prayer-row" data-book="${b.en}">
           <span class="prayer-row-title">${b.he}</span>${I.chev}</div>`).join('')}
@@ -1917,6 +2117,8 @@ function renderChokBooks(){
     </div>`;
     const tc=document.getElementById('ckTodayCard');
     if(tc) tc.onclick=()=>openChok(t.key,t.day);
+    const so=document.getElementById('ckSearchOpen');
+    if(so) so.onclick=()=>{ CKS.q=''; go('chokSearch'); };
     app.querySelectorAll('#app .prayer-row[data-book]').forEach(r=>r.onclick=()=>{
       CK.book=r.dataset.book; go('chokParshiot');
     });
@@ -2179,6 +2381,8 @@ function render(){
   else if(TAB==='zoharList') renderZoharList();
   else if(TAB==='zoharReader') renderZoharReader();
   else if(TAB==='chokBooks') renderChokBooks();
+  else if(TAB==='chokSearch') renderChokSearch();
+  else if(TAB==='chokUnit') renderChokUnit();
   else if(TAB==='chokParshiot') renderChokParshiot();
   else if(TAB==='chokList') renderChokList();
   else if(TAB==='chokReader') renderChokReader();
