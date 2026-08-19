@@ -746,6 +746,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 .ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.ck-teh-head{font-family:var(--font-sacred);font-size:14px;color:var(--gold,#b8963f);text-align:center;margin:14px 0 6px;letter-spacing:.04em}
 .ck-comm-bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
 .ck-comm-btn{font-family:var(--font-sacred);font-size:12px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
 .ck-comm-btn.on{background:var(--gold-soft,rgba(190,150,70,.14));color:var(--ink);border-color:var(--gold,#b8963f)}
@@ -1581,6 +1582,16 @@ function chokVerseSegs(key,refs){
   });
   return out;
 }
+/* The app's own daily Tehillim portion, read in its place inside the order. */
+function chokTehillimVerses(){
+  const T=window.TEHILLIM; if(!T) return [];
+  const out=[];
+  chaptersOf(portionFor(currentHDate())).forEach(ch=>{
+    (T[ch]||[]).forEach((he,i)=>out.push({ch, v:i+1, he}));
+  });
+  return out;
+}
+
 /* the sections shown for a given weekday, in study order */
 function chokSectionsFor(key,day){
   const wk=CHOK.schedule[key];
@@ -1602,6 +1613,7 @@ function chokSectionsFor(key,day){
     push('neviim','נְבִיאִים', chokVerseSegs(key,d.neviim), 'verse', null, d.neviim);
     push('ketuvim','כְּתוּבִים', chokVerseSegs(key,d.ketuvim), 'verse', null, d.ketuvim);
   }
+  push('tehillim','תְּהִלִּים', chokTehillimVerses(), 'tehillim');
   const mref=(d.mishnah_cycle||[])[my]||[];
   push('mishnah','מִשְׁנָה', chokBundleSegs(key,mref), 'text', null, mref);
   push('gemara','גְּמָרָא', chokBundleSegs(key,d.gemara), 'text', null, d.gemara);
@@ -1672,6 +1684,10 @@ function chokRefLabel(ref, sec){
   return ref;
 }
 function chokSourceLine(sec){
+  if(sec.key==='tehillim'){
+    const r=portionFor(currentHDate());
+    return 'סֵפֶר תְּהִלִּים · '+(r[0]===r[1]?'פֶּרֶק '+heNum(r[0]):'פְּרָקִים '+heNum(r[0])+CK_DASH+heNum(r[1]));
+  }
   const refs=(sec.refs||[]).map(r=>chokRefLabel(r,sec.key)).filter(Boolean);
   return refs.length?refs.join('  ·  '):'';
 }
@@ -1795,7 +1811,12 @@ function renderChokReader(){
   const rowLabel=chokRowLabel(CK.day,di);
   const pct=Math.round(((CK.sec+1)/secs.length)*100);
   const vid=v=>(v.book&&v.c&&v.v)?`${v.book} ${v.c}:${v.v}`:'';
-  const body = (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
+  const tehBody=items=>items.map((x,i)=>{
+    const head=(i===0||items[i-1].ch!==x.ch)?`<div class="ck-teh-head">פֶּרֶק ${heNum(x.ch)}</div>`:'';
+    return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.ch)}:${heNum(x.v)}</span><div class="sm-he">${x.he}</div></div>`;
+  }).join('');
+  const body = s.kind==='tehillim' ? tehBody(s.items)
+    : (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
     ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}${ckCommBar(vid(v),s.key)}</div>`).join('')
     : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`).join('');
   const srcLine=chokSourceLine(s);
