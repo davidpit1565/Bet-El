@@ -744,8 +744,8 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @media (prefers-reduced-motion: reduce){.skel-line{animation:none;opacity:.6}}
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
-.sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
-.ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.sm-aliyah-tag{font-family:var(--font-sacred);font-size:19px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:5px;letter-spacing:.01em;line-height:1.5}
+.ck-source{font-family:var(--font-sacred);font-size:15px;font-weight:600;color:var(--gold,#b8963f);opacity:1;text-align:center;letter-spacing:.01em;margin:0 0 10px;padding:0 8px;line-height:1.7}
 .ck-grp{font-family:var(--font-sacred);font-size:12px;color:var(--gold,#b8963f);margin:14px 4px 6px;letter-spacing:.05em}
 .ck-today{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10));cursor:pointer}
 .ck-today-tag{font-family:var(--font-sacred);font-size:11px;color:var(--gold,#b8963f);letter-spacing:.08em}
@@ -758,14 +758,17 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-resume-btns{display:flex;gap:6px}
 .ck-resume-btn{font-family:var(--font-sacred);font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-resume-btn.primary{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
-.ck-teh-head{font-family:var(--font-sacred);font-size:14px;color:var(--gold,#b8963f);text-align:center;margin:14px 0 6px;letter-spacing:.04em}
-.ck-comm-bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
-.ck-comm-btn{font-family:var(--font-sacred);font-size:12px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
+.sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
+.sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
+.sm-aliyah-chip.ck-arrow:disabled{opacity:.3}
+.ck-teh-head{font-family:var(--font-sacred);font-size:18px;font-weight:700;color:var(--gold,#b8963f);text-align:center;margin:20px 0 10px;letter-spacing:.03em}
+.ck-comm-bar{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0 2px}
+.ck-comm-btn{font-family:var(--font-sacred);font-size:15px;font-weight:600;padding:6px 18px;border-radius:999px;border:1.5px solid var(--gold,#b8963f);background:transparent;color:var(--gold,#b8963f);cursor:pointer;transition:.15s}
 .ck-comm-btn.on{background:var(--gold-soft,rgba(190,150,70,.14));color:var(--ink);border-color:var(--gold,#b8963f)}
 .ck-comm-panel{display:none}
 .ck-comm-panel.open{display:block;margin:8px 0 2px;padding:10px 12px;border-radius:10px;background:var(--card-2,rgba(0,0,0,.03));border:1px solid var(--line)}
-.ck-comm-title{font-family:var(--font-sacred);font-size:12px;color:var(--gold,#b8963f);margin-bottom:6px}
-.ck-comm-text{font-family:var(--font-sacred);font-size:15px;line-height:2;margin-bottom:8px}
+.ck-comm-title{font-family:var(--font-sacred);font-size:15px;font-weight:700;color:var(--gold,#b8963f);margin-bottom:8px}
+.ck-comm-text{font-family:var(--font-sacred);font-size:16px;line-height:2.05;margin-bottom:10px}
 .ck-comm-text:last-child{margin-bottom:0}
 .sm-aliyah-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .sm-aliyah-nav::-webkit-scrollbar{display:none}
@@ -1750,6 +1753,36 @@ function ckToggleComm(btn){
 }
 
 
+
+/* ---------- the quick-tools button, on every screen ---------- */
+/* Font size, light/dark, auto-scroll and home. It already existed inside the
+   Tehillim reader; this is the same control, lifted out so every page has it. */
+function toolsFab(opts){
+  opts=opts||{};
+  return `<div class="reader-tools collapsed" id="gTools">
+    <button class="rt-fab" id="gFab">${I.text}</button>
+    <div class="rt-panel">
+      <button id="gMinus">${I.aminus}</button>
+      <div class="fs-val" id="gFs">${Math.round(S.fontScale*100)}</div>
+      <button id="gPlus">${I.aplus}</button>
+      <div class="sep"></div>
+      <button id="gTheme">${S.theme==='dark'?I.sun:I.moon}</button>
+      ${opts.scroll?`<button class="autoscroll-btn" id="gAutoScroll">${I.play}</button>`:''}
+      <button id="gHome">${I.home}</button>
+    </div>
+  </div>`;
+}
+function wireToolsFab(){
+  const box=document.getElementById('gTools'); if(!box) return;
+  const fab=document.getElementById('gFab');
+  if(fab) fab.onclick=()=>box.classList.toggle('collapsed');
+  const mi=document.getElementById('gMinus'); if(mi) mi.onclick=()=>{ changeFont(-0.1); const v=document.getElementById('gFs'); if(v) v.textContent=Math.round(S.fontScale*100); };
+  const pl=document.getElementById('gPlus');  if(pl) pl.onclick=()=>{ changeFont(0.1);  const v=document.getElementById('gFs'); if(v) v.textContent=Math.round(S.fontScale*100); };
+  const th=document.getElementById('gTheme'); if(th) th.onclick=()=>{ toggleTheme(); th.innerHTML=S.theme==='dark'?I.sun:I.moon; };
+  const as=document.getElementById('gAutoScroll'); if(as) as.onclick=e=>toggleAutoScroll(e.currentTarget);
+  const hm=document.getElementById('gHome'); if(hm) hm.onclick=()=>go('home');
+}
+
 /* ---------- the date-driven cycles: Rambam and Zohar ---------- */
 /* Both run by the calendar, Shabbat included, so their position is a day count
    from a fixed anchor rather than a place in the parasha week. */
@@ -2178,8 +2211,8 @@ function drawChokList(){
         <div class="sm-week-name">${parshaName(key)}</div>
       </div>
       <div class="sm-aliyah-nav" style="margin:0">
-        <button class="sm-aliyah-chip" id="ckPrevWk" ${i>0?'':'disabled'}>${I.prev}</button>
-        <button class="sm-aliyah-chip" id="ckNextWk" ${i<CHOK.parshiot.length-1?'':'disabled'}>${I.next}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="ckPrevWk" ${i>0?'':'disabled'} aria-label="הַקּוֹדֶמֶת">${I.prev}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="ckNextWk" ${i<CHOK.parshiot.length-1?'':'disabled'} aria-label="הַבָּאָה">${I.next}</button>
       </div>
     </div>
     <div class="prayers-list">
@@ -2388,8 +2421,27 @@ function render(){
   else if(TAB==='chokReader') renderChokReader();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='tracker') renderTracker();
+  mountToolsFab();
   tr(app);
 }
+/* The reader carries its own copy, so only add ours where it is absent.
+   Screens that fetch their data replace the view after render() has returned,
+   which would wipe the button - so watch the view instead of mounting once,
+   and every screen gets it, including ones added later. */
+function mountToolsFab(){
+  if(TAB==='reader'||document.getElementById('gTools')) return;
+  if(!app.firstChild) return;
+  const scroll = /Reader|chokUnit/.test(TAB);
+  app.insertAdjacentHTML('beforeend', toolsFab({scroll}));
+  wireToolsFab();
+}
+let fabTimer=null;
+try{
+  new MutationObserver(()=>{
+    clearTimeout(fabTimer);
+    fabTimer=setTimeout(()=>{ try{ mountToolsFab(); }catch(e){} }, 40);
+  }).observe(app, {childList:true});
+}catch(e){}
 
 /* ================= HOME ================= */
 function greeting(){ const h=new Date().getHours();
