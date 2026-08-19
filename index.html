@@ -746,6 +746,14 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
 .ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
+.ck-comm-bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
+.ck-comm-btn{font-family:var(--font-sacred);font-size:12px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
+.ck-comm-btn.on{background:var(--gold-soft,rgba(190,150,70,.14));color:var(--ink);border-color:var(--gold,#b8963f)}
+.ck-comm-panel{display:none}
+.ck-comm-panel.open{display:block;margin:8px 0 2px;padding:10px 12px;border-radius:10px;background:var(--card-2,rgba(0,0,0,.03));border:1px solid var(--line)}
+.ck-comm-title{font-family:var(--font-sacred);font-size:12px;color:var(--gold,#b8963f);margin-bottom:6px}
+.ck-comm-text{font-family:var(--font-sacred);font-size:15px;line-height:2;margin-bottom:8px}
+.ck-comm-text:last-child{margin-bottom:0}
 .sm-aliyah-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .sm-aliyah-nav::-webkit-scrollbar{display:none}
 .sm-aliyah-chip{flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line-strong);
@@ -1548,13 +1556,29 @@ function chokTorahVerses(refs){
   (refs||[]).forEach(ref=>{
     const p=chokParseRef(ref);
     if(!p||!CHOK_TORAH_BOOKS[p.book]||!TORAH||!TORAH[p.book]) return;
-    out.push(...versesInRange(p.book, p.c1+':'+p.v1, p.c2+':'+p.v2));
+    versesInRange(p.book, p.c1+':'+p.v1, p.c2+':'+p.v2).forEach(v=>out.push(Object.assign({book:p.book}, v)));
   });
   return out;
 }
 function chokBundleSegs(key,refs){
   const b=CHOK_WEEK[key]||{}; const out=[];
   (refs||[]).forEach(r=>{ const v=b[r]; if(Array.isArray(v)) out.push(...v); else if(typeof v==='string') out.push(v); });
+  return out;
+}
+/* same segments, but carried as verses so a commentary can hang off each one */
+function chokVerseSegs(key,refs){
+  const b=CHOK_WEEK[key]||{}, out=[];
+  (refs||[]).forEach(r=>{
+    const segs=b[r]; if(!Array.isArray(segs)) return;
+    const p=chokParseRef(r);
+    if(!p){ segs.forEach(t=>out.push({he:t})); return; }
+    let c=p.c1, v=p.v1;
+    segs.forEach(t=>{
+      out.push({book:p.book, c, v, he:t});
+      v++;
+      if(c<p.c2 && v>(HAFTARAH&&HAFTARAH[p.book]&&HAFTARAH[p.book][c]?HAFTARAH[p.book][c].length:0)){ c++; v=1; }
+    });
+  });
   return out;
 }
 /* the sections shown for a given weekday, in study order */
@@ -1575,8 +1599,8 @@ function chokSectionsFor(key,day){
     const h=(d.haftarah_seph||[])[0];
     if(h) push('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah);
   } else {
-    push('neviim','נְבִיאִים', chokBundleSegs(key,d.neviim), 'text', null, d.neviim);
-    push('ketuvim','כְּתוּבִים', chokBundleSegs(key,d.ketuvim), 'text', null, d.ketuvim);
+    push('neviim','נְבִיאִים', chokVerseSegs(key,d.neviim), 'verse', null, d.neviim);
+    push('ketuvim','כְּתוּבִים', chokVerseSegs(key,d.ketuvim), 'verse', null, d.ketuvim);
   }
   const mref=(d.mishnah_cycle||[])[my]||[];
   push('mishnah','מִשְׁנָה', chokBundleSegs(key,mref), 'text', null, mref);
@@ -1650,6 +1674,40 @@ function chokRefLabel(ref, sec){
 function chokSourceLine(sec){
   const refs=(sec.refs||[]).map(r=>chokRefLabel(r,sec.key)).filter(Boolean);
   return refs.length?refs.join('  ·  '):'';
+}
+
+/* ---------- commentary windows ---------- */
+/* Opens under the verse it belongs to, on the same screen. One panel per row;
+   tapping the open commentary again closes it. */
+const CK_COMM = {
+  rashi: {he:'רַשִׁ״י',        on:['torah','neviim','ketuvim','haftarah','tzeruf']},
+  ohc:   {he:'אוֹר הַחַיִּים', on:['torah','tzeruf']},
+  bart:  {he:'בַּרְטֶנוּרָא',  on:['mishnah']},
+};
+function ckCommFor(id){ return ((CHOK_WEEK[CK.key]||{})._comm||{})[id]||null; }
+function ckCommBar(id, sec){
+  const c=ckCommFor(id);
+  if(!c) return '';
+  const btns=Object.keys(CK_COMM).filter(w=>CK_COMM[w].on.indexOf(sec)>=0 && (c[w]||[]).length);
+  if(!btns.length) return '';
+  return `<div class="ck-comm-bar">${btns.map(w=>
+    `<button class="ck-comm-btn" data-id="${id}" data-w="${w}">${CK_COMM[w].he}</button>`).join('')}</div>
+    <div class="ck-comm-panel" data-panel="${id}"></div>`;
+}
+function ckToggleComm(btn){
+  const id=btn.dataset.id, w=btn.dataset.w;
+  const panel=app.querySelector(`.ck-comm-panel[data-panel="${CSS.escape(id)}"]`);
+  if(!panel) return;
+  const bar=btn.parentElement;
+  const already = panel.dataset.open===w;
+  bar.querySelectorAll('.ck-comm-btn').forEach(b=>b.classList.remove('on'));
+  if(already){ panel.innerHTML=''; panel.dataset.open=''; panel.classList.remove('open'); return; }
+  const segs=(ckCommFor(id)||{})[w]||[];
+  panel.innerHTML=`<div class="ck-comm-title">${CK_COMM[w].he}</div>`+
+    segs.map(t=>`<div class="ck-comm-text">${t}</div>`).join('');
+  panel.dataset.open=w; panel.classList.add('open');
+  btn.classList.add('on');
+  tr(panel);
 }
 
 /* ---------- week list ---------- */
@@ -1736,8 +1794,9 @@ function renderChokReader(){
   const di=CHOK_DAYS.indexOf(CK.day);
   const rowLabel=chokRowLabel(CK.day,di);
   const pct=Math.round(((CK.sec+1)/secs.length)*100);
-  const body = (s.kind==='torah'||s.kind==='haftarah')
-    ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')
+  const vid=v=>(v.book&&v.c&&v.v)?`${v.book} ${v.c}:${v.v}`:'';
+  const body = (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
+    ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}${ckCommBar(vid(v),s.key)}</div>`).join('')
     : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div></div>`).join('');
   const srcLine=chokSourceLine(s);
   app.innerHTML=`
@@ -1771,6 +1830,7 @@ function renderChokReader(){
   const dn=document.getElementById('ckDone');
   if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
   app.querySelectorAll('.sm-aliyah-chip[data-sec]').forEach(b=>b.onclick=()=>{ CK.sec=+b.dataset.sec; renderChokReader(); forceScrollTop(); });
+  app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   tr(app);
 }
 
