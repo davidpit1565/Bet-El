@@ -2211,6 +2211,12 @@ function ckNorm(x){
     .replace(/[־\-:.,·]/g,' ')
     .replace(/\s+/g,' ').trim();
 }
+/* Nikud sources spell some names defectively - חֻלִּין where a search typed
+   plene would read חולין - so a word of three letters or more is also matched
+   with its ו stripped from both sides, which brings the two spellings
+   together. The י is left alone: it also marks tens in a numeral (קי״ט,
+   ק״ט), and dropping it would let a chapter search match the wrong chapter. */
+function ckSkel(s){ return (s||'').replace(/ו/g,''); }
 /* Hebrew numeral -> number, so "פרק י" and "פרק 10" both work */
 const CK_GEM={א:1,ב:2,ג:3,ד:4,ה:5,ו:6,ז:7,ח:8,ט:9,י:10,כ:20,ל:30,מ:40,נ:50,ס:60,ע:70,פ:80,צ:90,ק:100,ר:200,ש:300,ת:400};
 function ckNum(tok){
@@ -2241,6 +2247,13 @@ function ckBuildIndex(){
             label:chokRefLabel(r,'mishnah'), group:'מִשְׁנָה',
             s:ckNorm('משנה '+chokRefLabel(r,'mishnah')), key:k, day:d});
         }));
+        // Reshit Chokhmah, by gate and chapter
+        ((CHOK.schedule[k][d]||{}).musar||[]).forEach(r=>{
+          if(seen[r]) return; seen[r]=1;
+          const lab=chokRefLabel(r,'musar');
+          out.push({t:'unit', kind:'musar', ref:r, label:lab, group:'מוּסָר',
+            s:ckNorm('מוסר ראשית חכמה '+lab), key:k, day:d});
+        });
       });
     });
   }
@@ -2248,6 +2261,12 @@ function ckBuildIndex(){
     CYC.rambam.order.forEach((e,i)=>out.push({t:'unit', kind:'rambam', i,
       label:ckRambamName(e.book)+' · פֶּרֶק '+heNum(e.ch), group:'רַמְבַּ״ם',
       s:ckNorm('רמבם רמב״ם משנה תורה '+((CYC.rambam.sefarim||{})[e.book]||'')+' '+ckRambamName(e.book)+' פרק '+e.ch+' '+heNum(e.ch))}));
+    if(CYC.daf) CYC.daf.order.forEach((e,i)=>{
+      const nm=ckDafName(e.t);
+      out.push({t:'unit', kind:'daf', i,
+        label:'מַסֶּכֶת '+nm+' · דַּף '+heNum(e.daf), group:'גְּמָרָא',
+        s:ckNorm('גמרא תלמוד דף יומי מסכת '+nm+' דף '+e.daf+' '+heNum(e.daf))});
+    });
     CYC.zohar.order.forEach((e,i)=>{
       const part=(CYC.zohar.heParts||{})[e.part]||e.part;
       const vol=['','א׳','ב׳','ג׳'][e.vol]||e.vol;
@@ -2268,6 +2287,7 @@ function ckBuildIndex(){
     out.push({t:'sm', key:k, label:'שְׁנַיִם מִקְרָא · '+parshaName(k), group:'שְׁנַיִם מִקְרָא',
       s:ckNorm(parshaName(k))});
   });
+  out.forEach(e=>{ e.sk=ckSkel(e.s); });
   CK_INDEX=out;
   return out;
 }
@@ -2288,7 +2308,10 @@ function ckSearch(q){
   const hits=[];
   for(const e of ckBuildIndex()){
     let ok=true;
-    for(const w of words){ if(e.s.indexOf(w)<0){ ok=false; break; } }
+    for(const w of words){
+      const found = w.length>=3 ? e.sk.indexOf(ckSkel(w))>=0 : e.s.indexOf(w)>=0;
+      if(!found){ ok=false; break; }
+    }
     if(ok&&nums.length){
       ok=nums.every(x=>new RegExp('(^| )'+x+'( |$)').test(e.s));
     }
@@ -2306,7 +2329,7 @@ function ckNextDate(cfg,i){
 }
 function ckWhenLine(kind,i){
   if(!CYC) return '';
-  const cfg = kind==='rambam' ? CYC.rambam : CYC.zohar;
+  const cfg = kind==='rambam' ? CYC.rambam : kind==='daf' ? CYC.daf : CYC.zohar;
   const w=ckNextDate(cfg,i);
   if(kind==='rambam'){
     const per=ckRambamTrack(), n=cfg.order.length, hd=chokDayHDate();
@@ -2363,12 +2386,15 @@ function renderChokSearch(){
 function renderChokUnit(){
   const e=CKS.unit;
   if(!e) return go('chokBooks');
-  const load = e.kind==='mishnah' ? ensureChokData(e.key) : ensureCycDay(chokDayHDate());
+  const load = (e.kind==='mishnah'||e.kind==='musar') ? ensureChokData(e.key) : ensureCycDay(chokDayHDate());
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokSearch')}<div class="view">${smSkeleton()}</div>`;
   load.then(()=>{
     if(TAB!=='chokUnit') return;
     let segs=[], when='';
     if(e.kind==='mishnah'){ segs=chokBundleSegs(e.key,[e.ref]); when='שָׁנָה '+heNum(e.year)+' בְּמַחֲזוֹר הַמִּשְׁנָה'; }
+    else if(e.kind==='musar'){ segs=chokBundleSegs(e.key,[e.ref]); when='אֵין מַהֲדוּרָה מְנֻקֶּדֶת'; }
+    else if(e.kind==='daf'){ return ensureCycBlock('daf',ckDafBlock(e.i))
+      .then(()=>drawUnit(ckDafItems(e.i).filter(x=>x.t!==undefined).map(x=>x.t), ckWhenLine('daf',e.i))); }
     else if(e.kind==='rambam'){ return ensureCycBlock('rambam',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
     else if(e.kind==='zohar'){ return ensureCycBlock('zohar',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
     drawUnit(segs,when);
