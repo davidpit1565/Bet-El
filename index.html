@@ -761,6 +761,8 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
 .sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
 .sm-aliyah-chip.ck-arrow:disabled{opacity:.3}
+.ck-comm-body{font-size:16px;line-height:2.05;margin-bottom:8px}
+.ck-comm-body:last-child{margin-bottom:0}
 .ck-teh-head{font-family:var(--font-sacred);font-size:18px;font-weight:700;color:var(--gold,#b8963f);text-align:center;margin:20px 0 10px;letter-spacing:.03em}
 .ck-comm-bar{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0 2px}
 .ck-comm-btn{font-family:var(--font-sacred);font-size:15px;font-weight:600;padding:6px 18px;border-radius:999px;border:1.5px solid var(--gold,#b8963f);background:transparent;color:var(--gold,#b8963f);cursor:pointer;transition:.15s}
@@ -1608,6 +1610,18 @@ function chokTehillimVerses(){
   return out;
 }
 
+/* a commentary presented as its own section, each comment under the verse it
+   belongs to, rather than folded into the verse's bar */
+function chokCommVerses(verses, who){
+  const out=[];
+  (verses||[]).forEach(v=>{
+    if(!v.book||!v.c||!v.v) return;
+    const segs=((ckCommFor(v.book+' '+v.c+':'+v.v))||{})[who];
+    if(segs&&segs.length) out.push({c:v.c, v:v.v, book:v.book, segs});
+  });
+  return out;
+}
+
 /* the sections shown for a given weekday, in study order */
 function chokSectionsFor(key,day){
   const wk=CHOK.schedule[key];
@@ -1621,7 +1635,9 @@ function chokSectionsFor(key,day){
   const wkb=CHOK_WEEK[key]||{}, lab=wkb._labels||{}, mrf=wkb._mrefs||{};
   const joinFor=(map,refs)=>{ let o=[]; (refs||[]).forEach(r=>{ if(map[r]) o=o.concat(map[r]); }); return o.length?o:null; };
   const push=(k,he,items,kind,note,refs)=>{ if(items&&items.length) list.push({key:k,he,items,kind,note,refs:refs||[],tags:joinFor(lab,refs),ids:joinFor(mrf,refs)}); };
-  push('torah','תּוֹרָה', chokTorahVerses(d.torah), 'torah', null, d.torah);
+  const tv=chokTorahVerses(d.torah);
+  push('torah','תּוֹרָה', tv, 'torah', null, d.torah);
+  push('ohc','אוֹר הַחַיִּים', chokCommVerses(tv,'ohc'), 'comm', null, d.torah);
   if(day==='fri'){
     const h=(d.haftarah_seph||[])[0];
     if(h) push('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah);
@@ -1710,6 +1726,10 @@ function chokRefLabel(ref, sec){
 function chokSourceLine(sec){
   if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,currentHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
+  if(sec.kind==='comm'){
+    const refs=(sec.refs||[]).map(r=>chokRefLabel(r,'torah')).filter(Boolean);
+    return (refs.length?refs.join('  ·  '):'');
+  }
   if(sec.key==='tehillim'){
     const r=portionFor(currentHDate());
     return 'סֵפֶר תְּהִלִּים · '+(r[0]===r[1]?'פֶּרֶק '+heNum(r[0]):'פְּרָקִים '+heNum(r[0])+CK_DASH+heNum(r[1]));
@@ -1722,9 +1742,8 @@ function chokSourceLine(sec){
 /* Opens under the verse it belongs to, on the same screen. One panel per row;
    tapping the open commentary again closes it. */
 const CK_COMM = {
-  rashi: {he:'רַשִׁ״י',        on:['torah','neviim','ketuvim','haftarah','tzeruf']},
-  ohc:   {he:'אוֹר הַחַיִּים', on:['torah','tzeruf']},
-  bart:  {he:'בַּרְטֶנוּרָא',  on:['mishnah']},
+  rashi: {he:'רַשִׁ״י',       on:['torah','neviim','ketuvim','haftarah','tzeruf']},
+  bart:  {he:'בַּרְטֶנוּרָא', on:['mishnah']},
 };
 function ckCommFor(id){ return ((CHOK_WEEK[CK.key]||{})._comm||{})[id]||null; }
 function ckCommBar(id, sec){
@@ -2271,7 +2290,11 @@ function renderChokReader(){
     const head=(i===0||items[i-1].i!==x.i)?`<div class="ck-teh-head">${ckRambamName(e.book)} · פֶּרֶק ${heNum(e.ch)}</div>`:'';
     return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(i+1)}</span><div class="sm-he">${x.t}</div></div>`;
   }).join('');
-  const body = s.kind==='rambam' ? ramBody(s.items)
+  const commBody=items=>items.map(x=>
+    `<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.c)}:${heNum(x.v)}</span>`+
+    x.segs.map(t=>`<div class="sm-he ck-comm-body">${t}</div>`).join('')+`</div>`).join('');
+  const body = s.kind==='comm' ? commBody(s.items)
+    : s.kind==='rambam' ? ramBody(s.items)
     : s.kind==='tehillim' ? tehBody(s.items)
     : (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
     ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}${ckCommBar(vid(v),s.key)}</div>`).join('')
@@ -3826,21 +3849,24 @@ render();
   }
   lastY = getY();
   function onScroll(){
-    const nav = document.querySelector('.bottom-nav');
+    const nav = document.querySelector('.bottom-nav') || document.createElement('div');
     ticking = false;
-    if(!nav) return;
     const y = getY();
     const dy = y - lastY;
-    if(y < 40){
-      nav.classList.remove('nav-hidden');
-    } else if(dy > THRESHOLD){
-      nav.classList.add('nav-hidden');
-    } else if(dy < -THRESHOLD){
-      nav.classList.remove('nav-hidden');
-    }
+    const tools=document.getElementById('gTools');
+    const set=hide=>{
+      nav.classList.toggle('nav-hidden', hide);
+      if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
+    };
+    if(y < 40){ set(false); }
+    else if(dy > THRESHOLD){ set(true); }
+    else if(dy < -THRESHOLD){ set(false); }
     lastY = y;
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(()=>{ nav.classList.remove('nav-hidden'); }, 1400);
+    hideTimer = setTimeout(()=>{
+      nav.classList.remove('nav-hidden');
+      const t=document.getElementById('gTools'); if(t) t.classList.remove('nav-hidden');
+    }, 1400);
   }
   const raf = ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(onScroll); } };
   document.addEventListener('scroll', raf, {passive:true, capture:true});
