@@ -2089,7 +2089,7 @@ function ckDafItems(i){
 function ckZoharLabel(i){
   const e=CYC.zohar.order[i];
   const part=(CYC.zohar.heParts||{})[e.part]||e.part;
-  const vol=['','א','ב','ג'][e.vol]||e.vol;
+  const vol=['','א׳','ב׳','ג׳'][e.vol]||e.vol;
   let s='זֹהַר · '+part+' · חֵלֶק '+vol+' · דַּף '+heNum(e.daf)+' · '+e.side;
   if(e.split) s+='  ·  '+heNum(e.split[0])+' מִתּוֹךְ '+heNum(e.split[1]);
   return s;
@@ -2224,7 +2224,7 @@ function ckBuildIndex(){
       s:ckNorm('רמבם רמב״ם משנה תורה '+((CYC.rambam.sefarim||{})[e.book]||'')+' '+ckRambamName(e.book)+' פרק '+e.ch+' '+heNum(e.ch))}));
     CYC.zohar.order.forEach((e,i)=>{
       const part=(CYC.zohar.heParts||{})[e.part]||e.part;
-      const vol=['','א','ב','ג'][e.vol]||e.vol;
+      const vol=['','א׳','ב׳','ג׳'][e.vol]||e.vol;
       out.push({t:'unit', kind:'zohar', i,
         label:'זֹהַר · '+part+' · חֵלֶק '+vol+' · דַּף '+heNum(e.daf)+' · '+e.side, group:'זֹהַר',
         s:ckNorm('זוהר '+part+' חלק '+vol+' דף '+e.daf+' '+heNum(e.daf)+' '+e.side)});
