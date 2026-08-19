@@ -1748,9 +1748,24 @@ function chokSectionsFor(key,day){
 
 /* ---------- source labels ---------- */
 /* Sefaria's heTitle carries the work's own name; the framing words are ours. */
+/* The names of the works carry nikud, so a prefix is matched on the letters
+   alone and then cut from the pointed string, vowels and all. The maqaf is
+   left out of the marks - it separates words, as in כִּי־תֵצֵא. */
+const CK_NIK=/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g;
+function ckBare(x){ return (x||'').replace(CK_NIK,''); }
+function ckCutPrefix(s,bare){
+  if(ckBare(s).indexOf(bare)!==0) return s;
+  let seen=0, i=0;
+  while(i<s.length && seen<bare.length){ if(!s[i].match(CK_NIK)) seen++; i++; }
+  while(i<s.length && s[i].match(CK_NIK)) i++;
+  return s.slice(i).replace(/^\s+/,'');
+}
 function chokWorkName(base){
-  const n=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||base;
-  return n.replace(/^משנה תורה,\s*/,'').replace(/^משנה\s+/,'').replace(/^ספר הזהר$/,'זֹהַר');
+  let n=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||base;
+  if(ckBare(n)==='ספר הזהר') return 'זֹהַר';
+  n=ckCutPrefix(n,'משנה תורה,');
+  n=ckCutPrefix(n,'משנה ');
+  return n;
 }
 const CK_DASH='־';
 function ckRange(a,b){ return a===b?heNum(a):heNum(a)+CK_DASH+heNum(b); }
@@ -1798,7 +1813,7 @@ function chokRefLabel(ref, sec){
     const base=m[1];
     if(sec==='zohar'){
       const he=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||'';
-      const name=(!he||/^ספר הזהר$/.test(he))?base.replace(/^Zohar( Chadash)?,?\s*/,''):he;
+      const name=(!he||ckBare(he)==='ספר הזהר')?base.replace(/^Zohar( Chadash)?,?\s*/,''):he;
       const pre=/^Zohar Chadash/.test(base)?'זֹהַר חָדָשׁ · ':'זֹהַר · ';
       return pre+name+' · '+ckRange(+m[2], m[3]?+m[3]:+m[2]);
     }
@@ -2039,7 +2054,7 @@ function ckRambamIndexes(hd){
 }
 function ckRambamName(book){
   const he=(CYC.rambam.heNames||{})[book]||book;
-  return he.replace(/^משנה תורה,\s*/,'');
+  return ckCutPrefix(he,'משנה תורה,');
 }
 function ckRambamLabel(idxs){
   return idxs.map(i=>{
