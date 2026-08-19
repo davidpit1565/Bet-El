@@ -745,6 +745,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @media (prefers-reduced-motion: reduce){.skel-line{animation:none;opacity:.6}}
 .sm-search-hint{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 14px}
 .sm-aliyah-tag{font-family:var(--font-sacred);font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px}
+.ck-source{font-family:var(--font-sacred);font-size:12px;color:var(--muted);opacity:.85;text-align:center;letter-spacing:.02em;margin:0 0 8px;padding:0 8px;line-height:1.7}
 .sm-aliyah-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .sm-aliyah-nav::-webkit-scrollbar{display:none}
 .sm-aliyah-chip{flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line-strong);
@@ -1561,27 +1562,94 @@ function chokSectionsFor(key,day){
   const wk=CHOK.schedule[key];
   if(day==='night'){
     const t=chokTorahVerses(wk.night&&wk.night.tzeruf);
-    return t.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items:t,kind:'torah'}]:[];
+    return t.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items:t,kind:'torah',refs:(wk.night&&wk.night.tzeruf)||[]}]:[];
   }
   const d=wk[day];
   const hd=currentHDate(), my=chokMishnahYear(hd);
   const list=[];
-  const push=(k,he,items,kind,note)=>{ if(items&&items.length) list.push({key:k,he,items,kind,note}); };
-  push('torah','תּוֹרָה', chokTorahVerses(d.torah), 'torah');
+  const lab=(CHOK_WEEK[key]||{})._labels||{};
+  const tagsFor=refs=>{ let o=[]; (refs||[]).forEach(r=>{ if(lab[r]) o=o.concat(lab[r]); }); return o.length?o:null; };
+  const push=(k,he,items,kind,note,refs)=>{ if(items&&items.length) list.push({key:k,he,items,kind,note,refs:refs||[],tags:tagsFor(refs)}); };
+  push('torah','תּוֹרָה', chokTorahVerses(d.torah), 'torah', null, d.torah);
   if(day==='fri'){
     const h=(d.haftarah_seph||[])[0];
-    if(h) push('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah');
+    if(h) push('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah);
   } else {
-    push('neviim','נְבִיאִים', chokBundleSegs(key,d.neviim), 'text');
-    push('ketuvim','כְּתוּבִים', chokBundleSegs(key,d.ketuvim), 'text');
+    push('neviim','נְבִיאִים', chokBundleSegs(key,d.neviim), 'text', null, d.neviim);
+    push('ketuvim','כְּתוּבִים', chokBundleSegs(key,d.ketuvim), 'text', null, d.ketuvim);
   }
   const mref=(d.mishnah_cycle||[])[my]||[];
-  push('mishnah','מִשְׁנָה', chokBundleSegs(key,mref), 'text');
-  push('gemara','גְּמָרָא', chokBundleSegs(key,d.gemara), 'text');
-  push('zohar','זֹהַר', chokBundleSegs(key,d.zohar), 'text');
-  push('halacha','הֲלָכָה', chokBundleSegs(key,d.halacha), 'text');
-  push('musar','מוּסָר', chokBundleSegs(key,d.musar), 'text', 'רֵאשִׁית חָכְמָה · אֵין מַהֲדוּרָה מְנֻקֶּדֶת');
+  push('mishnah','מִשְׁנָה', chokBundleSegs(key,mref), 'text', null, mref);
+  push('gemara','גְּמָרָא', chokBundleSegs(key,d.gemara), 'text', null, d.gemara);
+  push('zohar','זֹהַר', chokBundleSegs(key,d.zohar), 'text', null, d.zohar);
+  push('halacha','הֲלָכָה', chokBundleSegs(key,d.halacha), 'text', null, d.halacha);
+  push('musar','מוּסָר', chokBundleSegs(key,d.musar), 'text', 'אֵין מַהֲדוּרָה מְנֻקֶּדֶת', d.musar);
   return list;
+}
+
+/* ---------- source labels ---------- */
+/* Sefaria's heTitle carries the work's own name; the framing words are ours. */
+function chokWorkName(base){
+  const n=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||base;
+  return n.replace(/^משנה תורה,\s*/,'').replace(/^משנה\s+/,'').replace(/^ספר הזהר$/,'זֹהַר');
+}
+const CK_DASH='־';
+function ckRange(a,b){ return a===b?heNum(a):heNum(a)+CK_DASH+heNum(b); }
+/* "23a" -> {daf:23, amud:'ע״א'} */
+function ckDaf(s){
+  const m=/^(\d+)([ab])$/.exec(s);
+  return m?{daf:+m[1], amud:m[2]==='a'?'ע״א':'ע״ב'}:null;
+}
+function chokRefLabel(ref, sec){
+  if(!ref) return '';
+  // Talmud: "Makkot 23a:1-8" or "Makkot 23a:11-23b:7"
+  let m=/^(.+?) (\d+[ab]):(\d+)(?:-(?:(\d+[ab]):)?(\d+))?$/.exec(ref);
+  if(m && sec==='gemara'){
+    const w=chokWorkName(m[1]), s=ckDaf(m[2]), e=m[4]?ckDaf(m[4]):s;
+    if(s){
+      const daf = s.daf===e.daf ? 'דַּף '+heNum(s.daf) : 'דַּף '+heNum(s.daf)+CK_DASH+heNum(e.daf);
+      const am  = s.amud===e.amud ? s.amud : s.amud+CK_DASH+e.amud;
+      return 'מַסֶּכֶת '+w+' · '+daf+' · '+am;
+    }
+  }
+  // two-level refs: "Mishnah Berakhot 1:1-4", "Isaiah 42:5-10", "Mishneh Torah, Sabbath 9:14-15"
+  m=/^(.+?) (\d+):(\d+)(?:-(?:(\d+):)?(\d+))?$/.exec(ref);
+  if(m){
+    const base=m[1], w=chokWorkName(base);
+    const c1=+m[2], v1=+m[3], c2=m[4]?+m[4]:c1, v2=m[5]?+m[5]:v1;
+    const span = c1===c2 ? ckRange(v1,v2) : heNum(c1)+':'+heNum(v1)+' – '+heNum(c2)+':'+heNum(v2);
+    if(sec==='mishnah'){
+      if(c1!==c2) return 'מַסֶּכֶת '+w+' · '+span;
+      return 'מַסֶּכֶת '+w+' · פֶּרֶק '+heNum(c1)+' · '+(v1===v2?'מִשְׁנָה ':'מִשְׁנָיוֹת ')+ckRange(v1,v2);
+    }
+    if(sec==='halacha'){
+      const pre=/^Mishneh Torah/.test(base)?'רַמְבַּ״ם · ':'';
+      return pre+w+(c1===c2?' · פֶּרֶק '+heNum(c1)+' · '+ckRange(v1,v2):' · '+span);
+    }
+    if(sec==='musar'){
+      const gate=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||'';
+      const head=/^Reshit Chokhmah,/.test(base)?('רֵאשִׁית חָכְמָה'+(gate?' · '+gate:'')):w;
+      return head+(c1===c2?' · '+heNum(c1)+' · '+ckRange(v1,v2):' · '+span);
+    }
+    return w+' · '+(c1===c2?heNum(c1)+' · '+ckRange(v1,v2):span);
+  }
+  // one-level refs: "Zohar, Emor 40"
+  m=/^(.+?) (\d+)(?:-(\d+))?$/.exec(ref);
+  if(m){
+    const base=m[1];
+    if(sec==='zohar'){
+      const he=(CHOK&&CHOK.heNames&&CHOK.heNames[base])||'';
+      const name=(!he||/^ספר הזהר$/.test(he))?base.replace(/^Zohar( Chadash)?,?\s*/,''):he;
+      const pre=/^Zohar Chadash/.test(base)?'זֹהַר חָדָשׁ · ':'זֹהַר · ';
+      return pre+name+' · '+ckRange(+m[2], m[3]?+m[3]:+m[2]);
+    }
+    return chokWorkName(base)+' · '+ckRange(+m[2], m[3]?+m[3]:+m[2]);
+  }
+  return ref;
+}
+function chokSourceLine(sec){
+  const refs=(sec.refs||[]).map(r=>chokRefLabel(r,sec.key)).filter(Boolean);
+  return refs.length?refs.join('  ·  '):'';
 }
 
 /* ---------- week list ---------- */
@@ -1670,7 +1738,8 @@ function renderChokReader(){
   const pct=Math.round(((CK.sec+1)/secs.length)*100);
   const body = (s.kind==='torah'||s.kind==='haftarah')
     ? s.items.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">תרגום</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')
-    : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(ix+1)}</span><div class="sm-he">${t}</div></div>`).join('');
+    : s.items.map((t,ix)=>`<div class="sm-verse-row"><span class="sm-vnum">${(s.tags&&s.tags[ix])||heNum(ix+1)}</span><div class="sm-he">${t}</div></div>`).join('');
+  const srcLine=chokSourceLine(s);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -1680,6 +1749,7 @@ function renderChokReader(){
         <button class="icon-btn autoscroll-btn" id="ckAutoScroll">${I.play}</button>
       </div>
       <div class="sm-aliyah-tag">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
+      ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
       <div class="sm-aliyah-nav">
         ${secs.map((x,ix)=>`<button class="sm-aliyah-chip ${ix===CK.sec?'on':''}" data-sec="${ix}">${x.he}</button>`).join('')}
@@ -1699,7 +1769,7 @@ function renderChokReader(){
   const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK.sec--; renderChokReader(); forceScrollTop(); };
   const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK.sec++; renderChokReader(); forceScrollTop(); };
   const dn=document.getElementById('ckDone');
-  if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); celebrate('daily','הַחֹק'); go('chokList'); };
+  if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
   app.querySelectorAll('.sm-aliyah-chip[data-sec]').forEach(b=>b.onclick=()=>{ CK.sec=+b.dataset.sec; renderChokReader(); forceScrollTop(); });
   tr(app);
 }
