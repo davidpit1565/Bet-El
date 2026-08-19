@@ -1822,9 +1822,13 @@ function ckAbsOf(iso){
   const [y,m,d]=iso.split('-').map(Number);
   return new HDate(new Date(y,m-1,d)).abs();
 }
+/* Daf Yomi, Rambam Yomi and the Zohar cycle are published against the civil
+   day, so they advance at midnight rather than at sunset - currentHDate()
+   rolls at sunset and would put the whole evening a day ahead. */
+function ckCivilAbs(){ return new HDate(civilToday()).abs(); }
 function ckCycleIndex(cfg,hd){
   const n=cfg.order.length;
-  const i=cfg.anchorIndex + (hd.abs() - ckAbsOf(cfg.anchorDate));
+  const i=cfg.anchorIndex + (ckCivilAbs() - ckAbsOf(cfg.anchorDate));
   return ((i%n)+n)%n;                       // the cycle simply starts again
 }
 function ckBlockOf(i){ return Math.floor(i/CYC.block); }
@@ -1833,8 +1837,9 @@ function ckBlockOf(i){ return Math.floor(i/CYC.block); }
 function ckRambamTrack(){ return S.rambamTrack==='year' ? 3 : 1; }
 function ckRambamIndexes(hd){
   const cfg=CYC.rambam, per=ckRambamTrack(), n=cfg.order.length;
-  const day=ckCycleIndex({order:cfg.order,anchorIndex:cfg.anchorIndex,anchorDate:cfg.anchorDate},hd);
-  const start=per===1 ? day : (day*3)%n;
+  const elapsed = ckCivilAbs() - ckAbsOf(cfg.anchorDate);
+  const base = per===1 ? cfg.anchorIndex : (cfg.anchorIndex3!=null?cfg.anchorIndex3:cfg.anchorIndex);
+  const start = ((base + elapsed*per) % n + n) % n;
   const out=[];
   for(let k=0;k<per;k++) out.push((start+k)%n);
   return out;
@@ -2026,22 +2031,23 @@ function ckSearch(q){
 
 /* when the cycle next reaches this position */
 function ckNextDate(cfg,i){
-  const n=cfg.order.length, hd=currentHDate();
-  const cur=ckCycleIndex(cfg,hd);
+  const n=cfg.order.length;
+  const cur=ckCycleIndex(cfg,currentHDate());
   const delta=((i-cur)%n+n)%n;
-  const d=new HDate(hd.abs()+delta);
-  return {delta, hd:d};
+  return {delta, hd:new HDate(ckCivilAbs()+delta)};
 }
 function ckWhenLine(kind,i){
   if(!CYC) return '';
   const cfg = kind==='rambam' ? CYC.rambam : CYC.zohar;
   const w=ckNextDate(cfg,i);
-  if(kind==='rambam' && ckRambamTrack()===3){
-    // three a day: the chapter's day is its index divided by three
-    const day=Math.floor(i/3), cur=ckCycleIndex(cfg,currentHDate());
-    const n=cfg.order.length, delta=((day*3-cur)%n+n)%n;
-    const d=new HDate(currentHDate().abs()+Math.floor(delta/3));
-    return delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(d.renderGematriya(true));
+  if(kind==='rambam'){
+    const per=ckRambamTrack(), n=cfg.order.length, hd=currentHDate();
+    const today=ckRambamIndexes(hd);
+    if(today.indexOf(i)>=0) return 'נִלְמָד הַיּוֹם';
+    const base=today[0];
+    const ahead=Math.ceil((((i-base)%n+n)%n)/per);
+    const d=new HDate(ckCivilAbs()+ahead);
+    return 'יִלָּמֵד בְּ'+localizeHebDateStr(d.renderGematriya(true));
   }
   return w.delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(w.hd.renderGematriya(true));
 }
