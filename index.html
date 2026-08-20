@@ -239,14 +239,21 @@ body::before{ /* subtle starfield/texture */
 .rnav-btn.done{background:var(--gold-grad);color:#2a1e05;flex:1.4}
 .rnav-btn svg{width:17px;height:17px}
 
-/* floating reader tools */
-.reader-tools{position:fixed;top:calc(env(safe-area-inset-top) + 10px);right:14px;z-index:35;
-  display:flex;gap:8px;background:var(--panel-solid);border:var(--glass-border);border-radius:999px;
-  padding:7px 9px;box-shadow:var(--card-shadow);backdrop-filter:blur(12px);animation:rise .4s var(--ease)}
-.reader-tools button{width:40px;height:40px;border:none;background:transparent;color:var(--gold);border-radius:50%;
+/* reader tools: a peer of the other header icons, its options dropping down
+   from it rather than floating loose over the page or another button */
+.reader-tools{position:relative;display:inline-flex}
+.reader-tools .rt-fab{width:42px;height:42px;border:var(--glass-border);background:var(--panel);color:var(--gold);
+  border-radius:12px;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px);transition:.2s var(--ease)}
+.reader-tools .rt-fab:active{transform:scale(.92)}
+.reader-tools .rt-fab svg{width:19px;height:19px}
+.reader-tools .rt-panel{position:absolute;top:calc(100% + 8px);left:0;z-index:36;
+  display:flex;align-items:center;gap:4px;background:var(--panel-solid);border:var(--glass-border);border-radius:999px;
+  padding:7px 9px;box-shadow:var(--card-shadow);backdrop-filter:blur(12px);animation:rise .2s var(--ease)}
+.reader-tools.collapsed .rt-panel{display:none}
+.reader-tools .rt-panel button{width:36px;height:36px;border:none;background:transparent;color:var(--gold);border-radius:50%;
   cursor:pointer;display:grid;place-items:center;transition:.15s var(--ease)}
-.reader-tools button:active{background:rgba(212,175,95,.15);transform:scale(.9)}
-.reader-tools button svg{width:19px;height:19px}
+.reader-tools .rt-panel button:active{background:rgba(212,175,95,.15);transform:scale(.9)}
+.reader-tools .rt-panel button svg{width:18px;height:18px}
 .reader-tools .sep{width:1px;background:var(--line);margin:6px 2px}
 .reader-tools .fs-val{font-family:var(--font-sacred);font-weight:700;font-size:13px;display:grid;place-items:center;min-width:30px;color:var(--ink-soft)}
 
@@ -524,17 +531,6 @@ body::before{ /* subtle starfield/texture */
 .sb-row .zname{flex:1;font-weight:600}
 .sb-row .ztime{font-family:var(--font-sacred);font-weight:700;font-size:16px}
 /* ===== v3 ===== */
-/* reader tools FAB */
-.reader-tools{transition:all .25s var(--ease)}
-.reader-tools .rt-fab{display:none;width:48px;height:48px;border-radius:50%;border:1px solid var(--line-strong);
-  background:var(--panel-2);color:var(--gold);box-shadow:var(--card-shadow);cursor:pointer;align-items:center;justify-content:center}
-.reader-tools .rt-fab svg{width:20px;height:20px}
-.reader-tools .rt-panel{display:flex;align-items:center;gap:4px}
-.reader-tools.collapsed{background:transparent;border:none;box-shadow:none;padding:0;backdrop-filter:none}
-.reader-tools.collapsed .rt-panel{display:none}
-.reader-tools.collapsed .rt-fab{display:flex;opacity:.6}
-.reader-tools.collapsed .rt-fab:active{opacity:1}
-.reader-tools:not(.collapsed) .rt-fab{display:flex;width:38px;height:38px;border:none;box-shadow:none;background:transparent}
 
 /* today button */
 .today-btn{display:flex;align-items:center;gap:6px;margin:0;background:var(--panel);
@@ -2957,13 +2953,21 @@ function render(){
    which would wipe the button - so watch the view instead of mounting once.
    Shown only on screens that actually display text to read - list and
    navigation screens (books, parshiot, settings, calendar...) have nothing
-   for a font-size/theme control to act on. */
+   for a font-size/theme control to act on.
+   Slotted into the screen's own header row - next to the back/autoscroll
+   button on chok/zohar/shnayim's shared .reader-top, or into prayerReader's
+   own icon group - rather than floated loose, so it can never land on top
+   of a button that is already there. */
 const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1};
 function mountToolsFab(){
   if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
   if(!app.firstChild) return;
   const scroll = /Reader|chokUnit/.test(TAB);
-  app.insertAdjacentHTML('beforeend', toolsFab({scroll}));
+  const html = toolsFab({scroll});
+  const readerTop = app.querySelector('.reader-top');
+  const slot = readerTop || app.querySelector('.topbar div[style*="display:flex"]');
+  if(slot) slot.insertAdjacentHTML('beforeend', html);
+  else app.insertAdjacentHTML('beforeend', html);
   wireToolsFab();
 }
 let fabTimer=null;
@@ -3335,6 +3339,18 @@ function renderReader(){
           <button class="icon-btn ${isFav(ch)?'fav-on':''}" id="rFav">${isFav(ch)?I.bookmarkOn:I.bookmark}</button>
           <button class="icon-btn" id="rShare">${I.share}</button>
           <button class="icon-btn" id="rShareQR">${I.qr}</button>
+          <div class="reader-tools collapsed" id="rTools">
+            <button class="rt-fab" id="tFab">${I.dots}</button>
+            <div class="rt-panel">
+              <button id="tMinus">${I.aminus}</button>
+              <div class="fs-val" id="tFs">${Math.round(S.fontScale*100)}</div>
+              <button id="tPlus">${I.aplus}</button>
+              <div class="sep"></div>
+              <button id="tTheme">${S.theme==='dark'?I.sun:I.moon}</button>
+              <button class="autoscroll-btn" id="tAutoScroll">${I.play}</button>
+              <button id="tHome">${I.home}</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="reader-progress"><i style="width:${RD.daily?(((RD.idx+1)/total)*100):((ch/150)*100)}%"></i></div>
@@ -3350,18 +3366,6 @@ function renderReader(){
         : `<button class="rnav-btn" id="rNext" ${last?'disabled':''}><span>הַבָּא</span>${I.next}</button>` }
     </div>
     <div style="height:26px"></div>
-  </div>
-  <div class="reader-tools collapsed" id="rTools">
-    <button class="rt-fab" id="tFab">${I.dots}</button>
-    <div class="rt-panel">
-      <button id="tMinus">${I.aminus}</button>
-      <div class="fs-val" id="tFs">${Math.round(S.fontScale*100)}</div>
-      <button id="tPlus">${I.aplus}</button>
-      <div class="sep"></div>
-      <button id="tTheme">${S.theme==='dark'?I.sun:I.moon}</button>
-      <button class="autoscroll-btn" id="tAutoScroll">${I.play}</button>
-      <button id="tHome">${I.home}</button>
-    </div>
   </div>`;
   wireReader();
 }
