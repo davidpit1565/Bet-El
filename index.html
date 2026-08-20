@@ -3098,20 +3098,29 @@ function renderHome(){
       </div>
     </div>
 
-    <div class="quick-grid">
-      ${(function(){
-        const cd=zoharCycleDay(hd); if(!cd) return '';
-        const done = zoharDone().includes(cd);
-        return `<div class="q-tile${done?' done':''}" id="homeZoharCard">
-          <div class="qt">זֹהַר הַיּוֹמִי</div>
-          <div class="qd">יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
-        </div>`;
-      })()}
-      ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" id="homeParshaCard">
-        <div class="qt">שְׁנַיִם מִקְרָא</div>
-        <div class="qd">${parshaName(weekParshaKey)}</div>
-      </div>`:''}
-    </div>
+    ${(function(){
+      const cd=zoharCycleDay(hd); if(!cd) return '';
+      const done = zoharDone().includes(cd);
+      return `<div class="sm-week-card${done?' tr-done':''}" id="homeZoharCard">
+        <div class="sm-week-icon tr-ring" style="--pct:${done?100:0}"><span class="tr-ring-inner">${done?I.check:I.zoharFlame}</span></div>
+        <div class="sm-week-text">
+          <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר</div>
+          <div class="sm-week-name">יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים${done?' · הוּשְׁלַם':''}</div>
+        </div>
+        <span class="sm-week-chev">${done?I.check:I.chev}</span>
+      </div>`;
+    })()}
+    ${weekParshaKey?(function(){
+      const done=smIsDone(weekParshaKey);
+      return `<div class="sm-week-card${done?' tr-done':''}" id="homeParshaCard">
+        <div class="sm-week-icon tr-ring" style="--pct:${done?100:0}"><span class="tr-ring-inner">${done?I.check:I.scroll}</span></div>
+        <div class="sm-week-text">
+          <div class="sm-week-tag">שְׁנַיִם מִקְרָא</div>
+          <div class="sm-week-name">${parshaName(weekParshaKey)}${done?' · הוּשְׁלְמָה':''}</div>
+        </div>
+        <span class="sm-week-chev">${done?I.check:I.chev}</span>
+      </div>`;
+    })():''}
     <div class="stats-row">
       <div class="stat-card"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">מִשְׁתַּמְּשִׁים</span></div><span class="sc-badge gold">${I.users}</span></div>
       <div class="stat-card"><div class="sc-info"><span class="sc-num" id="liveCount">–</span><span class="sc-label">מְחֻבָּרִים כָּעֵת</span></div><span class="sc-badge live">${I.liveDot}</span></div>
