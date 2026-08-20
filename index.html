@@ -2949,6 +2949,20 @@ function chokCheckReminders(){
       }
     }
   }
+  /* Tikkunei HaZohar reminder: only fires during its own 40-day window
+     (Rosh Chodesh Elul to Yom Kippur), same time-of-day as the other
+     reminders so Settings still has just the one time field */
+  if(localStorage.getItem('betel_zohar_morning_notif')!==todayStr){
+    const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
+    if(now.getHours()>hh||(now.getHours()===hh&&now.getMinutes()>=mm)){
+      const cd=zoharCycleDay(currentHDate());
+      if(cd && !zoharDone().includes(cd)){
+        localStorage.setItem('betel_zohar_morning_notif',todayStr);
+        const tx=ckNotifText();
+        try{ new Notification(tx.tikkuneiTitle,{body:tx.tikkuneiBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+      }
+    }
+  }
   /* the day after Yom Tov: ask about the portion that could not be studied */
   const miss=chokMissedSlots();
   if(miss.length && localStorage.getItem('betel_chok_makeup_notif')!==todayStr){
@@ -2988,22 +3002,27 @@ const CK_NOTIF={
   he:{chokTitle:'חוֹק לְיִשְׂרָאֵל', nightBody:'לֵיל שִׁשִּׁי · הִגִּיעַ זְמַן לִמּוּד הַחֹק',
       makeupPrefix:'הִשְׁלַמְתָּ אֶת הַחֹק שֶׁל ', makeupJoin:' וְ', makeupSuffix:'?',
       chokMorningBody:'הִגִּיעַ זְמַן לִלְמֹד אֶת הַחֹק שֶׁל הַיּוֹם',
+      tikkuneiTitle:'תִּיקּוּנֵי הַזֹּהַר', tikkuneiBody:'הִגִּיעַ זְמַן לִלְמֹד אֶת הַתִּיקּוּן שֶׁל הַיּוֹם',
       tehTitle:'בֵּית אֵל', tehBody:'זְמַן תְּהִלִּים! ', tehSuffix:' פְּרָקִים לְהַשְׁלָמָה'},
   en:{chokTitle:'Chok LeYisrael', nightBody:'Friday night · time to study the Chok',
       makeupPrefix:'Did you complete the Chok for ', makeupJoin:' and ', makeupSuffix:'?',
       chokMorningBody:'Time to study today’s Chok',
+      tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:'Time to study today’s Tikkun',
       tehTitle:'Beit-El', tehBody:'Time for Tehillim! ', tehSuffix:' chapters left'},
   fr:{chokTitle:'Chok LeYisraël', nightBody:'Vendredi soir · l’heure d’étudier le Chok',
       makeupPrefix:'As-tu terminé le Chok de ', makeupJoin:' et ', makeupSuffix:' ?',
       chokMorningBody:'C’est l’heure d’étudier le Chok du jour',
+      tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:'C’est l’heure d’étudier le Tikkoun du jour',
       tehTitle:'Beit-El', tehBody:'C’est l’heure des Tehilim ! ', tehSuffix:' chapitres à compléter'},
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · время учить Хок',
       makeupPrefix:'Завершили ли вы Хок за ', makeupJoin:' и ', makeupSuffix:'?',
       chokMorningBody:'Время учить сегодняшний Хок',
+      tikkuneiTitle:'Тикуней ХаЗоар', tikkuneiBody:'Время учить сегодняшний Тикун',
       tehTitle:'Бейт-Эль', tehBody:'Время Теилим! ', tehSuffix:' глав осталось'},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · ხოკის შესწავლის დროა',
       makeupPrefix:'დაასრულეთ ხოკი ', makeupJoin:' და ', makeupSuffix:'?',
       chokMorningBody:'დროა ვისწავლოთ დღევანდელი ხოკი',
+      tikkuneiTitle:'თიקუნეი ჰაზოჰარ', tikkuneiBody:'დროა ვისწავლოთ დღევანდელი თიკუნი',
       tehTitle:'ბეთ-ელ', tehBody:'თეილიმის დროა! ', tehSuffix:' თავი დარჩა'},
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
