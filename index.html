@@ -240,7 +240,7 @@ body::before{ /* subtle starfield/texture */
 .rnav-btn svg{width:17px;height:17px}
 
 /* floating reader tools */
-.reader-tools{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 16px);z-index:35;
+.reader-tools{position:fixed;top:calc(env(safe-area-inset-top) + 10px);right:14px;z-index:35;
   display:flex;gap:8px;background:var(--panel-solid);border:var(--glass-border);border-radius:999px;
   padding:7px 9px;box-shadow:var(--card-shadow);backdrop-filter:blur(12px);animation:rise .4s var(--ease)}
 .reader-tools button{width:40px;height:40px;border:none;background:transparent;color:var(--gold);border-radius:50%;
@@ -917,6 +917,7 @@ const I = {
   refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>',
   moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/></svg>',
   text:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 6V4M8 6v14M4 14h8"/></svg>',
+  dots:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5.5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="18.5" r="1.9"/></svg>',
   split:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   sunrise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M17 18a5 5 0 0 0-10 0M12 2v6M12 8l3 3M12 8l-3 3M2 18h20M4 22h16"/></svg>',
@@ -1698,18 +1699,6 @@ function chokTehillimVerses(hd){
   return out;
 }
 
-/* a commentary presented as its own section, each comment under the verse it
-   belongs to, rather than folded into the verse's bar */
-function chokCommVerses(verses, who){
-  const out=[];
-  (verses||[]).forEach(v=>{
-    if(!v.book||!v.c||!v.v) return;
-    const segs=((ckCommFor(v.book+' '+v.c+':'+v.v))||{})[who];
-    if(segs&&segs.length) out.push({c:v.c, v:v.v, book:v.book, segs});
-  });
-  return out;
-}
-
 /* Sections that are continuous prose rather than numbered units. The Zohar is
    read as a running page, not as lettered pieces. */
 const CK_NO_NUM={zohar:1, musar:1};
@@ -1756,7 +1745,6 @@ function chokSectionsFor(key,day){
     if(!d) return;
     const tv=chokTorahVerses(d.torah);
     add('torah','תּוֹרָה', tv, 'torah', null, d.torah, pk);
-    add('ohc','אוֹר הַחַיִּים', chokCommVerses(tv,'ohc'), 'comm', null, d.torah, pk);
     if(day==='fri'){
       const h=(d.haftarah_seph||[])[0];
       if(h) add('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah, pk);
@@ -1943,6 +1931,7 @@ function chokSourceLine(sec){
 /* Opens under the verse it belongs to, on the same screen. One panel per row;
    tapping the open commentary again closes it. */
 const CK_COMM = {
+  ohc:    {he:'אוֹר הַחַיִּים',     en:'Or HaChaim',      on:['torah']},
   rashi:  {he:'רַשִׁ״י',           en:'Rashi',           on:['torah','neviim','ketuvim','haftarah','tzeruf']},
   mdavid: {he:'מְצוּדַת דָּוִד',   en:'Metzudat David',  on:['neviim','ketuvim','haftarah'], partial:1},
   mzion:  {he:'מְצוּדַת צִיּוֹן',  en:'Metzudat Zion',   on:['neviim','ketuvim','haftarah'], partial:1},
@@ -2046,7 +2035,7 @@ function ckToggleComm(btn){
 function toolsFab(opts){
   opts=opts||{};
   return `<div class="reader-tools collapsed" id="gTools">
-    <button class="rt-fab" id="gFab">${I.text}</button>
+    <button class="rt-fab" id="gFab">${I.dots}</button>
     <div class="rt-panel">
       <button id="gMinus">${I.aminus}</button>
       <div class="fs-val" id="gFs">${Math.round(S.fontScale*100)}</div>
@@ -2765,10 +2754,16 @@ function renderChokReader(){
   const rowLabel=chokRowLabel(CK.day,di);
   const pct=Math.round(((CK.sec+1)/secs.length)*100);
   const vid=v=>(v.book&&v.c&&v.v)?`${v.book} ${v.c}:${v.v}`:'';
-  const tehBody=items=>items.map((x,i)=>{
-    const head=(i===0||items[i-1].ch!==x.ch)?`<div class="ck-teh-head">פֶּרֶק ${heNum(x.ch)}</div>`:'';
-    return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.ch)}:${heNum(x.v)}</span><div class="sm-he">${x.he}</div></div>`;
-  }).join('');
+  const tehBody=items=>{
+    let out='', buf=[], curCh=null;
+    const flush=()=>{ if(buf.length) out+=`<div class="psalm-body notranslate">${buf.join(' ')}</div>`; buf=[]; };
+    items.forEach(x=>{
+      if(x.ch!==curCh){ flush(); out+=`<div class="ck-teh-head">פֶּרֶק ${heNum(x.ch)}</div>`; curCh=x.ch; }
+      buf.push(`<span class="verse">${x.he}</span>`);
+    });
+    flush();
+    return out;
+  };
   const ramBody=items=>items.map((x,i)=>{
     const e=CYC.rambam.order[x.i];
     const head=(i===0||items[i-1].i!==x.i)?`<div class="ck-teh-head">${ckRambamName(e.book)} · פֶּרֶק ${heNum(e.ch)}</div>`:'';
@@ -2959,10 +2954,13 @@ function render(){
 }
 /* The reader carries its own copy, so only add ours where it is absent.
    Screens that fetch their data replace the view after render() has returned,
-   which would wipe the button - so watch the view instead of mounting once,
-   and every screen gets it, including ones added later. */
+   which would wipe the button - so watch the view instead of mounting once.
+   Shown only on screens that actually display text to read - list and
+   navigation screens (books, parshiot, settings, calendar...) have nothing
+   for a font-size/theme control to act on. */
+const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1};
 function mountToolsFab(){
-  if(TAB==='reader'||document.getElementById('gTools')) return;
+  if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
   if(!app.firstChild) return;
   const scroll = /Reader|chokUnit/.test(TAB);
   app.insertAdjacentHTML('beforeend', toolsFab({scroll}));
@@ -3354,7 +3352,7 @@ function renderReader(){
     <div style="height:26px"></div>
   </div>
   <div class="reader-tools collapsed" id="rTools">
-    <button class="rt-fab" id="tFab">${I.text}</button>
+    <button class="rt-fab" id="tFab">${I.dots}</button>
     <div class="rt-panel">
       <button id="tMinus">${I.aminus}</button>
       <div class="fs-val" id="tFs">${Math.round(S.fontScale*100)}</div>
