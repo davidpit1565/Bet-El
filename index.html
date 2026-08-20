@@ -118,6 +118,17 @@ body::before{ /* subtle starfield/texture */
 .date-greg{font-size:13px;color:var(--muted);letter-spacing:.5px}
 .greeting{font-size:14px;color:var(--gold);font-family:var(--font-sacred);margin-top:2px}
 
+/* ================= ONBOARDING ================= */
+.ob-title{font-family:var(--font-sacred);font-size:24px;font-weight:700;text-align:center;margin-top:14px}
+.ob-sub{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin-top:6px;text-align:center;line-height:1.4}
+.ob-list{display:flex;flex-direction:column;gap:12px;margin:22px 0}
+.ob-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:14px 16px}
+.ob-ic{width:42px;height:42px;border-radius:12px;background:var(--gold-grad);color:#2a1e05;
+  display:flex;align-items:center;justify-content:center;flex:none}
+.ob-ic svg{width:22px;height:22px}
+.ob-rt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
+.ob-rd{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+
 /* next zman strip */
 .zman-strip{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 4px;font-size:13.5px}
 .zman-strip b{color:var(--gold);font-weight:700}
@@ -1133,7 +1144,7 @@ en:{
  'סֵפֶר תְּהִלִּים':'Book of Tehillim','לוּחַ עִבְרִי':'Hebrew Calendar',
  'לַיְלָה טוֹב':'Good night','בֹּקֶר טוֹב':'Good morning','צָהֳרַיִם טוֹבִים':'Good afternoon','עֶרֶב טוֹב':'Good evening',
  'קְרִיאַת הַיּוֹם':'Today\u2019s reading','לַחֹדֶשׁ':'of the month','פְּרָקִים':'chapters','נִקְרְאוּ':'read','לִמּוּד':'Study',
- 'הַתְחֵל קְרִיאָה':'Start reading','הַמְשֵׁךְ בַּקְּרִיאָה':'Continue reading',
+ 'הַתְחֵל קְרִיאָה':'Start reading','הַתְחֵל':'Start','בְּרוּכִים הַבָּאִים לְבֵית אֵל':'Welcome to Beit-El','פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם':'A complete platform for daily study — with you everywhere','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר':'A full daily study: Torah, Prophets, Mishnah, Zohar, Halacha and Musar','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר':'A daily portion by day of the month, through the whole book','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי':'Today’s Zohar passage from Chok LeYisrael — as its own page','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם':'Reading the weekly Torah portion, twice in Hebrew and once in Aramaic translation','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה':'Appears only during the 40 days before Rosh Hashanah','הַמְשֵׁךְ בַּקְּרִיאָה':'Continue reading',
  'הַמְשֵׁךְ מֵהֵיכָן שֶׁהִפְסַקְתָּ':'Continue where you left off','פֶּרֶק':'Chapter',
  'כָּל הַתְּהִלִּים':'All Tehillim','ק״נ פְּרָקִים לְעִיּוּן':'150 chapters','לוּחַ זְמַנִּים':'Calendar & times','זְמַנֵּי הַיּוֹם וְהֶחָג':'Daily & holiday times',
  'עֲדְכֵּן מִקּוּם לַזְּמַנִּים':'Update location for times',
@@ -1161,7 +1172,7 @@ ru:{
  'סֵפֶר תְּהִלִּים':'Книга Теилим','לוּחַ עִבְרִי':'Еврейский календарь',
  'לַיְלָה טוֹב':'Доброй ночи','בֹּקֶר טוֹב':'Доброе утро','צָהֳרַיִם טוֹבִים':'Добрый день','עֶרֶב טוֹב':'Добрый вечер',
  'קְרִיאַת הַיּוֹם':'Чтение дня','לַחֹדֶשׁ':'числа месяца','פְּרָקִים':'глав','נִקְרְאוּ':'прочитано','לִמּוּד':'Изучение',
- 'הַתְחֵל קְרִיאָה':'Начать чтение','הַמְשֵׁךְ בַּקְּרִיאָה':'Продолжить чтение',
+ 'הַתְחֵל קְרִיאָה':'Начать чтение','הַתְחֵל':'Начать','בְּרוּכִים הַבָּאִים לְבֵית אֵל':'Добро пожаловать в Бейт-Эль','פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם':'Полноценная платформа ежедневного изучения — с тобой повсюду','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר':'Полное ежедневное изучение: Тора, Пророки, Мишна, Зоар, Галаха и Мусар','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר':'Ежедневная порция по дням месяца, до завершения всей книги','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי':'Отрывок Зоара на сегодня, из Хок ЛеИсраэль — отдельной страницей','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם':'Чтение недельной главы Торы, два раза на иврите и раз в переводе на арамейский','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה':'Появляется только в течение 40 дней перед Рош ха-Шана','הַמְשֵׁךְ בַּקְּרִיאָה':'Продолжить чтение',
  'הַמְשֵׁךְ מֵהֵיכָן שֶׁהִפְסַקְתָּ':'Продолжить с места остановки','פֶּרֶק':'Глава',
  'כָּל הַתְּהִלִּים':'Все Теилим','ק״נ פְּרָקִים לְעִיּוּן':'150 глав','לוּחַ זְמַנִּים':'Календарь и времена','זְמַנֵּי הַיּוֹם וְהֶחָג':'Времена дня и праздников',
  'עֲדְכֵּן מִקּוּם לַזְּמַנִּים':'Обновить местоположение',
@@ -1189,7 +1200,7 @@ ka:{
  'סֵפֶר תְּהִלִּים':'თეილიმის წიგნი','לוּחַ עִבְרִי':'ებრაული კალენდარი',
  'לַיְלָה טוֹב':'ღამე მშვიდობისა','בֹּקֶר טוֹב':'დილა მშვიდობისა','צָהֳרַיִם טוֹבִים':'შუადღე მშვიდობისა','עֶרֶב טוֹב':'საღამო მშვიდობისა',
  'קְרִיאַת הַיּוֹם':'დღის კითხვა','לַחֹדֶשׁ':'თვის','פְּרָקִים':'თავი','נִקְרְאוּ':'წაკითხულია','לִמּוּד':'სწავლა',
- 'הַתְחֵל קְרִיאָה':'კითხვის დაწყება','הַמְשֵׁךְ בַּקְּרִיאָה':'კითხვის გაგრძელება',
+ 'הַתְחֵל קְרִיאָה':'კითხვის დაწყება','הַתְחֵל':'დაწყება','בְּרוּכִים הַבָּאִים לְבֵית אֵל':'მოგესალმებით ბეთ-ელში','פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם':'სრული პლატფორმა ყოველდღიური სწავლისთვის — შენთან ერთად ყველგან','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר':'სრული ყოველდღიური სწავლა: თორა, წინასწარმეტყველები, მიშნა, ზოჰარი, ჰალახა და მუსარი','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר':'დღიური ნაწილი თვის დღეების მიხედვით, მთელი წიგნის დასრულებამდე','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי':'დღევანდელი ზოჰარის მონაკვეთი ხოყ ლეისრაელიდან — დამოუკიდებელ გვერდად','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם':'კვირის კვეთის კითხვა, ორჯერ ივრითა და ერთხელ თარგუმით','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה':'ჩნდება მხოლოდ როშ ჰაშანას წინა 40 დღის განმავლობაში','הַמְשֵׁךְ בַּקְּרִיאָה':'კითხვის გაგრძელება',
  'הַמְשֵׁךְ מֵהֵיכָן שֶׁהִפְסַקְתָּ':'გააგრძელე სადაც გაჩერდი','פֶּרֶק':'თავი',
  'כָּל הַתְּהִלִּים':'ყველა თეილიმი','ק״נ פְּרָקִים לְעִיּוּן':'150 თავი','לוּחַ זְמַנִּים':'კალენდარი და დროები','זְמַנֵּי הַיּוֹם וְהֶחָג':'დღისა და დღესასწაულის დროები',
  'עֲדְכֵּן מִקּוּם לַזְּמַנִּים':'მდებარეობის განახლება',
@@ -1217,7 +1228,7 @@ fr:{
  'סֵפֶר תְּהִלִּים':'Livre des Tehilim','לוּחַ עִבְרִי':'Calendrier hébraïque',
  'לַיְלָה טוֹב':'Bonne nuit','בֹּקֶר טוֹב':'Bonjour','צָהֳרַיִם טוֹבִים':'Bon après-midi','עֶרֶב טוֹב':'Bonsoir',
  'קְרִיאַת הַיּוֹם':'Lecture du jour','לַחֹדֶשׁ':'du mois','פְּרָקִים':'chapitres','נִקְרְאוּ':'lus','לִמּוּד':'Étude',
- 'הַתְחֵל קְרִיאָה':'Commencer la lecture','הַמְשֵׁךְ בַּקְּרִיאָה':'Continuer la lecture',
+ 'הַתְחֵל קְרִיאָה':'Commencer la lecture','הַתְחֵל':'Commencer','בְּרוּכִים הַבָּאִים לְבֵית אֵל':'Bienvenue à Beit-El','פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם':'Une plateforme complète d’étude quotidienne — avec toi partout','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר':'Une étude quotidienne complète : Torah, Prophètes, Michna, Zohar, Halakha et Moussar','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר':'Une portion quotidienne selon les jours du mois, jusqu’à la fin du livre entier','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי':'Le passage du Zohar du jour, tiré du Chok LeYisraël — comme page à part','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם':'Lecture de la parasha de la semaine, deux fois en hébreu et une fois en traduction araméenne','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה':'Apparaît seulement pendant les 40 jours avant Roch Hachana','הַמְשֵׁךְ בַּקְּרִיאָה':'Continuer la lecture',
  'הַמְשֵׁךְ מֵהֵיכָן שֶׁהִפְסַקְתָּ':'Continuer où vous vous êtes arrêté','פֶּרֶק':'Chapitre',
  'כָּל הַתְּהִלִּים':'Tout Tehilim','ק״נ פְּרָקִים לְעִיּוּן':'150 chapitres','לוּחַ זְמַנִּים':'Calendrier et horaires','זְמַנֵּי הַיּוֹם וְהֶחָג':'Horaires du jour et des fêtes',
  'עֲדְכֵּן מִקּוּם לַזְּמַנִּים':'Mettre à jour la localisation',
@@ -1809,6 +1820,38 @@ function renderZoharYomiReader(){
   </div>`;
   document.getElementById('zyBack').onclick=()=>go('home');
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
+}
+
+/* one-time welcome screen for new users, explaining the app's 5 study
+   tracks now that it is more than just Tehillim. Shown once, gated by
+   its own localStorage flag; buildNav() skips the bottom nav while
+   TAB==='onboard', so obStart rebuilds it on the way out. */
+function renderOnboard(){
+  const row=(icon,title,desc)=>`<div class="ob-row"><div class="ob-ic">${icon}</div>
+    <div><div class="ob-rt">${title}</div><div class="ob-rd">${desc}</div></div></div>`;
+  app.innerHTML=`
+  <div class="view">
+    <div class="hero"><img class="hero-logo" src="${LOGO}" alt="בית אל"/></div>
+    <div class="ob-title">בְּרוּכִים הַבָּאִים לְבֵית אֵל</div>
+    <div class="ob-sub">פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם</div>
+    <div class="ob-list">
+      ${row('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+        'חוֹק לְיִשְׂרָאֵל','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר')}
+      ${row(I.book,'תְּהִלִּים הַיּוֹמִי','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר')}
+      ${row(I.text,'זֹהַר הַיּוֹמִי','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי')}
+      ${row(I.scroll,'שְׁנַיִם מִקְרָא','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם')}
+      ${row(I.zoharFlame,'תִּיקּוּנֵי הַזֹּהַר','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה')}
+    </div>
+    <button class="btn btn-gold" id="obStart">הַתְחֵל</button>
+    <div style="height:20px"></div>
+  </div>`;
+  document.getElementById('obStart').onclick=()=>{
+    localStorage.setItem('betel_onboard_v1','1');
+    TAB='home';
+    buildNav();
+    render();
+    forceScrollTop();
+  };
 }
 
 /* ---------- source labels ---------- */
@@ -3017,12 +3060,12 @@ const CK_NOTIF={
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · время учить Хок',
       makeupPrefix:'Завершили ли вы Хок за ', makeupJoin:' и ', makeupSuffix:'?',
       chokMorningBody:'Время учить сегодняшний Хок',
-      tikkuneiTitle:'Тикуней ХаЗоар', tikkuneiBody:'Время учить сегодняшний Тикун',
+      tikkuneiTitle:'Тиккуне газогар', tikkuneiBody:'Время учить сегодняшний Тикун',
       tehTitle:'Бейт-Эль', tehBody:'Время Теилим! ', tehSuffix:' глав осталось'},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · ხოკის შესწავლის დროა',
       makeupPrefix:'დაასრულეთ ხოკი ', makeupJoin:' და ', makeupSuffix:'?',
       chokMorningBody:'დროა ვისწავლოთ დღევანდელი ხოკი',
-      tikkuneiTitle:'თიקუნეი ჰაზოჰარ', tikkuneiBody:'დროა ვისწავლოთ დღევანდელი თიკუნი',
+      tikkuneiTitle:'თიკკუნე ჰაზოჰარ', tikkuneiBody:'დროა ვისწავლოთ დღევანდელი თიკუნი',
       tehTitle:'ბეთ-ელ', tehBody:'თეილიმის დროა! ', tehSuffix:' თავი დარჩა'},
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
@@ -3046,6 +3089,7 @@ function render(){
   else if(TAB==='chokList') renderChokList();
   else if(TAB==='chokReader') renderChokReader();
   else if(TAB==='zoharYomi') renderZoharYomiReader();
+  else if(TAB==='onboard') renderOnboard();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='tracker') renderTracker();
   mountToolsFab();
@@ -4460,6 +4504,7 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 /* ================= BOOT ================= */
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
+  if(TAB==='onboard'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
   const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
@@ -4470,6 +4515,7 @@ function buildNav(){
 }
 applySettings();
 applyLang();
+if(!localStorage.getItem('betel_onboard_v1')) TAB='onboard';
 buildNav();
 render();
 (function initNavScrollHide(){
