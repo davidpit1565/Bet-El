@@ -3039,10 +3039,9 @@ function renderHome(){
       const title = st.chanukahNight ? `חֲנוּכָּה · נֵר ${heNum(st.chanukahNight)}`
         : st.label ? st.label
         : (hd.getDay()===5 ? 'עֶרֶב שַׁבָּת קֹדֶש' : 'הַדְלָקַת נֵרוֹת');
-      return `<div class="shabbat-times shabbat-home">
-        <div class="card-title"><span class="zi">${I.candle}</span>${title}</div>
-        <div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>
-        ${st.havdala?`<div class="sb-row"><span class="zi">${I.moon2}</span><span class="zname">צֵאת הַשַּׁבָּת</span><span class="ztime gold-text">${fmtTime(st.havdala)}</span></div>`:''}
+      return `<div class="date-band" style="margin-top:6px">
+        <div class="greeting">${title} · הַדְלָקַת נֵרוֹת ${fmtTime(st.candle)}</div>
+        ${st.havdala?`<div class="greeting">צֵאת הַשַּׁבָּת · ${fmtTime(st.havdala)}</div>`:''}
       </div>`;
     })()}
     ${dedHTML('')}
