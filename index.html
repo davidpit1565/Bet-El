@@ -131,7 +131,7 @@ body::before{ /* subtle starfield/texture */
   background:linear-gradient(135deg,rgba(212,175,95,.06),transparent 40%)}
 .card-title{font-family:var(--font-sacred);font-size:15px;color:var(--gold);letter-spacing:1px;margin-bottom:2px;
   display:flex;align-items:center;gap:8px}
-.daily-mode-tag{display:inline-block;font-size:11px;color:var(--gold);border:1px solid var(--line-strong);
+.daily-mode-tag{display:inline-block;font-size:11px;color:var(--gold);
   padding:3px 12px;border-radius:999px;margin-bottom:12px;letter-spacing:.5px}
 
 /* progress ring */
@@ -160,6 +160,7 @@ body::before{ /* subtle starfield/texture */
 .q-tile{background:var(--panel);border:var(--glass-border);border-radius:var(--radius-sm);padding:16px 14px;
   display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
 .q-tile:active{transform:scale(.97)}
+.q-tile.done{border-color:var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset,0 6px 18px -8px rgba(212,175,95,.45)}
 .q-tile .qi{color:var(--gold)}.q-tile .qi svg{width:24px;height:24px}
 .q-tile .qt{font-family:var(--font-sacred);font-size:18px;font-weight:700}
 .q-tile .qd{font-size:12px;color:var(--muted)}
@@ -280,7 +281,7 @@ body::before{ /* subtle starfield/texture */
 .dd-date{font-family:var(--font-sacred);font-size:20px;font-weight:700;text-align:center}
 .dd-greg{text-align:center;font-size:12px;color:var(--muted);margin-bottom:6px}
 .dd-events{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0}
-.dd-event{font-size:12px;color:var(--gold);border:1px solid var(--line-strong);padding:4px 12px;border-radius:999px;font-family:var(--font-sacred)}
+.dd-event{font-size:12px;color:var(--gold);padding:4px 12px;border-radius:999px;font-family:var(--font-sacred)}
 .dd-portion{text-align:center;margin:12px 0;padding:12px;background:var(--panel-2);border-radius:14px;border:var(--glass-border)}
 .dd-portion .lbl{font-size:11px;color:var(--muted);letter-spacing:.5px}
 .dd-portion .val{font-family:var(--font-sacred);font-size:18px;font-weight:700;color:var(--ink);margin-top:2px}
@@ -446,7 +447,7 @@ body::before{ /* subtle starfield/texture */
 .ring.small{width:52px;height:52px}
 .ring.small .lbl{font-size:12px}
 .daily-info{flex:1;min-width:0}
-.daily-tag{display:inline-block;font-size:13px;font-weight:600;color:var(--gold);border:1px solid var(--line-strong);
+.daily-tag{display:inline-block;font-size:13px;font-weight:600;color:var(--gold);
   padding:4px 13px;border-radius:999px;margin-bottom:8px;letter-spacing:.3px}
 .daily-range{font-family:var(--font-sacred);font-size:22px;font-weight:700;margin:0;line-height:1.15;color:var(--ink)}
 .continue-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:9px;
@@ -458,7 +459,7 @@ body::before{ /* subtle starfield/texture */
 /* dedication line */
 .ded-line{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 2px;
   color:var(--gold);font-family:var(--font-sacred);font-size:15px;font-weight:700;text-align:center}
-.reader-ded{margin:14px 2px 4px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;
+.reader-ded{margin:14px 2px 4px;padding:9px 14px;border-radius:12px;
   background:var(--panel);backdrop-filter:blur(8px);font-size:14px}
 .ded-preview{display:flex;align-items:center;gap:8px;color:var(--gold);font-family:var(--font-sacred);
   font-weight:700;font-size:15px;padding:8px 10px;border:1px dashed var(--line-strong);border-radius:10px}
@@ -507,7 +508,7 @@ body::before{ /* subtle starfield/texture */
 .next-hol svg{width:16px;height:16px;color:var(--gold);flex:none}
 
 /* shabbat/holiday times */
-.shabbat-times{margin:12px 0;padding:12px 14px;border:1px solid var(--line-strong);border-radius:13px;
+.shabbat-times{margin:12px 0;padding:12px 14px;border-radius:13px;
   background:linear-gradient(135deg,rgba(212,175,95,.08),transparent);display:flex;flex-direction:column;gap:9px}
 .sb-row{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink)}
 .sb-row .zi{width:20px;height:20px;color:var(--gold);flex:none}
@@ -653,10 +654,10 @@ input,select,button{max-width:100%;box-sizing:border-box}
 
 
 /* ---- streak (#5) ---- */
-.streak-chip{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(184,134,11,.15),rgba(230,200,116,.06));border:1px solid var(--glass-border);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--gold);margin:8px auto 0;cursor:default}
+.streak-chip{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(184,134,11,.15),rgba(230,200,116,.06));border-radius:20px;padding:5px 14px;font-size:13px;color:var(--gold);margin:8px auto 0;cursor:default}
 .streak-chip svg{width:14px;height:14px;flex-shrink:0}
 /* ---- yahrzeit (#4) ---- */
-.yahrzeit-strip{display:flex;align-items:center;gap:8px;background:rgba(184,134,11,.1);border:1px solid rgba(184,134,11,.3);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:14px;color:var(--gold);line-height:1.4}
+.yahrzeit-strip{display:flex;align-items:center;gap:8px;background:rgba(184,134,11,.1);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:14px;color:var(--gold);line-height:1.4}
 .yahrzeit-strip svg{width:18px;height:18px;flex-shrink:0}
 .yahr-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
 .yahr-row{display:flex;align-items:center;justify-content:space-between;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;padding:8px 12px;font-size:14px}
@@ -683,7 +684,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .fld-select{padding-left:26px !important}
 /* ---- stat chips (reading tracker) ---- */
 .ach-stats-row{display:flex;gap:10px;margin:4px 0 18px}
-.ach-stat{flex:1;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;
+.ach-stat{flex:1;background:var(--glass-bg);border-radius:12px;
   padding:14px 8px;text-align:center}
 .ach-stat .as-n{font-size:22px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
 .ach-stat .as-l{font-size:11px;color:var(--muted);margin-top:2px}
@@ -2896,6 +2897,19 @@ function chokCheckReminders(){
       }
     }
   }
+  /* daily morning reminder: same time-of-day as the Tehillim reminder, so
+     Settings stays a single time field rather than growing a second one */
+  if(localStorage.getItem('betel_chok_morning_notif')!==todayStr){
+    const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
+    if(now.getHours()>hh||(now.getHours()===hh&&now.getMinutes()>=mm)){
+      const t=ckTodayLine();
+      if(t && !chokIsDone(t.key,t.day)){
+        localStorage.setItem('betel_chok_morning_notif',todayStr);
+        const tx=ckNotifText();
+        try{ new Notification(tx.chokTitle,{body:tx.chokMorningBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+      }
+    }
+  }
   /* the day after Yom Tov: ask about the portion that could not be studied */
   const miss=chokMissedSlots();
   if(miss.length && localStorage.getItem('betel_chok_makeup_notif')!==todayStr){
@@ -2934,18 +2948,23 @@ function announceChokFeature(){
 const CK_NOTIF={
   he:{chokTitle:'חוֹק לְיִשְׂרָאֵל', nightBody:'לֵיל שִׁשִּׁי · הִגִּיעַ זְמַן לִמּוּד הַחֹק',
       makeupPrefix:'הִשְׁלַמְתָּ אֶת הַחֹק שֶׁל ', makeupJoin:' וְ', makeupSuffix:'?',
+      chokMorningBody:'הִגִּיעַ זְמַן לִלְמֹד אֶת הַחֹק שֶׁל הַיּוֹם',
       tehTitle:'בֵּית אֵל', tehBody:'זְמַן תְּהִלִּים! ', tehSuffix:' פְּרָקִים לְהַשְׁלָמָה'},
   en:{chokTitle:'Chok LeYisrael', nightBody:'Friday night · time to study the Chok',
       makeupPrefix:'Did you complete the Chok for ', makeupJoin:' and ', makeupSuffix:'?',
+      chokMorningBody:'Time to study today’s Chok',
       tehTitle:'Beit-El', tehBody:'Time for Tehillim! ', tehSuffix:' chapters left'},
   fr:{chokTitle:'Chok LeYisraël', nightBody:'Vendredi soir · l’heure d’étudier le Chok',
       makeupPrefix:'As-tu terminé le Chok de ', makeupJoin:' et ', makeupSuffix:' ?',
+      chokMorningBody:'C’est l’heure d’étudier le Chok du jour',
       tehTitle:'Beit-El', tehBody:'C’est l’heure des Tehilim ! ', tehSuffix:' chapitres à compléter'},
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · время учить Хок',
       makeupPrefix:'Завершили ли вы Хок за ', makeupJoin:' и ', makeupSuffix:'?',
+      chokMorningBody:'Время учить сегодняшний Хок',
       tehTitle:'Бейт-Эль', tehBody:'Время Теилим! ', tehSuffix:' глав осталось'},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · ხოკის შესწავლის დროა',
       makeupPrefix:'დაასრულეთ ხოკი ', makeupJoin:' და ', makeupSuffix:'?',
+      chokMorningBody:'დროა ვისწავლოთ დღევანდელი ხოკი',
       tehTitle:'ბეთ-ელ', tehBody:'თეილიმის დროა! ', tehSuffix:' თავი დარჩა'},
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
@@ -3035,6 +3054,8 @@ function renderHome(){
   const rangeLabel = range[0]===range[1] ? ('פֶּרֶק '+heNum(range[0])) : ('פְּרָקִים '+heNum(range[0])+' – '+heNum(range[1]));
   const ded=dedicationLine(); const last=getLast();
   const weekParshaKey=currentParshaKey();
+  const read=readSet();
+  const tehDoneToday = chs.length>0 && chs.every(c=>read.has(c));
   app.innerHTML = `
   ${topbar('בית אל')}
   <div class="view">
@@ -3065,12 +3086,13 @@ function renderHome(){
       ${(function(){
         if(!CHOK) return '';
         const t=ckTodayLine(); if(!t) return '';
-        return `<div class="q-tile" id="homeChokCard">
+        const done = chokIsDone(t.key,t.day);
+        return `<div class="q-tile${done?' done':''}" id="homeChokCard">
           <div class="qt">חוֹק לְיִשְׂרָאֵל</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
-      <div class="q-tile" id="homeTehillimCard">
+      <div class="q-tile${tehDoneToday?' done':''}" id="homeTehillimCard">
         <div class="qt">תְּהִלִּים הַיּוֹמִי</div>
         <div class="qd">${rangeLabel} · ${chs.length} פְּרָקִים</div>
       </div>
@@ -3079,12 +3101,13 @@ function renderHome(){
     <div class="quick-grid">
       ${(function(){
         const cd=zoharCycleDay(hd); if(!cd) return '';
-        return `<div class="q-tile" id="homeZoharCard">
+        const done = zoharDone().includes(cd);
+        return `<div class="q-tile${done?' done':''}" id="homeZoharCard">
           <div class="qt">זֹהַר הַיּוֹמִי</div>
           <div class="qd">יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
         </div>`;
       })()}
-      ${weekParshaKey?`<div class="q-tile" id="homeParshaCard">
+      ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" id="homeParshaCard">
         <div class="qt">שְׁנַיִם מִקְרָא</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
