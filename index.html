@@ -123,9 +123,6 @@ body::before{ /* subtle starfield/texture */
 .ob-sub{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin-top:6px;text-align:center;line-height:1.4}
 .ob-list{display:flex;flex-direction:column;gap:12px;margin:22px 0}
 .ob-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:14px 16px}
-.ob-ic{width:42px;height:42px;border-radius:12px;background:var(--gold-grad);color:#2a1e05;
-  display:flex;align-items:center;justify-content:center;flex:none}
-.ob-ic svg{width:22px;height:22px}
 .ob-rt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
 .ob-rd{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
 
@@ -1827,7 +1824,7 @@ function renderZoharYomiReader(){
    its own localStorage flag; buildNav() skips the bottom nav while
    TAB==='onboard', so obStart rebuilds it on the way out. */
 function renderOnboard(){
-  const row=(icon,title,desc)=>`<div class="ob-row"><div class="ob-ic">${icon}</div>
+  const row=(title,desc)=>`<div class="ob-row">
     <div><div class="ob-rt">${title}</div><div class="ob-rd">${desc}</div></div></div>`;
   app.innerHTML=`
   <div class="view">
@@ -1835,12 +1832,11 @@ function renderOnboard(){
     <div class="ob-title">בְּרוּכִים הַבָּאִים לְבֵית אֵל</div>
     <div class="ob-sub">פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם</div>
     <div class="ob-list">
-      ${row('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
-        'חוֹק לְיִשְׂרָאֵל','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר')}
-      ${row(I.book,'תְּהִלִּים הַיּוֹמִי','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר')}
-      ${row(I.text,'זֹהַר הַיּוֹמִי','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי')}
-      ${row(I.scroll,'שְׁנַיִם מִקְרָא','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם')}
-      ${row(I.zoharFlame,'תִּיקּוּנֵי הַזֹּהַר','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה')}
+      ${row('חוֹק לְיִשְׂרָאֵל','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר')}
+      ${row('תְּהִלִּים הַיּוֹמִי','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר')}
+      ${row('זֹהַר הַיּוֹמִי','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי')}
+      ${row('שְׁנַיִם מִקְרָא','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם')}
+      ${row('תִּיקּוּנֵי הַזֹּהַר','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה')}
     </div>
     <button class="btn btn-gold" id="obStart">הַתְחֵל</button>
     <div style="height:20px"></div>
