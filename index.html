@@ -133,9 +133,6 @@ body::before{ /* subtle starfield/texture */
   background:linear-gradient(135deg,rgba(212,175,95,.06),transparent 40%)}
 .card-title{font-family:var(--font-sacred);font-size:15px;color:var(--gold);letter-spacing:1px;margin-bottom:2px;
   display:flex;align-items:center;gap:8px}
-.daily-card{margin-top:16px;text-align:center}
-.daily-range{font-family:var(--font-sacred);font-size:32px;font-weight:700;margin:6px 0 2px;line-height:1.2}
-.daily-count{font-size:13px;color:var(--muted);margin-bottom:16px}
 .daily-mode-tag{display:inline-block;font-size:11px;color:var(--gold);border:1px solid var(--line-strong);
   padding:3px 12px;border-radius:999px;margin-bottom:12px;letter-spacing:.5px}
 
@@ -454,10 +451,9 @@ body::before{ /* subtle starfield/texture */
 .ring.small{width:52px;height:52px}
 .ring.small .lbl{font-size:12px}
 .daily-info{flex:1;min-width:0}
-.daily-tag{display:inline-block;font-size:10.5px;color:var(--gold);border:1px solid var(--line-strong);
-  padding:2px 10px;border-radius:999px;margin-bottom:6px;letter-spacing:.3px}
+.daily-tag{display:inline-block;font-size:13px;font-weight:600;color:var(--gold);border:1px solid var(--line-strong);
+  padding:4px 13px;border-radius:999px;margin-bottom:8px;letter-spacing:.3px}
 .daily-range{font-family:var(--font-sacred);font-size:22px;font-weight:700;margin:0;line-height:1.15;color:var(--ink)}
-.daily-count{font-size:12.5px;color:var(--muted);margin:3px 0 0}
 .continue-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:9px;
   background:transparent;border:1px dashed var(--line-strong);border-radius:12px;padding:10px;color:var(--gold);
   font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer}
@@ -1161,7 +1157,7 @@ en:{
  'תִּזְכֹּרֶת יוֹמִית':'Daily reminder','תִּזְכֹּרֶת לִקְרִיאַת תְּהִלִּים':'Tehillim reminder','הַתְרָאָה יוֹמִית בְּעֵת שֶׁהָאַפְּלִיקַצְיָה פְּתוּחָה':'Daily alert while the app is open','שְׁעַת הַתִּזְכֹּרֶת':'Reminder time','בְּחַר שָׁעָה נוֹחָה':'Pick a convenient hour',
  'מִקּוּם וּזְמַנִּים':'Location & times','מְעֻדְכָּן לְפִי GPS':'Updated via GPS','מִקּוּם נִבְחָר':'Chosen location','הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי':'Use my location','אִתּוּר אוֹטוֹמָטִי לְפִי GPS':'Automatic GPS detection','בְּחַר מִקּוּם מֵרְשִׁימָה':'Choose from list','עָרִים מִכָּל הָעוֹלָם':'Cities worldwide',
  'כְּלָלִי':'General','שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה':'Share the app','שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה':'Send to community friends','אִפּוּס מַעֲקַב הַיּוֹם':'Reset today\u2019s tracking','נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ':'Clear read marks',
- 'הַיּוֹם':'Today','מֵמִיר תַּאֲרִיכִים':'Date converter','עִבְרִי ← לוֹעֲזִי':'Hebrew → Civil','לוֹעֲזִי ← עִבְרִי':'Civil → Hebrew','תַּאֲרִיךְ לֹא תַּקִּין':'Invalid date',
+ 'הַיּוֹם':'Today','הַיּוֹמִי':'Daily','מֵמִיר תַּאֲרִיכִים':'Date converter','עִבְרִי ← לוֹעֲזִי':'Hebrew → Civil','לוֹעֲזִי ← עִבְרִי':'Civil → Hebrew','תַּאֲרִיךְ לֹא תַּקִּין':'Invalid date',
  'הֶחָג הַקָּרוֹב':'Next holiday','בְּעוֹד':'in','יוֹם':'day','יָמִים':'days','הַדְלָקַת נֵרוֹת':'Candle lighting','צֵאת הַשַּׁבָּת / חַג':'Shabbat/Holiday ends',
  'שִׁתּוּף':'Share','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'Share as designed image','שְׁלַח בְּוָואטְסְאַפּ':'Send via WhatsApp','הַעֲתֵק טֶקְסְט':'Copy text','שִׁתּוּף בַּמַּכְשִׁיר…':'Share via device…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Continuous reading, one page','רָצוּף':'continuous','גִּבּוּי לְקֹבֶץ':'Backup to file','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Save progress, favorites & settings','שִׁחְזוּר מִגִּבּוּי':'Restore from backup','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Load an existing backup file','אֵין הַקְדָּשׁוֹת עֲדַיִן':'No dedications yet','הַזֵּן שֵׁם':'Enter a name','הַהַקְדָּשָׁה נוֹסְפָה':'Dedication added','לִרְפוּאַת':'For the healing of','לְעִלּוּי נִשְׁמַת':'In memory of','לְהַצְלָחַת':'For the success of','לְזִוּוּג הָגוּן':'For a worthy match','לִזְכוּת':'In merit of',
@@ -1189,7 +1185,7 @@ ru:{
  'תִּזְכֹּרֶת יוֹמִית':'Ежедневное напоминание','תִּזְכֹּרֶת לִקְרִיאַת תְּהִלִּים':'Напоминание о Теилим','הַתְרָאָה יוֹמִית בְּעֵת שֶׁהָאַפְּלִיקַצְיָה פְּתוּחָה':'Уведомление, пока приложение открыто','שְׁעַת הַתִּזְכֹּרֶת':'Время напоминания','בְּחַר שָׁעָה נוֹחָה':'Выберите удобный час',
  'מִקּוּם וּזְמַנִּים':'Место и времена','מְעֻדְכָּן לְפִי GPS':'Обновлено по GPS','מִקּוּם נִבְחָר':'Выбранное место','הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי':'Моё местоположение','אִתּוּר אוֹטוֹמָטִי לְפִי GPS':'Автоопределение по GPS','בְּחַר מִקּוּם מֵרְשִׁימָה':'Выбрать из списка','עָרִים מִכָּל הָעוֹלָם':'Города всего мира',
  'כְּלָלִי':'Общее','שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה':'Поделиться приложением','שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה':'Отправить друзьям общины','אִפּוּס מַעֲקַב הַיּוֹם':'Сброс отметок дня','נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ':'Очистить отметки',
- 'הַיּוֹם':'Сегодня','מֵמִיר תַּאֲרִיכִים':'Конвертер дат','עִבְרִי ← לוֹעֲזִי':'Еврейская → Григ.','לוֹעֲזִי ← עִבְרִי':'Григ. → Еврейская','תַּאֲרִיךְ לֹא תַּקִּין':'Неверная дата',
+ 'הַיּוֹם':'Сегодня','הַיּוֹמִי':'Ежедневный','מֵמִיר תַּאֲרִיכִים':'Конвертер дат','עִבְרִי ← לוֹעֲזִי':'Еврейская → Григ.','לוֹעֲזִי ← עִבְרִי':'Григ. → Еврейская','תַּאֲרִיךְ לֹא תַּקִּין':'Неверная дата',
  'הֶחָג הַקָּרוֹב':'Ближайший праздник','בְּעוֹד':'через','יוֹם':'день','יָמִים':'дней','הַדְלָקַת נֵרוֹת':'Зажигание свечей','צֵאת הַשַּׁבָּת / חַג':'Исход Шаббата/праздника',
  'שִׁתּוּף':'Поделиться','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'Как красивая картинка','שְׁלַח בְּוָואטְסְאַפּ':'Отправить в WhatsApp','הַעֲתֵק טֶקְסְט':'Копировать текст','שִׁתּוּף בַּמַּכְשִׁיר…':'Через устройство…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Непрерывное чтение на одной странице','רָצוּף':'подряд','גִּבּוּי לְקֹבֶץ':'Резервная копия в файл','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Сохранить прогресс, избранное и настройки','שִׁחְזוּר מִגִּבּוּי':'Восстановить из копии','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Загрузить файл копии','אֵין הַקְדָּשׁוֹת עֲדַיִן':'Пока нет посвящений','הַזֵּן שֵׁם':'Введите имя','הַהַקְדָּשָׁה נוֹסְפָה':'Посвящение добавлено','לִרְפוּאַת':'Об исцелении','לְעִלּוּי נִשְׁמַת':'В память о','לְהַצְלָחַת':'Об успехе','לְזִוּוּג הָגוּן':'О достойной паре','לִזְכוּת':'В заслугу',
@@ -1217,7 +1213,7 @@ ka:{
  'תִּזְכֹּרֶת יוֹמִית':'ყოველდღიური შეხსენება','תִּזְכֹּרֶת לִקְרִיאַת תְּהִלִּים':'თეილიმის შეხსენება','הַתְרָאָה יוֹמִית בְּעֵת שֶׁהָאַפְּלִיקַצְיָה פְּתוּחָה':'შეტყობინება სანამ აპი ღიაა','שְׁעַת הַתִּזְכֹּרֶת':'შეხსენების დრო','בְּחַר שָׁעָה נוֹחָה':'აირჩიე მოსახერხებელი საათი',
  'מִקּוּם וּזְמַנִּים':'მდებარეობა და დროები','מְעֻדְכָּן לְפִי GPS':'განახლებულია GPS-ით','מִקּוּם נִבְחָר':'არჩეული ადგილი','הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי':'ჩემი მდებარეობა','אִתּוּר אוֹטוֹמָטִי לְפִי GPS':'ავტომატური GPS','בְּחַר מִקּוּם מֵרְשִׁימָה':'აირჩიე სიიდან','עָרִים מִכָּל הָעוֹלָם':'ქალაქები მთელი მსოფლიოდან',
  'כְּלָלִי':'ზოგადი','שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה':'აპლიკაციის გაზიარება','שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה':'გაუგზავნე თემის მეგობრებს','אִפּוּס מַעֲקַב הַיּוֹם':'დღის აღრიცხვის განულება','נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ':'მონიშვნების გასუფთავება',
- 'הַיּוֹם':'დღეს','מֵמִיר תַּאֲרִיכִים':'თარიღების გადამყვანი','עִבְרִי ← לוֹעֲזִי':'ებრაული → გრიგ.','לוֹעֲזִי ← עִבְרִי':'გრიგ. → ებრაული','תַּאֲרִיךְ לֹא תַּקִּין':'არასწორი თარიღი',
+ 'הַיּוֹם':'დღეს','הַיּוֹמִי':'დღიური','מֵמִיר תַּאֲרִיכִים':'თარიღების გადამყვანი','עִבְרִי ← לוֹעֲזִי':'ებრაული → გრიგ.','לוֹעֲזִי ← עִבְרִי':'გრიგ. → ებრაული','תַּאֲרִיךְ לֹא תַּקִּין':'არასწორი თარიღი',
  'הֶחָג הַקָּרוֹב':'უახლოესი დღესასწაული','בְּעוֹד':'დარჩა','יוֹם':'დღე','יָמִים':'დღე','הַדְלָקַת נֵרוֹת':'სანთლების ანთება','צֵאת הַשַּׁבָּת / חַג':'შაბათის/დღესასწაულის გასვლა',
  'שִׁתּוּף':'გაზიარება','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'ლამაზი სურათით','שְׁלַח בְּוָואטְסְאַפּ':'WhatsApp-ით გაგზავნა','הַעֲתֵק טֶקְסְט':'ტექსტის კოპირება','שִׁתּוּף בַּמַּכְשִׁיר…':'მოწყობილობით…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'უწყვეტი კითხვა ერთ გვერდზე','רָצוּף':'უწყვეტი','גִּבּוּי לְקֹבֶץ':'სარეზერვო ასლი ფაილში','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'პროგრესის, რჩეულების და პარამეტრების შენახვა','שִׁחְזוּר מִגִּבּוּי':'აღდგენა ასლიდან','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'არსებული ასლის ჩატვირთვა','אֵין הַקְדָּשׁוֹת עֲדַיִן':'ჯერ არ არის მიძღვნები','הַזֵּן שֵׁם':'შეიყვანე სახელი','הַהַקְדָּשָׁה נוֹסְפָה':'მიძღვნა დაემატა','לִרְפוּאַת':'განკურნებისთვის:','לְעִלּוּי נִשְׁמַת':'სულის ხსოვნისთვის:','לְהַצְלָחַת':'წარმატებისთვის:','לְזִוּוּג הָגוּן':'ღირსეული წყვილისთვის:','לִזְכוּת':'სასარგებლოდ:',
@@ -1245,7 +1241,7 @@ fr:{
  'תִּזְכֹּרֶת יוֹמִית':'Rappel quotidien','תִּזְכֹּרֶת לִקְרִיאַת תְּהִלִּים':'Rappel de lecture de Tehilim','הַתְרָאָה יוֹמִית בְּעֵת שֶׁהָאַפְּלִיקַצְיָה פְּתוּחָה':'Alerte quotidienne quand l’app est ouverte','שְׁעַת הַתִּזְכֹּרֶת':'Heure du rappel','בְּחַר שָׁעָה נוֹחָה':'Choisissez une heure',
  'מִקּוּם וּזְמַנִּים':'Lieu et horaires','מְעֻדְכָּן לְפִי GPS':'Mis à jour par GPS','מִקּוּם נִבְחָר':'Lieu choisi','הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי':'Utiliser ma position','אִתּוּר אוֹטוֹמָטִי לְפִי GPS':'Détection automatique par GPS','בְּחַר מִקּוּם מֵרְשִׁימָה':'Choisir dans la liste','עָרִים מִכָּל הָעוֹלָם':'Villes du monde entier',
  'כְּלָלִי':'Général','שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה':'Partager l’application','שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה':'Envoyer aux amis de la communauté','אִפּוּס מַעֲקַב הַיּוֹם':'Réinitialiser le suivi du jour','נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ':'Effacer les marques de lecture',
- 'הַיּוֹם':'Aujourd’hui','מֵמִיר תַּאֲרִיכִים':'Convertisseur de dates','עִבְרִי ← לוֹעֲזִי':'Hébreu → Civil','לוֹעֲזִי ← עִבְרִי':'Civil → Hébreu','תַּאֲרִיךְ לֹא תַּקִּין':'Date invalide',
+ 'הַיּוֹם':'Aujourd’hui','הַיּוֹמִי':'quotidien','מֵמִיר תַּאֲרִיכִים':'Convertisseur de dates','עִבְרִי ← לוֹעֲזִי':'Hébreu → Civil','לוֹעֲזִי ← עִבְרִי':'Civil → Hébreu','תַּאֲרִיךְ לֹא תַּקִּין':'Date invalide',
  'הֶחָג הַקָּרוֹב':'Prochaine fête','בְּעוֹד':'dans','יוֹם':'jour','יָמִים':'jours','הַדְלָקַת נֵרוֹת':'Allumage des bougies','צֵאת הַשַּׁבָּת / חַג':'Sortie de Shabbat/fête',
  'שִׁתּוּף':'Partage','שַׁתֵּף כִּתְמוּנָה מְעֻצֶּבֶת':'Partager comme image','שְׁלַח בְּוָואטְסְאַפּ':'Envoyer via WhatsApp','הַעֲתֵק טֶקְסְט':'Copier le texte','שִׁתּוּף בַּמַּכְשִׁיר…':'Partager via l’appareil…',
  'קְרִיאָה רְצוּפָה בְּדַף אֶחָד':'Lecture continue sur une page','רָצוּף':'continu','גִּבּוּי לְקֹבֶץ':'Sauvegarde dans un fichier','שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת':'Enregistrer progression, favoris et paramètres','שִׁחְזוּר מִגִּבּוּי':'Restaurer depuis une sauvegarde','טְעִינַת קֹבֶץ גִּבּוּי קַיָּם':'Charger un fichier de sauvegarde','אֵין הַקְדָּשׁוֹת עֲדַיִן':'Aucune dédicace pour le moment','הַזֵּן שֵׁם':'Entrez un nom','הַהַקְדָּשָׁה נוֹסְפָה':'Dédicace ajoutée','לִרְפוּאַת':'Pour la guérison de','לְעִלּוּי נִשְׁמַת':'À la mémoire de','לְהַצְלָחַת':'Pour la réussite de','לְזִוּוּג הָגוּן':'Pour un conjoint digne','לִזְכוּת':'En mérite de',
@@ -2518,7 +2514,6 @@ function renderChokUnit(){
         <div class="reader-top">
           <button class="icon-btn" id="cuBack">${I.prev}</button>
           <div class="reader-title">${e.group}</div>
-          <button class="icon-btn autoscroll-btn" id="cuAuto">${I.play}</button>
         </div>
         <div class="sm-aliyah-tag">${e.label}</div>
         ${when?`<div class="ck-source">${when}</div>`:''}
@@ -2530,7 +2525,6 @@ function renderChokUnit(){
       <div style="height:26px"></div>
     </div>`;
     document.getElementById('cuBack').onclick=()=>go('chokSearch');
-    document.getElementById('cuAuto').onclick=ev=>toggleAutoScroll(ev.currentTarget);
     tr(app);
   }
 }
@@ -2790,7 +2784,6 @@ function renderChokReader(){
       <div class="reader-top">
         <button class="icon-btn" id="ckBack">${I.prev}</button>
         <div class="reader-title">${parshaName(CK.key)}</div>
-        <button class="icon-btn autoscroll-btn" id="ckAutoScroll">${I.play}</button>
       </div>
       <div class="ck-daynav-wrap">
         <button class="sm-aliyah-chip ck-arrow" id="ckDayPrev" ${ckStepDay(-1)?'':'disabled'} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
@@ -2837,7 +2830,6 @@ function renderChokReader(){
   });
   const onChip=app.querySelector('.ck-daychip.on');
   if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
-  document.getElementById('ckAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK.sec--; renderChokReader(); forceScrollTop(); };
   const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK.sec++; renderChokReader(); forceScrollTop(); };
   const dn=document.getElementById('ckDone');
@@ -3023,9 +3015,7 @@ function nextZmanText(){
 function renderHome(){
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
-  const read=readSet(); const readInPortion=chs.filter(c=>read.has(c)).length;
   const nz=nextZmanText();
-  const streak=getStreak();
   const todayYahr=todaysYahrzeits();
   const rangeLabel = range[0]===range[1] ? ('פֶּרֶק '+heNum(range[0])) : ('פְּרָקִים '+heNum(range[0])+' – '+heNum(range[1]));
   const ded=dedicationLine(); const last=getLast();
@@ -3058,54 +3048,33 @@ function renderHome(){
     ${dedHTML('')}
     ${!LOC.auto?`<div style="text-align:center;margin-top:8px"><button id="locChip" class="loc-chip">${I.loc}<span>עֲדְכֵּן מִקּוּם לַזְּמַנִּים</span></button></div>`:''}
 
-    ${(function(){
-      if(!CHOK) return '';
-      const t=ckTodayLine(); if(!t) return '';
-      return `<div class="card daily-card" id="homeChokCard">
-        <div class="daily-head">
-          <div class="daily-info">
-            <div class="daily-tag">חוֹק לְיִשְׂרָאֵל · הַיּוֹם</div>
-            <div class="daily-range">${t.text}</div>
-          </div>
-        </div>
-        <button class="btn btn-gold" id="homeChokBtn">${I.play}<span>לִמּוּד הַיּוֹם</span></button>
-      </div>`;
-    })()}
-
-    <div class="card daily-card">
-      <div class="daily-head">
-        <div class="daily-info">
-          <div class="daily-tag">${S.division==='weekly'?'קְרִיאַת הַיּוֹם · '+dowName(hd):'קְרִיאַת הַיּוֹם · '+heNum(hd.getDate())+' לַחֹדֶשׁ'}</div>
-          <div class="daily-range">${rangeLabel}</div>
-          <div class="daily-count">${chs.length} פְּרָקִים</div>
-          ${streak.count>1?`<div class="streak-chip">${I.flame}<span>${heNum(streak.count)} יָמִים רְצוּפִים${streak.best>streak.count?' · 🏆 '+heNum(streak.best):''}</span></div>`:''}
-        </div>
+    <div class="quick-grid">
+      ${(function(){
+        if(!CHOK) return '';
+        const t=ckTodayLine(); if(!t) return '';
+        return `<div class="q-tile" id="homeChokCard">
+          <div class="qt">חוֹק לְיִשְׂרָאֵל</div>
+          <div class="qd">${t.text}</div>
+        </div>`;
+      })()}
+      <div class="q-tile" id="homeTehillimCard">
+        <div class="qt">תְּהִלִּים הַיּוֹמִי</div>
+        <div class="qd">${rangeLabel} · ${chs.length} פְּרָקִים</div>
       </div>
-      <button class="btn btn-gold" id="startBtn">${I.play}<span>${readInPortion&&readInPortion<chs.length?'הַמְשֵׁךְ בַּקְּרִיאָה':'הַתְחֵל קְרִיאָה'}</span></button>
     </div>
 
-    ${weekParshaKey?`<div class="sm-week-card" id="homeParshaCard">
-      <div class="sm-week-icon">${I.scroll}</div>
-      <div class="sm-week-text">
-        <div class="sm-week-tag">שניים מקרא ואחד תרגום</div>
-        <div class="sm-week-name">${parshaName(weekParshaKey)}</div>
-      </div>
-      <span class="sm-week-chev">${I.chev}</span>
-    </div>`:''}
-    ${(function(){
-      const cd=zoharCycleDay(hd); if(!cd) return '';
-      return `<div class="sm-week-card" id="homeZoharCard">
-        <div class="sm-week-icon">${I.zoharFlame}</div>
-        <div class="sm-week-text">
-          <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר · יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
-          <div class="sm-week-name">${ZOHAR&&ZOHAR[cd-1]?localizeHebDateStr(ZOHAR[cd-1].hebDate):''}</div>
-        </div>
-        <span class="sm-week-chev">${I.chev}</span>
-      </div>`;
-    })()}
     <div class="quick-grid">
-      <div class="q-tile" data-nav="tehillim"><div class="qi">${I.book}</div><div class="qt">כָּל הַתְּהִלִּים</div><div class="qd">ק״נ פְּרָקִים לְעִיּוּן</div></div>
-      <div class="q-tile" data-nav="calendar"><div class="qi">${I.cal}</div><div class="qt">לוּחַ זְמַנִּים</div><div class="qd">זְמַנֵּי הַיּוֹם וְהֶחָג</div></div>
+      ${(function(){
+        const cd=zoharCycleDay(hd); if(!cd) return '';
+        return `<div class="q-tile" id="homeZoharCard">
+          <div class="qt">זֹהַר הַיּוֹמִי</div>
+          <div class="qd">יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
+        </div>`;
+      })()}
+      ${weekParshaKey?`<div class="q-tile" id="homeParshaCard">
+        <div class="qt">שְׁנַיִם מִקְרָא</div>
+        <div class="qd">${parshaName(weekParshaKey)}</div>
+      </div>`:''}
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">מִשְׁתַּמְּשִׁים</span></div><span class="sc-badge gold">${I.users}</span></div>
@@ -3114,7 +3083,7 @@ function renderHome(){
     ${memorialHTML()}
     ${ornament()}
   </div>`;
-  document.getElementById('startBtn').onclick=()=>renderContinuous(chs,hd);
+  document.getElementById('homeTehillimCard').onclick=()=>renderContinuous(chs,hd);
   if(window.__paintVisitCount) window.__paintVisitCount();
   if(window.__paintLiveCount) window.__paintLiveCount();
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
@@ -3932,7 +3901,6 @@ function renderShnayimReader(){
       <div class="reader-top">
         <button class="icon-btn" id="smBack">${I.prev}</button>
         <div class="reader-title">${parshaName(SM.key)}</div>
-        <button class="icon-btn autoscroll-btn" id="smAutoScroll">${I.play}</button>
       </div>
       <div class="sm-aliyah-tag">${parshaName(SM.key)} · ${tag}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
@@ -3956,7 +3924,6 @@ function renderShnayimReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('smBack').onclick=()=>go('smList');
-  document.getElementById('smAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const prevBtn=document.getElementById('smPrev'); if(!prevBtn.disabled) prevBtn.onclick=smStepPrev;
   const nextBtn=document.getElementById('smNext'); if(nextBtn) nextBtn.onclick=smStepNext;
   const doneBtn=document.getElementById('smDone'); if(doneBtn) doneBtn.onclick=smFinish;
@@ -4051,7 +4018,6 @@ function renderZoharReader(){
       <div class="reader-top">
         <button class="icon-btn" id="zhBack">${I.prev}</button>
         <div class="reader-title">תִּיקּוּנֵי הַזֹּהַר</div>
-        <button class="icon-btn autoscroll-btn" id="zhAutoScroll">${I.play}</button>
       </div>
       <div class="sm-aliyah-tag">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${localizeHebDateStr(entry.hebDate)}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
@@ -4079,7 +4045,6 @@ function renderZoharReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('zhBack').onclick=()=>go('zoharList');
-  document.getElementById('zhAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
   const prevBtn=document.getElementById('zhPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>zhStep(-1);
   const nextBtn=document.getElementById('zhNext'); if(nextBtn) nextBtn.onclick=()=>zhStep(1);
   const doneBtn2=document.getElementById('zhDone2'); if(doneBtn2) doneBtn2.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); go('zoharList'); };
