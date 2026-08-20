@@ -3220,7 +3220,6 @@ function renderHome(){
       const cd=zoharCycleDay(hd); if(!cd) return '';
       const done = zoharDone().includes(cd);
       return `<div class="sm-week-card${done?' tr-done':''}" id="homeTikkuneiCard">
-        <div class="sm-week-icon tr-ring" style="--pct:${done?100:0}"><span class="tr-ring-inner">${done?I.check:I.zoharFlame}</span></div>
         <div class="sm-week-text">
           <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר</div>
           <div class="sm-week-name">יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים${done?' · הוּשְׁלַם':''}</div>
