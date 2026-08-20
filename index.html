@@ -2891,7 +2891,8 @@ function chokCheckReminders(){
       localStorage.setItem('betel_chok_night_notif',todayStr);
       const key=ckWeekKeyFor(now);
       if(key && !chokIsDone(key,'night')){
-        try{ new Notification('חוֹק לְיִשְׂרָאֵל',{body:'לֵיל שִׁשִּׁי · צֵרוּף יִהִוִהִ',dir:'rtl',lang:'he'}); }catch(e){}
+        const t=ckNotifText();
+        try{ new Notification(t.chokTitle,{body:t.nightBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
       }
     }
   }
@@ -2899,10 +2900,11 @@ function chokCheckReminders(){
   const miss=chokMissedSlots();
   if(miss.length && localStorage.getItem('betel_chok_makeup_notif')!==todayStr){
     localStorage.setItem('betel_chok_makeup_notif',todayStr);
+    const t=ckNotifText();
     try{
-      new Notification('חוֹק לְיִשְׂרָאֵל',{
-        body:'הִשְׁלַמְתָּ אֶת הַחֹק שֶׁל '+miss.map(m=>m.label).join(' וְ')+'?',
-        dir:'rtl',lang:'he'});
+      new Notification(t.chokTitle,{
+        body:t.makeupPrefix+miss.map(m=>m.label).join(t.makeupJoin)+t.makeupSuffix,
+        dir:ckNotifDir(),lang:S.lang||'he'});
     }catch(e){}
   }
 }
@@ -2924,6 +2926,30 @@ function announceChokFeature(){
   const t=CK_ANNOUNCE[S.lang]||CK_ANNOUNCE.he;
   try{ new Notification(t.title,{body:t.body,dir:S.lang==='he'||!S.lang?'rtl':'ltr',lang:S.lang||'he'}); }catch(e){}
 }
+/* every local notification's fixed text, in one place, so none of them
+   stays Hebrew-only by omission. The Friday-night line never names or
+   quotes the sacred combination it reminds about - a notification can
+   sit on a lock screen or in a notification history, and that is not
+   a respectful place for it. */
+const CK_NOTIF={
+  he:{chokTitle:'חוֹק לְיִשְׂרָאֵל', nightBody:'לֵיל שִׁשִּׁי · הִגִּיעַ זְמַן לִמּוּד הַחֹק',
+      makeupPrefix:'הִשְׁלַמְתָּ אֶת הַחֹק שֶׁל ', makeupJoin:' וְ', makeupSuffix:'?',
+      tehTitle:'תְּהִלִּים בֵּית אֵ-ל', tehBody:'זְמַן תְּהִלִּים! ', tehSuffix:' פְּרָקִים לְהַשְׁלָמָה'},
+  en:{chokTitle:'Chok LeYisrael', nightBody:'Friday night · time to study the Chok',
+      makeupPrefix:'Did you complete the Chok for ', makeupJoin:' and ', makeupSuffix:'?',
+      tehTitle:'Tehillim Beit-El', tehBody:'Time for Tehillim! ', tehSuffix:' chapters left'},
+  fr:{chokTitle:'Chok LeYisraël', nightBody:'Vendredi soir · l’heure d’étudier le Chok',
+      makeupPrefix:'As-tu terminé le Chok de ', makeupJoin:' et ', makeupSuffix:' ?',
+      tehTitle:'Tehilim Beit-El', tehBody:'C’est l’heure des Tehilim ! ', tehSuffix:' chapitres à compléter'},
+  ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · время учить Хок',
+      makeupPrefix:'Завершили ли вы Хок за ', makeupJoin:' и ', makeupSuffix:'?',
+      tehTitle:'Теилим Бейт-Эль', tehBody:'Время Теилим! ', tehSuffix:' глав осталось'},
+  ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · ხოკის შესწავლის დროა',
+      makeupPrefix:'დაასრულეთ ხოკი ', makeupJoin:' და ', makeupSuffix:'?',
+      tehTitle:'თეილიმ ბეთ-ელ', tehBody:'თეილიმის დროა! ', tehSuffix:' თავი დარჩა'},
+};
+function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
+function ckNotifDir(){ return (S.lang&&S.lang!=='he')?'ltr':'rtl'; }
 
 function render(){
   stopAutoScroll();
@@ -4393,7 +4419,8 @@ function checkNotification(){
     const left=chs.length-chs.filter(c=>read.has(c)).length;
     if(left<=0) return;
     localStorage.setItem('betel_notif_sent',todayStr);
-    new Notification('תְּהִלִּים בֵּית אֵ-ל',{body:'זְמַן תְּהִלִּים! '+left+' פְּרָקִים לְהַשְׁלָמָה',dir:'rtl',lang:'he'});
+    const t=ckNotifText();
+    new Notification(t.tehTitle,{body:t.tehBody+left+t.tehSuffix,dir:ckNotifDir(),lang:S.lang||'he'});
   }catch(e){}
 }
 try{checkNotification();}catch(e){}
