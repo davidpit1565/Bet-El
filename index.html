@@ -119,9 +119,7 @@ body::before{ /* subtle starfield/texture */
 .greeting{font-size:14px;color:var(--gold);font-family:var(--font-sacred);margin-top:2px}
 
 /* next zman strip */
-.zman-strip{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px auto 4px;
-  padding:9px 16px;border-radius:999px;background:var(--panel);border:var(--glass-border);
-  font-size:13.5px;max-width:max-content;backdrop-filter:blur(8px);box-shadow:var(--card-shadow)}
+.zman-strip{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 4px;font-size:13.5px}
 .zman-strip b{color:var(--gold);font-weight:700}
 .zman-strip .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -420,9 +418,6 @@ body::before{ /* subtle starfield/texture */
 
 .hidden{display:none!important}
 
-#locChip{display:inline-flex;align-items:center;gap:6px}
-#locChip svg{width:14px;height:14px}
-
 /* city picker */
 .city-modal{max-width:420px;max-height:82vh;display:flex;flex-direction:column;padding:22px 16px 16px;text-align:right}
 .city-list{overflow-y:auto;flex:1;margin:0 -4px}
@@ -468,12 +463,6 @@ body::before{ /* subtle starfield/texture */
 .ded-preview{display:flex;align-items:center;gap:8px;color:var(--gold);font-family:var(--font-sacred);
   font-weight:700;font-size:15px;padding:8px 10px;border:1px dashed var(--line-strong);border-radius:10px}
 .ded-preview svg{width:15px;height:15px;flex:none}
-
-/* location chip on home */
-.loc-chip{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line-strong);
-  border-radius:999px;padding:8px 16px;color:var(--gold);font-family:var(--font-ui);font-size:12.5px;font-weight:700;
-  cursor:pointer;backdrop-filter:blur(8px)}
-.loc-chip svg{width:15px;height:15px}
 
 /* reader fav button */
 .icon-btn.fav-on{color:var(--gold);background:rgba(212,175,95,.14)}
@@ -3045,7 +3034,6 @@ function renderHome(){
       </div>`;
     })()}
     ${dedHTML('')}
-    ${!LOC.auto?`<div style="text-align:center;margin-top:8px"><button id="locChip" class="loc-chip">${I.loc}<span>עֲדְכֵּן מִקּוּם לַזְּמַנִּים</span></button></div>`:''}
 
     <div class="quick-grid">
       ${(function(){
@@ -3093,7 +3081,6 @@ function renderHome(){
     hzc.onclick=()=>openZohar(cd);
     if(!ZOHAR) ensureZoharData().then(()=>{ if(TAB==='home') render(); });
   }
-  const lc=document.getElementById('locChip'); if(lc) lc.onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַזְּמַנִּים לְפִי מִקּוּמְךָ':'לֹא הִתְקַבְּלָה הַרְשָׁאָה'); if(TAB==='home') render(); }); };
   const hcc=document.getElementById('homeChokCard');
   if(hcc){ const t=ckTodayLine(); if(t) hcc.onclick=()=>openChok(t.key,t.day,null); }
   else ensureChokIndex().then(()=>{ if(TAB==='home') render(); });
