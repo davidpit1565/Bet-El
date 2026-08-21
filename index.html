@@ -126,6 +126,21 @@ body::before{ /* subtle starfield/texture */
 .ob-rt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
 .ob-rd{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
 
+/* Chok LeYisrael first-open pace questions - no icons, plain option cards */
+.pace-view{padding-top:36px}
+.pace-progress{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.pace-dot{width:26px;height:4px;border-radius:3px;background:var(--line)}
+.pace-dot.on{background:var(--gold)}
+.pace-q{font-family:var(--font-sacred);font-size:22px;font-weight:700;text-align:center;line-height:1.35}
+.pace-sub{font-family:var(--font-sacred);font-size:14px;color:var(--gold);text-align:center;margin-top:8px;line-height:1.5}
+.pace-list{display:flex;flex-direction:column;gap:12px;margin:24px 0}
+.pace-opt{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;cursor:pointer}
+.pace-opt:active{border-color:var(--gold)}
+.pace-opt-t{font-family:var(--font-sacred);font-size:17px;font-weight:700}
+.pace-opt-d{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+.pace-soon{margin-top:2px;text-align:center;font-size:12px;color:var(--muted);opacity:.75}
+.pace-foot{text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.5}
+
 /* next zman strip */
 .zman-strip{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 4px;font-size:13.5px}
 .zman-strip b{color:var(--gold);font-weight:700}
@@ -1027,7 +1042,7 @@ const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed tim
 const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
 function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.row1.join(' · ')}<br>${MEMORIAL.row2.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
 /* those who helped build this app - a third name still pending, to be added when received */
-const HATZLACHA = {row1:['אִילַיי מִיכָאֵל בֶּן אִירִית','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
+const HATZLACHA = {row1:['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
 function hatzlachaHTML(){ return `<div class="memorial">לְהַצְלָחַת<br>${HATZLACHA.row1.join(' · ')}</div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
@@ -1519,9 +1534,12 @@ function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div
 /* ================= ROUTER ================= */
 const app = document.getElementById('app');
 let TAB='home';
-function go(tab){ 
-  TAB=tab; 
-  render(); 
+function go(tab){
+  if(CK_PACE_FAMILY_TABS[tab] && !localStorage.getItem('betel_chok_pace_v1')){
+    CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=0; tab='chokPace';
+  }
+  TAB=tab;
+  render();
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab)); 
   forceScrollTop();
 }
@@ -2332,6 +2350,115 @@ function ckMusarSourceLabel(work,idxs){
     const unitLabel = (work==='reshit') ? (t.chapter+' '+heNum(e.ch)+' · '+t.para+' '+heNum(e.p)) : (t.para+' '+heNum(e.ch));
     return t[work]+' · '+gateName+' · '+unitLabel;
   }).join('  ·  ');
+}
+
+/* ---------- Chok LeYisrael first-open pace questions ----------
+   The user chooses their own defaults instead of the app silently picking
+   'reshit'/3-year-Rambam for them. Own small per-language table, same
+   reasoning as MUSAR_UI/RESHIT_GATES - self-contained feature copy, not
+   run through tr()'s generic substring pass. */
+const CK_PACE_UI={
+  he:{settingsTitle:'קֶצֶב לִמּוּד',
+    halachaQ:'אֵיזֶה קֶצֶב הֲלָכָה מַתְאִים לְךָ?', halachaSub:'רַמְבַּ״ם · מִשְׁנֵה תוֹרָה',
+    halachaOptADesc:'הַקֶּצֶב הַמָּסוֹרְתִּי — פֶּרֶק אֶחָד בְּכָל יוֹם, מְסַיֵּם אֶת כׇּל הַמִּשְׁנֵה תוֹרָה בְּתוֹךְ שָׁלֹשׁ שָׁנִים',
+    halachaOptBDesc:'קֶצֶב מָהִיר יוֹתֵר — מְסַיֵּם אֶת כׇּל הָרַמְבַּ״ם בְּתוֹךְ שָׁנָה אֶחָת',
+    soon:'בְּקָרוֹב: מַסְלוּל בֶּן אִיש חַי יִצְטָרֵף כְּאוֹפְּצְיָה נוֹסֶפֶת',
+    musarQ:'אֵיזֶה סֵפֶר מוּסָר תִּרְצֶה לְהַתְחִיל?', musarSub:'כֻּלָּם בְּקֶצֶב שֶׁל 3 יְחִידוֹת לְיוֹם',
+    changeInSettings:'אֶפְשָׁר לְשַׁנּוֹת בְּכׇל עֵת בַּהֲגָדָּרוֹת', finishBtn:'סַיֵּם וְהַתְחֵל לִלְמֹד',
+    approx:'כ-', years:'שָׁנִים', months:'חֳדָשִׁים',
+    musarDesc:{reshit:'5 שְׁעָרִים בְּיִרְאָה, אַהֲבָה, תְּשׁוּבָה, קְדוּשָׁה וְעֲנָוָה', teshuva:'רַבֵּנוּ יוֹנָה עַל דַּרְכֵי הַתְּשׁוּבָה', kedusha:'רַבִּי חַיִּים וִיטָאל, תַּלְמִיד הָאֲרִיזַ״ל', mesilat:'הָרַמְחַ״ל, יְסוֹדוֹת שְׁלֵמוּת הַמִּדּוֹת', orchot:'מוּסָר קְלָאסִי בְּ-28 שְׁעָרִים'}},
+  en:{settingsTitle:'Study Pace',
+    halachaQ:'Which Halacha pace suits you?', halachaSub:'Rambam · Mishneh Torah',
+    halachaOptADesc:'The traditional pace — one chapter a day, completing the whole Mishneh Torah in three years',
+    halachaOptBDesc:'A faster pace — completes the whole Rambam in one year',
+    soon:'Coming soon: a Ben Ish Chai track will join as another option',
+    musarQ:'Which Musar book would you like to start with?', musarSub:'All at a pace of 3 units a day',
+    changeInSettings:'You can change this anytime in Settings', finishBtn:'Finish and start studying',
+    approx:'~', years:'years', months:'months',
+    musarDesc:{reshit:'5 gates on fear, love, repentance, holiness and humility', teshuva:'Rabbeinu Yonah on the paths of repentance', kedusha:'Rabbi Chaim Vital, disciple of the Arizal', mesilat:"The Ramchal, foundations of perfecting one's character", orchot:'A classic Musar work in 28 gates'}},
+  fr:{settingsTitle:"Rythme d'étude",
+    halachaQ:'Quel rythme de Halacha vous convient ?', halachaSub:'Rambam · Michné Torah',
+    halachaOptADesc:'Le rythme traditionnel — un chapitre par jour, achève tout le Michné Torah en trois ans',
+    halachaOptBDesc:'Un rythme plus rapide — achève tout le Rambam en un an',
+    soon:'Bientôt : un parcours Ben Ish Haï rejoindra les options',
+    musarQ:'Quel livre de Moussar souhaitez-vous commencer ?', musarSub:'Tous au rythme de 3 unités par jour',
+    changeInSettings:'Vous pouvez changer cela à tout moment dans les Paramètres', finishBtn:"Terminer et commencer à étudier",
+    approx:'~', years:'ans', months:'mois',
+    musarDesc:{reshit:'5 portes sur la crainte, l’amour, le repentir, la sainteté et l’humilité', teshuva:'Rabbenou Yona sur les voies du repentir', kedusha:'Rabbi Haïm Vital, disciple de l’Arizal', mesilat:"Le Ramh'al, fondements de la perfection du caractère", orchot:'Un ouvrage de Moussar classique en 28 portes'}},
+  ru:{settingsTitle:'Темп учёбы',
+    halachaQ:'Какой темп изучения Ѓалахи вам подходит?', halachaSub:'Рамбам · Мишне Тора',
+    halachaOptADesc:'Традиционный темп — одна глава в день, весь Мишне Тора завершается за три года',
+    halachaOptBDesc:'Более быстрый темп — весь Рамбам завершается за один год',
+    soon:'Скоро: маршрут Бен Иш Хай станет ещё одним вариантом',
+    musarQ:'Какую книгу по мусару вы хотите начать изучать?', musarSub:'Все книги — в темпе 3 единицы в день',
+    changeInSettings:'Это можно изменить в любое время в Настройках', finishBtn:'Завершить и начать учёбу',
+    approx:'~', years:'лет', months:'месяцев',
+    musarDesc:{reshit:'5 врат — о страхе, любви, покаянии, святости и смирении', teshuva:'Рабейну Йона о путях покаяния', kedusha:'Рабби Хаим Виталь, ученик Аризаля', mesilat:'Рамхаль, основы совершенствования характера', orchot:'Классический труд по мусару в 28 вратах'}},
+  ka:{settingsTitle:'სწავლის ტემპი',
+    halachaQ:'ჰალახის რომელი ტემპი შეგეფერებათ?', halachaSub:'რამბამი · მიშნე თორა',
+    halachaOptADesc:'ტრადიციული ტემპი — ერთი თავი დღეში, მთელი მიშნე თორა სრულდება სამ წელიწადში',
+    halachaOptBDesc:'უფრო სწრაფი ტემპი — მთელი რამბამი სრულდება ერთ წელიწადში',
+    soon:'მალე: „ბენ იშ ხაის" მარშრუტი დაემატება, როგორც კიდევ ერთი ვარიანტი',
+    musarQ:'მუსარის რომელი წიგნით გინდათ დაწყება?', musarSub:'ყველა — დღეში 3 ერთეულის ტემპით',
+    changeInSettings:'ეს ნებისმიერ დროს შეიძლება შეიცვალოს პარამეტრებში', finishBtn:'დასრულება და სწავლის დაწყება',
+    approx:'~', years:'წელი', months:'თვე',
+    musarDesc:{reshit:'5 კარიბჭე — შიშზე, სიყვარულზე, მონანიებაზე, სიწმინდესა და სიმდაბლეზე', teshuva:'რაბენუ იონა მონანიების გზებზე', kedusha:'რაბი ხაიმ ვიტალი, არიზალის მოწაფე', mesilat:'რამხალი, ხასიათის სრულყოფის საფუძვლები', orchot:'კლასიკური მუსარის ნაშრომი 28 კარიბჭეში'}},
+};
+function ckPaceUI(){ return CK_PACE_UI[S.lang]||CK_PACE_UI.he; }
+function ckMusarCycleDays(work){ return Math.ceil(MCYC[work].order.length/3); }
+function ckMusarDurationLabel(work){
+  const days=ckMusarCycleDays(work), t=ckPaceUI();
+  const years=days/365.25;
+  if(years>=1) return t.approx+(Math.round(years*10)/10)+' '+t.years;
+  return t.approx+Math.round(days/30.44*10)/10+' '+t.months;
+}
+let CK_PACE_STEP=0, CK_PACE_PENDING_TAB=null;
+const CK_PACE_FAMILY_TABS={chokBooks:1,chokSearch:1,chokUnit:1,chokParshiot:1,chokList:1,chokReader:1};
+function renderChokPace(){
+  const t=ckPaceUI();
+  const optRow=(sel,title,desc)=>`<div class="pace-opt" data-pace-opt="${sel}"><div class="pace-opt-t">${title}</div>${desc?`<div class="pace-opt-d">${desc}</div>`:''}</div>`;
+  if(CK_PACE_STEP===1 && !MCYC){
+    app.innerHTML=`<div class="view">${smSkeleton()}</div>`;
+    ensureMusarCycles().then(()=>{ if(TAB==='chokPace') renderChokPace(); });
+    return;
+  }
+  let body;
+  if(CK_PACE_STEP===0){
+    ensureMusarCycles();
+    body=`<div class="pace-q">${t.halachaQ}</div>
+    <div class="pace-sub">${t.halachaSub}</div>
+    <div class="pace-list">
+      ${optRow('three','שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם',t.halachaOptADesc)}
+      ${optRow('year','שָׁנָה · שְׁלֹשָׁה פְּרָקִים',t.halachaOptBDesc)}
+    </div>
+    <div class="pace-soon">${t.soon}</div>`;
+  } else {
+    body=`<div class="pace-q">${t.musarQ}</div>
+    <div class="pace-sub">${t.musarSub}</div>
+    <div class="pace-list">
+      ${MUSAR_WORKS.filter(w=>MCYC&&MCYC[w.key]).map(w=>
+        optRow(w.key, ckMusarUI()[w.key], `${t.musarDesc[w.key]||''}${MCYC[w.key]?` · ${ckMusarDurationLabel(w.key)}`:''}`)
+      ).join('')}
+    </div>`;
+  }
+  app.innerHTML=`<div class="view pace-view">
+    <div class="pace-progress"><div class="pace-dot ${CK_PACE_STEP===0?'on':''}"></div><div class="pace-dot ${CK_PACE_STEP===1?'on':''}"></div></div>
+    ${body}
+    <div class="pace-foot">${t.changeInSettings}</div>
+  </div>`;
+  app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
+    const v=el.dataset.paceOpt;
+    if(CK_PACE_STEP===0){
+      S.rambamTrack=v; saveS();
+      CK_PACE_STEP=1; renderChokPace(); forceScrollTop();
+    } else {
+      S.musarWork=v; saveS();
+      localStorage.setItem('betel_chok_pace_v1','1');
+      CK_PACE_STEP=0;
+      go(CK_PACE_PENDING_TAB||'chokList');
+    }
+  });
+  tr(app);
 }
 /* Daf Yomi HaOlami: a whole daf a day, in the order of the Shas, from the
    published cycle. Three of its tractates are not Bavli - Shekalim is learnt
@@ -3206,6 +3333,7 @@ function render(){
   else if(TAB==='chokReader') renderChokReader();
   else if(TAB==='zoharYomi') renderZoharYomiReader();
   else if(TAB==='onboard') renderOnboard();
+  else if(TAB==='chokPace') renderChokPace();
   else if(TAB==='settings') renderSettings();
   else if(TAB==='tracker') renderTracker();
   mountToolsFab();
@@ -4335,6 +4463,7 @@ function renderZoharReader(){
 
 /* ================= SETTINGS ================= */
 function renderSettings(){
+  if(!MCYC) ensureMusarCycles().then(()=>{ if(TAB==='settings') renderSettings(); });
   const notifPerm=(typeof Notification!=='undefined')?Notification.permission:'denied';
   app.innerHTML=`
   ${topbar('הַגְדָּרוֹת')}
@@ -4356,6 +4485,19 @@ function renderSettings(){
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${S.division==='weekly'?'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)':'חָדְשִׁי (5 פְּרָקִים לְיוֹם)'}</div></div></div>
         <div class="seg"><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
       <div class="set-item" id="settingsTracker" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.tracker}</span><div><div class="si-t">מַעֲקַב קְרִיאָה</div><div class="si-d">תְּהִלִּים · תִּיקּוּנֵי הַזֹּהַר · שְׁנַיִם מִקְרָא</div></div></div>${I.chev}</div>
+    </div>
+
+    <div class="set-group">
+      <h3>${ckPaceUI().settingsTitle}</h3>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">הֲלָכָה</div><div class="si-d">רַמְבַּ״ם</div></div></div>
+        <select id="selRambamTrack" class="fld-select" style="width:auto;min-width:170px">
+          <option value="three" ${ckRambamTrack()===1?'selected':''}>שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם</option>
+          <option value="year" ${ckRambamTrack()===3?'selected':''}>שָׁנָה · שְׁלֹשָׁה פְּרָקִים</option>
+        </select></div>
+      ${MCYC?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">מוּסָר</div><div class="si-d">3 יְחִידוֹת לְיוֹם</div></div></div>
+        <select id="selMusarWork" class="fld-select" style="width:auto;min-width:170px">
+          ${MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>`<option value="${w.key}" ${(S.musarWork||'reshit')===w.key?'selected':''}>${ckMusarUI()[w.key]}</option>`).join('')}
+        </select></div>`:''}
     </div>
 
     <div class="set-group">
@@ -4450,6 +4592,8 @@ function renderSettings(){
     inp.click();
   };
   const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast(S.lang==='he'?'הַשָּׂפָה עֻדְכְּנָה':'✓'); }; }
+  const srt=document.getElementById('selRambamTrack'); if(srt) srt.onchange=()=>{ S.rambamTrack=srt.value; saveS(); renderSettings(); };
+  const smw=document.getElementById('selMusarWork'); if(smw) smw.onchange=()=>{ S.musarWork=smw.value; saveS(); renderSettings(); };
   const da=document.getElementById('dedAdd'); if(da) da.onclick=()=>{
     const t=document.getElementById('dedType').value, n=document.getElementById('dedName').value.trim();
     if(!n){ toast('הַזֵּן שֵׁם'); return; }
@@ -4620,7 +4764,7 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 /* ================= BOOT ================= */
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
-  if(TAB==='onboard'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
+  if(TAB==='onboard'||TAB==='chokPace'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
   const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
