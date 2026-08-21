@@ -3105,8 +3105,7 @@ const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharR
 function mountToolsFab(){
   if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
   if(!app.firstChild) return;
-  const scroll = /Reader|chokUnit/.test(TAB);
-  const html = toolsFab({scroll});
+  const html = toolsFab({scroll:true});
   const readerTop = app.querySelector('.reader-top');
   const slot = readerTop || app.querySelector('.topbar div[style*="display:flex"]');
   if(slot) slot.insertAdjacentHTML('beforeend', html);
