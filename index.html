@@ -4631,6 +4631,9 @@ function zoharDone(){ try{return JSON.parse(localStorage.getItem('betel_zohar_do
 function zoharMarkDone(day){
   const done=zoharDone(); if(!done.includes(day)){ done.push(day); localStorage.setItem('betel_zohar_done',JSON.stringify(done)); }
 }
+function zoharUnmarkDone(day){
+  const done=zoharDone().filter(d=>d!==day); localStorage.setItem('betel_zohar_done',JSON.stringify(done));
+}
 function zoharBookmarkGet(){ try{ return JSON.parse(localStorage.getItem('betel_zohar_bookmark')||'null'); }catch(e){ return null; } }
 function zoharBookmarkSet(bm){ localStorage.setItem('betel_zohar_bookmark', JSON.stringify(bm)); }
 function zoharBookmarkClear(){ localStorage.removeItem('betel_zohar_bookmark'); }
@@ -4713,19 +4716,21 @@ function renderZoharReader(){
     </div>`:''}
     <div class="reader-nav">
       <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
-      ${!zoharDone().includes(entry.day)
-        ? `<button class="rnav-btn done" id="zhDone">${I.check}<span>סִיַּמְתִּי אֶת הַתִּיקּוּן</span></button>`
-        : ZH.day<ZOHAR.length
-          ? `<button class="rnav-btn" id="zhNext"><span>הַבָּא</span>${I.next}</button>`
-          : `<button class="rnav-btn done" id="zhDone2">${I.check}<span>סִיַּמְתִּי אֶת הַתִּיקּוּן</span></button>`}
+      <button class="rnav-btn" id="zhNext" ${ZH.day<ZOHAR.length?'':'disabled'}><span>הַבָּא</span>${I.next}</button>
     </div>
+    <button class="rnav-btn done" id="zhToggleDone" style="width:100%;margin-top:10px">${I.check}<span>${zoharDone().includes(entry.day)?'הוּשְׁלַם · לְבַטֵּל סִמּוּן':'סִיַּמְתִּי אֶת הַתִּיקּוּן'}</span></button>
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('zhBack').onclick=()=>go('zoharList');
   const prevBtn=document.getElementById('zhPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>zhStep(-1);
-  const nextBtn=document.getElementById('zhNext'); if(nextBtn) nextBtn.onclick=()=>zhStep(1);
-  const doneBtn2=document.getElementById('zhDone2'); if(doneBtn2) doneBtn2.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); go('zoharList'); };
-  const doneBtn=document.getElementById('zhDone'); if(doneBtn) doneBtn.onclick=()=>{ haptic(); stopAutoScroll(); zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); if(ZH.day<ZOHAR.length){ zhStep(1); } else { go('zoharList'); } };
+  const nextBtn=document.getElementById('zhNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>zhStep(1);
+  const toggleBtn=document.getElementById('zhToggleDone');
+  if(toggleBtn) toggleBtn.onclick=()=>{
+    haptic(); stopAutoScroll();
+    if(zoharDone().includes(entry.day)){ zoharUnmarkDone(entry.day); }
+    else { zoharMarkDone(entry.day); celebrate('daily','הַתִּיקּוּן'); }
+    renderZoharReader();
+  };
   app.querySelectorAll('.zh-mark-btn').forEach(b=>b.onclick=()=>{
     const page=+b.dataset.page;
     const zbm=zoharBookmarkGet();
