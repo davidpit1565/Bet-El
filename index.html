@@ -428,6 +428,12 @@ body::before{ /* subtle starfield/texture */
 .modal .special-title .sp3{animation-delay:.5s}
 .modal .special-title .sp4{animation-delay:.75s}
 @keyframes sparkleTwinkle{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+/* the 1,000-user "grand" tier: a bigger glow and a slow scale pulse on
+   top of everything modal-special already does */
+.modal.modal-grand{box-shadow:0 0 0 2px rgba(212,175,95,.55),0 30px 90px rgba(212,175,95,.6),var(--card-shadow);
+  animation:pop .5s var(--ease), shefaGlow 2.2s ease-in-out infinite, grandPulse 1.8s ease-in-out infinite}
+@keyframes grandPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.modal.modal-grand .special-title{font-size:38px}
 
 /* confetti */
 .confetti{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
@@ -795,6 +801,28 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-aliyah-chip{flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line-strong);
   color:var(--ink-soft);border-radius:999px;padding:6px 13px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
 .sm-aliyah-chip.on{background:var(--gold-grad);color:#2a1e05;border-color:transparent}
+
+/* section carousel: the active section always stays centered and full
+   size, with its neighbors peeking on both sides - nothing to scroll or
+   lose off-screen */
+.ck-car{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 10px}
+.ck-car-arrow{flex:none;width:34px;height:34px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ck-car-arrow:disabled{opacity:.3;cursor:default}
+.ck-car-arrow svg{width:16px;height:16px}
+.ck-car-track{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:0;touch-action:pan-y}
+.ck-car-peek{flex:none;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:none;font-family:var(--font-ui);font-size:12.5px;color:var(--muted);opacity:.55;cursor:pointer;padding:6px 2px}
+.ck-car-peek.ck-car-empty{visibility:hidden}
+.ck-car-center{flex:none;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--gold-grad);color:#2a1e05;font-family:var(--font-ui);font-weight:800;font-size:14.5px;border-radius:999px;padding:9px 18px}
+.ck-car-dots{display:flex;justify-content:center;gap:5px;margin-bottom:12px}
+.ck-car-dots span{width:5px;height:5px;border-radius:50%;background:var(--line-strong)}
+.ck-car-dots span.on{background:var(--gold);width:16px;border-radius:3px}
+/* shared "slide in from the side you came from" touch, reused by the
+   carousel, the day/parsha titles and anything else driven by a
+   prev/next control */
+@keyframes ckSlideInR{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes ckSlideInL{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+.ck-anim-next{animation:ckSlideInR .28s ease both}
+.ck-anim-prev{animation:ckSlideInL .28s ease both}
 </style>
 </head>
 <body>
@@ -1868,7 +1896,11 @@ function renderOnboard(){
   </div>`;
   document.getElementById('obStart').onclick=()=>{
     localStorage.setItem('betel_onboard_v1','1');
-    TAB='home';
+    if(!localStorage.getItem('betel_chok_pace_v1')){
+      CK_PACE_PENDING_TAB='home'; CK_PACE_STEP=0; TAB='chokPace';
+    } else {
+      TAB='home';
+    }
     buildNav();
     render();
     forceScrollTop();
@@ -2364,6 +2396,9 @@ const CK_PACE_UI={
     halachaOptBDesc:'קֶצֶב מָהִיר יוֹתֵר — מְסַיֵּם אֶת כׇּל הָרַמְבַּ״ם בְּתוֹךְ שָׁנָה אֶחָת',
     soon:'בְּקָרוֹב: מַסְלוּל בֶּן אִיש חַי יִצְטָרֵף כְּאוֹפְּצְיָה נוֹסֶפֶת',
     musarQ:'אֵיזֶה סֵפֶר מוּסָר תִּרְצֶה לְהַתְחִיל?', musarSub:'כֻּלָּם בְּקֶצֶב שֶׁל 3 יְחִידוֹת לְיוֹם',
+    tehillimQ:'אֵיזוֹ שִׁיטַת חֲלוּקָה מַתְאִימָה לְךָ בִּתְהִלִּים הַיּוֹמִי?', tehillimSub:'תְּהִלִּים הַיּוֹמִי',
+    tehillimOptADesc:'מְחַלֵּק אֶת סֵפֶר תְּהִלִּים לְפִי יְמֵי הַחֹדֶשׁ — 5 פְּרָקִים בְּכָל יוֹם',
+    tehillimOptBDesc:'מְחַלֵּק אֶת הַסֵּפֶר לְפִי יְמוֹת הַשָּׁבוּעַ, כַּמִּנְהָג הַנָּפוֹץ',
     changeInSettings:'אֶפְשָׁר לְשַׁנּוֹת בְּכׇל עֵת בַּהֲגָדָּרוֹת', finishBtn:'סַיֵּם וְהַתְחֵל לִלְמֹד',
     approx:'כ-', years:'שָׁנִים', months:'חֳדָשִׁים',
     musarDesc:{reshit:'5 שְׁעָרִים בְּיִרְאָה, אַהֲבָה, תְּשׁוּבָה, קְדוּשָׁה וְעֲנָוָה', teshuva:'רַבֵּנוּ יוֹנָה עַל דַּרְכֵי הַתְּשׁוּבָה', kedusha:'רַבִּי חַיִּים וִיטָאל, תַּלְמִיד הָאֲרִיזַ״ל', mesilat:'הָרַמְחַ״ל, יְסוֹדוֹת שְׁלֵמוּת הַמִּדּוֹת', orchot:'מוּסָר קְלָאסִי בְּ-28 שְׁעָרִים'}},
@@ -2373,6 +2408,9 @@ const CK_PACE_UI={
     halachaOptBDesc:'A faster pace — completes the whole Rambam in one year',
     soon:'Coming soon: a Ben Ish Chai track will join as another option',
     musarQ:'Which Musar book would you like to start with?', musarSub:'All at a pace of 3 units a day',
+    tehillimQ:'Which division method suits your Daily Tehillim?', tehillimSub:'Daily Tehillim',
+    tehillimOptADesc:'Divides the Book of Tehillim by day of the month — 5 chapters each day',
+    tehillimOptBDesc:'Divides the book by day of the week, following the common custom',
     changeInSettings:'You can change this anytime in Settings', finishBtn:'Finish and start studying',
     approx:'~', years:'years', months:'months',
     musarDesc:{reshit:'5 gates on fear, love, repentance, holiness and humility', teshuva:'Rabbeinu Yonah on the paths of repentance', kedusha:'Rabbi Chaim Vital, disciple of the Arizal', mesilat:"The Ramchal, foundations of perfecting one's character", orchot:'A classic Musar work in 28 gates'}},
@@ -2382,6 +2420,9 @@ const CK_PACE_UI={
     halachaOptBDesc:'Un rythme plus rapide — achève tout le Rambam en un an',
     soon:'Bientôt : un parcours Ben Ish Haï rejoindra les options',
     musarQ:'Quel livre de Moussar souhaitez-vous commencer ?', musarSub:'Tous au rythme de 3 unités par jour',
+    tehillimQ:'Quelle méthode de répartition convient à votre Tehilim quotidien ?', tehillimSub:'Tehilim quotidien',
+    tehillimOptADesc:'Répartit le Livre des Tehilim par jour du mois — 5 chapitres par jour',
+    tehillimOptBDesc:'Répartit le livre par jour de la semaine, selon la coutume répandue',
     changeInSettings:'Vous pouvez changer cela à tout moment dans les Paramètres', finishBtn:"Terminer et commencer à étudier",
     approx:'~', years:'ans', months:'mois',
     musarDesc:{reshit:'5 portes sur la crainte, l’amour, le repentir, la sainteté et l’humilité', teshuva:'Rabbenou Yona sur les voies du repentir', kedusha:'Rabbi Haïm Vital, disciple de l’Arizal', mesilat:"Le Ramh'al, fondements de la perfection du caractère", orchot:'Un ouvrage de Moussar classique en 28 portes'}},
@@ -2391,6 +2432,9 @@ const CK_PACE_UI={
     halachaOptBDesc:'Более быстрый темп — весь Рамбам завершается за один год',
     soon:'Скоро: маршрут Бен Иш Хай станет ещё одним вариантом',
     musarQ:'Какую книгу по мусару вы хотите начать изучать?', musarSub:'Все книги — в темпе 3 единицы в день',
+    tehillimQ:'Какой способ деления подходит для ежедневного чтения Теилим?', tehillimSub:'Ежедневные Теилим',
+    tehillimOptADesc:'Делит книгу Теилим по дням месяца — 5 глав в день',
+    tehillimOptBDesc:'Делит книгу по дням недели, по распространённому обычаю',
     changeInSettings:'Это можно изменить в любое время в Настройках', finishBtn:'Завершить и начать учёбу',
     approx:'~', years:'лет', months:'месяцев',
     musarDesc:{reshit:'5 врат — о страхе, любви, покаянии, святости и смирении', teshuva:'Рабейну Йона о путях покаяния', kedusha:'Рабби Хаим Виталь, ученик Аризаля', mesilat:'Рамхаль, основы совершенствования характера', orchot:'Классический труд по мусару в 28 вратах'}},
@@ -2400,6 +2444,9 @@ const CK_PACE_UI={
     halachaOptBDesc:'უფრო სწრაფი ტემპი — მთელი რამბამი სრულდება ერთ წელიწადში',
     soon:'მალე: „ბენ იშ ხაის" მარშრუტი დაემატება, როგორც კიდევ ერთი ვარიანტი',
     musarQ:'მუსარის რომელი წიგნით გინდათ დაწყება?', musarSub:'ყველა — დღეში 3 ერთეულის ტემპით',
+    tehillimQ:'დაყოფის რომელი მეთოდი შეგეფერებათ ყოველდღიური თეილიმისთვის?', tehillimSub:'ყოველდღიური თეილიმი',
+    tehillimOptADesc:'ყოფს თეილიმის წიგნს თვის დღეების მიხედვით — 5 თავი დღეში',
+    tehillimOptBDesc:'ყოფს წიგნს კვირის დღეების მიხედვით, გავრცელებული ჩვევის თანახმად',
     changeInSettings:'ეს ნებისმიერ დროს შეიძლება შეიცვალოს პარამეტრებში', finishBtn:'დასრულება და სწავლის დაწყება',
     approx:'~', years:'წელი', months:'თვე',
     musarDesc:{reshit:'5 კარიბჭე — შიშზე, სიყვარულზე, მონანიებაზე, სიწმინდესა და სიმდაბლეზე', teshuva:'რაბენუ იონა მონანიების გზებზე', kedusha:'რაბი ხაიმ ვიტალი, არიზალის მოწაფე', mesilat:'რამხალი, ხასიათის სრულყოფის საფუძვლები', orchot:'კლასიკური მუსარის ნაშრომი 28 კარიბჭეში'}},
@@ -2432,7 +2479,7 @@ function renderChokPace(){
       ${optRow('year','שָׁנָה · שְׁלֹשָׁה פְּרָקִים',t.halachaOptBDesc)}
     </div>
     <div class="pace-soon">${t.soon}</div>`;
-  } else {
+  } else if(CK_PACE_STEP===1){
     body=`<div class="pace-q">${t.musarQ}</div>
     <div class="pace-sub">${t.musarSub}</div>
     <div class="pace-list">
@@ -2440,9 +2487,16 @@ function renderChokPace(){
         optRow(w.key, ckMusarUI()[w.key], `${t.musarDesc[w.key]||''}${MCYC[w.key]?` · ${ckMusarDurationLabel(w.key)}`:''}`)
       ).join('')}
     </div>`;
+  } else {
+    body=`<div class="pace-q">${t.tehillimQ}</div>
+    <div class="pace-sub">${t.tehillimSub}</div>
+    <div class="pace-list">
+      ${optRow('monthly','חָדְשִׁי (5 פְּרָקִים לְיוֹם)',t.tehillimOptADesc)}
+      ${optRow('weekly','שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)',t.tehillimOptBDesc)}
+    </div>`;
   }
   app.innerHTML=`<div class="view pace-view">
-    <div class="pace-progress"><div class="pace-dot ${CK_PACE_STEP===0?'on':''}"></div><div class="pace-dot ${CK_PACE_STEP===1?'on':''}"></div></div>
+    <div class="pace-progress"><div class="pace-dot ${CK_PACE_STEP===0?'on':''}"></div><div class="pace-dot ${CK_PACE_STEP===1?'on':''}"></div><div class="pace-dot ${CK_PACE_STEP===2?'on':''}"></div></div>
     ${body}
     <div class="pace-foot">${t.changeInSettings}</div>
   </div>`;
@@ -2451,8 +2505,11 @@ function renderChokPace(){
     if(CK_PACE_STEP===0){
       S.rambamTrack=v; saveS();
       CK_PACE_STEP=1; renderChokPace(); forceScrollTop();
-    } else {
+    } else if(CK_PACE_STEP===1){
       S.musarWork=v; saveS();
+      CK_PACE_STEP=2; renderChokPace(); forceScrollTop();
+    } else {
+      S.division=v; saveS();
       localStorage.setItem('betel_chok_pace_v1','1');
       CK_PACE_STEP=0;
       go(CK_PACE_PENDING_TAB||'chokList');
@@ -2868,6 +2925,16 @@ function ckTodayLine(){
 
 /* ---------- week list ---------- */
 let CK={key:null, day:null, sec:0, year:null};
+/* direction of the last prev/next-style navigation, consumed once by the
+   next render so its title/carousel can slide in from the matching side -
+   plain taps (a random chip/section) leave it at 0, so nothing animates
+   when the user didn't just move forward/back */
+let CK_NAV_DIR=0;
+function ckAnimClass(){
+  const c = CK_NAV_DIR===1?'ck-anim-next':CK_NAV_DIR===-1?'ck-anim-prev':'';
+  CK_NAV_DIR=0;
+  return c;
+}
 const CHOK_DAY_SHORT={sun:'א׳',mon:'ב׳',tue:'ג׳',wed:'ד׳',thu:'ה׳',night:'לֵיל ו׳',fri:'ו׳'};
 const CHOK_DAY_SHORT_BY_LANG={
   en:{sun:'Sun',mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',night:'Fri night',fri:'Fri'},
@@ -2969,6 +3036,7 @@ function drawChokList(){
   const i=CHOK.parshiot.indexOf(ckKeysOf(key)[0]||key);
   const miss=chokMissedSlots();
   const y=ckYear(), vd=CK.day?null:null;
+  const _anim=ckAnimClass();
   app.innerHTML=`
   ${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}
   <div class="view">
@@ -2983,7 +3051,7 @@ function drawChokList(){
     <div class="sm-week-card" id="ckWeekCard">
       <div class="sm-week-text">
         <div class="sm-week-tag">פָּרָשַׁת הַשָּׁבוּעַ · שְׁנַת ${ckYearHe(y)}</div>
-        <div class="sm-week-name">${parshaName(key)}</div>
+        <div class="sm-week-name ${_anim}">${parshaName(key)}</div>
       </div>
       <div class="sm-aliyah-nav" style="margin:0">
         <button class="sm-aliyah-chip ck-arrow" id="ckPrevWk" ${i>0?'':'disabled'} aria-label="הַקּוֹדֶמֶת">${I.prev}</button>
@@ -3012,8 +3080,8 @@ function drawChokList(){
   </div>`;
   app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openChok(key,r.dataset.day,CK.year));
   const p=document.getElementById('ckPrevWk'), n=document.getElementById('ckNextWk');
-  if(p&&!p.disabled) p.onclick=()=>{ CK.key=CHOK.parshiot[i-1]; ensureChokWeek(CK.key).then(drawChokList); };
-  if(n&&!n.disabled) n.onclick=()=>{ CK.key=CHOK.parshiot[i+1]; ensureChokWeek(CK.key).then(drawChokList); };
+  if(p&&!p.disabled) p.onclick=()=>{ CK_NAV_DIR=-1; CK.key=CHOK.parshiot[i-1]; ensureChokWeek(CK.key).then(drawChokList); };
+  if(n&&!n.disabled) n.onclick=()=>{ CK_NAV_DIR=1; CK.key=CHOK.parshiot[i+1]; ensureChokWeek(CK.key).then(drawChokList); };
   app.querySelectorAll('.ck-yr-btn').forEach(b=>b.onclick=()=>{
     const ny=ckYear()+(+b.dataset.yd);
     if(ny<CK_YEAR_MIN||ny>CK_YEAR_MAX) return;
@@ -3082,6 +3150,7 @@ function renderChokReader(){
         return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
       }).join('');
   const srcLine=chokSourceLine(s);
+  const _anim=ckAnimClass();
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -3096,7 +3165,7 @@ function renderChokReader(){
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckDayNext" ${ckStepDay(1)?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
       </div>
-      <div class="sm-aliyah-tag">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
+      <div class="sm-aliyah-tag ${_anim}">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
       <div class="ck-viewdate">${localizeHebDateStr(ckViewHDate().renderGematriya(true))}</div>
       ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       ${s.kind==='rambam'?`<div class="ck-track">
@@ -3109,9 +3178,16 @@ function renderChokReader(){
         ).join('')}
       </div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
-      <div class="sm-aliyah-nav">
-        ${secs.map((x,ix)=>`<button class="sm-aliyah-chip ${ix===CK.sec?'on':''}" data-sec="${ix}">${x.he}</button>`).join('')}
+      <div class="ck-car">
+        <button class="ck-car-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
+        <div class="ck-car-track">
+          ${CK.sec>0?`<button class="ck-car-peek" data-sec="${CK.sec-1}">${secs[CK.sec-1].he}</button>`:'<span class="ck-car-peek ck-car-empty"></span>'}
+          <div class="ck-car-center ${_anim}">${s.he}</div>
+          ${CK.sec<secs.length-1?`<button class="ck-car-peek" data-sec="${CK.sec+1}">${secs[CK.sec+1].he}</button>`:'<span class="ck-car-peek ck-car-empty"></span>'}
+        </div>
+        <button class="ck-car-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
       </div>
+      <div class="ck-car-dots">${secs.map((_,ix)=>`<span class="${ix===CK.sec?'on':''}"></span>`).join('')}</div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
       <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs[CK.resumeTo.sec]||secs[0]).he}</b></div>
@@ -3131,19 +3207,37 @@ function renderChokReader(){
   </div>`;
   document.getElementById('ckBack').onclick=()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); };
   const jump=t=>{ if(!t) return; try{ckTrackPosition();}catch(e){} openChok(t.key,t.day,t.year); };
-  const dp=document.getElementById('ckDayPrev'); if(dp&&!dp.disabled) dp.onclick=()=>jump(ckStepDay(-1));
-  const dn2=document.getElementById('ckDayNext'); if(dn2&&!dn2.disabled) dn2.onclick=()=>jump(ckStepDay(1));
+  const dp=document.getElementById('ckDayPrev'); if(dp&&!dp.disabled) dp.onclick=()=>{ CK_NAV_DIR=-1; jump(ckStepDay(-1)); };
+  const dn2=document.getElementById('ckDayNext'); if(dn2&&!dn2.disabled) dn2.onclick=()=>{ CK_NAV_DIR=1; jump(ckStepDay(1)); };
   app.querySelectorAll('.ck-daychip[data-jday]').forEach(b=>b.onclick=()=>{
     if(b.dataset.jday===CK.day) return;
+    CK_NAV_DIR=CHOK_ROWS.findIndex(([d])=>d===b.dataset.jday) > CHOK_ROWS.findIndex(([d])=>d===CK.day) ? 1 : -1;
     jump({key:CK.key, day:b.dataset.jday, year:ckYear()});
   });
   const onChip=app.querySelector('.ck-daychip.on');
   if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
-  const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK.sec--; renderChokReader(); forceScrollTop(); };
-  const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK.sec++; renderChokReader(); forceScrollTop(); };
+  const goSec=i=>{ CK.sec=i; CK.showResume=false; ckBmSet(CK.key,CK.day,CK.sec,0); renderChokReader(); forceScrollTop(); };
+  const pv=document.getElementById('ckPrev'); if(pv&&!pv.disabled) pv.onclick=()=>{ CK_NAV_DIR=-1; CK.sec--; renderChokReader(); forceScrollTop(); };
+  const nx=document.getElementById('ckNext'); if(nx) nx.onclick=()=>{ CK_NAV_DIR=1; CK.sec++; renderChokReader(); forceScrollTop(); };
   const dn=document.getElementById('ckDone');
   if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); ckBmClear(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
-  app.querySelectorAll('.sm-aliyah-chip[data-sec]').forEach(b=>b.onclick=()=>{ CK.sec=+b.dataset.sec; CK.showResume=false; ckBmSet(CK.key,CK.day,CK.sec,0); renderChokReader(); forceScrollTop(); });
+  const secPv=document.getElementById('ckSecPrev'); if(secPv&&!secPv.disabled) secPv.onclick=()=>{ CK_NAV_DIR=-1; goSec(CK.sec-1); };
+  const secNx=document.getElementById('ckSecNext'); if(secNx&&!secNx.disabled) secNx.onclick=()=>{ CK_NAV_DIR=1; goSec(CK.sec+1); };
+  app.querySelectorAll('.ck-car-peek[data-sec]').forEach(b=>b.onclick=()=>{
+    const ix=+b.dataset.sec; CK_NAV_DIR=ix>CK.sec?1:-1; goSec(ix);
+  });
+  const track=app.querySelector('.ck-car-track');
+  if(track){
+    let sx=null;
+    track.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
+    track.addEventListener('touchend',e=>{
+      if(sx==null) return;
+      const dx=e.changedTouches[0].clientX-sx; sx=null;
+      if(Math.abs(dx)<40) return;
+      if(dx<0 && CK.sec<secs.length-1){ CK_NAV_DIR=1; goSec(CK.sec+1); }
+      else if(dx>0 && CK.sec>0){ CK_NAV_DIR=-1; goSec(CK.sec-1); }
+    },{passive:true});
+  }
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   app.querySelectorAll('.ck-track-btn[data-track]').forEach(b=>b.onclick=()=>{
     S.rambamTrack=b.dataset.track; saveS();
@@ -4500,8 +4594,6 @@ function renderSettings(){
         <select id="selLang" class="fld-select" style="width:auto;min-width:120px">
           <option value="he">עברית</option><option value="en">English</option><option value="fr">Français</option><option value="ru">Русский</option><option value="ka">ქართული</option>
         </select></div>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${S.division==='weekly'?'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)':'חָדְשִׁי (5 פְּרָקִים לְיוֹם)'}</div></div></div>
-        <div class="seg"><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
       <div class="set-item" id="settingsTracker" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.tracker}</span><div><div class="si-t">מַעֲקַב קְרִיאָה</div><div class="si-d">תְּהִלִּים · תִּיקּוּנֵי הַזֹּהַר · שְׁנַיִם מִקְרָא</div></div></div>${I.chev}</div>
     </div>
 
@@ -4516,6 +4608,8 @@ function renderSettings(){
         <select id="selMusarWork" class="fld-select" style="width:auto;min-width:170px">
           ${MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>`<option value="${w.key}" ${(S.musarWork||'reshit')===w.key?'selected':''}>${ckMusarUI()[w.key]}</option>`).join('')}
         </select></div>`:''}
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${S.division==='weekly'?'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)':'חָדְשִׁי (5 פְּרָקִים לְיוֹם)'}</div></div></div>
+        <div class="seg"><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
     </div>
 
     <div class="set-group">
@@ -4764,6 +4858,66 @@ function confetti(n){
   setTimeout(()=>c.remove(),5000);
 }
 
+/* celebration when the public visit counter (Firestore, see the module
+   script below) crosses a hundred - fires for whoever has the app open at
+   that live moment (via Firestore's realtime listener), AND for anyone
+   who simply opens the app afterwards and hasn't seen that tier yet, so
+   nobody who deserves the moment misses it just for not watching live.
+   1,000 gets a deliberately bigger "explosion" version. Guarded per
+   device (betel_milestone_last) so the same tier never repeats there.
+   Called as window.celebrateMilestone(...) from the module script, since
+   a classic-script function declaration like this one attaches to window
+   and is reachable from a <script type="module">, while the reverse (or
+   sharing let/const) is not. */
+const MILESTONE_UI={
+  he:{title:'{n} מִשְׁתַּמְּשִׁים!', body:'הִגַּעְנוּ לְ-{n} מִשְׁתַּמְּשִׁים בְּבֵית אֵ-ל! תּוֹדָה שֶׁאַתָּה חֵלֶק מֵהַקְּהִלָּה.', btn:'מַמָּשׁ מְרַגֵּשׁ!',
+      grandTitle:'אֶלֶף מִשְׁתַּמְּשִׁים!', grandBody:'הִגַּעְנוּ לְ-{n} מִשְׁתַּמְּשִׁים בְּבֵית אֵ-ל — רֶגַע עָצוּם בַּדֶּרֶךְ שֶׁלָּנוּ! תּוֹדָה עַל כָּל נֶפֶש שֶׁמִּצְטָרְפֶת לְלִמּוּד.'},
+  en:{title:'{n} Users!', body:'We’ve reached {n} users on Beit-El! Thank you for being part of the community.', btn:'How exciting!',
+      grandTitle:'1,000 Users!', grandBody:'We’ve reached {n} users on Beit-El — a huge moment in our journey! Thank you to every soul joining in study.'},
+  fr:{title:'{n} utilisateurs !', body:'Nous avons atteint {n} utilisateurs sur Beit-El ! Merci de faire partie de la communauté.', btn:'Quelle joie !',
+      grandTitle:'1 000 utilisateurs !', grandBody:'Nous avons atteint {n} utilisateurs sur Beit-El — un moment immense dans notre parcours ! Merci à chaque âme qui rejoint l’étude.'},
+  ru:{title:'{n} пользователей!', body:'Мы достигли {n} пользователей в Бейт-Эль! Спасибо, что вы часть этой общины.', btn:'Как это радостно!',
+      grandTitle:'1000 пользователей!', grandBody:'Мы достигли {n} пользователей в Бейт-Эль — огромный момент в нашем пути! Спасибо каждой душе, присоединяющейся к учёбе.'},
+  ka:{title:'{n} მომხმარებელი!', body:'ჩვენ მივაღწიეთ {n} მომხმარებელს Beit-El-ში! გმადლობთ, რომ ამ საზოგადოების ნაწილი ხართ.', btn:'რა სასიხარულოა!',
+      grandTitle:'1,000 მომხმარებელი!', grandBody:'ჩვენ მივაღწიეთ {n} მომხმარებელს Beit-El-ში — ჩვენი გზის უდიდესი მომენტი! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
+};
+function celebrateMilestone(count, tier){
+  const grand = tier>=1000;
+  const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
+  const nStr=count.toLocaleString('he-IL'), tierStr=tier.toLocaleString('he-IL');
+  const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
+  const body = (grand?t.grandBody:t.body).replace('{n}',nStr);
+  haptic(grand?60:30);
+  confetti(grand?260:140);
+  if(grand) setTimeout(()=>confetti(220), 450);
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML=`<div class="modal modal-special${grand?' modal-grand':''}">
+    <button class="close-x" data-close>${I.x}</button>
+    <div class="m-crown m-crown-special">${I.flame}</div>
+    <h3 class="gold-text special-title"><span class="sp-sparkle sp1">✦</span><span class="sp-sparkle sp2">✦</span> ${title} <span class="sp-sparkle sp3">✦</span><span class="sp-sparkle sp4">✦</span></h3>
+    <p>${body}</p>
+    <button class="btn btn-gold" data-close><span>${I.heart}</span><span>${t.btn}</span></button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
+  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+  if(S.notifEnabled && typeof Notification!=='undefined' && Notification.permission==='granted'){
+    try{ new Notification(title,{body,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+  }
+}
+/* the highest hundred-tier (200,300,400,...) this device has already
+   celebrated - checked on every snapshot, live crossing or not, so a
+   device opening the app after the fact still gets shown whichever
+   tiers it missed (just the latest one, not a backlog of every one) */
+function ckMilestoneCheck(count){
+  const tier=Math.floor(count/100)*100;
+  const last=+(localStorage.getItem('betel_milestone_last')||0);
+  if(tier>=200 && tier>last){
+    localStorage.setItem('betel_milestone_last', String(tier));
+    try{ window.celebrateMilestone(count, tier); }catch(e){}
+  }
+}
+
 /* ================= UI bits ================= */
 const ORN='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 4.2L18 4.8l-1.4 4.4L21 11l-4.4 1.8L18 17l-4.4-1.4L12 20l-1.6-4.4L6 17l1.4-4.2L3 11l4.4-1.8L6 4.8l4.4 1.4z" opacity=".85"/></svg>';
 function ornament(){ return `<div class="ornament">${ORN}</div>`; }
@@ -4862,6 +5016,8 @@ try{
 
 // Expose functions referenced by inline onclick="..." HTML attributes (these run in global scope)
 window.go = go;
+window.celebrateMilestone = celebrateMilestone;
+window.ckMilestoneCheck = ckMilestoneCheck;
 window.openPrayer = openPrayer;
 function sharePrayer(key){
   const p = PRAYERS_EXTRA[key]; if(!p) return;
@@ -4927,7 +5083,11 @@ window.shareQR = shareQR;
     if(el && lastVisitCount != null) el.textContent = lastVisitCount.toLocaleString('he-IL');
   };
   onSnapshot(visitsRef, (snap) => {
-    if(snap.exists()){ lastVisitCount = snap.data().count || 0; window.__paintVisitCount(); }
+    if(snap.exists()){
+      const newCount = snap.data().count || 0;
+      try{ window.ckMilestoneCheck(newCount); }catch(e){}
+      lastVisitCount = newCount; window.__paintVisitCount();
+    }
   }, () => {});
   (async () => {
     if(localStorage.getItem('betel_visit_counted')) return;
