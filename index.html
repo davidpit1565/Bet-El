@@ -740,7 +740,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-today{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10));cursor:pointer}
 .ck-today-tag{font-family:var(--font-sacred);font-size:11px;color:var(--gold,#b8963f);letter-spacing:.08em}
 .ck-today-name{font-family:var(--font-sacred);font-size:15px;flex:1;text-align:center}
-.ck-track{display:flex;gap:6px;justify-content:center;margin:0 0 8px}
+.ck-track{display:flex;gap:6px;justify-content:center;margin:0 0 8px;flex-wrap:wrap}
 .ck-track-btn{font-family:var(--font-sacred);font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-track-btn.on{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
 .ck-resume{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:9px 12px;border-radius:10px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
@@ -1595,7 +1595,9 @@ function ensureChokWeek(key){
 }
 function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
-    .then(()=>ensureCycDay(ckViewHDate()));
+    .then(()=>ensureCycDay(ckViewHDate()))
+    .then(()=>ensureMusarCycles())
+    .then(()=>{ if(S.musarWork&&S.musarWork!=='reshit') return ensureMusarDay(S.musarWork,ckViewHDate()); });
 }
 /* A few weeks of the year have no weekly parasha of their own - the Shabbat
    of Chol HaMoed. Chok LeYisrael does not pause for them: it goes on to the
@@ -1773,10 +1775,17 @@ function chokSectionsFor(key,day){
       add('halacha','הֲלָכָה', chokBundleSegs(pk,d.halacha), 'text', null, d.halacha, pk);
     });
   }
-  keys.forEach(pk=>{
-    const d=(CHOK.schedule[pk]||{})[day];
-    if(d) add('musar','מוּסָר', chokBundleSegs(pk,d.musar), 'text', 'אֵין מַהֲדוּרָה מְנֻקֶּדֶת', d.musar, pk);
-  });
+  const musarWork=(S.musarWork&&S.musarWork!=='reshit')?S.musarWork:null;
+  if(musarWork && ckMusarReady(musarWork,hd)){
+    const mIdx=ckMusarIndexes(musarWork,hd);
+    const items=[]; mIdx.forEach(i=>{ items.push(...ckMusarSegs(musarWork,i)); });
+    if(items.length) list.push({key:'musar',he:'מוּסָר',items,kind:'musarcyc',note:(MCYC[musarWork].vocalized===false?'אֵין מַהֲדוּרָה מְנֻקֶּדֶת':null),refs:[],tags:null,ids:null,musarWork,mIdx});
+  } else {
+    keys.forEach(pk=>{
+      const d=(CHOK.schedule[pk]||{})[day];
+      if(d) add('musar','מוּסָר', chokBundleSegs(pk,d.musar), 'text', 'אֵין מַהֲדוּרָה מְנֻקֶּדֶת', d.musar, pk);
+    });
+  }
   return list;
 }
 
@@ -1967,6 +1976,7 @@ function chokRefLabel(ref, sec){
   return ref;
 }
 function chokSourceLine(sec){
+  if(sec.kind==='musarcyc') return ckMusarSourceLabel(sec.musarWork,sec.mIdx);
   if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,ckViewHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
   if(CYC&&sec.kind==='daf'){
@@ -2223,6 +2233,98 @@ function ckRambamLabel(idxs){
   return idxs.map(i=>{
     const e=CYC.rambam.order[i];
     return ckRambamName(e.book)+' · '+ckChrome('פֶּרֶק')+' '+heNum(e.ch);
+  }).join('  ·  ');
+}
+
+/* ---------- extra Musar works (Sha'arei Teshuvah, Sha'arei Kedusha, ...) ----------
+   A separate, additive cycle system mirroring CYC.rambam's pace-track idea
+   (1/day vs 3/day, cycling forever) without touching the Rambam/Zohar/Daf
+   code paths - S.musarWork stays 'reshit' (the original fixed weekly
+   schedule) for everyone until they explicitly pick one of these. */
+let MCYC=null, musarLoadPromise=null;
+const MCYC_BLOCK={};
+const MUSAR_BLOCK=40;
+function ensureMusarCycles(){
+  if(MCYC) return Promise.resolve();
+  if(musarLoadPromise) return musarLoadPromise;
+  musarLoadPromise=fetch('data/chok-musar-cycles.json').then(r=>r.json()).then(d=>{ MCYC=d; });
+  return musarLoadPromise;
+}
+function ckMusarBlockOf(i){ return Math.floor(i/MUSAR_BLOCK); }
+function ensureMusarBlock(work,b){
+  const k=work+'/'+b;
+  if(MCYC_BLOCK[k]) return Promise.resolve();
+  return fetch('data/chok-'+work+'/'+b+'.json').then(r=>r.json()).then(d=>{ MCYC_BLOCK[k]=d; });
+}
+/* same 1-vs-3-a-day idea as ckRambamTrack, one shared choice across whichever
+   extra Musar work is active */
+function ckMusarTrack(){ return S.musarTrack==='fast' ? 3 : 1; }
+function ckMusarIndexes(work,hd){
+  const cfg=MCYC[work], per=ckMusarTrack(), n=cfg.order.length;
+  const elapsed=(hd?hd.abs():ckCivilAbs())-ckAbsOf(cfg.anchorDate);
+  const base=per===1?cfg.anchorIndex:cfg.anchorIndex3;
+  const start=((base+elapsed*per)%n+n)%n;
+  const out=[]; for(let k=0;k<per;k++) out.push((start+k)%n);
+  return out;
+}
+function ckMusarSegs(work,i){
+  const b=MCYC_BLOCK[work+'/'+ckMusarBlockOf(i)]||{};
+  const ref=MCYC[work].order[i].ref;
+  return b[ref]||[];
+}
+function ckMusarReady(work,hd){
+  if(!MCYC||!MCYC[work]) return false;
+  return ckMusarIndexes(work,hd).every(i=>MCYC_BLOCK[work+'/'+ckMusarBlockOf(i)]);
+}
+function ensureMusarDay(work,hd){
+  return ensureMusarCycles().then(()=>{
+    if(!MCYC[work]) return;
+    const idxs=ckMusarIndexes(work,hd);
+    return Promise.all(idxs.map(i=>ensureMusarBlock(work,ckMusarBlockOf(i))));
+  });
+}
+/* days-to-complete-once-through, for the track-picker labels - computed from
+   the work's real size rather than hard-coded, since each book is a
+   different length */
+function ckMusarCycleDays(work,per){ return Math.ceil(MCYC[work].order.length/per); }
+/* code-assembled strings that mix in plain numbers (paragraph/month counts) -
+   kept in their own small per-language table like CK_NOTIF, rather than run
+   through tr()'s generic substring pass: a bare word like "אות" (paragraph)
+   would also match every biblical "sign" verse translated elsewhere in the
+   app if it were a normal dictionary entry. */
+const MUSAR_UI={
+  he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה',
+      gate:'שַׁעַר', intro:'הַקְדָּמָה', para:'אוֹת', year:'כִּשְׁנָה', months:m=>m+' חֳדָשִׁים', perOne:'אוֹת לְיוֹם', perN:n=>n+' אוֹתִיּוֹת לְיוֹם'},
+  en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha",
+      gate:'Gate', intro:'Introduction', para:'Paragraph', year:'~1 year', months:m=>'~'+m+' months', perOne:'1 a day', perN:n=>n+' a day'},
+  fr:{reshit:"Réchit 'Hokhma", teshuva:'Chaarei Techouva', kedusha:'Chaarei Kedoucha',
+      gate:'Porte', intro:'Introduction', para:'Paragraphe', year:'~1 an', months:m=>'~'+m+' mois', perOne:'1 par jour', perN:n=>n+' par jour'},
+  ru:{reshit:'Решит Хохма', teshuva:'Шаарей Тшува', kedusha:'Шаарей Кедуша',
+      gate:'Врата', intro:'Введение', para:'Абзац', year:'~1 год', months:m=>'~'+m+' мес.', perOne:'1 в день', perN:n=>n+' в день'},
+  ka:{reshit:'რეშით ხოხმა', teshuva:'შაარეი თშუვა', kedusha:'შაარეი კედუშა',
+      gate:'კარიბჭე', intro:'შესავალი', para:'აბზაცი', year:'~1 წელი', months:m=>'~'+m+' თვე', perOne:'1 დღეში', perN:n=>n+' დღეში'},
+};
+function ckMusarUI(){ return MUSAR_UI[S.lang]||MUSAR_UI.he; }
+function ckMusarPaceLabel(work,per){
+  const t=ckMusarUI();
+  const days=ckMusarCycleDays(work,per);
+  const months=Math.max(1,Math.round(days/30));
+  const dur = months>=11 ? t.year : t.months(months);
+  const perTxt = per===1 ? t.perOne : t.perN(per);
+  return dur+' · '+perTxt;
+}
+const MUSAR_WORKS=[
+  {key:'reshit'}, {key:'teshuva'}, {key:'kedusha'},
+];
+function ckMusarSourceLabel(work,idxs){
+  const cfg=MCYC[work], t=ckMusarUI();
+  return idxs.map(i=>{
+    const e=cfg.order[i];
+    let gateName;
+    if(e.part==='Introduction') gateName=t.intro;
+    else if(e.heSection) gateName = (S.lang&&S.lang!=='he') ? t.gate+' '+e.section.replace(/^Gate /,'') : e.heSection;
+    else gateName = t.gate+' '+heNum(e.gate);
+    return t[work]+' · '+gateName+' · '+t.para+' '+heNum(e.ch);
   }).join('  ·  ');
 }
 /* Daf Yomi HaOlami: a whole daf a day, in the order of the Shas, from the
@@ -2799,7 +2901,8 @@ function openChok(key,day,year){
 function renderChokReader(){
   stopAutoScroll();
   if(!CK.key||!CK.day) return renderChokList();
-  if(!CHOK||!ckWeekReady(CK.key)||!TORAH||!ckCycReady()){
+  const musarPending = !MCYC || (S.musarWork && S.musarWork!=='reshit' && !ckMusarReady(S.musarWork,ckViewHDate()));
+  if(!CHOK||!ckWeekReady(CK.key)||!TORAH||!ckCycReady()||musarPending){
     app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokList')}<div class="view">${smSkeleton()}</div>`;
     ensureChokData(CK.key).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
     return;
@@ -2867,6 +2970,15 @@ function renderChokReader(){
         <button class="ck-track-btn ${ckRambamTrack()===1?'on':''}" data-track="three">שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם</button>
         <button class="ck-track-btn ${ckRambamTrack()===3?'on':''}" data-track="year">שָׁנָה · שְׁלֹשָׁה פְּרָקִים</button>
       </div>`:''}
+      ${s.key==='musar'?`<div class="ck-track">
+        ${MUSAR_WORKS.filter(w=>w.key==='reshit'||(MCYC&&MCYC[w.key])).map(w=>
+          `<button class="ck-track-btn musar-work-btn ${((S.musarWork||'reshit')===w.key)?'on':''}" data-musar-work="${w.key}">${ckMusarUI()[w.key]}</button>`
+        ).join('')}
+      </div>`:''}
+      ${s.kind==='musarcyc'?`<div class="ck-track">
+        <button class="ck-track-btn ${ckMusarTrack()===1?'on':''}" data-musar-track="slow">${ckMusarPaceLabel(s.musarWork,1)}</button>
+        <button class="ck-track-btn ${ckMusarTrack()===3?'on':''}" data-musar-track="fast">${ckMusarPaceLabel(s.musarWork,3)}</button>
+      </div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
       <div class="sm-aliyah-nav">
         ${secs.map((x,ix)=>`<button class="sm-aliyah-chip ${ix===CK.sec?'on':''}" data-sec="${ix}">${x.he}</button>`).join('')}
@@ -2904,9 +3016,20 @@ function renderChokReader(){
   if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); ckBmClear(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
   app.querySelectorAll('.sm-aliyah-chip[data-sec]').forEach(b=>b.onclick=()=>{ CK.sec=+b.dataset.sec; CK.showResume=false; ckBmSet(CK.key,CK.day,CK.sec,0); renderChokReader(); forceScrollTop(); });
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
-  app.querySelectorAll('.ck-track-btn').forEach(b=>b.onclick=()=>{
+  app.querySelectorAll('.ck-track-btn[data-track]').forEach(b=>b.onclick=()=>{
     S.rambamTrack=b.dataset.track; saveS();
     ensureCycDay(ckViewHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
+  });
+  app.querySelectorAll('.ck-track-btn[data-musar-work]').forEach(b=>b.onclick=()=>{
+    const work=b.dataset.musarWork;
+    if((S.musarWork||'reshit')===work) return;
+    S.musarWork=work; saveS();
+    if(work==='reshit'){ renderChokReader(); return; }
+    ensureMusarDay(work,ckViewHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
+  });
+  app.querySelectorAll('.ck-track-btn[data-musar-track]').forEach(b=>b.onclick=()=>{
+    S.musarTrack=(b.dataset.musarTrack==='fast')?'fast':'slow'; saveS();
+    ensureMusarDay(S.musarWork,ckViewHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
   });
   const rg=document.getElementById('ckResumeGo'); if(rg) rg.onclick=ckResume;
   const rn=document.getElementById('ckResumeNew'); if(rn) rn.onclick=ckRestart;
