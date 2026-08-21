@@ -1,7 +1,7 @@
 {
   "name": "tehilim",
   "version": "1.0.0",
-  "description": "Tehilim - Hebrew Psalms Application",
+  "description": "Bet-El - daily study app: Chok LeYisrael, daily Tehillim, daily Zohar, Hebrew calendar and zmanim",
   "private": true,
   "scripts": {
     "test": "echo \"No tests specified\"",
@@ -20,7 +20,11 @@
   "keywords": [
     "tehilim",
     "psalms",
-    "hebrew"
+    "hebrew",
+    "chok-leyisrael",
+    "zohar",
+    "daily-study",
+    "beit-el"
   ],
   "author": "",
   "license": "ISC",
