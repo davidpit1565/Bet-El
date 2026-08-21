@@ -120,3 +120,126 @@ published English translation of this work uses "Gate One", "Gate Two", …).
 - No refs were skipped outright; the only paragraphs not appearing as their
   own standalone unit are the 14 gates' 2–3 header paragraphs, each merged
   into its gate's first unit as described above.
+
+## Addendum: Part 3 + Part 4 added (completes the book)
+
+### `order.json` was missing on disk — reconstructed, not overwritten
+Before this addition, `order.json` did not exist anywhere in this directory
+(only `0.json`–`6.json` + this NOTES.md were ever committed — confirmed via
+`git log --diff-filter=A --name-only` on the introducing commit). It was
+reconstructed byte-for-byte from `0.json`–`6.json` themselves: the block
+files' key order was walked in file order (0→6), each ref parsed to recover
+`part`/`section`/`heSection`/`ch` per the scheme documented above, and the
+result cross-checked against this file's own stated per-gate unit counts
+(12,13,8,13,7,23 for Part 1; 10,7,26,62,33,11,17,24 for Part 2; 279 total) —
+all matched exactly, so the reconstruction is confirmed faithful. The existing
+279 entries and `0.json`–`5.json` were left untouched (verified byte-identical
+after the compact `separators=(",", ":")` JSON formatting was matched); only
+`6.json` changed (topped up from 39→40 entries).
+
+### Source verification (Part 3 / Part 4)
+- `/api/v2/raw/index/Sha%27arei_Kedusha` shows Part 4 is **not** a depth-1
+  flat `JaggedArrayNode` like the Introduction — it is depth-2
+  (`sectionNames: ["Shaar","Paragraph"]`) exactly like Parts 1–3, just with
+  only one Shaar. Confirmed refs are `Sha'arei Kedusha, Part 4 1:N` (not a
+  flat `Part 4 N`), e.g. `.../Part_4.1.3` echoes back
+  `ref: "Sha'arei Kedusha, Part 4 1:3"`. The task's working assumption that
+  Part 4 is Introduction-style flat was incorrect; handled as a single-gate
+  case of the Part 1/2/3 pattern instead, with `section`/`part` still set to
+  `"Part 4"` (not `"Gate 1"`) since there is only one gate and it is the Part
+  itself, per the task's own instruction to mirror the Introduction's section
+  naming.
+- Whole-part fetches of the *bare* node (`.../Part_1?context=0`,
+  `.../Part_3?context=0`) now return **only Shaar 1**, not the full nested
+  array as the original NOTES above describe (Sefaria's API behavior for
+  this appears to have changed since the original build). The working form
+  used here is an explicit Shaar range: `.../Part_3.1-8?context=0` (returns
+  all 8 gates in one call) and `.../Part_4.1?context=0` (returns the single
+  gate's 6 paragraphs). Re-verified this same range form also correctly
+  pulls all 6 gates of Part 1 in one call, so this is a fetch-mechanics
+  correction, not a scheme change.
+- Part 3 raw paragraph-per-gate counts, fetched directly:
+  `[21, 48, 9, 6, 18, 23, 12, 11]` (148 total). This differs from the task's
+  stated `[21, 48, 10, 6, 18, 23, 12, 11]` (149 total) in gate 3 only — the
+  actual Sefaria text has 9 paragraphs in Part 3 Gate 3, not 10. Verified by
+  direct enumeration of the fetched array; used the real count.
+
+### Header paragraphs — a different, more varied pattern than Part 1/2
+All 8 gates of Part 3 open with a "Gate N:" + topic-sentence header exactly
+like Part 1/2, **but the topic sentence is sometimes followed by one more
+purely descriptive/meta sentence before real content begins**, and this had
+to be judged gate-by-gate by reading each opening (not assumed uniform):
+- **2-paragraph header** (gate label + topic, content starts immediately
+  after): Gates 3, 4, 5, 7, 8. In each of these the paragraph right after the
+  topic line already makes a substantive claim/teaches something (e.g. Gate
+  4 para 3 opens "בתנאי הנבואה בקצור גדול" but immediately gives concrete
+  practical instructions; Gate 8 para 3 "צריך שיזדכך חמשה זכוכים" states an
+  actual number/claim), so it was treated as content, not header.
+- **3-paragraph header** (gate label + topic + one extra meta sentence about
+  *why/how briefly* the gate will proceed, no actual teaching yet): Gates 2
+  and 6. E.g. Gate 2 para 3 ("ובו יתבאר דרושים לא שערום הראשונים... ואכתבם
+  בתכלית הקצור") is pure apologetic/scope framing, not a claim about "מהות
+  האדם" itself — judged as header, matching the Part 2 Gate 1 precedent
+  (label+topic+topic-sentence all merged) already in the original NOTES.
+- **4-paragraph header, including one truly empty paragraph**: Gate 1 — the
+  only case of its kind found in the whole book so far. Its paragraphs are:
+  1) `"חלק השלישי:"` (Part label — note: no ה prefix, unlike Part 1/2's
+  "החלק ראשון:"/"החלק שני"), 2) `"בהנהגת השגת רוח הקודש:"` (Part topic),
+  3) `""` (a genuinely empty string — Sefaria's own segmentation, not a
+  fetch error), 4) `"השער הראשון במהות העולמות..."` (gate label+topic,
+  pre-combined as in Part 1 Gate 1). Real content starts at paragraph 5.
+  **Judgment call**: the empty paragraph 3 was merged into the ref range
+  (`Sha'arei Kedusha, Part 3 1:1-5`, spanning all 5 raw paragraphs, matching
+  Sefaria's own numbering) but its empty string was *not* included in the
+  unit's paragraph-text array (nothing to preserve — "no text discarded"
+  still holds since there was no text there), giving that unit 4 (not 5)
+  strings.
+
+Part 4 opens with a plain 2-paragraph header — `"החלק הרביעי:"` (Part label,
+matches the task's suggested `heSection` exactly) + `"באופני השמוש בהשגת רוח
+הקודש:"` (topic) — then 4 further paragraphs, all real text: paragraphs 3–5
+are Rabbi Chaim Vital's own closing remarks (explaining the part would have
+covered specific yichudim, referencing his other work Eitz Chaim), and
+paragraph 6 is a **printer's note** (wrapped in the text's own `<small>` tag)
+stating this part's actual practical content was deliberately never
+transcribed/printed because it consists of divine names and hidden secrets
+unfit for the printing press — followed by the book's closing colophon "תם
+ונשלם השבח לאל בורא עולם". This paragraph 6 was kept as its own ordinary
+unit (not discarded, not specially flagged) since it is genuine authorial/
+editorial text, exactly like Introduction 1's opening attribution line.
+
+### Unit counts
+- Part 3, per gate (after merging headers forward): Gate 1: 17, Gate 2: 45,
+  Gate 3: 7, Gate 4: 4, Gate 5: 16, Gate 6: 20, Gate 7: 10, Gate 8: 9.
+  **Part 3 total: 128 units** (148 raw − 20 header paragraphs removed as
+  separate units, spread as 4+3+2+2+2+3+2+2 across the 8 gates).
+- Part 4: 6 raw paragraphs − 2 header paragraphs merged = **4 units**.
+- **New units added: 132** (128 + 4).
+- **New grand total: 411** (279 existing + 132 new).
+
+### Vocalization (nikud) — UNVOCALIZED, confirmed for Part 3 and Part 4 too
+Sampled 24 paragraphs spread across all 8 gates of Part 3 (first/middle/last
+paragraph of each gate) plus all 6 paragraphs of Part 4 (30 total) for
+Unicode combining marks U+0591–U+05C7. **Zero matches** — fully consistent
+with the Introduction/Part 1/Part 2 finding; the whole book ships unvocalized
+on Sefaria.
+Examples (plain consonantal text):
+1. Part 3, Gate 1, real content (para 5): `הנה המאציל העליון אשר האציל כל
+   העולמות נקרא אין סוף ואין בו שום תמונה...`
+2. Part 3, Gate 6, mid-gate: `גם נתבאר היות מדרגות לאין קץ כי ספירה כלולה
+   מעשר ועשר מעשר וכו'...`
+3. Part 4, para 6 (printer's note): `<small>(אמר המדפיס החלק הזה לא בא
+   להעתקה ולא נדפס כלל...)</small>`
+
+### Output (final state)
+- `order.json`: flat array, **411 entries** total (Introduction 13 + Part 1
+  76 + Part 2 190 + Part 3 128 + Part 4 4), same `{"part","section",
+  "heSection","ch","ref"}` shape throughout; the pre-existing 279 entries are
+  untouched and appear first, in their original order.
+- `0.json`–`10.json`: **11 block files**, chunk size 40 (block 10 has the
+  remaining 11). `0.json`–`5.json` are byte-identical to before this change;
+  `6.json` was topped up from 39→40 entries; `7.json`–`10.json` are new.
+  Block boundaries and ref lists were programmatically verified to line up
+  with the final `order.json` exactly, and every unit's paragraph array was
+  checked non-empty.
+- The book (Introduction + Parts 1–4) is now complete in this dataset.
