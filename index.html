@@ -1594,8 +1594,9 @@ function go(tab){
     CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=-2; CK_PACE_AFTER_LANG='intro'; tab='chokPace';
   }
   TAB=tab;
+  if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   render();
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab)); 
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab));
   forceScrollTop();
 }
 let autoScrollTimer=null;
