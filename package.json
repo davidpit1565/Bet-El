@@ -4,9 +4,16 @@
   "description": "Tehilim - Hebrew Psalms Application",
   "private": true,
   "scripts": {
-    "test": "echo \"No tests specified\""
+    "test": "echo \"No tests specified\"",
+    "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js manifest.json icon-192.png icon-512.png www/ && cp -r data www/data && npx cap sync ios"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0"
   },

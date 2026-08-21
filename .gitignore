@@ -9,3 +9,6 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Capacitor web asset copy - regenerate with `npm run cap:sync`
+/www
