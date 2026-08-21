@@ -23,7 +23,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :root{
   --gold:#d4af5f; --gold-bright:#f3e3af; --gold-deep:#b8860b;
   --gold-grad:linear-gradient(135deg,#a9791f 0%,#e6c874 38%,#f7ecc4 52%,#d9b25f 68%,#a9791f 100%);
-  --radius:20px; --radius-sm:14px;
+  --radius:28px; --radius-sm:20px;
+  --spring: cubic-bezier(.34,1.56,.64,1);
+  --spring-soft: cubic-bezier(.22,1.28,.36,1);
+  --lg-sheen: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 12%, transparent 45%);
   --font-sacred:"Noto Serif Hebrew",Georgia,"Times New Roman",serif;
   --font-reading:"David Libre","Frank Ruhl Libre","Noto Serif Hebrew",Georgia,serif;
   --font-ui:"Heebo","Assistant",system-ui,-apple-system,sans-serif;
@@ -44,6 +47,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 /* ---- LIGHT (parchment) ---- */
 [data-theme="light"]{
+  --lg-sheen: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.15) 12%, transparent 45%);
   --bg:#efe6d2; --bg-grad:radial-gradient(120% 90% at 50% -10%,#fbf5e6 0%,#f0e6d0 55%,#e7dcc2 100%);
   --panel:rgba(255,252,244,.78); --panel-solid:#fbf6ea; --panel-2:rgba(247,239,223,.8); --panel-hover:rgba(247,239,223,.8);
   --ink:#22314e; --ink-soft:#3c4a66; --muted:#8a7f66; --text:var(--ink);
@@ -716,8 +720,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .notif-time{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;width:110px}
 
 
-.view{animation:viewFadeIn .32s cubic-bezier(.16,1,.3,1)}
-@keyframes viewFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.view{animation:viewFadeIn .55s var(--spring-soft) both}
+@keyframes viewFadeIn{from{opacity:0;transform:translateY(14px) scale(.975);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
 @media (prefers-reduced-motion: reduce){.view{animation:none}}
 
 
@@ -841,6 +845,60 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @keyframes ckSlideInL{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
 .ck-anim-next{animation:ckSlideInR .28s ease both}
 .ck-anim-prev{animation:ckSlideInL .28s ease both}
+
+/* ================= iOS 26 "LIQUID GLASS" MATERIAL LAYER =================
+   Deeper blur/saturation + specular sheen on glass surfaces, continuous
+   (squircle) corners, capsule buttons/icon buttons, a real sliding tab-bar
+   pill (positioned by placeNavPill(), replacing the old per-item glow),
+   and spring/elastic press feedback. Colors, fonts and layout untouched. */
+.card,.prayer,.q-tile,.set-item,.pace-opt,.ob-row,.pace-recap,.search-box,
+.dd-portion,.sm-week-card,.rnav-btn,.reader-tools .rt-panel,.modal{
+  backdrop-filter:blur(20px) saturate(1.6);
+  -webkit-backdrop-filter:blur(20px) saturate(1.6);
+  border-radius:var(--radius);
+  box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255,255,255,.14);
+  background-image: var(--lg-sheen);
+}
+.q-tile,.set-item,.search-box,.dd-portion{border-radius:var(--radius-sm)}
+.btn{border-radius:999px}
+.btn-gold{box-shadow:0 10px 26px -10px rgba(184,134,11,.7), inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-ghost{backdrop-filter:blur(20px) saturate(1.6);background-image:var(--lg-sheen)}
+.icon-btn,.cal-nav,.reader-tools .rt-fab{border-radius:50%;backdrop-filter:blur(16px) saturate(1.6);background-image:var(--lg-sheen)}
+.topbar .tb-back{border-radius:50%}
+.topbar{backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.bottom-nav{
+  border-radius:34px;
+  backdrop-filter:blur(30px) saturate(1.7);-webkit-backdrop-filter:blur(30px) saturate(1.7);
+  background-image:var(--lg-sheen);
+  box-shadow:0 16px 40px -10px rgba(0,0,0,.4),0 2px 10px -2px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.14);
+}
+.nav-item{position:relative;z-index:1}
+.nav-item.on::before{display:none} /* replaced by the sliding .nav-pill */
+.nav-pill{
+  position:absolute; top:6px; height:calc(var(--nav-h) - 12px); border-radius:22px;
+  background:linear-gradient(180deg,rgba(212,175,95,.32),rgba(212,175,95,.14));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 4px 14px -4px rgba(212,175,95,.5);
+  backdrop-filter:blur(6px);
+  transition: left .5s var(--spring), width .5s var(--spring), opacity .2s ease;
+  pointer-events:none; z-index:0;
+}
+.modal{border-radius:32px;backdrop-filter:blur(26px) saturate(1.6)}
+.card,.q-tile,.set-item,.pace-opt,.ob-row,.btn,.icon-btn,.cal-nav,.ps-cell,.cal-cell,
+.rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card{
+  transition: transform .5s var(--spring), box-shadow .3s ease, background-color .3s ease;
+}
+.card:active,.q-tile:active,.set-item:active,.pace-opt:active,.ob-row:active,
+.dd-portion:active,.sm-week-card:active{ transform:scale(.965); transition-duration:.12s; }
+.btn:active,.icon-btn:active,.cal-nav:active,.reader-tools .rt-fab:active{ transform:scale(.9); transition-duration:.1s; }
+.ps-cell:active,.cal-cell:active{ transform:scale(.88); transition-duration:.1s; }
+.nav-item:active{ transform:scale(.9); transition-duration:.1s; }
+@media (prefers-reduced-motion: reduce){
+  .card,.q-tile,.set-item,.pace-opt,.ob-row,.btn,.icon-btn,.cal-nav,.ps-cell,.cal-cell,
+  .rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card,.nav-pill{
+    transition:none!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1597,7 +1655,18 @@ function go(tab){
   if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   render();
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab));
+  requestAnimationFrame(placeNavPill);
   forceScrollTop();
+}
+/* iOS 26 liquid-glass tab bar: slide the pill under whichever .nav-item is .on */
+function placeNavPill(){
+  const nav=document.querySelector('.bottom-nav'); if(!nav) return;
+  const on=nav.querySelector('.nav-item.on'); if(!on) return;
+  let pill=nav.querySelector('.nav-pill');
+  if(!pill){ pill=document.createElement('div'); pill.className='nav-pill'; nav.insertBefore(pill, nav.firstChild); }
+  const navRect=nav.getBoundingClientRect(), onRect=on.getBoundingClientRect();
+  pill.style.left=(onRect.left-navRect.left+6)+'px';
+  pill.style.width=(onRect.width-12)+'px';
 }
 let autoScrollTimer=null;
 function stopAutoScroll(){
@@ -5045,7 +5114,9 @@ function buildNav(){
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
   tr(nav);
+  requestAnimationFrame(placeNavPill);
 }
+window.addEventListener('resize', placeNavPill);
 applySettings();
 applyLang();
 if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; TAB='chokPace'; }
