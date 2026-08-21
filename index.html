@@ -1026,6 +1026,9 @@ const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending upda
 const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed times, ready to reveal now
 const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
 function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.row1.join(' · ')}<br>${MEMORIAL.row2.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
+/* those who helped build this app - a third name still pending, to be added when received */
+const HATZLACHA = {row1:['איליי מיכאל בן אירית','דוד מאיר ישראל בן שרה קרולין']};
+function hatzlachaHTML(){ return `<div class="memorial">לְהַצְלָחַת<br>${HATZLACHA.row1.join(' · ')}</div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -3343,6 +3346,7 @@ function renderHome(){
       <div class="stat-card"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">מִשְׁתַּמְּשִׁים</span></div><span class="sc-badge gold">${I.users}</span></div>
       <div class="stat-card"><div class="sc-info"><span class="sc-num" id="liveCount">–</span><span class="sc-label">מְחֻבָּרִים כָּעֵת</span></div><span class="sc-badge live">${I.liveDot}</span></div>
     </div>
+    ${hatzlachaHTML()}
     ${memorialHTML()}
     ${ornament()}
   </div>`;
@@ -4415,6 +4419,7 @@ function renderSettings(){
     </div>
 
     <div class="ornament">${ORN}</div>
+    ${hatzlachaHTML()}
     ${memorialHTML()}
     <div class="credit"><span class="cg">מֶרְכַּז ק״ק הַסְּפָרַדִּים · בֵּית אֵ-ל</span></div>
   </div>`;
