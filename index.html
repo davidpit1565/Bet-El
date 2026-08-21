@@ -1582,7 +1582,7 @@ const app = document.getElementById('app');
 let TAB='home';
 function go(tab){
   if(CK_PACE_FAMILY_TABS[tab] && !localStorage.getItem('betel_chok_pace_v1')){
-    CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=-1; tab='chokPace';
+    CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=-2; CK_PACE_AFTER_LANG='intro'; tab='chokPace';
   }
   TAB=tab;
   render();
@@ -2419,6 +2419,7 @@ const CK_PACE_UI={
     tehillimOptBDesc:'מְחַלֵּק אֶת הַסֵּפֶר לְפִי יְמוֹת הַשָּׁבוּעַ, כַּמִּנְהָג הַנָּפוֹץ',
     introTitle:'שָׁלוֹם! עוֹד רֶגַע וּמַתְחִילִים', introBody:'כְּדֵי שֶׁתִּלְמַד בַּקֶּצֶב הַנָּכוֹן בִּשְׁבִילְךָ, נִשְׁאַל אוֹתְךָ שָׁלוֹשׁ שְׁאֵלוֹת קְצָרוֹת. זֶה יִקָּח כַּמָּה שְׁנִיּוֹת — וְאֶפְשָׁר לְשַׁנּוֹת כָּל בְּחִירָה בְּכָל עֵת בַּהֲגָדָּרוֹת.', introBtn:'בֹּא נַתְחִיל',
     doneTitle:'הַכֹּל מוּכָן!', doneSub:'הַלִּמּוּד שֶׁלְּךָ מֻתְאָם אִישִׁית — אַתָּה יָכוֹל לְהַתְחִיל', doneBtn:'לְהַתְחִיל לִלְמֹד!',
+    langQ:'בְּאֵיזוֹ שָׂפָה תִּרְצֶה לִלְמֹד?',
     changeInSettings:'אֶפְשָׁר לְשַׁנּוֹת בְּכׇל עֵת בַּהֲגָדָּרוֹת', finishBtn:'סַיֵּם וְהַתְחֵל לִלְמֹד',
     approx:'כ-', years:'שָׁנִים', months:'חֳדָשִׁים',
     musarDesc:{reshit:'5 שְׁעָרִים בְּיִרְאָה, אַהֲבָה, תְּשׁוּבָה, קְדוּשָׁה וְעֲנָוָה', teshuva:'רַבֵּנוּ יוֹנָה עַל דַּרְכֵי הַתְּשׁוּבָה', kedusha:'רַבִּי חַיִּים וִיטָאל, תַּלְמִיד הָאֲרִיזַ״ל', mesilat:'הָרַמְחַ״ל, יְסוֹדוֹת שְׁלֵמוּת הַמִּדּוֹת', orchot:'מוּסָר קְלָאסִי בְּ-28 שְׁעָרִים'}},
@@ -2433,6 +2434,7 @@ const CK_PACE_UI={
     tehillimOptBDesc:'Divides the book by day of the week, following the common custom',
     introTitle:'Hello! Just a moment before we begin', introBody:"So you study at the pace that's right for you, we'll ask three short questions. It'll take a few seconds — and you can change any choice anytime in Settings.", introBtn:'Let’s begin',
     doneTitle:'All set!', doneSub:'Your study is personalized — you can start now', doneBtn:'Start studying!',
+    langQ:'Which language would you like to study in?',
     changeInSettings:'You can change this anytime in Settings', finishBtn:'Finish and start studying',
     approx:'~', years:'years', months:'months',
     musarDesc:{reshit:'5 gates on fear, love, repentance, holiness and humility', teshuva:'Rabbeinu Yonah on the paths of repentance', kedusha:'Rabbi Chaim Vital, disciple of the Arizal', mesilat:"The Ramchal, foundations of perfecting one's character", orchot:'A classic Musar work in 28 gates'}},
@@ -2447,6 +2449,7 @@ const CK_PACE_UI={
     tehillimOptBDesc:'Répartit le livre par jour de la semaine, selon la coutume répandue',
     introTitle:'Bonjour ! Encore un instant avant de commencer', introBody:'Pour que vous étudiiez au rythme qui vous convient, nous allons vous poser trois courtes questions. Cela prendra quelques secondes — et vous pouvez changer chaque choix à tout moment dans les Paramètres.', introBtn:'Commençons',
     doneTitle:'Tout est prêt !', doneSub:'Votre étude est personnalisée — vous pouvez commencer', doneBtn:'Commencer à étudier !',
+    langQ:'Dans quelle langue souhaitez-vous étudier ?',
     changeInSettings:'Vous pouvez changer cela à tout moment dans les Paramètres', finishBtn:"Terminer et commencer à étudier",
     approx:'~', years:'ans', months:'mois',
     musarDesc:{reshit:'5 portes sur la crainte, l’amour, le repentir, la sainteté et l’humilité', teshuva:'Rabbenou Yona sur les voies du repentir', kedusha:'Rabbi Haïm Vital, disciple de l’Arizal', mesilat:"Le Ramh'al, fondements de la perfection du caractère", orchot:'Un ouvrage de Moussar classique en 28 portes'}},
@@ -2461,6 +2464,7 @@ const CK_PACE_UI={
     tehillimOptBDesc:'Делит книгу по дням недели, по распространённому обычаю',
     introTitle:'Здравствуйте! Ещё момент, и начнём', introBody:'Чтобы вы учились в подходящем именно вам темпе, мы зададим три коротких вопроса. Это займёт всего несколько секунд — и любой выбор можно изменить в любое время в Настройках.', introBtn:'Начнём',
     doneTitle:'Всё готово!', doneSub:'Ваша учёба настроена персонально — можно начинать', doneBtn:'Начать учёбу!',
+    langQ:'На каком языке вы хотите учиться?',
     changeInSettings:'Это можно изменить в любое время в Настройках', finishBtn:'Завершить и начать учёбу',
     approx:'~', years:'лет', months:'месяцев',
     musarDesc:{reshit:'5 врат — о страхе, любви, покаянии, святости и смирении', teshuva:'Рабейну Йона о путях покаяния', kedusha:'Рабби Хаим Виталь, ученик Аризаля', mesilat:'Рамхаль, основы совершенствования характера', orchot:'Классический труд по мусару в 28 вратах'}},
@@ -2475,6 +2479,7 @@ const CK_PACE_UI={
     tehillimOptBDesc:'ყოფს წიგნს კვირის დღეების მიხედვით, გავრცელებული ჩვევის თანახმად',
     introTitle:'გამარჯობა! ერთი წამით დაწყებამდე', introBody:'რათა ისწავლოთ თქვენთვის შესაფერისი ტემპით, დაგისვამთ სამ მოკლე კითხვას. ეს წაგვიღებს რამდენიმე წამს — და ნებისმიერი არჩევანის შეცვლა შესაძლებელია ნებისმიერ დროს პარამეტრებში.', introBtn:'დავიწყოთ',
     doneTitle:'ყველაფერი მზადაა!', doneSub:'თქვენი სწავლა პერსონალიზებულია — შეგიძლიათ დაწყოთ', doneBtn:'სწავლის დაწყება!',
+    langQ:'რომელ ენაზე გნებავთ სწავლა?',
     changeInSettings:'ეს ნებისმიერ დროს შეიძლება შეიცვალოს პარამეტრებში', finishBtn:'დასრულება და სწავლის დაწყება',
     approx:'~', years:'წელი', months:'თვე',
     musarDesc:{reshit:'5 კარიბჭე — შიშზე, სიყვარულზე, მონანიებაზე, სიწმინდესა და სიმდაბლეზე', teshuva:'რაბენუ იონა მონანიების გზებზე', kedusha:'რაბი ხაიმ ვიტალი, არიზალის მოწაფე', mesilat:'რამხალი, ხასიათის სრულყოფის საფუძვლები', orchot:'კლასიკური მუსარის ნაშრომი 28 კარიბჭეში'}},
@@ -2487,17 +2492,36 @@ function ckMusarDurationLabel(work){
   if(years>=1) return t.approx+(Math.round(years*10)/10)+' '+t.years;
   return t.approx+Math.round(days/30.44*10)/10+' '+t.months;
 }
-/* -1 = welcome intro (skipped when arriving right after the general
-   onboarding screen, which already said hello), 0-2 = the three
-   questions, 3 = the closing celebration before dropping into the app */
-let CK_PACE_STEP=0, CK_PACE_PENDING_TAB=null;
+/* -2 = language, -1 = welcome intro (skipped when arriving right after
+   the general onboarding screen, which already said hello), 0-2 = the
+   three questions, 3 = the closing celebration before dropping into the
+   app. CK_PACE_AFTER_LANG says what follows the language step: a truly
+   fresh install still needs to see the general onboarding screen (in
+   the language just chosen) before any of this, while an existing user
+   reaching this via Chok LeYisrael goes straight to the welcome intro. */
+let CK_PACE_STEP=0, CK_PACE_PENDING_TAB=null, CK_PACE_AFTER_LANG='intro';
 const CK_PACE_FAMILY_TABS={chokBooks:1,chokSearch:1,chokUnit:1,chokParshiot:1,chokList:1,chokReader:1};
+const CK_PACE_LANGS=[{code:'he',label:'עברית'},{code:'en',label:'English'},{code:'fr',label:'Français'},{code:'ru',label:'Русский'},{code:'ka',label:'ქართული'}];
 function renderChokPace(){
   const t=ckPaceUI();
   const optRow=(sel,title,desc)=>`<div class="pace-opt" data-pace-opt="${sel}"><div class="pace-opt-t">${title}</div>${desc?`<div class="pace-opt-d">${desc}</div>`:''}</div>`;
   if(CK_PACE_STEP===1 && !MCYC){
     app.innerHTML=`<div class="view">${smSkeleton()}</div>`;
     ensureMusarCycles().then(()=>{ if(TAB==='chokPace') renderChokPace(); });
+    return;
+  }
+  if(CK_PACE_STEP===-2){
+    app.innerHTML=`<div class="view pace-view">
+      <div class="pace-q">${t.langQ}</div>
+      <div class="pace-list">${CK_PACE_LANGS.map(l=>optRow(l.code,l.label)).join('')}</div>
+    </div>`;
+    app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
+      S.lang=el.dataset.paceOpt; saveS(); applyLang(); buildNav();
+      if(CK_PACE_AFTER_LANG==='onboard'){ TAB='onboard'; render(); }
+      else { CK_PACE_STEP=-1; renderChokPace(); }
+      forceScrollTop();
+    });
+    tr(app);
     return;
   }
   if(CK_PACE_STEP===-1){
@@ -5014,7 +5038,7 @@ function buildNav(){
 }
 applySettings();
 applyLang();
-if(!localStorage.getItem('betel_onboard_v1')) TAB='onboard';
+if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; TAB='chokPace'; }
 buildNav();
 render();
 (function initNavScrollHide(){
