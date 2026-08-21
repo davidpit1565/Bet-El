@@ -140,6 +140,24 @@ body::before{ /* subtle starfield/texture */
 .pace-opt-d{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.5}
 .pace-soon{margin-top:2px;text-align:center;font-size:14px;color:var(--muted)}
 .pace-foot{text-align:center;font-size:14px;color:var(--muted);margin-top:14px;line-height:1.5}
+/* welcome/closing bookend screens around the pace questions - reuse the
+   modal-special shine/sparkle look but unscoped, so it works outside a
+   .modal too */
+.pace-bookend{padding-top:70px;text-align:center}
+.pace-shine-title{font-family:var(--font-sacred);font-size:26px;font-weight:700;line-height:1.4;
+  display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+  background:linear-gradient(90deg,#b8860b,#fff8e0,#b8860b,#e6c874,#b8860b);
+  -webkit-background-clip:text;background-clip:text;color:transparent;background-size:300% auto;
+  animation:shineText 2.4s linear infinite, pop .5s var(--ease)}
+.pace-shine-title .sp-sparkle{-webkit-text-fill-color:var(--gold);color:var(--gold);font-size:16px;
+  animation:sparkleTwinkle 1.4s ease-in-out infinite}
+.pace-bookend-body{font-size:14px;color:var(--ink-soft);line-height:1.7;margin:16px auto 0;max-width:320px}
+.pace-recap{margin:22px 0;background:var(--panel);border-radius:16px;padding:14px 18px;border:1px solid var(--line);text-align:right}
+.pace-recap-row{display:flex;justify-content:space-between;padding:9px 0;font-size:14px}
+.pace-recap-row+.pace-recap-row{border-top:1px solid var(--line)}
+.pace-recap-k{color:var(--muted)}
+.pace-recap-v{font-family:var(--font-sacred);font-weight:700;color:var(--gold)}
+.pace-bookend .btn{margin-top:8px}
 
 /* next zman strip */
 .zman-strip{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 4px;font-size:13.5px}
@@ -1564,7 +1582,7 @@ const app = document.getElementById('app');
 let TAB='home';
 function go(tab){
   if(CK_PACE_FAMILY_TABS[tab] && !localStorage.getItem('betel_chok_pace_v1')){
-    CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=0; tab='chokPace';
+    CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=-1; tab='chokPace';
   }
   TAB=tab;
   render();
@@ -2399,6 +2417,8 @@ const CK_PACE_UI={
     tehillimQ:'אֵיזוֹ שִׁיטַת חֲלוּקָה מַתְאִימָה לְךָ בִּתְהִלִּים הַיּוֹמִי?', tehillimSub:'תְּהִלִּים הַיּוֹמִי',
     tehillimOptADesc:'מְחַלֵּק אֶת סֵפֶר תְּהִלִּים לְפִי יְמֵי הַחֹדֶשׁ — 5 פְּרָקִים בְּכָל יוֹם',
     tehillimOptBDesc:'מְחַלֵּק אֶת הַסֵּפֶר לְפִי יְמוֹת הַשָּׁבוּעַ, כַּמִּנְהָג הַנָּפוֹץ',
+    introTitle:'שָׁלוֹם! עוֹד רֶגַע וּמַתְחִילִים', introBody:'כְּדֵי שֶׁתִּלְמַד בַּקֶּצֶב הַנָּכוֹן בִּשְׁבִילְךָ, נִשְׁאַל אוֹתְךָ שָׁלוֹשׁ שְׁאֵלוֹת קְצָרוֹת. זֶה יִקָּח כַּמָּה שְׁנִיּוֹת — וְאֶפְשָׁר לְשַׁנּוֹת כָּל בְּחִירָה בְּכָל עֵת בַּהֲגָדָּרוֹת.', introBtn:'בֹּא נַתְחִיל',
+    doneTitle:'הַכֹּל מוּכָן!', doneSub:'הַלִּמּוּד שֶׁלְּךָ מֻתְאָם אִישִׁית — אַתָּה יָכוֹל לְהַתְחִיל', doneBtn:'לְהַתְחִיל לִלְמֹד!',
     changeInSettings:'אֶפְשָׁר לְשַׁנּוֹת בְּכׇל עֵת בַּהֲגָדָּרוֹת', finishBtn:'סַיֵּם וְהַתְחֵל לִלְמֹד',
     approx:'כ-', years:'שָׁנִים', months:'חֳדָשִׁים',
     musarDesc:{reshit:'5 שְׁעָרִים בְּיִרְאָה, אַהֲבָה, תְּשׁוּבָה, קְדוּשָׁה וְעֲנָוָה', teshuva:'רַבֵּנוּ יוֹנָה עַל דַּרְכֵי הַתְּשׁוּבָה', kedusha:'רַבִּי חַיִּים וִיטָאל, תַּלְמִיד הָאֲרִיזַ״ל', mesilat:'הָרַמְחַ״ל, יְסוֹדוֹת שְׁלֵמוּת הַמִּדּוֹת', orchot:'מוּסָר קְלָאסִי בְּ-28 שְׁעָרִים'}},
@@ -2411,6 +2431,8 @@ const CK_PACE_UI={
     tehillimQ:'Which division method suits your Daily Tehillim?', tehillimSub:'Daily Tehillim',
     tehillimOptADesc:'Divides the Book of Tehillim by day of the month — 5 chapters each day',
     tehillimOptBDesc:'Divides the book by day of the week, following the common custom',
+    introTitle:'Hello! Just a moment before we begin', introBody:"So you study at the pace that's right for you, we'll ask three short questions. It'll take a few seconds — and you can change any choice anytime in Settings.", introBtn:'Let’s begin',
+    doneTitle:'All set!', doneSub:'Your study is personalized — you can start now', doneBtn:'Start studying!',
     changeInSettings:'You can change this anytime in Settings', finishBtn:'Finish and start studying',
     approx:'~', years:'years', months:'months',
     musarDesc:{reshit:'5 gates on fear, love, repentance, holiness and humility', teshuva:'Rabbeinu Yonah on the paths of repentance', kedusha:'Rabbi Chaim Vital, disciple of the Arizal', mesilat:"The Ramchal, foundations of perfecting one's character", orchot:'A classic Musar work in 28 gates'}},
@@ -2423,6 +2445,8 @@ const CK_PACE_UI={
     tehillimQ:'Quelle méthode de répartition convient à votre Tehilim quotidien ?', tehillimSub:'Tehilim quotidien',
     tehillimOptADesc:'Répartit le Livre des Tehilim par jour du mois — 5 chapitres par jour',
     tehillimOptBDesc:'Répartit le livre par jour de la semaine, selon la coutume répandue',
+    introTitle:'Bonjour ! Encore un instant avant de commencer', introBody:'Pour que vous étudiiez au rythme qui vous convient, nous allons vous poser trois courtes questions. Cela prendra quelques secondes — et vous pouvez changer chaque choix à tout moment dans les Paramètres.', introBtn:'Commençons',
+    doneTitle:'Tout est prêt !', doneSub:'Votre étude est personnalisée — vous pouvez commencer', doneBtn:'Commencer à étudier !',
     changeInSettings:'Vous pouvez changer cela à tout moment dans les Paramètres', finishBtn:"Terminer et commencer à étudier",
     approx:'~', years:'ans', months:'mois',
     musarDesc:{reshit:'5 portes sur la crainte, l’amour, le repentir, la sainteté et l’humilité', teshuva:'Rabbenou Yona sur les voies du repentir', kedusha:'Rabbi Haïm Vital, disciple de l’Arizal', mesilat:"Le Ramh'al, fondements de la perfection du caractère", orchot:'Un ouvrage de Moussar classique en 28 portes'}},
@@ -2435,6 +2459,8 @@ const CK_PACE_UI={
     tehillimQ:'Какой способ деления подходит для ежедневного чтения Теилим?', tehillimSub:'Ежедневные Теилим',
     tehillimOptADesc:'Делит книгу Теилим по дням месяца — 5 глав в день',
     tehillimOptBDesc:'Делит книгу по дням недели, по распространённому обычаю',
+    introTitle:'Здравствуйте! Ещё момент, и начнём', introBody:'Чтобы вы учились в подходящем именно вам темпе, мы зададим три коротких вопроса. Это займёт всего несколько секунд — и любой выбор можно изменить в любое время в Настройках.', introBtn:'Начнём',
+    doneTitle:'Всё готово!', doneSub:'Ваша учёба настроена персонально — можно начинать', doneBtn:'Начать учёбу!',
     changeInSettings:'Это можно изменить в любое время в Настройках', finishBtn:'Завершить и начать учёбу',
     approx:'~', years:'лет', months:'месяцев',
     musarDesc:{reshit:'5 врат — о страхе, любви, покаянии, святости и смирении', teshuva:'Рабейну Йона о путях покаяния', kedusha:'Рабби Хаим Виталь, ученик Аризаля', mesilat:'Рамхаль, основы совершенствования характера', orchot:'Классический труд по мусару в 28 вратах'}},
@@ -2447,6 +2473,8 @@ const CK_PACE_UI={
     tehillimQ:'დაყოფის რომელი მეთოდი შეგეფერებათ ყოველდღიური თეილიმისთვის?', tehillimSub:'ყოველდღიური თეილიმი',
     tehillimOptADesc:'ყოფს თეილიმის წიგნს თვის დღეების მიხედვით — 5 თავი დღეში',
     tehillimOptBDesc:'ყოფს წიგნს კვირის დღეების მიხედვით, გავრცელებული ჩვევის თანახმად',
+    introTitle:'გამარჯობა! ერთი წამით დაწყებამდე', introBody:'რათა ისწავლოთ თქვენთვის შესაფერისი ტემპით, დაგისვამთ სამ მოკლე კითხვას. ეს წაგვიღებს რამდენიმე წამს — და ნებისმიერი არჩევანის შეცვლა შესაძლებელია ნებისმიერ დროს პარამეტრებში.', introBtn:'დავიწყოთ',
+    doneTitle:'ყველაფერი მზადაა!', doneSub:'თქვენი სწავლა პერსონალიზებულია — შეგიძლიათ დაწყოთ', doneBtn:'სწავლის დაწყება!',
     changeInSettings:'ეს ნებისმიერ დროს შეიძლება შეიცვალოს პარამეტრებში', finishBtn:'დასრულება და სწავლის დაწყება',
     approx:'~', years:'წელი', months:'თვე',
     musarDesc:{reshit:'5 კარიბჭე — შიშზე, სიყვარულზე, მონანიებაზე, სიწმინდესა და სიმდაბლეზე', teshuva:'რაბენუ იონა მონანიების გზებზე', kedusha:'რაბი ხაიმ ვიტალი, არიზალის მოწაფე', mesilat:'რამხალი, ხასიათის სრულყოფის საფუძვლები', orchot:'კლასიკური მუსარის ნაშრომი 28 კარიბჭეში'}},
@@ -2459,6 +2487,9 @@ function ckMusarDurationLabel(work){
   if(years>=1) return t.approx+(Math.round(years*10)/10)+' '+t.years;
   return t.approx+Math.round(days/30.44*10)/10+' '+t.months;
 }
+/* -1 = welcome intro (skipped when arriving right after the general
+   onboarding screen, which already said hello), 0-2 = the three
+   questions, 3 = the closing celebration before dropping into the app */
 let CK_PACE_STEP=0, CK_PACE_PENDING_TAB=null;
 const CK_PACE_FAMILY_TABS={chokBooks:1,chokSearch:1,chokUnit:1,chokParshiot:1,chokList:1,chokReader:1};
 function renderChokPace(){
@@ -2467,6 +2498,35 @@ function renderChokPace(){
   if(CK_PACE_STEP===1 && !MCYC){
     app.innerHTML=`<div class="view">${smSkeleton()}</div>`;
     ensureMusarCycles().then(()=>{ if(TAB==='chokPace') renderChokPace(); });
+    return;
+  }
+  if(CK_PACE_STEP===-1){
+    haptic(15); confetti(40);
+    app.innerHTML=`<div class="view pace-view pace-bookend">
+      <div class="pace-shine-title"><span class="sp-sparkle">✦</span> ${t.introTitle} <span class="sp-sparkle">✦</span></div>
+      <p class="pace-bookend-body">${t.introBody}</p>
+      <button class="btn btn-gold" id="paceIntroGo">${t.introBtn}</button>
+    </div>`;
+    document.getElementById('paceIntroGo').onclick=()=>{ CK_PACE_STEP=0; renderChokPace(); forceScrollTop(); };
+    tr(app);
+    return;
+  }
+  if(CK_PACE_STEP===3){
+    haptic(30); confetti(80);
+    const rambamLabel=(S.rambamTrack==='year')?'שָׁנָה · שְׁלֹשָׁה פְּרָקִים':'שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם';
+    const divisionLabel=(S.division==='weekly')?'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)':'חָדְשִׁי (5 פְּרָקִים לְיוֹם)';
+    app.innerHTML=`<div class="view pace-view pace-bookend">
+      <div class="pace-shine-title"><span class="sp-sparkle">✦</span> ${t.doneTitle} <span class="sp-sparkle">✦</span></div>
+      <p class="pace-bookend-body">${t.doneSub}</p>
+      <div class="pace-recap">
+        <div class="pace-recap-row"><span class="pace-recap-k">הֲלָכָה</span><span class="pace-recap-v">${rambamLabel}</span></div>
+        <div class="pace-recap-row"><span class="pace-recap-k">מוּסָר</span><span class="pace-recap-v">${ckMusarUI()[S.musarWork||'reshit']}</span></div>
+        <div class="pace-recap-row"><span class="pace-recap-k">תְּהִלִּים הַיּוֹמִי</span><span class="pace-recap-v">${divisionLabel}</span></div>
+      </div>
+      <button class="btn btn-gold" id="paceDoneGo">${t.doneBtn}</button>
+    </div>`;
+    document.getElementById('paceDoneGo').onclick=()=>{ localStorage.setItem('betel_chok_pace_v1','1'); CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList'); };
+    tr(app);
     return;
   }
   let body;
@@ -2510,9 +2570,7 @@ function renderChokPace(){
       CK_PACE_STEP=2; renderChokPace(); forceScrollTop();
     } else {
       S.division=v; saveS();
-      localStorage.setItem('betel_chok_pace_v1','1');
-      CK_PACE_STEP=0;
-      go(CK_PACE_PENDING_TAB||'chokList');
+      CK_PACE_STEP=3; renderChokPace(); forceScrollTop();
     }
   });
   tr(app);
@@ -3852,12 +3910,13 @@ function renderReader(){
   const showBefore = RD.daily ? first : true;
   const showAfter  = RD.daily ? last  : true;
   const showDone   = RD.daily && last;
+  const _anim=ckAnimClass();
   app.innerHTML = `
   <div class="reader view">
     <div class="reader-head">
       <div class="reader-top">
         <button class="icon-btn" id="rBack">${I.prev}</button>
-        <div class="reader-title">${headTitle}</div>
+        <div class="reader-title ${_anim}">${headTitle}</div>
         <div style="display:flex;gap:6px">
           <button class="icon-btn ${isFav(ch)?'fav-on':''}" id="rFav">${isFav(ch)?I.bookmarkOn:I.bookmark}</button>
           <button class="icon-btn" id="rShare">${I.share}</button>
@@ -3905,9 +3964,9 @@ function wireReader(){
   app.querySelectorAll('[data-prayer]').forEach(pb=>{
     pb.querySelector('[data-ptoggle]').onclick=()=>pb.classList.toggle('collapsed');
   });
-  const prev=document.getElementById('rPrev'); if(prev) prev.onclick=()=>{ if(RD.idx>0){ RD.idx--; renderReader(); forceScrollTop(); } };
+  const prev=document.getElementById('rPrev'); if(prev) prev.onclick=()=>{ if(RD.idx>0){ CK_NAV_DIR=-1; RD.idx--; renderReader(); forceScrollTop(); } };
   const next=document.getElementById('rNext'); if(next) next.onclick=()=>{
-    markRead(RD.chapters[RD.idx]); RD.idx++; renderReader(); forceScrollTop();
+    markRead(RD.chapters[RD.idx]); CK_NAV_DIR=1; RD.idx++; renderReader(); forceScrollTop();
   };
   const done=document.getElementById('rDone'); if(done) done.onclick=()=>{
     haptic(); markRead(RD.chapters[RD.idx]); finishReading();
@@ -4022,12 +4081,13 @@ function renderCalendar(){
     const cls=['cal-cell']; if(isToday)cls.push('today'); if(hasEv)cls.push('hol'); if(dow===6)cls.push('sat'); if(d===selDay)cls.push('sel');
     cells+=`<div class="${cls.join(' ')}" data-day="${d}"><div class="hd">${heNum(d)}</div><div class="gd">${hd.greg().getDate()}/${hd.greg().getMonth()+1}</div></div>`;
   }
+  const _anim=ckAnimClass();
   app.innerHTML=`
   ${topbar('לוּחַ עִבְרִי')}
   <div class="view">
     <div class="cal-head">
       <button class="cal-nav" id="calPrevM">${I.prev}</button>
-      <div class="cal-month"><div class="m">${monthName(first)}</div><div class="y">${heNum(CAL.y)}</div></div>
+      <div class="cal-month ${_anim}"><div class="m">${monthName(first)}</div><div class="y">${heNum(CAL.y)}</div></div>
       <button class="cal-nav" id="calNextM">${I.next}</button>
     </div>
     <div class="cal-actions-row">
@@ -4067,8 +4127,8 @@ function renderCalendar(){
   document.getElementById('calToday').onclick=()=>{ const t=currentHDate(); CAL={y:t.getFullYear(),m:t.getMonth(),sel:t.getDate()}; renderCalendar(); };
   wireCalJump();
   wireConverter();
-  document.getElementById('calPrevM').onclick=()=>{ let m=CAL.m-1,y=CAL.y; if(m<1){m=13;y--;} while(!monthExists(m,y)){m--; if(m<1){m=13;y--;}} CAL={y,m}; renderCalendar(); };
-  document.getElementById('calNextM').onclick=()=>{ let m=CAL.m+1,y=CAL.y; if(!monthExists(m,y)){ m=1;y++; } CAL={y,m}; renderCalendar(); };
+  document.getElementById('calPrevM').onclick=()=>{ CK_NAV_DIR=-1; let m=CAL.m-1,y=CAL.y; if(m<1){m=13;y--;} while(!monthExists(m,y)){m--; if(m<1){m=13;y--;}} CAL={y,m}; renderCalendar(); };
+  document.getElementById('calNextM').onclick=()=>{ CK_NAV_DIR=1; let m=CAL.m+1,y=CAL.y; if(!monthExists(m,y)){ m=1;y++; } CAL={y,m}; renderCalendar(); };
   app.querySelectorAll('[data-day]').forEach(c=>c.onclick=()=>{ CAL.sel={d:+c.dataset.day,m:CAL.m,y:CAL.y}; renderCalendar(); });
   renderDayDetail(new HDate(selDay,CAL.m,CAL.y), evMap[selDay+'-'+CAL.m]||[]);
 }
@@ -4362,6 +4422,7 @@ function findParshaContaining(book,ch,vs){
 }
 function smStepNext(){
   const entry=LEYNING[SM.key];
+  CK_NAV_DIR=1;
   if(SM.mode!=='haftarah'){
     if(SM.n<7){ SM.n++; }
     else if(entry.haft){ SM.mode='haftarah'; }
@@ -4369,6 +4430,7 @@ function smStepNext(){
   renderShnayimReader(); forceScrollTop();
 }
 function smStepPrev(){
+  CK_NAV_DIR=-1;
   if(SM.mode==='haftarah'){ SM.mode='torah'; }
   else if(SM.n>1){ SM.n--; }
   renderShnayimReader(); forceScrollTop();
@@ -4402,6 +4464,7 @@ function renderShnayimReader(){
   }
   const isLastPage = isHaft || (n===7 && !entry.haft);
   const canGoPrev = isHaft || n>1;
+  const _anim=ckAnimClass();
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -4409,7 +4472,7 @@ function renderShnayimReader(){
         <button class="icon-btn" id="smBack">${I.prev}</button>
         <div class="reader-title">${parshaName(SM.key)}</div>
       </div>
-      <div class="sm-aliyah-tag">${parshaName(SM.key)} · ${tag}</div>
+      <div class="sm-aliyah-tag ${_anim}">${parshaName(SM.key)} · ${tag}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
       <div class="sm-aliyah-nav">
         ${entry.aliyot.map((_,i)=>`<button class="sm-aliyah-chip ${!isHaft&&n===i+1?'on':''}" data-n="${i+1}">${heNum(i+1)}</button>`).join('')}
@@ -4436,7 +4499,9 @@ function renderShnayimReader(){
   const doneBtn=document.getElementById('smDone'); if(doneBtn) doneBtn.onclick=smFinish;
   app.querySelectorAll('.sm-aliyah-chip').forEach(c=>c.onclick=()=>{
     haptic(); stopAutoScroll();
-    if(c.dataset.n==='haft'){ SM.mode='haftarah'; } else { SM.mode='torah'; SM.n=+c.dataset.n; }
+    const wasHaft=isHaft, oldN=n;
+    if(c.dataset.n==='haft'){ CK_NAV_DIR=1; SM.mode='haftarah'; }
+    else { const newN=+c.dataset.n; CK_NAV_DIR=(wasHaft||newN>oldN)?1:(newN<oldN?-1:0); SM.mode='torah'; SM.n=newN; }
     renderShnayimReader(); forceScrollTop();
   });
   app.querySelectorAll('.sm-mark-btn').forEach(b=>b.onclick=()=>{
@@ -4507,6 +4572,7 @@ function drawZoharList(){
 function zhStep(delta){
   const n=ZH.day+delta;
   if(n<1||n>ZOHAR.length) return;
+  CK_NAV_DIR=delta>0?1:-1;
   ZH.day=n; renderZoharReader(); forceScrollTop();
 }
 function renderZoharReader(){
@@ -4519,6 +4585,7 @@ function renderZoharReader(){
   }
   const entry=ZOHAR[ZH.day-1];
   const pct=Math.round((ZH.day/ZOHAR.length)*100);
+  const _anim=ckAnimClass();
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -4526,7 +4593,7 @@ function renderZoharReader(){
         <button class="icon-btn" id="zhBack">${I.prev}</button>
         <div class="reader-title">תִּיקּוּנֵי הַזֹּהַר</div>
       </div>
-      <div class="sm-aliyah-tag">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${localizeHebDateStr(entry.hebDate)}</div>
+      <div class="sm-aliyah-tag ${_anim}">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${localizeHebDateStr(entry.hebDate)}</div>
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
     ${entry.pageCount?`<div class="zh-pdf-embed">
