@@ -2293,16 +2293,16 @@ function ckMusarCycleDays(work,per){ return Math.ceil(MCYC[work].order.length/pe
    would also match every biblical "sign" verse translated elsewhere in the
    app if it were a normal dictionary entry. */
 const MUSAR_UI={
-  he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה',
-      gate:'שַׁעַר', intro:'הַקְדָּמָה', para:'אוֹת', year:'כִּשְׁנָה', months:m=>m+' חֳדָשִׁים', perOne:'אוֹת לְיוֹם', perN:n=>n+' אוֹתִיּוֹת לְיוֹם'},
-  en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha",
-      gate:'Gate', intro:'Introduction', para:'Paragraph', year:'~1 year', months:m=>'~'+m+' months', perOne:'1 a day', perN:n=>n+' a day'},
-  fr:{reshit:"Réchit 'Hokhma", teshuva:'Chaarei Techouva', kedusha:'Chaarei Kedoucha',
-      gate:'Porte', intro:'Introduction', para:'Paragraphe', year:'~1 an', months:m=>'~'+m+' mois', perOne:'1 par jour', perN:n=>n+' par jour'},
-  ru:{reshit:'Решит Хохма', teshuva:'Шаарей Тшува', kedusha:'Шаарей Кедуша',
-      gate:'Врата', intro:'Введение', para:'Абзац', year:'~1 год', months:m=>'~'+m+' мес.', perOne:'1 в день', perN:n=>n+' в день'},
-  ka:{reshit:'რეშით ხოხმა', teshuva:'შაარეი თშუვა', kedusha:'შაარეი კედუშა',
-      gate:'კარიბჭე', intro:'შესავალი', para:'აბზაცი', year:'~1 წელი', months:m=>'~'+m+' თვე', perOne:'1 დღეში', perN:n=>n+' დღეში'},
+  he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה', mesilat:'מְסִלַּת יְשָׁרִים', orchot:'אָרְחוֹת צַדִּיקִים',
+      gate:'שַׁעַר', chapter:'פֶּרֶק', intro:'הַקְדָּמָה', para:'אוֹת', year:'כִּשְׁנָה', months:m=>m+' חֳדָשִׁים', perOne:'אוֹת לְיוֹם', perN:n=>n+' אוֹתִיּוֹת לְיוֹם'},
+  en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha", mesilat:'Mesillat Yesharim', orchot:'Orchot Tzadikim',
+      gate:'Gate', chapter:'Chapter', intro:'Introduction', para:'Paragraph', year:'~1 year', months:m=>'~'+m+' months', perOne:'1 a day', perN:n=>n+' a day'},
+  fr:{reshit:"Réchit 'Hokhma", teshuva:'Chaarei Techouva', kedusha:'Chaarei Kedoucha', mesilat:'Messilat Yécharim', orchot:'Orḥot Tsadikim',
+      gate:'Porte', chapter:'Chapitre', intro:'Introduction', para:'Paragraphe', year:'~1 an', months:m=>'~'+m+' mois', perOne:'1 par jour', perN:n=>n+' par jour'},
+  ru:{reshit:'Решит Хохма', teshuva:'Шаарей Тшува', kedusha:'Шаарей Кедуша', mesilat:'Месилат Йешарим', orchot:'Орхот Цадиким',
+      gate:'Врата', chapter:'Глава', intro:'Введение', para:'Абзац', year:'~1 год', months:m=>'~'+m+' мес.', perOne:'1 в день', perN:n=>n+' в день'},
+  ka:{reshit:'რეშით ხოხმა', teshuva:'შაარეი თშუვა', kedusha:'შაარეი კედუშა', mesilat:'მესილათ იეშარიმ', orchot:'ორხოთ ცადიკიმ',
+      gate:'კარიბჭე', chapter:'თავი', intro:'შესავალი', para:'აბზაცი', year:'~1 წელი', months:m=>'~'+m+' თვე', perOne:'1 დღეში', perN:n=>n+' დღეში'},
 };
 function ckMusarUI(){ return MUSAR_UI[S.lang]||MUSAR_UI.he; }
 function ckMusarPaceLabel(work,per){
@@ -2314,16 +2314,20 @@ function ckMusarPaceLabel(work,per){
   return dur+' · '+perTxt;
 }
 const MUSAR_WORKS=[
-  {key:'reshit'}, {key:'teshuva'}, {key:'kedusha'},
+  {key:'reshit'}, {key:'teshuva'}, {key:'kedusha'}, {key:'mesilat'}, {key:'orchot'},
 ];
+/* Mesillat Yesharim is divided into chapters (פרקים), not gates - everything
+   else here (Teshuvah, Kedusha, Orchot Tzadikim) is a "Sha'arei"/gates work */
+const MUSAR_UNIT_WORD={mesilat:'chapter'};
 function ckMusarSourceLabel(work,idxs){
   const cfg=MCYC[work], t=ckMusarUI();
+  const unitWord=t[MUSAR_UNIT_WORD[work]||'gate'];
   return idxs.map(i=>{
     const e=cfg.order[i];
     let gateName;
     if(e.part==='Introduction') gateName=t.intro;
-    else if(e.heSection) gateName = (S.lang&&S.lang!=='he') ? t.gate+' '+e.section.replace(/^Gate /,'') : e.heSection;
-    else gateName = t.gate+' '+heNum(e.gate);
+    else if(e.heSection) gateName = (S.lang&&S.lang!=='he') ? unitWord+' '+e.section.replace(/^Gate /,'') : e.heSection;
+    else gateName = unitWord+' '+heNum(e.gate);
     return t[work]+' · '+gateName+' · '+t.para+' '+heNum(e.ch);
   }).join('  ·  ');
 }
