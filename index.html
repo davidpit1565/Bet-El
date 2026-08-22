@@ -3595,26 +3595,39 @@ function ckNotifDir(){ return (S.lang&&S.lang!=='he')?'ltr':'rtl'; }
 
 function render(){
   stopAutoScroll();
-  if(TAB==='home') renderHome();
-  else if(TAB==='tehillim') renderTehillim();
-  else if(TAB==='calendar') renderCalendar();
-  else if(TAB==='prayers') renderPrayersList();
-  else if(TAB==='prayerReader') renderPrayerReader();
-  else if(TAB==='smList') renderShnayimList();
-  else if(TAB==='smReader') renderShnayimReader();
-  else if(TAB==='zoharList') renderZoharList();
-  else if(TAB==='zoharReader') renderZoharReader();
-  else if(TAB==='chokBooks') renderChokBooks();
-  else if(TAB==='chokSearch') renderChokSearch();
-  else if(TAB==='chokUnit') renderChokUnit();
-  else if(TAB==='chokParshiot') renderChokParshiot();
-  else if(TAB==='chokList') renderChokList();
-  else if(TAB==='chokReader') renderChokReader();
-  else if(TAB==='zoharYomi') renderZoharYomiReader();
-  else if(TAB==='onboard') renderOnboard();
-  else if(TAB==='chokPace') renderChokPace();
-  else if(TAB==='settings') renderSettings();
-  else if(TAB==='tracker') renderTracker();
+  try{
+    if(TAB==='home') renderHome();
+    else if(TAB==='tehillim') renderTehillim();
+    else if(TAB==='calendar') renderCalendar();
+    else if(TAB==='prayers') renderPrayersList();
+    else if(TAB==='prayerReader') renderPrayerReader();
+    else if(TAB==='smList') renderShnayimList();
+    else if(TAB==='smReader') renderShnayimReader();
+    else if(TAB==='zoharList') renderZoharList();
+    else if(TAB==='zoharReader') renderZoharReader();
+    else if(TAB==='chokBooks') renderChokBooks();
+    else if(TAB==='chokSearch') renderChokSearch();
+    else if(TAB==='chokUnit') renderChokUnit();
+    else if(TAB==='chokParshiot') renderChokParshiot();
+    else if(TAB==='chokList') renderChokList();
+    else if(TAB==='chokReader') renderChokReader();
+    else if(TAB==='zoharYomi') renderZoharYomiReader();
+    else if(TAB==='onboard') renderOnboard();
+    else if(TAB==='chokPace') renderChokPace();
+    else if(TAB==='settings') renderSettings();
+    else if(TAB==='tracker') renderTracker();
+  }catch(err){
+    /* A screen that fails partway through building its innerHTML leaves
+       whatever was on screen before frozen there with no visible sign
+       anything went wrong. Surface a way out instead of a silent dead end. */
+    console.error('render() failed for TAB='+TAB, err);
+    app.innerHTML = `<div class="view" style="padding-top:80px;text-align:center">
+      <div style="font-size:17px;font-weight:700;margin-bottom:10px">מַשֶּׁהוּ הִשְׁתַּבֵּשׁ</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:20px">אֶפְשָׁר לְנַסּוֹת לְרַעֲנֵן אֶת הָעַמּוּד</div>
+      <button class="btn btn-gold" style="max-width:220px;margin:0 auto" onclick="location.reload()">רַעֲנֵן</button>
+    </div>`;
+    return;
+  }
   mountToolsFab();
   tr(app);
 }
@@ -3771,7 +3784,14 @@ function renderHome(){
   }
   const hcc=document.getElementById('homeChokCard');
   if(hcc){ const t=ckTodayLine(); if(t) hcc.onclick=()=>openChok(t.key,t.day,null); }
-  else ensureChokIndex().then(()=>{ if(TAB==='home') render(); });
+  /* homeChokCard is legitimately absent whenever ckTodayLine() has nothing
+     for today (Shabbat, chokSlotFor's own weekday check, etc.) - not only
+     while CHOK is still loading. Retrying on the DOM element alone re-ran
+     this every render forever once CHOK was already loaded (ensureChokIndex()
+     resolves an already-cached promise immediately, so .then() fires as a
+     same-tick microtask - an infinite render loop with no delay, hanging
+     the tab). Only retry the fetch itself if the data truly hasn't arrived. */
+  else if(!CHOK) ensureChokIndex().then(()=>{ if(TAB==='home') render(); });
 }
 
 /* ================= READING TRACKER ================= */
