@@ -1769,7 +1769,27 @@ function ckWeekKeyFor(dd){
   return null;
 }
 /* which parsha week and which weekday slot the given civil date falls in */
+/* Leil Shishi (Thursday night) is its own slot - from Thursday's sunset
+   until Friday's sunrise, not an extension of Thursday's daytime portion.
+   Returns Thursday's date while that window is open, else null. Only
+   applies when asking for "today" (no explicit date), matching the
+   Thursday-night reminder's own boundary in chokCheckReminders(). */
+function leilShishiDate(){
+  const now=new Date(), today=civilToday(), day=today.getDay();
+  try{
+    if(day===4){ const sunset=zmanimFor(today).sunset(); if(sunset && now>=sunset) return today; }
+    else if(day===5){ const sunrise=zmanimFor(today).sunrise(); if(sunrise && now<sunrise) return addDays(today,-1); }
+  }catch(e){}
+  return null;
+}
 function chokSlotFor(dateObj){
+  if(!dateObj){
+    const ls=leilShishiDate();
+    if(ls){
+      const key=ckWeekKeyFor(ls);
+      if(key && CHOK && ckKeysOf(key).length) return {key, day:'night', dayIdx:-1};
+    }
+  }
   const dd = dateObj || chokDayDate();
   const key=ckWeekKeyFor(dd);
   if(!key||!CHOK||!ckKeysOf(key).length) return null;
