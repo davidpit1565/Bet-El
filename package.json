@@ -4,7 +4,8 @@
   "description": "Bet-El - daily study app: Chok LeYisrael, daily Tehillim, daily Zohar, Hebrew calendar and zmanim",
   "private": true,
   "scripts": {
-    "test": "echo \"No tests specified\"",
+    "test": "npm run check:blocking",
+    "check:blocking": "node scripts/check-blocking-resources.mjs",
     "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js manifest.json icon-192.png icon-512.png www/ && cp -r data www/data && npx cap sync ios"
   },
   "dependencies": {
