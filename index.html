@@ -848,14 +848,17 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-anim-prev{animation:ckSlideInL .28s ease both}
 
 /* ================= iOS 26 "LIQUID GLASS" MATERIAL LAYER =================
-   Deeper blur/saturation + specular sheen on glass surfaces, continuous
-   (squircle) corners, capsule buttons/icon buttons, a real sliding tab-bar
-   pill (positioned by placeNavPill(), replacing the old per-item glow),
-   and spring/elastic press feedback. Colors, fonts and layout untouched. */
+   Continuous (squircle) corners, specular sheen, capsule buttons/icon
+   buttons, a real sliding tab-bar pill (positioned by placeNavPill(),
+   replacing the old per-item glow), and spring/elastic press feedback.
+   Deliberately does NOT add or increase backdrop-filter blur beyond the
+   base stylesheet's existing values: stacking many blurred layers is a
+   known Chrome renderer-crash risk ("Aw, Snap!", out-of-memory in the
+   GPU/compositor) - exactly what the first version of this feature
+   shipped with, applying heavier blur+saturate() to a dozen-plus
+   selectors at once. Colors, fonts and layout are otherwise untouched. */
 .card,.prayer,.q-tile,.set-item,.pace-opt,.ob-row,.pace-recap,.search-box,
 .dd-portion,.sm-week-card,.rnav-btn,.reader-tools .rt-panel,.modal{
-  backdrop-filter:blur(20px) saturate(1.6);
-  -webkit-backdrop-filter:blur(20px) saturate(1.6);
   border-radius:var(--radius);
   box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255,255,255,.14);
   background-image: var(--lg-sheen);
@@ -863,14 +866,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .q-tile,.set-item,.search-box,.dd-portion{border-radius:var(--radius-sm)}
 .btn{border-radius:999px}
 .btn-gold{box-shadow:0 10px 26px -10px rgba(184,134,11,.7), inset 0 1px 0 rgba(255,255,255,.35)}
-.btn-ghost{backdrop-filter:blur(20px) saturate(1.6);background-image:var(--lg-sheen)}
-.icon-btn,.cal-nav,.reader-tools .rt-fab{border-radius:50%;backdrop-filter:blur(16px) saturate(1.6);background-image:var(--lg-sheen)}
+.btn-ghost{background-image:var(--lg-sheen)}
+.icon-btn,.cal-nav,.reader-tools .rt-fab{border-radius:50%;background-image:var(--lg-sheen)}
 .topbar .tb-back{border-radius:50%}
-.topbar{backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);
-  border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar{border-bottom:1px solid rgba(255,255,255,.06)}
 .bottom-nav{
   border-radius:34px;
-  backdrop-filter:blur(30px) saturate(1.7);-webkit-backdrop-filter:blur(30px) saturate(1.7);
   background-image:var(--lg-sheen);
   box-shadow:0 16px 40px -10px rgba(0,0,0,.4),0 2px 10px -2px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.14);
 }
@@ -880,11 +881,10 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   position:absolute; top:6px; height:calc(var(--nav-h) - 12px); border-radius:22px;
   background:linear-gradient(180deg,rgba(212,175,95,.32),rgba(212,175,95,.14));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 4px 14px -4px rgba(212,175,95,.5);
-  backdrop-filter:blur(6px);
   transition: left .5s var(--spring), width .5s var(--spring), opacity .2s ease;
   pointer-events:none; z-index:0;
 }
-.modal{border-radius:32px;backdrop-filter:blur(26px) saturate(1.6)}
+.modal{border-radius:32px}
 .card,.q-tile,.set-item,.pace-opt,.ob-row,.btn,.icon-btn,.cal-nav,.ps-cell,.cal-cell,
 .rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card{
   transition: transform .5s var(--spring), box-shadow .3s ease, background-color .3s ease;
