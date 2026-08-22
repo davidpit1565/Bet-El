@@ -1466,14 +1466,16 @@ function ensureShnayimData(){
     fetch('data/leyning-data.json').then(r=>r.json()),
     fetch('data/torah-fr.json').then(r=>r.json()).catch(()=>({})),
     fetch('data/torah-en.json').then(r=>r.json()).catch(()=>({})),
-  ]).then(([t,h,l,fr,en])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr,en}; });
+  ]).then(([t,h,l,fr,en])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr,en}; })
+    .catch(e=>{ smLoadPromise=null; throw e; });
   return smLoadPromise;
 }
 let ZOHAR=null, zoharLoadPromise=null;
 function ensureZoharData(){
   if(ZOHAR) return Promise.resolve();
   if(zoharLoadPromise) return zoharLoadPromise;
-  zoharLoadPromise = fetch('data/tikkunei-hazohar-data.json').then(r=>r.json()).then(d=>{ ZOHAR=d; });
+  zoharLoadPromise = fetch('data/tikkunei-hazohar-data.json').then(r=>r.json()).then(d=>{ ZOHAR=d; })
+    .catch(e=>{ zoharLoadPromise=null; throw e; });
   return zoharLoadPromise;
 }
 // 40-day Tikkunei HaZohar cycle: 30 Av (month 5) -> cycle day 1, 1-29 Elul (month 6) -> cycle day 2-30, 1-10 Tishrei (month 7) -> cycle day 31-40
@@ -1715,7 +1717,8 @@ const CHOK_MISHNAH_EPOCH=5786;
 function ensureChokIndex(){
   if(CHOK) return Promise.resolve();
   if(chokLoadPromise) return chokLoadPromise;
-  chokLoadPromise=fetch('data/chok-leyisrael-index.json').then(r=>r.json()).then(d=>{ CHOK=d; });
+  chokLoadPromise=fetch('data/chok-leyisrael-index.json').then(r=>r.json()).then(d=>{ CHOK=d; })
+    .catch(e=>{ chokLoadPromise=null; throw e; });
   return chokLoadPromise;
 }
 function chokSlug(en){ return en.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,''); }
@@ -2281,7 +2284,8 @@ let CYC=null, CYC_BLOCK={}, cycLoadPromise=null;
 function ensureCycles(){
   if(CYC) return Promise.resolve();
   if(cycLoadPromise) return cycLoadPromise;
-  cycLoadPromise=fetch('data/chok-cycles.json').then(r=>r.json()).then(d=>{ CYC=d; });
+  cycLoadPromise=fetch('data/chok-cycles.json').then(r=>r.json()).then(d=>{ CYC=d; })
+    .catch(e=>{ cycLoadPromise=null; throw e; });
   return cycLoadPromise;
 }
 function ensureCycBlock(kind,b){
@@ -2393,7 +2397,8 @@ const MUSAR_BLOCK=40;
 function ensureMusarCycles(){
   if(MCYC) return Promise.resolve();
   if(musarLoadPromise) return musarLoadPromise;
-  musarLoadPromise=fetch('data/chok-musar-cycles.json').then(r=>r.json()).then(d=>{ MCYC=d; });
+  musarLoadPromise=fetch('data/chok-musar-cycles.json').then(r=>r.json()).then(d=>{ MCYC=d; })
+    .catch(e=>{ musarLoadPromise=null; throw e; });
   return musarLoadPromise;
 }
 function ckMusarBlockOf(i){ return Math.floor(i/MUSAR_BLOCK); }
