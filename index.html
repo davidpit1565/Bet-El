@@ -2316,7 +2316,14 @@ function chokDayDate(){
   const now=new Date(), base=civilToday();
   try{
     const nz=zmanimFor(base).sunrise();
-    if(nz && now < nz) return addDays(base,-1);
+    if(nz && now < nz){
+      const prev=addDays(base,-1);
+      /* Only extend into the previous day if it actually had a portion to
+         extend - Shabbat doesn't, so between midnight and Sunday's sunrise
+         this must not roll back onto it: today's (Sunday's) real content
+         should show right away instead of nothing until sunrise. */
+      if(prev.getDay()!==6) return prev;
+    }
   }catch(e){}
   return base;
 }
