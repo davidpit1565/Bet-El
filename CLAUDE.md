@@ -52,6 +52,22 @@ in English as usual.
   rather than folding into `ckCommFor()`/`ckToggleComm()`, since the data is
   already loaded inline (no async per-verse lookup) and there's only ever
   one explanation source, not several to pick between.
+- The Halacha "pace" is really one choice of 4 (Rambam 3yr/1yr, Ben Ish
+  Chai year1/year2), even though it's stored across two settings fields
+  for historical reasons (`S.halachaWork` plus either `S.rambamTrack` or
+  `S.bicYear`). `halachaChoice()`/`setHalachaChoice()`/
+  `halachaChoiceLabel()` present/set all 4 as one unit everywhere they
+  appear (Settings' single `<select>`, the pace wizard's Halacha step,
+  and an inline 4-button `.ck-track` row in the reader itself - the same
+  shape as the Musar work-switcher already there). Any async data source
+  gated behind a first render of one of these screens (e.g.
+  `ensureBicIndex()` on the wizard) must guard its post-load re-render
+  with `if(!BIC_INDEX)` or equivalent - an unguarded `.then(rerender)`
+  re-fires on every render of that step and hangs the page in an
+  infinite microtask loop the moment the data is already cached. The
+  regression sweep's fresh-user wizard case (a second, unflagged browser
+  context walking language → intro → Halacha step with a hard timeout)
+  exists specifically to catch this again.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real

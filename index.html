@@ -1781,6 +1781,30 @@ function ensureBicIndex(){
   return bicIndexPromise;
 }
 function bicTrack(){ return S.bicYear==='year2' ? 'year2' : 'year1'; }
+/* The Halacha source is really one choice of 4 - Rambam's two tracks and
+   Ben Ish Chai's two years - even though it's stored across two settings
+   fields (S.halachaWork, plus either S.rambamTrack or S.bicYear) so each
+   existing field keeps its own narrow meaning. This presents/sets all 4 as
+   a single unit everywhere the UI shows them (Settings, the pace wizard,
+   the in-reader track-switcher), the same way the 6 Musar works are one
+   list even though picking one only ever touches S.musarWork. */
+function halachaChoice(){
+  if(S.halachaWork==='benishchai') return S.bicYear==='year2' ? 'bic2' : 'bic1';
+  return S.rambamTrack==='year' ? 'rambam1' : 'rambam3';
+}
+function setHalachaChoice(v){
+  if(v==='bic1'){ S.halachaWork='benishchai'; S.bicYear='year1'; }
+  else if(v==='bic2'){ S.halachaWork='benishchai'; S.bicYear='year2'; }
+  else if(v==='rambam1'){ S.halachaWork='rambam'; S.rambamTrack='year'; }
+  else { S.halachaWork='rambam'; S.rambamTrack='three'; }
+}
+function halachaChoiceLabel(v){
+  v=v||halachaChoice();
+  if(v==='bic1') return ckBicUI().title+' · '+ckBicUI().year1;
+  if(v==='bic2') return ckBicUI().title+' · '+ckBicUI().year2;
+  if(v==='rambam1') return ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים');
+  return ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם');
+}
 function bicUnitsFor(keys,track){
   const idx=BIC_INDEX&&BIC_INDEX[track]; if(!idx) return [];
   const seen=new Set(), units=[];
@@ -2672,6 +2696,8 @@ const CK_PACE_UI={
     halachaQ:'אֵיזֶה קֶצֶב הֲלָכָה מַתְאִים לְךָ?', halachaSub:'רַמְבַּ״ם · מִשְׁנֵה תוֹרָה',
     halachaOptADesc:'הַקֶּצֶב הַמָּסוֹרְתִּי — פֶּרֶק אֶחָד בְּכָל יוֹם, מְסַיֵּם אֶת כׇּל הַמִּשְׁנֵה תוֹרָה בְּתוֹךְ שָׁלֹשׁ שָׁנִים',
     halachaOptBDesc:'קֶצֶב מָהִיר יוֹתֵר — מְסַיֵּם אֶת כׇּל הָרַמְבַּ״ם בְּתוֹךְ שָׁנָה אֶחָת',
+    halachaOptCDesc:'סֵפֶר הֲלָכָה סְפָרַדִּי מֵאֵת רַבִּי יוֹסֵף חַיִּים, לְפִי סֵדֶר פָּרָשׁוֹת הַשָּׁבוּעַ, עִם בֵּאוּר בְּעִבְרִית קַלָּה לְכָל הֲלָכָה',
+    halachaOptDDesc:'הַשָּׁנָה הַשְּׁנִיָּה שֶׁל אוֹתוֹ מַחְזוֹר',
     soon:'מַסְלוּל בֶּן אִישׁ חַי זָמִין כְּעֵת בַּהֲגָדָּרוֹת',
     musarQ:'אֵיזֶה סֵפֶר מוּסָר תִּרְצֶה לְהַתְחִיל?', musarSub:'כֻּלָּם בְּקֶצֶב שֶׁל 3 יְחִידוֹת לְיוֹם',
     tehillimQ:'אֵיזוֹ שִׁיטַת חֲלוּקָה מַתְאִימָה לְךָ בִּתְהִלִּים הַיּוֹמִי?', tehillimSub:'תְּהִלִּים הַיּוֹמִי',
@@ -2687,6 +2713,8 @@ const CK_PACE_UI={
     halachaQ:'Which Halacha pace suits you?', halachaSub:'Rambam · Mishneh Torah',
     halachaOptADesc:'The traditional pace — one chapter a day, completing the whole Mishneh Torah in three years',
     halachaOptBDesc:'A faster pace — completes the whole Rambam in one year',
+    halachaOptCDesc:'A Sephardic halacha work by Rabbi Yosef Chaim, following the weekly parasha, with a plain-language explanation for every halacha',
+    halachaOptDDesc:'The second year of the same cycle',
     soon:'A Ben Ish Chai track is now available in Settings',
     musarQ:'Which Musar book would you like to start with?', musarSub:'All at a pace of 3 units a day',
     tehillimQ:'Which division method suits your Daily Tehillim?', tehillimSub:'Daily Tehillim',
@@ -2702,6 +2730,8 @@ const CK_PACE_UI={
     halachaQ:'Quel rythme de Halacha vous convient ?', halachaSub:'Rambam · Michné Torah',
     halachaOptADesc:'Le rythme traditionnel — un chapitre par jour, achève tout le Michné Torah en trois ans',
     halachaOptBDesc:'Un rythme plus rapide — achève tout le Rambam en un an',
+    halachaOptCDesc:'Un ouvrage de halakha séfarade du rabbin Yossef Haïm, suivant la paracha de la semaine, avec une explication en langage simple pour chaque halakha',
+    halachaOptDDesc:'La deuxième année du même cycle',
     soon:'Un parcours Ben Ish Haï est maintenant disponible dans les Paramètres',
     musarQ:'Quel livre de Moussar souhaitez-vous commencer ?', musarSub:'Tous au rythme de 3 unités par jour',
     tehillimQ:'Quelle méthode de répartition convient à votre Tehilim quotidien ?', tehillimSub:'Tehilim quotidien',
@@ -2717,6 +2747,8 @@ const CK_PACE_UI={
     halachaQ:'Какой темп изучения Ѓалахи вам подходит?', halachaSub:'Рамбам · Мишне Тора',
     halachaOptADesc:'Традиционный темп — одна глава в день, весь Мишне Тора завершается за три года',
     halachaOptBDesc:'Более быстрый темп — весь Рамбам завершается за один год',
+    halachaOptCDesc:'Сефардский труд по Ѓалахе рабби Йосефа Хаима, по недельным главам Торы, с разъяснением на простом языке к каждой Ѓалахе',
+    halachaOptDDesc:'Второй год того же цикла',
     soon:'Маршрут Бен Иш Хай теперь доступен в Настройках',
     musarQ:'Какую книгу по мусару вы хотите начать изучать?', musarSub:'Все книги — в темпе 3 единицы в день',
     tehillimQ:'Какой способ деления подходит для ежедневного чтения Теилим?', tehillimSub:'Ежедневные Теилим',
@@ -2732,6 +2764,8 @@ const CK_PACE_UI={
     halachaQ:'ჰალახის რომელი ტემპი შეგეფერებათ?', halachaSub:'რამბამი · მიშნე თორა',
     halachaOptADesc:'ტრადიციული ტემპი — ერთი თავი დღეში, მთელი მიშნე თორა სრულდება სამ წელიწადში',
     halachaOptBDesc:'უფრო სწრაფი ტემპი — მთელი რამბამი სრულდება ერთ წელიწადში',
+    halachaOptCDesc:'რაბი იოსეფ ხაიმის სეფარდული ალახის ნაშრომი, კვირის პარაშას მიხედვით, თითოეული ალახის მარტივი განმარტებით',
+    halachaOptDDesc:'იმავე ციკლის მეორე წელი',
     soon:'„ბენ იშ ხაის" მარშრუტი უკვე ხელმისაწვდომია პარამეტრებში',
     musarQ:'მუსარის რომელი წიგნით გინდათ დაწყება?', musarSub:'ყველა — დღეში 3 ერთეულის ტემპით',
     tehillimQ:'დაყოფის რომელი მეთოდი შეგეფერებათ ყოველდღიური თეილიმისთვის?', tehillimSub:'ყოველდღიური თეილიმი',
@@ -2797,13 +2831,12 @@ function renderChokPace(){
   }
   if(CK_PACE_STEP===3){
     haptic(30); confetti(80);
-    const rambamLabel=(S.rambamTrack==='year')?'שָׁנָה · שְׁלֹשָׁה פְּרָקִים':'שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם';
     const divisionLabel=(S.division==='weekly')?'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)':'חָדְשִׁי (5 פְּרָקִים לְיוֹם)';
     app.innerHTML=`<div class="view pace-view pace-bookend">
       <div class="pace-shine-title"><span class="sp-sparkle">✦</span> ${t.doneTitle} <span class="sp-sparkle">✦</span></div>
       <p class="pace-bookend-body">${t.doneSub}</p>
       <div class="pace-recap">
-        <div class="pace-recap-row"><span class="pace-recap-k">הֲלָכָה</span><span class="pace-recap-v">${rambamLabel}</span></div>
+        <div class="pace-recap-row"><span class="pace-recap-k">הֲלָכָה</span><span class="pace-recap-v">${halachaChoiceLabel()}</span></div>
         <div class="pace-recap-row"><span class="pace-recap-k">מוּסָר</span><span class="pace-recap-v">${ckMusarUI()[S.musarWork||'reshit']}</span></div>
         <div class="pace-recap-row"><span class="pace-recap-k">תְּהִלִּים הַיּוֹמִי</span><span class="pace-recap-v">${divisionLabel}</span></div>
       </div>
@@ -2816,13 +2849,15 @@ function renderChokPace(){
   let body;
   if(CK_PACE_STEP===0){
     ensureMusarCycles();
+    if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(CK_PACE_STEP===0) renderChokPace(); });
     body=`<div class="pace-q">${t.halachaQ}</div>
     <div class="pace-sub">${t.halachaSub}</div>
     <div class="pace-list">
-      ${optRow('three','שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם',t.halachaOptADesc)}
-      ${optRow('year','שָׁנָה · שְׁלֹשָׁה פְּרָקִים',t.halachaOptBDesc)}
-    </div>
-    <div class="pace-soon">${t.soon}</div>`;
+      ${optRow('rambam3',ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם'),t.halachaOptADesc)}
+      ${optRow('rambam1',ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים'),t.halachaOptBDesc)}
+      ${BIC_INDEX?optRow('bic1',ckBicUI().title+' · '+ckBicUI().year1,t.halachaOptCDesc):''}
+      ${BIC_INDEX?optRow('bic2',ckBicUI().title+' · '+ckBicUI().year2,t.halachaOptDDesc):''}
+    </div>`;
   } else if(CK_PACE_STEP===1){
     body=`<div class="pace-q">${t.musarQ}</div>
     <div class="pace-sub">${t.musarSub}</div>
@@ -2847,7 +2882,7 @@ function renderChokPace(){
   app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
     const v=el.dataset.paceOpt;
     if(CK_PACE_STEP===0){
-      S.rambamTrack=v; saveS();
+      setHalachaChoice(v); saveS();
       CK_PACE_STEP=1; renderChokPace(); forceScrollTop();
     } else if(CK_PACE_STEP===1){
       S.musarWork=v; saveS();
@@ -3520,9 +3555,11 @@ function renderChokReader(){
       <div class="sm-aliyah-tag ${_anim}">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
       <div class="ck-viewdate">${localizeHebDateStr(ckViewHDate().renderGematriya(true))}</div>
       ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
-      ${s.kind==='rambam'?`<div class="ck-track">
-        <button class="ck-track-btn ${ckRambamTrack()===1?'on':''}" data-track="three">שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם</button>
-        <button class="ck-track-btn ${ckRambamTrack()===3?'on':''}" data-track="year">שָׁנָה · שְׁלֹשָׁה פְּרָקִים</button>
+      ${s.key==='halacha'?`<div class="ck-track">
+        <button class="ck-track-btn ${halachaChoice()==='rambam3'?'on':''}" data-halchoice="rambam3">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם')}</button>
+        <button class="ck-track-btn ${halachaChoice()==='rambam1'?'on':''}" data-halchoice="rambam1">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים')}</button>
+        <button class="ck-track-btn ${halachaChoice()==='bic1'?'on':''}" data-halchoice="bic1">${ckBicUI().title} · ${ckBicUI().year1}</button>
+        <button class="ck-track-btn ${halachaChoice()==='bic2'?'on':''}" data-halchoice="bic2">${ckBicUI().title} · ${ckBicUI().year2}</button>
       </div>`:''}
       ${s.key==='musar'?`<div class="ck-track">
         ${MUSAR_WORKS.filter(w=>MCYC&&MCYC[w.key]).map(w=>
@@ -3579,9 +3616,14 @@ function renderChokReader(){
   if(onSecChip) onSecChip.scrollIntoView({inline:'center', block:'nearest'});
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   app.querySelectorAll('.ck-comm-btn[data-bic]').forEach(b=>b.onclick=()=>bicToggleComm(b));
-  app.querySelectorAll('.ck-track-btn[data-track]').forEach(b=>b.onclick=()=>{
-    S.rambamTrack=b.dataset.track; saveS();
-    ensureCycDay(ckViewHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
+  app.querySelectorAll('.ck-track-btn[data-halchoice]').forEach(b=>b.onclick=()=>{
+    const v=b.dataset.halchoice;
+    if(halachaChoice()===v) return;
+    setHalachaChoice(v); saveS();
+    const ready = S.halachaWork==='benishchai'
+      ? ensureBicWeek(bicTrack(), ckKeysOf(CK.key))
+      : ensureCycDay(ckViewHDate());
+    ready.then(()=>{ if(TAB==='chokReader') renderChokReader(); });
   });
   app.querySelectorAll('.ck-track-btn[data-musar-work]').forEach(b=>b.onclick=()=>{
     const work=b.dataset.musarWork;
@@ -3724,6 +3766,27 @@ function announceChokFeature(){
   if(localStorage.getItem('betel_announce_chok_v1')==='1') return;
   localStorage.setItem('betel_announce_chok_v1','1');
   const t=CK_ANNOUNCE[S.lang]||CK_ANNOUNCE.he;
+  try{ new Notification(t.title,{body:t.body,dir:S.lang==='he'||!S.lang?'rtl':'ltr',lang:S.lang||'he'}); }catch(e){}
+}
+/* Ben Ish Chai's own one-time announcement, same pattern as
+   announceChokFeature - but held back until 48h after this feature
+   shipped (2026-08-23), so it reads as news the next time someone opens
+   the app rather than firing the moment the update lands. Its own flag
+   so the two announcements don't collide. */
+const BIC_ANNOUNCE={
+  he:{title:'בֶּן אִישׁ חַי בְּבֵית אֵ-ל', body:'מַסְלוּל בֶּן אִישׁ חַי נוֹסַף לַהֲלָכָה, מְתֻרְגָּם לְכׇל הַשָּׂפוֹת — אֶפְשָׁר לְהַחְלִיף בַּהֲגָדָּרוֹת'},
+  en:{title:'Ben Ish Chai on Beit-El', body:'A Ben Ish Chai track was added for Halacha, translated into every language - switch to it in Settings'},
+  fr:{title:'Ben Ish Haï sur Beit-El', body:'Un parcours Ben Ish Haï a été ajouté pour la Halakha, traduit dans toutes les langues - changez-le dans les Paramètres'},
+  ru:{title:'Бен Иш Хай на Beit-El', body:'Маршрут Бен Иш Хай добавлен для Ѓалахи, переведён на все языки - переключите его в Настройках'},
+  ka:{title:'ბენ იშ ხაი Beit-El-ზე', body:'ალახისთვის დაემატა „ბენ იშ ხაის" მარშრუტი, თარგმნილი ყველა ენაზე — გადართეთ პარამეტრებში'},
+};
+const BIC_ANNOUNCE_EARLIEST=Date.parse('2026-08-25T00:00:00Z');
+function announceBenishchaiFeature(){
+  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(localStorage.getItem('betel_announce_benishchai_v1')==='1') return;
+  if(Date.now()<BIC_ANNOUNCE_EARLIEST) return;
+  localStorage.setItem('betel_announce_benishchai_v1','1');
+  const t=BIC_ANNOUNCE[S.lang]||BIC_ANNOUNCE.he;
   try{ new Notification(t.title,{body:t.body,dir:S.lang==='he'||!S.lang?'rtl':'ltr',lang:S.lang||'he'}); }catch(e){}
 }
 /* every local notification's fixed text, in one place, so none of them
@@ -4980,17 +5043,13 @@ function renderSettings(){
 
     <div class="set-group">
       <h3>${ckPaceUI().settingsTitle}</h3>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">הֲלָכָה</div><div class="si-d">${S.halachaWork==='benishchai'?ckBicUI().title:'רַמְבַּ״ם'}</div></div></div>
-        <div class="seg"><button data-halwork="rambam" class="${S.halachaWork!=='benishchai'?'on':''}">רַמְבַּ״ם</button><button data-halwork="benishchai" class="${S.halachaWork==='benishchai'?'on':''}">${ckBicUI().title}</button></div></div>
-      ${S.halachaWork==='benishchai'?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">${ckBicUI().title}</div><div class="si-d">${bicTrack()==='year2'?ckBicUI().year2:ckBicUI().year1}</div></div></div>
-        <select id="selBicYear" class="fld-select" style="width:auto;min-width:170px">
-          <option value="year1" ${bicTrack()!=='year2'?'selected':''}>${ckBicUI().year1}</option>
-          <option value="year2" ${bicTrack()==='year2'?'selected':''}>${ckBicUI().year2}</option>
-        </select></div>`:`<div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">קֶצֶב רַמְבַּ״ם</div><div class="si-d">${ckRambamTrack()===1?'שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם':'שָׁנָה · שְׁלֹשָׁה פְּרָקִים'}</div></div></div>
-        <select id="selRambamTrack" class="fld-select" style="width:auto;min-width:170px">
-          <option value="three" ${ckRambamTrack()===1?'selected':''}>שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם</option>
-          <option value="year" ${ckRambamTrack()===3?'selected':''}>שָׁנָה · שְׁלֹשָׁה פְּרָקִים</option>
-        </select></div>`}
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">הֲלָכָה</div><div class="si-d">${halachaChoiceLabel()}</div></div></div>
+        <select id="selHalacha" class="fld-select" style="width:auto;min-width:190px">
+          <option value="rambam3" ${halachaChoice()==='rambam3'?'selected':''}>${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם')}</option>
+          <option value="rambam1" ${halachaChoice()==='rambam1'?'selected':''}>${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים')}</option>
+          <option value="bic1" ${halachaChoice()==='bic1'?'selected':''}>${ckBicUI().title} · ${ckBicUI().year1}</option>
+          <option value="bic2" ${halachaChoice()==='bic2'?'selected':''}>${ckBicUI().title} · ${ckBicUI().year2}</option>
+        </select></div>
       ${MCYC?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">מוּסָר</div><div class="si-d">3 יְחִידוֹת לְיוֹם</div></div></div>
         <select id="selMusarWork" class="fld-select" style="width:auto;min-width:170px">
           ${MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>`<option value="${w.key}" ${(S.musarWork||'reshit')===w.key?'selected':''}>${ckMusarUI()[w.key]}</option>`).join('')}
@@ -5089,9 +5148,7 @@ function renderSettings(){
     inp.click();
   };
   const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast(S.lang==='he'?'הַשָּׂפָה עֻדְכְּנָה':'✓'); }; }
-  const srt=document.getElementById('selRambamTrack'); if(srt) srt.onchange=()=>{ S.rambamTrack=srt.value; saveS(); renderSettings(); };
-  app.querySelectorAll('[data-halwork]').forEach(b=>b.onclick=()=>{ S.halachaWork=b.dataset.halwork; saveS(); renderSettings(); });
-  const sby=document.getElementById('selBicYear'); if(sby) sby.onchange=()=>{ S.bicYear=sby.value; saveS(); renderSettings(); };
+  const sh=document.getElementById('selHalacha'); if(sh) sh.onchange=()=>{ setHalachaChoice(sh.value); saveS(); renderSettings(); };
   const smw=document.getElementById('selMusarWork'); if(smw) smw.onchange=()=>{ S.musarWork=smw.value; saveS(); renderSettings(); };
   const da=document.getElementById('dedAdd'); if(da) da.onclick=()=>{
     const t=document.getElementById('dedType').value, n=document.getElementById('dedName').value.trim();
@@ -5431,6 +5488,7 @@ function checkNotification(){
 }
 try{checkNotification();}catch(e){}
 try{announceChokFeature();}catch(e){}
+try{announceBenishchaiFeature();}catch(e){}
 try{ensureChokIndex().then(()=>{ try{chokCheckReminders();}catch(e){} });}catch(e){}
 setInterval(()=>{ try{checkNotification();}catch(e){} try{chokCheckReminders();}catch(e){} }, 60000);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{chokCheckReminders();}catch(e){} } });

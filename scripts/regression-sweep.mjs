@@ -72,6 +72,38 @@ for (const [label, fn] of steps) {
 console.log('bottom-nav count:', await p.evaluate(() => document.querySelectorAll('.bottom-nav').length));
 console.log('nav-pill count:', await p.evaluate(() => document.querySelectorAll('.nav-pill').length));
 console.log('sw registered:', await p.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length));
+
+// A brand-new user (only betel_onboard_v1 set, no betel_chok_pace_v1) hits
+// the first-open pace wizard instead of going straight to chokList - its own
+// context, since the main steps above pre-skip that wizard entirely. This
+// caught a real bug once: an unguarded ensureBicIndex().then(rerender) on
+// the Halacha step re-triggered itself every render, hanging the page in an
+// infinite microtask loop the moment a fresh user reached that screen.
+const ctx2 = await b.newContext({ viewport: { width: 390, height: 844 } });
+await ctx2.addInitScript(() => localStorage.setItem('betel_onboard_v1', '1'));
+const p2 = await ctx2.newPage();
+p2.on('pageerror', e => errs.push('WIZARD PAGEERROR: ' + String(e).slice(0, 500)));
+await p2.goto('http://localhost:8899/index.html', { waitUntil: 'domcontentloaded', timeout: 20000 });
+await p2.waitForTimeout(800);
+await p2.evaluate(() => window.go('chokList'));
+await p2.waitForTimeout(500);
+await p2.click('[data-pace-opt="he"]', { timeout: 5000 }).catch(e => errs.push('WIZARD lang step: ' + e.message));
+await p2.waitForTimeout(500);
+await p2.click('#paceIntroGo', { timeout: 5000 }).catch(e => errs.push('WIZARD intro step: ' + e.message));
+await p2.waitForTimeout(800);
+try {
+  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('evaluate timed out (5s) - page likely hung')), 5000));
+  const halachaOpts = await Promise.race([
+    p2.evaluate(() => [...document.querySelectorAll('[data-pace-opt]')].length),
+    timeout,
+  ]);
+  console.log('ok: fresh-user pace wizard halacha step (' + halachaOpts + ' options)');
+  if (halachaOpts < 4) errs.push('WIZARD: expected 4 halacha options, got ' + halachaOpts);
+} catch (e) {
+  errs.push('WIZARD halacha step hung or errored: ' + e.message);
+}
+await ctx2.close();
+
 console.log('====ERRORS====');
 console.log(errs.length ? errs.join('\n') : 'none');
 await b.close();

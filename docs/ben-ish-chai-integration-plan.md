@@ -15,6 +15,28 @@ shape (`S.halachaWork`, `data/chok-benishchai*`, `ckBenishchaiLabel`/
 record of how the decision was reached; "open questions" at the bottom
 are marked with what was actually decided.
 
+**Follow-up round**: the Halacha picker was unified into one clear
+4-option choice (Rambam-3yr / Rambam-1yr / Ben Ish Chai-Year1 / Ben Ish
+Chai-Year2) via `halachaChoice()`/`setHalachaChoice()`/
+`halachaChoiceLabel()`, surfaced identically in Settings (one `<select>`,
+same shape as the Musar picker), inline in the reader itself (a
+`.ck-track` 4-button row, same shape as the Musar work-switcher already
+there), and in the first-run pace wizard's Halacha step (now 4
+`optRow()`s instead of 2). **This caught a real bug**: the wizard's
+Ben Ish Chai options were gated on `ensureBicIndex()`, and the first
+version re-triggered a `renderChokPace()` on *every* render of that
+step rather than only the first, creating an infinite microtask loop
+that hung the page solid the moment a brand-new user reached the
+Halacha question - fixed by guarding with `if(!BIC_INDEX)`, and a
+regression-sweep case was added (a second, unflagged browser context
+that walks language → intro → Halacha step with a hard 5s timeout) so
+this class of bug fails loudly instead of silently again. Also added a
+one-time local Notification announcing the feature (`BIC_ANNOUNCE`,
+5 languages), gated to fire no sooner than 48h after this shipped
+(2026-08-23) - same pattern as the existing `announceChokFeature()`,
+requires the user's own reminder opt-in since there's no real push
+infrastructure (see `CLAUDE.md`'s Firebase note).
+
 ## Update: v244 replaces v242 — most gaps closed
 
 The user later uploaded `ben-ish-chai-app-v244.zip` (~22MB uncompressed),
