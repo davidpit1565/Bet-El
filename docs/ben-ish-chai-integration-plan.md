@@ -11,6 +11,67 @@ track would be added, matching the already-planned mention in
 Nothing has been built yet — this is the analysis + design the user
 asked for before starting.
 
+## Update: v244 replaces v242 — most gaps closed
+
+The user later uploaded `ben-ish-chai-app-v244.zip` (~22MB uncompressed),
+a materially more complete package than v242. Everything below the
+original "What's in the source zip" section still describes the data
+*shape* correctly, but several concrete numbers/gaps changed:
+
+- **Year 2 now exists**: `content/year2/*.json`, 47 files, same shape
+  as year1. This resolves open question #1 below — both years can be
+  built together now, not just year1.
+- **Coverage is far more complete**:
+  - **Year 1: 100% of the 54 canonical parshiot** (52 files - some
+    combined-pairs pre-merged same as before, plus a `Chanukah` bonus
+    file and a `V'Zot HaBerachah` file that a naive name-match missed
+    on first pass but is present). None of the original 6 gaps remain.
+  - **Year 2: 46/54 (85%)** — real gaps are **Bamidbar, Devarim,
+    Nitzavim, Vayeilech, Ha'azinu, Vezot Haberakhah** (everything from
+    Bamidbar and Devarim except Vaetchanan..Ki Tavo). Behar/Bechukotai
+    is present as a merged file, same pattern as year1.
+  - One year2 file, **Vayeshev, is intentionally a single explanatory
+    entry, not a gap**: the source itself notes Rabbi Yosef Chaim taught
+    Chanukah laws in that slot every year instead of a regular halacha
+    set for Vayeshev in Shana Sheniya - this is authentic to the sefer,
+    not missing data.
+  - Total: **2,002 halachot** across both years (matches the package's
+    own README).
+- **Nikkud is already done** — `content/nikud.json` (4MB) is a
+  complete lookup, keyed `"<track>|<parasha_en>|<chapter-or-'intro'>"`
+  → array of fully vocalized paragraphs, covering all 2,002 halachot +
+  ~99 intros (2,100 entries). This replaces the earlier plan to run
+  Dicta's Nakdan — the vocalized text just needs joining in at
+  data-prep time, keyed the same way the raw content is (this answers
+  open question #3: nikkud is already available, no separate pass
+  needed).
+- **New optional-value data files**, not essential for a first version
+  but worth knowing about:
+  - `content/glossary.json` (2,065 entries): global hard-word →
+    plain-Hebrew definition pairs.
+  - `content/ctxgloss.json` (105 entries): per-halacha contextual
+    overrides for words whose meaning depends on that specific passage.
+  - `content/sefaria_refs.json` (2,100 entries): a canonical Sefaria
+    URL per halacha/intro — useful for a "view on Sefaria" / precise
+    citation link, matching how Bet-El already cites sources elsewhere.
+  - `content/topics.json`: halachot tagged by topic (e.g. "mezuzah" →
+    22 references across both years) — a "browse by topic" feature,
+    not needed for the daily-reading flow itself.
+  - `content/ambig.json` (69 entries): looks like the source's own
+    nikkud-disambiguation working data, not something Bet-El needs to
+    consume directly since the final vocalized text is already in
+    `nikud.json`.
+- **`content/week/` and `content/daily/`** are *not* a per-day division
+  of halachot (that would have solved the pacing question outright) -
+  they're just cached snapshots of "which parasha is this calendar
+  week/day" from Sefaria's calendar API, used by the standalone app's
+  own "today" view. The even-split-across-6-days design below is still
+  needed; nothing in v244 pre-computes it.
+- Per-parasha halacha counts are still highly uneven (year1: 9-58,
+  year2: 12-40 excluding the 1-entry Vayeshev special case), so the
+  even-split-with-remainder-front-loaded approach below remains the
+  right design, not a fixed N/day.
+
 ## What's in the source zip
 
 - `content/year1/<Parasha>.json` × 46 files (45 real parshiot + one
@@ -133,20 +194,24 @@ the parasha run one after the other," per the existing code comment.
 
 ## Open questions before building anything
 
-1. **Only year1 for now, or wait for year2?** No year2 data exists yet.
-   If the app should offer both years as parallel pace choices (like
-   Rambam's 1-year/3-year toggle), that has to wait; shipping year1
-   alone as a first Ben Ish Chai option is the only thing buildable
-   today.
-2. **The 6 missing parshiot** — ship with a graceful gap, or hold off
-   until the content backfills?
-3. **Nikkud** — worth running through Dicta's Nakdan now (same
-   pipeline as Pele Yoetz), or ship unvocalized first and add it later?
-4. **`clarification` field** — include it from day one (needs new UI),
-   or ship the raw halachot first and layer explanations in later?
+1. ~~Only year1 for now, or wait for year2?~~ **Resolved by v244** —
+   both years are available now; build both as parallel pace choices.
+2. **Year 2's 6 missing parshiot** (Bamidbar, Devarim, Nitzavim,
+   Vayeilech, Ha'azinu, Vezot Haberakhah) — ship year 2 with a graceful
+   gap for those weeks, or hold the year-2 option back until content
+   backfills? (Year 1 has no gaps at all, so this only affects year 2.)
+3. ~~Nikkud~~ **Resolved by v244** — full nikkud already ships in
+   `content/nikud.json`, just needs joining in at data-prep time.
+4. **`clarification` field** — include it from day one (needs new UI:
+   an expandable panel per halacha), or ship the raw halachot first and
+   layer explanations in later?
 5. **Where exactly it slots into the pace wizard** — replace Rambam
    entirely as a choice, or become a third Halacha option alongside the
    two existing Rambam tracks?
+6. **Extra metadata** (`glossary.json`, `ctxgloss.json`,
+   `sefaria_refs.json`, `topics.json`) — worth wiring in for v1 (e.g. a
+   "view on Sefaria" link is low-effort/high-value), or leave for later
+   since none of it is needed for the core daily-reading flow?
 
 No code changes were made for this — this file is the analysis and
 plan only, for the user to confirm before anything is built.
