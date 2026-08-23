@@ -6,6 +6,8 @@
   "scripts": {
     "test": "npm run check:blocking",
     "check:blocking": "node scripts/check-blocking-resources.mjs",
+    "serve:local": "python3 -c \"from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler; ThreadingHTTPServer(('127.0.0.1', 8899), SimpleHTTPRequestHandler).serve_forever()\"",
+    "test:sweep": "node scripts/regression-sweep.mjs",
     "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js manifest.json icon-192.png icon-512.png www/ && cp -r data www/data && npx cap sync ios"
   },
   "dependencies": {
@@ -30,6 +32,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5"
+    "@capacitor/assets": "^3.0.5",
+    "playwright": "^1.62.1"
   }
 }
