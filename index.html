@@ -2530,16 +2530,25 @@ function ckReshitGateName(gate){ return (RESHIT_GATES[S.lang]||RESHIT_GATES.he)[
 function ckMusarSourceLabel(work,idxs){
   const cfg=MCYC[work], t=ckMusarUI();
   const unitWord=t[MUSAR_UNIT_WORD[work]||'gate'];
-  return idxs.map(i=>{
+  /* Consecutive paragraphs on a multi-paragraph-per-day track usually share
+     the same book/gate/chapter - group those under one head and range just
+     the paragraph ("אות") numbers, instead of repeating the full head per
+     paragraph (e.g. "... · אות ז' · ... · אות ח' · ... · אות ט'"). */
+  const groups=[];
+  idxs.forEach(i=>{
     const e=cfg.order[i];
     let gateName;
     if(e.part==='Introduction') gateName=t.intro;
     else if(e.heSection) gateName = (S.lang&&S.lang!=='he') ? unitWord+' '+e.section.replace(/^Gate /,'') : e.heSection;
     else if(work==='reshit') gateName = ckReshitGateName(e.gate);
     else gateName = unitWord+' '+heNum(e.gate);
-    const unitLabel = (work==='reshit') ? (t.chapter+' '+heNum(e.ch)+' · '+t.para+' '+heNum(e.p)) : (t.para+' '+heNum(e.ch));
-    return t[work]+' · '+gateName+' · '+unitLabel;
-  }).join('  ·  ');
+    const head = (work==='reshit') ? (t[work]+' · '+gateName+' · '+t.chapter+' '+heNum(e.ch)) : (t[work]+' · '+gateName);
+    const para = work==='reshit' ? e.p : e.ch;
+    const last=groups[groups.length-1];
+    if(last && last.head===head) last.paras.push(para);
+    else groups.push({head, paras:[para]});
+  });
+  return groups.map(g=>g.head+' · '+t.para+' '+ckRange(g.paras[0], g.paras[g.paras.length-1])).join('  ·  ');
 }
 
 /* ---------- Chok LeYisrael first-open pace questions ----------
