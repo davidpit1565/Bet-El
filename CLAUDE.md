@@ -62,9 +62,11 @@ in English as usual.
   not an error), and `bicI18nItem(track,unit,dayIdx,itemIdx)` looks up the
   translated item by the same indices `bicBody()` already uses, falling
   back to the Hebrew original per-item when absent. This is a large,
-  incremental translation effort (~1,974 halachot × 4 languages) - most
-  units have no translation file yet and render in Hebrew regardless of
-  UI language, which is expected, not a bug.
+  incremental translation effort (~1,974 halachot × 4 languages) - as of
+  this writing all 51 year1 units are translated to English; year2 and
+  the other 3 languages (fr/ru/ka) are still pending, so most units still
+  render in Hebrew for those language/track combinations, which is
+  expected, not a bug.
 - The Halacha "pace" is really one choice of 4 (Rambam 3yr/1yr, Ben Ish
   Chai year1/year2), even though it's stored across two settings fields
   for historical reasons (`S.halachaWork` plus either `S.rambamTrack` or
