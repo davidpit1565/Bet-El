@@ -4090,7 +4090,7 @@ function renderContinuous(chs,hd){
     <div class="reader-top">
       <button class="icon-btn" id="rBack">${I.prev}</button>
       <div class="reader-title">קְרִיאַת הַיּוֹם</div>
-      <button class="icon-btn autoscroll-btn" id="flowAutoScroll">${I.play}</button>
+      ${toolsFab({scroll:true})}
     </div>
   </div>
   ${dedHTML('reader-ded')}
@@ -4102,7 +4102,7 @@ function renderContinuous(chs,hd){
   </div>`;
   document.getElementById('rBack').onclick=()=>go('home');
   forceScrollTop();
-  document.getElementById('flowAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
+  wireToolsFab();
   document.getElementById('flowDone').onclick=()=>{ haptic(); stopAutoScroll(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
   tr(app);
   document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);
