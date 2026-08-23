@@ -1772,7 +1772,7 @@ function ensureChokWeek(key){
    (Behar/Bechukotai etc.) regardless of whether the calendar combines them
    that year, so bicUnitsFor de-dupes by unit slug rather than assuming one
    unit per canonical key. */
-let BIC_INDEX=null, BIC_WEEK={}, bicIndexPromise=null;
+let BIC_INDEX=null, BIC_WEEK={}, BIC_WEEK_I18N={}, bicIndexPromise=null;
 function ensureBicIndex(){
   if(BIC_INDEX) return Promise.resolve();
   if(bicIndexPromise) return bicIndexPromise;
@@ -1811,13 +1811,30 @@ function bicUnitsFor(keys,track){
   (keys||[]).forEach(k=>{ const u=idx.unitOf[k]; if(u&&!seen.has(u)){ seen.add(u); units.push(u); } });
   return units;
 }
+/* The halacha/biur text itself stays Hebrew-only for Rambam and every Musar
+   work; Ben Ish Chai is (gradually) the one exception, translated per-unit
+   into a sibling `<unit>.<lang>.json` file with the same days[][] shape so
+   items line up by index. A unit not yet translated for the active
+   language simply has no such file (404 is expected, not an error) and
+   rendering falls back to the Hebrew original - see bicI18nItem(). */
 function ensureBicWeek(track,keys){
+  const lang=S.lang;
   return ensureBicIndex().then(()=>Promise.all(bicUnitsFor(keys,track).map(u=>{
     const k=track+'/'+u;
-    if(BIC_WEEK[k]) return null;
-    return fetch('data/chok-benishchai/'+track+'/'+u+'.json').then(r=>r.json())
-      .then(d=>{ BIC_WEEK[k]=d; });
+    const base=BIC_WEEK[k] ? null
+      : fetch('data/chok-benishchai/'+track+'/'+u+'.json').then(r=>r.json()).then(d=>{ BIC_WEEK[k]=d; });
+    const i18nKey=lang+'/'+k;
+    const i18n=(lang==='he'||BIC_WEEK_I18N[i18nKey]!==undefined) ? null
+      : fetch('data/chok-benishchai/'+track+'/'+u+'.'+lang+'.json')
+          .then(r=>r.ok?r.json():null).then(d=>{ BIC_WEEK_I18N[i18nKey]=d||null; })
+          .catch(()=>{ BIC_WEEK_I18N[i18nKey]=null; });
+    return Promise.all([base,i18n]);
   })));
+}
+function bicI18nItem(track,unit,dayIdx,itemIdx){
+  if(S.lang==='he') return null;
+  const d=BIC_WEEK_I18N[S.lang+'/'+track+'/'+unit];
+  return (d&&d.days&&d.days[dayIdx]&&d.days[dayIdx][itemIdx])||null;
 }
 function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
@@ -2016,7 +2033,7 @@ function chokSectionsFor(key,day){
       let bi=[];
       if(dayIdx>=0) units.forEach(u=>{
         const wk=BIC_WEEK[track+'/'+u];
-        if(wk&&wk.days&&wk.days[dayIdx]) bi=bi.concat(wk.days[dayIdx].map(h=>({...h,unit:u,parasha_he:wk.parasha_he})));
+        if(wk&&wk.days&&wk.days[dayIdx]) bi=bi.concat(wk.days[dayIdx].map((h,ii)=>({...h,unit:u,parasha_he:wk.parasha_he,dayIdx,itemIdx:ii})));
       });
       if(bi.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'benishchai',items:bi,refs:[],bicTrack:track});
     } else {
@@ -3516,18 +3533,21 @@ function renderChokReader(){
   const commBody=items=>items.map(x=>
     `<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.c)}:${heNum(x.v)}</span>`+
     x.segs.map(t=>`<div class="sm-he ck-comm-body">${t}</div>`).join('')+`</div>`).join('');
-  const bicBody=items=>{
+  const bicBody=(items,track)=>{
     BIC_CLARIFY={};
     return items.map((h,i)=>{
       const uid='bic:'+i+':'+h.chapter;
-      BIC_CLARIFY[uid]=h.clarification||null;
-      const paras=(h.paragraphs||[]).map(p=>`<div class="sm-he">${p}</div>`).join('');
+      const t18n=bicI18nItem(track,h.unit,h.dayIdx,h.itemIdx);
+      const paragraphs=(t18n&&t18n.paragraphs)||h.paragraphs;
+      const clarification=(t18n&&t18n.clarification)||h.clarification;
+      BIC_CLARIFY[uid]=clarification||null;
+      const paras=(paragraphs||[]).map(p=>`<div class="sm-he">${p}</div>`).join('');
       return `<div class="sm-verse-row"><span class="sm-vnum">${heNum(h.chapter)}</span>${paras}${bicCommBar(uid)}</div>`;
     }).join('');
   };
   const body = s.kind==='daf' ? dafBody(s.items)
     : s.kind==='comm' ? commBody(s.items)
-    : s.kind==='benishchai' ? bicBody(s.items)
+    : s.kind==='benishchai' ? bicBody(s.items,s.bicTrack)
     : s.kind==='rambam' ? ramBody(s.items)
     : s.kind==='tehillim' ? tehBody(s.items)
     : (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')

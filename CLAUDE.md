@@ -52,6 +52,19 @@ in English as usual.
   rather than folding into `ckCommFor()`/`ckToggleComm()`, since the data is
   already loaded inline (no async per-verse lookup) and there's only ever
   one explanation source, not several to pick between.
+- Unlike Rambam and every Musar work, Ben Ish Chai's halacha body text and
+  per-halacha biur are (gradually, by user request) being translated out of
+  Hebrew-only. Each unit file can have sibling
+  `data/chok-benishchai/<year1|year2>/<unit-slug>.<lang>.json` files (one
+  per UI language other than Hebrew) with the identical `days[][]` shape -
+  `ensureBicWeek()` fetches the sibling for the active language alongside
+  the Hebrew base (a 404 is expected and cached as "no translation yet",
+  not an error), and `bicI18nItem(track,unit,dayIdx,itemIdx)` looks up the
+  translated item by the same indices `bicBody()` already uses, falling
+  back to the Hebrew original per-item when absent. This is a large,
+  incremental translation effort (~1,974 halachot × 4 languages) - most
+  units have no translation file yet and render in Hebrew regardless of
+  UI language, which is expected, not a bug.
 - The Halacha "pace" is really one choice of 4 (Rambam 3yr/1yr, Ben Ish
   Chai year1/year2), even though it's stored across two settings fields
   for historical reasons (`S.halachaWork` plus either `S.rambamTrack` or
