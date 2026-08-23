@@ -77,7 +77,7 @@ body::before{ /* subtle starfield/texture */
 }
 [data-theme="light"] body::before{opacity:.25;
   background:radial-gradient(1px 1px at 20% 30%,rgba(150,116,44,.4),transparent),radial-gradient(1px 1px at 70% 60%,rgba(150,116,44,.3),transparent);}
-#app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 16px calc(var(--nav-h) + 30px + env(safe-area-inset-bottom));min-height:100vh;min-height:100dvh}
+#app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 16px calc(var(--nav-h) + 30px + env(safe-area-inset-bottom))}
 .view{animation:fade .45s var(--ease)}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 ::selection{background:rgba(212,175,95,.3)}
@@ -921,17 +921,10 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .hhf-bl{bottom:12px;right:12px}.hhf-br{bottom:12px;left:12px}
 
 .q-tile[data-cat]{position:relative;overflow:hidden}
-.q-tile[data-cat] .qcat-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
-  margin-bottom:10px;background:rgba(255,255,255,.5)}
-.q-tile[data-cat] .qcat-icon svg{width:17px;height:17px}
 .q-tile[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
-.q-tile[data-cat="chok"] .qcat-icon{color:#4c5fb8}
 .q-tile[data-cat="tehillim"]{background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
-.q-tile[data-cat="tehillim"] .qcat-icon{color:#9a7526}
 .q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
-.q-tile[data-cat="zohar"] .qcat-icon{color:#b8501f}
 .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
-.q-tile[data-cat="shnayim"] .qcat-icon{color:#256e51}
 </style>
 </head>
 <body>
@@ -3789,13 +3782,11 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
-          <span class="qcat-icon">${I.crown}</span>
           <div class="qt">חוֹק לְיִשְׂרָאֵל</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
       <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
-        <span class="qcat-icon">${I.book}</span>
         <div class="qt">תְּהִלִּים הַיּוֹמִי</div>
         <div class="qd">${rangeLabel} · ${chs.length} פְּרָקִים</div>
       </div>
@@ -3806,13 +3797,11 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="zohar" id="homeZoharCard">
-          <span class="qcat-icon">${I.zoharFlame}</span>
           <div class="qt">זֹהַר הַיּוֹמִי</div>
           <div class="qd">מִתּוֹךְ חֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם</div>
         </div>`;
       })()}
       ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" data-cat="shnayim" id="homeParshaCard">
-        <span class="qcat-icon">${I.scroll}</span>
         <div class="qt">שְׁנַיִם מִקְרָא</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
