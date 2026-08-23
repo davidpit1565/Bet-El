@@ -169,6 +169,52 @@ concatenate both parshiot's halacha lists into one combined-week list,
 then run the same even-split across the 6 days — "the tracks tied to
 the parasha run one after the other," per the existing code comment.
 
+## Update: accounting for real Yom Tov days (no data change needed)
+
+The user pushed back on the naive average (total halachot ÷ 52 weeks ÷ 6
+days): Shabbat is already excluded structurally (Chok LeYisrael only has
+sun-fri slots), but actual Yom Tov weekdays are days nobody studies
+through the app either - and that shouldn't be computed from specific
+calendar dates (which vary year to year), but reasoned about as a
+property of Chok LeYisrael's own weekly structure.
+
+Checked the app's existing `chokIsYomTov()` (index.html, "Yom Tov
+make-up" section, ~line 3495): it already defines exactly this - real
+Chag days only, explicitly excluding Chol HaMoed and Erev (both
+ordinary study days), via hebcal's flags, automatically adjusting for
+Israel (`il`) vs diaspora day-counts. Per year that's:
+
+- **Diaspora**: Rosh Hashana(2) + Yom Kippur(1) + Sukkot 1-2(2) +
+  Shmini Atzeret(1) + Simchat Torah(1) + Pesach 1-2,7-8(4) + Shavuot
+  1-2(2) = **13 chag-days/year**.
+- **Israel**: Rosh Hashana(2) + Yom Kippur(1) + Sukkot day 1(1) +
+  Shmini Atzeret/Simchat Torah combined(1) + Pesach 1,7(2) + Shavuot(1)
+  = **8 chag-days/year**.
+
+Roughly 6/7 of those land on an actual weekday rather than falling on
+Shabbat itself (an approximation - the exact count depends on which of
+the 14 possible Hebrew-year patterns a given year is, not something
+worth hand-computing per year for a planning estimate). That's ~11
+lost study-weekdays/year in the diaspora, ~7 in Israel.
+
+Corrected average (year1, 52 weeks × 6 = 312 nominal slots, 1,026
+halachot): **~3.41/day (diaspora)**, **~3.36/day (Israel)** - up from
+the naive 3.29/day. Year2 (47 weeks, 948 halachot): **~3.50/day
+(diaspora)**, **~3.45/day (Israel)** - up from 3.36/day naive. Full
+per-parasha breakdown with this correction is in the published report
+artifact from this conversation.
+
+**Conclusion: this does not change the data-prep design above.** The
+per-parasha 6-day schedule still has to fill all 6 slots, because at
+data-prep time there's no way to know which specific weekday a given
+year's Rosh Hashana/Pesach/etc. will land on - that's exactly why
+`chokIsYomTov()` checks the real calendar at runtime instead of being
+baked into static data. Once Ben Ish Chai is wired into the same
+`chokMissedSlots()`/make-up flow that Torah and Halacha already use, it
+inherits this handling automatically - a Yom Tov weekday's portion
+already gets folded into the next day's make-up prompt, generically,
+with no extra work needed for this specific track.
+
 ## Where the pace choice and UI would plug in
 
 - **Settings → קֶצֶב לִמּוּד → הֲלָכָה**: currently a 2-way toggle
