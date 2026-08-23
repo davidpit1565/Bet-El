@@ -2550,13 +2550,16 @@ function ckMusarSourceLabel(work,idxs){
     else if(work==='reshit') gateName = ckReshitGateName(e.gate);
     else if(work==='peleyoetz') gateName = ckPeleYoetzTopicName(e.gate);
     else gateName = unitWord+' '+heNum(e.gate);
-    const head = (work==='reshit') ? (t[work]+' · '+gateName+' · '+t.chapter+' '+heNum(e.ch)) : (t[work]+' · '+gateName);
+    /* t[work] (the book name) is invariant for the whole line - a single
+       reader session always shows one selected musar work - so it's
+       prefixed once below, not repeated inside each group's head. */
+    const head = (work==='reshit') ? (gateName+' · '+t.chapter+' '+heNum(e.ch)) : gateName;
     const para = work==='reshit' ? e.p : e.ch;
     const last=groups[groups.length-1];
     if(last && last.head===head) last.paras.push(para);
     else groups.push({head, paras:[para]});
   });
-  return groups.map(g=>g.head+' · '+t.para+' '+ckRange(g.paras[0], g.paras[g.paras.length-1])).join('  ·  ');
+  return t[work]+' · '+groups.map(g=>g.head+' · '+t.para+' '+ckRange(g.paras[0], g.paras[g.paras.length-1])).join('  ·  ');
 }
 
 /* ---------- Chok LeYisrael first-open pace questions ----------
