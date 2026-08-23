@@ -35,6 +35,23 @@ in English as usual.
 - Every musar work runs at the same fixed pace, `ckMusarTrack()` = 3
   units/day (not configurable per-work). Cycle length is computed
   automatically by `ckMusarDurationLabel()`.
+- Ben Ish Chai (`S.halachaWork==='benishchai'`, alongside the default
+  Rambam) is an alternate Halacha source, parasha-bound like Torah rather
+  than date-driven like Rambam/Zohar/daf. Its per-parasha halachot are
+  pre-split across the 6 study days **at data-prep time** (evenly, remainder
+  front-loaded - there's no printed-sheet convention to hand-curate from,
+  unlike Torah's own verse boundaries) into
+  `data/chok-benishchai/<year1|year2>/<unit-slug>.json`, indexed by
+  `data/chok-benishchai-index.json`'s `unitOf` map (canonical parasha name →
+  unit slug - some units cover two canonical parshiot at once, e.g.
+  Behar+Bechukotai, regardless of whether the calendar combines them that
+  year). `ckBenishchaiLabel()`/`bicBody()`/`bicCommBar()` mirror
+  `ckRambamLabel()`/`ramBody()`/`ckCommBar()`'s shape. The per-halacha
+  plain-language explanation (`clarification`) shows in a Rashi-style
+  expandable panel via `bicToggleComm()` - its own small function pair
+  rather than folding into `ckCommFor()`/`ckToggleComm()`, since the data is
+  already loaded inline (no async per-verse lookup) and there's only ever
+  one explanation source, not several to pick between.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
