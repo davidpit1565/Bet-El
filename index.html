@@ -825,20 +825,15 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   color:var(--ink-soft);border-radius:999px;padding:6px 13px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
 .sm-aliyah-chip.on{background:var(--gold-grad);color:#2a1e05;border-color:transparent}
 
-/* section carousel: the active section always stays centered and full
-   size, with its neighbors peeking on both sides - nothing to scroll or
-   lose off-screen */
-.ck-car{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 10px}
-.ck-car-arrow{flex:none;width:34px;height:34px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
-.ck-car-arrow:disabled{opacity:.3;cursor:default}
-.ck-car-arrow svg{width:16px;height:16px}
-.ck-car-track{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:0;touch-action:pan-y}
-.ck-car-peek{flex:none;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:none;font-family:var(--font-ui);font-size:12.5px;color:var(--muted);opacity:.55;cursor:pointer;padding:6px 2px}
-.ck-car-peek.ck-car-empty{visibility:hidden}
-.ck-car-center{flex:none;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--gold-grad);color:#2a1e05;font-family:var(--font-ui);font-weight:800;font-size:14.5px;border-radius:999px;padding:9px 18px}
-.ck-car-dots{display:flex;justify-content:center;gap:5px;margin-bottom:12px}
-.ck-car-dots span{width:5px;height:5px;border-radius:50%;background:var(--line-strong)}
-.ck-car-dots span.on{background:var(--gold);width:16px;border-radius:3px}
+/* section nav: every section title (Torah, Nevi'im, Tehillim, ...) sits
+   in one horizontally scrollable strip so the full list is discoverable
+   and each one is directly tappable, instead of being hidden one step
+   at a time behind prev/next peeks - mirrors the day-of-week nav above
+   it (.ck-daynav-wrap). */
+.ck-secnav-wrap{display:flex;align-items:center;gap:6px;margin:0 0 10px}
+.ck-secnav{flex:1;min-width:0;overflow-x:auto;padding:2px 2px 0;justify-content:flex-start}
+.ck-secnav-wrap .ck-arrow{flex:none}
+.sm-aliyah-chip.ck-secchip{font-family:var(--font-ui);font-size:13px;font-weight:700}
 /* shared "slide in from the side you came from" touch, reused by the
    carousel, the day/parsha titles and anything else driven by a
    prev/next control */
@@ -3429,16 +3424,13 @@ function renderChokReader(){
         ).join('')}
       </div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
-      <div class="ck-car">
-        <button class="ck-car-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
-        <div class="ck-car-track">
-          ${CK.sec>0?`<button class="ck-car-peek" data-sec="${CK.sec-1}">${secs[CK.sec-1].he}</button>`:'<span class="ck-car-peek ck-car-empty"></span>'}
-          <div class="ck-car-center ${_anim}">${s.he}</div>
-          ${CK.sec<secs.length-1?`<button class="ck-car-peek" data-sec="${CK.sec+1}">${secs[CK.sec+1].he}</button>`:'<span class="ck-car-peek ck-car-empty"></span>'}
+      <div class="ck-secnav-wrap">
+        <button class="sm-aliyah-chip ck-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
+        <div class="sm-aliyah-nav ck-secnav">
+          ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${sec.he}</button>`).join('')}
         </div>
-        <button class="ck-car-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
       </div>
-      <div class="ck-car-dots">${secs.map((_,ix)=>`<span class="${ix===CK.sec?'on':''}"></span>`).join('')}</div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
       <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs[CK.resumeTo.sec]||secs[0]).he}</b></div>
@@ -3474,21 +3466,11 @@ function renderChokReader(){
   if(dn) dn.onclick=()=>{ haptic(); stopAutoScroll(); chokMarkDone(CK.key,CK.day); chokClearMissed(CK.key,CK.day); ckBmClear(CK.key,CK.day); celebrate('daily','חוֹק לְיִשְׂרָאֵל'); go('chokList'); };
   const secPv=document.getElementById('ckSecPrev'); if(secPv&&!secPv.disabled) secPv.onclick=()=>{ CK_NAV_DIR=-1; goSec(CK.sec-1); };
   const secNx=document.getElementById('ckSecNext'); if(secNx&&!secNx.disabled) secNx.onclick=()=>{ CK_NAV_DIR=1; goSec(CK.sec+1); };
-  app.querySelectorAll('.ck-car-peek[data-sec]').forEach(b=>b.onclick=()=>{
-    const ix=+b.dataset.sec; CK_NAV_DIR=ix>CK.sec?1:-1; goSec(ix);
+  app.querySelectorAll('.ck-secchip[data-sec]').forEach(b=>b.onclick=()=>{
+    const ix=+b.dataset.sec; if(ix===CK.sec) return; CK_NAV_DIR=ix>CK.sec?1:-1; goSec(ix);
   });
-  const track=app.querySelector('.ck-car-track');
-  if(track){
-    let sx=null;
-    track.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
-    track.addEventListener('touchend',e=>{
-      if(sx==null) return;
-      const dx=e.changedTouches[0].clientX-sx; sx=null;
-      if(Math.abs(dx)<40) return;
-      if(dx<0 && CK.sec<secs.length-1){ CK_NAV_DIR=1; goSec(CK.sec+1); }
-      else if(dx>0 && CK.sec>0){ CK_NAV_DIR=-1; goSec(CK.sec-1); }
-    },{passive:true});
-  }
+  const onSecChip=app.querySelector('.ck-secchip.on');
+  if(onSecChip) onSecChip.scrollIntoView({inline:'center', block:'nearest'});
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   app.querySelectorAll('.ck-track-btn[data-track]').forEach(b=>b.onclick=()=>{
     S.rambamTrack=b.dataset.track; saveS();
