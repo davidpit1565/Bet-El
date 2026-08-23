@@ -900,6 +900,38 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
     transition:none!important;
   }
 }
+
+/* ================= HOME: ornamented hero frame + rich tile wash =========
+   A bordered "plaque" frame (gold double border, star corners, reusing the
+   existing ORN flourish) around the greeting/date/zman - and a soft per-
+   category color wash on the four daily-study tiles, so the home screen has
+   a clear focal moment instead of a plain list. Flat gradients/borders only,
+   no added backdrop-filter - see the Liquid Glass note above for why that
+   matters here. */
+.home-hero-frame{position:relative;margin-top:4px;padding:26px 18px 20px;border-radius:20px;
+  border:1.5px solid var(--gold);background:var(--panel);box-shadow:var(--card-shadow)}
+.home-hero-frame::before{content:'';position:absolute;inset:6px;border:1px solid rgba(212,175,95,.4);
+  border-radius:14px;pointer-events:none}
+.home-hero-frame .hero{padding:0}
+.home-hero-frame .hero-logo{width:80px}
+.home-hero-frame .date-band{margin-top:10px}
+.hhf-corner{position:absolute;width:15px;height:15px;color:var(--gold);opacity:.9}
+.hhf-corner svg{width:100%;height:100%}
+.hhf-tl{top:12px;right:12px}.hhf-tr{top:12px;left:12px}
+.hhf-bl{bottom:12px;right:12px}.hhf-br{bottom:12px;left:12px}
+
+.q-tile[data-cat]{position:relative;overflow:hidden}
+.q-tile[data-cat] .qcat-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  margin-bottom:10px;background:rgba(255,255,255,.5)}
+.q-tile[data-cat] .qcat-icon svg{width:17px;height:17px}
+.q-tile[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
+.q-tile[data-cat="chok"] .qcat-icon{color:#4c5fb8}
+.q-tile[data-cat="tehillim"]{background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
+.q-tile[data-cat="tehillim"] .qcat-icon{color:#9a7526}
+.q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
+.q-tile[data-cat="zohar"] .qcat-icon{color:#b8501f}
+.q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
+.q-tile[data-cat="shnayim"] .qcat-icon{color:#256e51}
 </style>
 </head>
 <body>
@@ -3724,15 +3756,19 @@ function renderHome(){
   app.innerHTML = `
   ${topbar('בית אל')}
   <div class="view">
-    <div class="hero">
-      <img class="hero-logo" src="${LOGO}" alt="בית אל"/>
+    <div class="home-hero-frame">
+      <span class="hhf-corner hhf-tl">${ORN}</span><span class="hhf-corner hhf-tr">${ORN}</span>
+      <span class="hhf-corner hhf-bl">${ORN}</span><span class="hhf-corner hhf-br">${ORN}</span>
+      <div class="hero">
+        <img class="hero-logo" src="${LOGO}" alt="בית אל"/>
+      </div>
+      <div class="date-band">
+        <div class="greeting">${greeting()}</div>
+        <div class="date-heb">${hebDateStr(hd)}</div>
+        <div class="date-greg">${dowName(hd)} · ${new Date().toLocaleDateString('en-GB')}</div>
+      </div>
+      ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     </div>
-    <div class="date-band">
-      <div class="greeting">${greeting()}</div>
-      <div class="date-heb">${hebDateStr(hd)}</div>
-      <div class="date-greg">${dowName(hd)} · ${new Date().toLocaleDateString('en-GB')}</div>
-    </div>
-    ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>יוֹם הַיָּאהְרְצַיְיט · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
     ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.moon2}<span>רֹאשׁ חֹדֶשׁ · <b>אַל תִּשְׁכַּח לְהַזְכִּיר יַעֲלֶה וְיָבֹא</b></span></div>`:''}
     ${(function(){
@@ -3752,12 +3788,14 @@ function renderHome(){
         if(!CHOK) return '';
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
-        return `<div class="q-tile${done?' done':''}" id="homeChokCard">
+        return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
+          <span class="qcat-icon">${I.crown}</span>
           <div class="qt">חוֹק לְיִשְׂרָאֵל</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
-      <div class="q-tile${tehDoneToday?' done':''}" id="homeTehillimCard">
+      <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
+        <span class="qcat-icon">${I.book}</span>
         <div class="qt">תְּהִלִּים הַיּוֹמִי</div>
         <div class="qd">${rangeLabel} · ${chs.length} פְּרָקִים</div>
       </div>
@@ -3767,12 +3805,14 @@ function renderHome(){
       ${(function(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
-        return `<div class="q-tile${done?' done':''}" id="homeZoharCard">
+        return `<div class="q-tile${done?' done':''}" data-cat="zohar" id="homeZoharCard">
+          <span class="qcat-icon">${I.zoharFlame}</span>
           <div class="qt">זֹהַר הַיּוֹמִי</div>
           <div class="qd">מִתּוֹךְ חֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם</div>
         </div>`;
       })()}
-      ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" id="homeParshaCard">
+      ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" data-cat="shnayim" id="homeParshaCard">
+        <span class="qcat-icon">${I.scroll}</span>
         <div class="qt">שְׁנַיִם מִקְרָא</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
