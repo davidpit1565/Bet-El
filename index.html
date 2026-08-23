@@ -4112,6 +4112,9 @@ function renderContinuous(chs,hd){
   document.getElementById('rBack').onclick=()=>go('home');
   forceScrollTop();
   wireToolsFab();
+  app.querySelectorAll('[data-prayer]').forEach(pb=>{
+    pb.querySelector('[data-ptoggle]').onclick=()=>pb.classList.toggle('collapsed');
+  });
   document.getElementById('flowDone').onclick=()=>{ haptic(); stopAutoScroll(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
   tr(app);
   document.documentElement.scrollTop=0; document.body.scrollTop=0; window.scrollTo(0,0);
