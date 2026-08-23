@@ -2495,21 +2495,31 @@ function ensureMusarDay(work,hd){
    word like "אות" (paragraph) would also match every biblical "sign" verse
    translated elsewhere in the app if it were a normal dictionary entry. */
 const MUSAR_UI={
-  he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה', mesilat:'מְסִלַּת יְשָׁרִים', orchot:'אָרְחוֹת צַדִּיקִים',
+  he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה', mesilat:'מְסִלַּת יְשָׁרִים', orchot:'אָרְחוֹת צַדִּיקִים', peleyoetz:'פֶּלֶא יוֹעֵץ',
       gate:'שַׁעַר', chapter:'פֶּרֶק', intro:'הַקְדָּמָה', para:'אוֹת'},
-  en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha", mesilat:'Mesillat Yesharim', orchot:'Orchot Tzadikim',
+  en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha", mesilat:'Mesillat Yesharim', orchot:'Orchot Tzadikim', peleyoetz:'Pele Yoetz',
       gate:'Gate', chapter:'Chapter', intro:'Introduction', para:'Paragraph'},
-  fr:{reshit:"Réchit 'Hokhma", teshuva:'Chaarei Techouva', kedusha:'Chaarei Kedoucha', mesilat:'Messilat Yécharim', orchot:'Orḥot Tsadikim',
+  fr:{reshit:"Réchit 'Hokhma", teshuva:'Chaarei Techouva', kedusha:'Chaarei Kedoucha', mesilat:'Messilat Yécharim', orchot:'Orḥot Tsadikim', peleyoetz:'Pélé Yoëts',
       gate:'Porte', chapter:'Chapitre', intro:'Introduction', para:'Paragraphe'},
-  ru:{reshit:'Решит Хохма', teshuva:'Шаарей Тшува', kedusha:'Шаарей Кедуша', mesilat:'Месилат Йешарим', orchot:'Орхот Цадиким',
+  ru:{reshit:'Решит Хохма', teshuva:'Шаарей Тшува', kedusha:'Шаарей Кедуша', mesilat:'Месилат Йешарим', orchot:'Орхот Цадиким', peleyoetz:'Пеле Йоэц',
       gate:'Врата', chapter:'Глава', intro:'Введение', para:'Абзац'},
-  ka:{reshit:'რეშით ხოხმა', teshuva:'შაარეი თშუვა', kedusha:'შაარეი კედუშა', mesilat:'მესილათ იეშარიმ', orchot:'ორხოთ ცადიკიმ',
+  ka:{reshit:'რეშით ხოხმა', teshuva:'შაარეი თშუვა', kedusha:'შაარეი კედუშა', mesilat:'მესილათ იეშარიმ', orchot:'ორხოთ ცადიკიმ', peleyoetz:'პელე იოეც',
       gate:'კარიბჭე', chapter:'თავი', intro:'შესავალი', para:'აბზაცი'},
 };
 function ckMusarUI(){ return MUSAR_UI[S.lang]||MUSAR_UI.he; }
 const MUSAR_WORKS=[
-  {key:'reshit'}, {key:'teshuva'}, {key:'kedusha'}, {key:'mesilat'}, {key:'orchot'},
+  {key:'reshit'}, {key:'teshuva'}, {key:'kedusha'}, {key:'mesilat'}, {key:'orchot'}, {key:'peleyoetz'},
 ];
+/* Pele Yoetz's 391 alphabetically-ordered topic entries (Faith, Truth, Love
+   of God, ...) are named units exactly like Reshit Chokhmah's 5 gates, just
+   391 of them instead of 5 - too many for a RESHIT_GATES-style inline
+   per-language table, so their translated names live in chok-musar-cycles.json
+   itself (MCYC.peleyoetz.topics), already lazy-loaded before any musar
+   content renders (ensureMusarCycles/ckMusarReady). */
+function ckPeleYoetzTopicName(topic){
+  const t=(MCYC.peleyoetz&&MCYC.peleyoetz.topics&&MCYC.peleyoetz.topics[topic])||{};
+  return t[S.lang]||t.he||topic;
+}
 /* Mesillat Yesharim is divided into chapters (פרקים), not gates - everything
    else here (Teshuvah, Kedusha, Orchot Tzadikim) is a "Sha'arei"/gates work */
 const MUSAR_UNIT_WORD={mesilat:'chapter'};
@@ -2538,6 +2548,7 @@ function ckMusarSourceLabel(work,idxs){
     if(e.part==='Introduction') gateName=t.intro;
     else if(e.heSection) gateName = (S.lang&&S.lang!=='he') ? unitWord+' '+e.section.replace(/^Gate /,'') : e.heSection;
     else if(work==='reshit') gateName = ckReshitGateName(e.gate);
+    else if(work==='peleyoetz') gateName = ckPeleYoetzTopicName(e.gate);
     else gateName = unitWord+' '+heNum(e.gate);
     const head = (work==='reshit') ? (t[work]+' · '+gateName+' · '+t.chapter+' '+heNum(e.ch)) : (t[work]+' · '+gateName);
     const para = work==='reshit' ? e.p : e.ch;
@@ -2568,7 +2579,7 @@ const CK_PACE_UI={
     langQ:'בְּאֵיזוֹ שָׂפָה תִּרְצֶה לִלְמֹד?',
     changeInSettings:'אֶפְשָׁר לְשַׁנּוֹת בְּכׇל עֵת בַּהֲגָדָּרוֹת', finishBtn:'סַיֵּם וְהַתְחֵל לִלְמֹד',
     approx:'כ-', years:'שָׁנִים', months:'חֳדָשִׁים',
-    musarDesc:{reshit:'5 שְׁעָרִים בְּיִרְאָה, אַהֲבָה, תְּשׁוּבָה, קְדוּשָׁה וְעֲנָוָה', teshuva:'רַבֵּנוּ יוֹנָה עַל דַּרְכֵי הַתְּשׁוּבָה', kedusha:'רַבִּי חַיִּים וִיטָאל, תַּלְמִיד הָאֲרִיזַ״ל', mesilat:'הָרַמְחַ״ל, יְסוֹדוֹת שְׁלֵמוּת הַמִּדּוֹת', orchot:'מוּסָר קְלָאסִי בְּ-28 שְׁעָרִים'}},
+    musarDesc:{reshit:'5 שְׁעָרִים בְּיִרְאָה, אַהֲבָה, תְּשׁוּבָה, קְדוּשָׁה וְעֲנָוָה', teshuva:'רַבֵּנוּ יוֹנָה עַל דַּרְכֵי הַתְּשׁוּבָה', kedusha:'רַבִּי חַיִּים וִיטָאל, תַּלְמִיד הָאֲרִיזַ״ל', mesilat:'הָרַמְחַ״ל, יְסוֹדוֹת שְׁלֵמוּת הַמִּדּוֹת', orchot:'מוּסָר קְלָאסִי בְּ-28 שְׁעָרִים', peleyoetz:'רַבִּי אֱלִיעֶזֶר פַּאפּוֹ, 391 עִנְיָנִים מַעֲשִׂיִּים לְפִי הָאָלֶף־בֵּית'}},
   en:{settingsTitle:'Study Pace',
     halachaQ:'Which Halacha pace suits you?', halachaSub:'Rambam · Mishneh Torah',
     halachaOptADesc:'The traditional pace — one chapter a day, completing the whole Mishneh Torah in three years',
@@ -2583,7 +2594,7 @@ const CK_PACE_UI={
     langQ:'Which language would you like to study in?',
     changeInSettings:'You can change this anytime in Settings', finishBtn:'Finish and start studying',
     approx:'~', years:'years', months:'months',
-    musarDesc:{reshit:'5 gates on fear, love, repentance, holiness and humility', teshuva:'Rabbeinu Yonah on the paths of repentance', kedusha:'Rabbi Chaim Vital, disciple of the Arizal', mesilat:"The Ramchal, foundations of perfecting one's character", orchot:'A classic Musar work in 28 gates'}},
+    musarDesc:{reshit:'5 gates on fear, love, repentance, holiness and humility', teshuva:'Rabbeinu Yonah on the paths of repentance', kedusha:'Rabbi Chaim Vital, disciple of the Arizal', mesilat:"The Ramchal, foundations of perfecting one's character", orchot:'A classic Musar work in 28 gates', peleyoetz:"Rabbi Eliezer Papo's practical ethics, 391 topics A to Z"}},
   fr:{settingsTitle:"Rythme d'étude",
     halachaQ:'Quel rythme de Halacha vous convient ?', halachaSub:'Rambam · Michné Torah',
     halachaOptADesc:'Le rythme traditionnel — un chapitre par jour, achève tout le Michné Torah en trois ans',
@@ -2598,7 +2609,7 @@ const CK_PACE_UI={
     langQ:'Dans quelle langue souhaitez-vous étudier ?',
     changeInSettings:'Vous pouvez changer cela à tout moment dans les Paramètres', finishBtn:"Terminer et commencer à étudier",
     approx:'~', years:'ans', months:'mois',
-    musarDesc:{reshit:'5 portes sur la crainte, l’amour, le repentir, la sainteté et l’humilité', teshuva:'Rabbenou Yona sur les voies du repentir', kedusha:'Rabbi Haïm Vital, disciple de l’Arizal', mesilat:"Le Ramh'al, fondements de la perfection du caractère", orchot:'Un ouvrage de Moussar classique en 28 portes'}},
+    musarDesc:{reshit:'5 portes sur la crainte, l’amour, le repentir, la sainteté et l’humilité', teshuva:'Rabbenou Yona sur les voies du repentir', kedusha:'Rabbi Haïm Vital, disciple de l’Arizal', mesilat:"Le Ramh'al, fondements de la perfection du caractère", orchot:'Un ouvrage de Moussar classique en 28 portes', peleyoetz:"Rabbi Eliezer Papo, éthique pratique en 391 sujets de A à Z"}},
   ru:{settingsTitle:'Темп учёбы',
     halachaQ:'Какой темп изучения Ѓалахи вам подходит?', halachaSub:'Рамбам · Мишне Тора',
     halachaOptADesc:'Традиционный темп — одна глава в день, весь Мишне Тора завершается за три года',
@@ -2613,7 +2624,7 @@ const CK_PACE_UI={
     langQ:'На каком языке вы хотите учиться?',
     changeInSettings:'Это можно изменить в любое время в Настройках', finishBtn:'Завершить и начать учёбу',
     approx:'~', years:'лет', months:'месяцев',
-    musarDesc:{reshit:'5 врат — о страхе, любви, покаянии, святости и смирении', teshuva:'Рабейну Йона о путях покаяния', kedusha:'Рабби Хаим Виталь, ученик Аризаля', mesilat:'Рамхаль, основы совершенствования характера', orchot:'Классический труд по мусару в 28 вратах'}},
+    musarDesc:{reshit:'5 врат — о страхе, любви, покаянии, святости и смирении', teshuva:'Рабейну Йона о путях покаяния', kedusha:'Рабби Хаим Виталь, ученик Аризаля', mesilat:'Рамхаль, основы совершенствования характера', orchot:'Классический труд по мусару в 28 вратах', peleyoetz:'Рабби Элиэзер Папо, практическая этика — 391 тема от А до Я'}},
   ka:{settingsTitle:'სწავლის ტემპი',
     halachaQ:'ჰალახის რომელი ტემპი შეგეფერებათ?', halachaSub:'რამბამი · მიშნე თორა',
     halachaOptADesc:'ტრადიციული ტემპი — ერთი თავი დღეში, მთელი მიშნე თორა სრულდება სამ წელიწადში',
@@ -2628,7 +2639,7 @@ const CK_PACE_UI={
     langQ:'რომელ ენაზე გნებავთ სწავლა?',
     changeInSettings:'ეს ნებისმიერ დროს შეიძლება შეიცვალოს პარამეტრებში', finishBtn:'დასრულება და სწავლის დაწყება',
     approx:'~', years:'წელი', months:'თვე',
-    musarDesc:{reshit:'5 კარიბჭე — შიშზე, სიყვარულზე, მონანიებაზე, სიწმინდესა და სიმდაბლეზე', teshuva:'რაბენუ იონა მონანიების გზებზე', kedusha:'რაბი ხაიმ ვიტალი, არიზალის მოწაფე', mesilat:'რამხალი, ხასიათის სრულყოფის საფუძვლები', orchot:'კლასიკური მუსარის ნაშრომი 28 კარიბჭეში'}},
+    musarDesc:{reshit:'5 კარიბჭე — შიშზე, სიყვარულზე, მონანიებაზე, სიწმინდესა და სიმდაბლეზე', teshuva:'რაბენუ იონა მონანიების გზებზე', kedusha:'რაბი ხაიმ ვიტალი, არიზალის მოწაფე', mesilat:'რამხალი, ხასიათის სრულყოფის საფუძვლები', orchot:'კლასიკური მუსარის ნაშრომი 28 კარიბჭეში', peleyoetz:'რაბი ელიეზერ პაპო, პრაქტიკული ეთიკა — 391 თემა ანბანის მიხედვით'}},
 };
 function ckPaceUI(){ return CK_PACE_UI[S.lang]||CK_PACE_UI.he; }
 function ckMusarCycleDays(work){ return Math.ceil(MCYC[work].order.length/3); }
