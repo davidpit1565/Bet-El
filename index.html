@@ -2432,10 +2432,19 @@ function ckRambamName(book){
   return ckChrome(he);
 }
 function ckRambamLabel(idxs){
-  return idxs.map(i=>{
+  /* Consecutive chapters on the 3-a-day track often share the same book -
+     group those under one head and range the chapter numbers, instead of
+     repeating the book name per chapter (see ckMusarSourceLabel for the
+     same fix on the Musar side). */
+  const groups=[];
+  idxs.forEach(i=>{
     const e=CYC.rambam.order[i];
-    return ckRambamName(e.book)+' · '+ckChrome('פֶּרֶק')+' '+heNum(e.ch);
-  }).join('  ·  ');
+    const book=ckRambamName(e.book);
+    const last=groups[groups.length-1];
+    if(last && last.book===book) last.chs.push(e.ch);
+    else groups.push({book, chs:[e.ch]});
+  });
+  return groups.map(g=>g.book+' · '+ckChrome('פֶּרֶק')+' '+ckRange(g.chs[0], g.chs[g.chs.length-1])).join('  ·  ');
 }
 
 /* ---------- extra Musar works (Sha'arei Teshuvah, Sha'arei Kedusha, ...) ----------
