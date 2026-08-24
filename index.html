@@ -1035,6 +1035,15 @@ window.PRAYERS = {
   (*! @hebcal/hdate v0.22.5, distributed under GPLv2 https://www.gnu.org/licenses/gpl-2.0.txt *)
 */
 </script>
+<!-- Vendored (not bundled - this app has no JS build step) UMD builds of
+     @capacitor/core and @capacitor/local-notifications, copied straight
+     from node_modules/*/dist. They register the native LocalNotifications
+     plugin used by fireNotif()/notifRequestPermission() below when running
+     inside the iOS/Android app shells, and are harmless no-op web fallbacks
+     in a plain browser (PWA/GitHub Pages/Vercel). Re-copy them if either
+     package is upgraded. -->
+<script src="capacitor-core.js"></script>
+<script src="capacitor-local-notifications.js"></script>
 <script>/* ================= BET EL · TEHILLIM · APP ================= */
 (function(){
 'use strict';
@@ -4086,7 +4095,7 @@ function chokMissedSlots(){
 /* Fires while the app is open; this is a static site with no push server, so
    the make-up card on the list screen stays the reliable path. */
 function chokCheckReminders(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(!notifReady()) return;
   const now=new Date(), todayStr=now.toISOString().slice(0,10);
   /* Thursday after sunset: the sixth Hebrew day has begun, so the night portion is due */
   if(now.getDay()===4 && localStorage.getItem('betel_chok_night_notif')!==todayStr){
@@ -4097,7 +4106,7 @@ function chokCheckReminders(){
       const key=ckWeekKeyFor(now);
       if(key && !chokIsDone(key,'night')){
         const t=ckNotifText();
-        try{ new Notification(t.chokTitle,{body:t.nightBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+        fireNotif(t.chokTitle,t.nightBody,ckNotifDir(),S.lang||'he');
       }
     }
   }
@@ -4110,7 +4119,7 @@ function chokCheckReminders(){
       if(t && !chokIsDone(t.key,t.day)){
         localStorage.setItem('betel_chok_morning_notif',todayStr);
         const tx=ckNotifText();
-        try{ new Notification(tx.chokTitle,{body:tx.chokMorningBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+        fireNotif(tx.chokTitle,tx.chokMorningBody,ckNotifDir(),S.lang||'he');
       }
     }
   }
@@ -4124,7 +4133,7 @@ function chokCheckReminders(){
       if(cd && !zoharDone().includes(cd)){
         localStorage.setItem('betel_zohar_morning_notif',todayStr);
         const tx=ckNotifText();
-        try{ new Notification(tx.tikkuneiTitle,{body:tx.tikkuneiBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+        fireNotif(tx.tikkuneiTitle,tx.tikkuneiBody,ckNotifDir(),S.lang||'he');
       }
     }
   }
@@ -4137,7 +4146,7 @@ function chokCheckReminders(){
       if(key && !smIsDone(key)){
         localStorage.setItem('betel_sm_morning_notif',todayStr);
         const tx=ckNotifText();
-        try{ new Notification(tx.smTitle,{body:tx.smBody,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+        fireNotif(tx.smTitle,tx.smBody,ckNotifDir(),S.lang||'he');
       }
     }
   }
@@ -4146,11 +4155,7 @@ function chokCheckReminders(){
   if(miss.length && localStorage.getItem('betel_chok_makeup_notif')!==todayStr){
     localStorage.setItem('betel_chok_makeup_notif',todayStr);
     const t=ckNotifText();
-    try{
-      new Notification(t.chokTitle,{
-        body:t.makeupPrefix+miss.map(m=>m.label).join(t.makeupJoin)+t.makeupSuffix,
-        dir:ckNotifDir(),lang:S.lang||'he'});
-    }catch(e){}
+    fireNotif(t.chokTitle,t.makeupPrefix+miss.map(m=>m.label).join(t.makeupJoin)+t.makeupSuffix,ckNotifDir(),S.lang||'he');
   }
 }
 
@@ -4165,11 +4170,11 @@ const CK_ANNOUNCE={
   ka:{title:'ხოყ ლეისრაელ', body:'სრული ყოველდღიური სწავლა ახლა მთავარ გვერდზეა'},
 };
 function announceChokFeature(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(!notifReady()) return;
   if(localStorage.getItem('betel_announce_chok_v1')==='1') return;
   localStorage.setItem('betel_announce_chok_v1','1');
   const t=CK_ANNOUNCE[S.lang]||CK_ANNOUNCE.he;
-  try{ new Notification(t.title,{body:t.body,dir:S.lang==='he'||!S.lang?'rtl':'ltr',lang:S.lang||'he'}); }catch(e){}
+  fireNotif(t.title,t.body,S.lang==='he'||!S.lang?'rtl':'ltr',S.lang||'he');
 }
 /* Ben Ish Chai's own one-time announcement, same pattern as
    announceChokFeature - but held back until 48h after this feature
@@ -4185,12 +4190,12 @@ const BIC_ANNOUNCE={
 };
 const BIC_ANNOUNCE_EARLIEST=Date.parse('2026-08-25T00:00:00Z');
 function announceBenishchaiFeature(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(!notifReady()) return;
   if(localStorage.getItem('betel_announce_benishchai_v1')==='1') return;
   if(Date.now()<BIC_ANNOUNCE_EARLIEST) return;
   localStorage.setItem('betel_announce_benishchai_v1','1');
   const t=BIC_ANNOUNCE[S.lang]||BIC_ANNOUNCE.he;
-  try{ new Notification(t.title,{body:t.body,dir:S.lang==='he'||!S.lang?'rtl':'ltr',lang:S.lang||'he'}); }catch(e){}
+  fireNotif(t.title,t.body,S.lang==='he'||!S.lang?'rtl':'ltr',S.lang||'he');
 }
 /* every local notification's fixed text, in one place, so none of them
    stays Hebrew-only by omission. The Friday-night line never names or
@@ -4241,6 +4246,44 @@ const CK_NOTIF={
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
 function ckNotifDir(){ return (S.lang&&S.lang!=='he')?'ltr':'rtl'; }
+/* Local notification abstraction: the plain Web Notification API works for
+   the PWA/desktop-web build, but inside the native iOS/Android app shells
+   (Capacitor) it isn't reliable for a scheduled daily reminder - Android
+   13+ in particular needs the native @capacitor/local-notifications
+   plugin and its own runtime permission. This app has no JS bundler (one
+   inline <script>), so the plugin can't be `import`ed - capacitor-core.js
+   and capacitor-local-notifications.js are the official UMD builds
+   straight from node_modules, loaded via plain <script> tags before this
+   file (same pattern Capacitor's own no-framework starter uses), which
+   also work harmlessly as a no-op set of web fallbacks in a plain
+   browser. */
+function notifLocalPlugin(){
+  return (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) || null;
+}
+let NOTIF_NATIVE_GRANTED=false;
+async function notifRequestPermission(){
+  const ln=notifLocalPlugin();
+  if(ln){
+    try{ const p=await ln.requestPermissions(); NOTIF_NATIVE_GRANTED=(p.display==='granted'); return NOTIF_NATIVE_GRANTED; }
+    catch(e){ return false; }
+  }
+  if(typeof Notification==='undefined') return false;
+  try{ const p=await Notification.requestPermission(); return p==='granted'; }catch(e){ return false; }
+}
+function notifPermGranted(){
+  if(notifLocalPlugin()) return NOTIF_NATIVE_GRANTED;
+  return typeof Notification!=='undefined' && Notification.permission==='granted';
+}
+function notifReady(){ return S.notifEnabled && notifPermGranted(); }
+let NOTIF_ID_SEQ=1;
+function fireNotif(title,body,dir,lang){
+  const ln=notifLocalPlugin();
+  if(ln){
+    try{ ln.schedule({notifications:[{id:(NOTIF_ID_SEQ++)%2147483647||1, title, body, schedule:{at:new Date(Date.now()+300)}}]}); }catch(e){}
+    return;
+  }
+  try{ new Notification(title,{body,dir,lang}); }catch(e){}
+}
 
 function render(){
   stopAutoScroll();
@@ -5459,7 +5502,7 @@ function renderZoharReader(){
 /* ================= SETTINGS ================= */
 function renderSettings(){
   if(!MCYC) ensureMusarCycles().then(()=>{ if(TAB==='settings') renderSettings(); });
-  const notifPerm=(typeof Notification!=='undefined')?Notification.permission:'denied';
+  const notifPerm=notifPermGranted()?'granted':'denied';
   app.innerHTML=`
   ${topbar('הַגְדָּרוֹת')}
   <div class="view">
@@ -5605,12 +5648,12 @@ function renderSettings(){
   // notification
   const tgn=document.getElementById('tgNotif');
   if(tgn) tgn.onclick=async()=>{
-    const currentlyOn = S.notifEnabled && notifPerm==='granted';
+    const currentlyOn = S.notifEnabled && notifPermGranted();
     if(!currentlyOn){
-      if(typeof Notification==='undefined'){ toast('הדפדפן אינו תומך בהתראות'); return; }
-      const p=await Notification.requestPermission();
-      S.notifEnabled=(p==='granted'); saveS(); renderSettings();
-      toast(p==='granted'?'הוֹדָעוֹת הֻפְעֲלוּ':'לֹא נִתְּנָה הַרְשָׁאָה');
+      if(!notifLocalPlugin() && typeof Notification==='undefined'){ toast('הדפדפן אינו תומך בהתראות'); return; }
+      const granted=await notifRequestPermission();
+      S.notifEnabled=granted; saveS(); renderSettings();
+      toast(granted?'הוֹדָעוֹת הֻפְעֲלוּ':'לֹא נִתְּנָה הַרְשָׁאָה');
     } else { S.notifEnabled=false; saveS(); renderSettings(); toast('הוֹדָעוֹת כֻּבּוּ'); }
   };
   tr(app);
@@ -5780,9 +5823,7 @@ function celebrateMilestone(count, tier){
   document.body.appendChild(ov);
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
-  if(S.notifEnabled && typeof Notification!=='undefined' && Notification.permission==='granted'){
-    try{ new Notification(title,{body,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
-  }
+  if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
 }
 /* the highest hundred-tier (200,300,400,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
@@ -5910,7 +5951,7 @@ render();
   window.addEventListener('scroll', raf, {passive:true});
 })();
 function checkNotification(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(!notifReady()) return;
   const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
   if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
   const todayStr=now.toISOString().slice(0,10);
@@ -5921,7 +5962,7 @@ function checkNotification(){
     if(left<=0) return;
     localStorage.setItem('betel_notif_sent',todayStr);
     const t=ckNotifText();
-    new Notification(t.tehTitle,{body:t.tehBody+left+t.tehSuffix,dir:ckNotifDir(),lang:S.lang||'he'});
+    fireNotif(t.tehTitle,t.tehBody+left+t.tehSuffix,ckNotifDir(),S.lang||'he');
   }catch(e){}
 }
 /* Daily Ben Ish Chai reminder, same gating (S.notifEnabled/S.notifTime) and
@@ -5931,7 +5972,7 @@ function checkNotification(){
    one is async, only marking betel_bic_notif_sent (and actually notifying)
    once that data resolves and a real parasha name is found. */
 function checkBicNotification(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(!notifReady()) return;
   const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
   if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
   const todayStr=now.toISOString().slice(0,10);
@@ -5943,7 +5984,7 @@ function checkBicNotification(){
     if(!p) return;
     localStorage.setItem('betel_bic_notif_sent',todayStr);
     const t=ckNotifText();
-    try{ new Notification(t.bicTitle,{body:t.bicBody+p.he,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+    fireNotif(t.bicTitle,t.bicBody+p.he,ckNotifDir(),S.lang||'he');
   }).catch(()=>{});
 }
 /* Daily Musar reminder, same gating/once-per-day pattern as
@@ -5951,7 +5992,7 @@ function checkBicNotification(){
    cycles data) to confirm the user's chosen work actually has data before
    naming it, and its own flag so it doesn't collide with the others. */
 function checkMusarNotification(){
-  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  if(!notifReady()) return;
   const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
   if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
   const todayStr=now.toISOString().slice(0,10);
@@ -5961,7 +6002,7 @@ function checkMusarNotification(){
     if(!MCYC||!MCYC[work]) return;
     localStorage.setItem('betel_musar_notif_sent',todayStr);
     const t=ckNotifText();
-    try{ new Notification(t.musarTitle,{body:t.musarBody+ckMusarUI()[work],dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+    fireNotif(t.musarTitle,t.musarBody+ckMusarUI()[work],ckNotifDir(),S.lang||'he');
   }).catch(()=>{});
 }
 try{checkNotification();}catch(e){}
