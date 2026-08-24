@@ -61,6 +61,8 @@ const steps = [
   ['shnayim mikra', () => document.getElementById('homeParshaCard')?.click()],
   ['home for tehillim daily', () => window.go('home')],
   ['tehillim daily reading', () => document.getElementById('homeTehillimCard')?.click()],
+  ['home for ben ish chai', () => window.go('home')],
+  ['ben ish chai open', () => document.getElementById('homeBicCard')?.click()],
 ];
 
 for (const [label, fn] of steps) {
@@ -76,9 +78,12 @@ console.log('sw registered:', await p.evaluate(async () => (await navigator.serv
 // A brand-new user (only betel_onboard_v1 set, no betel_chok_pace_v1) hits
 // the first-open pace wizard instead of going straight to chokList - its own
 // context, since the main steps above pre-skip that wizard entirely. This
-// caught a real bug once: an unguarded ensureBicIndex().then(rerender) on
-// the Halacha step re-triggered itself every render, hanging the page in an
-// infinite microtask loop the moment a fresh user reached that screen.
+// caught a real bug once (when the Halacha step still offered Ben Ish Chai
+// as one of its options): an unguarded ensureBicIndex().then(rerender) on
+// that step re-triggered itself every render, hanging the page in an
+// infinite microtask loop the moment a fresh user reached that screen. Kept
+// as a general fresh-user-wizard smoke test now that Ben Ish Chai is its
+// own standalone reader, not a Halacha-step option.
 const ctx2 = await b.newContext({ viewport: { width: 390, height: 844 } });
 await ctx2.addInitScript(() => localStorage.setItem('betel_onboard_v1', '1'));
 const p2 = await ctx2.newPage();
@@ -98,7 +103,7 @@ try {
     timeout,
   ]);
   console.log('ok: fresh-user pace wizard halacha step (' + halachaOpts + ' options)');
-  if (halachaOpts < 4) errs.push('WIZARD: expected 4 halacha options, got ' + halachaOpts);
+  if (halachaOpts < 2) errs.push('WIZARD: expected 2 halacha options, got ' + halachaOpts);
 } catch (e) {
   errs.push('WIZARD halacha step hung or errored: ' + e.message);
 }
