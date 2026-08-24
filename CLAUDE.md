@@ -42,10 +42,18 @@ in English as usual.
   today's `ckMusarSourceLabel()` (with the book-name prefix stripped
   since the row's own title already shows it) and a "today" button
   (`openMusarYomi(work)` → `renderMusarYomiReader()`, `TAB==='musarYomi'`)
-  that jumps straight to that work's reading for the current date - no
-  separate position to track beyond which work is open, since
-  `ckMusarIndexes`/`ensureMusarDay` are already purely date-driven
-  (cycle forever, same mechanism the Chok LeYisrael musar section uses).
+  that jumps straight to that work's reading for the current date. Unlike
+  the Chok LeYisrael musar section (purely date-driven, no position to
+  track beyond which work is open), this standalone reader also lets you
+  browse anywhere in the book: `MUSAR_YOMI_START` is an explicit override
+  order-index (`null` = follow today's date via `ckMusarIndexes`) stepped
+  ±3 by the prev/next-day arrows, or jumped directly via a `<select>` of
+  every gate/chapter/topic from `musarSections(work)` (the same
+  head-grouping logic as `ckMusarSourceLabel`, run over the work's whole
+  `order` instead of just today's 3 indices) - mirroring the Ben Ish Chai
+  reader's parasha picker, since browsing to an arbitrary section doesn't
+  need to fetch the same "3 units" block set date-navigation always has
+  ready, so it ensures its own block(s) before rendering.
 - Ben Ish Chai is its **own standalone section** - a home-screen card
   (`homeBicCard`) and reader (`renderBicReader()`, `TAB==='bicReader'`,
   opened via `openBic(parashaKey,day)`), independent of Chok LeYisrael and

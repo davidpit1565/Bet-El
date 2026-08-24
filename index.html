@@ -924,7 +924,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
 .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
 .q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
-.q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(196,142,58,.26),var(--panel) 60%)}
+.q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(56,163,165,.24),var(--panel) 60%)}
 </style>
 </head>
 <body>
@@ -2138,8 +2138,8 @@ function renderMusarList(){
   app.querySelectorAll('.prayer-row[data-musarwork]').forEach(r=>r.onclick=()=>openMusarYomi(r.dataset.musarwork));
   app.querySelectorAll('[data-musarday]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openMusarYomi(b.dataset.musarday); });
 }
-let MUSAR_YOMI_WORK=null;
-function openMusarYomi(work){ MUSAR_YOMI_WORK=work; go('musarYomi'); }
+let MUSAR_YOMI_WORK=null, MUSAR_YOMI_START=null;
+function openMusarYomi(work){ MUSAR_YOMI_WORK=work; MUSAR_YOMI_START=null; go('musarYomi'); }
 function renderMusarYomiReader(){
   const work=MUSAR_YOMI_WORK||'reshit';
   const t=ckMusarUI();
@@ -2148,10 +2148,26 @@ function renderMusarYomiReader(){
     ensureMusarDay(work,null).then(()=>{ if(TAB==='musarYomi') renderMusarYomiReader(); });
     return;
   }
-  const idxs=ckMusarIndexes(work,null);
+  const n=MCYC[work].order.length;
+  const todayIdxs=ckMusarIndexes(work,null);
+  const isToday=MUSAR_YOMI_START==null;
+  const start=isToday?todayIdxs[0]:MUSAR_YOMI_START;
+  const idxs=[start,(start+1)%n,(start+2)%n];
+  /* browsing to an arbitrary unit doesn't need its data block loaded ahead
+     of time the way the date-driven "today" does - ensureMusarDay(work,null)
+     above only guarantees today's block, so a manually-picked section must
+     ensure its own block before rendering. */
+  const need=idxs.filter(i=>!MCYC_BLOCK[work+'/'+ckMusarBlockOf(i)]);
+  if(need.length){
+    app.innerHTML=`${topbar(t[work]||'מוּסָר','musarList')}<div class="view">${smSkeleton()}</div>`;
+    Promise.all(idxs.map(i=>ensureMusarBlock(work,ckMusarBlockOf(i)))).then(()=>{ if(TAB==='musarYomi') renderMusarYomiReader(); });
+    return;
+  }
   const items=[]; idxs.forEach(i=>items.push(...ckMusarSegs(work,i)));
   const body=items.map(it=>`<div class="sm-verse-row ck-nonum"><div class="sm-he">${it}</div>${ckCommBar('','musar')}</div>`).join('');
   const srcLine=ckMusarSourceLabel(work,idxs);
+  const sections=musarSections(work);
+  const curSec=sections.reduce((best,s)=>s.startIndex<=start?s:best, sections[0]);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -2159,12 +2175,24 @@ function renderMusarYomiReader(){
         <button class="icon-btn" id="myBack">${I.prev}</button>
         <div class="reader-title">${t[work]}</div>
       </div>
+      <div class="ck-daynav-wrap">
+        <button class="sm-aliyah-chip ck-arrow" id="myPrev" aria-label="${ckBicUI().prevDay}">${I.prev}</button>
+        <select class="fld-select" id="mySecPick" style="max-width:220px">
+          ${sections.map(s=>`<option value="${s.startIndex}" ${s===curSec?'selected':''}>${s.head}</option>`).join('')}
+        </select>
+        <button class="sm-aliyah-chip ck-arrow" id="myNext" aria-label="${ckBicUI().nextDay}">${I.next}</button>
+      </div>
+      ${!isToday?`<div class="sm-aliyah-tag">לֹא הַיּוֹם הַנּוֹכְחִי · <button class="ck-track-btn" id="myToday" style="display:inline;padding:2px 10px">${ckMusarUI().today}</button></div>`:''}
       ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
     </div>
     <div class="sm-verses notranslate">${body}</div>
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('myBack').onclick=()=>go('musarList');
+  document.getElementById('myPrev').onclick=()=>{ MUSAR_YOMI_START=(start-3+n)%n; renderMusarYomiReader(); forceScrollTop(); };
+  document.getElementById('myNext').onclick=()=>{ MUSAR_YOMI_START=(start+3)%n; renderMusarYomiReader(); forceScrollTop(); };
+  const pick=document.getElementById('mySecPick'); if(pick) pick.onchange=()=>{ MUSAR_YOMI_START=+pick.value; renderMusarYomiReader(); forceScrollTop(); };
+  const tb=document.getElementById('myToday'); if(tb) tb.onclick=()=>{ MUSAR_YOMI_START=null; renderMusarYomiReader(); forceScrollTop(); };
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
@@ -2779,6 +2807,30 @@ function ckMusarSourceLabel(work,idxs){
     else groups.push({head, paras:[para]});
   });
   return t[work]+' · '+groups.map(g=>g.head+' · '+t.para+' '+ckRange(g.paras[0], g.paras[g.paras.length-1])).join('  ·  ');
+}
+/* The list of jump-to targets for musarSections() below, one entry per
+   gate/chapter/topic (same head-grouping logic as ckMusarSourceLabel, just
+   run over the work's whole order instead of just today's 3 indices) -
+   lets the standalone Musar reader jump straight to any unit, the same way
+   the Ben Ish Chai reader's parasha picker does, instead of only stepping
+   one day (3 paragraphs) at a time. */
+function musarSections(work){
+  const cfg=MCYC&&MCYC[work]; if(!cfg) return [];
+  const t=ckMusarUI(), unitWord=t[MUSAR_UNIT_WORD[work]||'gate'];
+  const sections=[];
+  cfg.order.forEach((e,i)=>{
+    let gateName;
+    if(e.part==='Introduction') gateName=t.intro;
+    else if(e.heSection) gateName = (S.lang&&S.lang!=='he') ? unitWord+' '+e.section.replace(/^Gate /,'') : e.heSection;
+    else if(work==='reshit') gateName = ckReshitGateName(e.gate);
+    else if(work==='peleyoetz') gateName = ckPeleYoetzTopicName(e.gate);
+    else gateName = unitWord+' '+heNum(e.gate);
+    const head = (work==='reshit') ? (gateName+' · '+t.chapter+' '+heNum(e.ch)) : gateName;
+    const last=sections[sections.length-1];
+    if(last && last.head===head) return;
+    sections.push({head, startIndex:i});
+  });
+  return sections;
 }
 
 /* ---------- Chok LeYisrael first-open pace questions ----------
