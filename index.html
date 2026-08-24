@@ -1850,15 +1850,42 @@ function bicNearestAvailableKey(track,targetKey){
   }
   return list[0].key;
 }
-function bicDayForToday(){ return CHOK_DAYS[Math.min(new Date().getDay(),5)]; }
-function bicItemsForDay(track,parashaKey,day){
+/* The original Ben Ish Chai app (the source this section is modeled on)
+   never split a parasha's halachot into study days - it's one flat,
+   sequentially-numbered list per parasha (intro first, if any, then every
+   halacha in source order), paged one at a time with an "X out of N"
+   counter and per-halacha completion tracking. The day[][] split in our
+   data files is purely our own data-prep pacing device (see the comment
+   above ensureBicWeek) - days[0..5] concatenated in order reconstructs
+   that exact original flat sequence, so no separate "flat" data files
+   were needed. */
+function bicFlatItems(track,parashaKey){
   const idx=BIC_INDEX&&BIC_INDEX[track]; if(!idx) return [];
   const unit=idx.unitOf[parashaKey]; if(!unit) return [];
-  const wk=BIC_WEEK[track+'/'+unit]; if(!wk||!wk.days) return [];
-  const dayIdx=CHOK_DAYS.indexOf(day);
-  if(dayIdx<0||!wk.days[dayIdx]) return [];
-  return wk.days[dayIdx].map((h,ii)=>({...h,unit,parasha_he:wk.parasha_he,dayIdx,itemIdx:ii}));
+  const wk=BIC_WEEK[track+'/'+unit]; if(!wk) return [];
+  const items=[];
+  if(wk.intro&&wk.intro.length) items.push({type:'intro', paragraphs:wk.intro, unit});
+  (wk.days||[]).forEach((day,dayIdx)=>{
+    day.forEach((h,itemIdx)=>{ items.push({...h, type:'halacha', unit, dayIdx, itemIdx}); });
+  });
+  return items;
 }
+/* Per-halacha completion, keyed by track+parasha+flat position - shown as
+   the "X מתוך N" progress bar on the year1/year2 cards, same spirit as the
+   original app's own per-parasha progress tracking. */
+let BIC_DONE=null;
+function bicLoadDone(){ if(!BIC_DONE){ try{ BIC_DONE=JSON.parse(localStorage.getItem('betel_bic_done')||'{}'); }catch(e){ BIC_DONE={}; } } return BIC_DONE; }
+function bicSaveDone(){ localStorage.setItem('betel_bic_done', JSON.stringify(BIC_DONE||{})); }
+function bicDoneKey(track,parashaKey){ return track+'/'+parashaKey; }
+function bicDoneSet(track,parashaKey){ const d=bicLoadDone(); return d[bicDoneKey(track,parashaKey)]||[]; }
+function bicIsDone(track,parashaKey,pos){ return bicDoneSet(track,parashaKey).includes(pos); }
+function bicToggleDone(track,parashaKey,pos){
+  const d=bicLoadDone(), k=bicDoneKey(track,parashaKey);
+  const set=new Set(d[k]||[]);
+  if(set.has(pos)) set.delete(pos); else set.add(pos);
+  d[k]=[...set]; bicSaveDone();
+}
+function bicProgress(track,parashaKey,total){ return {done:bicDoneSet(track,parashaKey).length, total}; }
 function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
     .then(()=>ensureCycDay(ckViewHDate()))
@@ -2631,20 +2658,25 @@ function ckRambamLabel(idxs){
    string elsewhere in the app. */
 const BIC_UI={
   he:{title:'בֶּן אִישׁ חַי', year1:'שָׁנָה א׳', year2:'שָׁנָה ב׳', halacha:'הֲלָכָה', biur:'בֵּיאוּר', noBiur:'אֵין בֵּיאוּר לַהֲלָכָה הַזֹּאת',
-    noDay:'אֵין הֲלָכוֹת לְיוֹם זֶה', prevParasha:'הַפָּרָשָׁה הַקּוֹדֶמֶת', nextParasha:'הַפָּרָשָׁה הַבָּאָה',
-    notThisWeek:'לֹא פָּרָשַׁת הַשָּׁבוּעַ הַנּוֹכְחִי', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא'},
+    prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', prevHalacha:'הַהֲלָכָה הַקּוֹדֶמֶת', nextHalacha:'הַהֲלָכָה הַבָּאָה',
+    intro:'פְּתִיחָה', introChip:'פ׳', outOf:'מִתּוֹךְ', halachot:'הֲלָכוֹת', startLearning:'הַתְחֵל לִלְמֹד', continueLearning:'הַמְשֵׁךְ לִלְמֹד',
+    yourProgress:'הַהִתְקַדְּמוּת שֶׁלְּךָ', weekParasha:'פָּרָשַׁת הַשָּׁבוּעַ', weekTab:'הַשָּׁבוּעַ', allParshiotTab:'כׇּל הַפָּרָשִׁיּוֹת', markDone:'סַמֵּן כְּהוּשְׁלַם'},
   en:{title:'Ben Ish Chai', year1:'Year 1', year2:'Year 2', halacha:'Halacha', biur:'Explanation', noBiur:'No explanation for this halacha',
-    noDay:'No halachot for this day', prevParasha:'Previous parasha', nextParasha:'Next parasha',
-    notThisWeek:"Not this week's parasha", prevDay:'Previous day', nextDay:'Next day'},
+    prevDay:'Previous day', nextDay:'Next day', prevHalacha:'Previous halacha', nextHalacha:'Next halacha',
+    intro:'Introduction', introChip:'I', outOf:'of', halachot:'halachot', startLearning:'Start learning', continueLearning:'Continue learning',
+    yourProgress:'Your progress', weekParasha:"This week's parasha", weekTab:'This week', allParshiotTab:'All parshiot', markDone:'Mark complete'},
   fr:{title:"Ben Ish 'Haï", year1:'Année 1', year2:'Année 2', halacha:'Halakha', biur:'Explication', noBiur:'Aucune explication pour cette halakha',
-    noDay:'Aucune halakha pour ce jour', prevParasha:'Paracha précédente', nextParasha:'Paracha suivante',
-    notThisWeek:"Pas la paracha de cette semaine", prevDay:'Jour précédent', nextDay:'Jour suivant'},
+    prevDay:'Jour précédent', nextDay:'Jour suivant', prevHalacha:'Halakha précédente', nextHalacha:'Halakha suivante',
+    intro:'Introduction', introChip:'I', outOf:'sur', halachot:'halakhot', startLearning:"Commencer à étudier", continueLearning:"Continuer l'étude",
+    yourProgress:'Votre progression', weekParasha:'Paracha de la semaine', weekTab:'Cette semaine', allParshiotTab:'Toutes les parachiot', markDone:'Marquer comme terminé'},
   ru:{title:'Бен Иш Хай', year1:'Год 1', year2:'Год 2', halacha:'Ѓалаха', biur:'Разъяснение', noBiur:'Нет разъяснения к этой Ѓалахе',
-    noDay:'Нет ѓалахот на этот день', prevParasha:'Предыдущая глава', nextParasha:'Следующая глава',
-    notThisWeek:'Не глава этой недели', prevDay:'Предыдущий день', nextDay:'Следующий день'},
+    prevDay:'Предыдущий день', nextDay:'Следующий день', prevHalacha:'Предыдущая Ѓалаха', nextHalacha:'Следующая Ѓалаха',
+    intro:'Введение', introChip:'В', outOf:'из', halachot:'Ѓалахот', startLearning:'Начать изучение', continueLearning:'Продолжить изучение',
+    yourProgress:'Ваш прогресс', weekParasha:'Недельная глава', weekTab:'На этой неделе', allParshiotTab:'Все главы', markDone:'Отметить как выполненное'},
   ka:{title:'ბენ იშ ხაი', year1:'პირველი წელი', year2:'მეორე წელი', halacha:'ალახა', biur:'განმარტება', noBiur:'ამ ალახაზე განმარტება არ არის',
-    noDay:'ამ დღისთვის ალახა არ არის', prevParasha:'წინა პარაშა', nextParasha:'შემდეგი პარაშა',
-    notThisWeek:'არ არის ამ კვირის პარაშა', prevDay:'წინა დღე', nextDay:'შემდეგი დღე'},
+    prevDay:'წინა დღე', nextDay:'შემდეგი დღე', prevHalacha:'წინა ალახა', nextHalacha:'შემდეგი ალახა',
+    intro:'შესავალი', introChip:'შ', outOf:'დან', halachot:'ალახები', startLearning:'დაწყება სწავლის', continueLearning:'სწავლის გაგრძელება',
+    yourProgress:'თქვენი პროგრესი', weekParasha:'ამ კვირის პარაშა', weekTab:'ამ კვირას', allParshiotTab:'ყველა პარაშა', markDone:'დასრულებულად მონიშვნა'},
 };
 function ckBicUI(){ return BIC_UI[S.lang]||BIC_UI.he; }
 /* the biur (plain-language explanation) shown per halacha, same expand/
@@ -3610,86 +3642,184 @@ function openChok(key,day,year){
 }
 
 /* ---------- Ben Ish Chai (standalone) ---------- */
-let BIC={parasha:null, day:null};
-function openBic(parashaKey,day){
-  BIC={parasha:parashaKey||null, day:day||null};
+/* Home ("this week") + all-parshiot list + the flat per-halacha reader -
+   mirrors the original standalone Ben Ish Chai app's own structure (a
+   this-week screen with two year progress cards, an all-parshiot list,
+   and a flat one-halacha-at-a-time reader with its own completion
+   tracking) rather than reusing Chok LeYisrael's day-based reader shape. */
+function openBic(){ go('bicHome'); }
+let BIC_PARSHIOT_TRACK='year1';
+function bicMiniTabs(active){
+  const t=ckBicUI();
+  return `<div class="ck-track">
+    <button class="ck-track-btn ${active==='week'?'on':''}" data-bictab="week">${t.weekTab}</button>
+    <button class="ck-track-btn ${active==='parshiot'?'on':''}" data-bictab="parshiot">${t.allParshiotTab}</button>
+  </div>`;
+}
+function wireBicMiniTabs(active){
+  document.querySelectorAll('[data-bictab]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.bictab===active) return;
+    go(b.dataset.bictab==='week'?'bicHome':'bicParshiot');
+  });
+}
+function renderBicHome(){
+  stopAutoScroll();
+  if(!BIC_INDEX){
+    app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view">${smSkeleton()}</div>`;
+    ensureBicIndex().then(()=>{ if(TAB==='bicHome') renderBicHome(); });
+    return;
+  }
+  const t=ckBicUI(), weekKey=currentParshaKey();
+  const cards=['year1','year2'].map(track=>{
+    const key=bicNearestAvailableKey(track,weekKey);
+    const p=bicParshiot(track).find(x=>x.key===key);
+    if(!p) return '';
+    const unitKey=track+'/'+(BIC_INDEX[track].unitOf[key]||'');
+    const total=BIC_WEEK[unitKey]?bicFlatItems(track,key).length:p.n;
+    const prog=bicProgress(track,key,total);
+    const pct=total?Math.round(100*prog.done/total):0;
+    return `<div class="sm-week-card" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
+      <div class="sm-week-text">
+        <div class="sm-week-tag">${t[track]} · ${heNum(p.n)} ${t.halachot}</div>
+        <div class="sm-week-name">${p.he}</div>
+      </div>
+      <div>
+        <div class="qd" style="margin-bottom:4px">${t.yourProgress} · ${heNum(prog.done)} ${t.outOf} ${heNum(total)}</div>
+        <div class="reader-progress"><i style="width:${pct}%"></i></div>
+      </div>
+      <button class="btn btn-gold" data-bicstart="${track}" data-bicparasha="${key}">${prog.done?t.continueLearning:t.startLearning} ${I.chev}</button>
+    </div>`;
+  }).join('');
+  app.innerHTML=`${topbar(t.title,'home')}
+  <div class="view">
+    ${bicMiniTabs('week')}
+    <div class="sm-week-card" style="cursor:default">
+      <div class="sm-week-text">
+        <div class="sm-week-tag">${t.weekParasha}</div>
+        <div class="sm-week-name">${parshaName(weekKey)}</div>
+      </div>
+    </div>
+    ${cards}
+    ${ornament()}
+  </div>`;
+  wireBicMiniTabs('week');
+  app.querySelectorAll('[data-bicstart]').forEach(b=>b.onclick=()=>{
+    ensureBicWeek(b.dataset.bicstart,[b.dataset.bicparasha]).then(()=>{
+      if(TAB!=='bicHome') return;
+      openBicReader(b.dataset.bicstart,b.dataset.bicparasha);
+    });
+  });
+}
+function renderBicParshiot(){
+  stopAutoScroll();
+  if(!BIC_INDEX){
+    app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view">${smSkeleton()}</div>`;
+    ensureBicIndex().then(()=>{ if(TAB==='bicParshiot') renderBicParshiot(); });
+    return;
+  }
+  const t=ckBicUI(), track=BIC_PARSHIOT_TRACK;
+  const rows=bicParshiot(track).map(p=>{
+    const done=bicDoneSet(track,p.key).length;
+    return `<div class="prayer-row" data-bicopen="${p.key}">
+      <div><div class="prayer-row-title">${p.he}</div><div class="qd">${heNum(p.n)} ${t.halachot}${done?' · '+heNum(done)+' '+t.outOf+' '+heNum(p.n):''}</div></div>
+      <span class="sm-week-chev">${I.chev}</span>
+    </div>`;
+  }).join('');
+  app.innerHTML=`${topbar(t.title,'home')}
+  <div class="view">
+    ${bicMiniTabs('parshiot')}
+    <div class="ck-track">
+      <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicptrack="year1">${t.year1}</button>
+      <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicptrack="year2">${t.year2}</button>
+    </div>
+    <div class="prayers-list">${rows}</div>
+    ${ornament()}
+  </div>`;
+  wireBicMiniTabs('parshiot');
+  app.querySelectorAll('[data-bicptrack]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.bicptrack===track) return;
+    BIC_PARSHIOT_TRACK=b.dataset.bicptrack; renderBicParshiot();
+  });
+  app.querySelectorAll('[data-bicopen]').forEach(r=>r.onclick=()=>{
+    ensureBicWeek(track,[r.dataset.bicopen]).then(()=>{
+      if(TAB!=='bicParshiot') return;
+      openBicReader(track,r.dataset.bicopen);
+    });
+  });
+}
+let BIC={track:null, parasha:null, pos:0};
+function openBicReader(track,parashaKey,pos){
+  BIC={track, parasha:parashaKey, pos:pos||0};
   go('bicReader');
 }
 function renderBicReader(){
   stopAutoScroll();
-  const track=bicTrack();
-  if(!BIC_INDEX){
-    app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view">${smSkeleton()}</div>`;
+  const track=BIC.track||bicTrack();
+  const backTab = BIC.parasha===currentParshaKey() ? 'bicHome' : 'bicParshiot';
+  if(!BIC_INDEX || !BIC.parasha){
+    app.innerHTML=`${topbar(ckBicUI().title,backTab)}<div class="view">${smSkeleton()}</div>`;
     ensureBicIndex().then(()=>{ if(TAB==='bicReader') renderBicReader(); });
     return;
   }
-  if(!BIC.parasha) BIC.parasha=bicNearestAvailableKey(track,currentParshaKey());
-  if(!BIC.day) BIC.day=bicDayForToday();
-  const list=bicParshiot(track);
-  const pi=bicParshaIndex(track,BIC.parasha);
-  const p=list[pi];
-  if(!p){ app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view"></div>`; return; }
+  const p=bicParshiot(track).find(x=>x.key===BIC.parasha);
+  if(!p){ go(backTab); return; }
   const unitKey=track+'/'+(BIC_INDEX[track].unitOf[BIC.parasha]||'');
   if(!BIC_WEEK[unitKey] || (S.lang!=='he' && BIC_WEEK_I18N[S.lang+'/'+unitKey]===undefined)){
-    app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view">${smSkeleton()}</div>`;
+    app.innerHTML=`${topbar(ckBicUI().title,backTab)}<div class="view">${smSkeleton()}</div>`;
     ensureBicWeek(track,[BIC.parasha]).then(()=>{ if(TAB==='bicReader') renderBicReader(); });
     return;
   }
-  const wasCurrentWeek = BIC.parasha===currentParshaKey();
-  const items=bicItemsForDay(track,BIC.parasha,BIC.day);
-  const body=items.length ? bicBody(items,track)
-    : `<div class="ck-comm-text ck-comm-none" style="text-align:center;padding:24px 0">${ckBicUI().noDay}</div>`;
-  const di=CHOK_DAYS.indexOf(BIC.day);
+  const t=ckBicUI();
+  const items=bicFlatItems(track,BIC.parasha);
+  if(!items.length){ go(backTab); return; }
+  if(BIC.pos>=items.length) BIC.pos=items.length-1;
+  if(BIC.pos<0) BIC.pos=0;
+  const it=items[BIC.pos];
+  const isCurrentWeek=BIC.parasha===currentParshaKey();
+  const yearLabel=track==='year2'?t.year2:t.year1;
+  const title=(isCurrentWeek?t.weekParasha:p.he)+' · '+yearLabel;
+  const unitLabel=it.type==='intro'?t.intro:(t.halacha+' '+heNum(it.chapter));
+  const body = it.type==='intro'
+    ? (it.paragraphs||[]).map(par=>`<div class="sm-he">${par}</div>`).join('')
+    : bicBody([it],track);
+  const done=bicIsDone(track,BIC.parasha,BIC.pos);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
       <div class="reader-top">
         <button class="icon-btn" id="bicBack">${I.prev}</button>
-        <div class="reader-title">${ckBicUI().title}</div>
+        <div class="reader-title">${title}</div>
       </div>
       <div class="bic-collapse">
-        <div class="ck-track">
-          <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicyear="year1">${ckBicUI().year1}</button>
-          <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicyear="year2">${ckBicUI().year2}</button>
-        </div>
+        <div class="sm-aliyah-tag">${unitLabel} · ${p.he} (${yearLabel}) · ${heNum(BIC.pos+1)} ${t.outOf} ${heNum(items.length)}</div>
         <div class="ck-daynav-wrap">
-          <button class="sm-aliyah-chip ck-arrow" id="bicPPrev" ${pi>0?'':'disabled'} aria-label="${ckBicUI().prevParasha}">${I.prev}</button>
-          <select class="fld-select" id="bicPPick" style="max-width:220px">
-            ${list.map(x=>`<option value="${x.key}" ${x.key===BIC.parasha?'selected':''}>${x.he}</option>`).join('')}
-          </select>
-          <button class="sm-aliyah-chip ck-arrow" id="bicPNext" ${pi<list.length-1?'':'disabled'} aria-label="${ckBicUI().nextParasha}">${I.next}</button>
-        </div>
-        ${!wasCurrentWeek?`<div class="sm-aliyah-tag">${ckBicUI().notThisWeek}</div>`:''}
-        <div class="ck-daynav-wrap">
-          <button class="sm-aliyah-chip ck-arrow" id="bicDPrev" ${di>0?'':'disabled'} aria-label="${ckBicUI().prevDay}">${I.prev}</button>
+          <button class="sm-aliyah-chip ck-arrow" id="bicPosPrev" ${BIC.pos>0?'':'disabled'} aria-label="${t.prevHalacha}">${I.prev}</button>
           <div class="sm-aliyah-nav ck-daynav">
-            ${CHOK_DAYS.map((d,ix)=>`<button class="sm-aliyah-chip ck-daychip${d===BIC.day?' on':''}" data-bicday="${d}">${chokRowLabel(d,ix)}</button>`).join('')}
+            ${items.map((x,ix)=>`<button class="sm-aliyah-chip ck-daychip${ix===BIC.pos?' on':''}" data-bicpos="${ix}">${x.type==='intro'?t.introChip:heNum(x.chapter)}</button>`).join('')}
           </div>
-          <button class="sm-aliyah-chip ck-arrow" id="bicDNext" ${di<CHOK_DAYS.length-1?'':'disabled'} aria-label="${ckBicUI().nextDay}">${I.next}</button>
+          <button class="sm-aliyah-chip ck-arrow" id="bicPosNext" ${BIC.pos<items.length-1?'':'disabled'} aria-label="${t.nextHalacha}">${I.next}</button>
         </div>
       </div>
     </div>
     <div class="sm-verses notranslate">${body}</div>
+    <div class="reader-nav">
+      <button class="rnav-btn" id="bicPrev" ${BIC.pos>0?'':'disabled'}>${I.prev}<span>${t.prevHalacha}</span></button>
+      <button class="rnav-btn${done?' done':''}" id="bicMark">${done?I.check:''}<span>${t.markDone}</span></button>
+      <button class="rnav-btn" id="bicNext" ${BIC.pos<items.length-1?'':'disabled'}>${I.next}<span>${t.nextHalacha}</span></button>
+    </div>
     <div style="height:26px"></div>
   </div>`;
-  const goP=key=>{ BIC.parasha=key; BIC.day=bicDayForToday(); ensureBicWeek(track,[key]).then(()=>{ if(TAB==='bicReader') renderBicReader(); }); };
-  document.getElementById('bicBack').onclick=()=>go('home');
-  app.querySelectorAll('.ck-track-btn[data-bicyear]').forEach(b=>b.onclick=()=>{
-    const y=b.dataset.bicyear; if(y===track) return;
-    S.bicYear=y; saveS();
-    const ny=bicNearestAvailableKey(y,BIC.parasha);
-    goP(ny);
-  });
-  const pp=document.getElementById('bicPPrev'); if(pp&&!pp.disabled) pp.onclick=()=>goP(list[pi-1].key);
-  const pn=document.getElementById('bicPNext'); if(pn&&!pn.disabled) pn.onclick=()=>goP(list[pi+1].key);
-  const pick=document.getElementById('bicPPick'); if(pick) pick.onchange=()=>goP(pick.value);
-  const dp=document.getElementById('bicDPrev'); if(dp&&!dp.disabled) dp.onclick=()=>{ BIC.day=CHOK_DAYS[di-1]; renderBicReader(); };
-  const dn=document.getElementById('bicDNext'); if(dn&&!dn.disabled) dn.onclick=()=>{ BIC.day=CHOK_DAYS[di+1]; renderBicReader(); };
-  app.querySelectorAll('.ck-daychip[data-bicday]').forEach(b=>b.onclick=()=>{
-    if(b.dataset.bicday===BIC.day) return;
-    BIC.day=b.dataset.bicday; renderBicReader();
+  document.getElementById('bicBack').onclick=()=>go(backTab);
+  const goPos=np=>{ BIC.pos=np; renderBicReader(); forceScrollTop(); };
+  const pv=document.getElementById('bicPrev'); if(pv&&!pv.disabled) pv.onclick=()=>goPos(BIC.pos-1);
+  const nx=document.getElementById('bicNext'); if(nx&&!nx.disabled) nx.onclick=()=>goPos(BIC.pos+1);
+  const pp=document.getElementById('bicPosPrev'); if(pp&&!pp.disabled) pp.onclick=()=>goPos(BIC.pos-1);
+  const pn=document.getElementById('bicPosNext'); if(pn&&!pn.disabled) pn.onclick=()=>goPos(BIC.pos+1);
+  app.querySelectorAll('.ck-daychip[data-bicpos]').forEach(b=>b.onclick=()=>{
+    const ix=+b.dataset.bicpos; if(ix===BIC.pos) return; goPos(ix);
   });
   const onChip=app.querySelector('.ck-daychip.on'); if(onChip) onChip.scrollIntoView({inline:'center',block:'nearest'});
+  document.getElementById('bicMark').onclick=()=>{ bicToggleDone(track,BIC.parasha,BIC.pos); renderBicReader(); };
   app.querySelectorAll('.ck-comm-btn[data-bic]').forEach(b=>b.onclick=()=>bicToggleComm(b));
 }
 
@@ -4054,6 +4184,8 @@ function render(){
     else if(TAB==='chokParshiot') renderChokParshiot();
     else if(TAB==='chokList') renderChokList();
     else if(TAB==='chokReader') renderChokReader();
+    else if(TAB==='bicHome') renderBicHome();
+    else if(TAB==='bicParshiot') renderBicParshiot();
     else if(TAB==='bicReader') renderBicReader();
     else if(TAB==='musarList') renderMusarList();
     else if(TAB==='musarYomi') renderMusarYomiReader();
@@ -4243,7 +4375,7 @@ function renderHome(){
   const hzc=document.getElementById('homeZoharCard'); if(hzc) hzc.onclick=()=>go('zoharYomi');
   const hbc=document.getElementById('homeBicCard');
   if(hbc){
-    hbc.onclick=()=>openBic(bicNearestAvailableKey(bicTrack(),weekParshaKey), bicDayForToday());
+    hbc.onclick=()=>openBic();
     if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
   }
   const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');

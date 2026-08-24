@@ -55,30 +55,50 @@ in English as usual.
   need to fetch the same "3 units" block set date-navigation always has
   ready, so it ensures its own block(s) before rendering.
 - Ben Ish Chai is its **own standalone section** - a home-screen card
-  (`homeBicCard`) and reader (`renderBicReader()`, `TAB==='bicReader'`,
-  opened via `openBic(parashaKey,day)`), independent of Chok LeYisrael and
-  not one of the Halacha options there (it was, briefly, during
-  development - Rambam is Chok LeYisrael's only Halacha source again;
-  `halachaChoice()`/`setHalachaChoice()`/`halachaChoiceLabel()` are back to
-  a plain 2-way Rambam 3yr/1yr toggle). Like Torah (and unlike Rambam's
-  pure date-driven cycle, see `ckRambamIndexes`), it's parasha-bound: each
-  parasha's halachot are pre-split across 6 study days **at data-prep
-  time** (evenly, remainder front-loaded - there's no printed-sheet
-  convention to hand-curate from, unlike Torah's own verse boundaries)
-  into `data/chok-benishchai/<year1|year2>/<unit-slug>.json`, indexed by
+  (`homeBicCard`) opening three screens: `renderBicHome()`
+  (`TAB==='bicHome'`, "this week's" parasha + year1/year2 progress cards),
+  `renderBicParshiot()` (`TAB==='bicParshiot'`, a flat list of every
+  parasha for a picked track), and `renderBicReader()`
+  (`TAB==='bicReader'`, opened via `openBicReader(track,parashaKey,pos)`).
+  Independent of Chok LeYisrael and not one of the Halacha options there
+  (it was, briefly, during development - Rambam is Chok LeYisrael's only
+  Halacha source again; `halachaChoice()`/`setHalachaChoice()`/
+  `halachaChoiceLabel()` are back to a plain 2-way Rambam 3yr/1yr toggle).
+  This structure (a this-week screen with two per-track progress cards, a
+  flat all-parshiot list, and a flat one-halacha-at-a-time reader with its
+  own per-halacha completion tracking) mirrors the original standalone Ben
+  Ish Chai app this section is modeled on, rather than reusing Chok
+  LeYisrael's day-based reader shape - deliberately, since the original
+  app never split a parasha's halachot into study days at all; it's one
+  flat, sequentially-numbered list per parasha (intro first, if any, then
+  every halacha in source order), paged one at a time with an "X out of
+  N" counter. `bicFlatItems(track,parashaKey)` reconstructs that exact
+  flat sequence by concatenating the data file's `days[][]` arrays back
+  in order (0..5) after any `intro` - the day split is purely our own
+  data-prep pacing device (see the comment above `ensureBicWeek`), not
+  something the original app or its data ever had, so no separate "flat"
+  data files were needed. `BIC_DONE` (persisted to
+  `localStorage['betel_bic_done']`, keyed by `track/parashaKey` → array of
+  done flat-positions) drives the "X מתוך N" progress bar and
+  continue/start-learning button label on each home-screen track card.
+  Like Torah (and unlike Rambam's pure date-driven cycle, see
+  `ckRambamIndexes`), it's parasha-bound: each parasha's halachot are
+  pre-split across 6 arbitrary buckets **at data-prep time** (evenly,
+  remainder front-loaded - there's no printed-sheet convention to
+  hand-curate from, unlike Torah's own verse boundaries) into
+  `data/chok-benishchai/<year1|year2>/<unit-slug>.json`, indexed by
   `data/chok-benishchai-index.json`'s `parshiot` array (ordered, per track)
   and `unitOf` map (canonical parasha name → unit slug - some units cover
   two canonical parshiot at once, e.g. Behar+Bechukotai, regardless of
   whether the calendar combines them that year, so `bicUnitsFor`/lookups
   de-dupe by unit slug rather than assuming one unit per canonical key).
-  `S.bicYear` picks year1/year2; the reader's own `BIC={parasha,day}`
-  state (not tied to any date) drives navigation - `bicNearestAvailableKey()`
-  finds this week's parasha's nearest real content when year2's genuine
-  content gaps (6 missing parshiot) put it in a hole, using Chok
-  LeYisrael's own annual `CHOK.parshiot` order as the distance metric,
-  since the Ben Ish Chai per-track list only contains parshiot that
-  actually have content. `bicBody()`/`bicCommBar()` mirror
-  `ramBody()`/`ckCommBar()`'s shape; the per-halacha plain-language
+  `S.bicYear` picks year1/year2 on the home screen;
+  `bicNearestAvailableKey()` finds this week's parasha's nearest real
+  content when year2's genuine content gaps (6 missing parshiot) put it
+  in a hole, using Chok LeYisrael's own annual `CHOK.parshiot` order as
+  the distance metric, since the Ben Ish Chai per-track list only
+  contains parshiot that actually have content. `bicBody()`/`bicCommBar()`
+  mirror `ramBody()`/`ckCommBar()`'s shape; the per-halacha plain-language
   explanation (`clarification`) shows in a Rashi-style expandable panel
   via `bicToggleComm()` - its own small function pair rather than folding
   into `ckCommFor()`/`ckToggleComm()`, since the data is already loaded
