@@ -35,23 +35,36 @@ in English as usual.
 - Every musar work runs at the same fixed pace, `ckMusarTrack()` = 3
   units/day (not configurable per-work). Cycle length is computed
   automatically by `ckMusarDurationLabel()`.
-- Ben Ish Chai (`S.halachaWork==='benishchai'`, alongside the default
-  Rambam) is an alternate Halacha source, parasha-bound like Torah rather
-  than date-driven like Rambam/Zohar/daf. Its per-parasha halachot are
-  pre-split across the 6 study days **at data-prep time** (evenly, remainder
-  front-loaded - there's no printed-sheet convention to hand-curate from,
-  unlike Torah's own verse boundaries) into
-  `data/chok-benishchai/<year1|year2>/<unit-slug>.json`, indexed by
-  `data/chok-benishchai-index.json`'s `unitOf` map (canonical parasha name →
-  unit slug - some units cover two canonical parshiot at once, e.g.
-  Behar+Bechukotai, regardless of whether the calendar combines them that
-  year). `ckBenishchaiLabel()`/`bicBody()`/`bicCommBar()` mirror
-  `ckRambamLabel()`/`ramBody()`/`ckCommBar()`'s shape. The per-halacha
-  plain-language explanation (`clarification`) shows in a Rashi-style
-  expandable panel via `bicToggleComm()` - its own small function pair
-  rather than folding into `ckCommFor()`/`ckToggleComm()`, since the data is
-  already loaded inline (no async per-verse lookup) and there's only ever
-  one explanation source, not several to pick between.
+- Ben Ish Chai is its **own standalone section** - a home-screen card
+  (`homeBicCard`) and reader (`renderBicReader()`, `TAB==='bicReader'`,
+  opened via `openBic(parashaKey,day)`), independent of Chok LeYisrael and
+  not one of the Halacha options there (it was, briefly, during
+  development - Rambam is Chok LeYisrael's only Halacha source again;
+  `halachaChoice()`/`setHalachaChoice()`/`halachaChoiceLabel()` are back to
+  a plain 2-way Rambam 3yr/1yr toggle). Like Torah (and unlike Rambam's
+  pure date-driven cycle, see `ckRambamIndexes`), it's parasha-bound: each
+  parasha's halachot are pre-split across 6 study days **at data-prep
+  time** (evenly, remainder front-loaded - there's no printed-sheet
+  convention to hand-curate from, unlike Torah's own verse boundaries)
+  into `data/chok-benishchai/<year1|year2>/<unit-slug>.json`, indexed by
+  `data/chok-benishchai-index.json`'s `parshiot` array (ordered, per track)
+  and `unitOf` map (canonical parasha name → unit slug - some units cover
+  two canonical parshiot at once, e.g. Behar+Bechukotai, regardless of
+  whether the calendar combines them that year, so `bicUnitsFor`/lookups
+  de-dupe by unit slug rather than assuming one unit per canonical key).
+  `S.bicYear` picks year1/year2; the reader's own `BIC={parasha,day}`
+  state (not tied to any date) drives navigation - `bicNearestAvailableKey()`
+  finds this week's parasha's nearest real content when year2's genuine
+  content gaps (6 missing parshiot) put it in a hole, using Chok
+  LeYisrael's own annual `CHOK.parshiot` order as the distance metric,
+  since the Ben Ish Chai per-track list only contains parshiot that
+  actually have content. `bicBody()`/`bicCommBar()` mirror
+  `ramBody()`/`ckCommBar()`'s shape; the per-halacha plain-language
+  explanation (`clarification`) shows in a Rashi-style expandable panel
+  via `bicToggleComm()` - its own small function pair rather than folding
+  into `ckCommFor()`/`ckToggleComm()`, since the data is already loaded
+  inline (no async per-verse lookup) and there's only ever one explanation
+  source, not several to pick between.
 - Unlike Rambam and every Musar work, Ben Ish Chai's halacha body text and
   per-halacha biur are (gradually, by user request) being translated out of
   Hebrew-only. Each unit file can have sibling
@@ -66,23 +79,9 @@ in English as usual.
   this writing all 51 year1 units are translated to English; year2 and
   the other 3 languages (fr/ru/ka) are still pending, so most units still
   render in Hebrew for those language/track combinations, which is
-  expected, not a bug.
-- The Halacha "pace" is really one choice of 4 (Rambam 3yr/1yr, Ben Ish
-  Chai year1/year2), even though it's stored across two settings fields
-  for historical reasons (`S.halachaWork` plus either `S.rambamTrack` or
-  `S.bicYear`). `halachaChoice()`/`setHalachaChoice()`/
-  `halachaChoiceLabel()` present/set all 4 as one unit everywhere they
-  appear (Settings' single `<select>`, the pace wizard's Halacha step,
-  and an inline 4-button `.ck-track` row in the reader itself - the same
-  shape as the Musar work-switcher already there). Any async data source
-  gated behind a first render of one of these screens (e.g.
-  `ensureBicIndex()` on the wizard) must guard its post-load re-render
-  with `if(!BIC_INDEX)` or equivalent - an unguarded `.then(rerender)`
-  re-fires on every render of that step and hangs the page in an
-  infinite microtask loop the moment the data is already cached. The
-  regression sweep's fresh-user wizard case (a second, unflagged browser
-  context walking language → intro → Halacha step with a hard timeout)
-  exists specifically to catch this again.
+  expected, not a bug. The biur/`clarification` text itself has no nikud
+  (unlike the halacha body, sourced from a vocalized original) - only
+  Dicta-run text gets nikud, and the biur hasn't been run through it.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real

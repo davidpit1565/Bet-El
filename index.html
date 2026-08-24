@@ -920,6 +920,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .q-tile[data-cat="tehillim"]{background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
 .q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
 .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
+.q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
 </style>
 </head>
 <body>
@@ -1763,15 +1764,17 @@ function ensureChokWeek(key){
       .then(d=>{ CHOK_WEEK[k]=d; });
   })));
 }
-/* ---------- Ben Ish Chai (an alternate Halacha source, see S.halachaWork) ----------
-   Unlike Rambam (a pure date-driven cycle, see ckRambamIndexes) this is
-   parasha-bound like Torah: each parasha's halachot are pre-split across its
-   6 days at data-prep time (evenly, remainder front-loaded - there's no
-   printed-sheet convention to hand-curate from, unlike Torah's own verse
-   boundaries). The source sometimes pairs two parshiot into one shaar
-   (Behar/Bechukotai etc.) regardless of whether the calendar combines them
-   that year, so bicUnitsFor de-dupes by unit slug rather than assuming one
-   unit per canonical key. */
+/* ---------- Ben Ish Chai ----------
+   Its own standalone reader (openBic/renderBicReader below), not a Halacha
+   source inside Chok LeYisrael. Unlike Rambam (a pure date-driven cycle, see
+   ckRambamIndexes) this is parasha-bound like Torah: each parasha's
+   halachot are pre-split across its 6 days at data-prep time (evenly,
+   remainder front-loaded - there's no printed-sheet convention to
+   hand-curate from, unlike Torah's own verse boundaries). The source
+   sometimes pairs two parshiot into one shaar (Behar/Bechukotai etc.)
+   regardless of whether the calendar combines them that year, so
+   bicUnitsFor de-dupes by unit slug rather than assuming one unit per
+   canonical key. */
 let BIC_INDEX=null, BIC_WEEK={}, BIC_WEEK_I18N={}, bicIndexPromise=null;
 function ensureBicIndex(){
   if(BIC_INDEX) return Promise.resolve();
@@ -1781,27 +1784,10 @@ function ensureBicIndex(){
   return bicIndexPromise;
 }
 function bicTrack(){ return S.bicYear==='year2' ? 'year2' : 'year1'; }
-/* The Halacha source is really one choice of 4 - Rambam's two tracks and
-   Ben Ish Chai's two years - even though it's stored across two settings
-   fields (S.halachaWork, plus either S.rambamTrack or S.bicYear) so each
-   existing field keeps its own narrow meaning. This presents/sets all 4 as
-   a single unit everywhere the UI shows them (Settings, the pace wizard,
-   the in-reader track-switcher), the same way the 6 Musar works are one
-   list even though picking one only ever touches S.musarWork. */
-function halachaChoice(){
-  if(S.halachaWork==='benishchai') return S.bicYear==='year2' ? 'bic2' : 'bic1';
-  return S.rambamTrack==='year' ? 'rambam1' : 'rambam3';
-}
-function setHalachaChoice(v){
-  if(v==='bic1'){ S.halachaWork='benishchai'; S.bicYear='year1'; }
-  else if(v==='bic2'){ S.halachaWork='benishchai'; S.bicYear='year2'; }
-  else if(v==='rambam1'){ S.halachaWork='rambam'; S.rambamTrack='year'; }
-  else { S.halachaWork='rambam'; S.rambamTrack='three'; }
-}
+function halachaChoice(){ return S.rambamTrack==='year' ? 'rambam1' : 'rambam3'; }
+function setHalachaChoice(v){ S.rambamTrack = v==='rambam1' ? 'year' : 'three'; }
 function halachaChoiceLabel(v){
   v=v||halachaChoice();
-  if(v==='bic1') return ckBicUI().title+' · '+ckBicUI().year1;
-  if(v==='bic2') return ckBicUI().title+' · '+ckBicUI().year2;
   if(v==='rambam1') return ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים');
   return ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם');
 }
@@ -1836,12 +1822,44 @@ function bicI18nItem(track,unit,dayIdx,itemIdx){
   const d=BIC_WEEK_I18N[S.lang+'/'+track+'/'+unit];
   return (d&&d.days&&d.days[dayIdx]&&d.days[dayIdx][itemIdx])||null;
 }
+/* Standalone Ben Ish Chai reader (its own home card, independent of Chok
+   LeYisrael's halacha slot). Its parasha list is the track's own `parshiot`
+   array, not Chok LeYisrael's - a parasha with no unit in this track (a
+   genuine year2 content gap) is simply absent from that array, so prev/next
+   navigation over it always lands on real content. Only "this week's"
+   parasha can fall in such a gap, hence bicNearestAvailableKey() below. */
+function bicParshiot(track){ return (BIC_INDEX&&BIC_INDEX[track]&&BIC_INDEX[track].parshiot)||[]; }
+function bicParshaIndex(track,key){ return bicParshiot(track).findIndex(p=>p.key===key); }
+function bicNearestAvailableKey(track,targetKey){
+  const list=bicParshiot(track); if(!list.length) return null;
+  if(list.some(p=>p.key===targetKey)) return targetKey;
+  const order=CHOK&&CHOK.parshiot;
+  if(order&&order.length){
+    const avail=new Set(list.map(p=>p.key));
+    const ti=order.indexOf(targetKey);
+    if(ti>=0){
+      for(let d=1;d<order.length;d++){
+        if(ti-d>=0 && avail.has(order[ti-d])) return order[ti-d];
+        if(ti+d<order.length && avail.has(order[ti+d])) return order[ti+d];
+      }
+    }
+  }
+  return list[0].key;
+}
+function bicDayForToday(){ return CHOK_DAYS[Math.min(new Date().getDay(),5)]; }
+function bicItemsForDay(track,parashaKey,day){
+  const idx=BIC_INDEX&&BIC_INDEX[track]; if(!idx) return [];
+  const unit=idx.unitOf[parashaKey]; if(!unit) return [];
+  const wk=BIC_WEEK[track+'/'+unit]; if(!wk||!wk.days) return [];
+  const dayIdx=CHOK_DAYS.indexOf(day);
+  if(dayIdx<0||!wk.days[dayIdx]) return [];
+  return wk.days[dayIdx].map((h,ii)=>({...h,unit,parasha_he:wk.parasha_he,dayIdx,itemIdx:ii}));
+}
 function ensureChokData(key){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
     .then(()=>ensureCycDay(ckViewHDate()))
     .then(()=>ensureMusarCycles())
-    .then(()=>ensureMusarDay(S.musarWork||'reshit',ckViewHDate()))
-    .then(()=>S.halachaWork==='benishchai' ? ensureBicWeek(bicTrack(),ckKeysOf(key)) : null);
+    .then(()=>ensureMusarDay(S.musarWork||'reshit',ckViewHDate()));
 }
 /* A few weeks of the year have no weekly parasha of their own - the Shabbat
    of Chol HaMoed. Chok LeYisrael does not pause for them: it goes on to the
@@ -2028,19 +2046,9 @@ function chokSectionsFor(key,day){
   if(CYC){
     const zi=ckCycleIndex(CYC.zohar,hd);
     add('zohar','זֹהַר', ckCycleSegs('zohar',zi), 'text', null, [], keys[0]);
-    if(S.halachaWork==='benishchai'){
-      const track=bicTrack(), units=bicUnitsFor(keys,track), dayIdx=CHOK_DAYS.indexOf(day);
-      let bi=[];
-      if(dayIdx>=0) units.forEach(u=>{
-        const wk=BIC_WEEK[track+'/'+u];
-        if(wk&&wk.days&&wk.days[dayIdx]) bi=bi.concat(wk.days[dayIdx].map((h,ii)=>({...h,unit:u,parasha_he:wk.parasha_he,dayIdx,itemIdx:ii})));
-      });
-      if(bi.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'benishchai',items:bi,refs:[],bicTrack:track});
-    } else {
-      const ri=ckRambamIndexes(hd);
-      let rs=[]; ri.forEach(i=>{ rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))); });
-      if(rs.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'rambam',items:rs,refs:[],rIdx:ri});
-    }
+    const ri=ckRambamIndexes(hd);
+    let rs=[]; ri.forEach(i=>{ rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))); });
+    if(rs.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'rambam',items:rs,refs:[],rIdx:ri});
   } else {
     keys.forEach(pk=>{
       const d=(CHOK.schedule[pk]||{})[day];
@@ -2252,7 +2260,6 @@ function chokSourceLine(sec){
   if(sec.kind==='musarcyc') return ckMusarSourceLabel(sec.musarWork,sec.mIdx);
   if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,ckViewHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
-  if(sec.kind==='benishchai') return ckBenishchaiLabel(sec.items,sec.bicTrack);
   if(CYC&&sec.kind==='daf'){
     const rec=ckDafRec(sec.dIdx)||{};
     return ckDafLabel(sec.dIdx)+(rec.src?'  ·  '+rec.src:'');
@@ -2532,27 +2539,23 @@ function ckRambamLabel(idxs){
    "בֵּיאוּר" is a common enough word that it risks matching an unrelated
    string elsewhere in the app. */
 const BIC_UI={
-  he:{title:'בֶּן אִישׁ חַי', year1:'שָׁנָה א׳', year2:'שָׁנָה ב׳', halacha:'הֲלָכָה', biur:'בֵּיאוּר', noBiur:'אֵין בֵּיאוּר לַהֲלָכָה הַזֹּאת'},
-  en:{title:'Ben Ish Chai', year1:'Year 1', year2:'Year 2', halacha:'Halacha', biur:'Explanation', noBiur:'No explanation for this halacha'},
-  fr:{title:"Ben Ish 'Haï", year1:'Année 1', year2:'Année 2', halacha:'Halakha', biur:'Explication', noBiur:'Aucune explication pour cette halakha'},
-  ru:{title:'Бен Иш Хай', year1:'Год 1', year2:'Год 2', halacha:'Ѓалаха', biur:'Разъяснение', noBiur:'Нет разъяснения к этой Ѓалахе'},
-  ka:{title:'ბენ იშ ხაი', year1:'პირველი წელი', year2:'მეორე წელი', halacha:'ალახა', biur:'განმარტება', noBiur:'ამ ალახაზე განმარტება არ არის'},
+  he:{title:'בֶּן אִישׁ חַי', year1:'שָׁנָה א׳', year2:'שָׁנָה ב׳', halacha:'הֲלָכָה', biur:'בֵּיאוּר', noBiur:'אֵין בֵּיאוּר לַהֲלָכָה הַזֹּאת',
+    noDay:'אֵין הֲלָכוֹת לְיוֹם זֶה', prevParasha:'הַפָּרָשָׁה הַקּוֹדֶמֶת', nextParasha:'הַפָּרָשָׁה הַבָּאָה',
+    notThisWeek:'לֹא פָּרָשַׁת הַשָּׁבוּעַ הַנּוֹכְחִי', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא'},
+  en:{title:'Ben Ish Chai', year1:'Year 1', year2:'Year 2', halacha:'Halacha', biur:'Explanation', noBiur:'No explanation for this halacha',
+    noDay:'No halachot for this day', prevParasha:'Previous parasha', nextParasha:'Next parasha',
+    notThisWeek:"Not this week's parasha", prevDay:'Previous day', nextDay:'Next day'},
+  fr:{title:"Ben Ish 'Haï", year1:'Année 1', year2:'Année 2', halacha:'Halakha', biur:'Explication', noBiur:'Aucune explication pour cette halakha',
+    noDay:'Aucune halakha pour ce jour', prevParasha:'Paracha précédente', nextParasha:'Paracha suivante',
+    notThisWeek:"Pas la paracha de cette semaine", prevDay:'Jour précédent', nextDay:'Jour suivant'},
+  ru:{title:'Бен Иш Хай', year1:'Год 1', year2:'Год 2', halacha:'Ѓалаха', biur:'Разъяснение', noBiur:'Нет разъяснения к этой Ѓалахе',
+    noDay:'Нет ѓалахот на этот день', prevParasha:'Предыдущая глава', nextParasha:'Следующая глава',
+    notThisWeek:'Не глава этой недели', prevDay:'Предыдущий день', nextDay:'Следующий день'},
+  ka:{title:'ბენ იშ ხაი', year1:'პირველი წელი', year2:'მეორე წელი', halacha:'ალახა', biur:'განმარტება', noBiur:'ამ ალახაზე განმარტება არ არის',
+    noDay:'ამ დღისთვის ალახა არ არის', prevParasha:'წინა პარაშა', nextParasha:'შემდეგი პარაშა',
+    notThisWeek:'არ არის ამ კვირის პარაშა', prevDay:'წინა დღე', nextDay:'შემდეგი დღე'},
 };
 function ckBicUI(){ return BIC_UI[S.lang]||BIC_UI.he; }
-function ckBenishchaiLabel(items,track){
-  const t=ckBicUI();
-  const yearLabel=(track||bicTrack())==='year2'?t.year2:t.year1;
-  /* group consecutive halachot from the same unit (almost always all of
-     them, since a combined week concatenating two units is rare) and range
-     the chapter numbers - same shape as ckRambamLabel/ckMusarSourceLabel */
-  const groups=[];
-  (items||[]).forEach(it=>{
-    const last=groups[groups.length-1];
-    if(last && last.unit===it.unit) last.chs.push(it.chapter);
-    else groups.push({unit:it.unit, he:it.parasha_he, chs:[it.chapter]});
-  });
-  return t.title+' · '+yearLabel+' · '+groups.map(g=>g.he+' · '+t.halacha+' '+ckRange(g.chs[0], g.chs[g.chs.length-1])).join('  ·  ');
-}
 /* the biur (plain-language explanation) shown per halacha, same expand/
    collapse interaction as the Rashi/Or HaChaim commentary bar - a dedicated
    pair of functions rather than folding into ckCommFor/ckToggleComm since
@@ -2577,6 +2580,18 @@ function bicToggleComm(btn){
   panel.innerHTML=`<div class="ck-comm-title">${t.biur}</div>`+body;
   panel.classList.add('open'); btn.classList.add('on');
   tr(panel);
+}
+function bicBody(items,track){
+  BIC_CLARIFY={};
+  return items.map((h,i)=>{
+    const uid='bic:'+i+':'+h.chapter;
+    const t18n=bicI18nItem(track,h.unit,h.dayIdx,h.itemIdx);
+    const paragraphs=(t18n&&t18n.paragraphs)||h.paragraphs;
+    const clarification=(t18n&&t18n.clarification)||h.clarification;
+    BIC_CLARIFY[uid]=clarification||null;
+    const paras=(paragraphs||[]).map(p=>`<div class="sm-he">${p}</div>`).join('');
+    return `<div class="sm-verse-row"><span class="sm-vnum">${heNum(h.chapter)}</span>${paras}${bicCommBar(uid)}</div>`;
+  }).join('');
 }
 
 /* ---------- extra Musar works (Sha'arei Teshuvah, Sha'arei Kedusha, ...) ----------
@@ -2713,8 +2728,6 @@ const CK_PACE_UI={
     halachaQ:'אֵיזֶה קֶצֶב הֲלָכָה מַתְאִים לְךָ?', halachaSub:'רַמְבַּ״ם · מִשְׁנֵה תוֹרָה',
     halachaOptADesc:'הַקֶּצֶב הַמָּסוֹרְתִּי — פֶּרֶק אֶחָד בְּכָל יוֹם, מְסַיֵּם אֶת כׇּל הַמִּשְׁנֵה תוֹרָה בְּתוֹךְ שָׁלֹשׁ שָׁנִים',
     halachaOptBDesc:'קֶצֶב מָהִיר יוֹתֵר — מְסַיֵּם אֶת כׇּל הָרַמְבַּ״ם בְּתוֹךְ שָׁנָה אֶחָת',
-    halachaOptCDesc:'סֵפֶר הֲלָכָה סְפָרַדִּי מֵאֵת רַבִּי יוֹסֵף חַיִּים, לְפִי סֵדֶר פָּרָשׁוֹת הַשָּׁבוּעַ, עִם בֵּאוּר בְּעִבְרִית קַלָּה לְכָל הֲלָכָה',
-    halachaOptDDesc:'הַשָּׁנָה הַשְּׁנִיָּה שֶׁל אוֹתוֹ מַחְזוֹר',
     soon:'מַסְלוּל בֶּן אִישׁ חַי זָמִין כְּעֵת בַּהֲגָדָּרוֹת',
     musarQ:'אֵיזֶה סֵפֶר מוּסָר תִּרְצֶה לְהַתְחִיל?', musarSub:'כֻּלָּם בְּקֶצֶב שֶׁל 3 יְחִידוֹת לְיוֹם',
     tehillimQ:'אֵיזוֹ שִׁיטַת חֲלוּקָה מַתְאִימָה לְךָ בִּתְהִלִּים הַיּוֹמִי?', tehillimSub:'תְּהִלִּים הַיּוֹמִי',
@@ -2730,8 +2743,6 @@ const CK_PACE_UI={
     halachaQ:'Which Halacha pace suits you?', halachaSub:'Rambam · Mishneh Torah',
     halachaOptADesc:'The traditional pace — one chapter a day, completing the whole Mishneh Torah in three years',
     halachaOptBDesc:'A faster pace — completes the whole Rambam in one year',
-    halachaOptCDesc:'A Sephardic halacha work by Rabbi Yosef Chaim, following the weekly parasha, with a plain-language explanation for every halacha',
-    halachaOptDDesc:'The second year of the same cycle',
     soon:'A Ben Ish Chai track is now available in Settings',
     musarQ:'Which Musar book would you like to start with?', musarSub:'All at a pace of 3 units a day',
     tehillimQ:'Which division method suits your Daily Tehillim?', tehillimSub:'Daily Tehillim',
@@ -2747,8 +2758,6 @@ const CK_PACE_UI={
     halachaQ:'Quel rythme de Halacha vous convient ?', halachaSub:'Rambam · Michné Torah',
     halachaOptADesc:'Le rythme traditionnel — un chapitre par jour, achève tout le Michné Torah en trois ans',
     halachaOptBDesc:'Un rythme plus rapide — achève tout le Rambam en un an',
-    halachaOptCDesc:'Un ouvrage de halakha séfarade du rabbin Yossef Haïm, suivant la paracha de la semaine, avec une explication en langage simple pour chaque halakha',
-    halachaOptDDesc:'La deuxième année du même cycle',
     soon:'Un parcours Ben Ish Haï est maintenant disponible dans les Paramètres',
     musarQ:'Quel livre de Moussar souhaitez-vous commencer ?', musarSub:'Tous au rythme de 3 unités par jour',
     tehillimQ:'Quelle méthode de répartition convient à votre Tehilim quotidien ?', tehillimSub:'Tehilim quotidien',
@@ -2764,8 +2773,6 @@ const CK_PACE_UI={
     halachaQ:'Какой темп изучения Ѓалахи вам подходит?', halachaSub:'Рамбам · Мишне Тора',
     halachaOptADesc:'Традиционный темп — одна глава в день, весь Мишне Тора завершается за три года',
     halachaOptBDesc:'Более быстрый темп — весь Рамбам завершается за один год',
-    halachaOptCDesc:'Сефардский труд по Ѓалахе рабби Йосефа Хаима, по недельным главам Торы, с разъяснением на простом языке к каждой Ѓалахе',
-    halachaOptDDesc:'Второй год того же цикла',
     soon:'Маршрут Бен Иш Хай теперь доступен в Настройках',
     musarQ:'Какую книгу по мусару вы хотите начать изучать?', musarSub:'Все книги — в темпе 3 единицы в день',
     tehillimQ:'Какой способ деления подходит для ежедневного чтения Теилим?', tehillimSub:'Ежедневные Теилим',
@@ -2781,8 +2788,6 @@ const CK_PACE_UI={
     halachaQ:'ჰალახის რომელი ტემპი შეგეფერებათ?', halachaSub:'რამბამი · მიშნე თორა',
     halachaOptADesc:'ტრადიციული ტემპი — ერთი თავი დღეში, მთელი მიშნე თორა სრულდება სამ წელიწადში',
     halachaOptBDesc:'უფრო სწრაფი ტემპი — მთელი რამბამი სრულდება ერთ წელიწადში',
-    halachaOptCDesc:'რაბი იოსეფ ხაიმის სეფარდული ალახის ნაშრომი, კვირის პარაშას მიხედვით, თითოეული ალახის მარტივი განმარტებით',
-    halachaOptDDesc:'იმავე ციკლის მეორე წელი',
     soon:'„ბენ იშ ხაის" მარშრუტი უკვე ხელმისაწვდომია პარამეტრებში',
     musarQ:'მუსარის რომელი წიგნით გინდათ დაწყება?', musarSub:'ყველა — დღეში 3 ერთეულის ტემპით',
     tehillimQ:'დაყოფის რომელი მეთოდი შეგეფერებათ ყოველდღიური თეილიმისთვის?', tehillimSub:'ყოველდღიური თეილიმი',
@@ -2866,14 +2871,11 @@ function renderChokPace(){
   let body;
   if(CK_PACE_STEP===0){
     ensureMusarCycles();
-    if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(CK_PACE_STEP===0) renderChokPace(); });
     body=`<div class="pace-q">${t.halachaQ}</div>
     <div class="pace-sub">${t.halachaSub}</div>
     <div class="pace-list">
       ${optRow('rambam3',ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם'),t.halachaOptADesc)}
       ${optRow('rambam1',ckChrome('רַמְבַּ״ם')+' · '+ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים'),t.halachaOptBDesc)}
-      ${BIC_INDEX?optRow('bic1',ckBicUI().title+' · '+ckBicUI().year1,t.halachaOptCDesc):''}
-      ${BIC_INDEX?optRow('bic2',ckBicUI().title+' · '+ckBicUI().year2,t.halachaOptDDesc):''}
     </div>`;
   } else if(CK_PACE_STEP===1){
     body=`<div class="pace-q">${t.musarQ}</div>
@@ -3492,6 +3494,88 @@ function openChok(key,day,year){
   go('chokReader');
 }
 
+/* ---------- Ben Ish Chai (standalone) ---------- */
+let BIC={parasha:null, day:null};
+function openBic(parashaKey,day){
+  BIC={parasha:parashaKey||null, day:day||null};
+  go('bicReader');
+}
+function renderBicReader(){
+  stopAutoScroll();
+  const track=bicTrack();
+  if(!BIC_INDEX){
+    app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view">${smSkeleton()}</div>`;
+    ensureBicIndex().then(()=>{ if(TAB==='bicReader') renderBicReader(); });
+    return;
+  }
+  if(!BIC.parasha) BIC.parasha=bicNearestAvailableKey(track,currentParshaKey());
+  if(!BIC.day) BIC.day=bicDayForToday();
+  const list=bicParshiot(track);
+  const pi=bicParshaIndex(track,BIC.parasha);
+  const p=list[pi];
+  if(!p){ app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view"></div>`; return; }
+  const unitKey=track+'/'+(BIC_INDEX[track].unitOf[BIC.parasha]||'');
+  if(!BIC_WEEK[unitKey] || (S.lang!=='he' && BIC_WEEK_I18N[S.lang+'/'+unitKey]===undefined)){
+    app.innerHTML=`${topbar(ckBicUI().title,'home')}<div class="view">${smSkeleton()}</div>`;
+    ensureBicWeek(track,[BIC.parasha]).then(()=>{ if(TAB==='bicReader') renderBicReader(); });
+    return;
+  }
+  const wasCurrentWeek = BIC.parasha===currentParshaKey();
+  const items=bicItemsForDay(track,BIC.parasha,BIC.day);
+  const body=items.length ? bicBody(items,track)
+    : `<div class="ck-comm-text ck-comm-none" style="text-align:center;padding:24px 0">${ckBicUI().noDay}</div>`;
+  const di=CHOK_DAYS.indexOf(BIC.day);
+  app.innerHTML=`
+  <div class="reader view">
+    <div class="reader-head">
+      <div class="reader-top">
+        <button class="icon-btn" id="bicBack">${I.prev}</button>
+        <div class="reader-title">${ckBicUI().title}</div>
+      </div>
+      <div class="ck-track">
+        <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicyear="year1">${ckBicUI().year1}</button>
+        <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicyear="year2">${ckBicUI().year2}</button>
+      </div>
+      <div class="ck-daynav-wrap">
+        <button class="sm-aliyah-chip ck-arrow" id="bicPPrev" ${pi>0?'':'disabled'} aria-label="${ckBicUI().prevParasha}">${I.prev}</button>
+        <select class="fld-select" id="bicPPick" style="max-width:220px">
+          ${list.map(x=>`<option value="${x.key}" ${x.key===BIC.parasha?'selected':''}>${x.he}</option>`).join('')}
+        </select>
+        <button class="sm-aliyah-chip ck-arrow" id="bicPNext" ${pi<list.length-1?'':'disabled'} aria-label="${ckBicUI().nextParasha}">${I.next}</button>
+      </div>
+      ${!wasCurrentWeek?`<div class="sm-aliyah-tag">${ckBicUI().notThisWeek}</div>`:''}
+      <div class="ck-daynav-wrap">
+        <button class="sm-aliyah-chip ck-arrow" id="bicDPrev" ${di>0?'':'disabled'} aria-label="${ckBicUI().prevDay}">${I.prev}</button>
+        <div class="sm-aliyah-nav ck-daynav">
+          ${CHOK_DAYS.map((d,ix)=>`<button class="sm-aliyah-chip ck-daychip${d===BIC.day?' on':''}" data-bicday="${d}">${chokRowLabel(d,ix)}</button>`).join('')}
+        </div>
+        <button class="sm-aliyah-chip ck-arrow" id="bicDNext" ${di<CHOK_DAYS.length-1?'':'disabled'} aria-label="${ckBicUI().nextDay}">${I.next}</button>
+      </div>
+    </div>
+    <div class="sm-verses notranslate">${body}</div>
+    <div style="height:26px"></div>
+  </div>`;
+  const goP=key=>{ BIC.parasha=key; BIC.day=bicDayForToday(); ensureBicWeek(track,[key]).then(()=>{ if(TAB==='bicReader') renderBicReader(); }); };
+  document.getElementById('bicBack').onclick=()=>go('home');
+  app.querySelectorAll('.ck-track-btn[data-bicyear]').forEach(b=>b.onclick=()=>{
+    const y=b.dataset.bicyear; if(y===track) return;
+    S.bicYear=y; saveS();
+    const ny=bicNearestAvailableKey(y,BIC.parasha);
+    goP(ny);
+  });
+  const pp=document.getElementById('bicPPrev'); if(pp&&!pp.disabled) pp.onclick=()=>goP(list[pi-1].key);
+  const pn=document.getElementById('bicPNext'); if(pn&&!pn.disabled) pn.onclick=()=>goP(list[pi+1].key);
+  const pick=document.getElementById('bicPPick'); if(pick) pick.onchange=()=>goP(pick.value);
+  const dp=document.getElementById('bicDPrev'); if(dp&&!dp.disabled) dp.onclick=()=>{ BIC.day=CHOK_DAYS[di-1]; renderBicReader(); };
+  const dn=document.getElementById('bicDNext'); if(dn&&!dn.disabled) dn.onclick=()=>{ BIC.day=CHOK_DAYS[di+1]; renderBicReader(); };
+  app.querySelectorAll('.ck-daychip[data-bicday]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.bicday===BIC.day) return;
+    BIC.day=b.dataset.bicday; renderBicReader();
+  });
+  const onChip=app.querySelector('.ck-daychip.on'); if(onChip) onChip.scrollIntoView({inline:'center',block:'nearest'});
+  app.querySelectorAll('.ck-comm-btn[data-bic]').forEach(b=>b.onclick=()=>bicToggleComm(b));
+}
+
 /* ---------- reader ---------- */
 function renderChokReader(){
   stopAutoScroll();
@@ -3533,21 +3617,8 @@ function renderChokReader(){
   const commBody=items=>items.map(x=>
     `<div class="sm-verse-row"><span class="sm-vnum">${heNum(x.c)}:${heNum(x.v)}</span>`+
     x.segs.map(t=>`<div class="sm-he ck-comm-body">${t}</div>`).join('')+`</div>`).join('');
-  const bicBody=(items,track)=>{
-    BIC_CLARIFY={};
-    return items.map((h,i)=>{
-      const uid='bic:'+i+':'+h.chapter;
-      const t18n=bicI18nItem(track,h.unit,h.dayIdx,h.itemIdx);
-      const paragraphs=(t18n&&t18n.paragraphs)||h.paragraphs;
-      const clarification=(t18n&&t18n.clarification)||h.clarification;
-      BIC_CLARIFY[uid]=clarification||null;
-      const paras=(paragraphs||[]).map(p=>`<div class="sm-he">${p}</div>`).join('');
-      return `<div class="sm-verse-row"><span class="sm-vnum">${heNum(h.chapter)}</span>${paras}${bicCommBar(uid)}</div>`;
-    }).join('');
-  };
   const body = s.kind==='daf' ? dafBody(s.items)
     : s.kind==='comm' ? commBody(s.items)
-    : s.kind==='benishchai' ? bicBody(s.items,s.bicTrack)
     : s.kind==='rambam' ? ramBody(s.items)
     : s.kind==='tehillim' ? tehBody(s.items)
     : (s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse')
@@ -3578,8 +3649,6 @@ function renderChokReader(){
       ${s.key==='halacha'?`<div class="ck-track">
         <button class="ck-track-btn ${halachaChoice()==='rambam3'?'on':''}" data-halchoice="rambam3">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם')}</button>
         <button class="ck-track-btn ${halachaChoice()==='rambam1'?'on':''}" data-halchoice="rambam1">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים')}</button>
-        <button class="ck-track-btn ${halachaChoice()==='bic1'?'on':''}" data-halchoice="bic1">${ckBicUI().title} · ${ckBicUI().year1}</button>
-        <button class="ck-track-btn ${halachaChoice()==='bic2'?'on':''}" data-halchoice="bic2">${ckBicUI().title} · ${ckBicUI().year2}</button>
       </div>`:''}
       ${s.key==='musar'?`<div class="ck-track">
         ${MUSAR_WORKS.filter(w=>MCYC&&MCYC[w.key]).map(w=>
@@ -3635,15 +3704,11 @@ function renderChokReader(){
   const onSecChip=app.querySelector('.ck-secchip.on');
   if(onSecChip) onSecChip.scrollIntoView({inline:'center', block:'nearest'});
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
-  app.querySelectorAll('.ck-comm-btn[data-bic]').forEach(b=>b.onclick=()=>bicToggleComm(b));
   app.querySelectorAll('.ck-track-btn[data-halchoice]').forEach(b=>b.onclick=()=>{
     const v=b.dataset.halchoice;
     if(halachaChoice()===v) return;
     setHalachaChoice(v); saveS();
-    const ready = S.halachaWork==='benishchai'
-      ? ensureBicWeek(bicTrack(), ckKeysOf(CK.key))
-      : ensureCycDay(ckViewHDate());
-    ready.then(()=>{ if(TAB==='chokReader') renderChokReader(); });
+    ensureCycDay(ckViewHDate()).then(()=>{ if(TAB==='chokReader') renderChokReader(); });
   });
   app.querySelectorAll('.ck-track-btn[data-musar-work]').forEach(b=>b.onclick=()=>{
     const work=b.dataset.musarWork;
@@ -3794,11 +3859,11 @@ function announceChokFeature(){
    the app rather than firing the moment the update lands. Its own flag
    so the two announcements don't collide. */
 const BIC_ANNOUNCE={
-  he:{title:'בֶּן אִישׁ חַי בְּבֵית אֵ-ל', body:'מַסְלוּל בֶּן אִישׁ חַי נוֹסַף לַהֲלָכָה, מְתֻרְגָּם לְכׇל הַשָּׂפוֹת — אֶפְשָׁר לְהַחְלִיף בַּהֲגָדָּרוֹת'},
-  en:{title:'Ben Ish Chai on Beit-El', body:'A Ben Ish Chai track was added for Halacha, translated into every language - switch to it in Settings'},
-  fr:{title:'Ben Ish Haï sur Beit-El', body:'Un parcours Ben Ish Haï a été ajouté pour la Halakha, traduit dans toutes les langues - changez-le dans les Paramètres'},
-  ru:{title:'Бен Иш Хай на Beit-El', body:'Маршрут Бен Иш Хай добавлен для Ѓалахи, переведён на все языки - переключите его в Настройках'},
-  ka:{title:'ბენ იშ ხაი Beit-El-ზე', body:'ალახისთვის დაემატა „ბენ იშ ხაის" მარშრუტი, თარგმნილი ყველა ენაზე — გადართეთ პარამეტრებში'},
+  he:{title:'בֶּן אִישׁ חַי בְּבֵית אֵ-ל', body:'לְבֶן אִישׁ חַי יֵשׁ עַכְשָׁו קוּבִיָּה וְקוֹרֵא עַצְמָאִי בְּדַף הַבַּיִת'},
+  en:{title:'Ben Ish Chai on Beit-El', body:'Ben Ish Chai now has its own card and reader on the home screen'},
+  fr:{title:'Ben Ish Haï sur Beit-El', body:"Ben Ish Haï a maintenant sa propre carte et son lecteur sur l'écran d'accueil"},
+  ru:{title:'Бен Иш Хай на Beit-El', body:'У Бен Иш Хая теперь своя карточка и читалка на главном экране'},
+  ka:{title:'ბენ იშ ხაი Beit-El-ზე', body:'ბენ იშ ხაის ახლა აქვს საკუთარი ბარათი და წამკითხველი მთავარ გვერდზე'},
 };
 const BIC_ANNOUNCE_EARLIEST=Date.parse('2026-08-25T00:00:00Z');
 function announceBenishchaiFeature(){
@@ -3867,6 +3932,7 @@ function render(){
     else if(TAB==='chokParshiot') renderChokParshiot();
     else if(TAB==='chokList') renderChokList();
     else if(TAB==='chokReader') renderChokReader();
+    else if(TAB==='bicReader') renderBicReader();
     else if(TAB==='zoharYomi') renderZoharYomiReader();
     else if(TAB==='onboard') renderOnboard();
     else if(TAB==='chokPace') renderChokPace();
@@ -3897,7 +3963,7 @@ function render(){
    button on chok/zohar/shnayim's shared .reader-top, or into prayerReader's
    own icon group - rather than floated loose, so it can never land on top
    of a button that is already there. */
-const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1};
+const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1, bicReader:1};
 function mountToolsFab(){
   if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
   if(!app.firstChild) return;
@@ -4011,6 +4077,17 @@ function renderHome(){
       </div>`:''}
     </div>
 
+    <div class="quick-grid">
+      ${(function(){
+        const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
+        const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
+        return `<div class="q-tile" data-cat="benishchai" id="homeBicCard">
+          <div class="qt">${ckBicUI().title}</div>
+          <div class="qd">${p?p.he:(weekParshaKey?parshaName(weekParshaKey):'')}</div>
+        </div>`;
+      })()}
+    </div>
+
     ${(function(){
       const cd=zoharCycleDay(hd); if(!cd) return '';
       const done = zoharDone().includes(cd);
@@ -4036,6 +4113,11 @@ function renderHome(){
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
   const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
   const hzc=document.getElementById('homeZoharCard'); if(hzc) hzc.onclick=()=>go('zoharYomi');
+  const hbc=document.getElementById('homeBicCard');
+  if(hbc){
+    hbc.onclick=()=>openBic(bicNearestAvailableKey(bicTrack(),weekParshaKey), bicDayForToday());
+    if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
+  }
   const htc=document.getElementById('homeTikkuneiCard');
   if(htc){
     const cd=zoharCycleDay(hd);
@@ -5067,8 +5149,6 @@ function renderSettings(){
         <select id="selHalacha" class="fld-select" style="width:auto;min-width:190px">
           <option value="rambam3" ${halachaChoice()==='rambam3'?'selected':''}>${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם')}</option>
           <option value="rambam1" ${halachaChoice()==='rambam1'?'selected':''}>${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים')}</option>
-          <option value="bic1" ${halachaChoice()==='bic1'?'selected':''}>${ckBicUI().title} · ${ckBicUI().year1}</option>
-          <option value="bic2" ${halachaChoice()==='bic2'?'selected':''}>${ckBicUI().title} · ${ckBicUI().year2}</option>
         </select></div>
       ${MCYC?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">מוּסָר</div><div class="si-d">3 יְחִידוֹת לְיוֹם</div></div></div>
         <select id="selMusarWork" class="fld-select" style="width:auto;min-width:170px">
