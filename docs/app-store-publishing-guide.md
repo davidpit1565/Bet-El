@@ -52,21 +52,18 @@ upload, attach to a new "version" in App Store Connect, submit).
    keytool -genkeypair -v -keystore beitel-release.keystore \
      -alias beitel -keyalg RSA -keysize 2048 -validity 10000
    ```
-3. Tell Gradle about it — create `android/keystore.properties` (already
-   covered by `android/.gitignore`'s generic ignores; add it explicitly if
-   not, it must never be committed):
+3. Tell Gradle about it — create `android/keystore.properties` (git-ignored,
+   never commit it):
    ```
    storeFile=/absolute/path/to/beitel-release.keystore
    storePassword=<the password you set>
    keyAlias=beitel
    keyPassword=<the password you set>
    ```
-   and reference it from `android/app/build.gradle`'s `signingConfigs` /
-   `buildTypes.release` block (Capacitor's default `build.gradle` has a
-   commented-out or placeholder signing config — wire it to read from
-   `keystore.properties` the standard Capacitor/Android way; ask an agent
-   to do this edit once you have the keystore file, since it's a small
-   code change).
+   `android/app/build.gradle` already reads this file and wires it into the
+   release `signingConfig` automatically when it's present — no further
+   code change needed, just drop the file next to `android/app/` on
+   whatever machine builds the release AAB.
 4. Bump `versionCode` (integer, must increase every release) and
    `versionName` (the human-readable string) in `android/app/build.gradle`.
 5. Build the signed release bundle:
@@ -85,6 +82,41 @@ upload, attach to a new "version" in App Store Connect, submit).
 
 Every subsequent update repeats steps 4–5 (bump version, rebuild) and 7
 (upload the new `.aab` under a new release).
+
+## App Privacy (App Store Connect) / Data Safety (Play Console) answers
+
+Both stores make you fill in a data-collection questionnaire during
+submission. Since the app collects nothing and sends nothing to any server
+of ours, the honest answer to nearly every question is "no data collected":
+
+- Apple's "App Privacy" section: select **"Data Not Collected"**. This is
+  accurate — `localStorage` never leaves the device, and Google Fonts /
+  the QR-code share service only see what any font/CDN request or a
+  public share link already implies, not anything the App Store's
+  category options are asking about.
+- Google Play's "Data Safety" form: answer **"No"** to "Does your app
+  collect or share any of the required user data types?".
+- Encryption/export compliance (iOS): already answered by
+  `ITSAppUsesNonExemptEncryption = false` in `Info.plist`, so Xcode/App
+  Store Connect won't prompt for it on each upload.
+- Content rating questionnaire (both stores): no user-generated content,
+  no ads, no in-app purchases, no violence/gambling — this is religious
+  study content, so it qualifies for the lowest content-rating tier
+  ("4+"/"Everyone") on both stores.
+
+## Known gap to check before shipping: the reminder notification
+
+Settings' daily-reminder toggle currently uses the plain Web Notification
+API from JS, not `@capacitor/local-notifications`. That's fine for the PWA/
+browser install, but inside the native app shells this needs verifying:
+Android 13+ requires the app to actually request the `POST_NOTIFICATIONS`
+runtime permission (not just declare a manifest entry), and a reliably
+*scheduled* (not just "requested while open") daily notification generally
+needs the native Local Notifications plugin rather than the web API. Test
+this specifically on a real device before submitting — if it doesn't fire
+correctly, that's a follow-up task (`npm install @capacitor/local-notifications`
++ wiring `checkNotification()`/`checkBicNotification()` to it), not a
+blocker for getting the rest of the store listing ready.
 
 ## Multiple apps under one developer account
 

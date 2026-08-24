@@ -6,6 +6,12 @@
 *.ap_
 *.aab
 
+# Release signing key + credentials - generated locally per
+# docs/app-store-publishing-guide.md, never committed
+keystore.properties
+*.keystore
+*.jks
+
 # Files for the ART/Dalvik VM
 *.dex
 
