@@ -411,6 +411,7 @@ body::before{ /* subtle starfield/texture */
 .bic-mark-btn svg{width:26px;height:26px}
 .bic-mark-label{text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px}
 .q-tile.bic-round{border-radius:var(--radius)}
+.prayer-row.bic-round{border-radius:var(--radius-sm)}
 .prayer-row.bic-week-row{border:1px solid var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative;padding:6px 2px;min-width:0;text-align:center}
@@ -3790,7 +3791,7 @@ function renderBicParshiot(){
   const rows=bicParshiot(track).filter(p=>bicBookOf((p.covers&&p.covers[0])||p.key)===BIC_PARSHIOT_BOOK).map(p=>{
     const done=bicDoneSet(track,p.key).length;
     const isWeek=p.key===weekKey;
-    return `<div class="prayer-row${isWeek?' bic-week-row':''}" data-bicopen="${p.key}">
+    return `<div class="prayer-row bic-round${isWeek?' bic-week-row':''}" data-bicopen="${p.key}">
       <div><div class="prayer-row-title">${p.he}</div><div class="qd">${heNum(p.n)} ${t.halachot}${done?' · '+heNum(done)+' '+t.outOf+' '+heNum(p.n):''}</div></div>
       <span class="sm-week-chev">${I.chev}</span>
     </div>`;

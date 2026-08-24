@@ -1,4 +1,4 @@
-const CACHE = 'betel-tehilim-v6';
+const CACHE = 'betel-tehilim-v7';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const NET_TIMEOUT = 4000;
 
