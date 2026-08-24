@@ -35,6 +35,17 @@ in English as usual.
 - Every musar work runs at the same fixed pace, `ckMusarTrack()` = 3
   units/day (not configurable per-work). Cycle length is computed
   automatically by `ckMusarDurationLabel()`.
+- Musar also has its own home-screen entry point (`homeMusarCard` →
+  `renderMusarList()`, `TAB==='musarList'`), separate from - and in
+  addition to - the musar work-switcher already inside the Chok
+  LeYisrael reader. It lists all 6 works, each on its own row with
+  today's `ckMusarSourceLabel()` (with the book-name prefix stripped
+  since the row's own title already shows it) and a "today" button
+  (`openMusarYomi(work)` → `renderMusarYomiReader()`, `TAB==='musarYomi'`)
+  that jumps straight to that work's reading for the current date - no
+  separate position to track beyond which work is open, since
+  `ckMusarIndexes`/`ensureMusarDay` are already purely date-driven
+  (cycle forever, same mechanism the Chok LeYisrael musar section uses).
 - Ben Ish Chai is its **own standalone section** - a home-screen card
   (`homeBicCard`) and reader (`renderBicReader()`, `TAB==='bicReader'`,
   opened via `openBic(parashaKey,day)`), independent of Chok LeYisrael and
@@ -82,6 +93,22 @@ in English as usual.
   expected, not a bug. The biur/`clarification` text itself has no nikud
   (unlike the halacha body, sourced from a vocalized original) - only
   Dicta-run text gets nikud, and the biur hasn't been run through it.
+- The standalone Ben Ish Chai reader's sticky header is tall (year toggle
+  + parasha picker + day nav on top of the back/title row), so everything
+  below the back/title row is wrapped in its own `.bic-collapse` div that
+  the shared scroll-direction listener (the `initNavScrollHide` IIFE,
+  originally built for hiding the bottom nav) also collapses on scroll-down
+  and reveals on scroll-up or after a pause - same interaction as
+  Safari/YouTube's chrome, reusing the existing listener rather than adding
+  a second one. Any other reader that grows a similarly tall sticky header
+  can opt into the same behavior by giving its collapsible portion the
+  `.bic-collapse` class - the listener queries for it by class, not by tab.
+- Ben Ish Chai also gets its own daily local Notification
+  (`checkBicNotification()`, mirroring `checkNotification()`'s Tehillim
+  reminder) naming the current week's parasha, gated by the same
+  `S.notifEnabled`/`S.notifTime` Settings toggle and its own
+  once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
+  for it specifically, enabling the general reminder toggle enables both.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
