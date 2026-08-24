@@ -677,6 +677,11 @@ input,select,button{max-width:100%;box-sizing:border-box}
   color:var(--muted);font-size:12.5px;line-height:1.9;opacity:.85}
 .memorial span{font-size:11px;letter-spacing:.5px}
 [data-theme="dark"] .memorial{color:#8d97ad}
+.social-links{display:flex;justify-content:center;gap:14px;margin:10px 0 4px}
+.social-link{width:36px;height:36px;border-radius:50%;border:var(--glass-border);background:var(--panel);
+  color:var(--gold);display:flex;align-items:center;justify-content:center}
+.social-link:active{transform:scale(.92)}
+.social-link svg{width:18px;height:18px}
 .stats-row{display:flex;gap:10px;margin:14px 4px 0}
 .stat-card{flex:1;position:relative;overflow:hidden;background:linear-gradient(155deg,var(--panel) 55%,rgba(212,175,95,.14) 100%);
   border:1px solid var(--line-strong);border-radius:22px;
@@ -805,10 +810,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-track{display:flex;gap:6px;justify-content:center;margin:0 0 8px;flex-wrap:wrap}
 .ck-track-btn{font-family:var(--font-sacred);font-size:14px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-track-btn.on{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
-.ck-resume{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:9px 12px;border-radius:10px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
-.ck-resume-text{font-family:var(--font-sacred);font-size:13px;display:flex;align-items:center;gap:6px}
-.ck-resume-btns{display:flex;gap:6px}
-.ck-resume-btn{font-family:var(--font-sacred);font-size:14px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.ck-resume{display:flex;flex-direction:column;gap:8px;margin:0 0 10px;padding:10px 12px;border-radius:10px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
+.ck-resume-text{font-family:var(--font-sacred);font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ck-resume-text svg{width:15px;height:15px;flex:none;color:var(--gold,#b8963f)}
+.ck-kavana{font-family:var(--font-sacred);font-size:13px;line-height:1.7;color:var(--muted);text-align:center;padding:6px 10px;margin:2px 0 4px}
+.ck-resume-btns{display:flex;gap:8px}
+.ck-resume-btn{flex:1;text-align:center;font-family:var(--font-sacred);font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-resume-btn.primary{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
 .sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
 .sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
@@ -1204,6 +1211,20 @@ const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending upda
 const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed times, ready to reveal now
 const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
 function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.row1.join(' · ')}<br>${MEMORIAL.row2.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
+/* Rav's social links, shown right under the memorial dedication on the home
+   screen - each its own platform icon, opening in a new tab/browser rather
+   than trying to deep-link into each app (simplest, and works identically
+   inside the native Capacitor shells too). */
+const SOCIAL_LINKS=[
+  {key:'instagram', url:'https://www.instagram.com/rabi.itschak.pitchkhadze', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>'},
+  {key:'youtube', url:'https://www.youtube.com/@rabi.itschak.pitchkhadze', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.5 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/></svg>'},
+  {key:'tiktok', url:'https://www.tiktok.com/@rabi.itschak.pitchkhadze', icon:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14.5 3h2.6c.2 1.6 1.3 3 3 3.4v2.6c-1.1 0-2.2-.3-3.1-.9v6.3a5.1 5.1 0 1 1-5.1-5.1c.3 0 .6 0 .9.1v2.7a2.4 2.4 0 1 0 1.7 2.3V3z"/></svg>'},
+];
+function socialLinksHTML(){
+  return `<div class="social-links">${SOCIAL_LINKS.map(s=>
+    `<a class="social-link" href="${s.url}" target="_blank" rel="noopener" aria-label="${s.key}">${s.icon}</a>`
+  ).join('')}</div>`;
+}
 /* those who helped build this app */
 const HATZLACHA = {row1:['אֱלִי אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית'],row2:['דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
 function hatzlachaHTML(){ return `<div class="memorial">לְהַצְלָחַת<br>${HATZLACHA.row1.join(' · ')}<br>${HATZLACHA.row2.join(' · ')}</div>`; }
@@ -1311,7 +1332,7 @@ function openPrayer(prayerKey){
   }
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, notifTime:'08:00' };
+const DEF = { theme:'light', fontScale:1, division:'monthly', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); }
@@ -2568,6 +2589,16 @@ function wireToolsFab(){
   const as=document.getElementById('gAutoScroll'); if(as) as.onclick=e=>toggleAutoScroll(e.currentTarget);
   const hm=document.getElementById('gHome'); if(hm) hm.onclick=()=>go('home');
 }
+/* Close the quick-tools panel on a single tap anywhere else on the screen,
+   not just by re-tapping the dots button. Registered once, globally - it
+   looks up #gTools fresh on every click (the element is re-created on every
+   render) rather than capturing a reference, so no per-render listener
+   needs adding or cleaning up. */
+document.addEventListener('click', e=>{
+  const box=document.getElementById('gTools');
+  if(!box || box.classList.contains('collapsed') || box.contains(e.target)) return;
+  box.classList.add('collapsed');
+});
 
 /* ---------- the date-driven cycles: Rambam and Zohar ---------- */
 /* Both run by the calendar, Shabbat included, so their position is a day count
@@ -3475,6 +3506,13 @@ function renderChokUnit(){
 }
 
 /* ---------- browse: five books, then parasha, then day ---------- */
+/* The Kavana recited before the day's Torah portion in Chok LeYisrael is a
+   fixed liturgical text (not something to author from memory - a wrong
+   sacred text is worse than a missing one). Left null - a real,
+   nikud-vocalized source is still needed - until then CK_KAVANA renders
+   nothing (see ${s.key==='torah'&&CK_KAVANA?...} in renderChokReader) so
+   nothing incorrect ever ships; the display slot itself is already wired. */
+const CK_KAVANA=null;
 const CK_BOOKS=[
   {en:'Genesis',     he:'בְּרֵאשִׁית'},
   {en:'Exodus',      he:'שְׁמוֹת'},
@@ -3963,6 +4001,7 @@ function renderChokReader(){
         <button class="icon-btn" id="ckBack">${I.prev}</button>
         <div class="reader-title">${parshaName(CK.key)}</div>
       </div>
+      <div class="bic-collapse">
       <div class="ck-daynav-wrap">
         <button class="sm-aliyah-chip ck-arrow" id="ckDayPrev" ${ckStepDay(-1)?'':'disabled'} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
         <div class="sm-aliyah-nav ck-daynav">
@@ -3973,6 +4012,7 @@ function renderChokReader(){
       <div class="sm-aliyah-tag ${_anim}">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
       <div class="ck-viewdate">${localizeHebDateStr(ckViewHDate().renderGematriya(true))}</div>
       ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
+      ${s.key==='torah'&&CK_KAVANA?`<div class="ck-kavana">${CK_KAVANA}</div>`:''}
       ${s.key==='halacha'?`<div class="ck-track">
         <button class="ck-track-btn ${halachaChoice()==='rambam3'?'on':''}" data-halchoice="rambam3">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם')}</button>
         <button class="ck-track-btn ${halachaChoice()==='rambam1'?'on':''}" data-halchoice="rambam1">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁנָה · שְׁלֹשָׁה פְּרָקִים')}</button>
@@ -3989,6 +4029,7 @@ function renderChokReader(){
           ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${sec.he}</button>`).join('')}
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
+      </div>
       </div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
@@ -4097,11 +4138,13 @@ function chokMissedSlots(){
 function chokCheckReminders(){
   if(!notifReady()) return;
   const now=new Date(), todayStr=now.toISOString().slice(0,10);
-  /* Thursday after sunset: the sixth Hebrew day has begun, so the night portion is due */
+  /* Thursday, once chatzot halayla (halachic midnight) of the night ahead has
+     passed - not just sunset - so the night portion nudge lands once the
+     night is properly under way */
   if(now.getDay()===4 && localStorage.getItem('betel_chok_night_notif')!==todayStr){
-    let sunset=null;
-    try{ sunset=zmanimFor(civilToday()).sunset(); }catch(e){}
-    if(sunset && now>=sunset){
+    let cn=null;
+    try{ cn=zmanimFor(civilToday()).chatzotNight(); }catch(e){}
+    if(cn && now>=cn){
       localStorage.setItem('betel_chok_night_notif',todayStr);
       const key=ckWeekKeyFor(now);
       if(key && !chokIsDone(key,'night')){
@@ -4110,11 +4153,9 @@ function chokCheckReminders(){
       }
     }
   }
-  /* daily morning reminder: same time-of-day as the Tehillim reminder, so
-     Settings stays a single time field rather than growing a second one */
+  /* daily morning reminder: its own fixed time (09:40) */
   if(localStorage.getItem('betel_chok_morning_notif')!==todayStr){
-    const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-    if(now.getHours()>hh||(now.getHours()===hh&&now.getMinutes()>=mm)){
+    if(now.getHours()>9||(now.getHours()===9&&now.getMinutes()>=40)){
       const t=ckTodayLine();
       if(t && !chokIsDone(t.key,t.day)){
         localStorage.setItem('betel_chok_morning_notif',todayStr);
@@ -4124,11 +4165,9 @@ function chokCheckReminders(){
     }
   }
   /* Tikkunei HaZohar reminder: only fires during its own 40-day window
-     (Rosh Chodesh Elul to Yom Kippur), same time-of-day as the other
-     reminders so Settings still has just the one time field */
+     (Rosh Chodesh Elul to Yom Kippur), its own fixed time (18:00) */
   if(localStorage.getItem('betel_zohar_morning_notif')!==todayStr){
-    const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-    if(now.getHours()>hh||(now.getHours()===hh&&now.getMinutes()>=mm)){
+    if(now.getHours()>=18){
       const cd=zoharCycleDay(currentHDate());
       if(cd && !zoharDone().includes(cd)){
         localStorage.setItem('betel_zohar_morning_notif',todayStr);
@@ -4138,10 +4177,9 @@ function chokCheckReminders(){
     }
   }
   /* Friday: Shnayim Mikra veEchad Targum should be finished before Shabbat,
-     same time-of-day as the other reminders */
+     its own fixed time (12:00) */
   if(now.getDay()===5 && localStorage.getItem('betel_sm_morning_notif')!==todayStr){
-    const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-    if(now.getHours()>hh||(now.getHours()===hh&&now.getMinutes()>=mm)){
+    if(now.getHours()>=12){
       const key=currentParshaKey();
       if(key && !smIsDone(key)){
         localStorage.setItem('betel_sm_morning_notif',todayStr);
@@ -4150,12 +4188,25 @@ function chokCheckReminders(){
       }
     }
   }
-  /* the day after Yom Tov: ask about the portion that could not be studied */
-  const miss=chokMissedSlots();
-  if(miss.length && localStorage.getItem('betel_chok_makeup_notif')!==todayStr){
-    localStorage.setItem('betel_chok_makeup_notif',todayStr);
-    const t=ckNotifText();
-    fireNotif(t.chokTitle,t.makeupPrefix+miss.map(m=>m.label).join(t.makeupJoin)+t.makeupSuffix,ckNotifDir(),S.lang||'he');
+  /* 60 minutes before sunset: if today's own Chok LeYisrael portion still
+     isn't marked done, nudge with real progress (how much of this week's
+     7 slots are already done) rather than a flat "you forgot" message */
+  if(localStorage.getItem('betel_chok_presunset_notif')!==todayStr){
+    let sunset=null;
+    try{ sunset=zmanimFor(civilToday()).sunset(); }catch(e){}
+    if(sunset){
+      const warnAt=new Date(sunset.getTime()-60*60000);
+      if(now>=warnAt && now<sunset){
+        const t=ckTodayLine();
+        if(t && !chokIsDone(t.key,t.day)){
+          const key=ckWeekKeyFor(now);
+          const doneCount=key?CHOK_ROWS.filter(([d])=>chokIsDone(key,d)).length:0;
+          localStorage.setItem('betel_chok_presunset_notif',todayStr);
+          const tx=ckNotifText();
+          fireNotif(tx.chokTitle,tx.presunsetPrefix+heNum(doneCount)+tx.presunsetJoin+heNum(CHOK_ROWS.length)+tx.presunsetSuffix,ckNotifDir(),S.lang||'he');
+        }
+      }
+    }
   }
 }
 
@@ -4204,7 +4255,7 @@ function announceBenishchaiFeature(){
    a respectful place for it. */
 const CK_NOTIF={
   he:{chokTitle:'חוֹק לְיִשְׂרָאֵל', nightBody:'לֵיל שִׁשִּׁי · חוֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם מְחַכֶּה — סַיֵּם לִפְנֵי שַׁבָּת',
-      makeupPrefix:'עוֹד לֹא מְאֻחָר לְהַשְׁלִים אֶת חוֹק לְיִשְׂרָאֵל שֶׁל ', makeupJoin:' וְ', makeupSuffix:'',
+      presunsetPrefix:'הִשְׁלַמְתָּ ', presunsetJoin:' מִתּוֹךְ ', presunsetSuffix:' חֶלְקֵי חוֹק לְיִשְׂרָאֵל הַשָּׁבוּעַ — הַשְׁלֵם לִפְנֵי הַשְּׁקִיעָה',
       chokMorningBody:'חוֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם מוּכָן בִּשְׁבִילְךָ — כַּמָּה דַּקּוֹת שֶׁל תּוֹרָה',
       tikkuneiTitle:'תִּיקּוּנֵי הַזֹּהַר', tikkuneiBody:'יְמֵי הָרַחֲמִים · עֵת לְעוֹרֵר אֶת הַלֵּב — תִּיקּוּנֵי הַזֹּהַר שֶׁל הַיּוֹם',
       smTitle:'שְׁנַיִם מִקְרָא', smBody:'יוֹם שִׁשִּׁי · שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם לִכְבוֹד שַׁבָּת קֹדֶשׁ',
@@ -4212,7 +4263,7 @@ const CK_NOTIF={
       bicTitle:'בֶּן אִישׁ חַי', bicBody:'הֲלָכָה יוֹמִית מְחַכָּה לְךָ בְּבֶן אִישׁ חַי: ',
       musarTitle:'מוּסָר', musarBody:'כַּמָּה דַּקּוֹת שֶׁל מוּסָר לַנֶּפֶשׁ מְחַכּוֹת לְךָ הַיּוֹם בְּ'},
   en:{chokTitle:'Chok LeYisrael', nightBody:"Friday night · today's Chok LeYisrael is waiting — finish before Shabbat",
-      makeupPrefix:"It's not too late to complete Chok LeYisrael for ", makeupJoin:' and ', makeupSuffix:'',
+      presunsetPrefix:'You’ve completed ', presunsetJoin:' out of ', presunsetSuffix:' parts of this week’s Chok LeYisrael — finish before sunset',
       chokMorningBody:'Today’s Chok LeYisrael is ready for you — a few minutes of Torah',
       tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:"Days of mercy · time to awaken the heart — today's Tikkunei HaZohar",
       smTitle:'Shnayim Mikra', smBody:'Friday · Shnayim Mikra veEchad Targum in honor of the holy Shabbat',
@@ -4220,7 +4271,7 @@ const CK_NOTIF={
       bicTitle:'Ben Ish Chai', bicBody:"Today's halacha is waiting for you in Ben Ish Chai: ",
       musarTitle:'Musar', musarBody:'A few minutes of Musar for the soul await you today in '},
   fr:{chokTitle:'Chok LeYisraël', nightBody:"Vendredi soir · le Chok LeYisraël du jour t'attend — termine avant Chabbat",
-      makeupPrefix:"Il n'est pas trop tard pour terminer le Chok LeYisraël de ", makeupJoin:' et ', makeupSuffix:'',
+      presunsetPrefix:'Tu as terminé ', presunsetJoin:' sur ', presunsetSuffix:' parties du Chok LeYisraël de cette semaine — termine avant le coucher du soleil',
       chokMorningBody:'Le Chok LeYisraël du jour est prêt pour toi — quelques minutes de Torah',
       tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:"Jours de miséricorde · l'heure d'éveiller le cœur — le Tikkounei HaZohar du jour",
       smTitle:'Chnayim Mikra', smBody:'Vendredi · Chnayim mikra véékhad targoum en l’honneur du Chabbat saint',
@@ -4228,7 +4279,7 @@ const CK_NOTIF={
       bicTitle:"Ben Ish 'Haï", bicBody:"Aujourd'hui, une halacha t'attend dans Ben Ish 'Haï : ",
       musarTitle:'Moussar', musarBody:"Quelques minutes de Moussar pour l'âme t'attendent aujourd'hui dans "},
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · сегодняшний Хок ЛеИсраэль ждёт вас — завершите до Шаббата',
-      makeupPrefix:'Ещё не поздно завершить Хок ЛеИсраэль за ', makeupJoin:' и ', makeupSuffix:'',
+      presunsetPrefix:'Вы завершили ', presunsetJoin:' из ', presunsetSuffix:' частей Хок ЛеИсраэль на этой неделе — завершите до заката',
       chokMorningBody:'Сегодняшний Хок ЛеИсраэль готов для вас — несколько минут Торы',
       tikkuneiTitle:'Тиккуне газогар', tikkuneiBody:'Дни милосердия · время пробудить сердце — сегодняшний Тиккуне ѓа-Зогар',
       smTitle:'Шнайим микра', smBody:'Пятница · Шнайим микра веехад таргум в честь святой субботы',
@@ -4236,7 +4287,7 @@ const CK_NOTIF={
       bicTitle:'Бен Иш Хай', bicBody:'Сегодня вас ждёт ѓалаха в Бен Иш Хай: ',
       musarTitle:'Мусар', musarBody:'Несколько минут Мусара для души ждут вас сегодня в '},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · დღევანდელი ხოყ ლეისრაელი გელოდებათ — დაასრულეთ შაბათამდე',
-      makeupPrefix:'ჯერ არ არის გვიან დაასრულოთ ხოყ ლეისრაელ ', makeupJoin:' და ', makeupSuffix:'',
+      presunsetPrefix:'დაასრულეთ ', presunsetJoin:'-დან ', presunsetSuffix:' ხოყ ლეისრაელის ნაწილი ამ კვირას — დაასრულეთ მზის ჩასვლამდე',
       chokMorningBody:'დღევანდელი ხოყ ლეისრაელ მზადაა თქვენთვის — რამდენიმე წუთი თორას',
       tikkuneiTitle:'თიკკუნე ჰაზოჰარ', tikkuneiBody:'წყალობის დღეები · დროა გულის გასაღვიძებლად — დღევანდელი თიკკუნე ჰაზოჰარ',
       smTitle:'შნაიიმ მიკრა', smBody:'პარასკევი · შნაიიმ მიკრა ვეეხად თარგუმი წმინდა შაბათის პატივსაცემად',
@@ -4484,6 +4535,7 @@ function renderHome(){
     </div>
     ${hatzlachaHTML()}
     ${memorialHTML()}
+    ${socialLinksHTML()}
     ${ornament()}
   </div>`;
   document.getElementById('homeTehillimCard').onclick=()=>renderContinuous(chs,hd);
@@ -5585,7 +5637,7 @@ function renderSettings(){
 
     <div class="set-group">
       <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל · בְּשָׁעָה 08:00 בַּבֹּקֶר':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
     </div>
 
     <div class="set-group">
@@ -5952,8 +6004,9 @@ render();
 })();
 function checkNotification(){
   if(!notifReady()) return;
-  const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-  if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
+  const now=new Date();
+  let cz=null; try{ cz=zmanimFor(civilToday()).chatzot(); }catch(e){}
+  if(!cz || now<cz) return;
   const todayStr=now.toISOString().slice(0,10);
   if(localStorage.getItem('betel_notif_sent')===todayStr) return;
   try{
@@ -5965,7 +6018,7 @@ function checkNotification(){
     fireNotif(t.tehTitle,t.tehBody+left+t.tehSuffix,ckNotifDir(),S.lang||'he');
   }catch(e){}
 }
-/* Daily Ben Ish Chai reminder, same gating (S.notifEnabled/S.notifTime) and
+/* Daily Ben Ish Chai reminder (fixed at 09:55), same S.notifEnabled gating and
    once-per-day flag pattern as checkNotification() above, but its own flag
    so the two don't collide. Needs BIC_INDEX to name today's parasha, which
    is not necessarily loaded yet at boot - unlike checkNotification() this
@@ -5973,8 +6026,8 @@ function checkNotification(){
    once that data resolves and a real parasha name is found. */
 function checkBicNotification(){
   if(!notifReady()) return;
-  const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-  if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
+  const now=new Date();
+  if(now.getHours()<9||(now.getHours()===9&&now.getMinutes()<55)) return;
   const todayStr=now.toISOString().slice(0,10);
   if(localStorage.getItem('betel_bic_notif_sent')===todayStr) return;
   ensureBicIndex().then(()=>{
@@ -5993,8 +6046,8 @@ function checkBicNotification(){
    naming it, and its own flag so it doesn't collide with the others. */
 function checkMusarNotification(){
   if(!notifReady()) return;
-  const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
-  if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
+  const now=new Date();
+  if(now.getHours()<20) return;
   const todayStr=now.toISOString().slice(0,10);
   if(localStorage.getItem('betel_musar_notif_sent')===todayStr) return;
   ensureMusarCycles().then(()=>{
