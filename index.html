@@ -410,9 +410,9 @@ body::before{ /* subtle starfield/texture */
 .bic-mark-btn.on{background:var(--gold-grad);color:#2a1e05;border-color:transparent}
 .bic-mark-btn svg{width:26px;height:26px}
 .bic-mark-label{text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px}
-.q-tile.bic-round{border-radius:var(--radius)}
-.prayer-row.bic-round{border-radius:var(--radius-sm)}
-.prayer-row.bic-week-row{border:1px solid var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset}
+.q-tile.round-card{border-radius:var(--radius)}
+.prayer-row.round-card{border-radius:var(--radius-sm)}
+.prayer-row.week-row{border:1px solid var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative;padding:6px 2px;min-width:0;text-align:center}
 .nav-item svg{width:24px;height:24px;flex:none;transition:.2s var(--ease)}
@@ -3551,9 +3551,11 @@ function renderChokBooks(){
       </div>`:''}
       <div class="search-box" id="ckSearchOpen" style="cursor:pointer">${I.search}
         <input readonly placeholder="חִפּוּשׂ בְּכָל הָאַפְּלִיקַצְיָה" style="pointer-events:none"/></div>
-      <div class="prayers-list">
-        ${CK_BOOKS.map(b=>`<div class="prayer-row" data-book="${b.en}">
-          <span class="prayer-row-title">${ckBookName(b)}</span>${I.chev}</div>`).join('')}
+      <div class="quick-grid">
+        ${CK_BOOKS.map(b=>`<div class="q-tile round-card" data-cat="chok" data-book="${b.en}">
+          <div class="qt">${ckBookName(b)}</div>
+          <div class="qd">${heNum(ckParshiotOf(b.en).length)} פָּרָשִׁיּוֹת</div>
+        </div>`).join('')}
       </div>
       ${ornament()}
     </div>`;
@@ -3561,7 +3563,7 @@ function renderChokBooks(){
     if(tc) tc.onclick=()=>openChok(t.key,t.day,null);
     const so=document.getElementById('ckSearchOpen');
     if(so) so.onclick=()=>{ CKS.q=''; go('chokSearch'); };
-    app.querySelectorAll('#app .prayer-row[data-book]').forEach(r=>r.onclick=()=>{
+    app.querySelectorAll('#app [data-book]').forEach(r=>r.onclick=()=>{
       CK.book=r.dataset.book; go('chokParshiot');
     });
     tr(app);
@@ -3581,8 +3583,11 @@ function renderChokParshiot(){
       <button class="ck-yr-btn" data-yd="1" ${ckYear()<CK_YEAR_MAX?'':'disabled'}>${I.next}</button>
     </div>
     <div class="prayers-list">
-      ${list.map(k=>`<div class="prayer-row" data-key="${k}">
-        <span class="prayer-row-title">${parshaName(k)}${today&&ckKeysOf(today.key).indexOf(k)>=0?' · הַשָּׁבוּעַ':''}</span>${I.chev}</div>`).join('')}
+      ${list.map(k=>{
+        const isWeek=today&&ckKeysOf(today.key).indexOf(k)>=0;
+        return `<div class="prayer-row round-card${isWeek?' week-row':''}" data-key="${k}">
+        <span class="prayer-row-title">${parshaName(k)}${isWeek?' · הַשָּׁבוּעַ':''}</span>${I.chev}</div>`;
+      }).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -3764,7 +3769,7 @@ function renderBicParshiot(){
       const book=bicBookOf((p.covers&&p.covers[0])||p.key);
       if(book) counts[book]=(counts[book]||0)+1;
     });
-    const tiles=BIC_TORAH_BOOKS.map(([book])=>`<div class="q-tile bic-round" data-cat="benishchai" data-bicbook="${book}">
+    const tiles=BIC_TORAH_BOOKS.map(([book])=>`<div class="q-tile round-card" data-cat="benishchai" data-bicbook="${book}">
       <div class="qt">${book}</div>
       <div class="qd">${heNum(counts[book]||0)} ${t.parshiotWord}</div>
     </div>`).join('');
@@ -3791,7 +3796,7 @@ function renderBicParshiot(){
   const rows=bicParshiot(track).filter(p=>bicBookOf((p.covers&&p.covers[0])||p.key)===BIC_PARSHIOT_BOOK).map(p=>{
     const done=bicDoneSet(track,p.key).length;
     const isWeek=p.key===weekKey;
-    return `<div class="prayer-row bic-round${isWeek?' bic-week-row':''}" data-bicopen="${p.key}">
+    return `<div class="prayer-row round-card${isWeek?' week-row':''}" data-bicopen="${p.key}">
       <div><div class="prayer-row-title">${p.he}</div><div class="qd">${heNum(p.n)} ${t.halachot}${done?' · '+heNum(done)+' '+t.outOf+' '+heNum(p.n):''}</div></div>
       <span class="sm-week-chev">${I.chev}</span>
     </div>`;
