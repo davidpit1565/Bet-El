@@ -104,19 +104,28 @@ of ours, the honest answer to nearly every question is "no data collected":
   study content, so it qualifies for the lowest content-rating tier
   ("4+"/"Everyone") on both stores.
 
-## Known gap to check before shipping: the reminder notification
+## Reminder notification: wired, but still needs a real-device check
 
-Settings' daily-reminder toggle currently uses the plain Web Notification
-API from JS, not `@capacitor/local-notifications`. That's fine for the PWA/
-browser install, but inside the native app shells this needs verifying:
-Android 13+ requires the app to actually request the `POST_NOTIFICATIONS`
-runtime permission (not just declare a manifest entry), and a reliably
-*scheduled* (not just "requested while open") daily notification generally
-needs the native Local Notifications plugin rather than the web API. Test
-this specifically on a real device before submitting — if it doesn't fire
-correctly, that's a follow-up task (`npm install @capacitor/local-notifications`
-+ wiring `checkNotification()`/`checkBicNotification()` to it), not a
-blocker for getting the rest of the store listing ready.
+Settings' daily-reminder toggle now routes through `@capacitor/local-
+notifications` on the native iOS/Android app shells (`notifReady()`/
+`fireNotif()` in index.html), not just the plain Web Notification API used
+by the PWA/browser install. Since this app has no JS bundler, the plugin
+is loaded as a vendored UMD build (`capacitor-core.js` +
+`capacitor-local-notifications.js`, plain `<script>` tags, copied straight
+from `node_modules/*/dist` — re-copy them if either package is upgraded)
+rather than `import`ed.
+
+This has only been verified in a headless browser (the web fallback path
+fires without errors). It has **not** been verified on a real device yet —
+do that before submitting:
+- Android 13+: confirm the app actually prompts for the `POST_NOTIFICATIONS`
+  runtime permission when the Settings toggle is turned on, and that a
+  reminder still fires the next day when the app isn't open.
+- iOS: confirm the same permission prompt and next-day firing.
+
+If it doesn't fire correctly, the fix is inside `notifLocalPlugin()`/
+`fireNotif()` in index.html - not a blocker for getting the rest of the
+store listing ready in the meantime.
 
 ## Multiple apps under one developer account
 
