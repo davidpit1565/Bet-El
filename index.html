@@ -410,6 +410,8 @@ body::before{ /* subtle starfield/texture */
 .bic-mark-btn.on{background:var(--gold-grad);color:#2a1e05;border-color:transparent}
 .bic-mark-btn svg{width:26px;height:26px}
 .bic-mark-label{text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+.q-tile.bic-round{border-radius:var(--radius)}
+.prayer-row.bic-week-row{border:1px solid var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative;padding:6px 2px;min-width:0;text-align:center}
 .nav-item svg{width:24px;height:24px;flex:none;transition:.2s var(--ease)}
@@ -2692,23 +2694,23 @@ const BIC_UI={
   he:{title:'בֶּן אִישׁ חַי', year1:'שָׁנָה א׳', year2:'שָׁנָה ב׳', halacha:'הֲלָכָה', biur:'בֵּיאוּר', noBiur:'אֵין בֵּיאוּר לַהֲלָכָה הַזֹּאת',
     prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', prevHalacha:'הַהֲלָכָה הַקּוֹדֶמֶת', nextHalacha:'הַהֲלָכָה הַבָּאָה',
     intro:'פְּתִיחָה', introChip:'פ׳', outOf:'מִתּוֹךְ', halachot:'הֲלָכוֹת', startLearning:'הַתְחֵל לִלְמֹד', continueLearning:'הַמְשֵׁךְ לִלְמֹד',
-    yourProgress:'הַהִתְקַדְּמוּת שֶׁלְּךָ', weekParasha:'פָּרָשַׁת הַשָּׁבוּעַ', weekTab:'הַשָּׁבוּעַ', allParshiotTab:'כׇּל הַפָּרָשִׁיּוֹת', markDone:'סַמֵּן כְּהוּשְׁלַם'},
+    yourProgress:'הַהִתְקַדְּמוּת שֶׁלְּךָ', weekParasha:'פָּרָשַׁת הַשָּׁבוּעַ', weekTab:'הַשָּׁבוּעַ', allParshiotTab:'כׇּל הַפָּרָשִׁיּוֹת', markDone:'סַמֵּן כְּהוּשְׁלַם', parshiotWord:'פָּרָשִׁיּוֹת'},
   en:{title:'Ben Ish Chai', year1:'Year 1', year2:'Year 2', halacha:'Halacha', biur:'Explanation', noBiur:'No explanation for this halacha',
     prevDay:'Previous day', nextDay:'Next day', prevHalacha:'Previous halacha', nextHalacha:'Next halacha',
     intro:'Introduction', introChip:'I', outOf:'of', halachot:'halachot', startLearning:'Start learning', continueLearning:'Continue learning',
-    yourProgress:'Your progress', weekParasha:"This week's parasha", weekTab:'This week', allParshiotTab:'All parshiot', markDone:'Mark complete'},
+    yourProgress:'Your progress', weekParasha:"This week's parasha", weekTab:'This week', allParshiotTab:'All parshiot', markDone:'Mark complete', parshiotWord:'parshiot'},
   fr:{title:"Ben Ish 'Haï", year1:'Année 1', year2:'Année 2', halacha:'Halakha', biur:'Explication', noBiur:'Aucune explication pour cette halakha',
     prevDay:'Jour précédent', nextDay:'Jour suivant', prevHalacha:'Halakha précédente', nextHalacha:'Halakha suivante',
     intro:'Introduction', introChip:'I', outOf:'sur', halachot:'halakhot', startLearning:"Commencer à étudier", continueLearning:"Continuer l'étude",
-    yourProgress:'Votre progression', weekParasha:'Paracha de la semaine', weekTab:'Cette semaine', allParshiotTab:'Toutes les parachiot', markDone:'Marquer comme terminé'},
+    yourProgress:'Votre progression', weekParasha:'Paracha de la semaine', weekTab:'Cette semaine', allParshiotTab:'Toutes les parachiot', markDone:'Marquer comme terminé', parshiotWord:'parachiot'},
   ru:{title:'Бен Иш Хай', year1:'Год 1', year2:'Год 2', halacha:'Ѓалаха', biur:'Разъяснение', noBiur:'Нет разъяснения к этой Ѓалахе',
     prevDay:'Предыдущий день', nextDay:'Следующий день', prevHalacha:'Предыдущая Ѓалаха', nextHalacha:'Следующая Ѓалаха',
     intro:'Введение', introChip:'В', outOf:'из', halachot:'Ѓалахот', startLearning:'Начать изучение', continueLearning:'Продолжить изучение',
-    yourProgress:'Ваш прогресс', weekParasha:'Недельная глава', weekTab:'На этой неделе', allParshiotTab:'Все главы', markDone:'Отметить как выполненное'},
+    yourProgress:'Ваш прогресс', weekParasha:'Недельная глава', weekTab:'На этой неделе', allParshiotTab:'Все главы', markDone:'Отметить как выполненное', parshiotWord:'глав'},
   ka:{title:'ბენ იშ ხაი', year1:'პირველი წელი', year2:'მეორე წელი', halacha:'ალახა', biur:'განმარტება', noBiur:'ამ ალახაზე განმარტება არ არის',
     prevDay:'წინა დღე', nextDay:'შემდეგი დღე', prevHalacha:'წინა ალახა', nextHalacha:'შემდეგი ალახა',
     intro:'შესავალი', introChip:'შ', outOf:'დან', halachot:'ალახები', startLearning:'დაწყება სწავლის', continueLearning:'სწავლის გაგრძელება',
-    yourProgress:'თქვენი პროგრესი', weekParasha:'ამ კვირის პარაშა', weekTab:'ამ კვირას', allParshiotTab:'ყველა პარაშა', markDone:'დასრულებულად მონიშვნა'},
+    yourProgress:'თქვენი პროგრესი', weekParasha:'ამ კვირის პარაშა', weekTab:'ამ კვირას', allParshiotTab:'ყველა პარაშა', markDone:'დასრულებულად მონიშვნა', parshiotWord:'პარაშა'},
 };
 function ckBicUI(){ return BIC_UI[S.lang]||BIC_UI.he; }
 /* the biur (plain-language explanation) shown per halacha, same expand/
@@ -3679,7 +3681,7 @@ function openChok(key,day,year){
    this-week screen with two year progress cards, an all-parshiot list,
    and a flat one-halacha-at-a-time reader with its own completion
    tracking) rather than reusing Chok LeYisrael's day-based reader shape. */
-function openBic(){ go('bicHome'); }
+function openBic(){ BIC_PARSHIOT_BOOK=null; go('bicHome'); }
 let BIC_PARSHIOT_TRACK='year1';
 function bicMiniTabs(active){
   const t=ckBicUI();
@@ -3742,6 +3744,11 @@ function renderBicHome(){
     });
   });
 }
+/* "כל הפרשיות" is two levels: 5 rounded book tiles (one per Chumash), then
+   that book's own parshiot list - rather than one long list with inline
+   headers, mirroring how a book is picked before browsing its contents
+   elsewhere in the app (e.g. Chok LeYisrael's own book picker). */
+let BIC_PARSHIOT_BOOK=null;
 function renderBicParshiot(){
   stopAutoScroll();
   if(!BIC_INDEX){
@@ -3749,33 +3756,56 @@ function renderBicParshiot(){
     ensureBicIndex().then(()=>{ if(TAB==='bicParshiot') renderBicParshiot(); });
     return;
   }
-  const t=ckBicUI(), track=BIC_PARSHIOT_TRACK;
-  let lastBook=null;
-  const rows=bicParshiot(track).map(p=>{
+  const t=ckBicUI(), track=BIC_PARSHIOT_TRACK, weekKey=currentParshaKey();
+  if(!BIC_PARSHIOT_BOOK){
+    const counts={};
+    bicParshiot(track).forEach(p=>{
+      const book=bicBookOf((p.covers&&p.covers[0])||p.key);
+      if(book) counts[book]=(counts[book]||0)+1;
+    });
+    const tiles=BIC_TORAH_BOOKS.map(([book])=>`<div class="q-tile bic-round" data-cat="benishchai" data-bicbook="${book}">
+      <div class="qt">${book}</div>
+      <div class="qd">${heNum(counts[book]||0)} ${t.parshiotWord}</div>
+    </div>`).join('');
+    app.innerHTML=`${topbar(t.title,'home')}
+    <div class="view">
+      ${bicMiniTabs('parshiot')}
+      <div class="ck-track">
+        <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicptrack="year1">${t.year1}</button>
+        <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicptrack="year2">${t.year2}</button>
+      </div>
+      <div class="quick-grid">${tiles}</div>
+      ${ornament()}
+    </div>`;
+    wireBicMiniTabs('parshiot');
+    app.querySelectorAll('[data-bicptrack]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.bicptrack===track) return;
+      BIC_PARSHIOT_TRACK=b.dataset.bicptrack; renderBicParshiot();
+    });
+    app.querySelectorAll('[data-bicbook]').forEach(b=>b.onclick=()=>{
+      BIC_PARSHIOT_BOOK=b.dataset.bicbook; renderBicParshiot();
+    });
+    return;
+  }
+  const rows=bicParshiot(track).filter(p=>bicBookOf((p.covers&&p.covers[0])||p.key)===BIC_PARSHIOT_BOOK).map(p=>{
     const done=bicDoneSet(track,p.key).length;
-    const book=bicBookOf((p.covers&&p.covers[0])||p.key);
-    const head = book!==lastBook ? `<div class="ck-teh-head">${book||''}</div>` : '';
-    lastBook=book;
-    return head+`<div class="prayer-row" data-bicopen="${p.key}">
+    const isWeek=p.key===weekKey;
+    return `<div class="prayer-row${isWeek?' bic-week-row':''}" data-bicopen="${p.key}">
       <div><div class="prayer-row-title">${p.he}</div><div class="qd">${heNum(p.n)} ${t.halachot}${done?' · '+heNum(done)+' '+t.outOf+' '+heNum(p.n):''}</div></div>
       <span class="sm-week-chev">${I.chev}</span>
     </div>`;
   }).join('');
-  app.innerHTML=`${topbar(t.title,'home')}
+  app.innerHTML=`
+  <div class="topbar">
+    <button class="icon-btn tb-back" id="bicBookBack">${I.prev}</button>
+    <div class="tb-title gold-text">${BIC_PARSHIOT_BOOK}</div>
+    <div style="width:34px"></div>
+  </div>
   <div class="view">
-    ${bicMiniTabs('parshiot')}
-    <div class="ck-track">
-      <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicptrack="year1">${t.year1}</button>
-      <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicptrack="year2">${t.year2}</button>
-    </div>
     <div class="prayers-list">${rows}</div>
     ${ornament()}
   </div>`;
-  wireBicMiniTabs('parshiot');
-  app.querySelectorAll('[data-bicptrack]').forEach(b=>b.onclick=()=>{
-    if(b.dataset.bicptrack===track) return;
-    BIC_PARSHIOT_TRACK=b.dataset.bicptrack; renderBicParshiot();
-  });
+  document.getElementById('bicBookBack').onclick=()=>{ BIC_PARSHIOT_BOOK=null; renderBicParshiot(); };
   app.querySelectorAll('[data-bicopen]').forEach(r=>r.onclick=()=>{
     ensureBicWeek(track,[r.dataset.bicopen]).then(()=>{
       if(TAB!=='bicParshiot') return;
