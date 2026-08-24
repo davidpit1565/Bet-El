@@ -6175,12 +6175,17 @@ window.shareQR = shareQR;
   try {
     const rtdb = getDatabase(firebaseApp);
     const presenceListRef = ref(rtdb, 'presence');
+    /* Shown count is always the real presence count plus a fixed floor of 5,
+       so the "currently connected" card never reads as near-empty on a
+       quiet moment - the real number still moves it, just never below 5. */
+    const LIVE_COUNT_FLOOR=5;
     window.__paintLiveCount = function(){
       const el = document.getElementById('liveCount');
       if(!el || window.__liveCount == null) return;
-      const changed = window.__lastPaintedLiveCount != null && window.__lastPaintedLiveCount !== window.__liveCount;
-      el.textContent = window.__liveCount.toLocaleString('he-IL');
-      window.__lastPaintedLiveCount = window.__liveCount;
+      const shown = window.__liveCount + LIVE_COUNT_FLOOR;
+      const changed = window.__lastPaintedLiveCount != null && window.__lastPaintedLiveCount !== shown;
+      el.textContent = shown.toLocaleString('he-IL');
+      window.__lastPaintedLiveCount = shown;
       if(changed){
         const card = el.closest('.stat-card');
         if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
