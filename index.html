@@ -4158,11 +4158,11 @@ function chokCheckReminders(){
    the same local Notification the reminders use, just fired once, guarded
    by its own localStorage flag so it never repeats */
 const CK_ANNOUNCE={
-  he:{title:'חוֹק לְיִשְׂרָאֵל בְּבֵית אֵ-ל', body:'לִמּוּד יוֹמִי מָלֵא זָמִין כָּעֵת בְּדַף הַבַּיִת'},
-  en:{title:'Chok LeYisrael on Beit-El', body:'A full daily study is now on the home page'},
-  fr:{title:'Chok LeYisraël sur Beit-El', body:'Une étude quotidienne complète est maintenant sur la page d’accueil'},
-  ru:{title:'Хок ЛеИсраэль в Бейт-Эль', body:'Полное ежедневное изучение теперь на главной странице'},
-  ka:{title:'ხოყ ლეისრაელ Beit-El-ზე', body:'სრული ყოველდღიური სწავლა ახლა მთავარ გვერდზეა'},
+  he:{title:'חוֹק לְיִשְׂרָאֵל', body:'לִמּוּד יוֹמִי מָלֵא זָמִין כָּעֵת בְּדַף הַבַּיִת'},
+  en:{title:'Chok LeYisrael', body:'A full daily study is now on the home page'},
+  fr:{title:'Chok LeYisraël', body:'Une étude quotidienne complète est maintenant sur la page d’accueil'},
+  ru:{title:'Хок ЛеИсраэль', body:'Полное ежедневное изучение теперь на главной странице'},
+  ka:{title:'ხოყ ლეისრაელ', body:'სრული ყოველდღიური სწავლა ახლა მთავარ გვერდზეა'},
 };
 function announceChokFeature(){
   if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
@@ -4177,11 +4177,11 @@ function announceChokFeature(){
    the app rather than firing the moment the update lands. Its own flag
    so the two announcements don't collide. */
 const BIC_ANNOUNCE={
-  he:{title:'בֶּן אִישׁ חַי בְּבֵית אֵ-ל', body:'לְבֶן אִישׁ חַי יֵשׁ עַכְשָׁו קוּבִיָּה וְקוֹרֵא עַצְמָאִי בְּדַף הַבַּיִת'},
-  en:{title:'Ben Ish Chai on Beit-El', body:'Ben Ish Chai now has its own card and reader on the home screen'},
-  fr:{title:'Ben Ish Haï sur Beit-El', body:"Ben Ish Haï a maintenant sa propre carte et son lecteur sur l'écran d'accueil"},
-  ru:{title:'Бен Иш Хай на Beit-El', body:'У Бен Иш Хая теперь своя карточка и читалка на главном экране'},
-  ka:{title:'ბენ იშ ხაი Beit-El-ზე', body:'ბენ იშ ხაის ახლა აქვს საკუთარი ბარათი და წამკითხველი მთავარ გვერდზე'},
+  he:{title:'בֶּן אִישׁ חַי', body:'לְבֶן אִישׁ חַי יֵשׁ עַכְשָׁו קוּבִיָּה וְקוֹרֵא עַצְמָאִי בְּדַף הַבַּיִת'},
+  en:{title:'Ben Ish Chai', body:'Ben Ish Chai now has its own card and reader on the home screen'},
+  fr:{title:'Ben Ish Haï', body:"Ben Ish Haï a maintenant sa propre carte et son lecteur sur l'écran d'accueil"},
+  ru:{title:'Бен Иш Хай', body:'У Бен Иш Хая теперь своя карточка и читалка на главном экране'},
+  ka:{title:'ბენ იშ ხაი', body:'ბენ იშ ხაის ახლა აქვს საკუთარი ბარათი და წამკითხველი მთავარ გვერდზე'},
 };
 const BIC_ANNOUNCE_EARLIEST=Date.parse('2026-08-25T00:00:00Z');
 function announceBenishchaiFeature(){
@@ -4203,41 +4203,41 @@ const CK_NOTIF={
       chokMorningBody:'חוֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם מוּכָן בִּשְׁבִילְךָ — כַּמָּה דַּקּוֹת שֶׁל תּוֹרָה',
       tikkuneiTitle:'תִּיקּוּנֵי הַזֹּהַר', tikkuneiBody:'יְמֵי הָרַחֲמִים · עֵת לְעוֹרֵר אֶת הַלֵּב — תִּיקּוּנֵי הַזֹּהַר שֶׁל הַיּוֹם',
       smTitle:'שְׁנַיִם מִקְרָא', smBody:'יוֹם שִׁשִּׁי · שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם לִכְבוֹד שַׁבָּת קֹדֶשׁ',
-      tehTitle:'בֵּית אֵל', tehBody:'עוֹד ', tehSuffix:' פְּרָקִים לְסִיּוּם תְּהִלִּים שֶׁל הַיּוֹם — כָּל כָּךְ קָרוֹב',
+      tehTitle:'תְּהִלִּים', tehBody:'עוֹד ', tehSuffix:' פְּרָקִים לְסִיּוּם תְּהִלִּים שֶׁל הַיּוֹם — כָּל כָּךְ קָרוֹב',
       bicTitle:'בֶּן אִישׁ חַי', bicBody:'הֲלָכָה יוֹמִית מְחַכָּה לְךָ בְּבֶן אִישׁ חַי: ',
-      musarTitle:'מוּסָר לְבֵית אֵל', musarBody:'כַּמָּה דַּקּוֹת שֶׁל מוּסָר לַנֶּפֶשׁ מְחַכּוֹת לְךָ הַיּוֹם בְּ'},
+      musarTitle:'מוּסָר', musarBody:'כַּמָּה דַּקּוֹת שֶׁל מוּסָר לַנֶּפֶשׁ מְחַכּוֹת לְךָ הַיּוֹם בְּ'},
   en:{chokTitle:'Chok LeYisrael', nightBody:"Friday night · today's Chok LeYisrael is waiting — finish before Shabbat",
       makeupPrefix:"It's not too late to complete Chok LeYisrael for ", makeupJoin:' and ', makeupSuffix:'',
       chokMorningBody:'Today’s Chok LeYisrael is ready for you — a few minutes of Torah',
       tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:"Days of mercy · time to awaken the heart — today's Tikkunei HaZohar",
       smTitle:'Shnayim Mikra', smBody:'Friday · Shnayim Mikra veEchad Targum in honor of the holy Shabbat',
-      tehTitle:'Beit-El', tehBody:'Just ', tehSuffix:' more chapters to finish today’s Tehillim — so close',
+      tehTitle:'Tehillim', tehBody:'Just ', tehSuffix:' more chapters to finish today’s Tehillim — so close',
       bicTitle:'Ben Ish Chai', bicBody:"Today's halacha is waiting for you in Ben Ish Chai: ",
-      musarTitle:'Musar for Beit-El', musarBody:'A few minutes of Musar for the soul await you today in '},
+      musarTitle:'Musar', musarBody:'A few minutes of Musar for the soul await you today in '},
   fr:{chokTitle:'Chok LeYisraël', nightBody:"Vendredi soir · le Chok LeYisraël du jour t'attend — termine avant Chabbat",
       makeupPrefix:"Il n'est pas trop tard pour terminer le Chok LeYisraël de ", makeupJoin:' et ', makeupSuffix:'',
       chokMorningBody:'Le Chok LeYisraël du jour est prêt pour toi — quelques minutes de Torah',
       tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:"Jours de miséricorde · l'heure d'éveiller le cœur — le Tikkounei HaZohar du jour",
       smTitle:'Chnayim Mikra', smBody:'Vendredi · Chnayim mikra véékhad targoum en l’honneur du Chabbat saint',
-      tehTitle:'Beit-El', tehBody:'Encore ', tehSuffix:' chapitres pour terminer les Tehilim d’aujourd’hui — si proche',
+      tehTitle:'Tehilim', tehBody:'Encore ', tehSuffix:' chapitres pour terminer les Tehilim d’aujourd’hui — si proche',
       bicTitle:"Ben Ish 'Haï", bicBody:"Aujourd'hui, une halacha t'attend dans Ben Ish 'Haï : ",
-      musarTitle:'Moussar pour Beit-El', musarBody:"Quelques minutes de Moussar pour l'âme t'attendent aujourd'hui dans "},
+      musarTitle:'Moussar', musarBody:"Quelques minutes de Moussar pour l'âme t'attendent aujourd'hui dans "},
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · сегодняшний Хок ЛеИсраэль ждёт вас — завершите до Шаббата',
       makeupPrefix:'Ещё не поздно завершить Хок ЛеИсраэль за ', makeupJoin:' и ', makeupSuffix:'',
       chokMorningBody:'Сегодняшний Хок ЛеИсраэль готов для вас — несколько минут Торы',
       tikkuneiTitle:'Тиккуне газогар', tikkuneiBody:'Дни милосердия · время пробудить сердце — сегодняшний Тиккуне ѓа-Зогар',
       smTitle:'Шнайим микра', smBody:'Пятница · Шнайим микра веехад таргум в честь святой субботы',
-      tehTitle:'Бейт-Эль', tehBody:'Ещё ', tehSuffix:' глав до конца сегодняшних Теилим — совсем близко',
+      tehTitle:'Теилим', tehBody:'Ещё ', tehSuffix:' глав до конца сегодняшних Теилим — совсем близко',
       bicTitle:'Бен Иш Хай', bicBody:'Сегодня вас ждёт ѓалаха в Бен Иш Хай: ',
-      musarTitle:'Мусар для Бейт-Эль', musarBody:'Несколько минут Мусара для души ждут вас сегодня в '},
+      musarTitle:'Мусар', musarBody:'Несколько минут Мусара для души ждут вас сегодня в '},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · დღევანდელი ხოყ ლეისრაელი გელოდებათ — დაასრულეთ შაბათამდე',
       makeupPrefix:'ჯერ არ არის გვიან დაასრულოთ ხოყ ლეისრაელ ', makeupJoin:' და ', makeupSuffix:'',
       chokMorningBody:'დღევანდელი ხოყ ლეისრაელ მზადაა თქვენთვის — რამდენიმე წუთი თორას',
       tikkuneiTitle:'თიკკუნე ჰაზოჰარ', tikkuneiBody:'წყალობის დღეები · დროა გულის გასაღვიძებლად — დღევანდელი თიკკუნე ჰაზოჰარ',
       smTitle:'შნაიიმ მიკრა', smBody:'პარასკევი · შნაიიმ მიკრა ვეეხად თარგუმი წმინდა შაბათის პატივსაცემად',
-      tehTitle:'ბეთ-ელ', tehBody:'კიდევ ', tehSuffix:' თავი დარჩა დღევანდელი თეილიმის დასასრულებლად — ისე ახლოსაა',
+      tehTitle:'თეილიმი', tehBody:'კიდევ ', tehSuffix:' თავი დარჩა დღევანდელი თეილიმის დასასრულებლად — ისე ახლოსაა',
       bicTitle:'ბენ იშ ხაი', bicBody:'დღეს ბენ იშ ხაიში ჰალახა გელოდებათ: ',
-      musarTitle:'მუსარი Beit-El-ისთვის', musarBody:'რამდენიმე წუთი მუსარი სულისთვის გელოდებათ დღეს '},
+      musarTitle:'მუსარი', musarBody:'რამდენიმე წუთი მუსარი სულისთვის გელოდებათ დღეს '},
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
 function ckNotifDir(){ return (S.lang&&S.lang!=='he')?'ltr':'rtl'; }
@@ -5749,16 +5749,16 @@ function confetti(n){
    and is reachable from a <script type="module">, while the reverse (or
    sharing let/const) is not. */
 const MILESTONE_UI={
-  he:{title:'בָּרוּךְ הַשֵּׁם — {n} מִשְׁתַּמְּשִׁים!', body:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת ה-{n} מִשְׁתַּמְּשִׁים בְּבֵית אֵ-ל! תּוֹדָה שֶׁאַתָּה חֵלֶק מֵהַקְּהִלָּה.', btn:'מַמָּשׁ מְרַגֵּשׁ!',
-      grandTitle:'בָּרוּךְ הַשֵּׁם — אֶלֶף מִשְׁתַּמְּשִׁים!', grandBody:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת הָאֶלֶף מִשְׁתַּמְּשִׁים בְּבֵית אֵ-ל — רֶגַע עָצוּם בְּזִכּוּי הָרַבִּים! תּוֹדָה עַל כָּל נֶפֶש שֶׁמִּצְטָרְפֶת לְלִמּוּד.'},
-  en:{title:'Thank G-d — {n} Users!', body:'Thank G-d, we’ve passed {n} users on Beit-El! Thank you for being part of the community.', btn:'How exciting!',
-      grandTitle:'Thank G-d — 1,000 Users!', grandBody:'Thank G-d, we’ve passed {n} users on Beit-El — a huge moment for the merit of the many! Thank you to every soul joining in study.'},
-  fr:{title:'Grâce à D.ieu — {n} utilisateurs !', body:'Grâce à D.ieu, nous avons dépassé {n} utilisateurs sur Beit-El ! Merci de faire partie de la communauté.', btn:'Quelle joie !',
-      grandTitle:'Grâce à D.ieu — 1 000 utilisateurs !', grandBody:'Grâce à D.ieu, nous avons dépassé {n} utilisateurs sur Beit-El — un moment immense pour le mérite du plus grand nombre ! Merci à chaque âme qui rejoint l’étude.'},
-  ru:{title:'Слава Богу — {n} пользователей!', body:'Слава Богу, мы превысили {n} пользователей в Бейт-Эль! Спасибо, что вы часть этой общины.', btn:'Как это радостно!',
-      grandTitle:'Слава Богу — 1000 пользователей!', grandBody:'Слава Богу, мы превысили {n} пользователей в Бейт-Эль — огромный момент для заслуги многих! Спасибо каждой душе, присоединяющейся к учёбе.'},
-  ka:{title:'მადლობა ღმერთს — {n} მომხმარებელი!', body:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს Beit-El-ში! გმადლობთ, რომ ამ საზოგადოების ნაწილი ხართ.', btn:'რა სასიხარულოა!',
-      grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს Beit-El-ში — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
+  he:{title:'בָּרוּךְ הַשֵּׁם — {n} מִשְׁתַּמְּשִׁים!', body:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת ה-{n} מִשְׁתַּמְּשִׁים! תּוֹדָה שֶׁאַתָּה חֵלֶק מֵהַקְּהִלָּה.', btn:'מַמָּשׁ מְרַגֵּשׁ!',
+      grandTitle:'בָּרוּךְ הַשֵּׁם — אֶלֶף מִשְׁתַּמְּשִׁים!', grandBody:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת הָאֶלֶף מִשְׁתַּמְּשִׁים — רֶגַע עָצוּם בְּזִכּוּי הָרַבִּים! תּוֹדָה עַל כָּל נֶפֶש שֶׁמִּצְטָרְפֶת לְלִמּוּד.'},
+  en:{title:'Thank G-d — {n} Users!', body:'Thank G-d, we’ve passed {n} users! Thank you for being part of the community.', btn:'How exciting!',
+      grandTitle:'Thank G-d — 1,000 Users!', grandBody:'Thank G-d, we’ve passed {n} users — a huge moment for the merit of the many! Thank you to every soul joining in study.'},
+  fr:{title:'Grâce à D.ieu — {n} utilisateurs !', body:'Grâce à D.ieu, nous avons dépassé {n} utilisateurs ! Merci de faire partie de la communauté.', btn:'Quelle joie !',
+      grandTitle:'Grâce à D.ieu — 1 000 utilisateurs !', grandBody:'Grâce à D.ieu, nous avons dépassé {n} utilisateurs — un moment immense pour le mérite du plus grand nombre ! Merci à chaque âme qui rejoint l’étude.'},
+  ru:{title:'Слава Богу — {n} пользователей!', body:'Слава Богу, мы превысили {n} пользователей! Спасибо, что вы часть этой общины.', btn:'Как это радостно!',
+      grandTitle:'Слава Богу — 1000 пользователей!', grandBody:'Слава Богу, мы превысили {n} пользователей — огромный момент для заслуги многих! Спасибо каждой душе, присоединяющейся к учёбе.'},
+  ka:{title:'მადლობა ღმერთს — {n} მომხმარებელი!', body:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს! გმადლობთ, რომ ამ საზოგადოების ნაწილი ხართ.', btn:'რა სასიხარულოა!',
+      grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
   const grand = tier>=1000;
