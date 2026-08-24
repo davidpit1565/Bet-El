@@ -63,6 +63,9 @@ const steps = [
   ['tehillim daily reading', () => document.getElementById('homeTehillimCard')?.click()],
   ['home for ben ish chai', () => window.go('home')],
   ['ben ish chai open', () => document.getElementById('homeBicCard')?.click()],
+  ['home for musar', () => window.go('home')],
+  ['musar list open', () => document.getElementById('homeMusarCard')?.click()],
+  ['musar work open', () => document.querySelector('[data-musarday]')?.click()],
 ];
 
 for (const [label, fn] of steps) {

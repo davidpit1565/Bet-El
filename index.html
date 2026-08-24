@@ -393,6 +393,9 @@ body::before{ /* subtle starfield/texture */
              transform .26s cubic-bezier(.4,0,.68,.06),
              filter .26s cubic-bezier(.4,0,.68,.06),
              visibility .26s}
+.bic-collapse{max-height:300px;overflow:hidden;opacity:1;transform:translateY(0);
+  transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .3s,transform .3s}
+.bic-collapse.collapsed{max-height:0;opacity:0;transform:translateY(-8px);pointer-events:none}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative;padding:6px 2px;min-width:0;text-align:center}
 .nav-item svg{width:24px;height:24px;flex:none;transition:.2s var(--ease)}
@@ -921,6 +924,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
 .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
 .q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
+.q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(196,142,58,.26),var(--panel) 60%)}
 </style>
 </head>
 <body>
@@ -2105,6 +2109,65 @@ function renderZoharYomiReader(){
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
+/* Musar home-screen entry point: one card opens a list of all 6 works,
+   each on its own row with today's source label and a dedicated "today"
+   button - not folded into the Chok LeYisrael reader's musar work-switcher,
+   since these are read independent of Chok LeYisrael entirely. Each work
+   is date-driven and cycles forever (ckMusarIndexes/ensureMusarDay,
+   already used by the Chok LeYisrael musar section), so there is no
+   separate "position" to track here beyond which work is currently open. */
+function renderMusarList(){
+  if(!MCYC){
+    app.innerHTML=`${topbar('מוּסָר','home')}<div class="view">${smSkeleton()}</div>`;
+    ensureMusarCycles().then(()=>{ if(TAB==='musarList') renderMusarList(); });
+    return;
+  }
+  const t=ckMusarUI();
+  const rows=MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>{
+    const idxs=ckMusarIndexes(w.key,null);
+    return `<div class="prayer-row" data-musarwork="${w.key}">
+      <div><div class="prayer-row-title">${t[w.key]}</div><div class="qd">${ckMusarSourceLabel(w.key,idxs).replace(t[w.key]+' · ','')}</div></div>
+      <button class="ck-track-btn on" data-musarday="${w.key}">${t.today}</button>
+    </div>`;
+  }).join('');
+  app.innerHTML=`${topbar('מוּסָר','home')}
+  <div class="view">
+    <div class="prayers-list">${rows}</div>
+    ${ornament()}
+  </div>`;
+  app.querySelectorAll('.prayer-row[data-musarwork]').forEach(r=>r.onclick=()=>openMusarYomi(r.dataset.musarwork));
+  app.querySelectorAll('[data-musarday]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openMusarYomi(b.dataset.musarday); });
+}
+let MUSAR_YOMI_WORK=null;
+function openMusarYomi(work){ MUSAR_YOMI_WORK=work; go('musarYomi'); }
+function renderMusarYomiReader(){
+  const work=MUSAR_YOMI_WORK||'reshit';
+  const t=ckMusarUI();
+  if(!ckMusarReady(work,null)){
+    app.innerHTML=`${topbar(t[work]||'מוּסָר','musarList')}<div class="view">${smSkeleton()}</div>`;
+    ensureMusarDay(work,null).then(()=>{ if(TAB==='musarYomi') renderMusarYomiReader(); });
+    return;
+  }
+  const idxs=ckMusarIndexes(work,null);
+  const items=[]; idxs.forEach(i=>items.push(...ckMusarSegs(work,i)));
+  const body=items.map(it=>`<div class="sm-verse-row ck-nonum"><div class="sm-he">${it}</div>${ckCommBar('','musar')}</div>`).join('');
+  const srcLine=ckMusarSourceLabel(work,idxs);
+  app.innerHTML=`
+  <div class="reader view">
+    <div class="reader-head">
+      <div class="reader-top">
+        <button class="icon-btn" id="myBack">${I.prev}</button>
+        <div class="reader-title">${t[work]}</div>
+      </div>
+      ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
+    </div>
+    <div class="sm-verses notranslate">${body}</div>
+    <div style="height:26px"></div>
+  </div>`;
+  document.getElementById('myBack').onclick=()=>go('musarList');
+  app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
+}
+
 /* one-time welcome screen for new users, explaining the app's 5 study
    tracks now that it is more than just Tehillim. Shown once, gated by
    its own localStorage flag; buildNav() skips the bottom nav while
@@ -2652,15 +2715,15 @@ function ensureMusarDay(work,hd){
    translated elsewhere in the app if it were a normal dictionary entry. */
 const MUSAR_UI={
   he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה', mesilat:'מְסִלַּת יְשָׁרִים', orchot:'אָרְחוֹת צַדִּיקִים', peleyoetz:'פֶּלֶא יוֹעֵץ',
-      gate:'שַׁעַר', chapter:'פֶּרֶק', intro:'הַקְדָּמָה', para:'אוֹת'},
+      gate:'שַׁעַר', chapter:'פֶּרֶק', intro:'הַקְדָּמָה', para:'אוֹת', today:'הַיּוֹם'},
   en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha", mesilat:'Mesillat Yesharim', orchot:'Orchot Tzadikim', peleyoetz:'Pele Yoetz',
-      gate:'Gate', chapter:'Chapter', intro:'Introduction', para:'Paragraph'},
+      gate:'Gate', chapter:'Chapter', intro:'Introduction', para:'Paragraph', today:'Today'},
   fr:{reshit:"Réchit 'Hokhma", teshuva:'Chaarei Techouva', kedusha:'Chaarei Kedoucha', mesilat:'Messilat Yécharim', orchot:'Orḥot Tsadikim', peleyoetz:'Pélé Yoëts',
-      gate:'Porte', chapter:'Chapitre', intro:'Introduction', para:'Paragraphe'},
+      gate:'Porte', chapter:'Chapitre', intro:'Introduction', para:'Paragraphe', today:"Aujourd'hui"},
   ru:{reshit:'Решит Хохма', teshuva:'Шаарей Тшува', kedusha:'Шаарей Кедуша', mesilat:'Месилат Йешарим', orchot:'Орхот Цадиким', peleyoetz:'Пеле Йоэц',
-      gate:'Врата', chapter:'Глава', intro:'Введение', para:'Абзац'},
+      gate:'Врата', chapter:'Глава', intro:'Введение', para:'Абзац', today:'Сегодня'},
   ka:{reshit:'რეშით ხოხმა', teshuva:'შაარეი თშუვა', kedusha:'შაარეი კედუშა', mesilat:'მესილათ იეშარიმ', orchot:'ორხოთ ცადიკიმ', peleyoetz:'პელე იოეც',
-      gate:'კარიბჭე', chapter:'თავი', intro:'შესავალი', para:'აბზაცი'},
+      gate:'კარიბჭე', chapter:'თავი', intro:'შესავალი', para:'აბზაცი', today:'დღეს'},
 };
 function ckMusarUI(){ return MUSAR_UI[S.lang]||MUSAR_UI.he; }
 const MUSAR_WORKS=[
@@ -3532,24 +3595,26 @@ function renderBicReader(){
         <button class="icon-btn" id="bicBack">${I.prev}</button>
         <div class="reader-title">${ckBicUI().title}</div>
       </div>
-      <div class="ck-track">
-        <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicyear="year1">${ckBicUI().year1}</button>
-        <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicyear="year2">${ckBicUI().year2}</button>
-      </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="bicPPrev" ${pi>0?'':'disabled'} aria-label="${ckBicUI().prevParasha}">${I.prev}</button>
-        <select class="fld-select" id="bicPPick" style="max-width:220px">
-          ${list.map(x=>`<option value="${x.key}" ${x.key===BIC.parasha?'selected':''}>${x.he}</option>`).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="bicPNext" ${pi<list.length-1?'':'disabled'} aria-label="${ckBicUI().nextParasha}">${I.next}</button>
-      </div>
-      ${!wasCurrentWeek?`<div class="sm-aliyah-tag">${ckBicUI().notThisWeek}</div>`:''}
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="bicDPrev" ${di>0?'':'disabled'} aria-label="${ckBicUI().prevDay}">${I.prev}</button>
-        <div class="sm-aliyah-nav ck-daynav">
-          ${CHOK_DAYS.map((d,ix)=>`<button class="sm-aliyah-chip ck-daychip${d===BIC.day?' on':''}" data-bicday="${d}">${chokRowLabel(d,ix)}</button>`).join('')}
+      <div class="bic-collapse">
+        <div class="ck-track">
+          <button class="ck-track-btn ${track==='year1'?'on':''}" data-bicyear="year1">${ckBicUI().year1}</button>
+          <button class="ck-track-btn ${track==='year2'?'on':''}" data-bicyear="year2">${ckBicUI().year2}</button>
         </div>
-        <button class="sm-aliyah-chip ck-arrow" id="bicDNext" ${di<CHOK_DAYS.length-1?'':'disabled'} aria-label="${ckBicUI().nextDay}">${I.next}</button>
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="bicPPrev" ${pi>0?'':'disabled'} aria-label="${ckBicUI().prevParasha}">${I.prev}</button>
+          <select class="fld-select" id="bicPPick" style="max-width:220px">
+            ${list.map(x=>`<option value="${x.key}" ${x.key===BIC.parasha?'selected':''}>${x.he}</option>`).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="bicPNext" ${pi<list.length-1?'':'disabled'} aria-label="${ckBicUI().nextParasha}">${I.next}</button>
+        </div>
+        ${!wasCurrentWeek?`<div class="sm-aliyah-tag">${ckBicUI().notThisWeek}</div>`:''}
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="bicDPrev" ${di>0?'':'disabled'} aria-label="${ckBicUI().prevDay}">${I.prev}</button>
+          <div class="sm-aliyah-nav ck-daynav">
+            ${CHOK_DAYS.map((d,ix)=>`<button class="sm-aliyah-chip ck-daychip${d===BIC.day?' on':''}" data-bicday="${d}">${chokRowLabel(d,ix)}</button>`).join('')}
+          </div>
+          <button class="sm-aliyah-chip ck-arrow" id="bicDNext" ${di<CHOK_DAYS.length-1?'':'disabled'} aria-label="${ckBicUI().nextDay}">${I.next}</button>
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">${body}</div>
@@ -3885,31 +3950,36 @@ const CK_NOTIF={
       chokMorningBody:'הִגִּיעַ זְמַן לִלְמֹד אֶת חוֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם',
       tikkuneiTitle:'תִּיקּוּנֵי הַזֹּהַר', tikkuneiBody:'הִגִּיעַ זְמַן לִלְמֹד אֶת הַתִּיקּוּן שֶׁל הַיּוֹם',
       smTitle:'שְׁנַיִם מִקְרָא', smBody:'יוֹם שִׁשִּׁי · הִגִּיעַ זְמַן שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם',
-      tehTitle:'בֵּית אֵל', tehBody:'זְמַן תְּהִלִּים! ', tehSuffix:' פְּרָקִים לְהַשְׁלָמָה'},
+      tehTitle:'בֵּית אֵל', tehBody:'זְמַן תְּהִלִּים! ', tehSuffix:' פְּרָקִים לְהַשְׁלָמָה',
+      bicTitle:'בֶּן אִישׁ חַי', bicBody:'הַיּוֹם לוֹמְדִים בְּבֶן אִישׁ חַי: '},
   en:{chokTitle:'Chok LeYisrael', nightBody:'Friday night · time to study Chok LeYisrael',
       makeupPrefix:'Did you complete Chok LeYisrael for ', makeupJoin:' and ', makeupSuffix:'?',
       chokMorningBody:'Time to study today’s Chok LeYisrael',
       tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:'Time to study today’s Tikkun',
       smTitle:'Shnayim Mikra', smBody:'Friday · time for Shnayim Mikra veEchad Targum',
-      tehTitle:'Beit-El', tehBody:'Time for Tehillim! ', tehSuffix:' chapters left'},
+      tehTitle:'Beit-El', tehBody:'Time for Tehillim! ', tehSuffix:' chapters left',
+      bicTitle:'Ben Ish Chai', bicBody:'Today in Ben Ish Chai: '},
   fr:{chokTitle:'Chok LeYisraël', nightBody:'Vendredi soir · l’heure d’étudier le Chok LeYisraël',
       makeupPrefix:'As-tu terminé le Chok LeYisraël de ', makeupJoin:' et ', makeupSuffix:' ?',
       chokMorningBody:'C’est l’heure d’étudier le Chok LeYisraël du jour',
       tikkuneiTitle:'Tikkunei HaZohar', tikkuneiBody:'C’est l’heure d’étudier le Tikkoun du jour',
       smTitle:'Chnayim Mikra', smBody:'Vendredi · l’heure du Chnayim mikra véékhad targoum',
-      tehTitle:'Beit-El', tehBody:'C’est l’heure des Tehilim ! ', tehSuffix:' chapitres à compléter'},
+      tehTitle:'Beit-El', tehBody:'C’est l’heure des Tehilim ! ', tehSuffix:' chapitres à compléter',
+      bicTitle:"Ben Ish 'Haï", bicBody:"Aujourd'hui dans Ben Ish 'Haï : "},
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · время учить Хок ЛеИсраэль',
       makeupPrefix:'Завершили ли вы Хок ЛеИсраэль за ', makeupJoin:' и ', makeupSuffix:'?',
       chokMorningBody:'Время учить сегодняшний Хок ЛеИсраэль',
       tikkuneiTitle:'Тиккуне газогар', tikkuneiBody:'Время учить сегодняшний Тикун',
       smTitle:'Шнайим микра', smBody:'Пятница · время Шнайим микра веехад таргум',
-      tehTitle:'Бейт-Эль', tehBody:'Время Теилим! ', tehSuffix:' глав осталось'},
+      tehTitle:'Бейт-Эль', tehBody:'Время Теилим! ', tehSuffix:' глав осталось',
+      bicTitle:'Бен Иш Хай', bicBody:'Сегодня в Бен Иш Хай: '},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · ხოყ ლეისრაელის შესწავლის დროა',
       makeupPrefix:'დაასრულეთ ხოყ ლეისრაელ ', makeupJoin:' და ', makeupSuffix:'?',
       chokMorningBody:'დროა ვისწავლოთ დღევანდელი ხოყ ლეისრაელ',
       tikkuneiTitle:'თიკკუნე ჰაზოჰარ', tikkuneiBody:'დროა ვისწავლოთ დღევანდელი თიკუნი',
       smTitle:'შნაიიმ მიკრა', smBody:'პარასკევი · შნაიიმ მიკრა ვეეხად თარგუმის დროა',
-      tehTitle:'ბეთ-ელ', tehBody:'თეილიმის დროა! ', tehSuffix:' თავი დარჩა'},
+      tehTitle:'ბეთ-ელ', tehBody:'თეილიმის დროა! ', tehSuffix:' თავი დარჩა',
+      bicTitle:'ბენ იშ ხაი', bicBody:'დღეს ბენ იშ ხაიში: '},
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
 function ckNotifDir(){ return (S.lang&&S.lang!=='he')?'ltr':'rtl'; }
@@ -3933,6 +4003,8 @@ function render(){
     else if(TAB==='chokList') renderChokList();
     else if(TAB==='chokReader') renderChokReader();
     else if(TAB==='bicReader') renderBicReader();
+    else if(TAB==='musarList') renderMusarList();
+    else if(TAB==='musarYomi') renderMusarYomiReader();
     else if(TAB==='zoharYomi') renderZoharYomiReader();
     else if(TAB==='onboard') renderOnboard();
     else if(TAB==='chokPace') renderChokPace();
@@ -3963,7 +4035,7 @@ function render(){
    button on chok/zohar/shnayim's shared .reader-top, or into prayerReader's
    own icon group - rather than floated loose, so it can never land on top
    of a button that is already there. */
-const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1, bicReader:1};
+const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1, bicReader:1, musarYomi:1};
 function mountToolsFab(){
   if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
   if(!app.firstChild) return;
@@ -4086,6 +4158,10 @@ function renderHome(){
           <div class="qd">${p?p.he:(weekParshaKey?parshaName(weekParshaKey):'')}</div>
         </div>`;
       })()}
+      <div class="q-tile" data-cat="musar" id="homeMusarCard">
+        <div class="qt">מוּסָר</div>
+        <div class="qd">6 סְפָרִים</div>
+      </div>
     </div>
 
     ${(function(){
@@ -4118,6 +4194,7 @@ function renderHome(){
     hbc.onclick=()=>openBic(bicNearestAvailableKey(bicTrack(),weekParshaKey), bicDayForToday());
     if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
   }
+  const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');
   const htc=document.getElementById('homeTikkuneiCard');
   if(htc){
     const cd=zoharCycleDay(hd);
@@ -5553,9 +5630,11 @@ render();
     const y = getY();
     const dy = y - lastY;
     const tools=document.getElementById('gTools');
+    const bicHead=document.querySelector('.bic-collapse');
     const set=hide=>{
       nav.classList.toggle('nav-hidden', hide);
       if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
+      if(bicHead) bicHead.classList.toggle('collapsed', hide);
     };
     if(y < 40){ set(false); }
     else if(dy > THRESHOLD){ set(true); }
@@ -5565,6 +5644,7 @@ render();
     hideTimer = setTimeout(()=>{
       nav.classList.remove('nav-hidden');
       const t=document.getElementById('gTools'); if(t) t.classList.remove('nav-hidden');
+      const bh=document.querySelector('.bic-collapse'); if(bh) bh.classList.remove('collapsed');
     }, 1400);
   }
   const raf = ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(onScroll); } };
@@ -5586,7 +5666,30 @@ function checkNotification(){
     new Notification(t.tehTitle,{body:t.tehBody+left+t.tehSuffix,dir:ckNotifDir(),lang:S.lang||'he'});
   }catch(e){}
 }
+/* Daily Ben Ish Chai reminder, same gating (S.notifEnabled/S.notifTime) and
+   once-per-day flag pattern as checkNotification() above, but its own flag
+   so the two don't collide. Needs BIC_INDEX to name today's parasha, which
+   is not necessarily loaded yet at boot - unlike checkNotification() this
+   one is async, only marking betel_bic_notif_sent (and actually notifying)
+   once that data resolves and a real parasha name is found. */
+function checkBicNotification(){
+  if(!S.notifEnabled || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  const now=new Date(); const [hh,mm]=(S.notifTime||'08:00').split(':').map(Number);
+  if(now.getHours()<hh||(now.getHours()===hh&&now.getMinutes()<mm)) return;
+  const todayStr=now.toISOString().slice(0,10);
+  if(localStorage.getItem('betel_bic_notif_sent')===todayStr) return;
+  ensureBicIndex().then(()=>{
+    const track=bicTrack();
+    const key=bicNearestAvailableKey(track,currentParshaKey());
+    const p=bicParshiot(track).find(x=>x.key===key);
+    if(!p) return;
+    localStorage.setItem('betel_bic_notif_sent',todayStr);
+    const t=ckNotifText();
+    try{ new Notification(t.bicTitle,{body:t.bicBody+p.he,dir:ckNotifDir(),lang:S.lang||'he'}); }catch(e){}
+  }).catch(()=>{});
+}
 try{checkNotification();}catch(e){}
+try{checkBicNotification();}catch(e){}
 try{announceChokFeature();}catch(e){}
 try{announceBenishchaiFeature();}catch(e){}
 try{ensureChokIndex().then(()=>{ try{chokCheckReminders();}catch(e){} });}catch(e){}
