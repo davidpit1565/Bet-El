@@ -8,13 +8,15 @@
     "check:blocking": "node scripts/check-blocking-resources.mjs",
     "serve:local": "python3 -c \"from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler; ThreadingHTTPServer(('127.0.0.1', 8899), SimpleHTTPRequestHandler).serve_forever()\"",
     "test:sweep": "node scripts/regression-sweep.mjs",
-    "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js manifest.json icon-192.png icon-512.png www/ && cp -r data www/data && npx cap sync ios"
+    "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js manifest.json capacitor-core.js capacitor-local-notifications.js icon-192.png icon-512.png www/ && cp -r data www/data && npx cap sync"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
     "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
+    "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
     "@vercel/analytics": "^1.4.1",
