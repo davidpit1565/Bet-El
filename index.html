@@ -354,6 +354,7 @@ body::before{ /* subtle starfield/texture */
 .set-item.col{flex-direction:column;align-items:stretch;gap:9px}
 .set-item .si-l{display:flex;align-items:center;gap:12px}
 .set-item .si-ico{color:var(--gold);width:20px;height:20px;flex:none}.set-item .si-ico svg{width:20px;height:20px}
+a.set-item{text-decoration:none;color:inherit}
 .set-item .si-t{font-size:14px;font-weight:600}
 .set-item .si-d{font-size:14px;color:var(--muted);margin-top:1px}
 /* toggle */
@@ -677,11 +678,10 @@ input,select,button{max-width:100%;box-sizing:border-box}
   color:var(--muted);font-size:12.5px;line-height:1.9;opacity:.85}
 .memorial span{font-size:11px;letter-spacing:.5px}
 [data-theme="dark"] .memorial{color:#8d97ad}
-.social-links{display:flex;justify-content:center;gap:14px;margin:10px 0 4px}
-.social-link{width:36px;height:36px;border-radius:50%;border:var(--glass-border);background:var(--panel);
-  color:var(--gold);display:flex;align-items:center;justify-content:center}
-.social-link:active{transform:scale(.92)}
-.social-link svg{width:18px;height:18px}
+.social-links{display:flex;justify-content:center;gap:18px;margin:10px 0 4px}
+.social-link{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--gold);opacity:.8}
+.social-link:active{transform:scale(.9);opacity:1}
+.social-link svg{width:24px;height:24px}
 .stats-row{display:flex;gap:10px;margin:14px 4px 0}
 .stat-card{flex:1;position:relative;overflow:hidden;background:linear-gradient(155deg,var(--panel) 55%,rgba(212,175,95,.14) 100%);
   border:1px solid var(--line-strong);border-radius:22px;
@@ -3513,12 +3513,9 @@ function renderChokUnit(){
    nothing (see ${s.key==='torah'&&CK_KAVANA?...} in renderChokReader) so
    nothing incorrect ever ships; the display slot itself is already wired. */
 const CK_KAVANA=null;
-/* Donation link (Stripe Payment Link) - left null until the rav creates one
-   in the Stripe Dashboard (Payment Links -> New) and sends the URL; this
-   app has no backend, so a Payment Link is the only donation flow that
-   needs zero server code / secret keys on our side. The Settings row below
-   only renders once this is a real URL. */
-const STRIPE_DONATE_URL=null;
+/* Donation link - Beit-El's own site product page (itself backed by
+   Stripe), so this app has zero payment code/keys of its own to manage. */
+const STRIPE_DONATE_URL='https://bet-el.be/product/truma/';
 const CK_BOOKS=[
   {en:'Genesis',     he:'בְּרֵאשִׁית'},
   {en:'Exodus',      he:'שְׁמוֹת'},
@@ -4029,13 +4026,13 @@ function renderChokReader(){
         ).join('')}
       </div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
+      </div>
       <div class="ck-secnav-wrap">
         <button class="sm-aliyah-chip ck-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
         <div class="sm-aliyah-nav ck-secnav">
           ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${sec.he}</button>`).join('')}
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
-      </div>
       </div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
@@ -5572,6 +5569,11 @@ function renderSettings(){
         <div class="stepper"><button id="fsMinus">−</button><span class="v" id="fsVal">${Math.round(S.fontScale*100)}%</span><button id="fsPlus">+</button></div></div>
     </div>
 
+    ${STRIPE_DONATE_URL?`<div class="set-group">
+      <h3>תְּרוּמָה</h3>
+      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תָּמְכוּ בְּבֵית אֵל</div><div class="si-d">כָּל תְּרוּמָה מְסַיַּעַת לְהַמְשֵׁךְ הַלִּמּוּד הַיּוֹמִי</div></div></div>${I.chev}</a>
+    </div>`:''}
+
     <div class="set-group">
       <h3>קְרִיאָה יוֹמִית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">שָׂפָה</div><div class="si-d">שְׂפַת הַמִּמְשָׁק</div></div></div>
@@ -5645,11 +5647,6 @@ function renderSettings(){
       <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
     </div>
-
-    ${STRIPE_DONATE_URL?`<div class="set-group">
-      <h3>תְּמִיכָה</h3>
-      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener" style="cursor:pointer;text-decoration:none;color:inherit"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תְּרוּמָה</div><div class="si-d">תָּמְכוּ בַּהֲמְשֵׁךְ הַלִּמּוּד</div></div></div>${I.chev}</a>
-    </div>`:''}
 
     <div class="set-group">
       <h3>שִׁתּוּף</h3>
