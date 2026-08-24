@@ -3513,6 +3513,12 @@ function renderChokUnit(){
    nothing (see ${s.key==='torah'&&CK_KAVANA?...} in renderChokReader) so
    nothing incorrect ever ships; the display slot itself is already wired. */
 const CK_KAVANA=null;
+/* Donation link (Stripe Payment Link) - left null until the rav creates one
+   in the Stripe Dashboard (Payment Links -> New) and sends the URL; this
+   app has no backend, so a Payment Link is the only donation flow that
+   needs zero server code / secret keys on our side. The Settings row below
+   only renders once this is a real URL. */
+const STRIPE_DONATE_URL=null;
 const CK_BOOKS=[
   {en:'Genesis',     he:'בְּרֵאשִׁית'},
   {en:'Exodus',      he:'שְׁמוֹת'},
@@ -5639,6 +5645,11 @@ function renderSettings(){
       <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
     </div>
+
+    ${STRIPE_DONATE_URL?`<div class="set-group">
+      <h3>תְּמִיכָה</h3>
+      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener" style="cursor:pointer;text-decoration:none;color:inherit"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תְּרוּמָה</div><div class="si-d">תָּמְכוּ בַּהֲמְשֵׁךְ הַלִּמּוּד</div></div></div>${I.chev}</a>
+    </div>`:''}
 
     <div class="set-group">
       <h3>שִׁתּוּף</h3>
