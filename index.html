@@ -396,6 +396,20 @@ body::before{ /* subtle starfield/texture */
 .bic-collapse{max-height:300px;overflow:hidden;opacity:1;transform:translateY(0);
   transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .3s,transform .3s}
 .bic-collapse.collapsed{max-height:0;opacity:0;transform:translateY(-8px);pointer-events:none}
+/* the round mark-complete control flanked by prev/next arrows, matching
+   the original standalone Ben Ish Chai app's own per-halacha nav */
+.bic-mark-row{display:flex;align-items:center;justify-content:center;gap:20px;margin:20px 0 8px}
+.bic-arrow-btn{flex:none;width:40px;height:40px;border-radius:50%;border:var(--glass-border);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.bic-arrow-btn:active{transform:scale(.92)}
+.bic-arrow-btn:disabled{opacity:.35}
+.bic-arrow-btn svg{width:20px;height:20px}
+.bic-mark-btn{flex:none;width:58px;height:58px;border-radius:50%;border:2px solid var(--gold);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.bic-mark-btn:active{transform:scale(.94)}
+.bic-mark-btn.on{background:var(--gold-grad);color:#2a1e05;border-color:transparent}
+.bic-mark-btn svg{width:26px;height:26px}
+.bic-mark-label{text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   cursor:pointer;color:var(--muted);transition:.2s var(--ease);position:relative;padding:6px 2px;min-width:0;text-align:center}
 .nav-item svg{width:24px;height:24px;flex:none;transition:.2s var(--ease)}
@@ -1834,6 +1848,24 @@ function bicI18nItem(track,unit,dayIdx,itemIdx){
    parasha can fall in such a gap, hence bicNearestAvailableKey() below. */
 function bicParshiot(track){ return (BIC_INDEX&&BIC_INDEX[track]&&BIC_INDEX[track].parshiot)||[]; }
 function bicParshaIndex(track,key){ return bicParshiot(track).findIndex(p=>p.key===key); }
+/* The all-parshiot list groups by the 5 Chumashim - a fixed, universally
+   known assignment of the 54 weekly parshiot, not derived from any
+   per-track data (both tracks share the identical grouping). Grouping key
+   is `covers[0]` (the parasha's own first canonical name, same spelling
+   hebcal itself produces - see the index files) rather than the track's
+   own `key` field, since a combined-pair key like "Behar-Bechukotai"
+   would otherwise need its own entry alongside every single-name one. */
+const BIC_TORAH_BOOKS=[
+  ['בְּרֵאשִׁית',['Bereshit','Noach','Lech-Lecha','Vayera','Chayei Sara','Toldot','Vayetzei','Vayishlach','Vayeshev','Miketz','Vayigash','Vayechi']],
+  ['שְׁמוֹת',['Shemot','Vaera','Bo','Beshalach','Yitro','Mishpatim','Terumah','Tetzaveh','Ki Tisa','Vayakhel','Pekudei']],
+  ['וַיִּקְרָא',['Vayikra','Tzav','Shmini','Tazria','Metzora','Achrei Mot','Kedoshim','Emor','Behar','Bechukotai']],
+  ['בְּמִדְבַּר',['Bamidbar','Nasso',"Beha'alotcha","Sh'lach",'Korach','Chukat','Balak','Pinchas','Matot','Masei']],
+  ['דְּבָרִים',['Devarim','Vaetchanan','Eikev',"Re'eh",'Shoftim','Ki Teitzei','Ki Tavo','Nitzavim','Vayeilech',"Ha'azinu",'Vezot Haberakhah']],
+];
+function bicBookOf(coverName){
+  const hit=BIC_TORAH_BOOKS.find(([,names])=>names.includes(coverName));
+  return hit?hit[0]:null;
+}
 function bicNearestAvailableKey(track,targetKey){
   const list=bicParshiot(track); if(!list.length) return null;
   if(list.some(p=>p.key===targetKey)) return targetKey;
@@ -3718,9 +3750,13 @@ function renderBicParshiot(){
     return;
   }
   const t=ckBicUI(), track=BIC_PARSHIOT_TRACK;
+  let lastBook=null;
   const rows=bicParshiot(track).map(p=>{
     const done=bicDoneSet(track,p.key).length;
-    return `<div class="prayer-row" data-bicopen="${p.key}">
+    const book=bicBookOf((p.covers&&p.covers[0])||p.key);
+    const head = book!==lastBook ? `<div class="ck-teh-head">${book||''}</div>` : '';
+    lastBook=book;
+    return head+`<div class="prayer-row" data-bicopen="${p.key}">
       <div><div class="prayer-row-title">${p.he}</div><div class="qd">${heNum(p.n)} ${t.halachot}${done?' · '+heNum(done)+' '+t.outOf+' '+heNum(p.n):''}</div></div>
       <span class="sm-week-chev">${I.chev}</span>
     </div>`;
@@ -3802,11 +3838,12 @@ function renderBicReader(){
       </div>
     </div>
     <div class="sm-verses notranslate">${body}</div>
-    <div class="reader-nav">
-      <button class="rnav-btn" id="bicPrev" ${BIC.pos>0?'':'disabled'}>${I.prev}<span>${t.prevHalacha}</span></button>
-      <button class="rnav-btn${done?' done':''}" id="bicMark">${done?I.check:''}<span>${t.markDone}</span></button>
-      <button class="rnav-btn" id="bicNext" ${BIC.pos<items.length-1?'':'disabled'}>${I.next}<span>${t.nextHalacha}</span></button>
+    <div class="bic-mark-row">
+      <button class="bic-arrow-btn" id="bicPrev" ${BIC.pos>0?'':'disabled'} aria-label="${t.prevHalacha}">${I.prev}</button>
+      <button class="bic-mark-btn${done?' on':''}" id="bicMark" aria-label="${t.markDone}">${I.check}</button>
+      <button class="bic-arrow-btn" id="bicNext" ${BIC.pos<items.length-1?'':'disabled'} aria-label="${t.nextHalacha}">${I.next}</button>
     </div>
+    <div class="bic-mark-label">${unitLabel}</div>
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('bicBack').onclick=()=>go(backTab);
