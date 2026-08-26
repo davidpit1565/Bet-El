@@ -1580,8 +1580,13 @@ function updateCompassNeedle(){
 function onDeviceOrientation(e){
   if(TAB!=='kotelCompass') return;
   let heading;
+  /* Only trust a heading that's actually anchored to true/magnetic north:
+     iOS Safari's webkitCompassHeading always is; a plain (non-absolute)
+     'deviceorientation' alpha on many Android/Chrome devices is relative
+     to wherever the device happened to be facing on load, not north -
+     using it anyway would show a confidently wrong green/red verdict. */
   if(typeof e.webkitCompassHeading==='number') heading=e.webkitCompassHeading;
-  else if(e.alpha!=null) heading=(360-e.alpha)%360;
+  else if(e.absolute===true && e.alpha!=null) heading=(360-e.alpha)%360;
   else return;
   CompassState.heading=heading;
   updateCompassNeedle();
