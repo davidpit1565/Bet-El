@@ -357,6 +357,24 @@ body::before{ /* subtle starfield/texture */
 a.set-item{text-decoration:none;color:inherit}
 .set-item .si-t{font-size:14px;font-weight:600}
 .set-item .si-d{font-size:14px;color:var(--muted);margin-top:1px}
+/* ================= KOTEL COMPASS ================= */
+.compass-wrap{display:flex;justify-content:center;margin:6px 0 18px}
+.compass-dial{position:relative;width:230px;height:230px;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%, var(--panel) 0%, rgba(0,0,0,.18) 100%);
+  border:2px solid var(--gold);box-shadow:0 14px 34px -16px rgba(0,0,0,.55),inset 0 0 0 6px rgba(212,175,95,.08)}
+.compass-top-marker{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--gold)}
+.compass-ticks{position:absolute;inset:0}
+.compass-ticks .tick{position:absolute;top:0;left:50%;width:2px;height:14px;background:var(--muted);
+  opacity:.6;transform-origin:1px 115px;transform:translateX(-1px)}
+.compass-ticks .tick.major{height:18px;width:3px;background:var(--gold);opacity:.9}
+.compass-needle{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .3s ease-out}
+.compass-needle svg{width:100%;height:100%}
+.compass-info{text-align:center}
+.compass-dist{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:3px}
+.compass-hint{font-size:13px;color:var(--muted)}
+.compass-note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6}
+.compass-card .btn{margin-top:12px}
 /* toggle */
 .toggle{width:50px;height:29px;border-radius:999px;background:var(--line);border:1px solid var(--line-strong);
   position:relative;cursor:pointer;transition:.25s var(--ease);flex:none}
@@ -1112,6 +1130,7 @@ const I = {
   pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4"/><path d="M9 13.5h1.4a1.3 1.3 0 0 0 0-2.6H9v5.2M13 16.1V11h1.3a1.9 1.9 0 0 1 0 3.8H13z"/></svg>',
   bookmark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   bookmarkOn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
+  compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-4 2 2-5z" fill="currentColor" stroke="none"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
   wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 7.5c1.5-4 6-5.5 9-2.5s1.5 7.5-2 9M10.5 16.5l3 3-6 1.5 1.5-6"/></svg>',
@@ -1509,6 +1528,65 @@ function requestGPS(cb){
     saveLoc(); cb&&cb(true);
   }, ()=>{ cb&&cb(false); }, {enableHighAccuracy:false, timeout:8000, maximumAge:3600000});
 }
+/* ---------- kotel compass ---------- */
+/* Kodesh HaKodashim / Temple Mount, Jerusalem - fixed target for the compass */
+const KOTEL_LAT=31.7780, KOTEL_LON=35.2354;
+function toRad(d){ return d*Math.PI/180; }
+function toDeg(r){ return r*180/Math.PI; }
+function bearingTo(lat1,lon1,lat2,lon2){
+  const p1=toRad(lat1), p2=toRad(lat2), dl=toRad(lon2-lon1);
+  const y=Math.sin(dl)*Math.cos(p2);
+  const x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+  return (toDeg(Math.atan2(y,x))+360)%360;
+}
+function distanceKm(lat1,lon1,lat2,lon2){
+  const R=6371, p1=toRad(lat1), p2=toRad(lat2), dp=toRad(lat2-lat1), dl=toRad(lon2-lon1);
+  const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+let CompassState={bearing:null,distKm:null,heading:null,handler:null,needsOrientPerm:false};
+function stopCompass(){
+  if(CompassState.handler){
+    window.removeEventListener('deviceorientationabsolute',CompassState.handler,true);
+    window.removeEventListener('deviceorientation',CompassState.handler,true);
+    CompassState.handler=null;
+  }
+}
+function updateCompassNeedle(){
+  const needle=document.getElementById('compassNeedle'); if(!needle) return;
+  if(CompassState.bearing==null) return;
+  const deg=CompassState.heading!=null?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing;
+  needle.style.transform=`rotate(${deg}deg)`;
+  const hint=document.getElementById('compassHint');
+  if(hint) hint.textContent=CompassState.heading!=null
+    ? 'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה'
+    : 'הַכִּוּוּן מוּצָג לְפִי צָפוֹן קָבוּעַ · אַפְשְׁרוּ חַיָּשׁן כִּוּוּן לְדִיּוּק חַי';
+}
+function onDeviceOrientation(e){
+  if(TAB!=='kotelCompass') return;
+  let heading;
+  if(typeof e.webkitCompassHeading==='number') heading=e.webkitCompassHeading;
+  else if(e.alpha!=null) heading=(360-e.alpha)%360;
+  else return;
+  CompassState.heading=heading;
+  updateCompassNeedle();
+}
+function attachOrientationListener(){
+  const handler=e=>onDeviceOrientation(e);
+  window.addEventListener('deviceorientationabsolute',handler,true);
+  window.addEventListener('deviceorientation',handler,true);
+  CompassState.handler=handler;
+}
+function startCompass(){
+  if(!LOC || LOC.lat==null) return;
+  CompassState.bearing=bearingTo(LOC.lat,LOC.lon,KOTEL_LAT,KOTEL_LON);
+  CompassState.distKm=distanceKm(LOC.lat,LOC.lon,KOTEL_LAT,KOTEL_LON);
+  if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+    CompassState.needsOrientPerm=true;
+  } else if(typeof DeviceOrientationEvent!=='undefined'){
+    attachOrientationListener();
+  }
+}
 /* ---------- shnayim mikra (parashat hashavua) ---------- */
 const PARSHA_HE_NAMES = {"Bereshit":"בְּרֵאשִׁית","Noach":"נֹחַ","Lech-Lecha":"לֶךְ־לְךָ","Vayera":"וַיֵּרָא","Chayei Sara":"חַיֵּי שָׂרָה","Toldot":"תּוֹלְדוֹת","Vayetzei":"וַיֵּצֵא","Vayishlach":"וַיִּשְׁלַח","Vayeshev":"וַיֵּשֶׁב","Miketz":"מִקֵּץ","Vayigash":"וַיִּגַּשׁ","Vayechi":"וַיְחִי","Shemot":"שְׁמוֹת","Vaera":"וָאֵרָא","Bo":"בֹּא","Beshalach":"בְּשַׁלַּח","Yitro":"יִתְרוֹ","Mishpatim":"מִשְׁפָּטִים","Terumah":"תְּרוּמָה","Tetzaveh":"תְּצַוֶּה","Ki Tisa":"כִּי תִשָּׂא","Vayakhel":"וַיַּקְהֵל","Pekudei":"פְקוּדֵי","Vayikra":"וַיִּקְרָא","Tzav":"צַו","Shmini":"שְּׁמִינִי","Tazria":"תַזְרִיעַ","Metzora":"מְצֹרָע","Achrei Mot":"אַחֲרֵי מוֹת","Kedoshim":"קְדֹשִׁים","Emor":"אֱמוֹר","Behar":"בְּהַר","Bechukotai":"בְּחֻקֹּתַי","Bamidbar":"בְּמִדְבַּר","Nasso":"נָשׂא","Beha'alotcha":"בְּהַעֲלֹתְךָ","Sh'lach":"שְׁלַח־לְךָ","Korach":"קֹרַח","Chukat":"חֻקַּת","Balak":"בָּלָק","Pinchas":"פִּינְחָס","Matot":"מַטּוֹת","Masei":"מַסְעֵי","Devarim":"דְּבָרִים","Vaetchanan":"וָאֶתְחַנַּן","Eikev":"עֵקֶב","Re'eh":"רְאֵה","Shoftim":"שׁוֹפְטִים","Ki Teitzei":"כִּי־תֵצֵא","Ki Tavo":"כִּי־תָבוֹא","Nitzavim":"נִצָּבִים","Vayeilech":"וַיֵּלֶךְ","Ha'azinu":"הַאֲזִינוּ","Vezot Haberakhah":"וְזֹאת הַבְּרָכָה","Vayakhel-Pekudei":"וַיַּקְהֵל־פְקוּדֵי","Tazria-Metzora":"תַזְרִיעַ־מְצֹרָע","Achrei Mot-Kedoshim":"אַחֲרֵי מוֹת־קְדֹשִׁים","Behar-Bechukotai":"בְּהַר־בְּחֻקֹּתַי","Chukat-Balak":"חֻקַּת־בָּלָק","Matot-Masei":"מַטּוֹת־מַסְעֵי","Nitzavim-Vayeilech":"נִצָּבִים־וַיֵּלֶךְ"};
 const PARSHA_FR_NAMES={"Bereshit":"Béréchit","Noach":"Noakh","Lech-Lecha":"Lékh-lékha","Vayera":"Vayyéra","Chayei Sara":"Khayyé sara","Toldot":"Toldot","Vayetzei":"Vayyétsé","Vayishlach":"Vayyichlakh","Vayeshev":"Vayyéchév","Miketz":"Mikkéts","Vayigash":"Vayyiggach","Vayechi":"Vaykhi","Shemot":"Chémot","Vaera":"Vaéra","Bo":"Bo","Beshalach":"Béchallakh","Yitro":"Yitro","Mishpatim":"Michpatim","Terumah":"Térouma","Tetzaveh":"Tétsavvé","Ki Tisa":"Ki tissa","Vayakhel":"Vayyakhél","Pekudei":"Fékoudé","Vayikra":"Vayyikra","Tzav":"Tsav","Shmini":"Chémini","Tazria":"Tazria","Metzora":"Métsora","Achrei Mot":"Akharé mot","Kedoshim":"Kédochim","Emor":"Émor","Behar":"Béhar","Bechukotai":"Békhoukkotay","Bamidbar":"Bémidbar","Nasso":"Nas","Beha'alotcha":"Béhaalotkha","Sh'lach":"Chélakh-lékha","Korach":"Korakh","Chukat":"Khoukkat","Balak":"Balak","Pinchas":"Pinkhas","Matot":"Mattot","Masei":"Massé","Devarim":"Dévarim","Vaetchanan":"Vaétkhannan","Eikev":"Ékév","Re'eh":"Réé","Shoftim":"Choftim","Ki Teitzei":"Ki-tétsé","Ki Tavo":"Ki-tavo","Nitzavim":"Nitstsavim","Vayeilech":"Vayyélékh","Ha'azinu":"Haazinou","Vezot Haberakhah":"Vézot habbérakha","Vayakhel-Pekudei":"Vayyakhél-fékoudé","Tazria-Metzora":"Tazria-métsora","Achrei Mot-Kedoshim":"Akharé mot-kédochim","Behar-Bechukotai":"Béhar-békhoukkotay","Chukat-Balak":"Khoukkat-balak","Matot-Masei":"Mattot-massé","Nitzavim-Vayeilech":"Nitstsavim-vayyélékh"};
@@ -1731,6 +1809,7 @@ function go(tab){
   if(CK_PACE_FAMILY_TABS[tab] && !localStorage.getItem('betel_chok_pace_v1')){
     CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=-2; CK_PACE_AFTER_LANG='intro'; tab='chokPace';
   }
+  if(TAB==='kotelCompass' && tab!=='kotelCompass') stopCompass();
   TAB=tab;
   if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   render();
@@ -4390,6 +4469,7 @@ function render(){
     else if(TAB==='chokPace') renderChokPace();
     else if(TAB==='settings') renderSettings();
     else if(TAB==='tracker') renderTracker();
+    else if(TAB==='kotelCompass') renderKotelCompass();
   }catch(err){
     /* A screen that fails partway through building its innerHTML leaves
        whatever was on screen before frozen there with no visible sign
@@ -5579,6 +5659,49 @@ function renderZoharReader(){
 }
 
 /* ================= SETTINGS ================= */
+function renderKotelCompass(){
+  const hasLoc=LOC && LOC.lat!=null;
+  if(hasLoc) startCompass();
+  const deg=CompassState.bearing!=null?(CompassState.heading!=null?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing):0;
+  const hint=!hasLoc?'אַפְשְׁרוּ גִּישָׁה לְמִקּוּם כְּדֵי לְחַשֵּׁב אֶת הַכִּוּוּן'
+    :(CompassState.heading!=null?'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה'
+      :'הַכִּוּוּן מוּצָג לְפִי צָפוֹן קָבוּעַ · אַפְשְׁרוּ חַיָּשׁן כִּוּוּן לְדִיּוּק חַי');
+  app.innerHTML=`
+  ${topbar('מַצְפֵּן לְבֵית הַמִּקְדָּשׁ','settings')}
+  <div class="view">
+    <div class="card compass-card">
+      <div class="card-title">כִּוּוּן קֹדֶש הַקֳּדָשִׁים</div>
+      <div class="compass-wrap">
+        <div class="compass-dial">
+          <div class="compass-top-marker"></div>
+          <div class="compass-ticks">${[...Array(24)].map((_,i)=>`<div class="tick ${i%6===0?'major':''}" style="transform:rotate(${i*15}deg) translateX(-1px)"></div>`).join('')}</div>
+          <div class="compass-needle" id="compassNeedle" style="transform:rotate(${deg}deg)">
+            <svg viewBox="0 0 230 230">
+              <polygon points="115,22 128,114 115,99 102,114" fill="var(--gold)"/>
+              <polygon points="115,208 128,116 115,131 102,116" fill="var(--muted)" opacity=".45"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="compass-info">
+        ${hasLoc?`<div class="compass-dist">${Math.round(CompassState.distKm)} ק״מ מִירוּשָׁלַיִם</div>`:''}
+        <div class="compass-hint" id="compassHint">${hint}</div>
+      </div>
+      ${!hasLoc?`<button class="btn btn-gold" id="compassLocBtn">${I.loc}<span>אַפְשְׁרוּ גִּישָׁה לְמִקּוּם</span></button>`:''}
+      ${hasLoc && CompassState.needsOrientPerm && !CompassState.handler?`<button class="btn btn-ghost" id="compassOrientBtn">${I.compass}<span>אַפְשְׁרוּ חַיָּשׁן כִּוּוּן</span></button>`:''}
+      <div class="compass-note">הַמַּצְפֵּן מַחְשֵׁב אֶת הַכִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בְּבֵית הַמִּקְדָּשׁ, עַל פִּי הַמִּקּוּם הַנּוֹכְחִי שֶׁלָּכֶם וְחַיָּשׁן הַכִּוּוּן שֶׁל הַמַּכְשִׁיר.</div>
+    </div>
+  </div>`;
+  const locBtn=document.getElementById('compassLocBtn');
+  if(locBtn) locBtn.onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderKotelCompass(); }); };
+  const orientBtn=document.getElementById('compassOrientBtn');
+  if(orientBtn) orientBtn.onclick=()=>{
+    DeviceOrientationEvent.requestPermission().then(state=>{
+      if(state==='granted'){ attachOrientationListener(); renderKotelCompass(); }
+      else toast('לֹא הִתְקַבְּלָה הַרְשָׁאָה לְחַיָּשׁן הַכִּוּוּן');
+    }).catch(()=>{});
+  };
+}
 function renderSettings(){
   if(!MCYC) ensureMusarCycles().then(()=>{ if(TAB==='settings') renderSettings(); });
   const notifPerm=notifPermGranted()?'granted':'denied';
@@ -5649,6 +5772,7 @@ function renderSettings(){
     <div class="set-group">
       <h3>מִקּוּם וּזְמַנִּים</h3>
       <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי</div><div class="si-d">אִתּוּר אוֹטוֹמָטִי לְפִי GPS</div></div></div>${I.refresh}</div>
+      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן לְבֵית הַמִּקְדָּשׁ</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
     </div>
 
 
@@ -5689,6 +5813,7 @@ function renderSettings(){
   document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
   app.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{ S.division=b.dataset.div; saveS(); renderSettings(); });
   document.getElementById('useGPS').onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן לְפִי GPS':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderSettings(); }); };
+  document.getElementById('openCompass').onclick=()=>go('kotelCompass');
   document.getElementById('shareApp').onclick=shareApp;
   document.getElementById('shareAppQR').onclick=shareQR;
   document.getElementById('settingsTracker').onclick=()=>go('tracker');
