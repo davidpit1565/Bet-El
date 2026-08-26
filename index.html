@@ -368,8 +368,13 @@ a.set-item{text-decoration:none;color:inherit}
 .compass-ticks .tick{position:absolute;top:0;left:50%;width:2px;height:14px;background:var(--muted);
   opacity:.6;transform-origin:1px 115px;transform:translateX(-1px)}
 .compass-ticks .tick.major{height:18px;width:3px;background:var(--gold);opacity:.9}
-.compass-needle{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .3s ease-out}
+.compass-needle{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .3s ease-out;--needle-color:var(--gold)}
 .compass-needle svg{width:100%;height:100%}
+.compass-needle.ok{--needle-color:#2fae5c}
+.compass-needle.bad{--needle-color:#e2483c}
+.compass-deg{font-size:26px;font-weight:800;text-align:center;color:var(--gold);margin:2px 0 10px;transition:color .25s}
+.compass-deg.ok{color:#2fae5c}
+.compass-deg.bad{color:#e2483c}
 .compass-info{text-align:center}
 .compass-dist{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:3px}
 .compass-hint{font-size:13px;color:var(--muted)}
@@ -1555,11 +1560,21 @@ function stopCompass(){
 function updateCompassNeedle(){
   const needle=document.getElementById('compassNeedle'); if(!needle) return;
   if(CompassState.bearing==null) return;
-  const deg=CompassState.heading!=null?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing;
+  const knowsHeading=CompassState.heading!=null;
+  const deg=knowsHeading?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing;
+  const aligned=knowsHeading && compassAlign(deg);
   needle.style.transform=`rotate(${deg}deg)`;
+  needle.classList.toggle('ok',aligned);
+  needle.classList.toggle('bad',knowsHeading && !aligned);
+  const degEl=document.getElementById('compassDeg');
+  if(degEl){
+    degEl.textContent=(Math.round(deg)%360)+'°';
+    degEl.classList.toggle('ok',aligned);
+    degEl.classList.toggle('bad',knowsHeading && !aligned);
+  }
   const hint=document.getElementById('compassHint');
-  if(hint) hint.textContent=CompassState.heading!=null
-    ? 'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה'
+  if(hint) hint.textContent=knowsHeading
+    ? (aligned?'אַתֶּם פּוֹנִים לְכִוּוּן הַנָּכוֹן!':'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה')
     : 'הַכִּוּוּן מוּצָג לְפִי צָפוֹן קָבוּעַ · אַפְשְׁרוּ חַיָּשׁן כִּוּוּן לְדִיּוּק חַי';
 }
 function onDeviceOrientation(e){
@@ -5659,15 +5674,20 @@ function renderZoharReader(){
 }
 
 /* ================= SETTINGS ================= */
+function compassAlign(deg){ const diff=Math.min(deg,360-deg); return diff<=10; }
 function renderKotelCompass(){
   const hasLoc=LOC && LOC.lat!=null;
   if(hasLoc) startCompass();
   const deg=CompassState.bearing!=null?(CompassState.heading!=null?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing):0;
+  const knowsHeading=hasLoc && CompassState.heading!=null;
+  const aligned=knowsHeading && compassAlign(deg);
+  const needleCls=knowsHeading?(aligned?'ok':'bad'):'';
+  const degCls=knowsHeading?(aligned?'ok':'bad'):'';
   const hint=!hasLoc?'אַפְשְׁרוּ גִּישָׁה לְמִקּוּם כְּדֵי לְחַשֵּׁב אֶת הַכִּוּוּן'
-    :(CompassState.heading!=null?'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה'
+    :(knowsHeading?(aligned?'אַתֶּם פּוֹנִים לְכִוּוּן הַנָּכוֹן!':'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה')
       :'הַכִּוּוּן מוּצָג לְפִי צָפוֹן קָבוּעַ · אַפְשְׁרוּ חַיָּשׁן כִּוּוּן לְדִיּוּק חַי');
   app.innerHTML=`
-  ${topbar('מַצְפֵּן לְבֵית הַמִּקְדָּשׁ','settings')}
+  ${topbar('מַצְפֵּן','settings')}
   <div class="view">
     <div class="card compass-card">
       <div class="card-title">כִּוּוּן קֹדֶש הַקֳּדָשִׁים</div>
@@ -5675,14 +5695,15 @@ function renderKotelCompass(){
         <div class="compass-dial">
           <div class="compass-top-marker"></div>
           <div class="compass-ticks">${[...Array(24)].map((_,i)=>`<div class="tick ${i%6===0?'major':''}" style="transform:rotate(${i*15}deg) translateX(-1px)"></div>`).join('')}</div>
-          <div class="compass-needle" id="compassNeedle" style="transform:rotate(${deg}deg)">
+          <div class="compass-needle ${needleCls}" id="compassNeedle" style="transform:rotate(${deg}deg)">
             <svg viewBox="0 0 230 230">
-              <polygon points="115,22 128,114 115,99 102,114" fill="var(--gold)"/>
+              <polygon points="115,22 128,114 115,99 102,114" fill="var(--needle-color)"/>
               <polygon points="115,208 128,116 115,131 102,116" fill="var(--muted)" opacity=".45"/>
             </svg>
           </div>
         </div>
       </div>
+      <div class="compass-deg ${degCls}" id="compassDeg">${Math.round(deg)%360}°</div>
       <div class="compass-info">
         ${hasLoc?`<div class="compass-dist">${Math.round(CompassState.distKm)} ק״מ מִירוּשָׁלַיִם</div>`:''}
         <div class="compass-hint" id="compassHint">${hint}</div>
@@ -5772,7 +5793,7 @@ function renderSettings(){
     <div class="set-group">
       <h3>מִקּוּם וּזְמַנִּים</h3>
       <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי</div><div class="si-d">אִתּוּר אוֹטוֹמָטִי לְפִי GPS</div></div></div>${I.refresh}</div>
-      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן לְבֵית הַמִּקְדָּשׁ</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
+      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
     </div>
 
 
