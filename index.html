@@ -358,28 +358,50 @@ a.set-item{text-decoration:none;color:inherit}
 .set-item .si-t{font-size:14px;font-weight:600}
 .set-item .si-d{font-size:14px;color:var(--muted);margin-top:1px}
 /* ================= KOTEL COMPASS ================= */
-.compass-wrap{display:flex;justify-content:center;margin:6px 0 18px}
-.compass-dial{position:relative;width:230px;height:230px;border-radius:50%;
-  background:radial-gradient(circle at 50% 40%, var(--panel) 0%, rgba(0,0,0,.18) 100%);
-  border:2px solid var(--gold);box-shadow:0 14px 34px -16px rgba(0,0,0,.55),inset 0 0 0 6px rgba(212,175,95,.08)}
+/* Full-screen overlay, not a normal .view - fixed, above everything,
+   on the app's own calm navy/gold background (no camera passthrough -
+   unpredictable live video read as noisy/undignified, not the quiet,
+   precise feel a study app calls for). */
+.compass-full{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;
+  background:radial-gradient(circle at 50% 18%, #1a2c52 0%, #0c1730 60%, #080d19 100%);overflow:hidden}
+.compass-fhead{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 10px;flex:none}
+.compass-close{border:1px solid rgba(255,255,255,.35);background:rgba(20,25,40,.55);color:#f3e9d0;
+  border-radius:999px;padding:9px 20px;font-family:var(--font-ui);font-size:14px;font-weight:600;cursor:pointer}
+.compass-ftitle{color:#f3e9d0;font-family:var(--font-sacred);font-size:17px;font-weight:700}
+.compass-fbody{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:14px;padding:0 18px 24px;overflow:auto}
+.compass-wrap{position:relative;width:min(78vw,300px);height:min(78vw,300px);flex:none}
+.compass-dial{position:relative;width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.06) 0%, rgba(0,0,0,.25) 100%);
+  border:2px solid rgba(243,230,175,.75);box-shadow:0 14px 34px -16px rgba(0,0,0,.7),inset 0 0 0 6px rgba(212,175,95,.08)}
 .compass-top-marker{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:0;height:0;
-  border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--gold)}
+  border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--gold);z-index:3}
 .compass-ticks{position:absolute;inset:0}
-.compass-ticks .tick{position:absolute;top:0;left:50%;width:2px;height:14px;background:var(--muted);
-  opacity:.6;transform-origin:1px 115px;transform:translateX(-1px)}
-.compass-ticks .tick.major{height:18px;width:3px;background:var(--gold);opacity:.9}
-.compass-needle{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .3s ease-out;--needle-color:var(--gold)}
-.compass-needle svg{width:100%;height:100%}
-.compass-needle.ok{--needle-color:#2fae5c}
+.compass-ticks .tick{position:absolute;inset:0;display:flex;justify-content:center}
+.compass-ticks .tick::before{content:"";display:block;width:2px;height:12px;margin-top:3px;background:rgba(255,255,255,.55)}
+.compass-ticks .tick.major::before{height:16px;background:var(--gold)}
+.compass-labels{position:absolute;inset:0}
+.compass-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#f3e9d0;
+  font-family:var(--font-ui);font-size:13px;font-weight:700;opacity:.85}
+.compass-needle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;--needle-color:#cfd6e6}
+.compass-needle svg{width:62%;height:62%;transition:filter .25s}
+.compass-needle.ok{--needle-color:#3ecf78}
 .compass-needle.bad{--needle-color:#e2483c}
-.compass-deg{font-size:26px;font-weight:800;text-align:center;color:var(--gold);margin:2px 0 10px;transition:color .25s}
-.compass-deg.ok{color:#2fae5c}
+.compass-deg{font-size:44px;font-weight:800;text-align:center;color:#f3e9d0;transition:color .25s;line-height:1.1}
+.compass-deg.ok{color:#3ecf78}
 .compass-deg.bad{color:#e2483c}
-.compass-info{text-align:center}
-.compass-dist{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:3px}
-.compass-hint{font-size:13px;color:var(--muted)}
-.compass-note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6}
-.compass-card .btn{margin-top:12px}
+.compass-dirname{font-size:15px;text-align:center;color:#cfd6e6;margin-top:-4px}
+.compass-target-card{width:100%;max-width:340px;background:rgba(15,20,35,.6);border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;padding:14px 18px;text-align:center}
+.compass-target-line{font-size:15px;font-weight:700;color:#f3e9d0}
+.compass-turn-line{font-size:15px;font-weight:700;color:#5ea9ff;margin-top:4px}
+.compass-turn-line.ok{color:#3ecf78}
+.compass-loc-card{width:100%;max-width:340px;background:rgba(15,20,35,.45);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:10px 18px;text-align:center;font-size:13px;color:#cfd6e6}
+.compass-loc-card b{color:#f3e9d0;font-weight:700}
+.compass-note{font-size:12px;color:#a9b3c9;text-align:center;line-height:1.6;max-width:340px}
+.compass-full .btn{max-width:340px;margin:0 auto}
 /* toggle */
 .toggle{width:50px;height:29px;border-radius:999px;background:var(--line);border:1px solid var(--line-strong);
   position:relative;cursor:pointer;transition:.25s var(--ease);flex:none}
@@ -1550,6 +1572,14 @@ function distanceKm(lat1,lon1,lat2,lon2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 let CompassState={bearing:null,distKm:null,heading:null,handler:null,needsOrientPerm:false};
+const COMPASS_DIR_NAMES=['צָפוֹן','צָפוֹן־מִזְרָח','מִזְרָח','דָּרוֹם־מִזְרָח','דָּרוֹם','דָּרוֹם־מַעֲרָב','מַעֲרָב','צָפוֹן־מַעֲרָב'];
+function compassDirName(deg){ return COMPASS_DIR_NAMES[Math.round((((deg%360)+360)%360)/45)%8]; }
+function compassTurnInfo(heading,target){
+  const diff=((target-heading+540)%360)-180;
+  const absDiff=Math.round(Math.abs(diff));
+  if(absDiff<=5) return {aligned:true, text:'אתם מכוונים נכון!'};
+  return {aligned:false, text:`הִסְתּוֹבְבוּ ${absDiff}° ${diff<0?'שְׁמָאלָה':'יָמִינָה'}`};
+}
 function stopCompass(){
   if(CompassState.handler){
     window.removeEventListener('deviceorientationabsolute',CompassState.handler,true);
@@ -1558,24 +1588,33 @@ function stopCompass(){
   }
 }
 function updateCompassNeedle(){
-  const needle=document.getElementById('compassNeedle'); if(!needle) return;
+  const ticks=document.getElementById('compassTicks'); if(!ticks) return;
   if(CompassState.bearing==null) return;
   const knowsHeading=CompassState.heading!=null;
-  const deg=knowsHeading?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing;
-  const aligned=knowsHeading && compassAlign(deg);
-  needle.style.transform=`rotate(${deg}deg)`;
-  needle.classList.toggle('ok',aligned);
-  needle.classList.toggle('bad',knowsHeading && !aligned);
+  const heading=knowsHeading?CompassState.heading:0;
+  ticks.style.transform=`rotate(${-heading}deg)`;
+  document.querySelectorAll('.compass-label').forEach(el=>{
+    const a=(parseFloat(el.dataset.a)-heading)*Math.PI/180;
+    el.style.left=(50+38*Math.sin(a))+'%';
+    el.style.top=(50-38*Math.cos(a))+'%';
+  });
+  const turn=knowsHeading?compassTurnInfo(heading,CompassState.bearing):null;
+  const aligned=!!(turn && turn.aligned);
+  const needle=document.getElementById('compassNeedle');
+  if(needle){ needle.classList.toggle('ok',aligned); needle.classList.toggle('bad',knowsHeading && !aligned); }
   const degEl=document.getElementById('compassDeg');
   if(degEl){
-    degEl.textContent=(Math.round(deg)%360)+'°';
+    degEl.textContent=knowsHeading?(Math.round(heading)%360)+'°':'--';
     degEl.classList.toggle('ok',aligned);
     degEl.classList.toggle('bad',knowsHeading && !aligned);
   }
-  const hint=document.getElementById('compassHint');
-  if(hint) hint.textContent=knowsHeading
-    ? (aligned?'אַתֶּם פּוֹנִים לְכִוּוּן הַנָּכוֹן!':'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה')
-    : 'הַכִּוּוּן מוּצָג לְפִי צָפוֹן קָבוּעַ · אַפְשְׁרוּ חַיָּשׁן כִּוּוּן לְדִיּוּק חַי';
+  const dirEl=document.getElementById('compassDirName');
+  if(dirEl) dirEl.textContent=knowsHeading?compassDirName(heading):'אַפְשְׁרוּ חַיָּשׁן כִּוּוּן';
+  const turnEl=document.getElementById('compassTurnLine');
+  if(turnEl){
+    turnEl.textContent=knowsHeading?turn.text:'הַכִּוּוּן הַחַי דּוֹרֵשׁ אִשּׁוּר חַיָּשׁן';
+    turnEl.classList.toggle('ok',aligned);
+  }
 }
 function onDeviceOrientation(e){
   if(TAB!=='kotelCompass') return;
@@ -1831,7 +1870,12 @@ function go(tab){
   }
   if(TAB==='kotelCompass' && tab!=='kotelCompass') stopCompass();
   TAB=tab;
-  if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
+  /* the full-screen AR compass overlay must cover the bottom nav completely,
+     but .bottom-nav is a body-level sibling outside #app's own stacking
+     context, so no z-index inside #app can ever paint over it - remove it
+     outright instead, same as onboard/chokPace already do. */
+  if(tab==='kotelCompass'){ const nav=document.querySelector('.bottom-nav'); if(nav) nav.remove(); }
+  else if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   render();
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab));
   requestAnimationFrame(placeNavPill);
@@ -5679,45 +5723,50 @@ function renderZoharReader(){
 }
 
 /* ================= SETTINGS ================= */
-function compassAlign(deg){ const diff=Math.min(deg,360-deg); return diff<=10; }
+const COMPASS_RING=[[0,'N'],[45,'NE'],[90,'E'],[135,'SE'],[180,'S'],[225,'SW'],[270,'W'],[315,'NW']];
 function renderKotelCompass(){
   const hasLoc=LOC && LOC.lat!=null;
   if(hasLoc) startCompass();
-  const deg=CompassState.bearing!=null?(CompassState.heading!=null?(CompassState.bearing-CompassState.heading+360)%360:CompassState.bearing):0;
   const knowsHeading=hasLoc && CompassState.heading!=null;
-  const aligned=knowsHeading && compassAlign(deg);
-  const needleCls=knowsHeading?(aligned?'ok':'bad'):'';
-  const degCls=knowsHeading?(aligned?'ok':'bad'):'';
-  const hint=!hasLoc?'אַפְשְׁרוּ גִּישָׁה לְמִקּוּם כְּדֵי לְחַשֵּׁב אֶת הַכִּוּוּן'
-    :(knowsHeading?(aligned?'אַתֶּם פּוֹנִים לְכִוּוּן הַנָּכוֹן!':'סוֹבְבוּ אֶת הַמַּכְשִׁיר עַד שֶׁהַחֵץ מַצְבִּיעַ לְמַעְלָה')
-      :'הַכִּוּוּן מוּצָג לְפִי צָפוֹן קָבוּעַ · אַפְשְׁרוּ חַיָּשׁן כִּוּוּן לְדִיּוּק חַי');
+  const heading=knowsHeading?CompassState.heading:0;
+  const turn=knowsHeading?compassTurnInfo(heading,CompassState.bearing):null;
+  const aligned=!!(turn && turn.aligned);
+  const cls=knowsHeading?(aligned?'ok':'bad'):'';
   app.innerHTML=`
-  ${topbar('מַצְפֵּן','settings')}
-  <div class="view">
-    <div class="card compass-card">
-      <div class="card-title">כִּוּוּן קֹדֶש הַקֳּדָשִׁים</div>
+  <div class="compass-full">
+    <div class="compass-fhead">
+      <button class="compass-close" id="compassClose">סָגוּר</button>
+      <div class="compass-ftitle">כִּוּוּן תְּפִלָּה</div>
+    </div>
+    <div class="compass-fbody">
       <div class="compass-wrap">
         <div class="compass-dial">
           <div class="compass-top-marker"></div>
-          <div class="compass-ticks">${[...Array(24)].map((_,i)=>`<div class="tick ${i%6===0?'major':''}" style="transform:rotate(${i*15}deg) translateX(-1px)"></div>`).join('')}</div>
-          <div class="compass-needle ${needleCls}" id="compassNeedle" style="transform:rotate(${deg}deg)">
-            <svg viewBox="0 0 230 230">
-              <polygon points="115,22 128,114 115,99 102,114" fill="var(--needle-color)"/>
-              <polygon points="115,208 128,116 115,131 102,116" fill="var(--muted)" opacity=".45"/>
+          <div class="compass-ticks" id="compassTicks">${[...Array(24)].map((_,i)=>`<div class="tick ${i%3===0?'major':''}" style="transform:rotate(${i*15}deg)"></div>`).join('')}</div>
+          <div class="compass-labels">${COMPASS_RING.map(([a,l])=>`<div class="compass-label" data-a="${a}" style="left:${50+38*Math.sin(a*Math.PI/180)}%;top:${50-38*Math.cos(a*Math.PI/180)}%">${l}</div>`).join('')}</div>
+          <div class="compass-needle ${cls}" id="compassNeedle">
+            <svg viewBox="0 0 100 100">
+              <polygon points="50,6 74,66 50,50 26,66" fill="var(--needle-color)"/>
             </svg>
           </div>
         </div>
       </div>
-      <div class="compass-deg ${degCls}" id="compassDeg">${Math.round(deg)%360}°</div>
-      <div class="compass-info">
-        ${hasLoc?`<div class="compass-dist">${Math.round(CompassState.distKm)} ק״מ מִירוּשָׁלַיִם</div>`:''}
-        <div class="compass-hint" id="compassHint">${hint}</div>
+      <div>
+        <div class="compass-deg ${cls}" id="compassDeg">${knowsHeading?Math.round(heading)+'°':'--'}</div>
+        <div class="compass-dirname" id="compassDirName">${knowsHeading?compassDirName(heading):(hasLoc?'אַפְשְׁרוּ חַיָּשׁן כִּוּוּן':'אַפְשְׁרוּ גִּישָׁה לְמִקּוּם')}</div>
       </div>
+      <div class="compass-target-card">
+        <div class="compass-target-line">כִּוּוּן קֹדֶש הַקֳּדָשִׁים: ${hasLoc?Math.round(CompassState.bearing)+'°':'—'}</div>
+        <div class="compass-turn-line ${aligned?'ok':''}" id="compassTurnLine">${knowsHeading?turn.text:(hasLoc?'הַכִּוּוּן הַחַי דּוֹרֵשׁ אִשּׁוּר חַיָּשׁן':'')}</div>
+      </div>
+      ${hasLoc?`<div class="compass-loc-card">${LOC.name} <b>·</b> ${LOC.lat.toFixed(3)}°, ${LOC.lon.toFixed(3)}° <b>·</b> ${Math.round(CompassState.distKm)} ק״מ מִירוּשָׁלַיִם</div>`:''}
       ${!hasLoc?`<button class="btn btn-gold" id="compassLocBtn">${I.loc}<span>אַפְשְׁרוּ גִּישָׁה לְמִקּוּם</span></button>`:''}
       ${hasLoc && CompassState.needsOrientPerm && !CompassState.handler?`<button class="btn btn-ghost" id="compassOrientBtn">${I.compass}<span>אַפְשְׁרוּ חַיָּשׁן כִּוּוּן</span></button>`:''}
-      <div class="compass-note">הַמַּצְפֵּן מַחְשֵׁב אֶת הַכִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בְּבֵית הַמִּקְדָּשׁ, עַל פִּי הַמִּקּוּם הַנּוֹכְחִי שֶׁלָּכֶם וְחַיָּשׁן הַכִּוּוּן שֶׁל הַמַּכְשִׁיר.</div>
+      <div class="compass-note">הַכִּוּוּן מְחֻשָּׁב לְפִי הַמִּקּוּם וְחַיָּשׁן הַכִּוּוּן שֶׁל הַמַּכְשִׁיר. שִׁמְעוּ לָב: יִתָּכֵן שֶׁתִּהְיֶה סְטִיָּה קַלָּה בְּמַצְפֵּן הַטֶּלֶפוֹן - הַשִּׁמּוּש בְּאַחְרָיוּתְכֶם בִּלְבַד.</div>
     </div>
   </div>`;
+  updateCompassNeedle();
+  document.getElementById('compassClose').onclick=()=>go('settings');
   const locBtn=document.getElementById('compassLocBtn');
   if(locBtn) locBtn.onclick=()=>{ toast('מְאַתֵּר מִקּוּם…'); requestGPS(ok=>{ toast(ok?'הַמִּקּוּם עֻדְכַּן':'לֹא הִתְקַבְּלָה הַרְשָׁאַת מִקּוּם'); renderKotelCompass(); }); };
   const orientBtn=document.getElementById('compassOrientBtn');
@@ -6091,7 +6140,7 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 /* ================= BOOT ================= */
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
-  if(TAB==='onboard'||TAB==='chokPace'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
+  if(TAB==='onboard'||TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
   const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','תפילות',I.scroll],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
