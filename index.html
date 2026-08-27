@@ -1158,6 +1158,8 @@ const I = {
   bookmark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   bookmarkOn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-4 2 2-5z" fill="currentColor" stroke="none"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
   wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 7.5c1.5-4 6-5.5 9-2.5s1.5 7.5-2 9M10.5 16.5l3 3-6 1.5 1.5-6"/></svg>',
@@ -2227,12 +2229,24 @@ function chokSectionsFor(key,day){
   if(!keys.length) return [];
   const hd=ckViewHDate(), my=chokMishnahYear(hd);
   if(day==='night'){
+    /* Leil Shishi adds its own extra Torah portion (tzeruf), but every
+       other subject - Nevi'im/Ketuvim, Tehillim, Mishnah, Gemara, Zohar,
+       Halacha, Musar - hasn't changed yet: it's still Thursday's, right up
+       until Friday's own daytime portion begins (see leilShishiDate /
+       chokDayDate, both gated on Friday's sunrise). Build Thursday's full
+       list and splice the tzeruf in next to the Torah section, instead of
+       showing only the insert and dropping everything else. */
     let items=[], refs=[];
     keys.forEach(k=>{
       const t=((CHOK.schedule[k]||{}).night||{}).tzeruf;
       refs=refs.concat(t||[]); items=items.concat(chokTorahVerses(t));
     });
-    return items.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items,kind:'torah',refs}]:[];
+    const thuList=chokSectionsFor(key,'thu');
+    if(!items.length) return thuList;
+    const tzeruf={key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items,kind:'torah',refs};
+    const ti=thuList.findIndex(x=>x.key==='torah');
+    if(ti>=0) thuList.splice(ti+1,0,tzeruf); else thuList.unshift(tzeruf);
+    return thuList;
   }
   const list=[], slot={};
   /* one section per kind, however many parshiot feed it */
@@ -5864,6 +5878,12 @@ function renderSettings(){
         </div>
         <button class="btn btn-gold" id="yahrAdd">${I.plus}<span>הוֹסֵף יָאהְרְצַיְיט</span></button>
       </div>
+    </div>
+
+    <div class="set-group">
+      <h3>מִשְׁפָּטִי</h3>
+      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מְדִינִיּוּת פְּרָטִיּוּת</div><div class="si-d">מָה נִשְׁמָר וְאֵיפֹה</div></div></div>${I.chev}</a>
+      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תְּנָאֵי שִׁמּוּשׁ</div><div class="si-d">תְּנָאִים לְשִׁמּוּשׁ בָּאַפְּלִיקַצְיָה</div></div></div>${I.chev}</a>
     </div>
 
     <div class="set-group">
