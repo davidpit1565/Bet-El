@@ -1,30 +1,37 @@
 <!doctype html>
-<html dir="rtl" lang="he">
+<html lang="he" dir="rtl" id="html-root">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מדיניות פרטיות · בית אל</title>
+<title id="page-title">מדיניות פרטיות · בית אל</title>
 <style>
   body{font-family:"Heebo","Assistant",system-ui,-apple-system,sans-serif;background:#080d19;color:#f6f1e4;
     max-width:640px;margin:0 auto;padding:32px 20px 60px;line-height:1.7}
-  h1{font-size:22px;color:#f3e3af}
+  h1{font-size:22px;color:#f3e3af;margin-bottom:4px}
   h2{font-size:17px;color:#d4af5f;margin-top:28px}
   p,li{font-size:15px;color:#cdd6ec}
   a{color:#d4af5f}
+  .updated{font-size:13px;color:#8593b6;margin-bottom:20px}
+  .langbar{display:flex;justify-content:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+  .langbar button{font-family:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;
+    border:1px solid #2a3450;background:#101a30;color:#cdd6ec;cursor:pointer}
+  .langbar button.on{background:#d4af5f;color:#2a1e05;border-color:#d4af5f}
+  .lang-section{display:none}
+  .lang-section.on{display:block}
 </style>
 </head>
 <body>
+
+<div class="langbar" id="langbar"></div>
+
+<div class="lang-section" data-lang="he" dir="rtl">
 <h1>מדיניות פרטיות — בית אל · לימוד יומי</h1>
-<p>עודכן לאחרונה: 2026-08-24</p>
-
+<p class="updated">עודכן לאחרונה: 2026-08-27</p>
 <p>אפליקציית "בית אל" נועדה ללימוד יומי (חוק לישראל, תהילים, תיקוני הזוהר, שניים מקרא ואחד תרגום, בן איש חי ומוסר). האפליקציה <strong>אינה אוספת, שומרת או משדרת מידע אישי מזהה</strong> לשום שרת חיצוני.</p>
-
 <h2>מה נשמר, ואיפה</h2>
 <p>כל ההתקדמות האישית שלך (אילו ימים סומנו כהושלמו, הגדרות שפה/ערכת נושא, אילו ספרים נלמדים) נשמרת <strong>מקומית בלבד</strong> על המכשיר שלך, באמצעות localStorage של הדפדפן/האפליקציה. מידע זה אינו נשלח לשום שרת ואינו נגיש לנו.</p>
-
 <h2>התראות</h2>
 <p>אם תפעיל תזכורת יומית בהגדרות, ההתראה נשלחת מקומית על ידי המכשיר שלך בלבד (Local Notification) — לא דרך שרת דחיפה חיצוני.</p>
-
 <h2>תוכן ונתונים חיצוניים</h2>
 <p>האפליקציה טוענת קבצי טקסט (JSON) סטטיים המצורפים אליה עצמה. מלבד זאת, שני שירותי צד-שלישי בלבד נטענים:</p>
 <ul>
@@ -32,8 +39,130 @@
   <li><strong>שירות יצירת קוד QR</strong> (api.qrserver.com) — משמש רק כשאתה משתף קישור מתוך האפליקציה (למשל שיתוף פרק תהילים); הקישור הציבורי עצמו נשלח ליצירת התמונה, ללא מידע אישי נוסף.</li>
 </ul>
 <p>בגרסת האינטרנט (לא בגרסאות App Store/Google Play) נטען גם <strong>Vercel Speed Insights</strong> — מדדי ביצועים אנונימיים בלבד (זמני טעינה), ללא מזהה אישי. הוא אינו פעיל בגרסאות הנייטיב.</p>
-
+<h2>ילדים</h2>
+<p>האפליקציה מתאימה לכלל הגילאים ואינה מיועדת במיוחד לילדים, אך אינה אוספת מידע מאף משתמש, כולל ילדים.</p>
+<h2>שינויים במדיניות זו</h2>
+<p>אם מדיניות הפרטיות תשתנה, העדכון יפורסם בעמוד זה עם תאריך עדכון חדש.</p>
 <h2>יצירת קשר</h2>
 <p>לשאלות בנוגע למדיניות זו ניתן לפנות דרך <a href="https://github.com/davidpit1565/Bet-El">מאגר הפרויקט ב-GitHub</a>.</p>
+</div>
+
+<div class="lang-section" data-lang="en" dir="ltr">
+<h1>Privacy Policy — Beit-El · Daily Study</h1>
+<p class="updated">Last updated: 2026-08-27</p>
+<p>The "Beit-El" app is a daily Torah-study companion (Chok LeYisrael, Tehillim, Tikkunei HaZohar, Shnayim Mikra veEchad Targum, Ben Ish Chai and Musar). The app <strong>does not collect, store, or transmit any personally identifiable information</strong> to any external server.</p>
+<h2>What is stored, and where</h2>
+<p>All of your personal progress (which days are marked complete, language/theme settings, which books you're studying) is stored <strong>locally only</strong> on your device, using your browser's/app's localStorage. This information is never sent to any server and is not accessible to us.</p>
+<h2>Notifications</h2>
+<p>If you enable a daily reminder in Settings, the notification is fired locally by your own device (a Local Notification) — not through any external push server.</p>
+<h2>External content and data</h2>
+<p>The app loads static text files (JSON) bundled with it. Beyond that, only two third-party services are ever loaded:</p>
+<ul>
+  <li><strong>Google Fonts</strong> — for correctly rendering Hebrew (and other) text. Google may see the request's IP address, as with any web font load.</li>
+  <li><strong>A QR-code generation service</strong> (api.qrserver.com) — used only when you share a link from within the app (e.g. sharing a Tehillim chapter); only the public link itself is sent to generate the image, with no further personal information.</li>
+</ul>
+<p>The web version (not the App Store/Google Play versions) also loads <strong>Vercel Speed Insights</strong> — anonymous performance metrics only (load times), with no personal identifier. It is not active in the native app versions.</p>
+<h2>Children</h2>
+<p>The app is suitable for all ages and is not specifically directed at children, but it does not collect information from any user, including children.</p>
+<h2>Changes to this policy</h2>
+<p>If this privacy policy changes, the update will be posted on this page with a new "last updated" date.</p>
+<h2>Contact</h2>
+<p>For questions about this policy, reach out via the <a href="https://github.com/davidpit1565/Bet-El">project's GitHub repository</a>.</p>
+</div>
+
+<div class="lang-section" data-lang="fr" dir="ltr">
+<h1>Politique de confidentialité — Beit-El · Étude quotidienne</h1>
+<p class="updated">Dernière mise à jour : 2026-08-27</p>
+<p>L'application « Beit-El » est un compagnon d'étude quotidienne de la Torah (Chok LeYisrael, Tehillim, Tikkunei HaZohar, Chnayim Mikra vé'Éh'ad Targoum, Ben Ich H'aï et Moussar). L'application <strong>ne collecte, ne stocke ni ne transmet aucune information personnelle identifiable</strong> à un serveur externe.</p>
+<h2>Ce qui est enregistré, et où</h2>
+<p>Toute votre progression personnelle (les jours marqués comme terminés, les réglages de langue/thème, les ouvrages étudiés) est enregistrée <strong>uniquement en local</strong> sur votre appareil, via le localStorage de votre navigateur/application. Ces informations ne sont jamais envoyées à un serveur et ne nous sont pas accessibles.</p>
+<h2>Notifications</h2>
+<p>Si vous activez un rappel quotidien dans les Réglages, la notification est déclenchée localement par votre propre appareil (notification locale) — jamais via un serveur de notifications push externe.</p>
+<h2>Contenu et données externes</h2>
+<p>L'application charge des fichiers texte statiques (JSON) intégrés à l'application elle-même. En dehors de cela, seuls deux services tiers sont chargés :</p>
+<ul>
+  <li><strong>Google Fonts</strong> — pour afficher correctement le texte hébreu (et autres). Google peut voir l'adresse IP de la requête, comme pour tout chargement de police web.</li>
+  <li><strong>Un service de génération de code QR</strong> (api.qrserver.com) — utilisé uniquement lorsque vous partagez un lien depuis l'application (par exemple le partage d'un chapitre de Tehillim) ; seul le lien public lui-même est envoyé pour générer l'image, sans autre information personnelle.</li>
+</ul>
+<p>La version web (et non les versions App Store/Google Play) charge également <strong>Vercel Speed Insights</strong> — des mesures de performance anonymes uniquement (temps de chargement), sans identifiant personnel. Il n'est pas actif dans les versions natives de l'application.</p>
+<h2>Enfants</h2>
+<p>L'application convient à tous les âges et ne s'adresse pas spécifiquement aux enfants, mais elle ne collecte d'information d'aucun utilisateur, enfants inclus.</p>
+<h2>Modifications de cette politique</h2>
+<p>En cas de modification de cette politique de confidentialité, la mise à jour sera publiée sur cette page avec une nouvelle date de mise à jour.</p>
+<h2>Contact</h2>
+<p>Pour toute question concernant cette politique, contactez-nous via le <a href="https://github.com/davidpit1565/Bet-El">dépôt GitHub du projet</a>.</p>
+</div>
+
+<div class="lang-section" data-lang="ru" dir="ltr">
+<h1>Политика конфиденциальности — Бейт-Эль · Ежедневное изучение</h1>
+<p class="updated">Последнее обновление: 2026-08-27</p>
+<p>Приложение «Бейт-Эль» — это спутник ежедневного изучения Торы (Хок ле-Исраэль, Теилим, Тикуней ха-Зоар, Шнаим Микра ве-Эхад Таргум, Бен Иш Хай и Мусар). Приложение <strong>не собирает, не хранит и не передаёт какую-либо личную идентифицирующую информацию</strong> на внешний сервер.</p>
+<h2>Что сохраняется и где</h2>
+<p>Весь ваш личный прогресс (какие дни отмечены как завершённые, настройки языка/темы, какие книги изучаются) сохраняется <strong>только локально</strong> на вашем устройстве, с помощью localStorage браузера/приложения. Эта информация никогда не отправляется на сервер и недоступна нам.</p>
+<h2>Уведомления</h2>
+<p>Если вы включите ежедневное напоминание в настройках, уведомление запускается локально самим вашим устройством (локальное уведомление) — а не через внешний сервер push-уведомлений.</p>
+<h2>Внешний контент и данные</h2>
+<p>Приложение загружает статические текстовые файлы (JSON), встроенные в само приложение. Помимо этого, загружаются только две сторонние службы:</p>
+<ul>
+  <li><strong>Google Fonts</strong> — для корректного отображения текста на иврите (и других языках). Google может видеть IP-адрес запроса, как при любой загрузке веб-шрифта.</li>
+  <li><strong>Сервис генерации QR-кода</strong> (api.qrserver.com) — используется только когда вы делитесь ссылкой из приложения (например, главой Теилим); на сервис отправляется только сама публичная ссылка, без дополнительной личной информации.</li>
+</ul>
+<p>Веб-версия (не версии App Store/Google Play) также загружает <strong>Vercel Speed Insights</strong> — только анонимные показатели производительности (время загрузки), без личного идентификатора. Он не активен в нативных версиях приложения.</p>
+<h2>Дети</h2>
+<p>Приложение подходит для всех возрастов и не предназначено специально для детей, однако оно не собирает информацию ни от одного пользователя, включая детей.</p>
+<h2>Изменения в этой политике</h2>
+<p>При изменении данной политики конфиденциальности обновление будет опубликовано на этой странице с новой датой обновления.</p>
+<h2>Контакты</h2>
+<p>По вопросам, связанным с этой политикой, обращайтесь через <a href="https://github.com/davidpit1565/Bet-El">репозиторий проекта на GitHub</a>.</p>
+</div>
+
+<div class="lang-section" data-lang="ka" dir="ltr">
+<h1>კონფიდენციალურობის პოლიტიკა — ბეით-ელ · ყოველდღიური სწავლა</h1>
+<p class="updated">ბოლო განახლება: 2026-08-27</p>
+<p>აპლიკაცია „ბეით-ელ" არის თორას ყოველდღიური სწავლის თანამგზავრი (ხოკ ლეისრაელი, თეილიმი, ტიკუნეი ჰაზოჰარი, შნაიმ მიკრა ვეეხად თარგუმი, ბენ იშ ხაი და მუსარი). აპლიკაცია <strong>არ აგროვებს, არ ინახავს და არ გადასცემს არავითარ პირადად იდენტიფიცირებად ინფორმაციას</strong> გარე სერვერზე.</p>
+<h2>რა ინახება და სად</h2>
+<p>თქვენი პირადი პროგრესი (რომელი დღეებია მონიშნული დასრულებულად, ენის/თემის პარამეტრები, რომელი წიგნები ისწავლება) ინახება <strong>მხოლოდ ლოკალურად</strong> თქვენს მოწყობილობაზე, ბრაუზერის/აპლიკაციის localStorage-ის მეშვეობით. ეს ინფორმაცია არასდროს იგზავნება სერვერზე და ჩვენთვის ხელმისაწვდომი არ არის.</p>
+<h2>შეტყობინებები</h2>
+<p>თუ პარამეტრებში ჩართავთ ყოველდღიურ შეხსენებას, შეტყობინება იგზავნება ლოკალურად თქვენივე მოწყობილობის მიერ (ლოკალური შეტყობინება) — და არა გარე push-სერვერის მეშვეობით.</p>
+<h2>გარე კონტენტი და მონაცემები</h2>
+<p>აპლიკაცია ტვირთავს სტატიკურ ტექსტურ ფაილებს (JSON), რომლებიც თავად აპლიკაციაშია ჩაშენებული. ამის გარდა, იტვირთება მხოლოდ ორი მესამე მხარის სერვისი:</p>
+<ul>
+  <li><strong>Google Fonts</strong> — ივრითის (და სხვა ენების) ტექსტის სწორად გამოსახვისთვის. Google-მა შეიძლება ნახოს მოთხოვნის IP მისამართი, როგორც ნებისმიერი ვებ-ფონტის ჩატვირთვისას.</li>
+  <li><strong>QR-კოდის გენერაციის სერვისი</strong> (api.qrserver.com) — გამოიყენება მხოლოდ მაშინ, როცა აპლიკაციიდან იზიარებთ ბმულს (მაგალითად, თეილიმის თავს); სურათის შესაქმნელად იგზავნება მხოლოდ საჯარო ბმული, დამატებითი პირადი ინფორმაციის გარეშე.</li>
+</ul>
+<p>ვების ვერსია (და არა App Store/Google Play ვერსიები) ასევე ტვირთავს <strong>Vercel Speed Insights</strong>-ს — მხოლოდ ანონიმურ წარმადობის მაჩვენებლებს (ჩატვირთვის დრო), პირადი იდენტიფიკატორის გარეშე. ის არააქტიურია აპლიკაციის ნატიურ ვერსიებში.</p>
+<h2>ბავშვები</h2>
+<p>აპლიკაცია შესაფერისია ყველა ასაკისთვის და არ არის სპეციალურად მიმართული ბავშვებზე, თუმცა ის არ აგროვებს ინფორმაციას არცერთი მომხმარებლისგან, ბავშვების ჩათვლით.</p>
+<h2>ცვლილებები ამ პოლიტიკაში</h2>
+<p>თუ ეს კონფიდენციალურობის პოლიტიკა შეიცვლება, განახლება გამოქვეყნდება ამ გვერდზე ახალი განახლების თარიღით.</p>
+<h2>კონტაქტი</h2>
+<p>ამ პოლიტიკასთან დაკავშირებული კითხვებისთვის მიმართეთ პროექტის <a href="https://github.com/davidpit1565/Bet-El">GitHub რეპოზიტორიის</a> მეშვეობით.</p>
+</div>
+
+<script>
+(function(){
+  var LANGS=[['he','עברית'],['en','English'],['fr','Français'],['ru','Русский'],['ka','ქართული']];
+  var bar=document.getElementById('langbar');
+  var sections=document.querySelectorAll('.lang-section');
+  function apply(l){
+    sections.forEach(function(s){ s.classList.toggle('on', s.dataset.lang===l); });
+    document.getElementById('html-root').setAttribute('lang', l);
+    document.getElementById('html-root').setAttribute('dir', l==='he'?'rtl':'ltr');
+    bar.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang===l); });
+    try{ localStorage.setItem('betel_legal_lang', l); }catch(e){}
+  }
+  LANGS.forEach(function(pair){
+    var b=document.createElement('button');
+    b.textContent=pair[1]; b.dataset.lang=pair[0];
+    b.onclick=function(){ apply(pair[0]); };
+    bar.appendChild(b);
+  });
+  var saved=null;
+  try{ saved=localStorage.getItem('betel_legal_lang'); }catch(e){}
+  var nav=(navigator.language||'he').slice(0,2);
+  var initial = saved || (LANGS.some(function(p){return p[0]===nav;}) ? nav : 'he');
+  apply(initial);
+})();
+</script>
 </body>
 </html>

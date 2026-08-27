@@ -123,7 +123,11 @@ No user-generated content, no ads, no purchases, no violence/gambling -
 religious study content only. Answers on both stores should land at the
 lowest tier ("4+" / "Everyone").
 
-## Privacy Policy URL
+## Privacy Policy URL / Terms of Service URL
 
 Use the deployed `privacy.html` (e.g. `https://<your-pages-domain>/privacy.html`)
-in both stores' privacy policy fields - see `docs/app-store-publishing-guide.md`.
+in both stores' privacy policy fields, and `terms.html` (same domain) for
+Google Play's optional Terms of Service field - see
+`docs/app-store-publishing-guide.md`. Both pages cover all 5 app
+languages via an inline switcher, so the same URL works regardless of
+which language the store shows it in.

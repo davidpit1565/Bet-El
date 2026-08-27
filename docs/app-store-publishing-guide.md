@@ -5,10 +5,16 @@ both exist and are kept in sync via `npm run cap:sync` (runs `npx cap sync`
 with no platform arg, syncing both). App icons and splash screens for both
 platforms were generated from `icon-512.png` via `@capacitor/assets`
 (`resources/icon.png` is the source), using the app's dark navy background
-(`#080d19`) instead of the tool's white default. `privacy.html` at the repo
-root is deployed by the existing GitHub Pages workflow alongside
-`index.html`, so it's reachable at `<pages-url>/privacy.html` — needed as
-the privacy policy URL both stores require.
+(`#080d19`) instead of the tool's white default. `privacy.html` and
+`terms.html` at the repo root are deployed by the existing GitHub Pages
+workflow alongside `index.html`, so they're reachable at
+`<pages-url>/privacy.html` and `<pages-url>/terms.html` — the privacy
+policy URL both stores require, and a Terms of Service URL for Google
+Play's optional field / an in-app link to a custom EULA if Apple ever
+asks for one. Both pages are self-contained (a small inline language
+switcher, all 5 app languages' text embedded directly, defaulting to the
+visitor's browser language) rather than separate per-language files -
+also linked from Settings → "מִשְׁפָּטִי" inside the app itself.
 
 This doc is the reference for what's left, which is almost entirely account
 setup + signing/build steps only the app owner (not an agent) can do, since
