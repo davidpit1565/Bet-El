@@ -2227,12 +2227,24 @@ function chokSectionsFor(key,day){
   if(!keys.length) return [];
   const hd=ckViewHDate(), my=chokMishnahYear(hd);
   if(day==='night'){
+    /* Leil Shishi adds its own extra Torah portion (tzeruf), but every
+       other subject - Nevi'im/Ketuvim, Tehillim, Mishnah, Gemara, Zohar,
+       Halacha, Musar - hasn't changed yet: it's still Thursday's, right up
+       until Friday's own daytime portion begins (see leilShishiDate /
+       chokDayDate, both gated on Friday's sunrise). Build Thursday's full
+       list and splice the tzeruf in next to the Torah section, instead of
+       showing only the insert and dropping everything else. */
     let items=[], refs=[];
     keys.forEach(k=>{
       const t=((CHOK.schedule[k]||{}).night||{}).tzeruf;
       refs=refs.concat(t||[]); items=items.concat(chokTorahVerses(t));
     });
-    return items.length?[{key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items,kind:'torah',refs}]:[];
+    const thuList=chokSectionsFor(key,'thu');
+    if(!items.length) return thuList;
+    const tzeruf={key:'tzeruf',he:'צֵרוּף יִהִוִהִ',items,kind:'torah',refs};
+    const ti=thuList.findIndex(x=>x.key==='torah');
+    if(ti>=0) thuList.splice(ti+1,0,tzeruf); else thuList.unshift(tzeruf);
+    return thuList;
   }
   const list=[], slot={};
   /* one section per kind, however many parshiot feed it */
