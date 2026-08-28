@@ -1233,11 +1233,6 @@ function monthName(hd){
 function heNum(n){ if(n===0) return '0'; return (!S.lang||S.lang==='he') ? gematriya(n) : String(n); }
 function hebDateStr(hd){ return heNum(hd.getDate())+' '+monthName(hd)+' '+heNum(hd.getFullYear()); }
 function hebDateShort(hd){ return heNum(hd.getDate())+' '+monthName(hd); }
-/* built from gematriya() itself, not hand-typed, so its keys always match
-   the exact geresh/gershayim punctuation renderGematriya() actually
-   produces (which uses the real Hebrew geresh ׳/gershayim ״ characters,
-   not the ASCII apostrophe/quote a hand-typed table could drift into) */
-const HEB_DAY_STR_TO_NUM = Object.fromEntries(Array.from({length:30},(_,i)=>[gematriya(i+1), i+1]));
 const HE_MONTH_NAME_TO_NUM = Object.fromEntries(Object.entries(MONTHS_HE).map(([k,v])=>[v,+k]));
 function localizeHebDateStr(str){
   if(!str || !S.lang || S.lang==='he') return str;
@@ -1246,8 +1241,16 @@ function localizeHebDateStr(str){
   /* "day month" or "day month year" (e.g. the Chok reader's date line
      includes the Hebrew year too) - only day+month are translated, the
      year (if present) stays in its Hebrew gematria form as-is, same as
-     everywhere else in the app that doesn't convert Hebrew year numbers */
-  const dayNum=HEB_DAY_STR_TO_NUM[parts[0]], monthNum=HE_MONTH_NAME_TO_NUM[parts[1]];
+     everywhere else in the app that doesn't convert Hebrew year numbers.
+     The day gematria string can come either from the live library's own
+     renderGematriya() (real geresh/gershayim marks, U+05F3/U+05F4) or from
+     pre-baked data files like tikkunei-hazohar-data.json's hebDate field
+     (plain ASCII ' and " instead) - rather than keep two lookup tables in
+     sync, strip every punctuation-like mark and sum the remaining Hebrew
+     letters' own gematria values (CK_GEM), which works for either style. */
+  const dayLetters=[...parts[0]].filter(ch=>CK_GEM[ch]!=null);
+  const dayNum=dayLetters.reduce((s,ch)=>s+CK_GEM[ch],0);
+  const monthNum=HE_MONTH_NAME_TO_NUM[parts[1]];
   const table={en:MONTHS_EN,fr:MONTHS_FR,ru:MONTHS_RU,ka:MONTHS_KA}[S.lang];
   if(!dayNum || !monthNum || !table) return str;
   const rest = parts.slice(2).join(' ');
