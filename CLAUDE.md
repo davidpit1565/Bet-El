@@ -113,12 +113,13 @@ in English as usual.
   the Hebrew base (a 404 is expected and cached as "no translation yet",
   not an error), and `bicI18nItem(track,unit,dayIdx,itemIdx)` looks up the
   translated item by the same indices `bicBody()` already uses, falling
-  back to the Hebrew original per-item when absent. This is a large,
-  incremental translation effort (~1,974 halachot × 4 languages) - as of
-  this writing all 51 year1 units are translated to English; year2 and
-  the other 3 languages (fr/ru/ka) are still pending, so most units still
-  render in Hebrew for those language/track combinations, which is
-  expected, not a bug. The biur/`clarification` text itself has no nikud
+  back to the Hebrew original per-item when absent. This was a large,
+  incremental translation effort (~1,974 halachot × 4 languages); as of
+  this writing all 51 year1 units and all 47 year2 units are translated
+  into all 4 languages (en/fr/ru/ka), each following the same convention:
+  halacha body paragraphs are phonetic transliteration only (like
+  Tehillim/Prayers), while the `clarification` (biur/explanation +
+  takeaways) is a genuine meaning-translation. The biur/`clarification` text itself has no nikud
   (unlike the halacha body, sourced from a vocalized original) - only
   Dicta-run text gets nikud, and the biur hasn't been run through it.
 - The standalone Ben Ish Chai reader's sticky header is tall (year toggle
