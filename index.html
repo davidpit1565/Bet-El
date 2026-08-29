@@ -203,6 +203,7 @@ body::before{ /* subtle starfield/texture */
 
 /* quick tiles */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.quick-grid:has(>.q-tile:only-child)>.q-tile{grid-column:1/-1}
 .q-tile{background:var(--panel);border:var(--glass-border);border-radius:var(--radius-sm);padding:16px 14px;
   display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
 .q-tile:active{transform:scale(.97)}
