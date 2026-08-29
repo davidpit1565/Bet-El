@@ -5884,6 +5884,155 @@ function renderLibraryMishnahReader(){
   tr(app);
 }
 
+
+/* ---------- Nevi'im & Ketuvim (new full-text data, Hebrew only) ----------
+   The app previously had no full Nevi'im/Ketuvim text anywhere, only short
+   daily-cycle excerpts from 19 books. data/neviim-data.json and
+   data/ketuvim-data.json are new source content (user-approved exception to
+   "no new content" for this feature): the full Hebrew text of every
+   Nevi'im/Ketuvim book, fetched from Sefaria's "Tanach with Ta'amei
+   Hamikra" version - Sefaria's own API marks this version's license as
+   "Public Domain", and it is the exact same version already used to build
+   data/torah-data.json (verified by an identical Genesis 1:1 byte-for-byte
+   before use here - see scripts/fetch-neviim-ketuvim.mjs). Psalms is NOT
+   duplicated in ketuvim-data.json - it reuses the app's own existing
+   window.TEHILLIM. Hebrew only, deliberately no en/fr/ru/ka transliteration
+   for this content (deferred by the user to a future phase) - the reader
+   below only ever shows the Hebrew verse text, regardless of S.lang. */
+const NK_BOOKS={
+  neviim:[
+    {k:'Joshua', he:'יְהוֹשֻׁעַ', en:'Joshua', fr:'Josué', ru:'Иисус Навин', ka:'იესო ნავეს ძე'},
+    {k:'Judges', he:'שׁוֹפְטִים', en:'Judges', fr:'Juges', ru:'Судьи', ka:'მსაჯულთა'},
+    {k:'I Samuel', he:'שְׁמוּאֵל א', en:'I Samuel', fr:'I Samuel', ru:'1-я Царств', ka:'I სამუელი'},
+    {k:'II Samuel', he:'שְׁמוּאֵל ב', en:'II Samuel', fr:'II Samuel', ru:'2-я Царств', ka:'II სამუელი'},
+    {k:'I Kings', he:'מְלָכִים א', en:'I Kings', fr:'I Rois', ru:'3-я Царств', ka:'I მეფეთა'},
+    {k:'II Kings', he:'מְלָכִים ב', en:'II Kings', fr:'II Rois', ru:'4-я Царств', ka:'II მეფეთა'},
+    {k:'Isaiah', he:'יְשַׁעְיָהוּ', en:'Isaiah', fr:'Isaïe', ru:'Исаия', ka:'ესაია'},
+    {k:'Jeremiah', he:'יִרְמְיָהוּ', en:'Jeremiah', fr:'Jérémie', ru:'Иеремия', ka:'იერემია'},
+    {k:'Ezekiel', he:'יְחֶזְקֵאל', en:'Ezekiel', fr:'Ézéchiel', ru:'Иезекииль', ka:'ეზეკიელი'},
+    {k:'Hosea', he:'הוֹשֵׁעַ', en:'Hosea', fr:'Osée', ru:'Осия', ka:'ოსია'},
+    {k:'Joel', he:'יוֹאֵל', en:'Joel', fr:'Joël', ru:'Иоиль', ka:'იოელი'},
+    {k:'Amos', he:'עָמוֹס', en:'Amos', fr:'Amos', ru:'Амос', ka:'ამოსი'},
+    {k:'Obadiah', he:'עֹבַדְיָה', en:'Obadiah', fr:'Abdias', ru:'Авдий', ka:'აბდია'},
+    {k:'Jonah', he:'יוֹנָה', en:'Jonah', fr:'Jonas', ru:'Иона', ka:'იონა'},
+    {k:'Micah', he:'מִיכָה', en:'Micah', fr:'Michée', ru:'Михей', ka:'მიქა'},
+    {k:'Nahum', he:'נַחוּם', en:'Nahum', fr:'Nahum', ru:'Наум', ka:'ნაუმი'},
+    {k:'Habakkuk', he:'חֲבַקּוּק', en:'Habakkuk', fr:'Habacuc', ru:'Аввакум', ka:'აბაკუმი'},
+    {k:'Zephaniah', he:'צְפַנְיָה', en:'Zephaniah', fr:'Sophonie', ru:'Софония', ka:'სოფონია'},
+    {k:'Haggai', he:'חַגַּי', en:'Haggai', fr:'Aggée', ru:'Аггей', ka:'ანგია'},
+    {k:'Zechariah', he:'זְכַרְיָה', en:'Zechariah', fr:'Zacharie', ru:'Захария', ka:'ზაქარია'},
+    {k:'Malachi', he:'מַלְאָכִי', en:'Malachi', fr:'Malachie', ru:'Малахия', ka:'მალაქია'},
+  ],
+  ketuvim:[
+    {k:'Psalms', he:'תְּהִלִּים', en:'Psalms', fr:'Psaumes', ru:'Псалтирь', ka:'ფსალმუნები'},
+    {k:'Proverbs', he:'מִשְׁלֵי', en:'Proverbs', fr:'Proverbes', ru:'Притчи', ka:'იგავნი'},
+    {k:'Job', he:'אִיּוֹב', en:'Job', fr:'Job', ru:'Иов', ka:'იობი'},
+    {k:'Song of Songs', he:'שִׁיר הַשִּׁירִים', en:'Song of Songs', fr:'Cantique des Cantiques', ru:'Песнь Песней', ka:'ქება ქებათა'},
+    {k:'Ruth', he:'רוּת', en:'Ruth', fr:'Ruth', ru:'Руфь', ka:'რუთი'},
+    {k:'Lamentations', he:'אֵיכָה', en:'Lamentations', fr:'Lamentations', ru:'Плач Иеремии', ka:'გოდება იერემიასი'},
+    {k:'Ecclesiastes', he:'קֹהֶלֶת', en:'Ecclesiastes', fr:'Ecclésiaste', ru:'Екклесиаст', ka:'ეკლესიასტე'},
+    {k:'Esther', he:'אֶסְתֵּר', en:'Esther', fr:'Esther', ru:'Есфирь', ka:'ესთერი'},
+    {k:'Daniel', he:'דָּנִיֵּאל', en:'Daniel', fr:'Daniel', ru:'Даниил', ka:'დანიელი'},
+    {k:'Ezra', he:'עֶזְרָא', en:'Ezra', fr:'Esdras', ru:'Ездра', ka:'ეზრა'},
+    {k:'Nehemiah', he:'נְחֶמְיָה', en:'Nehemiah', fr:'Néhémie', ru:'Неемия', ka:'ნეემია'},
+    {k:'I Chronicles', he:'דִּבְרֵי הַיָּמִים א', en:'I Chronicles', fr:'I Chroniques', ru:'1-я Паралипоменон', ka:'I ნეშტთა'},
+    {k:'II Chronicles', he:'דִּבְרֵי הַיָּמִים ב', en:'II Chronicles', fr:'II Chroniques', ru:'2-я Паралипоменон', ka:'II ნეშტთა'},
+  ],
+};
+function nkBookMeta(cat,key){ return (NK_BOOKS[cat]||[]).find(b=>b.k===key); }
+function nkBookName(cat,key){
+  const b=nkBookMeta(cat,key); if(!b) return key;
+  const l=S.lang||'he';
+  return b[l]||b.he;
+}
+let NEVIIM_DATA=null, KETUVIM_DATA=null, neviimLoadPromise=null, ketuvimLoadPromise=null;
+function ensureNeviimData(){
+  if(NEVIIM_DATA) return Promise.resolve();
+  if(neviimLoadPromise) return neviimLoadPromise;
+  neviimLoadPromise=fetch('data/neviim-data.json').then(r=>r.json()).then(d=>{ NEVIIM_DATA=d; })
+    .catch(e=>{ neviimLoadPromise=null; throw e; });
+  return neviimLoadPromise;
+}
+function ensureKetuvimData(){
+  if(KETUVIM_DATA) return Promise.resolve();
+  if(ketuvimLoadPromise) return ketuvimLoadPromise;
+  ketuvimLoadPromise=fetch('data/ketuvim-data.json').then(r=>r.json()).then(d=>{ KETUVIM_DATA=d; })
+    .catch(e=>{ ketuvimLoadPromise=null; throw e; });
+  return ketuvimLoadPromise;
+}
+function nkEnsureData(cat){
+  if(cat==='neviim') return ensureNeviimData();
+  return ensureKetuvimData(); // Ketuvim minus Psalms; Psalms itself comes from window.TEHILLIM (always already loaded)
+}
+function nkChaptersOf(cat,book){
+  if(book==='Psalms') return Object.keys(window.TEHILLIM||{}).length;
+  const store=cat==='neviim'?NEVIIM_DATA:KETUVIM_DATA;
+  return (store && store[book]) ? store[book].length : 0;
+}
+function nkVersesOf(cat,book,ch){
+  if(book==='Psalms') return (window.TEHILLIM&&window.TEHILLIM[String(ch)])||[];
+  const store=cat==='neviim'?NEVIIM_DATA:KETUVIM_DATA;
+  return (store && store[book] && store[book][ch-1]) || [];
+}
+function renderLibraryNKBooks(){
+  const cat=LIB.nkCat==='ketuvim'?'ketuvim':'neviim';
+  const title=libCatLabel(cat);
+  app.innerHTML=`${topbar(title,'library')}<div class="view">${smSkeleton()}</div>`;
+  nkEnsureData(cat).then(()=>{
+    if(TAB!=='libraryNKBooks') return;
+    const books=NK_BOOKS[cat];
+    app.innerHTML=`
+    ${topbar(title,'library')}
+    <div class="view">
+      <div class="prayers-list">
+        ${books.map(b=>`<div class="prayer-row round-card" data-book="${b.k}"><span class="prayer-row-title">${nkBookName(cat,b.k)}</span><span class="qd">${heNum(nkChaptersOf(cat,b.k))} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`).join('')}
+      </div>
+      ${ornament()}
+    </div>`;
+    app.querySelectorAll('[data-book]').forEach(r=>r.onclick=()=>{
+      LIB.nkBook=r.dataset.book; LIB.nkChapter=1; go('libraryNKReader');
+    });
+    tr(app);
+  });
+}
+function renderLibraryNKReader(){
+  const cat=LIB.nkCat==='ketuvim'?'ketuvim':'neviim';
+  if(!LIB.nkBook){ return renderLibraryNKBooks(); }
+  app.innerHTML=`${topbar(nkBookName(cat,LIB.nkBook),'libraryNKBooks')}<div class="view">${smSkeleton()}</div>`;
+  nkEnsureData(cat).then(()=>{
+    if(TAB!=='libraryNKReader') return;
+    const book=LIB.nkBook;
+    const nCh=nkChaptersOf(cat,book);
+    const ch=Math.min(Math.max(LIB.nkChapter||1,1),nCh);
+    const verses=nkVersesOf(cat,book,ch);
+    app.innerHTML=`
+    <div class="reader view">
+      <div class="reader-head">
+        <div class="reader-top">
+          <button class="icon-btn" id="libnBack">${I.prev}</button>
+          <div class="reader-title">${nkBookName(cat,book)}</div>
+        </div>
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="libnPrev" ${ch<=1?'disabled':''}>${I.prev}</button>
+          <select class="fld-select" id="libnChPick" style="max-width:220px">
+            ${Array.from({length:nCh},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===ch?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(c)}</option>`).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="libnNext" ${ch>=nCh?'disabled':''}>${I.next}</button>
+        </div>
+      </div>
+      <div class="sm-verses notranslate">
+        ${verses.map((he,i)=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(ch)}:${heNum(i+1)}</span><div class="sm-he">${he}</div></div>`).join('')}
+      </div>
+      <div style="height:26px"></div>
+    </div>`;
+    document.getElementById('libnBack').onclick=()=>go('libraryNKBooks');
+    const prevBtn=document.getElementById('libnPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); };
+    const nextBtn=document.getElementById('libnNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); };
+    document.getElementById('libnChPick').onchange=function(){ LIB.nkChapter=+this.value; renderLibraryNKReader(); forceScrollTop(); };
+    tr(app);
+  });
+}
+
 /* ================= PRAYER READER ================= */
 function renderPrayerReader(){
   if(!PR.prayer) return renderPrayersList();
