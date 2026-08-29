@@ -4580,6 +4580,7 @@ function render(){
     else if(TAB==='zoharYomi') renderZoharYomiReader();
     else if(TAB==='library') renderLibrary();
     else if(TAB==='libraryTorahBooks') renderLibraryTorahBooks();
+    else if(TAB==='libraryTorahParshiot') renderLibraryTorahParshiot();
     else if(TAB==='libraryTorahReader') renderLibraryTorahReader();
     else if(TAB==='libraryGemaraMasechtot') renderLibraryGemaraMasechtot();
     else if(TAB==='libraryGemaraReader') renderLibraryGemaraReader();
@@ -5466,27 +5467,53 @@ function renderLibraryTorahBooks(){
     <div class="quick-grid">
       ${LIB_TORAH_BOOKS.map(b=>`<div class="q-tile round-card" data-book="${b}">
         <div class="qt">${bookName(b)}</div>
-        <div class="qd">${heNum(TORAH[b].length)} ${ckChrome('פְּרָקִים')}</div>
+        <div class="qd">${heNum(libTorahParshaKeys(b).length)} ${ckChrome('פָּרָשִׁיּוֹת')}</div>
       </div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
   app.querySelectorAll('[data-book]').forEach(t=>t.onclick=()=>{
-    LIB.torahBook=t.dataset.book; LIB.torahChapter=1; go('libraryTorahReader');
+    LIB.torahBook=t.dataset.book; go('libraryTorahParshiot');
+  });
+  tr(app);
+}
+function libTorahParshaKeys(book){
+  return individualParshaKeys().filter(k=>LEYNING[k].book===book);
+}
+function renderLibraryTorahParshiot(){
+  if(!LEYNING || !LIB.torahBook){
+    app.innerHTML=`${topbar('תּוֹרָה','libraryTorahBooks')}<div class="view">${smSkeleton()}</div>`;
+    ensureShnayimData().then(()=>{ if(TAB==='libraryTorahParshiot'){ renderLibraryTorahParshiot(); tr(app); } });
+    return;
+  }
+  const book=LIB.torahBook;
+  const keys=libTorahParshaKeys(book);
+  app.innerHTML=`
+  ${topbar(bookName(book),'libraryTorahBooks')}
+  <div class="view">
+    <div class="prayers-list">
+      ${keys.map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${parshaName(k)}</span>${I.chev}</div>`).join('')}
+    </div>
+    ${ornament()}
+  </div>`;
+  app.querySelectorAll('.prayer-row').forEach(r=>r.onclick=()=>{
+    LIB.torahParsha=r.dataset.k; go('libraryTorahReader');
   });
   tr(app);
 }
 function renderLibraryTorahReader(){
-  if(!TORAH || !LIB.torahBook){
-    app.innerHTML=`${topbar('תּוֹרָה','libraryTorahBooks')}<div class="view">${smSkeleton()}</div>`;
+  if(!LEYNING || !LIB.torahBook || !LIB.torahParsha){
+    app.innerHTML=`${topbar('תּוֹרָה','libraryTorahParshiot')}<div class="view">${smSkeleton()}</div>`;
     ensureShnayimData().then(()=>{ if(TAB==='libraryTorahReader'){ renderLibraryTorahReader(); tr(app); } });
     return;
   }
   const book=LIB.torahBook;
-  const nCh=TORAH[book].length;
-  const ch=Math.min(Math.max(LIB.torahChapter||1,1),nCh);
-  const last=TORAH[book][ch-1].length;
-  const verses=versesInRange(book, ch+':1', ch+':'+last);
+  const keys=libTorahParshaKeys(book);
+  const i=Math.max(keys.indexOf(LIB.torahParsha),0);
+  const key=keys[i];
+  const entry=LEYNING[key];
+  const aliyot=entry.aliyot.filter(Boolean);
+  const verses=versesInRange(entry.book, aliyot[0][0], aliyot[aliyot.length-1][1]);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -5495,11 +5522,11 @@ function renderLibraryTorahReader(){
         <div class="reader-title">${bookName(book)}</div>
       </div>
       <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="libtPrev" ${ch<=1?'disabled':''}>${I.prev}</button>
-        <select class="fld-select" id="libtChPick" style="max-width:220px">
-          ${Array.from({length:nCh},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===ch?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(c)}</option>`).join('')}
+        <button class="sm-aliyah-chip ck-arrow" id="libtPrev" ${i<=0?'disabled':''}>${I.prev}</button>
+        <select class="fld-select" id="libtPPick" style="max-width:220px">
+          ${keys.map((k,idx)=>`<option value="${k}" ${idx===i?'selected':''}>${parshaName(k)}</option>`).join('')}
         </select>
-        <button class="sm-aliyah-chip ck-arrow" id="libtNext" ${ch>=nCh?'disabled':''}>${I.next}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="libtNext" ${i>=keys.length-1?'disabled':''}>${I.next}</button>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -5507,10 +5534,10 @@ function renderLibraryTorahReader(){
     </div>
     <div style="height:26px"></div>
   </div>`;
-  document.getElementById('libtBack').onclick=()=>go('libraryTorahBooks');
-  const prevBtn=document.getElementById('libtPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.torahChapter=ch-1; renderLibraryTorahReader(); forceScrollTop(); };
-  const nextBtn=document.getElementById('libtNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.torahChapter=ch+1; renderLibraryTorahReader(); forceScrollTop(); };
-  document.getElementById('libtChPick').onchange=function(){ LIB.torahChapter=+this.value; renderLibraryTorahReader(); forceScrollTop(); };
+  document.getElementById('libtBack').onclick=()=>go('libraryTorahParshiot');
+  const prevBtn=document.getElementById('libtPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.torahParsha=keys[i-1]; renderLibraryTorahReader(); forceScrollTop(); };
+  const nextBtn=document.getElementById('libtNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.torahParsha=keys[i+1]; renderLibraryTorahReader(); forceScrollTop(); };
+  document.getElementById('libtPPick').onchange=function(){ LIB.torahParsha=this.value; renderLibraryTorahReader(); forceScrollTop(); };
   tr(app);
 }
 
