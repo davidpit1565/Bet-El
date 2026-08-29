@@ -3784,12 +3784,12 @@ function ckStepDay(dir){
   return {key:list[p], day:CHOK_ROWS[dir>0?0:CHOK_ROWS.length-1][0], year:ckYear()};
 }
 function renderChokBooks(){
-  app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}<div class="view">${smSkeleton()}</div>`;
+  app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','library')}<div class="view">${smSkeleton()}</div>`;
   ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureCycles()).then(()=>{
     if(TAB!=='chokBooks') return;
     const t=ckTodayLine();
     app.innerHTML=`
-    ${topbar('חוֹק לְיִשְׂרָאֵל','prayers')}
+    ${topbar('חוֹק לְיִשְׂרָאֵל','library')}
     <div class="view">
       ${t?`<div class="ck-today" id="ckTodayCard">
         <div class="ck-today-tag">הַיּוֹם</div>
@@ -5352,15 +5352,6 @@ function renderPrayersList(){
     ${topbar('תְּפִלּוֹת')}
     <div class="view">
       <div class="prayers-list">
-        <div class="prayer-row" onclick="go('chokBooks')">
-          <span class="prayer-row-title">חוק לישראל</span>
-        </div>
-        <div class="prayer-row" onclick="go('smList')">
-          <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
-        </div>
-        <div class="prayer-row" onclick="go('zoharList')">
-          <span class="prayer-row-title">תיקוני הזוהר</span>
-        </div>
         <div class="prayer-row" onclick="go('library')">
           <span class="prayer-row-title">עִיּוּן בַּסְּפָרִים</span>
         </div>
@@ -5377,15 +5368,6 @@ function renderPrayersList(){
   ${topbar('תְּפִלּוֹת')}
   <div class="view">
     <div class="prayers-list">
-      <div class="prayer-row" onclick="go('chokBooks')">
-        <span class="prayer-row-title">חוק לישראל</span>
-      </div>
-      <div class="prayer-row" onclick="go('smList')">
-        <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
-      </div>
-      <div class="prayer-row" onclick="go('zoharList')">
-        <span class="prayer-row-title">תיקוני הזוהר</span>
-      </div>
       <div class="prayer-row" onclick="go('library')">
         <span class="prayer-row-title">עִיּוּן בַּסְּפָרִים</span>
       </div>
@@ -5446,6 +5428,17 @@ function renderLibrary(){
       ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}">
         <div class="qt">${libCatLabel(c.key)}</div>
       </div>`).join('')}
+    </div>
+    <div class="prayers-list" style="margin-top:14px">
+      <div class="prayer-row" onclick="go('chokBooks')">
+        <span class="prayer-row-title">חוק לישראל</span>
+      </div>
+      <div class="prayer-row" onclick="go('smList')">
+        <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
+      </div>
+      <div class="prayer-row" onclick="go('zoharList')">
+        <span class="prayer-row-title">תיקוני הזוהר</span>
+      </div>
     </div>
     ${ornament()}
   </div>`;
@@ -6124,7 +6117,7 @@ function smSkeleton(){
   </div>`;
 }
 function renderShnayimList(){
-  app.innerHTML=`${topbar('שניים מקרא','prayers')}<div class="view">${smSkeleton()}</div>`;
+  app.innerHTML=`${topbar('שניים מקרא','library')}<div class="view">${smSkeleton()}</div>`;
   ensureShnayimData().then(()=>{ if(TAB==='smList'){ drawShnayimList(); tr(app); } });
 }
 let SML = { book:null };
@@ -6135,7 +6128,7 @@ function drawShnayimList(){
   const bm=smBookmarkGet();
   const bmEntry = bm && LEYNING[bm.key];
   app.innerHTML=`
-  ${topbar('שניים מקרא','prayers')}
+  ${topbar('שניים מקרא','library')}
   <div class="view">
     ${bmEntry?`<div class="sm-week-card" id="smBookmarkCard">
       <div class="sm-week-icon">${I.bookmarkOn}</div>
@@ -6257,7 +6250,7 @@ function renderShnayimReader(){
   stopAutoScroll();
   if(!SM.key){ return renderShnayimList(); }
   if(!LEYNING){
-    app.innerHTML=`${topbar('שניים מקרא','prayers')}<div class="view">${smSkeleton()}</div>`;
+    app.innerHTML=`${topbar('שניים מקרא','library')}<div class="view">${smSkeleton()}</div>`;
     ensureShnayimData().then(()=>{ if(TAB==='smReader'){ renderShnayimReader(); tr(app); } });
     return;
   }
@@ -6357,7 +6350,7 @@ function zoharGoToBookmark(){
   go('zoharReader');
 }
 function renderZoharList(){
-  app.innerHTML=`${topbar('תיקוני הזוהר','prayers')}<div class="view">${smSkeleton()}</div>`;
+  app.innerHTML=`${topbar('תיקוני הזוהר','library')}<div class="view">${smSkeleton()}</div>`;
   ensureZoharData().then(()=>{ if(TAB==='zoharList'){ drawZoharList(); tr(app); } });
 }
 function drawZoharList(){
@@ -6367,7 +6360,7 @@ function drawZoharList(){
   const zbm=zoharBookmarkGet();
   const zbmEntry = zbm && ZOHAR[zbm.day-1];
   app.innerHTML=`
-  ${topbar('תיקוני הזוהר','prayers')}
+  ${topbar('תיקוני הזוהר','library')}
   <div class="view">
     ${zbmEntry?`<div class="sm-week-card" id="zhBookmarkCard">
       <div class="sm-week-icon">${I.bookmarkOn}</div>
@@ -6397,7 +6390,7 @@ function renderZoharReader(){
   stopAutoScroll();
   if(!ZH.day) return renderZoharList();
   if(!ZOHAR){
-    app.innerHTML=`${topbar('תיקוני הזוהר','prayers')}<div class="view">${smSkeleton()}</div>`;
+    app.innerHTML=`${topbar('תיקוני הזוהר','library')}<div class="view">${smSkeleton()}</div>`;
     ensureZoharData().then(()=>{ if(TAB==='zoharReader'){ renderZoharReader(); tr(app); } });
     return;
   }
