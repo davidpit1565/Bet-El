@@ -119,9 +119,11 @@ body::before{ /* subtle starfield/texture */
 @keyframes rise{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
 
 .date-band{display:flex;flex-direction:column;align-items:center;gap:3px;margin:6px 0 4px}
-.date-heb{font-family:var(--font-sacred);font-size:26px;font-weight:700;letter-spacing:.5px}
-.date-greg{font-size:13px;color:var(--muted);letter-spacing:.5px}
-.greeting{font-size:14px;color:var(--gold);font-family:var(--font-sacred);margin-top:2px}
+.date-heb{font-family:var(--font-sacred);font-size:29px;font-weight:700;letter-spacing:-.01em;
+  text-shadow:0 0 18px rgba(212,175,95,.22)}
+.date-greg{font-size:13px;color:var(--muted);letter-spacing:.3px}
+.greeting{font-size:13.5px;color:var(--gold);font-family:var(--font-sacred);margin-top:2px;
+  letter-spacing:.08em}
 
 /* ================= ONBOARDING ================= */
 .ob-title{font-family:var(--font-sacred);font-size:24px;font-weight:700;text-align:center;margin-top:14px}
@@ -222,6 +224,12 @@ body::before{ /* subtle starfield/texture */
 .q-tile .qi{color:var(--gold)}.q-tile .qi svg{width:24px;height:24px}
 .q-tile .qt{font-family:var(--font-sacred);font-size:18px;font-weight:700}
 .q-tile .qd{font-size:14px;color:var(--muted)}
+/* the home screen's very first row (today's Chok LeYisrael + Tehillim) are
+   the two daily anchor obligations - give them a touch more presence than
+   the five secondary tiles below so the grid isn't six identical boxes */
+.quick-grid-primary .q-tile{padding:19px 16px 18px}
+.quick-grid-primary .q-tile .qt{font-size:19.5px}
+.quick-grid-primary .q-tile{box-shadow:0 14px 30px -16px rgba(0,0,0,.4),var(--card-shadow)}
 
 /* ================= TEHILLIM GRID ================= */
 .section-head{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 14px}
@@ -730,11 +738,20 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .ded-line{font-size:14px}
 .ded-multi span{display:block;line-height:1.75}
 
-/* permanent memorial */
-.memorial{margin:26px auto 6px;text-align:center;font-family:var(--font-sacred);
-  color:var(--muted);font-size:12.5px;line-height:1.9;opacity:.85}
-.memorial span{font-size:11px;letter-spacing:.5px}
-[data-theme="dark"] .memorial{color:#8d97ad}
+/* dedication panels (hatzlacha + permanent memorial): quiet, humble content,
+   but still framed as an intentional card like everything else on the page -
+   plain floating text here read as an unfinished afterthought next to the
+   fully-carded quick-tiles/stats above it. */
+.dedication-panel{margin:16px auto 0;padding:14px 20px 15px;border-radius:16px;
+  border:1px solid var(--line);background:var(--panel-2);text-align:center;
+  font-family:var(--font-sacred)}
+.dedication-panel + .dedication-panel{margin-top:10px}
+.ded-panel-label{font-size:11.5px;letter-spacing:.14em;color:var(--gold);opacity:.95;margin-bottom:5px}
+.ded-panel-names{color:var(--muted);font-size:12.5px;line-height:1.85;opacity:.9}
+.ded-panel-foot{margin-top:6px;font-size:10.5px;letter-spacing:.5px;color:var(--muted);opacity:.7}
+.dedication-memorial{background:transparent;border-style:dashed;border-color:var(--line)}
+.dedication-memorial .ded-panel-label{color:var(--muted);opacity:.85}
+[data-theme="dark"] .ded-panel-names{color:#8d97ad}
 .social-links{display:flex;justify-content:center;gap:18px;margin:10px 0 4px}
 .social-link{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--gold);opacity:.8}
 .social-link:active{transform:scale(.9);opacity:1}
@@ -768,6 +785,24 @@ input,select,button{max-width:100%;box-sizing:border-box}
 @media (hover:hover){.prayer-row:hover{background:var(--panel-hover)}}
 .prayer-row svg{width:16px;height:16px;flex:none;color:var(--gold)}
 .prayer-row-title{font-family:var(--font-sacred);font-size:17px;font-weight:700;color:var(--text)}
+/* Library's three flagship sections (Chok LeYisrael, Shnayim Mikra, Tikkunei
+   HaZohar) were plain unaccented prayer-rows sitting right under the vividly
+   color-coded category grid - they read as an afterthought even though
+   they're just as central as the categories above. Reuse each section's own
+   home-tile accent color (--cat-color, set by the same [data-cat] rules the
+   quick-tiles use) for a colored leading bar + icon dot, so the whole
+   library screen carries one consistent color language. */
+.prayer-row-feature{border-inline-start:3px solid var(--cat-color,var(--gold));padding-inline-start:15px}
+.prayer-row-feature .prayer-row-title{font-size:18px}
+.prayer-row-feature[data-cat="chok"]{--cat-color:#6f83d6;background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
+.prayer-row-feature[data-cat="shnayim"]{--cat-color:#3aa87c;background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
+.prayer-row-feature[data-cat="zohar"]{--cat-color:#e0562e;background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
+:root .prayer-row-feature[data-cat="chok"],[data-theme="dark"] .prayer-row-feature[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(122,143,230,.32),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="shnayim"],[data-theme="dark"] .prayer-row-feature[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(70,196,145,.32),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="zohar"],[data-theme="dark"] .prayer-row-feature[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(232,105,64,.32),var(--panel) 62%)}
+[data-theme="light"] .prayer-row-feature[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
 
 /* Prayer Reader Page */
 .prayer-reader-page{padding-bottom:40px}
@@ -998,23 +1033,54 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .hhf-bl{bottom:12px;right:12px}.hhf-br{bottom:12px;left:12px}
 
 .q-tile[data-cat]{position:relative;overflow:hidden}
-.q-tile[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
-.q-tile[data-cat="tehillim"]{background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
-.q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
-.q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
-.q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
-.q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(56,163,165,.24),var(--panel) 60%)}
+.q-tile[data-cat]::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;opacity:.9;
+  background:var(--cat-color)}
+.q-tile[data-cat="chok"]{--cat-color:#6f83d6;background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
+.q-tile[data-cat="tehillim"]{--cat-color:var(--gold-grad);background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
+.q-tile[data-cat="zohar"]{--cat-color:#e0562e;background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
+.q-tile[data-cat="shnayim"]{--cat-color:#3aa87c;background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
+.q-tile[data-cat="benishchai"]{--cat-color:#9662a8;background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
+.q-tile[data-cat="musar"]{--cat-color:#38a3a5;background-image:linear-gradient(150deg,rgba(56,163,165,.24),var(--panel) 60%)}
+/* dark theme: the pastel washes above read correctly against the light
+   parchment panel but nearly vanish against the deep-navy dark panel at the
+   same alpha, leaving every tile looking like the same flat navy card -
+   richer alpha + a touch more saturation restores the intended per-category
+   color read without changing the palette or hue. */
+:root .q-tile[data-cat="chok"],[data-theme="dark"] .q-tile[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(122,143,230,.42),var(--panel) 62%)}
+:root .q-tile[data-cat="tehillim"],[data-theme="dark"] .q-tile[data-cat="tehillim"]{background-image:linear-gradient(150deg,rgba(224,187,104,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="zohar"],[data-theme="dark"] .q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(232,105,64,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="shnayim"],[data-theme="dark"] .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(70,196,145,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="benishchai"],[data-theme="dark"] .q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(178,120,196,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="musar"],[data-theme="dark"] .q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(66,190,192,.4),var(--panel) 62%)}
+[data-theme="light"] .q-tile[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="tehillim"]{background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(56,163,165,.24),var(--panel) 60%)}
 /* Library category grid reuses the same per-category wash as the home
    tiles (see the HOME comment above) for its 5 categories that don't
    already have one from the home screen - so every tile across both
    screens carries a distinct hue instead of the flat, uncolored look
    the Library grid had before. */
-.q-tile[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(196,90,110,.24),var(--panel) 60%)}
-.q-tile[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(79,126,168,.24),var(--panel) 60%)}
-.q-tile[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(201,138,63,.26),var(--panel) 60%)}
-.q-tile[data-cat="mishnah"]{background-image:linear-gradient(150deg,rgba(138,111,201,.24),var(--panel) 60%)}
-.q-tile[data-cat="gemara"]{background-image:linear-gradient(150deg,rgba(150,110,70,.26),var(--panel) 60%)}
-.q-tile[data-cat="rambam"]{background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
+.q-tile[data-cat="torah"]{--cat-color:#c45a6e;background-image:linear-gradient(150deg,rgba(196,90,110,.24),var(--panel) 60%)}
+.q-tile[data-cat="neviim"]{--cat-color:#4f7ea8;background-image:linear-gradient(150deg,rgba(79,126,168,.24),var(--panel) 60%)}
+.q-tile[data-cat="ketuvim"]{--cat-color:#c98a3f;background-image:linear-gradient(150deg,rgba(201,138,63,.26),var(--panel) 60%)}
+.q-tile[data-cat="mishnah"]{--cat-color:#8a6fc9;background-image:linear-gradient(150deg,rgba(138,111,201,.24),var(--panel) 60%)}
+.q-tile[data-cat="gemara"]{--cat-color:#966e46;background-image:linear-gradient(150deg,rgba(150,110,70,.26),var(--panel) 60%)}
+.q-tile[data-cat="rambam"]{--cat-color:#969e46;background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
+:root .q-tile[data-cat="torah"],[data-theme="dark"] .q-tile[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(214,110,130,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="neviim"],[data-theme="dark"] .q-tile[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(96,152,204,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="ketuvim"],[data-theme="dark"] .q-tile[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(222,160,80,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="mishnah"],[data-theme="dark"] .q-tile[data-cat="mishnah"]{background-image:linear-gradient(150deg,rgba(160,132,224,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="gemara"],[data-theme="dark"] .q-tile[data-cat="gemara"]{background-image:linear-gradient(150deg,rgba(180,132,86,.4),var(--panel) 62%)}
+:root .q-tile[data-cat="rambam"],[data-theme="dark"] .q-tile[data-cat="rambam"]{background-image:linear-gradient(150deg,rgba(178,188,86,.4),var(--panel) 62%)}
+[data-theme="light"] .q-tile[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(196,90,110,.24),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(79,126,168,.24),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(201,138,63,.26),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="mishnah"]{background-image:linear-gradient(150deg,rgba(138,111,201,.24),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="gemara"]{background-image:linear-gradient(150deg,rgba(150,110,70,.26),var(--panel) 60%)}
+[data-theme="light"] .q-tile[data-cat="rambam"]{background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
 </style>
 </head>
 <body>
@@ -1310,7 +1376,7 @@ const DED_NAMES_TRANSLIT = {
 function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
 const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
 function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
-function memorialHTML(){ return `<div class="memorial notranslate">${ckChrome('לְעִלּוּי נִשְׁמַת')}<br>${MEMORIAL.row1.map(dedName).join(' · ')}<br>${MEMORIAL.row2.map(dedName).join(' · ')}<br><span>${tntzbh()}</span></div>`; }
+function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.row1.map(dedName).join(' · ')}<br>${MEMORIAL.row2.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1327,7 +1393,7 @@ function socialLinksHTML(){
 }
 /* those who helped build this app */
 const HATZLACHA = {row1:['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית'],row2:['דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
-function hatzlachaHTML(){ return `<div class="memorial notranslate">${ckChrome('לְהַצְלָחַת')}<br>${HATZLACHA.row1.map(dedName).join(' · ')}<br>${HATZLACHA.row2.map(dedName).join(' · ')}</div>`; }
+function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.row1.map(dedName).join(' · ')}<br>${HATZLACHA.row2.map(dedName).join(' · ')}</div></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -4765,7 +4831,7 @@ function renderHome(){
     })()}
     ${dedHTML('')}
 
-    <div class="quick-grid">
+    <div class="quick-grid quick-grid-primary">
       ${(function(){
         if(!CHOK) return '';
         const t=ckTodayLine(); if(!t) return '';
@@ -5486,14 +5552,14 @@ function renderLibrary(){
       </div>`).join('')}
     </div>
     <div class="prayers-list" style="margin-top:14px">
-      <div class="prayer-row" onclick="go('chokBooks')">
-        <span class="prayer-row-title">חוק לישראל</span>
+      <div class="prayer-row prayer-row-feature" data-cat="chok" onclick="go('chokBooks')">
+        <span class="prayer-row-title">חוק לישראל</span>${I.chev}
       </div>
-      <div class="prayer-row" onclick="go('smList')">
-        <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
+      <div class="prayer-row prayer-row-feature" data-cat="shnayim" onclick="go('smList')">
+        <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>${I.chev}
       </div>
-      <div class="prayer-row" onclick="go('zoharList')">
-        <span class="prayer-row-title">תיקוני הזוהר</span>
+      <div class="prayer-row prayer-row-feature" data-cat="zohar" onclick="go('zoharList')">
+        <span class="prayer-row-title">תיקוני הזוהר</span>${I.chev}
       </div>
     </div>
     ${ornament()}
