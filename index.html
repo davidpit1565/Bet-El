@@ -3438,6 +3438,7 @@ function renderChokPace(){
     <div class="pace-progress"><div class="pace-dot ${CK_PACE_STEP===0?'on':''}"></div><div class="pace-dot ${CK_PACE_STEP===1?'on':''}"></div><div class="pace-dot ${CK_PACE_STEP===2?'on':''}"></div></div>
     ${body}
     <div class="pace-foot">${t.changeInSettings}</div>
+    ${ornament()}
   </div>`;
   app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
     const v=el.dataset.paceOpt;
