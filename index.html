@@ -1263,7 +1263,32 @@ function localizeHebDateStr(str){
 const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending updated formulas
 const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed times, ready to reveal now
 const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
-function memorialHTML(){ return `<div class="memorial">לְעִלּוּי נִשְׁמַת<br>${MEMORIAL.row1.join(' · ')}<br>${MEMORIAL.row2.join(' · ')}<br><span>ת.נ.צ.ב.ה</span></div>`; }
+/* Personal dedication names are Hebrew proper names with no meaning to
+   translate - like sacred-text bodies, they get phonetic transliteration
+   per language instead (never left showing raw Hebrew when another
+   language is selected). */
+const DED_NAMES_TRANSLIT = {
+  en:{'אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה':'Eliyahu ben Nurit Penina','אִילַיִי מִיכָאֵל בֶּן אִירִית':'Ilay Michael ben Irit',
+    'דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין':'David Meir Yisrael ben Sarah Karolin','דָּנִיֵּאל בֶּן מִיכָאֵל':'Daniel ben Michael',
+    'יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן':'Yocheved Gugoli bat Simon','אֲבִישַׁי בֶּן יִשָּׂשכָר':'Avishai ben Yissachar',
+    'נָדָב יְהוּדָה בֶּן אֲבִישַׁי':'Nadav Yehuda ben Avishai','יִשָּׂשכָר בֶּן אֲבִישַׁי':'Yissachar ben Avishai'},
+  fr:{'אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה':'Eliyahou ben Nourit Peninah','אִילַיִי מִיכָאֵל בֶּן אִירִית':'Ilaï Michaël ben Irit',
+    'דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין':'David Meïr Israël ben Sarah Karolin','דָּנִיֵּאל בֶּן מִיכָאֵל':'Daniel ben Michaël',
+    'יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן':'Yokheved Gugoli bat Simon','אֲבִישַׁי בֶּן יִשָּׂשכָר':'Avishaï ben Issakhar',
+    'נָדָב יְהוּדָה בֶּן אֲבִישַׁי':'Nadav Yehouda ben Avishaï','יִשָּׂשכָר בֶּן אֲבִישַׁי':'Issakhar ben Avishaï'},
+  ru:{'אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה':'Элияху бен Нурит Пенина','אִילַיִי מִיכָאֵל בֶּן אִירִית':'Илай Михаэль бен Ирит',
+    'דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין':'Давид Меир Исраэль бен Сара Каролин','דָּנִיֵּאל בֶּן מִיכָאֵל':'Даниэль бен Михаэль',
+    'יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן':'Йохевед Гуголи бат Симон','אֲבִישַׁי בֶּן יִשָּׂשכָר':'Авишай бен Иссахар',
+    'נָדָב יְהוּדָה בֶּן אֲבִישַׁי':'Надав Йехуда бен Авишай','יִשָּׂשכָר בֶּן אֲבִישַׁי':'Иссахар бен Авишай'},
+  ka:{'אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה':'ელიაჰუ ბენ ნურით პენინა','אִילַיִי מִיכָאֵל בֶּן אִירִית':'ილაი მიქაელ ბენ ირით',
+    'דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין':'დავით მეირ ისრაელ ბენ სარა კაროლინ','דָּנִיֵּאל בֶּן מִיכָאֵל':'დანიელ ბენ მიქაელ',
+    'יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן':'იოხევედ გუგოლი ბატ სიმონ','אֲבִישַׁי בֶּן יִשָּׂשכָר':'ავიშაი ბენ ისახარ',
+    'נָדָב יְהוּדָה בֶּן אֲבִישַׁי':'ნადავ იეჰუდა ბენ ავიშაი','יִשָּׂשכָר בֶּן אֲבִישַׁי':'ისახარ ბენ ავიშაი'},
+};
+function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
+const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
+function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
+function memorialHTML(){ return `<div class="memorial notranslate">${ckChrome('לְעִלּוּי נִשְׁמַת')}<br>${MEMORIAL.row1.map(dedName).join(' · ')}<br>${MEMORIAL.row2.map(dedName).join(' · ')}<br><span>${tntzbh()}</span></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1280,7 +1305,7 @@ function socialLinksHTML(){
 }
 /* those who helped build this app */
 const HATZLACHA = {row1:['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית'],row2:['דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
-function hatzlachaHTML(){ return `<div class="memorial">לְהַצְלָחַת<br>${HATZLACHA.row1.join(' · ')}<br>${HATZLACHA.row2.join(' · ')}</div>`; }
+function hatzlachaHTML(){ return `<div class="memorial notranslate">${ckChrome('לְהַצְלָחַת')}<br>${HATZLACHA.row1.map(dedName).join(' · ')}<br>${HATZLACHA.row2.map(dedName).join(' · ')}</div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -1654,6 +1679,14 @@ function onDeviceOrientation(e){
   updateCompassNeedle();
 }
 function attachOrientationListener(){
+  /* Idempotent by construction: every caller (startCompass() on each
+     re-render, the permission-grant button) used to add another listener
+     on top of any already attached, since a fresh closure never equals
+     the old one removeEventListener could target - stacking duplicate
+     handlers that each recompute the same heading, causing the needle to
+     visibly lag/jitter more with every re-entry into this screen. Always
+     tear down first so exactly one listener is ever live. */
+  stopCompass();
   const handler=e=>onDeviceOrientation(e);
   window.addEventListener('deviceorientationabsolute',handler,true);
   window.addEventListener('deviceorientation',handler,true);
