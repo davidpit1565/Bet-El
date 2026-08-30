@@ -133,6 +133,17 @@ body::before{ /* subtle starfield/texture */
 
 /* Chok LeYisrael first-open pace questions - no icons, plain option cards */
 .pace-view{padding-top:36px}
+/* the very first screen anyone ever sees (language pick, before S.lang is
+   even known) had just a heading + 5 buttons with a long empty stretch
+   below on any normal phone height - every other pace-view step (the
+   welcome/closing bookends, the question steps) is anchored by a logo
+   or a filled list. Giving this one the same hero-logo the onboarding/
+   welcome screens use gives it the same presence instead of trailing
+   off into blank space. */
+.pace-lang{padding-top:18px}
+.pace-lang .hero{padding:0 0 4px}
+.pace-lang .hero-logo{width:120px}
+.pace-lang .pace-q{margin-top:4px}
 .pace-progress{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
 .pace-dot{width:26px;height:4px;border-radius:3px;background:var(--line)}
 .pace-dot.on{background:var(--gold)}
@@ -3290,7 +3301,8 @@ function renderChokPace(){
     return;
   }
   if(CK_PACE_STEP===-2){
-    app.innerHTML=`<div class="view pace-view">
+    app.innerHTML=`<div class="view pace-view pace-lang">
+      <div class="hero"><img class="hero-logo" src="${LOGO}" alt="בית אל"/></div>
       <div class="pace-q">${t.langQ}</div>
       <div class="pace-list">${CK_PACE_LANGS.map(l=>optRow(l.code,l.label)).join('')}</div>
     </div>`;
