@@ -993,6 +993,17 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
 .q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
 .q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(56,163,165,.24),var(--panel) 60%)}
+/* Library category grid reuses the same per-category wash as the home
+   tiles (see the HOME comment above) for its 5 categories that don't
+   already have one from the home screen - so every tile across both
+   screens carries a distinct hue instead of the flat, uncolored look
+   the Library grid had before. */
+.q-tile[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(196,90,110,.24),var(--panel) 60%)}
+.q-tile[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(79,126,168,.24),var(--panel) 60%)}
+.q-tile[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(201,138,63,.26),var(--panel) 60%)}
+.q-tile[data-cat="mishnah"]{background-image:linear-gradient(150deg,rgba(138,111,201,.24),var(--panel) 60%)}
+.q-tile[data-cat="gemara"]{background-image:linear-gradient(150deg,rgba(150,110,70,.26),var(--panel) 60%)}
+.q-tile[data-cat="rambam"]{background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
 </style>
 </head>
 <body>
@@ -5458,7 +5469,7 @@ function renderLibrary(){
   ${topbar('עִיּוּן בַּסְּפָרִים','prayers')}
   <div class="view">
     <div class="quick-grid">
-      ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}">
+      ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.key}">
         <div class="qt">${libCatLabel(c.key)}</div>
       </div>`).join('')}
     </div>
@@ -5578,6 +5589,26 @@ function libDafRangeFor(t){
   CYC.daf.order.forEach((e,i)=>{ if(e.t===t){ if(first<0) first=i; last=i; } });
   return {first,last};
 }
+/* every amud (side) of every daf in a masechet, in order - Shekalim, Kinnim
+   and Middot aren't split into amudim (see e.whole), so they contribute one
+   step per daf instead of two */
+function libAmudList(t){
+  const rg=libDafRangeFor(t), out=[];
+  for(let i=rg.first;i<=rg.last;i++){
+    const e=ckDafEntry(i);
+    out.push({i,side:'a'});
+    if(!e.whole) out.push({i,side:'b'});
+  }
+  return out;
+}
+function ckAmudLetter(side){ return (S.lang&&S.lang!=='he') ? ckChrome(CK_AMUD[side]) : CK_AMUD[side]; }
+/* one side's segments only - same id scheme ckDafItems uses (daf:i:side:ix),
+   so any future commentary lookup by id keeps working unchanged */
+function ckDafSideItems(i,side){
+  const rec=ckDafRec(i); if(!rec) return [];
+  const segs=(rec.g||{})[side]; if(!segs) return [];
+  return segs.map((t,ix)=>({t, id:'daf:'+i+':'+side+':'+ix, n:ix+1}));
+}
 function renderLibraryGemaraMasechtot(){
   if(!CYC){
     app.innerHTML=`${topbar('גְּמָרָא','library')}<div class="view">${smSkeleton()}</div>`;
@@ -5598,7 +5629,7 @@ function renderLibraryGemaraMasechtot(){
   </div>`;
   app.querySelectorAll('[data-t]').forEach(r=>r.onclick=()=>{
     const rg=libDafRangeFor(r.dataset.t);
-    LIB.gemaraIndex=rg.first; go('libraryGemaraReader');
+    LIB.gemaraIndex=rg.first; LIB.gemaraSide='a'; go('libraryGemaraReader');
   });
   tr(app);
 }
@@ -5608,7 +5639,7 @@ function renderLibraryGemaraReader(){
     ensureCycles().then(()=>{ if(TAB==='libraryGemaraReader'){ renderLibraryGemaraReader(); tr(app); } });
     return;
   }
-  const i=LIB.gemaraIndex;
+  const i=LIB.gemaraIndex, side=LIB.gemaraSide||'a';
   const e=ckDafEntry(i);
   const b=ckDafBlock(i);
   if(!CYC_BLOCK['daf/'+b]){
@@ -5616,34 +5647,41 @@ function renderLibraryGemaraReader(){
     ensureCycBlock('daf',b).then(()=>{ if(TAB==='libraryGemaraReader'){ renderLibraryGemaraReader(); tr(app); } });
     return;
   }
-  const rg=libDafRangeFor(e.t);
-  const items=ckDafItems(i);
+  const list=libAmudList(e.t);
+  const pos=list.findIndex(x=>x.i===i&&x.side===side);
+  const items=ckDafSideItems(i,side);
+  const titleAmud=e.whole?'':' · '+ckAmudLetter(side);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
       <div class="reader-top">
         <button class="icon-btn" id="libgBack">${I.prev}</button>
-        <div class="reader-title">${ckDafName(e.t)}</div>
+        <div class="reader-title">${ckDafName(e.t)} · ${ckChrome('דַּף')} ${heNum(e.daf)}${titleAmud}</div>
       </div>
       <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="libgPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="libgPrev" ${pos<=0?'disabled':''}>${I.prev}</button>
         <select class="fld-select" id="libgDafPick" style="max-width:220px">
-          ${Array.from({length:rg.last-rg.first+1},(_,k)=>rg.first+k).map(ix=>`<option value="${ix}" ${ix===i?'selected':''}>${ckChrome('דַּף')} ${heNum(ckDafEntry(ix).daf)}</option>`).join('')}
+          ${list.map((x,ix)=>{
+            const xe=ckDafEntry(x.i);
+            const lbl=ckChrome('דַּף')+' '+heNum(xe.daf)+(xe.whole?'':' · '+ckAmudLetter(x.side));
+            return `<option value="${ix}" ${ix===pos?'selected':''}>${lbl}</option>`;
+          }).join('')}
         </select>
-        <button class="sm-aliyah-chip ck-arrow" id="libgNext" ${i>=rg.last?'disabled':''}>${I.next}</button>
+        <button class="sm-aliyah-chip ck-arrow" id="libgNext" ${pos>=list.length-1?'disabled':''}>${I.next}</button>
       </div>
     </div>
     <div class="sm-verses notranslate">
-      ${items.map(it=>it.t!=null
-        ? `<div class="sm-verse-row ck-nonum"><div class="sm-he">${it.t}</div></div>`
-        : `<div class="ck-source">${ckChrome(it.head)}</div>`).join('')}
+      ${items.length
+        ? items.map(it=>`<div class="sm-verse-row ck-nonum"><div class="sm-he">${it.t}</div></div>`).join('')
+        : `<div class="ck-source">${ckChrome('אֵין כָּאן פֵּרוּשׁ עַל הַקֶּטַע הַזֶּה')}</div>`}
     </div>
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('libgBack').onclick=()=>go('libraryGemaraMasechtot');
-  const prevBtn=document.getElementById('libgPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.gemaraIndex=i-1; renderLibraryGemaraReader(); forceScrollTop(); };
-  const nextBtn=document.getElementById('libgNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.gemaraIndex=i+1; renderLibraryGemaraReader(); forceScrollTop(); };
-  document.getElementById('libgDafPick').onchange=function(){ LIB.gemaraIndex=+this.value; renderLibraryGemaraReader(); forceScrollTop(); };
+  const goTo=p=>{ LIB.gemaraIndex=p.i; LIB.gemaraSide=p.side; renderLibraryGemaraReader(); forceScrollTop(); };
+  const prevBtn=document.getElementById('libgPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>goTo(list[pos-1]);
+  const nextBtn=document.getElementById('libgNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>goTo(list[pos+1]);
+  document.getElementById('libgDafPick').onchange=function(){ goTo(list[+this.value]); };
   tr(app);
 }
 
