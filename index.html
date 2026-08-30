@@ -803,6 +803,29 @@ input,select,button{max-width:100%;box-sizing:border-box}
 [data-theme="light"] .prayer-row-feature[data-cat="chok"]{background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
 [data-theme="light"] .prayer-row-feature[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
 [data-theme="light"] .prayer-row-feature[data-cat="zohar"]{background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
+/* Same treatment, one level down: every Library category's own inner list
+   screens (books/sedarim/masechtot/sefarim/parts, etc.) reuse the exact
+   [data-cat] colors already defined for that category's top-level q-tile
+   (see the "Library category tiles" block below) so the accent carries
+   through at every navigation depth, not just the top grid. */
+.prayer-row-feature[data-cat="torah"]{--cat-color:#c45a6e;background-image:linear-gradient(150deg,rgba(196,90,110,.24),var(--panel) 60%)}
+.prayer-row-feature[data-cat="neviim"]{--cat-color:#4f7ea8;background-image:linear-gradient(150deg,rgba(79,126,168,.24),var(--panel) 60%)}
+.prayer-row-feature[data-cat="ketuvim"]{--cat-color:#c98a3f;background-image:linear-gradient(150deg,rgba(201,138,63,.26),var(--panel) 60%)}
+.prayer-row-feature[data-cat="mishnah"]{--cat-color:#8a6fc9;background-image:linear-gradient(150deg,rgba(138,111,201,.24),var(--panel) 60%)}
+.prayer-row-feature[data-cat="gemara"]{--cat-color:#966e46;background-image:linear-gradient(150deg,rgba(150,110,70,.26),var(--panel) 60%)}
+.prayer-row-feature[data-cat="rambam"]{--cat-color:#969e46;background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
+:root .prayer-row-feature[data-cat="torah"],[data-theme="dark"] .prayer-row-feature[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(214,110,130,.3),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="neviim"],[data-theme="dark"] .prayer-row-feature[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(96,152,204,.3),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="ketuvim"],[data-theme="dark"] .prayer-row-feature[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(222,160,80,.3),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="mishnah"],[data-theme="dark"] .prayer-row-feature[data-cat="mishnah"]{background-image:linear-gradient(150deg,rgba(160,132,224,.3),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="gemara"],[data-theme="dark"] .prayer-row-feature[data-cat="gemara"]{background-image:linear-gradient(150deg,rgba(180,132,86,.3),var(--panel) 62%)}
+:root .prayer-row-feature[data-cat="rambam"],[data-theme="dark"] .prayer-row-feature[data-cat="rambam"]{background-image:linear-gradient(150deg,rgba(178,188,86,.3),var(--panel) 62%)}
+[data-theme="light"] .prayer-row-feature[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(196,90,110,.24),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(79,126,168,.24),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(201,138,63,.26),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="mishnah"]{background-image:linear-gradient(150deg,rgba(138,111,201,.24),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="gemara"]{background-image:linear-gradient(150deg,rgba(150,110,70,.26),var(--panel) 60%)}
+[data-theme="light"] .prayer-row-feature[data-cat="rambam"]{background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
 
 /* Prayer Reader Page */
 .prayer-reader-page{padding-bottom:40px}
@@ -2509,8 +2532,10 @@ function renderZoharYomiReader(){
         <button class="icon-btn" id="zyBack">${I.prev}</button>
         <div class="reader-title">זֹהַר הַיּוֹמִי</div>
       </div>
-      <div class="sm-aliyah-tag">${parshaName(t.key)} · ${rowLabel}</div>
-      ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
+      <div class="bic-collapse">
+        <div class="sm-aliyah-tag">${parshaName(t.key)} · ${rowLabel}</div>
+        ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
+      </div>
     </div>
     <div class="sm-verses notranslate">${body}</div>
     <div style="height:26px"></div>
@@ -2585,15 +2610,17 @@ function renderMusarYomiReader(){
         <button class="icon-btn" id="myBack">${I.prev}</button>
         <div class="reader-title">${t[work]}</div>
       </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="myPrev" aria-label="${ckBicUI().prevDay}">${I.prev}</button>
-        <select class="fld-select" id="mySecPick" style="max-width:220px">
-          ${sections.map(s=>`<option value="${s.startIndex}" ${s===curSec?'selected':''}>${s.head}</option>`).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="myNext" aria-label="${ckBicUI().nextDay}">${I.next}</button>
+      <div class="bic-collapse">
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="myPrev" aria-label="${ckBicUI().prevDay}">${I.prev}</button>
+          <select class="fld-select" id="mySecPick" style="max-width:220px">
+            ${sections.map(s=>`<option value="${s.startIndex}" ${s===curSec?'selected':''}>${s.head}</option>`).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="myNext" aria-label="${ckBicUI().nextDay}">${I.next}</button>
+        </div>
+        ${!isToday?`<div class="sm-aliyah-tag">לֹא הַיּוֹם הַנּוֹכְחִי · <button class="ck-track-btn" id="myToday" style="display:inline;padding:2px 10px">${ckMusarUI().today}</button></div>`:''}
+        ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       </div>
-      ${!isToday?`<div class="sm-aliyah-tag">לֹא הַיּוֹם הַנּוֹכְחִי · <button class="ck-track-btn" id="myToday" style="display:inline;padding:2px 10px">${ckMusarUI().today}</button></div>`:''}
-      ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
     </div>
     <div class="sm-verses notranslate">${body}</div>
     <div style="height:26px"></div>
@@ -3815,8 +3842,10 @@ function renderChokUnit(){
           <button class="icon-btn" id="cuBack">${I.prev}</button>
           <div class="reader-title">${e.group}</div>
         </div>
-        <div class="sm-aliyah-tag">${e.label}</div>
-        ${when?`<div class="ck-source">${when}</div>`:''}
+        <div class="bic-collapse">
+          <div class="sm-aliyah-tag">${e.label}</div>
+          ${when?`<div class="ck-source">${when}</div>`:''}
+        </div>
       </div>
       <div class="sm-verses notranslate">
         ${(segs||[]).map((t,i)=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(i+1)}</span><div class="sm-he">${t}</div></div>`).join('')
@@ -5249,7 +5278,9 @@ function renderReader(){
           </div>
         </div>
       </div>
-      <div class="reader-progress"><i style="width:${RD.daily?(((RD.idx+1)/total)*100):((ch/150)*100)}%"></i></div>
+      <div class="bic-collapse">
+        <div class="reader-progress"><i style="width:${RD.daily?(((RD.idx+1)/total)*100):((ch/150)*100)}%"></i></div>
+      </div>
     </div>
     ${dedHTML('reader-ded')}
     ${showBefore?prayerBlock('before'):''}
@@ -5629,7 +5660,7 @@ function renderLibraryTorahBooks(){
   ${topbar('תּוֹרָה','library')}
   <div class="view">
     <div class="quick-grid">
-      ${LIB_TORAH_BOOKS.map(b=>`<div class="q-tile round-card" data-book="${b}">
+      ${LIB_TORAH_BOOKS.map(b=>`<div class="q-tile round-card" data-cat="torah" data-book="${b}">
         <div class="qt">${bookName(b)}</div>
         <div class="qd">${heNum(libTorahParshaKeys(b).length)} ${ckChrome('פָּרָשִׁיּוֹת')}</div>
       </div>`).join('')}
@@ -5656,7 +5687,7 @@ function renderLibraryTorahParshiot(){
   ${topbar(bookName(book),'libraryTorahBooks')}
   <div class="view">
     <div class="prayers-list">
-      ${keys.map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${parshaName(k)}</span>${I.chev}</div>`).join('')}
+      ${keys.map(k=>`<div class="prayer-row prayer-row-feature" data-cat="torah" data-k="${k}"><span class="prayer-row-title">${parshaName(k)}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -5685,12 +5716,14 @@ function renderLibraryTorahReader(){
         <button class="icon-btn" id="libtBack">${I.prev}</button>
         <div class="reader-title">${bookName(book)}</div>
       </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="libtPrev" ${i<=0?'disabled':''}>${I.prev}</button>
-        <select class="fld-select" id="libtPPick" style="max-width:220px">
-          ${keys.map((k,idx)=>`<option value="${k}" ${idx===i?'selected':''}>${parshaName(k)}</option>`).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="libtNext" ${i>=keys.length-1?'disabled':''}>${I.next}</button>
+      <div class="bic-collapse">
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="libtPrev" ${i<=0?'disabled':''}>${I.prev}</button>
+          <select class="fld-select" id="libtPPick" style="max-width:220px">
+            ${keys.map((k,idx)=>`<option value="${k}" ${idx===i?'selected':''}>${parshaName(k)}</option>`).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="libtNext" ${i>=keys.length-1?'disabled':''}>${I.next}</button>
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -5749,7 +5782,7 @@ function renderLibraryGemaraMasechtot(){
     <div class="prayers-list">
       ${list.map(t=>{
         const r=libDafRangeFor(t);
-        return `<div class="prayer-row round-card" data-t="${t}"><span class="prayer-row-title">${ckDafName(t)}</span><span class="qd">${heNum(r.last-r.first+1)} ${ckChrome('דַּפִּים')}</span>${I.chev}</div>`;
+        return `<div class="prayer-row round-card prayer-row-feature" data-cat="gemara" data-t="${t}"><span class="prayer-row-title">${ckDafName(t)}</span><span class="qd">${heNum(r.last-r.first+1)} ${ckChrome('דַּפִּים')}</span>${I.chev}</div>`;
       }).join('')}
     </div>
     ${ornament()}
@@ -5785,16 +5818,18 @@ function renderLibraryGemaraReader(){
         <button class="icon-btn" id="libgBack">${I.prev}</button>
         <div class="reader-title">${ckDafName(e.t)} · ${ckChrome('דַּף')} ${heNum(e.daf)}${titleAmud}</div>
       </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="libgPrev" ${pos<=0?'disabled':''}>${I.prev}</button>
-        <select class="fld-select" id="libgDafPick" style="max-width:220px">
-          ${list.map((x,ix)=>{
-            const xe=ckDafEntry(x.i);
-            const lbl=ckChrome('דַּף')+' '+heNum(xe.daf)+(xe.whole?'':' · '+ckAmudLetter(x.side));
-            return `<option value="${ix}" ${ix===pos?'selected':''}>${lbl}</option>`;
-          }).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="libgNext" ${pos>=list.length-1?'disabled':''}>${I.next}</button>
+      <div class="bic-collapse">
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="libgPrev" ${pos<=0?'disabled':''}>${I.prev}</button>
+          <select class="fld-select" id="libgDafPick" style="max-width:220px">
+            ${list.map((x,ix)=>{
+              const xe=ckDafEntry(x.i);
+              const lbl=ckChrome('דַּף')+' '+heNum(xe.daf)+(xe.whole?'':' · '+ckAmudLetter(x.side));
+              return `<option value="${ix}" ${ix===pos?'selected':''}>${lbl}</option>`;
+            }).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="libgNext" ${pos>=list.length-1?'disabled':''}>${I.next}</button>
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -5845,7 +5880,7 @@ function renderLibraryRambamSefarim(){
   ${topbar('רַמְבַּ״ם','library')}
   <div class="view">
     <div class="prayers-list">
-      ${list.map(s=>`<div class="prayer-row round-card" data-sefer="${s}"><span class="prayer-row-title">${libSeferName(s)}</span>${I.chev}</div>`).join('')}
+      ${list.map(s=>`<div class="prayer-row round-card prayer-row-feature" data-cat="rambam" data-sefer="${s}"><span class="prayer-row-title">${libSeferName(s)}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -5862,7 +5897,7 @@ function renderLibraryRambamBooks(){
     <div class="prayers-list">
       ${books.map(bk=>{
         const rg=libRambamRangeFor(bk);
-        return `<div class="prayer-row round-card" data-book="${bk}"><span class="prayer-row-title">${ckRambamName(bk)}</span><span class="qd">${heNum(rg.last-rg.first+1)} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`;
+        return `<div class="prayer-row round-card prayer-row-feature" data-cat="rambam" data-book="${bk}"><span class="prayer-row-title">${ckRambamName(bk)}</span><span class="qd">${heNum(rg.last-rg.first+1)} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`;
       }).join('')}
     </div>
     ${ornament()}
@@ -5896,12 +5931,14 @@ function renderLibraryRambamReader(){
         <button class="icon-btn" id="librBack">${I.prev}</button>
         <div class="reader-title">${ckRambamName(e.book)}</div>
       </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="librPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
-        <select class="fld-select" id="librChPick" style="max-width:220px">
-          ${Array.from({length:rg.last-rg.first+1},(_,k)=>rg.first+k).map(ix=>`<option value="${ix}" ${ix===i?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(CYC.rambam.order[ix].ch)}</option>`).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="librNext" ${i>=rg.last?'disabled':''}>${I.next}</button>
+      <div class="bic-collapse">
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="librPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
+          <select class="fld-select" id="librChPick" style="max-width:220px">
+            ${Array.from({length:rg.last-rg.first+1},(_,k)=>rg.first+k).map(ix=>`<option value="${ix}" ${ix===i?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(CYC.rambam.order[ix].ch)}</option>`).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="librNext" ${i>=rg.last?'disabled':''}>${I.next}</button>
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -5938,7 +5975,7 @@ function renderLibraryZoharParts(){
   ${topbar('זֹהַר','library')}
   <div class="view">
     <div class="prayers-list">
-      ${list.map(p=>`<div class="prayer-row round-card" data-part="${p}"><span class="prayer-row-title">${ckZoharPartName(p)}</span>${I.chev}</div>`).join('')}
+      ${list.map(p=>`<div class="prayer-row round-card prayer-row-feature" data-cat="zohar" data-part="${p}"><span class="prayer-row-title">${ckZoharPartName(p)}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -5971,15 +6008,17 @@ function renderLibraryZoharReader(){
         <button class="icon-btn" id="libzBack">${I.prev}</button>
         <div class="reader-title">${ckZoharPartName(e.part)}</div>
       </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="libzPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
-        <select class="fld-select" id="libzDafPick" style="max-width:220px">
-          ${Array.from({length:rg.last-rg.first+1},(_,k)=>rg.first+k).map(ix=>{
-            const ee=CYC.zohar.order[ix];
-            return `<option value="${ix}" ${ix===i?'selected':''}>${ckChrome('דַּף')} ${heNum(ee.daf)} ${ee.side}</option>`;
-          }).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="libzNext" ${i>=rg.last?'disabled':''}>${I.next}</button>
+      <div class="bic-collapse">
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="libzPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
+          <select class="fld-select" id="libzDafPick" style="max-width:220px">
+            ${Array.from({length:rg.last-rg.first+1},(_,k)=>rg.first+k).map(ix=>{
+              const ee=CYC.zohar.order[ix];
+              return `<option value="${ix}" ${ix===i?'selected':''}>${ckChrome('דַּף')} ${heNum(ee.daf)} ${ee.side}</option>`;
+            }).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="libzNext" ${i>=rg.last?'disabled':''}>${I.next}</button>
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -6033,7 +6072,7 @@ function renderLibraryMishnahSedarim(){
   ${topbar('מִשְׁנָה','library')}
   <div class="view">
     <div class="prayers-list">
-      ${MISHNAH_IDX.sedarim.map(s=>`<div class="prayer-row round-card" data-seder="${s.seder}"><span class="prayer-row-title">${sederName(s.seder)}</span><span class="qd">${heNum(s.tractates.length)} ${ckChrome('מַסֶּכְתּוֹת')}</span>${I.chev}</div>`).join('')}
+      ${MISHNAH_IDX.sedarim.map(s=>`<div class="prayer-row round-card prayer-row-feature" data-cat="mishnah" data-seder="${s.seder}"><span class="prayer-row-title">${sederName(s.seder)}</span><span class="qd">${heNum(s.tractates.length)} ${ckChrome('מַסֶּכְתּוֹת')}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -6047,7 +6086,7 @@ function renderLibraryMishnahTractates(){
   ${topbar(sederName(LIB.mishnahSeder),'libraryMishnahSedarim')}
   <div class="view">
     <div class="prayers-list">
-      ${seder.tractates.map(t=>`<div class="prayer-row round-card" data-t="${t.masechet}"><span class="prayer-row-title">${mishTractateName(t.masechet)}</span><span class="qd">${heNum(t.chapters.length)} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`).join('')}
+      ${seder.tractates.map(t=>`<div class="prayer-row round-card prayer-row-feature" data-cat="mishnah" data-t="${t.masechet}"><span class="prayer-row-title">${mishTractateName(t.masechet)}</span><span class="qd">${heNum(t.chapters.length)} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -6061,7 +6100,7 @@ function renderLibraryMishnahChapters(){
   ${topbar(mishTractateName(LIB.mishnahTractate),'libraryMishnahTractates')}
   <div class="view">
     <div class="quick-grid">
-      ${t.chapters.map((c,i)=>`<div class="q-tile round-card" data-i="${i}">
+      ${t.chapters.map((c,i)=>`<div class="q-tile round-card" data-cat="mishnah" data-i="${i}">
         <div class="qt">${ckChrome('פֶּרֶק')} ${heNum(c.ch)}</div>
         <div class="qd">${heNum(c.mishnayot.length)} ${ckChrome('מִשְׁנָיוֹת')}</div>
       </div>`).join('')}
@@ -6083,12 +6122,14 @@ function renderLibraryMishnahReader(){
         <button class="icon-btn" id="libmBack">${I.prev}</button>
         <div class="reader-title">${mishTractateName(LIB.mishnahTractate)}</div>
       </div>
-      <div class="ck-daynav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="libmPrev" ${ci<=0?'disabled':''}>${I.prev}</button>
-        <select class="fld-select" id="libmChPick" style="max-width:220px">
-          ${t.chapters.map((cc,i)=>`<option value="${i}" ${i===ci?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(cc.ch)}</option>`).join('')}
-        </select>
-        <button class="sm-aliyah-chip ck-arrow" id="libmNext" ${ci>=t.chapters.length-1?'disabled':''}>${I.next}</button>
+      <div class="bic-collapse">
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="libmPrev" ${ci<=0?'disabled':''}>${I.prev}</button>
+          <select class="fld-select" id="libmChPick" style="max-width:220px">
+            ${t.chapters.map((cc,i)=>`<option value="${i}" ${i===ci?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(cc.ch)}</option>`).join('')}
+          </select>
+          <button class="sm-aliyah-chip ck-arrow" id="libmNext" ${ci>=t.chapters.length-1?'disabled':''}>${I.next}</button>
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -6204,7 +6245,7 @@ function renderLibraryNKBooks(){
     ${topbar(title,'library')}
     <div class="view">
       <div class="prayers-list">
-        ${books.map(b=>`<div class="prayer-row round-card" data-book="${b.k}"><span class="prayer-row-title">${nkBookName(cat,b.k)}</span><span class="qd">${heNum(nkChaptersOf(cat,b.k))} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`).join('')}
+        ${books.map(b=>`<div class="prayer-row round-card prayer-row-feature" data-cat="${cat}" data-book="${b.k}"><span class="prayer-row-title">${nkBookName(cat,b.k)}</span><span class="qd">${heNum(nkChaptersOf(cat,b.k))} ${ckChrome('פְּרָקִים')}</span>${I.chev}</div>`).join('')}
       </div>
       ${ornament()}
     </div>`;
@@ -6231,12 +6272,14 @@ function renderLibraryNKReader(){
           <button class="icon-btn" id="libnBack">${I.prev}</button>
           <div class="reader-title">${nkBookName(cat,book)}</div>
         </div>
-        <div class="ck-daynav-wrap">
-          <button class="sm-aliyah-chip ck-arrow" id="libnPrev" ${ch<=1?'disabled':''}>${I.prev}</button>
-          <select class="fld-select" id="libnChPick" style="max-width:220px">
-            ${Array.from({length:nCh},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===ch?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(c)}</option>`).join('')}
-          </select>
-          <button class="sm-aliyah-chip ck-arrow" id="libnNext" ${ch>=nCh?'disabled':''}>${I.next}</button>
+        <div class="bic-collapse">
+          <div class="ck-daynav-wrap">
+            <button class="sm-aliyah-chip ck-arrow" id="libnPrev" ${ch<=1?'disabled':''}>${I.prev}</button>
+            <select class="fld-select" id="libnChPick" style="max-width:220px">
+              ${Array.from({length:nCh},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===ch?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(c)}</option>`).join('')}
+            </select>
+            <button class="sm-aliyah-chip ck-arrow" id="libnNext" ${ch>=nCh?'disabled':''}>${I.next}</button>
+          </div>
         </div>
       </div>
       <div class="sm-verses notranslate">
@@ -6478,11 +6521,13 @@ function renderShnayimReader(){
         <button class="icon-btn" id="smBack">${I.prev}</button>
         <div class="reader-title">${parshaName(SM.key)}</div>
       </div>
-      <div class="sm-aliyah-tag ${_anim}">${parshaName(SM.key)} · ${tag}</div>
-      <div class="reader-progress"><i style="width:${pct}%"></i></div>
-      <div class="sm-aliyah-nav">
-        ${entry.aliyot.map((_,i)=>`<button class="sm-aliyah-chip ${!isHaft&&n===i+1?'on':''}" data-n="${i+1}">${heNum(i+1)}</button>`).join('')}
-        ${(entry.haft||entry.seph)?`<button class="sm-aliyah-chip ${isHaft?'on':''}" data-n="haft">הַפְטָרָה</button>`:''}
+      <div class="bic-collapse">
+        <div class="sm-aliyah-tag ${_anim}">${parshaName(SM.key)} · ${tag}</div>
+        <div class="reader-progress"><i style="width:${pct}%"></i></div>
+        <div class="sm-aliyah-nav">
+          ${entry.aliyot.map((_,i)=>`<button class="sm-aliyah-chip ${!isHaft&&n===i+1?'on':''}" data-n="${i+1}">${heNum(i+1)}</button>`).join('')}
+          ${(entry.haft||entry.seph)?`<button class="sm-aliyah-chip ${isHaft?'on':''}" data-n="haft">הַפְטָרָה</button>`:''}
+        </div>
       </div>
     </div>
     <div class="sm-verses notranslate">
@@ -6602,8 +6647,10 @@ function renderZoharReader(){
         <button class="icon-btn" id="zhBack">${I.prev}</button>
         <div class="reader-title">תִּיקּוּנֵי הַזֹּהַר</div>
       </div>
-      <div class="sm-aliyah-tag ${_anim}">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${localizeHebDateStr(entry.hebDate)}</div>
-      <div class="reader-progress"><i style="width:${pct}%"></i></div>
+      <div class="bic-collapse">
+        <div class="sm-aliyah-tag ${_anim}">יוֹם ${heNum(entry.day)} לְמִנְיַן הָאַרְבָּעִים · ${localizeHebDateStr(entry.hebDate)}</div>
+        <div class="reader-progress"><i style="width:${pct}%"></i></div>
+      </div>
     </div>
     ${entry.pageCount?`<div class="zh-pdf-embed">
       <div class="zh-pdf-canvas">
@@ -7145,39 +7192,42 @@ render();
   }, {passive:true});
 })();
 (function initNavScrollHide(){
-  let lastY = 0, ticking = false, hideTimer = null;
+  let lastY = 0, ticking = false;
   const THRESHOLD = 6;
   function getY(){
     const se = document.scrollingElement || document.documentElement;
     return Math.max(se.scrollTop||0, document.body.scrollTop||0, window.scrollY||0);
   }
   lastY = getY();
+  /* Chrome (bottom nav + any .bic-collapse reader header) hides on scroll-down
+     and reveals on scroll-up - but must NOT reappear on its own just because
+     the user stopped scrolling: an idle timer that force-reveals it fights a
+     reader who deliberately scrolled past it to read undisturbed. Revealing
+     is instead an explicit user action - scroll up, or a tap/touch anywhere
+     on the screen - never a timeout. */
+  function set(hide){
+    const nav = document.querySelector('.bottom-nav'); if(!nav) return;
+    const tools=document.getElementById('gTools');
+    const bicHead=document.querySelector('.bic-collapse');
+    nav.classList.toggle('nav-hidden', hide);
+    if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
+    if(bicHead) bicHead.classList.toggle('collapsed', hide);
+  }
   function onScroll(){
-    const nav = document.querySelector('.bottom-nav') || document.createElement('div');
     ticking = false;
     const y = getY();
     const dy = y - lastY;
-    const tools=document.getElementById('gTools');
-    const bicHead=document.querySelector('.bic-collapse');
-    const set=hide=>{
-      nav.classList.toggle('nav-hidden', hide);
-      if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
-      if(bicHead) bicHead.classList.toggle('collapsed', hide);
-    };
     if(y < 40){ set(false); }
     else if(dy > THRESHOLD){ set(true); }
     else if(dy < -THRESHOLD){ set(false); }
     lastY = y;
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(()=>{
-      nav.classList.remove('nav-hidden');
-      const t=document.getElementById('gTools'); if(t) t.classList.remove('nav-hidden');
-      const bh=document.querySelector('.bic-collapse'); if(bh) bh.classList.remove('collapsed');
-    }, 1400);
   }
   const raf = ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(onScroll); } };
   document.addEventListener('scroll', raf, {passive:true, capture:true});
   window.addEventListener('scroll', raf, {passive:true});
+  const reveal=()=>set(false);
+  document.addEventListener('touchstart', reveal, {passive:true, capture:true});
+  document.addEventListener('mousedown', reveal, {capture:true});
 })();
 function checkNotification(){
   if(!notifReady()) return;
