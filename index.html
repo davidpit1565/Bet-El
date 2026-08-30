@@ -4958,8 +4958,31 @@ function renderTracker(){
   const parshaDone = weekParshaKey ? smIsDone(weekParshaKey) : false;
   const parshaCel = weekParshaKey ? trCelebrate('sm_'+weekParshaKey, parshaDone) : false;
 
-  const sections = [true, !!cd, !!weekParshaKey].filter(Boolean).length;
-  const doneCount = (tehillimDone?1:0) + (cd&&zoharDoneToday?1:0) + (weekParshaKey&&parshaDone?1:0);
+  /* Chok LeYisrael - same "today's slot done or not" shape chokIsDone()
+     already tracks (see homeChokCard). CHOK loads lazily like every other
+     ensureX() source here; while it's missing, ckTodayLine() simply comes
+     back null and the card is skipped for this render - ensureChokIndex()
+     re-renders once it lands, mirroring the home screen's own retry. */
+  const ckLine=CHOK?ckTodayLine():null;
+  const chokDoneToday = ckLine ? chokIsDone(ckLine.key,ckLine.day) : false;
+  const chokCel = ckLine ? trCelebrate('ck_'+ckLine.key+'|'+ckLine.day, chokDoneToday) : false;
+
+  /* Ben Ish Chai - this week's parasha on the active track (S.bicYear),
+     same per-parasha completion BIC_DONE already drives on the home cards
+     (bicProgress/bicDoneSet). BIC_INDEX/BIC_WEEK are lazy too. */
+  const bicTrackVal=bicTrack();
+  const bicKey = (weekParshaKey && BIC_INDEX) ? bicNearestAvailableKey(bicTrackVal,weekParshaKey) : null;
+  const bicP = bicKey ? bicParshiot(bicTrackVal).find(x=>x.key===bicKey) : null;
+  const bicUnitKey = bicP ? bicTrackVal+'/'+(BIC_INDEX[bicTrackVal].unitOf[bicKey]||'') : null;
+  const bicTotal = bicP ? (BIC_WEEK[bicUnitKey] ? bicFlatItems(bicTrackVal,bicKey).length : bicP.n) : 0;
+  const bicDoneN = bicP ? bicDoneSet(bicTrackVal,bicKey).length : 0;
+  const bicDone = bicP && bicTotal>0 && bicDoneN>=bicTotal;
+  const bicPct = bicTotal ? Math.round(100*bicDoneN/bicTotal) : 0;
+  const bicCel = bicP ? trCelebrate('bic_'+bicTrackVal+'/'+bicKey, bicDone) : false;
+
+  const sections = [true, !!cd, !!weekParshaKey, !!ckLine, !!bicP].filter(Boolean).length;
+  const doneCount = (tehillimDone?1:0) + (cd&&zoharDoneToday?1:0) + (weekParshaKey&&parshaDone?1:0)
+    + (ckLine&&chokDoneToday?1:0) + (bicP&&bicDone?1:0);
 
   app.innerHTML=`
   ${topbar('מַעֲקַב קְרִיאָה','home')}
@@ -4967,6 +4990,15 @@ function renderTracker(){
     <div class="ach-stats-row">
       <div class="ach-stat"><div class="as-n">${doneCount}/${sections}</div><div class="as-l">הֻשְׁלְמוּ</div></div>
     </div>
+
+    ${ckLine?`<div class="sm-week-card ${chokDoneToday?'tr-done':''} ${chokCel?'tr-celebrate':''}" id="trackChok">
+      <div class="sm-week-icon tr-ring" style="--pct:${chokDoneToday?100:0}"><span class="tr-ring-inner">${chokDoneToday?I.check:I.crown}</span></div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">חוֹק לְיִשְׂרָאֵל · קְרִיאַת הַיּוֹם</div>
+        <div class="sm-week-name">${ckLine.text}${chokDoneToday?' · הוּשְׁלַם':' · עֲדַיִן לֹא הוּשְׁלַם'}</div>
+      </div>
+      <span class="sm-week-chev">${chokDoneToday?I.check:I.chev}</span>
+    </div>`:''}
 
     <div class="sm-week-card ${tehillimDone?'tr-done':''} ${tehillimCel?'tr-celebrate':''}" id="trackTehillim">
       <div class="sm-week-icon tr-ring" style="--pct:${tehillimPct}"><span class="tr-ring-inner">${tehillimDone?I.check:I.book}</span></div>
@@ -4994,12 +5026,26 @@ function renderTracker(){
       </div>
       <span class="sm-week-chev">${parshaDone?I.check:I.chev}</span>
     </div>`:''}
+
+    ${bicP?`<div class="sm-week-card ${bicDone?'tr-done':''} ${bicCel?'tr-celebrate':''}" id="trackBic">
+      <div class="sm-week-icon tr-ring" style="--pct:${bicPct}"><span class="tr-ring-inner">${bicDone?I.check:I.candle}</span></div>
+      <div class="sm-week-text">
+        <div class="sm-week-tag">${ckBicUI().title} · ${parshaName(bicKey)}</div>
+        <div class="sm-week-name">${bicDoneN}/${bicTotal} ${ckBicUI().halachot}${bicDone?' · הוּשְׁלַם':''}</div>
+      </div>
+      <span class="sm-week-chev">${bicDone?I.check:I.chev}</span>
+    </div>`:''}
     ${ornament()}
   </div>`;
   document.getElementById('trackTehillim').onclick=()=>renderContinuous(chs,hd);
   const tz=document.getElementById('trackZohar'); if(tz) tz.onclick=()=>openZohar(cd);
   const ts=document.getElementById('trackShnayim'); if(ts) ts.onclick=()=>openShnayim(weekParshaKey);
+  const tc=document.getElementById('trackChok'); if(tc) tc.onclick=()=>openChok(ckLine.key,ckLine.day,null);
+  const tb=document.getElementById('trackBic'); if(tb) tb.onclick=()=>openBic();
   tr(app);
+  if(!CHOK) ensureChokIndex().then(()=>{ if(TAB==='tracker') renderTracker(); });
+  if(weekParshaKey && !BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='tracker') renderTracker(); });
+  else if(bicP && !BIC_WEEK[bicUnitKey]) ensureBicWeek(bicTrackVal,[bicKey]).then(()=>{ if(TAB==='tracker') renderTracker(); });
 }
 
 /* ================= TEHILLIM GRID ================= */
