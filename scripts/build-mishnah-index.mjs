@@ -12,11 +12,11 @@ import { readFileSync, writeFileSync, readdirSync } from 'fs';
 
 const SEDARIM = {
   'Zeraim': ['Berakhot','Peah','Demai','Kilayim','Sheviit','Terumot','Maasrot','Maaser Sheni','Challah','Orlah','Bikkurim'],
-  'Moed': ['Shabbat','Eruvin','Pesachim','Shekalim','Yoma','Sukkah','Beitzah','Rosh Hashanah','Taanit','Megillah','Moed Katan','Chagigah'],
+  'Moed': ['Shabbat','Eruvin','Pesachim','Shekalim','Yoma','Sukkah','Beitzah','Rosh Hashanah',"Ta'anit",'Megillah','Moed Katan','Chagigah'],
   'Nashim': ['Yevamot','Ketubot','Nedarim','Nazir','Sotah','Gittin','Kiddushin'],
   'Nezikin': ['Bava Kamma','Bava Metzia','Bava Batra','Sanhedrin','Makkot','Shevuot','Eduyot','Avodah Zarah','Avot','Horayot'],
   'Kodashim': ['Zevachim','Menachot','Chullin','Bekhorot','Arakhin','Temurah','Keritot','Meilah','Tamid','Middot','Kinnim'],
-  'Taharot': ['Kelim','Oholot','Negaim','Parah','Taharot','Mikvaot','Niddah','Makhshirin','Zavim','Tevul Yom','Yadayim','Uktzin'],
+  'Taharot': ['Kelim','Oholot','Negaim','Parah','Tahorot','Mikvaot','Niddah','Makhshirin','Zavim','Tevul Yom','Yadayim','Oktzin'],
 };
 const TRACTATE_SEDER = {};
 for (const [seder, list] of Object.entries(SEDARIM)) for (const t of list) TRACTATE_SEDER[t] = seder;
