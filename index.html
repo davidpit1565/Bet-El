@@ -221,7 +221,7 @@ body::before{ /* subtle starfield/texture */
   display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
 .q-tile:active{transform:scale(.97)}
 .q-tile.done{border-color:var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset,0 6px 18px -8px rgba(212,175,95,.45)}
-.q-tile .qi{color:var(--cat-color,var(--gold))}.q-tile .qi svg{width:24px;height:24px;display:block}
+.q-tile .qi{color:var(--gold)}.q-tile .qi svg{width:24px;height:24px}
 .q-tile .qt{font-family:var(--font-sacred);font-size:18px;font-weight:700}
 .q-tile .qd{font-size:14px;color:var(--muted)}
 /* the home screen's very first row (today's Chok LeYisrael + Tehillim) are
@@ -4837,13 +4837,11 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
-          <div class="qi">${I.scroll}</div>
           <div class="qt">חוֹק לְיִשְׂרָאֵל</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
       <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
-        <div class="qi">${I.book}</div>
         <div class="qt">תְּהִלִּים הַיּוֹמִי</div>
         <div class="qd">${rangeLabel} · ${chs.length} פְּרָקִים</div>
       </div>
@@ -4854,13 +4852,11 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="zohar" id="homeZoharCard">
-          <div class="qi">${I.zoharFlame}</div>
           <div class="qt">זֹהַר הַיּוֹמִי</div>
           <div class="qd">מִתּוֹךְ חֹק לְיִשְׂרָאֵל שֶׁל הַיּוֹם</div>
         </div>`;
       })()}
       ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" data-cat="shnayim" id="homeParshaCard">
-        <div class="qi">${I.split}</div>
         <div class="qt">שְׁנַיִם מִקְרָא</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
@@ -4871,13 +4867,11 @@ function renderHome(){
         const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
         const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
         return `<div class="q-tile" data-cat="benishchai" id="homeBicCard">
-          <div class="qi">${I.candle}</div>
           <div class="qt">${ckBicUI().title}</div>
           <div class="qd">${p?bicParshaName(p):(weekParshaKey?parshaName(weekParshaKey):'')}</div>
         </div>`;
       })()}
       <div class="q-tile" data-cat="musar" id="homeMusarCard">
-        <div class="qi">${I.compass}</div>
         <div class="qt">מוּסָר</div>
         <div class="qd">6 סְפָרִים</div>
       </div>
@@ -5532,7 +5526,6 @@ const LIBRARY_CATS = [
   {key:'musar', label:'מוּסָר'},
   {key:'zohar', label:'זֹהַר'},
 ];
-const LIBRARY_CAT_ICONS={torah:'book',neviim:'flame',ketuvim:'star',mishnah:'doc',gemara:'library',rambam:'shield',benishchai:'candle',musar:'compass',zohar:'zoharFlame'};
 function libCatLabel(key){
   if(key==='benishchai') return (BIC_UI[S.lang]||BIC_UI.he).title;
   const c=LIBRARY_CATS.find(x=>x.key===key);
@@ -5555,7 +5548,6 @@ function renderLibrary(){
   <div class="view">
     <div class="quick-grid">
       ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.key}">
-        <div class="qi">${I[LIBRARY_CAT_ICONS[c.key]]}</div>
         <div class="qt">${libCatLabel(c.key)}</div>
       </div>`).join('')}
     </div>
