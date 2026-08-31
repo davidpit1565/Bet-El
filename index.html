@@ -853,6 +853,31 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-note{margin:4px 0 14px;font-size:14px;font-weight:700;color:var(--gold);text-align:center;
   font-family:var(--font-ui);letter-spacing:.2px}
 .prayer-para:last-child{border:none;margin-bottom:0}
+/* Siddur: day-conditional insertions (Yaale V'Yavo, Al HaNissim, Aneinu,
+   Aseret Yemei Teshuva swaps, Hallel) get a colored left rule + small tag
+   so it's visually clear *why* a line is there today, instead of blending
+   into the rest of the Amidah's plain paragraphs. */
+.siddur-insert{border-right:3px solid #7a9a3f;padding-right:12px;margin:10px 0}
+[data-theme="dark"] .siddur-insert,:root:not([data-theme="light"]) .siddur-insert{border-right-color:#96b65b}
+.siddur-insert-tag{display:block;font-family:var(--font-ui);font-size:12px;font-weight:700;color:#7a9a3f;margin-bottom:4px}
+[data-theme="dark"] .siddur-insert-tag,:root:not([data-theme="light"]) .siddur-insert-tag{color:#96b65b}
+.siddur-section-title{font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--muted);
+  letter-spacing:.3px;margin:26px 0 10px;text-align:center}
+.siddur-tachanun-strip{display:flex;align-items:center;gap:8px;justify-content:center;font-family:var(--font-ui);
+  font-size:13px;color:var(--muted);background:var(--panel);border-radius:12px;padding:10px 14px;margin:8px 0 20px}
+.siddur-selichot-link{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--panel);border-radius:14px;padding:14px 16px;margin:8px 0 20px;cursor:pointer}
+/* Collapsible person-dependent content (Birkat HaGomel, Vidui, groom
+   blessing) - closed by default, own small accordion (ckToggleComm is
+   tightly coupled to CK_COMM/commentary ids and daf lookups, not a clean
+   fit for arbitrary named text blocks here). */
+.siddur-accordion{margin:14px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.siddur-accordion-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 16px;font-family:var(--font-ui);font-weight:700;font-size:15px;cursor:pointer;background:var(--panel)}
+.siddur-accordion-chev{transition:transform .2s}
+.siddur-accordion.open .siddur-accordion-chev{transform:rotate(90deg)}
+.siddur-accordion-body{display:none;padding:4px 16px 16px}
+.siddur-accordion.open .siddur-accordion-body{display:block}
 
 
 /* ---- streak (#5) ---- */
@@ -984,6 +1009,22 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-secnav{flex:1;min-width:0;overflow-x:auto;padding:2px 2px 0;justify-content:flex-start}
 .ck-secnav-wrap .ck-arrow{flex:none}
 .sm-aliyah-chip.ck-secchip{font-family:var(--font-ui);font-size:13px;font-weight:700}
+
+/* Siddur reader: a small, always-visible-but-unobtrusive column of dots
+   pinned to the screen edge (left, so it sits on the far side from where
+   RTL Hebrew text starts) letting you jump to any section of the single
+   continuous scroll below, instead of the wide chip strip used elsewhere
+   (renderChokReader etc still page-switch and keep that pattern - this is
+   specific to the Siddur's own continuous-scroll reader). Deliberately
+   tiny: a few millimeters of dots, not a bar - "not permanently prominent"
+   per spec. */
+.sid-dotnav{position:fixed;left:6px;top:50%;transform:translateY(-50%);z-index:35;
+  display:flex;flex-direction:column;align-items:center;gap:9px;padding:8px 6px;
+  border-radius:999px;background:var(--panel);border:1px solid var(--line);
+  box-shadow:var(--card-shadow)}
+.sid-dot{flex:none;width:7px;height:7px;border-radius:50%;padding:0;border:none;cursor:pointer;
+  background:var(--line-strong);transition:.25s var(--ease)}
+.sid-dot.on{background:var(--gold-grad);width:9px;height:9px}
 /* shared "slide in from the side you came from" touch, reused by the
    carousel, the day/parsha titles and anything else driven by a
    prev/next control */
@@ -1234,7 +1275,7 @@ window.PRAYERS = {
 (function(){
 'use strict';
 const H = window.HebcalLib;
-const { HDate, Zmanim, Location, HebrewCalendar, gematriya } = H;
+const { HDate, Zmanim, Location, HebrewCalendar, gematriya, months: HMONTHS } = H;
 const T = window.TEHILLIM;      // {1:[verses],...}
 const P = window.PRAYERS;
 
@@ -1469,9 +1510,11 @@ const PRAYERS_EXTRA = {
   },
   birkotHashachar: {
     title: 'ברכות השחר',
-    subtitle: 'נֻסַּח עֵדוֹת הַמִּזְרָח',
-    ready: false, // TEMP: nusach needs rework — David flagged it's not right yet
-    text: 'לְעוֹלָם יְהֵא אָדָם יְרֵא שָׁמַיִם בְּסֵתֶר וּבַגָּלוּי, וּמוֹדֶה עַל הָאֱמֶת, וְדוֹבֵר אֱמֶת בִּלְבָבוֹ, וְיַשְׁכֵּים וְיֹאמַר:\n\nרִבּוֹן כָּל הָעוֹלָמִים, לֹא עַל צִדְקוֹתֵינוּ אֲנַחְנוּ מַפִּילִים תַּחֲנוּנֵינוּ לְפָנֶיךָ, כִּי עַל רַחֲמֶיךָ הָרַבִּים. מָה אָנוּ, מֶה חַיֵּינוּ, מֶה חַסְדֵּנוּ, מַה צִּדְקֵנוּ, מַה יְּשׁוּעָתֵנוּ, מַה כֹּחֵנוּ, מַה גְּבוּרָתֵנוּ.\n\nמוֹדֶה אֲנִי לְפָנֶיךָ מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה, רַבָּה אֱמוּנָתֶךָ.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר נָתַן לַשֶּׂכְוִי בִינָה לְהַבְחִין בֵּין יוֹם וּבֵין לָיְלָה.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי גּוֹי.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי עָבֶד.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי אִשָּׁה. (וְאִשָּׁה מְבָרֶכֶת: שֶׁעָשַׂנִי כִּרְצוֹנוֹ)\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, זוֹקֵף כְּפוּפִים.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, פּוֹקֵחַ עִוְרִים.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, מַתִּיר אֲסוּרִים.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, מַלְבִּישׁ עֲרֻמִּים.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, רוֹקַע הָאָרֶץ עַל הַמָּיִם.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁעָשָׂה לִי כָּל צָרְכִּי.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, הַמֵּכִין מִצְעֲדֵי גָבֶר.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אוֹזֵר יִשְׂרָאֵל בִּגְבוּרָה.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, עוֹטֵר יִשְׂרָאֵל בְּתִפְאָרָה.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, הַנּוֹתֵן לַיָּעֵף כֹּחַ.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, הַמַּעֲבִיר שֵׁנָה מֵעֵינַי וּתְנוּמָה מֵעַפְעַפָּי.\n\nוִיהִי רָצוֹן מִלְּפָנֶיךָ ה\' אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, שֶׁתַּרְגִּילֵנוּ בְּתוֹרָתֶךָ וְדַבְּקֵנוּ בְּמִצְוֹתֶיךָ, וְאַל תְּבִיאֵנוּ לֹא לִידֵי חֵטְא וְלֹא לִידֵי עֲבֵרָה וְעָוֹן, וְלֹא לִידֵי נִסָּיוֹן וְלֹא לִידֵי בִזָּיוֹן, וְאַל תַּשְׁלֶט בָּנוּ יֵצֶר הָרָע, וְהַרְחִיקֵנוּ מֵאָדָם רָע וּמֵחָבֵר רָע, וְדַבְּקֵנוּ בְּיֵצֶר הַטּוֹב וּבְמַעֲשִׂים טוֹבִים, וְכֹף אֶת יִצְרֵנוּ לְהִשְׁתַּעְבֶּד לָךְ, וּתְנֵנוּ הַיּוֹם וּבְכָל יוֹם לְחֵן וּלְחֶסֶד וּלְרַחֲמִים בְּעֵינֶיךָ וּבְעֵינֵי כָל רוֹאֵינוּ, וְתִגְמְלֵנוּ חֲסָדִים טוֹבִים. בָּרוּךְ אַתָּה ה\', הַגּוֹמֵל חֲסָדִים טוֹבִים לְעַמּוֹ יִשְׂרָאֵל.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ לַעֲסוֹק בְּדִבְרֵי תוֹרָה. וְהַעֲרֶב נָא ה\' אֱלֹהֵינוּ אֶת דִּבְרֵי תוֹרָתְךָ בְּפִינוּ וּבְפִיפִיּוֹת עַמְּךָ בֵּית יִשְׂרָאֵל, וְנִהְיֶה אֲנַחְנוּ וְצֶאֱצָאֵינוּ וְצֶאֱצָאֵי עַמְּךָ בֵּית יִשְׂרָאֵל כֻּלָּנוּ יוֹדְעֵי שְׁמֶךָ וְלוֹמְדֵי תוֹרָתְךָ לִשְׁמָהּ. בָּרוּךְ אַתָּה ה\', הַמְלַמֵּד תּוֹרָה לְעַמּוֹ יִשְׂרָאֵל.\n\nבָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר בָּחַר בָּנוּ מִכָּל הָעַמִּים וְנָתַן לָנוּ אֶת תּוֹרָתוֹ. בָּרוּךְ אַתָּה ה\', נוֹתֵן הַתּוֹרָה.\n\nיְבָרֶכְךָ ה\' וְיִשְׁמְרֶךָ: יָאֵר ה\' פָּנָיו אֵלֶיךָ וִיחֻנֶּךָּ: יִשָּׂא ה\' פָּנָיו אֵלֶיךָ וְיָשֵׂם לְךָ שָׁלוֹם.\n\nאֵלּוּ דְבָרִים שֶׁאֵין לָהֶם שִׁעוּר: הַפֵּאָה, וְהַבִּכּוּרִים, וְהָרֵאָיוֹן, וּגְמִילוּת חֲסָדִים, וְתַלְמוּד תּוֹרָה. אֵלּוּ דְבָרִים שֶׁאָדָם אוֹכֵל פֵּרוֹתֵיהֶם בָּעוֹלָם הַזֶּה וְהַקֶּרֶן קַיֶּמֶת לוֹ לָעוֹלָם הַבָּא: כִּבּוּד אָב וָאֵם, וּגְמִילוּת חֲסָדִים, וַהֲבָאַת שָׁלוֹם בֵּין אָדָם לַחֲבֵרוֹ, וְתַלְמוּד תּוֹרָה כְּנֶגֶד כֻּלָּם.'
+    subtitle: 'נֻסַּח עֵדוֹת הַמִּזְרָח (בֶּן אִישׁ חַי)',
+    ready: true, // Fixed: replaced Ashkenazi-order draft with the real Baghdadi/Edot HaMizrach
+    // order+wording, sourced verbatim from the digitized Siddur Edot HaMizrach
+    // (Sefaria, Preparatory Prayers > Morning Blessings) - see the Siddur build notes.
+    text: 'בָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל נְטִילַת יָדָיִם:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר יָצַר אֶת הָאָדָם בְּחָכְמָה, וּבָרָא בוֹ נְקָבִים נְקָבִים, חֲלוּלִים חֲלוּלִים, גָּלוּי וְיָדוּעַ לִפְנֵי כִסֵּא כְבוֹדֶךָ, שֶׁאִם יִסָּתֵם אֶחָד מֵהֶם, אוֹ אִם יִפָּתֵח אֶחָד מֵהֶם, אֵי אֶפְשָׁר לְהִתְקַיֵּם אַפִלּוּ שָׁעָה אֶחָת. בָּרוּךְ אַתָּה יְהֹוָה, רוֹפֵא כָל־בָּשָׂר וּמַפְלִיא לַעֲשׂוֹת:\n\nאֱלֹהַי, נְשָׁמָה שֶׁנָּתַתָּ בִּי טְהוֹרָה, אַתָּה בְרָאתָהּ, אַתָּה יְצַרְתָּהּ, אַתָּה נְפַחְתָּהּ בִּי, וְאַתָּה מְשַׁמְּרָהּ בְּקִרְבִּי, וְאַתָּה עָתִיד לִטְּלָהּ מִמֶּנִּי, וּלְהַחֲזִירָהּ בִּי לֶעָתִיד לָבוֹא, כָּל־זְמַן שֶׁהַנְּשָׁמָה בְקִרְבִּי, מוֹדֶה (האשה אומרת מוֹדָה) אֲנִי לְפָנֶיךָ יְהֹוָה אֱלֹהַי וֵאלֹהֵי אֲבוֹתַי, רִבּוֹן כָּל־הַמַּעֲשִׂים אֲדוֹן כָּל־הַנְּשָׁמוֹת. בָּרוּךְ אַתָּה יְהֹוָה, הַמַּחֲזִיר נְשָׁמוֹת לִפְגָרִים מֵתִים:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, הַנוֹתֵן לַשֶּׂכְוִי בִינָה, לְהַבְחִין בֵּין יוֹם וּבֵין לָיְלָה:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, פּוֹקֵחַ עִוְרִים:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, מַתִּיר אֲסוּרִים:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, זוֹקֵף כְּפוּפִים:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, מַלְבִּישׁ עֲרֻמִּים:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, הַנּוֹתֵן לַיָּעֵף כֹּחַ:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, רוֹקַע הָאָרֶץ עַל הַמָּיִם:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, הַמֵּכִין מִצְעֲדֵי גָבֶר:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, שֶׁעָשָׂה לִי כָּל־צָרְכִּי:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אוֹזֵר יִשְׂרָאֵל בִּגְבוּרָה:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, עוֹטֵר יִשְׂרָאֵל בְּתִפְאָרָה:\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי גוֹי: (וְאִשָּׁה אוֹמֶרֶת: שֶׁלֹּא עָשַׂנִי גּוֹיָה)\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי עָבֶד: (וְאִשָּׁה אוֹמֶרֶת: שֶׁלֹּא עָשַׂנִי שִׁפְחָה)\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי אִשָּׁה:\n\n(וְאִשָּׁה מְבָרֶכֶת בְּלִי שֵׁם וּמַלְכוּת: בָּרוּךְ שֶׁעָשַׂנִי כִּרְצוֹנוֹ:)\n\nבָּרוּךְ אַתָּה יְהוָֹה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, הַמַּעֲבִיר חֶבְלֵי שֵׁנָה מֵעֵינָי וּתְנוּמָה מֵעַפְעַפָּי. וִיהִי רָצוֹן מִלְפָנֶיךָ יְהֹוָה, אֱלֹהַי וֵאלֹהֵי אֲבוֹתַי, שֶׁתַרְגִּילֵנִי בְּתוֹרָתֶךָ, וְתַדְבִּיקֵנִי בְּמִצְוֹתֶיךָ, וְאַל תְּבִיאֵנִי לִידֵי חֵטְא, וְלֹא לִידֵי עָוֹן, וְלֹא לִידֵי נִסָיוֹן, וְלֹא לִידֵי בִזָּיוֹן, וְתַרְחִיקֵנִי מִיֵּצֶר הָרָע, וְתַדְבִּיקֵנִי בְּיֵצֶר הַטּוֹב, וְכוֹף אֶת־יִצְרִי לְהִשְׁתַּעְבֶּד לָּךְ, וּתְנֵנִי הַיּוֹם וּבְכָל־יוֹם לְחֵן וּלְחֶסֶד וּלְרַחֲמִים בְּעֵינֶיךָ וּבְעֵינֵי כָל־רוֹאַי, וְגָמְלֵנִי חֲסָדִים טוֹבִים. בָּרוּךְ אַתָּה יְהֹוָה, גּוֹמֵל חֲסָדִים טוֹבִים לְעַמּוֹ יִשְׂרָאֵל:\n\nיְהִי רָצוֹן מִלְּפָנֶיךָ יְהֹוָה, אֱלֹהַי וֵאלֹהֵי אֲבוֹתַי, שֶׁתַּצִּילֵנִי הַיּוֹם וּבְכָל יוֹם וָיוֹם, מֵעַזֵּי פָנִים, וּמֵעַזּוּת פָּנִים, מֵאָדָם רָע, מִיֵּצֶר רָע, מֵחָבֵר רָע, מִשָּׁכֵן רָע, מִפֶּגַע רָע, מֵעַיִן הָרָע, וּמִלָּשׁוֹן הָרָע, מִדִּין קָשֶׁה, וּמִבַּעַל דִּין קָשֶׁה, בֵּין שֶׁהוּא בֶן־בְּרִית, וּבֵין שֶׁאֵינוֹ בֶן־בְּרִית:'
   },
   pitumHaketoret: {
     title: 'פיטום הקטורת',
@@ -1536,8 +1579,8 @@ const PRAYERS_EXTRA = {
    automatically (prayerGroupKeys computes it by exclusion), so a new
    PRAYERS_EXTRA entry never needs a matching edit here to show up somewhere. */
 const PRAYER_GROUPS = {
+  siddur: {he:'סִדּוּר', keys:[]}, // now a real full screen (siddurHome/siddurReader), not a flat prayer list - see renderSiddurHome/renderSiddurReader. tefilatHaderech falls through to "more" below (prayerGroupKeys collects any key no other group claims).
   brachot: {he:'בְּרָכוֹת', keys:['birkatHamazon']},
-  siddur: {he:'סִדּוּר', keys:['tefilatHaderech']},
   more: {he:'תְּפִלּוֹת נוֹסָפוֹת', keys:null},
 };
 function prayerGroupKeys(group){
@@ -4838,6 +4881,8 @@ function render(){
     else if(TAB==='prayers') renderPrayersList();
     else if(TAB==='prayersGroup') renderPrayersGroup();
     else if(TAB==='prayerReader') renderPrayerReader();
+    else if(TAB==='siddurHome') renderSiddurHome();
+    else if(TAB==='siddurReader') renderSiddurReader();
     else if(TAB==='smList') renderShnayimList();
     else if(TAB==='smReader') renderShnayimReader();
     else if(TAB==='zoharList') renderZoharList();
@@ -5489,6 +5534,160 @@ function isRoshChodeshToday(hd){
     return evs.some(ev=>/^Rosh Chodesh/i.test((ev.getDesc&&ev.getDesc())||''));
   }catch(err){ return false; }
 }
+
+/* ================= SIDDUR (day-conditional Shacharit/Mincha/Arvit/Musaf) ================= */
+let SIDDUR=null, siddurLoadPromise=null;
+function ensureSiddurData(){
+  if(SIDDUR) return Promise.resolve();
+  if(siddurLoadPromise) return siddurLoadPromise;
+  siddurLoadPromise = fetch('data/siddur.json').then(r=>r.json()).then(d=>{ SIDDUR=d; })
+    .catch(e=>{ siddurLoadPromise=null; throw e; });
+  return siddurLoadPromise;
+}
+const SIDDUR_FAST_DAYS = {"Tzom Gedaliah":"צוֹם גְּדַלְיָה","Asara B'Tevet":"עֲשָׂרָה בְּטֵבֵת","Ta'anit Esther":"תַּעֲנִית אֶסְתֵּר","Tzom Tammuz":"שִׁבְעָה עָשָׂר בְּתַמּוּז"};
+/* Isru Chag (day after each of the 3 pilgrimage festivals) has no event of
+   its own in this vendored hebcal build - scanning a full year never
+   surfaces one - so it's computed directly from the fixed month/day the
+   day after each festival ends, which differs by one day in Israel vs. the
+   diaspora (same `il` flag hebLocation() already derives everywhere else). */
+function isIsruChagToday(hd, il){
+  const m=hd.getMonth(), d=hd.getDate();
+  if(m===HMONTHS.NISAN && d===(il?22:23)) return true; // after Pesach
+  if(m===HMONTHS.SIVAN && d===(il?7:8)) return true; // after Shavuot
+  if(m===HMONTHS.TISHREI && d===(il?23:24)) return true; // after Sukkot/Shmini Atzeret
+  return false;
+}
+/* Tal (dew) vs. geshem (rain) wording in the Amidah's 2nd blessing: "מוֹרִיד
+   הַטָּל" from the first day of Pesach through Shemini Atzeret/Sukkot's end,
+   "מַשִּׁיב הָרוּחַ וּמוֹרִיד הַגֶּשֶם" the rest of the year. The exact halachic
+   switch-over happens at a specific tefillah (Musaf of Shmini Atzeret /
+   Mincha of the first Pesach day), not midnight - this simplifies to a
+   plain date range, which is accurate every day except the two transition
+   days themselves. */
+function siddurIsTalSeason(hd){
+  const m=hd.getMonth(), d=hd.getDate();
+  if(m===HMONTHS.NISAN) return d>=15;
+  if(m>HMONTHS.NISAN && m<HMONTHS.TISHREI) return true;
+  if(m===HMONTHS.TISHREI) return d<=21;
+  return false;
+}
+/* One function describing everything the Siddur's rendering needs to know
+   about today, so the reader screens just check plain booleans/fields
+   rather than re-deriving calendar logic themselves - mirrors
+   isRoshChodeshToday's own HebrewCalendar.calendar+getDesc() pattern. */
+function siddurDayInfo(hd){
+  hd = hd || currentHDate();
+  const info = {
+    isRoshChodesh:false, isCholHaMoed:false, cholHaMoedChag:null,
+    isFastDay:false, fastDayName:null, fastDayHe:null,
+    isChanukah:false, chanukahDay:null,
+    isPurim:false,
+    isAseretYemeiTeshuva:false,
+    isNisan:false, isLagBaOmer:false, isErevYomKippur:false, isTuBishvat:false,
+    isErevRoshHashana:false, isIsruChag:false,
+    omerDay:null,
+    skipTachanun:false,
+    hallel:null, // null | 'half' | 'full'
+    hallelBlessing:false,
+    isTalSeason:false,
+  };
+  try{
+    const il=/Jerusalem/.test(LOC.tz);
+    info.isNisan = hd.getMonth()===HMONTHS.NISAN;
+    /* "the 10 days between Rosh Hashana and Yom Kippur" - as used by this
+       app, that's Tishrei 3-9: Rosh Hashana itself (1-2 Tishrei) and Yom
+       Kippur itself (10 Tishrei) are out of scope (major holidays, no
+       phone use), so only the days *between* them ever render here. */
+    info.isAseretYemeiTeshuva = hd.getMonth()===HMONTHS.TISHREI && hd.getDate()>=3 && hd.getDate()<=9;
+    info.isIsruChag = isIsruChagToday(hd, il);
+    info.isTalSeason = siddurIsTalSeason(hd);
+    const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
+    const evs=HebrewCalendar.calendar({start:s,end:e,il,location:hebLocation()});
+    evs.forEach(ev=>{
+      const d=(ev.getDesc&&ev.getDesc())||'';
+      let m;
+      if(/^Rosh Chodesh/i.test(d)) info.isRoshChodesh=true;
+      if(/^Pesach.*\(CH''M\)/i.test(d)){ info.isCholHaMoed=true; info.cholHaMoedChag='pesach'; }
+      // Hoshana Raba (Sukkot VII) is halachically Chol HaMoed's last day even
+      // though hebcal labels it "(Hoshana Raba)" rather than "(CH''M)".
+      if(/^Sukkot.*\((CH''M|Hoshana Raba)\)/i.test(d)){ info.isCholHaMoed=true; info.cholHaMoedChag='sukkot'; }
+      if(SIDDUR_FAST_DAYS[d]){ info.isFastDay=true; info.fastDayName=d; info.fastDayHe=SIDDUR_FAST_DAYS[d]; }
+      if((m=/^Chanukah: (\d+)/i.exec(d))){ info.isChanukah=true; info.chanukahDay=+m[1]; }
+      else if(/^Chanukah: 8th Day/i.test(d)){ info.isChanukah=true; info.chanukahDay=8; }
+      if(/^Purim$|^Shushan Purim$/i.test(d)) info.isPurim=true;
+      if(/^Lag BaOmer$/i.test(d)) info.isLagBaOmer=true;
+      if(/^Erev Yom Kippur$/i.test(d)) info.isErevYomKippur=true;
+      if(/^Tu BiShvat$/i.test(d)) info.isTuBishvat=true;
+      if(/^Erev Rosh Hashana$/i.test(d)) info.isErevRoshHashana=true;
+    });
+  }catch(err){}
+  // Omer count: 16 Nisan (the day after the seder night) = day 1, through 5 Sivan = day 49.
+  try{
+    const abs = hd.abs();
+    const day1abs = new HDate(16, HMONTHS.NISAN, hd.getFullYear()).abs();
+    const diff = abs - day1abs + 1;
+    if(diff>=1 && diff<=49) info.omerDay = diff;
+  }catch(err){}
+  /* Tachanun skip list, per this feature's confirmed research (see the
+     PR notes): Rosh Chodesh, all of Nisan, Lag BaOmer, Erev Yom Kippur,
+     all of Chanukah, Tu BiShvat, Purim + Shushan Purim, Isru Chag (all 3
+     festivals), Tisha B'Av afternoon (out of scope - major fast, not
+     built here). Erev Rosh Hashana's status was left genuinely uncertain
+     by that research - treated here as a normal Tachanun day (NOT
+     skipped) per explicit instruction pending a real decision later;
+     isErevRoshHashana is still exposed above so flipping this later is a
+     one-line change. */
+  info.skipTachanun = info.isRoshChodesh || info.isNisan || info.isLagBaOmer || info.isErevYomKippur
+    || info.isChanukah || info.isTuBishvat || info.isPurim || info.isIsruChag;
+  /* Hallel: Rosh Chodesh + Chol HaMoed Pesach = half, NO blessing before or
+     after (Edot HaMizrach/Sephardi practice per Shulchan Aruch - Ashkenazim
+     differ and do bless it). Chol HaMoed Sukkot + Chanukah = full, WITH
+     blessing, not in dispute. The "no blessing on Chol HaMoed Pesach" half
+     is inferred by the same principle as Rosh Chodesh rather than
+     independently confirmed - flagged per the build brief. */
+  if(info.isChanukah || (info.isCholHaMoed && info.cholHaMoedChag==='sukkot')){ info.hallel='full'; info.hallelBlessing=true; }
+  else if(info.isRoshChodesh || (info.isCholHaMoed && info.cholHaMoedChag==='pesach')){ info.hallel='half'; info.hallelBlessing=false; }
+  return info;
+}
+/* Standard Sefirat HaOmer formula, generated algorithmically from the day
+   number (1-49) rather than as 49 stored strings - verified against the
+   exact wording/grammar of Sefaria's Siddur Edot HaMizrach (Counting of the
+   Omer) for representative days across the range (1,2,7,8,10,11,14,15,20-
+   22,29-31,40-45,48,49) before generalizing. */
+const OMER_ONES = ['','אֶחָד','שְׁנֵי','שְׁלֹשָׁה','אַרְבָּעָה','חֲמִשָּׁה','שִׁשָּׁה','שִׁבְעָה','שְׁמוֹנָה','תִּשְׁעָה','עֲשָׂרָה'];
+const OMER_ONES_ABS = ['','אֶחָד','שְׁנַיִם','שְׁלֹשָׁה','אַרְבָּעָה','חֲמִשָּׁה','שִׁשָּׁה','שִׁבְעָה','שְׁמוֹנָה','תִּשְׁעָה'];
+const OMER_TEENS = ['','אַחַד עָשָׂר','שְׁנֵים עָשָׂר','שְׁלֹשָׁה עָשָׂר','אַרְבָּעָה עָשָׂר','חֲמִשָּׁה עָשָׂר','שִׁשָּׁה עָשָׂר','שִׁבְעָה עָשָׂר','שְׁמוֹנָה עָשָׂר','תִּשְׁעָה עָשָׂר'];
+const OMER_TENS = ['','עֲשָׂרָה','עֶשְׂרִים','שְׁלֹשִׁים','אַרְבָּעִים'];
+// The vav-conjunction's niqud depends on the first letter/vowel of the word
+// it attaches to (shuruk before a shva-initial word, patach before a
+// guttural-chataf-patach word, plain shva otherwise) - verified against
+// the sourced examples (וּשְׁנֵי/וּשְׁלֹשָׁה/וּשְׁמוֹנָה, וַחֲמִשָּׁה,
+// וְשִׁשָּׁה/וְאַרְבָּעִים/וְעֶשְׂרִים) rather than applied as a blanket rule.
+const OMER_VAV = {'שְׁנֵי':'וּ','שְׁנַיִם':'וּ','שְׁלֹשָׁה':'וּ','שְׁלֹשִׁים':'וּ','שְׁמוֹנָה':'וּ','חֲמִשָּׁה':'וַ'};
+function omerVav(word){ return (OMER_VAV[word]||'וְ')+word; }
+function omerNumWords(n, noun /* 'יָמִים' plural, only used for 2-10 (1 is special-cased) */){
+  if(n===0) return '';
+  if(n<=10) return n===1 ? 'יוֹם אֶחָד' : (OMER_ONES[n]+' '+noun);
+  if(n<=19) return OMER_TEENS[n-10]+' יוֹם';
+  const tens=Math.floor(n/10), ones=n%10;
+  if(ones===0) return OMER_TENS[tens]+' יוֹם';
+  return OMER_ONES_ABS[ones]+' '+omerVav(OMER_TENS[tens])+' יוֹם';
+}
+function omerRemainderWords(rem){ // remainder days (0-6) after full weeks, e.g. "וְיוֹם אֶחָד" / "וּשְׁנֵי יָמִים"
+  if(rem===0) return '';
+  if(rem===1) return ' וְיוֹם אֶחָד';
+  return ' '+omerVav(OMER_ONES[rem])+' יָמִים';
+}
+function omerWeeksWords(weeks){
+  return weeks===1 ? 'שָׁבֽוּעַ אֶחָד' : (OMER_ONES[weeks]+' שָׁבוּעוֹת');
+}
+function omerCountText(day){
+  if(!(day>=1 && day<=49)) return '';
+  const weeks=Math.floor(day/7), rem=day%7;
+  let s = omerNumWords(day,'יָמִים') + ' לָעֹמֶר';
+  if(day>=7) s += ', שֶׁהֵם ' + omerWeeksWords(weeks) + omerRemainderWords(rem);
+  return s + ':';
+}
 function wireConverter(){
   const hMonths=(y)=>{ const n=HDate.monthsInYear?HDate.monthsInYear(y):((y*7+1)%19<7?13:12); const out=[]; for(let m=1;m<=n;m++){ out.push({v:m, t:monthName(new HDate(1,m,y))}); } return out; };
   const d=document.getElementById('cvDay'), m=document.getElementById('cvMon'), y=document.getElementById('cvYear'), out=document.getElementById('cvOut');
@@ -5687,7 +5886,10 @@ function renderPrayersList(){
     </div>
     ${ornament()}
   </div>`;
-  app.querySelectorAll('[data-praygroup]').forEach(t=>t.onclick=()=>{ PR.group=t.dataset.praygroup; go('prayersGroup'); });
+  app.querySelectorAll('[data-praygroup]').forEach(t=>t.onclick=()=>{
+    if(t.dataset.praygroup==='siddur') return go('siddurHome');
+    PR.group=t.dataset.praygroup; go('prayersGroup');
+  });
   tr(app);
 }
 function renderPrayersGroup(){
@@ -6581,6 +6783,416 @@ function renderPrayerReader(){
     </div>
     <div style="height:80px"></div>
   </div>`;
+  tr(app);
+}
+
+/* ================= SIDDUR (screens) ================= */
+let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'musaf'
+const SIDDUR_PRAYER_NAMES = {shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף'};
+function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
+function siddurSkeleton(){
+  return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
+}
+function renderSiddurHome(){
+  app.innerHTML = `${topbar('סִדּוּר','prayers')}<div class="view">${siddurSkeleton()}</div>`;
+  ensureSiddurData().then(()=>{ if(TAB==='siddurHome') drawSiddurHome(); });
+}
+function drawSiddurHome(){
+  const info = siddurDayInfo(currentHDate());
+  const tiles = ['shacharit','mincha','arvit'];
+  if(info.isRoshChodesh) tiles.push('musaf');
+  app.innerHTML = `
+  ${topbar('סִדּוּר','prayers')}
+  <div class="view">
+    <div class="quick-grid">
+      ${tiles.map(p=>`<div class="q-tile round-card" data-cat="siddur" data-sidp="${p}">
+        <div class="qt">${SIDDUR_PRAYER_NAMES[p]}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-family:var(--font-ui);font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7">
+      נֻסָּח עֲדוֹת הַמִּזְרָח, בְּעִקְבוֹת בֶּן אִישׁ חַי · הַתֹּכֶן מִתְעַדְכֵּן אוֹטוֹמָטִית לְפִי הַיּוֹם
+    </div>
+    ${ornament()}
+  </div>`;
+  app.querySelectorAll('[data-sidp]').forEach(t=>t.onclick=()=>openSiddurPrayer(t.dataset.sidp));
+  tr(app);
+}
+
+/* ---- small shared render helpers, reusing the app's existing Tehillim
+   and Torah infrastructure rather than duplicating either as new text
+   (see the Siddur build notes: Tehillim chapters come from window.TEHILLIM,
+   exactly like data/ketuvim-data.json's own Psalms deliberately do; Torah
+   verses come from chokTorahVerses()/TORAH, exactly like the Chok
+   LeYisrael day-view's own Torah section does). ---- */
+function siddurParasFromText(text){
+  return (text||'').split('\n\n').map(line=>`<div class="prayer-para">${line}</div>`).join('');
+}
+function siddurTehillimChapterHTML(ch){
+  const T=window.TEHILLIM; const verses=(T&&(T[ch]||T[String(ch)]))||[];
+  return verses.length ? `<div class="prayer-para">${verses.join(' ')}</div>` : '';
+}
+function siddurTorahBody(verses){
+  return verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div></div>`).join('');
+}
+
+/* Monday/Thursday weekday Torah reading = the first aliyah (all 3 olim
+   read within it, only the internal split differs - the range read is the
+   same) of the coming Shabbat's parasha. Sourced from Sefaria's own Torah
+   aliyah divisions (Genesis..Deuteronomy index alt_structs/Parasha, the
+   first ref of each parasha's 7), keyed by the exact same parasha names
+   CHOK.schedule already uses (hebcal's own naming - verified to match for
+   every parasha that can actually land on a plain Monday/Thursday; the
+   one hebcal name with no match, Vezot Haberakhah, is Simchat-Torah-only
+   and out of scope). */
+const PARSHA_FIRST_ALIYAH = {"Achrei Mot": "Leviticus 16:1-16:17", "Balak": "Numbers 22:2-22:12", "Bamidbar": "Numbers 1:1-1:19", "Bechukotai": "Leviticus 26:3-26:5", "Beha'alotcha": "Numbers 8:1-8:14", "Behar": "Leviticus 25:1-25:13", "Bereshit": "Genesis 1:1-2:3", "Beshalach": "Exodus 13:17-14:8", "Bo": "Exodus 10:1-10:11", "Chayei Sara": "Genesis 23:1-23:16", "Chukat": "Numbers 19:1-19:17", "Devarim": "Deuteronomy 1:1-1:10", "Eikev": "Deuteronomy 7:12-8:10", "Emor": "Leviticus 21:1-21:15", "Ha'azinu": "Deuteronomy 32:1-32:6", "Kedoshim": "Leviticus 19:1-19:14", "Ki Tavo": "Deuteronomy 26:1-26:11", "Ki Teitzei": "Deuteronomy 21:10-21:21", "Ki Tisa": "Exodus 30:11-31:17", "Korach": "Numbers 16:1-16:13", "Lech-Lecha": "Genesis 12:1-12:13", "Masei": "Numbers 33:1-33:10", "Matot": "Numbers 30:2-30:17", "Metzora": "Leviticus 14:1-14:12", "Miketz": "Genesis 41:1-41:14", "Mishpatim": "Exodus 21:1-21:19", "Nasso": "Numbers 4:21-4:37", "Nitzavim": "Deuteronomy 29:9-29:11", "Noach": "Genesis 6:9-6:22", "Pekudei": "Exodus 38:21-39:1", "Pinchas": "Numbers 25:10-26:4", "Re'eh": "Deuteronomy 11:26-12:10", "Sh'lach": "Numbers 13:1-13:20", "Shemot": "Exodus 1:1-1:17", "Shmini": "Leviticus 9:1-9:16", "Shoftim": "Deuteronomy 16:18-17:13", "Tazria": "Leviticus 12:1-13:5", "Terumah": "Exodus 25:1-25:16", "Tetzaveh": "Exodus 27:20-28:12", "Toldot": "Genesis 25:19-26:5", "Tzav": "Leviticus 6:1-6:11", "Vaera": "Exodus 6:2-6:13", "Vaetchanan": "Deuteronomy 3:23-4:4", "Vayakhel": "Exodus 35:1-35:20", "Vayechi": "Genesis 47:28-48:9", "Vayeilech": "Deuteronomy 31:1-31:3", "Vayera": "Genesis 18:1-18:14", "Vayeshev": "Genesis 37:1-37:11", "Vayetzei": "Genesis 28:10-28:22", "Vayigash": "Genesis 44:18-44:30", "Vayikra": "Leviticus 1:1-1:13", "Vayishlach": "Genesis 32:4-32:13", "Yitro": "Exodus 18:1-18:12"};
+/* Special-day Torah readings. Rosh Chodesh (Bamidbar 28:1-15) and the
+   Purim/fast-day references were cross-checked against the digitized
+   Siddur Edot HaMizrach (Sefaria: Purim > Purim Day; Fast Days and
+   Mourning > Torah Reading for Fast Days), which quotes the verse text
+   itself, not just a citation - so the exact chapter:verse boundaries
+   below are read off that quoted text, not assumed. The 8 Chanukah day
+   ranges are likewise read off Sefaria's Hanukkah > Shacharit page, which
+   gives the day-by-day cut points in its own instructions (e.g. day 1
+   "Kohen reads until 'lifnei hamishkan'..."). */
+const SIDDUR_TORAH_ROSH_CHODESH = ['Numbers 28:1-28:15'];
+const SIDDUR_TORAH_FAST_DAY = ['Exodus 32:11-32:14','Exodus 34:1-34:10'];
+const SIDDUR_TORAH_PURIM = ['Exodus 17:8-17:16'];
+const SIDDUR_TORAH_CHANUKAH = {
+  1:['Numbers 6:22-6:27','Numbers 7:1-7:17'],
+  2:['Numbers 7:18-7:23'], 3:['Numbers 7:24-7:29'], 4:['Numbers 7:30-7:35'],
+  5:['Numbers 7:36-7:41'], 6:['Numbers 7:42-7:47'], 7:['Numbers 7:48-7:53'],
+  8:['Numbers 7:54-8:4'],
+};
+function siddurWeekdayTorahKey(dateObj){
+  const day=dateObj.getDay(); // 0=Sun..6=Sat; regular reading is Monday(1)/Thursday(4) only
+  if(day!==1 && day!==4) return null;
+  const pk = parshaKeyForDate(dateObj);
+  if(!pk) return null;
+  const first = ckSplitPair(pk)[0]; // a combined week reads the first parasha's first aliyah
+  return PARSHA_FIRST_ALIYAH[first] ? {key:first, ref:PARSHA_FIRST_ALIYAH[first]} : null;
+}
+/* Which Torah reading (if any) applies today. Chol HaMoed's own daily
+   readings aren't included here - the build brief's day-type list for
+   this section named Rosh Chodesh/Chanukah/Purim/the 4 fast days/regular
+   Monday-Thursday specifically, not Chol HaMoed, so it's left out rather
+   than guessed at; flagged in the build notes. Mincha only gets a Torah
+   reading on the 4 fast days in the standard practice. */
+function siddurTorahReading(dateObj, info, opts){
+  opts=opts||{};
+  if(info.isFastDay) return {label:'תַּעֲנִית · '+(info.fastDayHe||''), refs:SIDDUR_TORAH_FAST_DAY};
+  if(opts.mincha) return null;
+  if(info.isChanukah && SIDDUR_TORAH_CHANUKAH[info.chanukahDay]) return {label:'חֲנֻכָּה · יוֹם '+heNum(info.chanukahDay), refs:SIDDUR_TORAH_CHANUKAH[info.chanukahDay]};
+  if(info.isPurim) return {label:'פּוּרִים', refs:SIDDUR_TORAH_PURIM};
+  if(info.isRoshChodesh) return {label:'רֹאשׁ חֹדֶשׁ', refs:SIDDUR_TORAH_ROSH_CHODESH};
+  const wk = siddurWeekdayTorahKey(dateObj);
+  if(wk) return {label:'פָּרָשַׁת '+parshaName(wk.key), refs:[wk.ref]};
+  return null;
+}
+function siddurTorahReadingHTML(dateObj, info, opts){
+  const tr = siddurTorahReading(dateObj, info, opts);
+  if(!tr) return '';
+  const verses = chokTorahVerses(tr.refs);
+  if(!verses.length) return '';
+  let html = `<div class="siddur-section-title">${tr.label}</div>`;
+  html += `<div class="prayer-para">${SIDDUR.torahBirkatBefore||''}</div>`;
+  html += `<div class="sm-verses notranslate">${siddurTorahBody(verses)}</div>`;
+  html += `<div class="prayer-para">${SIDDUR.torahBirkatAfter||''}</div>`;
+  return html;
+}
+
+/* Builds one Amidah blessing's paragraphs for today, given its data
+   definition (data/siddur.json's amidah19 entries) and today's
+   siddurDayInfo(). Returns an array of {text, insert} - insert=true marks
+   a day-conditional paragraph so the caller can highlight it. skipYaale
+   suppresses the Yaale V'Yavo insertion (used for Musaf's own Avodah
+   blessing, since the whole Musaf already IS that day's expression). */
+function siddurBlessingParas(b, info, opts){
+  opts = opts || {};
+  const out = [];
+  if(b.text) out.push({text:b.text});
+  if(b.season) out.push({text: info.isTalSeason ? b.season.summer : b.season.winter});
+  if(b.text2) out.push({text:b.text2});
+  if(b.teshuvaInsert && info.isAseretYemeiTeshuva) out.push({text:b.teshuvaInsert, insert:true, tag:'עֲשֶׂרֶת יְמֵי תְּשׁוּבָה'});
+  if(b.faslInsert && info.isFastDay) out.push({text:b.faslInsert, insert:true, tag:'עֲנֵנוּ · '+(info.fastDayHe||'')});
+  if(b.yaaleVeyavo && !opts.skipYaale && (info.isRoshChodesh || info.isCholHaMoed)){
+    const y=b.yaaleVeyavo;
+    const occ = info.isRoshChodesh ? y.roshChodesh : (info.cholHaMoedChag==='pesach' ? y.pesach : y.sukkot);
+    out.push({text:[y.head,occ,y.tail].join(' '), insert:true, tag:'יַעֲלֶה וְיָבֹא'});
+  }
+  if(b.tail) out.push({text:b.tail});
+  if(b.alHanissim && (info.isChanukah || info.isPurim)){
+    const al=b.alHanissim;
+    out.push({text:al.head+' '+(info.isChanukah?al.chanukah:al.purim), insert:true, tag:info.isChanukah?'עַל הַנִּסִּים · חֲנֻכָּה':'עַל הַנִּסִּים · פּוּרִים'});
+  }
+  if(b.tail2) out.push({text:b.tail2});
+  let seal = b.seal;
+  if(b.sealTeshuva && info.isAseretYemeiTeshuva) seal = b.sealTeshuva;
+  if(seal) out.push({text:seal, insert:(seal!==b.seal), tag:'עֲשֶׂרֶת יְמֵי תְּשׁוּבָה'});
+  return out;
+}
+function siddurParaHTML(p){
+  if(p.insert) return `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">${p.tag||'תּוֹסֶפֶת שֶׁל הַיּוֹם'}</span>${p.text}</div>`;
+  return `<div class="prayer-para">${p.text}</div>`;
+}
+function siddurAmidahHTML(info, opts){
+  opts = opts || {};
+  const skipBlessings = opts.onlyBlessings; // for Musaf: [1,2,3,17,18,19]
+  let html = `<div class="prayer-para">${SIDDUR.openingLine}</div>`;
+  SIDDUR.amidah19.forEach(b=>{
+    if(skipBlessings && !skipBlessings.includes(b.n)) return;
+    siddurBlessingParas(b, info, {skipYaale:opts.skipYaale}).forEach(p=>{ html += siddurParaHTML(p); });
+  });
+  return html;
+}
+function siddurMusafHTML(info){
+  const b = n => SIDDUR.amidah19.find(x=>x.n===n);
+  let html = `<div class="prayer-para">${SIDDUR.openingLine}</div>`;
+  [1,2,3].forEach(n=>{ siddurBlessingParas(b(n), info, {}).forEach(p=>{ html += siddurParaHTML(p); }); });
+  html += `<div class="prayer-para">${SIDDUR.musafRoshChodesh.middle}</div>`;
+  html += `<div class="prayer-para">${SIDDUR.musafRoshChodesh.yehiRatzon}</div>`;
+  [17,18,19].forEach(n=>{ siddurBlessingParas(b(n), info, {skipYaale:true}).forEach(p=>{ html += siddurParaHTML(p); }); });
+  return html;
+}
+function siddurHallelHTML(info){
+  if(!info.hallel) return '';
+  const h = SIDDUR.hallel;
+  let html = `<div class="siddur-section-title">הַלֵּל · ${info.hallel==='full'?'שָׁלֵם':'חָצִי'}${info.hallelBlessing?'':' (לְלֹא בְּרָכָה, כְּמִנְהַג עֲדוֹת הַמִּזְרָח)'}</div>`;
+  if(info.hallelBlessing) html += `<div class="prayer-para">${h.opening_bracha}</div>`;
+  h.psalms.forEach(ps=>{
+    if(ps.skipInHalf && info.hallel==='half') return;
+    html += `<div class="prayer-para">${ps.text}</div>`;
+  });
+  if(info.hallelBlessing) html += `<div class="prayer-para">${h.closing_yehalelucha}</div>`;
+  return html;
+}
+function siddurAccordionHTML(id, title, body){
+  return `<div class="siddur-accordion" data-sidacc="${id}">
+    <div class="siddur-accordion-head" data-sidacc-btn="${id}"><span>${title}</span><span class="siddur-accordion-chev">${I.chev}</span></div>
+    <div class="siddur-accordion-body" data-sidacc-body="${id}">${body}</div>
+  </div>`;
+}
+function siddurToggleAccordion(btn){
+  const wrap = btn.closest('.siddur-accordion');
+  if(wrap) wrap.classList.toggle('open');
+}
+/* Selichot is a fully separate standalone recitation before dawn (Edot
+   HaMizrach/Baghdadi custom), not embedded in the Shacharit Amidah flow -
+   the app already has the complete text at PRAYERS_EXTRA.selichotEdotHamizrach;
+   this just shows a linked callout to it during its season (Elul through
+   Aseret Yemei Teshuva) rather than duplicating the text here. */
+function siddurIsSelichotSeason(hd){
+  const m=hd.getMonth(), d=hd.getDate();
+  if(m===HMONTHS.ELUL) return true;
+  if(m===HMONTHS.TISHREI && d<=9) return true; // through Aseret Yemei Teshuva (Erev Yom Kippur)
+  return false;
+}
+
+/* ---- Pesukei D'Zimra: Baruch She'amar / Yehi Chevod / Ashrei (Tehillim
+   145, reused) / Tehillim 146-150 (reused) / closing verses / Vayevarech
+   David / Vayosha / Az Yashir (Shemot 15:1-19) / Ki LaShem Hamlucha /
+   Yishtabach - all sourced verbatim from the digitized Siddur Edot
+   HaMizrach (Sefaria: Weekday Shacharit > Pesukei D'Zimra). ---- */
+function siddurPesukeiDezimraHTML(info){
+  const pz = SIDDUR.pesukeiDezimra;
+  let html = siddurParasFromText(pz.baruchSheamar);
+  html += siddurTehillimChapterHTML(100); // Mizmor LeToda
+  html += `<div class="prayer-para">${pz.yehiChevod}</div>`;
+  html += `<div class="prayer-para">${pz.ashreiIntro}</div>`;
+  html += siddurTehillimChapterHTML(145); // the Ashrei psalm itself
+  for(let ch=146; ch<=150; ch++) html += siddurTehillimChapterHTML(ch);
+  html += `<div class="prayer-para">${pz.closingVerses}</div>`;
+  if(info.isAseretYemeiTeshuva) html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">עֲשֶׂרֶת יְמֵי תְּשׁוּבָה</span>${pz.aseretYemeiTeshuvaInsert}</div>`;
+  html += `<div class="prayer-para">${pz.vayevarechDavid}</div>`;
+  html += `<div class="prayer-para">${pz.vayosha}</div>`;
+  html += `<div class="siddur-section-title">שִׁירַת הַיָּם</div>`;
+  html += `<div class="prayer-para">${pz.azYashir}</div>`;
+  html += `<div class="prayer-para">${pz.kiLashemHamlucha}</div>`;
+  html += `<div class="prayer-para">${pz.yishtabach}</div>`;
+  return html;
+}
+/* ---- Birkot Kriat Shema + Shema itself + Geula (Emet Veyatziv), all
+   sourced verbatim from the same digitized siddur (Weekday Shacharit >
+   The Shema). ---- */
+function siddurBirkotShemaHTML(){
+  const s = SIDDUR.birkotKriatShema;
+  let html = `<div class="siddur-section-title">יוֹצֵר אוֹר</div>`;
+  html += `<div class="prayer-para">${s.yotzerOhr}</div>`;
+  html += `<div class="prayer-para">${s.keilBaruch}</div>`;
+  html += `<div class="siddur-section-title">אַהֲבָה רַבָּה</div>`;
+  html += `<div class="prayer-para">${s.ahavahRabbah}</div>`;
+  html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
+  html += `<div class="prayer-para">${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}</div>`;
+  html += `<div class="prayer-para">(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:</div>`;
+  html += `<div class="prayer-para">${s.veahavta}</div>`;
+  html += `<div class="prayer-para">${s.vehaya}</div>`;
+  html += `<div class="prayer-para">${s.vayomer}</div>`;
+  html += `<div class="siddur-section-title">גְּאֻלָּה</div>`;
+  html += `<div class="prayer-para">${s.emetVeyatziv}</div>`;
+  return html;
+}
+/* ---- Arvit's own Kriat Shema blessings: Hama'ariv Aravim / Ahavat Olam
+   (not Yotzer/Ahavah Rabbah), the same Shema paragraphs, Emet Ve'emunah
+   (Arvit's own Geula, not Emet Veyatziv) and Hashkiveinu. Note: the
+   digitized Edot HaMizrach siddur does NOT include an Ashkenazi-style
+   "Baruch Hashem L'Olam" paragraph after Hashkiveinu on weeknights - that
+   passage is an Ashkenazi-specific addition; flagged in the build notes
+   as a deliberate deviation from the literal brief, backed by the
+   sourced text rather than assumed. ---- */
+function siddurArvitShemaHTML(){
+  const a = SIDDUR.arvitBlessings, s = SIDDUR.birkotKriatShema;
+  let html = `<div class="siddur-section-title">בָּרְכוּ</div>`;
+  html += `<div class="prayer-para">${a.barchu}</div>`;
+  html += `<div class="siddur-section-title">הַמַּעֲרִיב עֲרָבִים</div>`;
+  html += `<div class="prayer-para">${a.maarivAravim}</div>`;
+  html += `<div class="siddur-section-title">אַהֲבַת עוֹלָם</div>`;
+  html += `<div class="prayer-para">${a.ahavatOlam}</div>`;
+  html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
+  html += `<div class="prayer-para">${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}</div>`;
+  html += `<div class="prayer-para">(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:</div>`;
+  html += `<div class="prayer-para">${s.veahavta}</div>`;
+  html += `<div class="prayer-para">${s.vehaya}</div>`;
+  html += `<div class="prayer-para">${s.vayomer}</div>`;
+  html += `<div class="siddur-section-title">גְּאֻלָּה</div>`;
+  html += `<div class="prayer-para">${a.emetVeemunah}</div>`;
+  html += `<div class="siddur-section-title">הַשְׁכִּיבֵנוּ</div>`;
+  html += `<div class="prayer-para">${a.hashkiveinu}</div>`;
+  return html;
+}
+/* ---- Korbanot: Leshem Yichud used to be its own separate section (item 1
+   in the Shacharit flow); it's now merged in as this section's opening
+   paragraph instead of a standalone chip/section (one fewer section
+   overall) - followed by Akeidah/Tamid/13-Midot, then the standalone
+   Kaddish Derabbanan. Pitum HaKetoret is deliberately NOT duplicated here,
+   it's the app's existing PRAYERS_EXTRA.pitumHaketoret, linked to
+   instead. ---- */
+function siddurKorbanotHTML(){
+  const k = SIDDUR.korbanot;
+  let html = `<div class="prayer-para">${SIDDUR.leshemYichud}</div>`;
+  html += `<div class="prayer-para">${k.elokeinuVelohei}</div>`;
+  html += `<div class="siddur-section-title">עֲקֵדַת יִצְחָק</div>`;
+  html += `<div class="prayer-para">${k.akeida}</div>`;
+  html += `<div class="prayer-para">${k.akeidaYehiRatzon}</div>`;
+  html += `<div class="prayer-para">${k.ribonoShelOlam}</div>`;
+  html += `<div class="siddur-section-title">פָּרָשַׁת הַתָּמִיד</div>`;
+  html += `<div class="prayer-para">${k.parashatHatamid}</div>`;
+  html += `<div class="siddur-selichot-link" data-sidgo="pitumHaketoret"><span>פִּטּוּם הַקְּטֹרֶת - הַנֻּסָּח הַמָּלֵא</span><span>${I.chev}</span></div>`;
+  html += `<div class="siddur-section-title">שְׁלֹשׁ עֶשְׂרֵה מִדּוֹת שֶׁהַתּוֹרָה נִדְרֶשֶׁת בָּהֶן</div>`;
+  html += `<div class="prayer-para">${k.midot13}</div>`;
+  html += `<div class="prayer-para">${k.yehudaBenTeima}</div>`;
+  html += `<div class="prayer-para">${k.yehiRatzonMikdash}</div>`;
+  return html;
+}
+
+/* ---- the list of sections for a prayer: rendered concatenated into one
+   continuous scroll by drawSiddurReader (not page-switched one-at-a-time
+   like renderChokReader's ck-secnav-wrap/ck-secchip strip) - each entry's
+   `key` becomes that section's scroll anchor id and its dot in the side
+   dot-nav. ---- */
+function siddurSections(dateObj, info, prayer){
+  const list = [];
+  const push = (key, he, html) => { if(html) list.push({key, he, html}); };
+  if(prayer==='shacharit'){
+    push('korbanot','קָרְבָּנוֹת', siddurKorbanotHTML());
+    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurParasFromText(PRAYERS_EXTRA.birkotHashachar.text));
+    push('kaddishD','קַדִּישׁ דְּרַבָּנָן', `<div class="prayer-para">${SIDDUR.kaddishDerabbanan}</div>`);
+    push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
+    push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
+    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    push('tachanun','תַּחֲנוּן', `<div class="siddur-tachanun-strip">${info.skipTachanun ? 'הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן' : 'הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל'}</div>`+(siddurIsSelichotSeason(dateObj)?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר</span><span>${I.chev}</span></div>`:''));
+    push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {}));
+    push('hallel','הַלֵּל', siddurHallelHTML(info));
+    let al = `<div class="prayer-para">${SIDDUR.ashreiUvaLetzion.ashreiIntro}</div>`+siddurTehillimChapterHTML(145)+`<div class="siddur-section-title">וּבָא לְצִיּוֹן גּוֹאֵל</div><div class="prayer-para">${SIDDUR.ashreiUvaLetzion.uvaLetzion}</div>`;
+    push('ashrei','אַשְׁרֵי וּבָא לְצִיּוֹן', al);
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`);
+    let extra = '';
+    extra += siddurAccordionHTML('gomel','בִּרְכַּת הַגּוֹמֵל · לְמִי שֶׁנִּיצַּל מִסַּכָּנָה', `<div class="prayer-para">${SIDDUR.birkatHagomel}</div>`);
+    extra += siddurAccordionHTML('vidui','וִדּוּי אִישִׁי', `<div class="prayer-para">${SIDDUR.viduiShort}</div>`);
+    extra += siddurAccordionHTML('chatan','בִּרְכַּת חָתָן', `<div class="prayer-para">${SIDDUR.groomBlessing}</div>`);
+    push('more','נוֹסָפוֹת', extra);
+  } else if(prayer==='mincha'){
+    push('ashrei','אַשְׁרֵי', `<div class="prayer-para">${SIDDUR.ashreiUvaLetzion.ashreiIntro}</div>`+siddurTehillimChapterHTML(145));
+    push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {mincha:true}));
+    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    push('tachanun','תַּחֲנוּן', `<div class="siddur-tachanun-strip">${info.skipTachanun ? 'הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן' : 'הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל'}</div>`);
+    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', `<div class="prayer-para">${SIDDUR.kaddishTitkabel}</div>`);
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`);
+  } else if(prayer==='arvit'){
+    push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML());
+    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`);
+    if(info.omerDay){
+      push('omer','סְפִירַת הָעֹמֶר', `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">סְפִירַת הָעֹֽמֶר · יוֹם ${info.omerDay}</span>בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָֽׁנוּ בְּמִצְוֹתָיו וְצִוָּֽנוּ עַל סְפִירַת הָעֹֽמֶר: הַיּוֹם ${omerCountText(info.omerDay)}</div>`);
+    }
+  } else if(prayer==='musaf'){
+    push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
+  }
+  return list;
+}
+
+function renderSiddurReader(){
+  if(!SID.prayer) return go('siddurHome');
+  app.innerHTML = `${topbar(SIDDUR_PRAYER_NAMES[SID.prayer],'siddurHome')}<div class="view">${siddurSkeleton()}</div>`;
+  // Torah reading needs TORAH (data/torah-data.json etc, the same source
+  // Shnayim Mikra and the Chok LeYisrael day-view already use) - loaded
+  // lazily here too, alongside the Siddur's own data.
+  Promise.all([ensureSiddurData(), ensureShnayimData()]).then(()=>{ if(TAB==='siddurReader') drawSiddurReader(); });
+}
+/* Continuous-scroll reader: every section from siddurSections() is
+   concatenated in order into one scrollable page (no more page-switching
+   one section at a time), each wrapped in an anchored <section id="sid-
+   sec-<key>">. Navigation between them is the small fixed dot-column
+   (.sid-dotnav, one dot per section) rather than the old always-visible
+   ck-secnav-wrap chip strip: tapping a dot scrolls to that section, and
+   scroll-spying via IntersectionObserver keeps the dot for whichever
+   section is currently on screen lit. */
+let SID_OBS = null;
+function drawSiddurReader(){
+  const p = SID.prayer;
+  const dateObj = new Date();
+  const info = siddurDayInfo(currentHDate());
+  const secs = siddurSections(dateObj, info, p);
+  if(!secs.length){ toast('אֵין תֹּכֶן לְהַיּוֹם'); return go('siddurHome'); }
+  if(SID_OBS){ SID_OBS.disconnect(); SID_OBS=null; }
+  app.innerHTML = `
+  ${topbar(SIDDUR_PRAYER_NAMES[p],'siddurHome')}
+  <div class="view prayer-reader-page">
+    <div class="prayer-reader-header">
+      <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
+      <div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>
+    </div>
+    <div class="prayer-reader-divider"></div>
+    <div class="prayer-reader-text notranslate">
+      ${secs.map(sec=>`<section id="sid-sec-${sec.key}" data-sidanchor="${sec.key}">${sec.html}</section>`).join('')}
+    </div>
+    <div style="height:80px"></div>
+  </div>
+  ${secs.length>1?`<div class="sid-dotnav" role="tablist" aria-label="קְטָעִים">
+    ${secs.map((sec,ix)=>`<button class="sid-dot${ix===0?' on':''}" data-siddot="${sec.key}" aria-label="${sec.he}"></button>`).join('')}
+  </div>`:''}`;
+  app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
+  const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openPrayer('selichotEdotHamizrach');
+  const ket = app.querySelector('[data-sidgo="pitumHaketoret"]'); if(ket) ket.onclick=()=>openPrayer('pitumHaketoret');
+  const dots = app.querySelectorAll('.sid-dot[data-siddot]');
+  dots.forEach(d=>d.onclick=()=>{
+    const target = document.getElementById('sid-sec-'+d.dataset.siddot);
+    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  if(secs.length>1){
+    const anchors = app.querySelectorAll('[data-sidanchor]');
+    SID_OBS = new IntersectionObserver((entries)=>{
+      if(TAB!=='siddurReader'){ SID_OBS.disconnect(); SID_OBS=null; return; }
+      // pick the entry closest to the top of the viewport among those
+      // currently intersecting, so the highlighted dot tracks whichever
+      // section heading is topmost on screen rather than flapping between
+      // several partially-visible sections at once.
+      let best=null;
+      entries.forEach(e=>{ if(e.isIntersecting && (!best || e.boundingClientRect.top<best.boundingClientRect.top)) best=e; });
+      if(!best) return;
+      const key = best.target.dataset.sidanchor;
+      dots.forEach(d=>d.classList.toggle('on', d.dataset.siddot===key));
+    }, {rootMargin:'-15% 0px -70% 0px', threshold:0});
+    anchors.forEach(a=>SID_OBS.observe(a));
+  }
   tr(app);
 }
 
