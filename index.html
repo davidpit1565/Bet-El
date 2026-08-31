@@ -816,6 +816,9 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-row-feature[data-cat="rambam"]{--cat-color:#969e46;background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
 .prayer-row-feature[data-cat="tanya"]{--cat-color:#589b4b;background-image:linear-gradient(150deg,rgba(88,155,75,.22),var(--panel) 60%)}
 .prayer-row-feature[data-cat="library"]{--cat-color:#3d5a8a;background-image:linear-gradient(150deg,rgba(61,90,138,.22),var(--panel) 60%)}
+.prayer-row-feature[data-cat="brachot"]{--cat-color:#a34f97}
+.prayer-row-feature[data-cat="siddur"]{--cat-color:#7a9a3f}
+.prayer-row-feature[data-cat="more"]{--cat-color:#8c7a6b}
 :root .prayer-row-feature[data-cat="torah"],[data-theme="dark"] .prayer-row-feature[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(214,110,130,.3),var(--panel) 62%)}
 :root .prayer-row-feature[data-cat="neviim"],[data-theme="dark"] .prayer-row-feature[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(96,152,204,.3),var(--panel) 62%)}
 :root .prayer-row-feature[data-cat="ketuvim"],[data-theme="dark"] .prayer-row-feature[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(222,160,80,.3),var(--panel) 62%)}
@@ -5695,7 +5698,7 @@ function renderPrayersGroup(){
   <div class="view">
     <div class="prayers-list">
       ${ready.length ? ready.map(key => `
-        <div class="prayer-row" onclick="openPrayer('${key}','${group}')">
+        <div class="prayer-row prayer-row-feature" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
           <span class="prayer-row-title">${PRAYERS_EXTRA[key].title}</span>
         </div>
       `).join('') : `<div class="empty-note" style="padding:40px 20px;text-align:center">
