@@ -2488,6 +2488,16 @@ function chokSectionsFor(key,day){
       if(d) add('gemara','גְּמָרָא', chokBundleSegs(pk,d.gemara), 'text', null, d.gemara, pk);
     });
   }
+  if(CYC){
+    const ri=ckRambamIndexes(hd);
+    let rs=[]; ri.forEach(i=>{ rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))); });
+    if(rs.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'rambam',items:rs,refs:[],rIdx:ri});
+  } else {
+    keys.forEach(pk=>{
+      const d=(CHOK.schedule[pk]||{})[day];
+      if(d) add('halacha','הֲלָכָה', chokBundleSegs(pk,d.halacha), 'text', null, d.halacha, pk);
+    });
+  }
   const musarWork=S.musarWork||'reshit';
   if(ckMusarReady(musarWork,hd)){
     const mIdx=ckMusarIndexes(musarWork,hd);
@@ -2495,17 +2505,12 @@ function chokSectionsFor(key,day){
     if(items.length) list.push({key:'musar',he:'מוּסָר',items,kind:'musarcyc',note:(MCYC[musarWork].vocalized===false?'אֵין מַהֲדוּרָה מְנֻקֶּדֶת':null),refs:[],tags:null,ids:null,musarWork,mIdx});
   }
   if(CYC){
-    const ri=ckRambamIndexes(hd);
-    let rs=[]; ri.forEach(i=>{ rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))); });
-    if(rs.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'rambam',items:rs,refs:[],rIdx:ri});
     const zi=ckCycleIndex(CYC.zohar,hd);
     add('zohar','זֹהַר', ckCycleSegs('zohar',zi), 'text', null, [], keys[0]);
   } else {
     keys.forEach(pk=>{
       const d=(CHOK.schedule[pk]||{})[day];
-      if(!d) return;
-      add('halacha','הֲלָכָה', chokBundleSegs(pk,d.halacha), 'text', null, d.halacha, pk);
-      add('zohar','זֹהַר', chokBundleSegs(pk,d.zohar), 'text', null, d.zohar, pk);
+      if(d) add('zohar','זֹהַר', chokBundleSegs(pk,d.zohar), 'text', null, d.zohar, pk);
     });
   }
   if(ckTanyaReady(hd)){
