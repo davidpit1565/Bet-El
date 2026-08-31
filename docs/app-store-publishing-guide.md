@@ -31,7 +31,7 @@ they require a paid developer account and (for iOS) a Mac.
    App Store Connect.
 4. Create the app record in App Store Connect
    (https://appstoreconnect.apple.com) with that same bundle ID, app name
-   ("בית אל · לימוד יומי" or an ASCII variant App Store may require),
+   ("תָּמִיד · לימוד יומי" or an ASCII variant App Store may require),
    primary category, and the `privacy.html` URL as the Privacy Policy URL.
 5. Bump the version/build number (Xcode target → General tab, or directly
    in `ios/App/App.xcodeproj/project.pbxproj`'s `MARKETING_VERSION`/

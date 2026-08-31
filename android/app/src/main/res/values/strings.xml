@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">בית אל · לימוד יומי</string>
-    <string name="title_activity_main">בית אל · לימוד יומי</string>
+    <string name="app_name">תָּמִיד · לימוד יומי</string>
+    <string name="title_activity_main">תָּמִיד · לימוד יומי</string>
     <string name="package_name">com.beitel.tehilim</string>
     <string name="custom_url_scheme">com.beitel.tehilim</string>
 </resources>

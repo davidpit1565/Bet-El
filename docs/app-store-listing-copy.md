@@ -7,10 +7,10 @@ ships English too.
 
 ## App name
 
-**בית אל · לימוד יומי**
+**תָּמִיד · לימוד יומי**
 
 (ASCII fallback if a store field rejects the Hebrew title outright:
-**Beit-El - Daily Torah Study**)
+**Tamid - Daily Torah Study**)
 
 ## Subtitle / short description
 
@@ -27,7 +27,7 @@ English equivalents:
 ## Full description (Hebrew)
 
 ```
-בֵּית אֵל הִיא אַפְּלִיקַצְיַת הַלִּמּוּד הַיּוֹמִי שֶׁל קְהִלַּת בֵּית אֵל -
+תָּמִיד הִיא אַפְּלִיקַצְיַת הַלִּמּוּד הַיּוֹמִי שֶׁל קְהִלַּת בֵּית אֵל -
 כֹּל מַה שֶּׁצָּרִיךְ כְּדֵי לְהַתְמִיד בְּלִמּוּד תּוֹרָה יוֹם יוֹם, בְּמָקוֹם אֶחָד.
 
 📖 חוֹק לְיִשְׂרָאֵל
@@ -67,7 +67,7 @@ English equivalents:
 ## Full description (English)
 
 ```
-Beit-El is a daily Torah study companion for the Beit-El community -
+Tamid is a daily Torah study companion for the Beit-El community -
 everything you need to keep a daily learning habit, in one app.
 
 📖 Chok LeYisrael

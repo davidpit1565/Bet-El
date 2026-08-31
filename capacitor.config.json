@@ -1,6 +1,6 @@
 {
   "appId": "com.beitel.tehilim",
-  "appName": "בית אל · לימוד יומי",
+  "appName": "תָּמִיד · לימוד יומי",
   "webDir": "www",
   "ios": {
     "contentInset": "always",
