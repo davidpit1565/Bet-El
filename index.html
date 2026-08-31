@@ -7178,6 +7178,7 @@ function drawSiddurReader(){
   dots.forEach(d=>d.onclick=()=>{
     const target = document.getElementById('sid-sec-'+d.dataset.siddot);
     if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    toast(d.getAttribute('aria-label'));
   });
   if(secs.length>1){
     const anchors = app.querySelectorAll('[data-sidanchor]');
