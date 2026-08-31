@@ -7,10 +7,10 @@ ships English too.
 
 ## App name
 
-**תָּמִיד · לימוד יומי**
+**תָּמִיד**
 
 (ASCII fallback if a store field rejects the Hebrew title outright:
-**Tamid - Daily Torah Study**)
+**Tamid**)
 
 ## Subtitle / short description
 
