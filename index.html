@@ -2511,7 +2511,7 @@ function chokSectionsFor(key,day){
   if(ckTanyaReady(hd)){
     const te=ckTanyaDayEntry(hd);
     const items=ckTanyaSegs(te.orderIndex);
-    if(items.length) list.push({key:'tanya', he:'חֲסִידוּת', items, kind:'tanyacyc', refs:[], tIdx:te.orderIndex, note:'מְהַדּוּרַת קה״ת, בְּאֶמְצָעוּת סְפָרְיָא (CC BY-NC)'});
+    if(items.length) list.push({key:'tanya', he:'חֲסִידוּת', items, kind:'tanyacyc', refs:[], tIdx:te.orderIndex});
   }
   return list;
 }
@@ -2801,7 +2801,7 @@ function chokRefLabel(ref, sec){
 }
 function chokSourceLine(sec){
   if(sec.kind==='musarcyc') return ckMusarSourceLabel(sec.musarWork,sec.mIdx);
-  if(sec.kind==='tanyacyc') return ckTanyaLabel(sec.tIdx);
+  if(sec.kind==='tanyacyc') return ckTanyaLabel(sec.tIdx)+' · מְהַדּוּרַת קה״ת, בְּאֶמְצָעוּת סְפָרְיָא (CC BY-NC)';
   if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,ckViewHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
   if(CYC&&sec.kind==='daf'){
