@@ -863,6 +863,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
 [data-theme="dark"] .siddur-insert-tag,:root:not([data-theme="light"]) .siddur-insert-tag{color:#96b65b}
 .siddur-section-title{font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--muted);
   letter-spacing:.3px;margin:26px 0 10px;text-align:center}
+.siddur-halacha-note{display:block;font-family:var(--font-ui);font-size:12.5px;font-style:italic;
+  color:var(--muted);text-align:center;margin:8px 0;line-height:1.5}
 .siddur-tachanun-strip{display:flex;align-items:center;gap:8px;justify-content:center;font-family:var(--font-ui);
   font-size:13px;color:var(--muted);background:var(--panel);border-radius:12px;padding:10px 14px;margin:8px 0 20px}
 .siddur-selichot-link{display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -6825,7 +6827,12 @@ function drawSiddurHome(){
    verses come from chokTorahVerses()/TORAH, exactly like the Chok
    LeYisrael day-view's own Torah section does). ---- */
 function siddurParasFromText(text){
-  return (text||'').split('\n\n').map(line=>`<div class="prayer-para">${line}</div>`).join('');
+  return (text||'').split('\n\n').map(line=>{
+    line=line.trim();
+    const hal=line.match(/^\[\[HAL\]\]([\s\S]*)\[\[\/HAL\]\]$/);
+    if(hal) return `<div class="siddur-halacha-note">${hal[1]}</div>`;
+    return `<div class="prayer-para">${line}</div>`;
+  }).join('');
 }
 function siddurTehillimChapterHTML(ch){
   const T=window.TEHILLIM; const verses=(T&&(T[ch]||T[String(ch)]))||[];
@@ -7002,7 +7009,7 @@ function siddurPesukeiDezimraHTML(info){
   for(let ch=146; ch<=150; ch++) html += siddurTehillimChapterHTML(ch);
   html += `<div class="prayer-para">${pz.closingVerses}</div>`;
   if(info.isAseretYemeiTeshuva) html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">עֲשֶׂרֶת יְמֵי תְּשׁוּבָה</span>${pz.aseretYemeiTeshuvaInsert}</div>`;
-  html += `<div class="prayer-para">${pz.vayevarechDavid}</div>`;
+  html += siddurParasFromText(pz.vayevarechDavid);
   html += `<div class="prayer-para">${pz.vayosha}</div>`;
   html += `<div class="siddur-section-title">שִׁירַת הַיָּם</div>`;
   html += `<div class="prayer-para">${pz.azYashir}</div>`;
@@ -7016,18 +7023,18 @@ function siddurPesukeiDezimraHTML(info){
 function siddurBirkotShemaHTML(){
   const s = SIDDUR.birkotKriatShema;
   let html = `<div class="siddur-section-title">יוֹצֵר אוֹר</div>`;
-  html += `<div class="prayer-para">${s.yotzerOhr}</div>`;
+  html += siddurParasFromText(s.yotzerOhr);
   html += `<div class="prayer-para">${s.keilBaruch}</div>`;
   html += `<div class="siddur-section-title">אַהֲבָה רַבָּה</div>`;
   html += `<div class="prayer-para">${s.ahavahRabbah}</div>`;
   html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
   html += `<div class="prayer-para">${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}</div>`;
   html += `<div class="prayer-para">(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:</div>`;
-  html += `<div class="prayer-para">${s.veahavta}</div>`;
+  html += siddurParasFromText(s.veahavta);
   html += `<div class="prayer-para">${s.vehaya}</div>`;
   html += `<div class="prayer-para">${s.vayomer}</div>`;
   html += `<div class="siddur-section-title">גְּאֻלָּה</div>`;
-  html += `<div class="prayer-para">${s.emetVeyatziv}</div>`;
+  html += siddurParasFromText(s.emetVeyatziv);
   return html;
 }
 /* ---- Arvit's own Kriat Shema blessings: Hama'ariv Aravim / Ahavat Olam
@@ -7049,7 +7056,7 @@ function siddurArvitShemaHTML(){
   html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
   html += `<div class="prayer-para">${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}</div>`;
   html += `<div class="prayer-para">(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:</div>`;
-  html += `<div class="prayer-para">${s.veahavta}</div>`;
+  html += siddurParasFromText(s.veahavta);
   html += `<div class="prayer-para">${s.vehaya}</div>`;
   html += `<div class="prayer-para">${s.vayomer}</div>`;
   html += `<div class="siddur-section-title">גְּאֻלָּה</div>`;
