@@ -6788,7 +6788,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'musaf'
-const SIDDUR_PRAYER_NAMES = {shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף'};
 function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
@@ -6799,7 +6799,7 @@ function renderSiddurHome(){
 }
 function drawSiddurHome(){
   const info = siddurDayInfo(currentHDate());
-  const tiles = ['shacharit','mincha','arvit'];
+  const tiles = ['birkot','shacharit','mincha','arvit'];
   if(info.isRoshChodesh) tiles.push('musaf');
   app.innerHTML = `
   ${topbar('סִדּוּר','prayers')}
@@ -7062,9 +7062,10 @@ function siddurArvitShemaHTML(){
    in the Shacharit flow); it's now merged in as this section's opening
    paragraph instead of a standalone chip/section (one fewer section
    overall) - followed by Akeidah/Tamid/13-Midot, then the standalone
-   Kaddish Derabbanan. Pitum HaKetoret is deliberately NOT duplicated here,
-   it's the app's existing PRAYERS_EXTRA.pitumHaketoret, linked to
-   instead. ---- */
+   Kaddish Derabbanan. Pitum HaKetoret renders inline here (reusing the
+   app's existing PRAYERS_EXTRA.pitumHaketoret text, not a duplicate copy)
+   like every other paragraph in Korbanot - it's a required, always-said
+   part of the daily reading, not an optional link-out. ---- */
 function siddurKorbanotHTML(){
   const k = SIDDUR.korbanot;
   let html = `<div class="prayer-para">${SIDDUR.leshemYichud}</div>`;
@@ -7075,7 +7076,8 @@ function siddurKorbanotHTML(){
   html += `<div class="prayer-para">${k.ribonoShelOlam}</div>`;
   html += `<div class="siddur-section-title">פָּרָשַׁת הַתָּמִיד</div>`;
   html += `<div class="prayer-para">${k.parashatHatamid}</div>`;
-  html += `<div class="siddur-selichot-link" data-sidgo="pitumHaketoret"><span>פִּטּוּם הַקְּטֹרֶת - הַנֻּסָּח הַמָּלֵא</span><span>${I.chev}</span></div>`;
+  html += `<div class="siddur-section-title">פִּטּוּם הַקְּטֹרֶת</div>`;
+  html += siddurParasFromText(PRAYERS_EXTRA.pitumHaketoret.text);
   html += `<div class="siddur-section-title">שְׁלֹשׁ עֶשְׂרֵה מִדּוֹת שֶׁהַתּוֹרָה נִדְרֶשֶׁת בָּהֶן</div>`;
   html += `<div class="prayer-para">${k.midot13}</div>`;
   html += `<div class="prayer-para">${k.yehudaBenTeima}</div>`;
@@ -7093,7 +7095,6 @@ function siddurSections(dateObj, info, prayer){
   const push = (key, he, html) => { if(html) list.push({key, he, html}); };
   if(prayer==='shacharit'){
     push('korbanot','קָרְבָּנוֹת', siddurKorbanotHTML());
-    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurParasFromText(PRAYERS_EXTRA.birkotHashachar.text));
     push('kaddishD','קַדִּישׁ דְּרַבָּנָן', `<div class="prayer-para">${SIDDUR.kaddishDerabbanan}</div>`);
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
@@ -7125,6 +7126,8 @@ function siddurSections(dateObj, info, prayer){
     }
   } else if(prayer==='musaf'){
     push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
+  } else if(prayer==='birkot'){
+    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurParasFromText(PRAYERS_EXTRA.birkotHashachar.text));
   }
   return list;
 }
@@ -7171,7 +7174,6 @@ function drawSiddurReader(){
   </div>`:''}`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
   const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openPrayer('selichotEdotHamizrach');
-  const ket = app.querySelector('[data-sidgo="pitumHaketoret"]'); if(ket) ket.onclick=()=>openPrayer('pitumHaketoret');
   const dots = app.querySelectorAll('.sid-dot[data-siddot]');
   dots.forEach(d=>d.onclick=()=>{
     const target = document.getElementById('sid-sec-'+d.dataset.siddot);
