@@ -5760,15 +5760,15 @@ function renderLibrary(){
         <div class="qt">${libCatLabel(c.key)}</div>
       </div>`).join('')}
     </div>
-    <div class="prayers-list" style="margin-top:14px">
-      <div class="prayer-row round-card prayer-row-feature" data-cat="chok" onclick="go('chokBooks')">
-        <span class="prayer-row-title">חוק לישראל</span>
+    <div class="quick-grid" style="margin-top:12px">
+      <div class="q-tile round-card" data-cat="chok" onclick="go('chokBooks')">
+        <div class="qt">חוק לישראל</div>
       </div>
-      <div class="prayer-row round-card prayer-row-feature" data-cat="shnayim" onclick="go('smList')">
-        <span class="prayer-row-title">שניים מקרא ואחד תרגום</span>
+      <div class="q-tile round-card" data-cat="shnayim" onclick="go('smList')">
+        <div class="qt">שניים מקרא ואחד תרגום</div>
       </div>
-      <div class="prayer-row round-card prayer-row-feature" data-cat="zohar" onclick="go('zoharList')">
-        <span class="prayer-row-title">תיקוני הזוהר</span>
+      <div class="q-tile round-card" data-cat="zohar" onclick="go('zoharList')">
+        <div class="qt">תיקוני הזוהר</div>
       </div>
     </div>
     ${ornament()}
@@ -6564,7 +6564,7 @@ function renderPrayerReader(){
   app.innerHTML=`
   <div class="topbar" style="justify-content:space-between">
     <button class="icon-btn" onclick="go('${PR.group?'prayersGroup':'prayers'}')">${I.prev}<span style="display:none">חזור</span></button>
-    <div class="tb-title">${p.title}</div>
+    <div class="tb-title gold-text">${p.title}</div>
     <div style="display:flex;gap:6px">
       <button class="icon-btn" onclick="sharePrayer('${PR.prayer}')">${I.share}<span style="display:none">שתף</span></button>
       <button class="icon-btn" onclick="shareQR()">${I.qr}<span style="display:none">קוד QR</span></button>
