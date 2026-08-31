@@ -6218,13 +6218,13 @@ function renderLibraryGemaraReader(){
 }
 
 /* ---------- Rambam (Mishneh Torah, CYC.rambam) ---------- */
+// canonical Mishneh Torah sefer order (Madda first) - independent of wherever
+// the daily study cycle's own order array currently happens to begin
+const RAMBAM_SEFER_ORDER=['סֵפֶר הַמַּדָּע','סֵפֶר אַהֲבָה','סֵפֶר זְמַנִּים','סֵפֶר נָשִׁים','סֵפֶר קְדֻשָּׁה','סֵפֶר הַפְלָאָה','סֵפֶר זְרָעִים','סֵפֶר עֲבוֹדָה','סֵפֶר קָרְבָּנוֹת','סֵפֶר טָהֳרָה','סֵפֶר נְזִיקִין','סֵפֶר קִנְיָן','סֵפֶר מִשְׁפָּטִים','סֵפֶר שׁוֹפְטִים'];
 function libRambamSefarim(){
-  const map=[]; const seen={};
-  CYC.rambam.order.forEach(e=>{
-    const sefer=CYC.rambam.sefarim[e.book];
-    if(!seen[sefer]){ seen[sefer]=true; map.push(sefer); }
-  });
-  return map;
+  const seen={};
+  CYC.rambam.order.forEach(e=>{ seen[CYC.rambam.sefarim[e.book]]=true; });
+  return RAMBAM_SEFER_ORDER.filter(s=>seen[s]);
 }
 function libRambamBooksOf(sefer){
   const out=[]; const seen={};
