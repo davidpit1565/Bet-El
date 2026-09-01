@@ -7183,7 +7183,21 @@ function siddurPesukeiDezimraHTML(info){
    siddurParasFromText call (tight=true) that only leaves a divider after
    the paragraph's own last piece; Vehaya and Vayomer are then each their
    own single paragraph, so they naturally get their own divider. */
-function siddurShemaCoreHTML(s){
+// Tefillin are only worn by day - the "touch your tefillin" [[HALI]] asides
+// inside Veahavta/Vehaya belong to Shacharit's Shema only. Arvit reuses the
+// same shared Shema text (siddurShemaCoreHTML below) but must not show them,
+// so they're stripped by content (matching "תפלין") rather than duplicating
+// the whole veahavta/vehaya fields just to omit two asides. Vayomer's
+// tzitzit asides are untouched - tzitzit (unlike tefillin) aren't day-only.
+function siddurStripTefillinAsides(text){
+  return (text||'')
+    .replace(/\s*\[\[HALI\]\][^[]*?תפלין[^[]*?\[\[\/HALI\]\]\s*/g, ' ')
+    .replace(/ +(?=[׃׀,.:])/g, '')
+    .replace(/ {2,}/g, ' ')
+    .trim();
+}
+function siddurShemaCoreHTML(s, opts){
+  opts = opts || {};
   // Shema itself + the whispered "Baruch Shem" response are one tight unit
   // (no divider between the verse and its own response), but Veahavta -
   // the start of the real first of the 3 Biblical paragraphs (Deut
@@ -7194,8 +7208,8 @@ function siddurShemaCoreHTML(s){
   // already one single continuous paragraph.
   const shemaOpen = `${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}\n\n(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:`;
   let html = siddurParasFromText(shemaOpen, true);
-  html += siddurParasFromText(s.veahavta);
-  html += siddurParasFromText(s.vehaya);
+  html += siddurParasFromText(opts.skipTefillinNotes ? siddurStripTefillinAsides(s.veahavta) : s.veahavta);
+  html += siddurParasFromText(opts.skipTefillinNotes ? siddurStripTefillinAsides(s.vehaya) : s.vehaya);
   html += siddurParasFromText(s.vayomer);
   return html;
 }
@@ -7235,7 +7249,7 @@ function siddurArvitShemaHTML(){
   html += `<div class="siddur-section-title">אַהֲבַת עוֹלָם</div>`;
   html += `<div class="prayer-para">${a.ahavatOlam}</div>`;
   html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
-  html += siddurShemaCoreHTML(s);
+  html += siddurShemaCoreHTML(s, {skipTefillinNotes:true});
   html += `<div class="siddur-section-title">בִּרְכַּת גָּאַל יִשְׂרָאֵל</div>`;
   html += `<div class="prayer-para">${a.emetVeemunah}</div>`;
   html += `<div class="siddur-section-title">הַשְׁכִּיבֵנוּ</div>`;
