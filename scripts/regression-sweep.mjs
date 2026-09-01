@@ -61,8 +61,12 @@ const steps = [
   ['shnayim mikra', () => document.getElementById('homeParshaCard')?.click()],
   ['home for tehillim daily', () => window.go('home')],
   ['tehillim daily reading', () => document.getElementById('homeTehillimCard')?.click()],
-  ['home for ben ish chai', () => window.go('home')],
-  ['ben ish chai open', () => document.getElementById('homeBicCard')?.click()],
+  ['home for dynamic prayer tile', () => window.go('home')],
+  ['dynamic prayer tile open', () => document.getElementById('homePrayerCard')?.click()],
+  ['library open', () => window.go('library')],
+  ['tehillim open via library', () => document.querySelector('[data-libcat="tehillim"]')?.click()],
+  ['library open again', () => window.go('library')],
+  ['ben ish chai open via library', () => document.querySelector('[data-libcat="benishchai"]')?.click()],
   ['home for musar', () => window.go('home')],
   ['musar list open', () => document.getElementById('homeMusarCard')?.click()],
   ['musar work open', () => document.querySelector('[data-musarday]')?.click()],
@@ -75,6 +79,7 @@ for (const [label, fn] of steps) {
 }
 
 console.log('bottom-nav count:', await p.evaluate(() => document.querySelectorAll('.bottom-nav').length));
+console.log('bottom-nav item count:', await p.evaluate(() => document.querySelectorAll('.nav-item').length));
 console.log('nav-pill count:', await p.evaluate(() => document.querySelectorAll('.nav-pill').length));
 console.log('sw registered:', await p.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length));
 

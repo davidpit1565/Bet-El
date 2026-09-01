@@ -2147,7 +2147,7 @@ function go(tab){
   if(tab==='kotelCompass'){ const nav=document.querySelector('.bottom-nav'); if(nav) nav.remove(); }
   else if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   render();
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===tab));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===navActiveTab(tab)));
   requestAnimationFrame(placeNavPill);
   forceScrollTop();
 }
@@ -4998,6 +4998,25 @@ function nextZmanText(){
   }
   return {label:z.label, t, time:fmtTime(z.date)};
 }
+/* Which of the day's prayers is "current" right now, for the home screen's
+   dynamic prayer tile (replaces the old static Ben Ish Chai tile - Ben Ish
+   Chai itself is unaffected, still reachable from the Library, see
+   LIBRARY_CATS). Reuses the same Zmanim object the "next zman" strip above
+   already builds - no new zmanim math. Only sunrise/chatzot/sunset are
+   considered production-ready right now (ZMANIM_READY, see its own comment)
+   - alot hashachar isn't, so rather than guess at a Tikun Chatzot window we
+   can't accurately start, the chatzot-halayla-to-alot-hashachar stretch
+   simply stays Arvit too (falls out of the final `return 'arvit'` below,
+   covering both "after shkia" and "before netz"). */
+function homeNowPrayerKey(){
+  try{
+    const now=new Date(), z=zmanimFor(civilToday());
+    const netz=z.sunrise(), chatzotYom=z.chatzot(), shkia=z.sunset();
+    if(netz && chatzotYom && now>=netz && now<chatzotYom) return 'shacharit';
+    if(chatzotYom && shkia && now>=chatzotYom && now<shkia) return 'mincha';
+  }catch(e){}
+  return 'arvit';
+}
 function renderHome(){
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
@@ -5071,11 +5090,10 @@ function renderHome(){
 
     <div class="quick-grid">
       ${(function(){
-        const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
-        const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
-        return `<div class="q-tile" data-cat="benishchai" id="homeBicCard">
-          <div class="qt">${ckBicUI().title}</div>
-          <div class="qd">${p?bicParshaName(p):(weekParshaKey?parshaName(weekParshaKey):'')}</div>
+        const key=homeNowPrayerKey();
+        return `<div class="q-tile" data-cat="siddur" id="homePrayerCard">
+          <div class="qt">${SIDDUR_PRAYER_NAMES[key]}</div>
+          <div class="qd">עַכְשָׁו</div>
         </div>`;
       })()}
       <div class="q-tile" data-cat="musar" id="homeMusarCard">
@@ -5110,11 +5128,8 @@ function renderHome(){
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
   const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
   const hzc=document.getElementById('homeZoharCard'); if(hzc) hzc.onclick=()=>go('zoharYomi');
-  const hbc=document.getElementById('homeBicCard');
-  if(hbc){
-    hbc.onclick=()=>openBic();
-    if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
-  }
+  const hpr=document.getElementById('homePrayerCard');
+  if(hpr) hpr.onclick=()=>openSiddurPrayer(homeNowPrayerKey());
   const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');
   const htc=document.getElementById('homeTikkuneiCard');
   if(htc){
@@ -5258,7 +5273,7 @@ function renderTracker(){
 function stripNik(x){ return (x||'').replace(/[\u0591-\u05C7]/g,'').replace(/[\u05BE\u05F3\u05F4'"׳״:.,]/g,'').trim(); }
 function renderTehillim(){
   app.innerHTML = `
-  ${topbar('סֵפֶר תְּהִלִּים')}
+  ${topbar('סֵפֶר תְּהִלִּים','library')}
   <div class="view">
     <div class="search-box">${I.search}<input id="psSearch" placeholder="חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…"/></div>
     <div class="chip-row">
@@ -5934,6 +5949,7 @@ const LIBRARY_CATS = [
   {key:'torah', label:'תּוֹרָה'},
   {key:'neviim', label:'נְבִיאִים'},
   {key:'ketuvim', label:'כְּתוּבִים'},
+  {key:'tehillim', label:'תְּהִלִּים'},
   {key:'mishnah', label:'מִשְׁנָה'},
   {key:'gemara', label:'גְּמָרָא'},
   {key:'rambam', label:'רַמְבַּ״ם'},
@@ -5951,6 +5967,7 @@ function openLibraryCat(key){
   haptic();
   if(key==='musar') return go('musarList');
   if(key==='benishchai') return go('bicHome');
+  if(key==='tehillim') return go('tehillim');
   if(key==='torah') return go('libraryTorahBooks');
   if(key==='gemara') return go('libraryGemaraMasechtot');
   if(key==='rambam') return go('libraryRambamSefarim');
@@ -6816,7 +6833,7 @@ function drawSiddurHome(){
       </div>`).join('')}
     </div>
     <div style="font-family:var(--font-ui);font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7">
-      נֻסָּח עֲדוֹת הַמִּזְרָח, בְּעִקְבוֹת בֶּן אִישׁ חַי · הַתֹּכֶן מִתְעַדְכֵּן אוֹטוֹמָטִית לְפִי הַיּוֹם
+      נֻסָּח עֲדוֹת הַמִּזְרָח · הַתֹּכֶן מִתְעַדְכֵּן אוֹטוֹמָטִית לְפִי הַיּוֹם
     </div>
     ${ornament()}
   </div>`;
@@ -7128,8 +7145,8 @@ function siddurPesukeiDezimraHTML(info){
 function siddurShemaCoreHTML(s){
   const shemaOpen = `${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}\n\n(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:\n\n${s.veahavta}`;
   let html = siddurParasFromText(shemaOpen, true);
-  html += `<div class="prayer-para">${s.vehaya}</div>`;
-  html += `<div class="prayer-para">${s.vayomer}</div>`;
+  html += siddurParasFromText(s.vehaya);
+  html += siddurParasFromText(s.vayomer);
   return html;
 }
 /* ---- Birkot Kriat Shema + Shema itself + Geula (Emet Veyatziv), all
@@ -7196,7 +7213,7 @@ function siddurKorbanotHTML(){
   html += `<div class="siddur-section-title">עֲקֵדַת יִצְחָק</div>`;
   html += `<div class="prayer-para">${k.akeida}</div>`;
   html += `<div class="prayer-para">${k.akeidaYehiRatzon}</div>`;
-  html += `<div class="prayer-para">${k.ribonoShelOlam}</div>`;
+  html += siddurParasFromText(k.ribonoShelOlam);
   html += `<div class="siddur-section-title">פָּרָשַׁת הַתָּמִיד</div>`;
   html += `<div class="prayer-para">${k.parashatHatamid}</div>`;
   html += `<div class="siddur-section-title">פִּטּוּם הַקְּטֹרֶת</div>`;
@@ -8145,13 +8162,40 @@ let toastT;
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t);} if(S.lang!=='he'&&I18N[S.lang]){const d=I18N[S.lang];if(d[msg])msg=d[msg];else for(const k in d){if(k.length>2&&msg.includes(k))msg=msg.split(k).join(d[k]);}} t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
 
 /* ================= BOOT ================= */
+/* Every screen nested under the Library nav icon (renderLibrary() itself,
+   every per-category browse/reader screen it opens, and the Prayers-list
+   screens nested under it the same way) should keep that icon lit rather
+   than going dark the moment TAB stops being the literal 'prayers' string -
+   previously NONE of them did (go()'s nav-highlight toggle only ever
+   matched a tab name to itself), which is what let Tehillim get away with
+   owning its own bottom-nav icon in the first place. Now that Tehillim is
+   a Library entry like any other (see LIBRARY_CATS), it and its per-chapter
+   reader (TAB==='reader' when RD.daily is false - the same 'reader' tab is
+   also used for the home screen's daily-reading flow, where RD.daily is
+   true and 'home' should stay lit instead) join this same group. */
+const LIBRARY_NESTED_TABS=new Set(['library',
+  'libraryTorahBooks','libraryTorahParshiot','libraryTorahReader',
+  'libraryGemaraMasechtot','libraryGemaraReader',
+  'libraryRambamSefarim','libraryRambamBooks','libraryRambamReader',
+  'libraryZoharParts','libraryZoharReader',
+  'libraryTanyaParts','libraryTanyaReader',
+  'libraryMishnahSedarim','libraryMishnahTractates','libraryMishnahChapters','libraryMishnahReader',
+  'libraryNKBooks','libraryNKReader',
+  'musarList','musarYomi','bicHome','bicParshiot','bicReader',
+  'tehillim','prayersGroup','siddurHome','siddurReader']);
+function navActiveTab(tab){
+  tab=tab||'home';
+  if(LIBRARY_NESTED_TABS.has(tab)) return 'prayers';
+  if(tab==='reader' && RD && !RD.daily) return 'prayers';
+  return tab;
+}
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
   if(TAB==='onboard'||TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
-  nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===(TAB||'home')?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
+  const items=[['home','דף הבית',I.home],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
+  nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===navActiveTab(TAB)?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
   tr(nav);
