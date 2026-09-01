@@ -739,17 +739,14 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .ded-multi span{display:block;line-height:1.75}
 
 /* dedication panels (hatzlacha + permanent memorial): quiet, humble content,
-   but still framed as an intentional card like everything else on the page -
-   plain floating text here read as an unfinished afterthought next to the
-   fully-carded quick-tiles/stats above it. */
-.dedication-panel{margin:16px auto 0;padding:14px 20px 15px;border-radius:16px;
-  border:1px solid var(--line);background:var(--panel-2);text-align:center;
-  font-family:var(--font-sacred)}
+   unframed - plain text sitting directly on the home page's own background,
+   like the dedication line above it, rather than boxed as a separate card. */
+.dedication-panel{margin:16px auto 0;padding:0 20px;border:none;background:transparent;
+  text-align:center;font-family:var(--font-sacred)}
 .dedication-panel + .dedication-panel{margin-top:10px}
 .ded-panel-label{font-size:11.5px;letter-spacing:.14em;color:var(--gold);opacity:.95;margin-bottom:5px}
 .ded-panel-names{color:var(--muted);font-size:12.5px;line-height:1.85;opacity:.9}
 .ded-panel-foot{margin-top:6px;font-size:10.5px;letter-spacing:.5px;color:var(--muted);opacity:.7}
-.dedication-memorial{background:transparent;border-style:dashed;border-color:var(--line)}
 .dedication-memorial .ded-panel-label{color:var(--muted);opacity:.85}
 [data-theme="dark"] .ded-panel-names{color:#8d97ad}
 .social-links{display:flex;justify-content:center;gap:18px;margin:10px 0 4px}
@@ -865,6 +862,13 @@ input,select,button{max-width:100%;box-sizing:border-box}
   letter-spacing:.3px;margin:26px 0 10px;text-align:center}
 .siddur-halacha-note{display:block;font-family:var(--font-ui);font-size:12.5px;font-style:italic;
   color:var(--muted);text-align:center;margin:8px 0;line-height:1.5}
+/* the single-letter counting markers (א ב ג...) in Yishtabach's 13-synonym
+   list aren't part of the prayer text itself - de-emphasize them. */
+.siddur-enum-marker{font-size:.72em;color:var(--muted);opacity:.8;font-family:var(--font-ui)}
+/* dividers between .prayer-para blocks should read as blessing boundaries,
+   not sub-line breaks within one passage - use on paragraphs that are a
+   direct continuation of the one before them. */
+.siddur-para-nodivider{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .siddur-tachanun-strip{display:flex;align-items:center;gap:8px;justify-content:center;font-family:var(--font-ui);
   font-size:13px;color:var(--muted);background:var(--panel);border-radius:12px;padding:10px 14px;margin:8px 0 20px}
 .siddur-selichot-link{display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -6826,12 +6830,23 @@ function drawSiddurHome(){
    exactly like data/ketuvim-data.json's own Psalms deliberately do; Torah
    verses come from chokTorahVerses()/TORAH, exactly like the Chok
    LeYisrael day-view's own Torah section does). ---- */
-function siddurParasFromText(text){
-  return (text||'').split('\n\n').map(line=>{
+/* `tight`: when the whole field is really one continuous passage that only
+   [[HAL]]/[[NOTE]] asides split into multiple divs (e.g. Veahavta, broken up
+   by inline tefillin instructions), suppress the divider between those
+   sub-pieces - it isn't a real blessing boundary - while still leaving the
+   very last piece with its normal divider, since that IS the boundary
+   before whatever comes next. */
+function siddurParasFromText(text, tight){
+  const parts = (text||'').split('\n\n');
+  const lastParaIdx = (()=>{ for(let i=parts.length-1;i>=0;i--){ const t=parts[i].trim(); if(!/^\[\[HAL\]\]|^\[\[NOTE\]\]|^\[\[MENORAH\]\]$/.test(t)) return i; } return -1; })();
+  return parts.map((line,i)=>{
     line=line.trim();
     const hal=line.match(/^\[\[HAL\]\]([\s\S]*)\[\[\/HAL\]\]$/);
     if(hal) return `<div class="siddur-halacha-note">${hal[1]}</div>`;
-    return `<div class="prayer-para">${line}</div>`;
+    if(line==='[[MENORAH]]') return `<div class="prayer-menorah-wrap">${menorahSVG()}</div>`;
+    if(line.startsWith('[[NOTE]]')) return `<div class="siddur-halacha-note">${line.slice(8)}</div>`;
+    const nodiv = tight && i!==lastParaIdx;
+    return `<div class="prayer-para${nodiv?' siddur-para-nodivider':''}">${line}</div>`;
   }).join('');
 }
 function siddurTehillimChapterHTML(ch){
@@ -6941,10 +6956,91 @@ function siddurParaHTML(p){
   if(p.insert) return `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">${p.tag||'תּוֹסֶפֶת שֶׁל הַיּוֹם'}</span>${p.text}</div>`;
   return `<div class="prayer-para">${p.text}</div>`;
 }
+
+/* ---- Shir Shel Yom: the Levites' day-of-week Psalm of the Day, recited
+   after Ashrei/Uva LeTzion, before Aleinu (Sefaria: Siddur Edot HaMizrach,
+   Weekday Shacharit > Song of the Day). Reuses window.TEHILLIM (never
+   duplicates Psalm text) via the existing siddurTehillimChapterHTML
+   helper. Sunday=Tehillim 24, Monday=48, Tuesday=82, Wednesday=94,
+   Thursday=81, Friday=93, Shabbat=92 (out of this app's in-scope days,
+   included anyway for a complete day-of-week table). */
+const SIDDUR_SHIR_SHEL_YOM = {
+  0: {ch:24, intro:'הַיּוֹם יוֹם אֶחָד בְּשַׁבַּת קוֹדֶשׁ, הַשִּׁיר שֶׁהָיוּ הַלְוִיִּם אוֹמְרִים עַל הַדּוּכָן:'},
+  1: {ch:48, intro:'הַיּוֹם יוֹם שֵׁנִי בְּשַׁבַּת קוֹדֶשׁ, הַשִּׁיר שֶׁהָיוּ הַלְוִיִּם אוֹמְרִים עַל הַדּוּכָן:'},
+  2: {ch:82, intro:'הַיּוֹם יוֹם שְׁלִישִׁי בְּשַׁבַּת קוֹדֶשׁ, הַשִּׁיר שֶׁהָיוּ הַלְוִיִּם אוֹמְרִים עַל הַדּוּכָן:'},
+  3: {ch:94, intro:'הַיּוֹם יוֹם רְבִיעִי בְּשַׁבַּת קוֹדֶשׁ, הַשִּׁיר שֶׁהָיוּ הַלְוִיִּם אוֹמְרִים עַל הַדּוּכָן:'},
+  4: {ch:81, intro:'הַיּוֹם יוֹם חֲמִישִׁי בְּשַׁבַּת קוֹדֶשׁ, הַשִּׁיר שֶׁהָיוּ הַלְוִיִּם אוֹמְרִים עַל הַדּוּכָן:'},
+  5: {ch:93, intro:'הַיּוֹם יוֹם הַשִּׁשִּׁי בְּשַׁבַּת קוֹדֶשׁ, הַשִּׁיר שֶׁהָיוּ הַלְוִיִּם אוֹמְרִים עַל הַדּוּכָן:'},
+  6: {ch:92}
+};
+/* ---- Birkot HaShachar: Modeh Ani (SIDDUR.modehAni, said immediately on
+   waking, before Netilat Yadayim - reused rather than duplicated) prepended
+   to PRAYERS_EXTRA.birkotHashachar.text, and the run of ~15 short one-line
+   "Baruch Ata..." blessings (from "HaNoten LaSechvi Vina" through the
+   "she'asani isha"/"ke'ratzono" pair) given the same tight, no-divider
+   spacing already used for Birkat HaMazon's "HaRachaman Hu" run. ---- */
+function siddurBirkotHashacharHTML(){
+  let html = `<div class="prayer-para">${SIDDUR.modehAni}</div>`;
+  const paras = (PRAYERS_EXTRA.birkotHashachar.text||'').split('\n\n');
+  let tight = false;
+  paras.forEach(line=>{
+    line = line.trim();
+    const n = ckNorm(line);
+    if(n.startsWith('הנותן לשכוי')) tight = true;
+    const isTight = tight;
+    if(n.startsWith('ואשה מברכת')) tight = false;
+    html += `<div class="prayer-para${isTight?' prayer-para-tight':''}">${line}</div>`;
+  });
+  return html;
+}
+function siddurShirShelYomHTML(dateObj){
+  const d = SIDDUR_SHIR_SHEL_YOM[dateObj.getDay()];
+  if(!d) return '';
+  let html = d.intro ? `<div class="prayer-para">${d.intro}</div>` : '';
+  html += siddurTehillimChapterHTML(d.ch);
+  return html;
+}
+/* ---- Chatzi Kaddish (Half Kaddish): reuses the identical opening
+   paragraph of SIDDUR.kaddishDerabbanan rather than storing the same
+   Aramaic text a third time (Sefaria: Weekday Mincha > Offerings, right
+   before the Amida - verbatim match against the standalone Chatzi Kaddish
+   there). ---- */
+function siddurChatziKaddishHTML(){
+  return `<div class="prayer-para">${SIDDUR.kaddishDerabbanan.split('\n\n')[0]}</div>`;
+}
+/* ---- The 4 verses traditionally added right after Aleinu Leshabeach
+   (Proverbs 3:25, Isaiah 8:10, Isaiah 46:4, Psalm 140:14) - shared by
+   Shacharit/Mincha/Arvit so the text lives in one place. Not located
+   verbatim in this specific digitized Sefaria Siddur edition's own Aleinu
+   context (only Isaiah 8:10 turned up elsewhere in the source) - see the
+   build report. ---- */
+function siddurAfterAleinuHTML(){
+  return `<div class="prayer-para">${SIDDUR.afterAleinuVerses}</div>`;
+}
+/* ---- Shacharit's closing sequence after Shir Shel Yom (Sefaria: Weekday
+   Shacharit > Kaveh): Kaveh, Ein Keloheinu, a SECOND recitation of Pitum
+   HaKetoret (genuinely said twice in the service - once early in Korbanot,
+   once again here, per the source), Tana Devei Eliyahu, Kaddish (reusing
+   kaddishDerabbanan in full, as the source's own "קדיש על ישראל" here),
+   then Barchu (reusing arvitBlessings.barchu - identical wording) - right
+   before Aleinu. ---- */
+function siddurKavehClosingHTML(){
+  let html = `<div class="siddur-section-title">קַוֵּה</div>`;
+  html += `<div class="prayer-para">${SIDDUR.kaveh}</div>`;
+  html += `<div class="prayer-para">${SIDDUR.einKeElokeinu}</div>`;
+  html += `<div class="siddur-section-title">פִּטּוּם הַקְּטֹרֶת</div>`;
+  html += siddurParasFromText(PRAYERS_EXTRA.pitumHaketoret.text);
+  html += `<div class="prayer-para">${SIDDUR.tanaDeveiEliyahu}</div>`;
+  html += `<div class="prayer-para">${SIDDUR.kaddishDerabbanan}</div>`;
+  html += `<div class="siddur-section-title">בָּרְכוּ</div>`;
+  html += `<div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
+  return html;
+}
 function siddurAmidahHTML(info, opts){
   opts = opts || {};
   const skipBlessings = opts.onlyBlessings; // for Musaf: [1,2,3,17,18,19]
-  let html = `<div class="prayer-para">${SIDDUR.openingLine}</div>`;
+  let html = `<div class="siddur-section-title">תְּפִלַּת הָעֲמִידָה</div>`;
+  html += `<div class="prayer-para">${SIDDUR.openingLine}</div>`;
   SIDDUR.amidah19.forEach(b=>{
     if(skipBlessings && !skipBlessings.includes(b.n)) return;
     siddurBlessingParas(b, info, {skipYaale:opts.skipYaale}).forEach(p=>{ html += siddurParaHTML(p); });
@@ -6994,14 +7090,19 @@ function siddurIsSelichotSeason(hd){
   return false;
 }
 
-/* ---- Pesukei D'Zimra: Baruch She'amar / Yehi Chevod / Ashrei (Tehillim
-   145, reused) / Tehillim 146-150 (reused) / closing verses / Vayevarech
-   David / Vayosha / Az Yashir (Shemot 15:1-19) / Ki LaShem Hamlucha /
-   Yishtabach - all sourced verbatim from the digitized Siddur Edot
-   HaMizrach (Sefaria: Weekday Shacharit > Pesukei D'Zimra). ---- */
+/* ---- Pesukei D'Zimra: Hodu (1 Chronicles 16:8-36, plus the "Hashem
+   Melech" declaration and Hoshi'einu closing verse) traditionally comes
+   first, before Baruch She'amar / Yehi Chevod / Ashrei (Tehillim 145,
+   reused) / Tehillim 146-150 (reused) / closing verses / Vayevarech David /
+   Vayosha / Az Yashir (Shemot 15:1-19) / Ki LaShem Hamlucha / Yishtabach -
+   all sourced verbatim from the digitized Siddur Edot HaMizrach (Sefaria:
+   Weekday Shacharit > Hodu / Pesukei D'Zimra). ---- */
 function siddurPesukeiDezimraHTML(info){
   const pz = SIDDUR.pesukeiDezimra;
-  let html = siddurParasFromText(pz.baruchSheamar);
+  let html = `<div class="siddur-section-title">הוֹדוּ</div>`;
+  html += siddurParasFromText(pz.hodu);
+  html += `<div class="siddur-section-title">בָּרוּךְ שֶׁאָמַר</div>`;
+  html += siddurParasFromText(pz.baruchSheamar);
   html += siddurTehillimChapterHTML(100); // Mizmor LeToda
   html += `<div class="prayer-para">${pz.yehiChevod}</div>`;
   html += `<div class="prayer-para">${pz.ashreiIntro}</div>`;
@@ -7017,22 +7118,35 @@ function siddurPesukeiDezimraHTML(info){
   html += `<div class="prayer-para">${pz.yishtabach}</div>`;
   return html;
 }
+/* Shema's real Biblical division is 3 paragraphs (Deut 6:4-9, Deut 11:13-21,
+   Numbers 15:37-41) - not one div per sub-line. The Shema line itself and
+   the whispered "Baruch Shem" both belong to paragraph 1 together with
+   Veahavta (which they textually open), so they're joined into one
+   siddurParasFromText call (tight=true) that only leaves a divider after
+   the paragraph's own last piece; Vehaya and Vayomer are then each their
+   own single paragraph, so they naturally get their own divider. */
+function siddurShemaCoreHTML(s){
+  const shemaOpen = `${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}\n\n(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:\n\n${s.veahavta}`;
+  let html = siddurParasFromText(shemaOpen, true);
+  html += `<div class="prayer-para">${s.vehaya}</div>`;
+  html += `<div class="prayer-para">${s.vayomer}</div>`;
+  return html;
+}
 /* ---- Birkot Kriat Shema + Shema itself + Geula (Emet Veyatziv), all
    sourced verbatim from the same digitized siddur (Weekday Shacharit >
    The Shema). ---- */
 function siddurBirkotShemaHTML(){
   const s = SIDDUR.birkotKriatShema;
   let html = `<div class="siddur-section-title">יוֹצֵר אוֹר</div>`;
-  html += siddurParasFromText(s.yotzerOhr);
-  html += `<div class="prayer-para">${s.keilBaruch}</div>`;
-  html += `<div class="siddur-section-title">אַהֲבָה רַבָּה</div>`;
+  // Yotzer Or and Keil Baruch (through the Kedusha and the "Yotzer
+  // HaMe'orot" seal) are one continuous blessing - join them into a single
+  // siddurParasFromText call so no divider appears until the blessing
+  // actually ends.
+  html += siddurParasFromText(`${s.yotzerOhr}\n\n${s.keilBaruch}`, true);
+  html += `<div class="siddur-section-title">אַהֲבַת עוֹלָם</div>`;
   html += `<div class="prayer-para">${s.ahavahRabbah}</div>`;
   html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
-  html += `<div class="prayer-para">${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}</div>`;
-  html += `<div class="prayer-para">(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:</div>`;
-  html += siddurParasFromText(s.veahavta);
-  html += `<div class="prayer-para">${s.vehaya}</div>`;
-  html += `<div class="prayer-para">${s.vayomer}</div>`;
+  html += siddurShemaCoreHTML(s);
   html += `<div class="siddur-section-title">גְּאֻלָּה</div>`;
   html += siddurParasFromText(s.emetVeyatziv);
   return html;
@@ -7054,11 +7168,7 @@ function siddurArvitShemaHTML(){
   html += `<div class="siddur-section-title">אַהֲבַת עוֹלָם</div>`;
   html += `<div class="prayer-para">${a.ahavatOlam}</div>`;
   html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
-  html += `<div class="prayer-para">${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}</div>`;
-  html += `<div class="prayer-para">(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:</div>`;
-  html += siddurParasFromText(s.veahavta);
-  html += `<div class="prayer-para">${s.vehaya}</div>`;
-  html += `<div class="prayer-para">${s.vayomer}</div>`;
+  html += siddurShemaCoreHTML(s);
   html += `<div class="siddur-section-title">גְּאֻלָּה</div>`;
   html += `<div class="prayer-para">${a.emetVeemunah}</div>`;
   html += `<div class="siddur-section-title">הַשְׁכִּיבֵנוּ</div>`;
@@ -7075,7 +7185,13 @@ function siddurArvitShemaHTML(){
    part of the daily reading, not an optional link-out. ---- */
 function siddurKorbanotHTML(){
   const k = SIDDUR.korbanot;
-  let html = `<div class="prayer-para">${SIDDUR.leshemYichud}</div>`;
+  // Leshem Yichud's own text ends before "Hareni Mekabel" (accepting the
+  // mitzvah of loving one's fellow) - a separate, distinct declaration that
+  // traditionally precedes Leshem Yichud, not part of it (the data field
+  // has a paragraph break there); render via siddurParasFromText so it
+  // gets its own visually-separated paragraph instead of reading as one
+  // continuous block.
+  let html = siddurParasFromText(SIDDUR.leshemYichud);
   html += `<div class="prayer-para">${k.elokeinuVelohei}</div>`;
   html += `<div class="siddur-section-title">עֲקֵדַת יִצְחָק</div>`;
   html += `<div class="prayer-para">${k.akeida}</div>`;
@@ -7109,32 +7225,54 @@ function siddurSections(dateObj, info, prayer){
     push('tachanun','תַּחֲנוּן', `<div class="siddur-tachanun-strip">${info.skipTachanun ? 'הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן' : 'הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל'}</div>`+(siddurIsSelichotSeason(dateObj)?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר</span><span>${I.chev}</span></div>`:''));
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {}));
     push('hallel','הַלֵּל', siddurHallelHTML(info));
-    let al = `<div class="prayer-para">${SIDDUR.ashreiUvaLetzion.ashreiIntro}</div>`+siddurTehillimChapterHTML(145)+`<div class="siddur-section-title">וּבָא לְצִיּוֹן גּוֹאֵל</div><div class="prayer-para">${SIDDUR.ashreiUvaLetzion.uvaLetzion}</div>`;
+    // Between Ashrei (Tehillim 145) and Uva LeTzion, on days WITH Tachanun,
+    // Tehillim 20 is said (reusing window.TEHILLIM, not duplicated).
+    let al = `<div class="prayer-para">${SIDDUR.ashreiUvaLetzion.ashreiIntro}</div>`+siddurTehillimChapterHTML(145);
+    if(!info.skipTachanun) al += siddurTehillimChapterHTML(20);
+    al += `<div class="siddur-section-title">וּבָא לְצִיּוֹן גּוֹאֵל</div><div class="prayer-para">${SIDDUR.ashreiUvaLetzion.uvaLetzion}</div>`;
     push('ashrei','אַשְׁרֵי וּבָא לְצִיּוֹן', al);
-    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`);
-    let extra = '';
-    extra += siddurAccordionHTML('gomel','בִּרְכַּת הַגּוֹמֵל · לְמִי שֶׁנִּיצַּל מִסַּכָּנָה', `<div class="prayer-para">${SIDDUR.birkatHagomel}</div>`);
-    extra += siddurAccordionHTML('vidui','וִדּוּי אִישִׁי', `<div class="prayer-para">${SIDDUR.viduiShort}</div>`);
-    extra += siddurAccordionHTML('chatan','בִּרְכַּת חָתָן', `<div class="prayer-para">${SIDDUR.groomBlessing}</div>`);
-    push('more','נוֹסָפוֹת', extra);
+    push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
+    push('shirShelYom','שִׁיר שֶׁל יוֹם', siddurShirShelYomHTML(dateObj));
+    push('kaddish2','קַדִּישׁ', siddurChatziKaddishHTML());
+    push('kaveh','קַוֵּה', siddurKavehClosingHTML());
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
   } else if(prayer==='mincha'){
     push('ashrei','אַשְׁרֵי', `<div class="prayer-para">${SIDDUR.ashreiUvaLetzion.ashreiIntro}</div>`+siddurTehillimChapterHTML(145));
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {mincha:true}));
+    push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    // On days with no Tachanun, Tehillim 67 ("Elokim Yechonenu") is said
+    // instead - traditionally laid out in a menorah shape in print, which
+    // is a distinct convention from this app's own [[MENORAH]] marker (an
+    // illustration placed after the Pitum HaKetoret "Vaya'as et haMenorah"
+    // passage, not a text-layout mechanism) - rendered here as plain text;
+    // see the build report.
+    if(info.skipTachanun) push('psalm67','תְּהִלִּים סז', siddurTehillimChapterHTML(67));
     push('tachanun','תַּחֲנוּן', `<div class="siddur-tachanun-strip">${info.skipTachanun ? 'הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן' : 'הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל'}</div>`);
     push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', `<div class="prayer-para">${SIDDUR.kaddishTitkabel}</div>`);
-    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`);
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
   } else if(prayer==='arvit'){
+    let opening = `<div class="prayer-para">${SIDDUR.arvitBlessings.leshemYichud}</div>`;
+    opening += `<div class="prayer-para">${SIDDUR.arvitBlessings.openingVerses}</div>`;
+    opening += siddurChatziKaddishHTML();
+    opening += `<div class="prayer-para">${SIDDUR.arvitBlessings.vehuRachum}</div>`;
+    push('opening','לְשֵׁם יִחוּד', opening);
     push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML());
+    push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
-    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`);
+    let post = siddurChatziKaddishHTML();
+    post += siddurTehillimChapterHTML(121);
+    post += siddurChatziKaddishHTML();
+    post += `<div class="siddur-section-title">בָּרְכוּ</div><div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
+    push('postAmidah','קַדִּישׁ · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
     if(info.omerDay){
       push('omer','סְפִירַת הָעֹמֶר', `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">סְפִירַת הָעֹֽמֶר · יוֹם ${info.omerDay}</span>בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָֽׁנוּ בְּמִצְוֹתָיו וְצִוָּֽנוּ עַל סְפִירַת הָעֹֽמֶר: הַיּוֹם ${omerCountText(info.omerDay)}</div>`);
     }
   } else if(prayer==='musaf'){
     push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
   } else if(prayer==='birkot'){
-    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurParasFromText(PRAYERS_EXTRA.birkotHashachar.text));
+    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurBirkotHashacharHTML());
   }
   return list;
 }
