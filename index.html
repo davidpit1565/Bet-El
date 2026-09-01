@@ -7066,10 +7066,18 @@ function siddurBirkotHashacharHTML(){
   return html;
 }
 function siddurShirShelYomHTML(dateObj){
-  const d = SIDDUR_SHIR_SHEL_YOM[dateObj.getDay()];
+  const day = dateObj.getDay();
+  const d = SIDDUR_SHIR_SHEL_YOM[day];
   if(!d) return '';
   let html = d.intro ? `<div class="prayer-para siddur-para-nodivider">${d.intro}</div>` : '';
   html += siddurTehillimChapterHTML(d.ch);
+  // Every weekday's Song of the Day (Sunday-Friday; Shabbat's Psalm 92 has
+  // its own distinct ending, out of scope) closes with this same 4-verse
+  // "Hoshi'einu...Baruch Hashem...Amen ve'Amen" addition - previously
+  // missing entirely (Sefaria: Weekday Shacharit > Song of the Day, printed
+  // right after each day's psalm; not part of window.TEHILLIM's own,
+  // purely Biblical chapter text).
+  if(day!==6 && SIDDUR.shirShelYomClosing) html += `<div class="prayer-para">${SIDDUR.shirShelYomClosing}</div>`;
   return html;
 }
 /* ---- Chatzi Kaddish (Half Kaddish): reuses the identical opening
@@ -7165,6 +7173,14 @@ function siddurAmidahClosingHTML(info){
   let html = siddurParasFromText(`${SIDDUR.yihyuLeratzon}\n\n${SIDDUR.elokaiNetzor}\n\n${SIDDUR.yihyuLeratzon}`, true);
   const oseShalom = info.isAseretYemeiTeshuva ? SIDDUR.oseShalom.replace('שָׁלוֹם', SIDDUR.oseShalomTeshuvaWord) : SIDDUR.oseShalom;
   html += siddurParasFromText(`[[HAL]]יפסע שלש פסיעות לאחור[[/HAL]]\n\n${oseShalom}\n\n${SIDDUR.korbanot.yehiRatzonMikdash}`);
+  // Avinu Malkeinu (Sefaria: Weekday Shacharit > Amida, right after this
+  // Yehi Ratzon and before Tachanun) - said only during the Ten Days of
+  // Repentance, per the source's own rubric. Previously missing entirely
+  // (no SIDDUR field existed for it at all).
+  if(info.isAseretYemeiTeshuva){
+    html += `<div class="siddur-section-title">אָבִינוּ מַלְכֵּנוּ</div>`;
+    html += siddurParasFromText(SIDDUR.avinuMalkeinu.join('\n\n'), true);
+  }
   return html;
 }
 function siddurAmidahHTML(info, opts){
@@ -7248,13 +7264,29 @@ function siddurPesukeiDezimraHTML(info){
   html += siddurTehillimChapterHTML(145); // the Ashrei psalm itself
   for(let ch=146; ch<=150; ch++) html += siddurTehillimChapterHTML(ch);
   html += `<div class="prayer-para">${pz.closingVerses}</div>`;
-  if(info.isAseretYemeiTeshuva) html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">עֲשֶׂרֶת יְמֵי תְּשׁוּבָה</span>${pz.aseretYemeiTeshuvaInsert}</div>`;
   html += siddurParasFromText(pz.vayevarechDavid);
   html += `<div class="prayer-para">${pz.vayosha}</div>`;
   html += `<div class="siddur-section-title">שִׁירַת הַיָּם</div>`;
   html += `<div class="prayer-para">${pz.azYashir}</div>`;
   html += `<div class="prayer-para">${pz.kiLashemHamlucha}</div>`;
   html += `<div class="prayer-para">${pz.yishtabach}</div>`;
+  // Aseret Yemei Teshuva addition (Shir HaMaalot Mimaamakim, Tehillim 130)
+  // belongs right after Yishtabach, not before Vayevarech David - verified
+  // in both Sefaria editions (Weekday Shacharit > Pesukei D'Zimra: the
+  // "said in the Ten Days of Repentance" rubric sits right before this
+  // psalm, immediately after Yishtabach's blessing and right before the
+  // Chatzi Kaddish that closes the section). A previous round placed it
+  // earlier in the sequence by mistake; corrected here.
+  if(info.isAseretYemeiTeshuva) html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">עֲשֶׂרֶת יְמֵי תְּשׁוּבָה</span>${pz.aseretYemeiTeshuvaInsert}</div>`;
+  // Pesukei D'Zimra's own closing Chatzi Kaddish + Barchu (Sefaria: Weekday
+  // Shacharit > Pesukei D'Zimra ends with "ואומר החזן חצי קדיש" then
+  // Barchu) - previously missing entirely, so Birkot Kriat Shema jumped
+  // straight from Yishtabach into Yotzer Ohr with no Kaddish/Barchu
+  // between them. Barchu text reused from arvitBlessings.barchu (identical
+  // wording to the Pesukei D'Zimra node's own Barchu in the source).
+  html += siddurChatziKaddishHTML();
+  html += `<div class="siddur-section-title">בָּרְכוּ</div>`;
+  html += `<div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
   return html;
 }
 /* Shema's real Biblical division is 3 paragraphs (Deut 6:4-9, Deut 11:13-21,
@@ -7371,6 +7403,16 @@ function siddurKorbanotHTML(){
   html += `<div class="prayer-para">${k.akeida}</div>`;
   html += `<div class="prayer-para">${k.akeidaYehiRatzon}</div>`;
   html += siddurParasFromText(k.ribonoShelOlam);
+  // Eilu Devarim (Mishnah Peah 1:1) / Le'olam Yehei Adam (Tana Devei
+  // Eliyahu) / Lefichach Anachnu Chayavim, then the Shema+Baruch Shem said
+  // here (a second daily recitation, distinct from the one in Birkot Kriat
+  // Shema) followed by Ata Hu Echad / Ata Hu Hashem Ha'Elokim (Kabetz
+  // Nefutzot) / a Yehi Ratzon - all previously missing entirely (Sefaria:
+  // Weekday Shacharit > Morning Prayer, right before Parashat HaTamid).
+  // Verified in both editions checked (only spelling/orthography differs).
+  html += siddurParasFromText(`${k.eiluDevarim}\n\n${k.leOlamYehei}\n\n${k.lefichachAnachnu}`);
+  html += siddurParasFromText(`${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}\n\n(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:`, true);
+  html += siddurParasFromText(`${k.ataHuEchad}\n\n${k.kabetzNefutzot}\n\n${k.yehiRatzonTamid}`);
   html += `<div class="siddur-section-title">פָּרָשַׁת הַתָּמִיד</div>`;
   html += `<div class="prayer-para">${k.parashatHatamid}</div>`;
   html += `<div class="siddur-section-title">פִּטּוּם הַקְּטֹרֶת</div>`;
@@ -7417,6 +7459,13 @@ function siddurSections(dateObj, info, prayer){
     // both previously present in SIDDUR.minchaOpening/newly added but never
     // rendered anywhere (Sefaria: Weekday Mincha > Offerings, opening).
     push('opening','לְשֵׁם יִחוּד', `<div class="prayer-para">${SIDDUR.minchaOpening.leshemYichud}</div>`+siddurTehillimChapterHTML(84));
+    // Parashat HaTamid (Numbers 28:1-8, the same verses as Shacharit's own
+    // Korbanot reading - reused via SIDDUR.korbanot.parashatHatamid rather
+    // than duplicated) sits right here in Mincha too, between Tefila
+    // LeMoshe and Pitum HaKetoret - verified via two independent Sefaria
+    // editions (Weekday Mincha > Offerings, both agree) - previously
+    // missing entirely from this section.
+    push('tamid','פָּרָשַׁת הַתָּמִיד', `<div class="prayer-para">${SIDDUR.korbanot.parashatHatamid}</div>`);
     // Mincha's own Korbanot-analog Pitum HaKetoret, right at the start
     // (verified: Weekday Mincha > Offerings has the identical SHORTER
     // form used in Shacharit's closing Kaveh sequence - ends after Bar
@@ -7428,8 +7477,13 @@ function siddurSections(dateObj, info, prayer){
     // set before You as incense...") right after - previously unused data
     // (SIDDUR.minchaOpening.tichonTefilati), now wired in at its real
     // Sefaria position (Weekday Mincha > Offerings, right before the
-    // Chatzi Kaddish that opens the Amida).
-    push('ashrei','אַשְׁרֵי', siddurParasFromText(SIDDUR.ashreiUvaLetzion.ashreiIntro, true)+siddurTehillimChapterHTML(145)+`<div class="prayer-para">${SIDDUR.minchaOpening.tichonTefilati}</div>`);
+    // Chatzi Kaddish that opens the Amida). Note: unlike Shacharit's own
+    // Ashrei (which opens with the "Yehi chasdecha" verse, Psalm 33:22 -
+    // correctly kept there), Mincha's own Ashrei here begins directly with
+    // "Ashrei yoshvei veitecha" with no such prefix - verified via two
+    // independent Sefaria editions (both agree) - so only the second
+    // paragraph of the shared ashreiIntro field is used here.
+    push('ashrei','אַשְׁרֵי', siddurParasFromText(SIDDUR.ashreiUvaLetzion.ashreiIntro.split('\n\n')[1], true)+siddurTehillimChapterHTML(145)+`<div class="prayer-para">${SIDDUR.minchaOpening.tichonTefilati}</div>`);
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {mincha:true}));
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
