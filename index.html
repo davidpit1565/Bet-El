@@ -7320,7 +7320,7 @@ function siddurKavehClosingHTML(){
   html += siddurParasFromText(SIDDUR.tanaDeveiEliyahu, true);
   html += siddurParasFromText(SIDDUR.kaddishDerabbanan);
   html += `<div class="siddur-section-title">בָּרְכוּ</div>`;
-  html += `<div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
+  html += siddurParasFromText(SIDDUR.arvitBlessings.barchu, true);
   return html;
 }
 // The individual's own conclusion said after every Amidah (Shacharit,
@@ -7562,7 +7562,7 @@ function siddurPesukeiDezimraHTML(info){
   // wording to the Pesukei D'Zimra node's own Barchu in the source).
   html += siddurChatziKaddishHTML();
   html += `<div class="siddur-section-title">בָּרְכוּ</div>`;
-  html += `<div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
+  html += siddurParasFromText(SIDDUR.arvitBlessings.barchu, true);
   return html;
 }
 /* Shema's real Biblical division is 3 paragraphs (Deut 6:4-9, Deut 11:13-21,
@@ -7637,7 +7637,7 @@ function siddurBirkotShemaHTML(){
 function siddurArvitShemaHTML(){
   const a = SIDDUR.arvitBlessings, s = SIDDUR.birkotKriatShema;
   let html = `<div class="siddur-section-title">בָּרְכוּ</div>`;
-  html += `<div class="prayer-para">${a.barchu}</div>`;
+  html += siddurParasFromText(a.barchu, true);
   html += `<div class="siddur-section-title">הַמַּעֲרִיב עֲרָבִים</div>`;
   html += `<div class="prayer-para">${a.maarivAravim}</div>`;
   html += `<div class="siddur-section-title">אַהֲבַת עוֹלָם</div>`;
@@ -7875,7 +7875,7 @@ function siddurSections(dateObj, info, prayer){
     let post = siddurChatziKaddishHTML();
     post += siddurTehillimChapterHTML(121);
     post += siddurChatziKaddishHTML();
-    post += `<div class="siddur-section-title">בָּרְכוּ</div><div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
+    post += `<div class="siddur-section-title">בָּרְכוּ</div>`+siddurParasFromText(SIDDUR.arvitBlessings.barchu, true);
     push('postAmidah','קַדִּישׁ · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('arvit', info));
   } else if(prayer==='roshChodesh'){
