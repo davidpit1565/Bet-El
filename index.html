@@ -5637,6 +5637,8 @@ function siddurDayInfo(hd){
     isChanukah:false, chanukahDay:null,
     isPurim:false,
     isAseretYemeiTeshuva:false,
+    isElulTishreiLedavid:false,
+    isHashemHuHaElokimDay:false,
     isNisan:false, isLagBaOmer:false, isErevYomKippur:false, isTuBishvat:false,
     isErevRoshHashana:false, isIsruChag:false,
     omerDay:null,
@@ -5653,6 +5655,17 @@ function siddurDayInfo(hd){
        Kippur itself (10 Tishrei) are out of scope (major holidays, no
        phone use), so only the days *between* them ever render here. */
     info.isAseretYemeiTeshuva = hd.getMonth()===HMONTHS.TISHREI && hd.getDate()>=3 && hd.getDate()<=9;
+    // "LeDavid Hashem Ori" (Psalm 27) after Shacharit's Aleinu, Rosh Chodesh
+    // Elul through Hoshana Raba (Tishrei 21) - per custom, wider than
+    // siddurIsSelichotSeason's own Elul+Tishrei<=9 range (that one's for the
+    // separate standalone Selichot recitation, not this addition).
+    info.isElulTishreiLedavid = hd.getMonth()===HMONTHS.ELUL || (hd.getMonth()===HMONTHS.TISHREI && hd.getDate()<=21);
+    // "Hashem Hu HaElokim" x2 + "Hashem Melech"/"Vehaya Hashem Lemelech"/
+    // Hoshi'einu (Sefaria: Weekday Shacharit > Hodu, "בעשרת ימי תשובה
+    // והושענא רבה אומרים") - Aseret Yemei Teshuva (this app's own Tishrei
+    // 3-9 window, see isAseretYemeiTeshuva above) OR Hoshana Raba (Tishrei
+    // 21) alone, not the whole isElulTishreiLedavid range.
+    info.isHashemHuHaElokimDay = info.isAseretYemeiTeshuva || (hd.getMonth()===HMONTHS.TISHREI && hd.getDate()===21);
     info.isIsruChag = isIsruChagToday(hd, il);
     info.isTalSeason = siddurIsTalSeason(hd);
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
@@ -6984,6 +6997,11 @@ function siddurTorahReadingHTML(dateObj, info, opts){
   html += `<div class="prayer-para">${SIDDUR.torahBirkatBefore||''}</div>`;
   html += `<div class="sm-verses notranslate">${siddurTorahBody(verses)}</div>`;
   html += `<div class="prayer-para">${SIDDUR.torahBirkatAfter||''}</div>`;
+  // "Yehalelu et Shem Hashem" (Tehillim 148:13-14) - said while returning
+  // the Torah scroll to the ark (Sefaria: Weekday Shacharit > Uva LeSion,
+  // "ומחזירין את ספר התורה למקומו ואומרים יהללו"), right after the
+  // reading's closing blessing. Previously missing.
+  html += siddurParasFromText(SIDDUR.torahYehalelu, true, 'siddur-verse-centered');
   return html;
 }
 
@@ -7236,14 +7254,27 @@ function siddurTachanunHTML(info, dateObj){
   html += siddurChatziKaddishHTML();
   return html;
 }
-/* ---- The 4 verses traditionally added right after Aleinu Leshabeach
-   (Proverbs 3:25, Isaiah 8:10, Isaiah 46:4, Psalm 140:14) - shared by
-   Shacharit/Mincha/Arvit so the text lives in one place. Not located
-   verbatim in this specific digitized Sefaria Siddur edition's own Aleinu
-   context (only Isaiah 8:10 turned up elsewhere in the source) - see the
-   build report. ---- */
-function siddurAfterAleinuHTML(){
-  return siddurParasFromText(SIDDUR.afterAleinuVerses, true, 'siddur-verse-centered');
+/* ---- What actually follows Aleinu Leshabeach's two main paragraphs, per
+   Sefaria (Weekday Shacharit/Mincha/Arvit > Alenu, both editions checked):
+   a "U'vtoratcha... Shema Yisrael" line (common to all three services -
+   Shacharit/Mincha/Arvit's Alenu nodes all end with at least this line),
+   then - Shacharit only - the "Vayomer im shamoa" paragraph (Shemot 15:26 +
+   Mishlei 3:18/17/16 "Eitz Chayim") and, during Elul through Hoshana Raba
+   (info.isElulTishreiLedavid), the full "LeDavid Hashem Ori" (Tehillim 27,
+   reusing window.TEHILLIM rather than a duplicated copy - see house style
+   on quoting full psalm chapters vs. verses in prose). The previous
+   "Al Tira" 4-verse set stored here (Mishlei 3:25, Yeshayahu 8:10, 46:4,
+   Tehillim 140:14) was never actually part of any Sefaria edition's Alenu
+   context in this Siddur and has been dropped in favor of the above. ---- */
+function siddurAfterAleinuHTML(prayer, info){
+  let html = siddurParasFromText(SIDDUR.aleinuShemaLine, true, 'siddur-verse-centered');
+  if(prayer==='shacharit'){
+    html += siddurParasFromText(SIDDUR.aleinuEitzChaim, true, 'siddur-verse-centered');
+    if(info && info.isElulTishreiLedavid){
+      html += `<div class="siddur-section-title">לְדָוִד יְהֹוָה אוֹרִי</div>`+siddurTehillimChapterHTML(27);
+    }
+  }
+  return html;
 }
 /* ---- Shacharit's closing sequence after Shir Shel Yom (Sefaria: Weekday
    Shacharit > Kaveh): Kaveh, Ein Keloheinu, a SECOND recitation of Pitum
@@ -7362,25 +7393,36 @@ function siddurPesukeiDezimraHTML(info){
   const pz = SIDDUR.pesukeiDezimra;
   let html = `<div class="siddur-section-title">הוֹדוּ</div>`;
   html += siddurParasFromText(pz.hodu, true);
-  // Romemu Hashem Eloheinu / El Nekamot Hashem (Sefaria's Hodu node,
-  // paragraphs 3-4) - previously missing entirely, so Hodu jumped
-  // straight from "Zera Yisrael avdo" into Psalm 30 with a real content
-  // gap in between. Verified against both Sefaria editions.
+  // "Romemu Hashem Eloheinu" (x2) through "El Nekamot Hashem...va'ani
+  // b'chasdecha vatachti" - said every day, right after Hodu's own two
+  // paragraphs and before Psalm 30 (Sefaria: Weekday Shacharit > Hodu,
+  // unconditional - no "on X days" rubric precedes it). Previously missing
+  // entirely.
   html += siddurParasFromText(pz.romemuElNekamot, true);
-  // Psalm 30 ("Mizmor Shir Chanukat HaBayit LeDavid") sits right after
-  // Romemu/El Nekamot, not immediately after Hodu's own body (a previous
-  // round placed it one step too early, before Romemu/El Nekamot even
-  // existed in the data) - verified in two independent Sefaria editions.
-  // Reuses window.TEHILLIM.
+  // Psalm 30 ("Mizmor Shir Chanukat HaBayit LeDavid") sits here, between
+  // the Hodu body and the "Hashem Melech" declaration - verified in two
+  // independent Sefaria editions (Shaliehsaboo Edition and Torat Emet
+  // 357), both agreeing on this exact position. Reuses window.TEHILLIM.
   html += siddurTehillimChapterHTML(30);
-  // "Hashem Hu HaElokim" x2 (paragraph 7) - also previously missing,
-  // between Psalm 30 and the "Hashem Melech" declaration.
-  html += siddurParasFromText(pz.hashemHuHaElokim, true);
-  html += siddurParasFromText(pz.hoduHashemMelech, true);
-  // Tehillim 67 ("Lamnatzeach Bincginot") closes Hodu itself in the
-  // source (traditionally laid out in a menorah shape in print, like the
-  // identical chapter's appearance elsewhere in the siddur - rendered
-  // here as plain text, see the build notes on that other occurrence).
+  // "Hashem Hu HaElokim" (x2) and the "Hashem Melech / Vehaya Hashem
+  // Lemelech / Hoshi'einu" sequence (pz.hoduHashemMelech) both belong ONLY
+  // to Aseret Yemei Teshuva and Hoshana Raba (Sefaria's own rubric: "בעשרת
+  // ימי תשובה והושענא רבה אומרים") - a previous round rendered
+  // hoduHashemMelech unconditionally every day, which is wrong; corrected
+  // here, and Hashem Hu HaElokim (previously missing) added right before
+  // it, both gated on the new info.isHashemHuHaElokimDay.
+  if(info.isHashemHuHaElokimDay){
+    html += `<div class="siddur-insert"><span class="siddur-insert-tag">עֲשֶׂרֶת יְמֵי תְּשׁוּבָה · הוֹשַׁעֲנָא רַבָּה</span>`
+      +siddurParasFromText(pz.hashemHuHaElokim, true)
+      +siddurParasFromText(pz.hoduHashemMelech, true)
+      +`</div>`;
+  }
+  // Tehillim 67 ("Elokim Yechonenu") closes Hodu every weekday (Sefaria:
+  // right after the above, printed in a menorah shape in some editions -
+  // a print-layout convention, not reproduced here; see house style on
+  // this app's own [[MENORAH]] marker elsewhere, which is unrelated).
+  // Reuses window.TEHILLIM rather than a duplicated copy. Previously
+  // missing entirely.
   html += siddurTehillimChapterHTML(67);
   html += `<div class="siddur-section-title">בָּרוּךְ שֶׁאָמַר</div>`;
   html += siddurParasFromText(pz.baruchSheamar, true);
@@ -7577,7 +7619,7 @@ function siddurSections(dateObj, info, prayer){
     push('shirShelYom','שִׁיר שֶׁל יוֹם', siddurShirShelYomHTML(dateObj));
     push('kaddish2','קַדִּישׁ', siddurChatziKaddishHTML());
     push('kaveh','קַוֵּה', siddurKavehClosingHTML());
-    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('shacharit', info));
   } else if(prayer==='mincha'){
     // Mincha's own Leshem Yichud ("she'tiken Yitzchak Avinu" - distinct
     // wording from Shacharit's/Arvit's own, each naming its own Patriarch)
@@ -7644,7 +7686,7 @@ function siddurSections(dateObj, info, prayer){
     // Tachanun; both editions checked show this same full Kaddish Titkabel
     // text recited twice in Mincha, so it's reused rather than duplicated.
     push('kaddishT2','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel));
-    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('mincha', info));
   } else if(prayer==='arvit'){
     let opening = `<div class="prayer-para">${SIDDUR.arvitBlessings.leshemYichud}</div>`;
     opening += `<div class="prayer-para">${SIDDUR.arvitBlessings.openingVerses}</div>`;
@@ -7659,7 +7701,7 @@ function siddurSections(dateObj, info, prayer){
     post += siddurChatziKaddishHTML();
     post += `<div class="siddur-section-title">בָּרְכוּ</div><div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
     push('postAmidah','קַדִּישׁ · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
-    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('arvit', info));
     if(info.omerDay){
       push('omer','סְפִירַת הָעֹמֶר', `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">סְפִירַת הָעֹֽמֶר · יוֹם ${info.omerDay}</span>בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָֽׁנוּ בְּמִצְוֹתָיו וְצִוָּֽנוּ עַל סְפִירַת הָעֹֽמֶר: הַיּוֹם ${omerCountText(info.omerDay)}</div>`);
     }
