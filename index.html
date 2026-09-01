@@ -5299,7 +5299,7 @@ function renderTracker(){
 function stripNik(x){ return (x||'').replace(/[\u0591-\u05C7]/g,'').replace(/[\u05BE\u05F3\u05F4'"׳״:.,]/g,'').trim(); }
 function renderTehillim(){
   app.innerHTML = `
-  ${topbar('סֵפֶר תְּהִלִּים','library')}
+  ${topbar('סֵפֶר תְּהִלִּים')}
   <div class="view">
     <div class="search-box">${I.search}<input id="psSearch" placeholder="חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…"/></div>
     <div class="chip-row">
@@ -5983,7 +5983,6 @@ const LIBRARY_CATS = [
   {key:'torah', label:'תּוֹרָה'},
   {key:'neviim', label:'נְבִיאִים'},
   {key:'ketuvim', label:'כְּתוּבִים'},
-  {key:'tehillim', label:'תְּהִלִּים'},
   {key:'mishnah', label:'מִשְׁנָה'},
   {key:'gemara', label:'גְּמָרָא'},
   {key:'rambam', label:'רַמְבַּ״ם'},
@@ -6004,7 +6003,6 @@ function openLibraryCat(key){
   haptic();
   if(key==='musar') return go('musarList');
   if(key==='benishchai') return go('bicHome');
-  if(key==='tehillim') return go('tehillim');
   if(key==='torah') return go('libraryTorahBooks');
   if(key==='gemara') return go('libraryGemaraMasechtot');
   if(key==='rambam') return go('libraryRambamSefarim');
@@ -8418,12 +8416,12 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
    screens nested under it the same way) should keep that icon lit rather
    than going dark the moment TAB stops being the literal 'prayers' string -
    previously NONE of them did (go()'s nav-highlight toggle only ever
-   matched a tab name to itself), which is what let Tehillim get away with
-   owning its own bottom-nav icon in the first place. Now that Tehillim is
-   a Library entry like any other (see LIBRARY_CATS), it and its per-chapter
-   reader (TAB==='reader' when RD.daily is false - the same 'reader' tab is
-   also used for the home screen's daily-reading flow, where RD.daily is
-   true and 'home' should stay lit instead) join this same group. */
+   matched a tab name to itself). Tehillim owns its own bottom-nav icon
+   again (see buildNav()'s `items`), so its own per-chapter reader
+   (TAB==='reader' when RD.daily is false - the same 'reader' tab is also
+   used for the home screen's daily-reading flow, where RD.daily is true
+   and 'home' should stay lit instead) lights that icon rather than
+   Library's, via the special case below rather than joining this set. */
 const LIBRARY_NESTED_TABS=new Set(['library',
   'libraryTorahBooks','libraryTorahParshiot','libraryTorahReader',
   'libraryGemaraMasechtot','libraryGemaraReader',
@@ -8433,11 +8431,11 @@ const LIBRARY_NESTED_TABS=new Set(['library',
   'libraryMishnahSedarim','libraryMishnahTractates','libraryMishnahChapters','libraryMishnahReader',
   'libraryNKBooks','libraryNKReader',
   'musarList','musarYomi','bicHome','bicParshiot','bicReader',
-  'tehillim','prayersGroup','siddurHome','siddurReader']);
+  'prayersGroup','siddurHome','siddurReader']);
 function navActiveTab(tab){
   tab=tab||'home';
+  if(tab==='reader' && RD && !RD.daily) return 'tehillim';
   if(LIBRARY_NESTED_TABS.has(tab)) return 'prayers';
-  if(tab==='reader' && RD && !RD.daily) return 'prayers';
   return tab;
 }
 function buildNav(){
@@ -8445,7 +8443,7 @@ function buildNav(){
   if(TAB==='onboard'||TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
+  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
   nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===navActiveTab(TAB)?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
