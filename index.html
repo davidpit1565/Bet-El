@@ -7710,7 +7710,7 @@ function drawSiddurReader(){
   <div class="view prayer-reader-page">
     <div class="prayer-reader-header">
       <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
-      <div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>
+      ${(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
     </div>
     <div class="prayer-reader-divider"></div>
     <div class="prayer-reader-text notranslate">
