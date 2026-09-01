@@ -6927,8 +6927,16 @@ function siddurParasFromText(text, tight, extraClass){
     return `<div class="prayer-para${nodiv?' siddur-para-nodivider':''}${extraClass?' '+extraClass:''}">${line}</div>`;
   }).join('');
 }
-function siddurTehillimChapterHTML(ch){
-  const T=window.TEHILLIM; const verses=(T&&(T[ch]||T[String(ch)]))||[];
+function siddurTehillimChapterHTML(ch, opts){
+  const T=window.TEHILLIM; let verses=(T&&(T[ch]||T[String(ch)]))||[];
+  // skipSuperscription: some siddur contexts (e.g. Hodu's Psalm 30, per
+  // Sefaria's own Weekday Shacharit > Hodu leaf, verified in both editions)
+  // omit the chapter's opening superscription verse ("מִזְמוֹר שִׁיר
+  // חֲנֻכַּת הַבַּיִת לְדָוִד" for ch.30) and start straight from the body -
+  // this app's own window.TEHILLIM stores that superscription as verse 1
+  // (needed when the chapter is read in full elsewhere), so it must be
+  // sliced off here rather than removed from the shared data.
+  if(opts && opts.skipSuperscription) verses = verses.slice(1);
   return verses.length ? `<div class="prayer-para">${verses.join(' ')}</div>` : '';
 }
 function siddurTorahBody(verses){
@@ -7399,24 +7407,31 @@ function siddurPesukeiDezimraHTML(info){
   // unconditional - no "on X days" rubric precedes it). Previously missing
   // entirely.
   html += siddurParasFromText(pz.romemuElNekamot, true);
-  // Psalm 30 ("Mizmor Shir Chanukat HaBayit LeDavid") sits here, between
-  // the Hodu body and the "Hashem Melech" declaration - verified in two
-  // independent Sefaria editions (Shaliehsaboo Edition and Torat Emet
-  // 357), both agreeing on this exact position. Reuses window.TEHILLIM.
-  html += siddurTehillimChapterHTML(30);
-  // "Hashem Hu HaElokim" (x2) and the "Hashem Melech / Vehaya Hashem
-  // Lemelech / Hoshi'einu" sequence (pz.hoduHashemMelech) both belong ONLY
-  // to Aseret Yemei Teshuva and Hoshana Raba (Sefaria's own rubric: "בעשרת
-  // ימי תשובה והושענא רבה אומרים") - a previous round rendered
-  // hoduHashemMelech unconditionally every day, which is wrong; corrected
-  // here, and Hashem Hu HaElokim (previously missing) added right before
-  // it, both gated on the new info.isHashemHuHaElokimDay.
+  // Psalm 30 sits here, between the Hodu body and the "Hashem Melech"
+  // declaration - verified in two independent Sefaria editions
+  // (Shaliehsaboo Edition and Torat Emet 357), both agreeing on this exact
+  // position AND that Sefaria's own Hodu leaf starts the psalm directly at
+  // "Aromimcha" - its opening superscription ("Mizmor Shir Chanukat
+  // HaBayit LeDavid") is NOT part of Hodu's text there (that line is only
+  // the chapter's own heading when read as a standalone psalm elsewhere),
+  // so it must be skipped here or Hodu ends up with a verse Sefaria
+  // doesn't have.
+  html += siddurTehillimChapterHTML(30, {skipSuperscription:true});
+  // "Hashem Hu HaElokim" (x2) belongs ONLY to Aseret Yemei Teshuva and
+  // Hoshana Raba (Sefaria's own rubric: "בעשרת ימי תשובה ובהושענא רבה
+  // עומדים ואומרים", directly before it in both editions) - previously
+  // missing entirely, now gated on info.isHashemHuHaElokimDay. The
+  // "Hashem Melech / Vehaya Hashem Lemelech / Hoshi'einu" sequence
+  // (pz.hoduHashemMelech) is introduced by its OWN separate, unconditional
+  // "עומדים ואומרים" note right after and is said every single day - a
+  // previous round wrongly folded it into the same gated block; corrected
+  // here.
   if(info.isHashemHuHaElokimDay){
     html += `<div class="siddur-insert"><span class="siddur-insert-tag">עֲשֶׂרֶת יְמֵי תְּשׁוּבָה · הוֹשַׁעֲנָא רַבָּה</span>`
       +siddurParasFromText(pz.hashemHuHaElokim, true)
-      +siddurParasFromText(pz.hoduHashemMelech, true)
       +`</div>`;
   }
+  html += siddurParasFromText(pz.hoduHashemMelech, true);
   // Tehillim 67 ("Elokim Yechonenu") closes Hodu every weekday (Sefaria:
   // right after the above, printed in a menorah shape in some editions -
   // a print-layout convention, not reproduced here; see house style on
