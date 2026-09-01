@@ -6858,7 +6858,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
 function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
@@ -7130,10 +7130,10 @@ function siddurBirkotHashacharHTML(){
    Shacharit Shema already uses, rather than duplicated. */
 function siddurTalitTefilinHTML(){
   const tt = SIDDUR.talitTefilin;
-  const talit = `<div class="siddur-section-title">סֵֽדֶר עֲטִיפַת טַלִּית</div>`
+  const talit = `<div class="siddur-section-title">סֵדֶר עֲטִיפַת טַלִּית</div>`
     + siddurParasFromText(`${tt.talitLeshemYichud}\n\n${tt.talitBracha}`);
 
-  let tefilin = `<div class="siddur-section-title">סֵֽדֶר הַנָּחַת תְּפִלִּין</div>`;
+  let tefilin = `<div class="siddur-section-title">סֵדֶר הַנָּחַת תְּפִלִּין</div>`;
   tefilin += siddurParasFromText(`${tt.tefilinLeshemYichud}\n\n${tt.tefilinBracha}`);
   tefilin += siddurParasFromText(`[[HAL]]${tt.tefilinBrachaAltNote}[[/HAL]]\n\n${tt.tefilinBrachaAlt}`);
   tefilin += siddurParasFromText(`[[HAL]]${tt.tefilinFingerWrapNote}[[/HAL]]\n\n${tt.tefilinFingerWrapVerses}`);
@@ -7180,7 +7180,7 @@ function siddurTikunChatzotHTML(info){
   // a truncated preview of that entry and concluded (wrongly) that no
   // Leshem Yichud existed at all, and deleted it. Re-verified against the
   // full untruncated fetch: it's there, right after the rubric note.
-  let opening = `<div class="siddur-section-title">סֵֽדֶר תִּקּוּן חֲצוֹת</div>`;
+  let opening = `<div class="siddur-section-title">סֵדֶר תִּקּוּן חֲצוֹת</div>`;
   opening += siddurParasFromText(`[[HAL]]${tc.rubricNote}[[/HAL]]\n\n${tc.leshemYichud}`);
   opening += siddurParasFromText(`${tc.ana}\n\n${tc.mahNomar}`);
 
