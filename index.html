@@ -8501,9 +8501,9 @@ const MILESTONE_UI={
 function celebrateMilestone(count, tier){
   const grand = tier>=1000;
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
-  const nStr=count.toLocaleString('he-IL'), tierStr=tier.toLocaleString('he-IL');
+  const tierStr=tier.toLocaleString('he-IL');
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
-  const body = (grand?t.grandBody:t.body).replace('{n}',nStr);
+  const body = (grand?t.grandBody:t.body).replace('{n}',tierStr);
   haptic(grand?60:30);
   confetti(grand?260:140);
   if(grand) setTimeout(()=>confetti(220), 450);
