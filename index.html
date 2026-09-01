@@ -7137,7 +7137,7 @@ function siddurTalitTefilinHTML(){
   tefilin += siddurParasFromText(`[[HAL]]${tt.tefilinKadeshLiNote}[[/HAL]]\n\n${tt.tefilinKadeshLi}\n\n${tt.tefilinVehayaKiYeviacha}`);
   tefilin += siddurParasFromText(`[[NOTE]]שְׁתֵּי הַפָּרָשִׁיּוֹת הַבָּאוֹת הֵן שְׁתֵּי הַפָּרָשִׁיּוֹת הַנּוֹסָפוֹת הַכְּתוּבוֹת בַּתְּפִלִּין - קְרִיאַת שְׁמַע וְהָיָה אִם שָׁמֹעַ, הַנֶּאֱמָרוֹת גַּם כְּחֵלֶק מִקְּרִיאַת שְׁמַע שֶׁל שַׁחֲרִית; מוּבָאוֹת כָּאן לְמִי שֶׁמַּשְׁלִים בְּעַצְמוֹ אֶת אַרְבַּע הַפָּרָשִׁיּוֹת מִיָּד לְאַחַר הַנָּחַת הַתְּפִלִּין`);
   const shemaLine = SIDDUR.shemaLine || 'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:';
-  tefilin += siddurParasFromText(`${shemaLine}\n\n(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:`, true);
+  tefilin += siddurParasFromText(`${shemaLine}\n\n<span class="siddur-whisper">(בלחש)</span> בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:`, true);
   tefilin += siddurParasFromText(`${SIDDUR.birkotKriatShema.veahavta}\n\n${SIDDUR.birkotKriatShema.vehaya}`);
   return {talit, tefilin};
 }
@@ -7171,6 +7171,12 @@ function siddurTikunChatzotHTML(info){
   const petach = `<div class="siddur-section-title">פֶּתַח אֵלִיָּהוּ</div>`
     + siddurParasFromText(PRAYERS_EXTRA.petichatEliyahu.text);
 
+  // Sefaria's own "LeShem Yichud" node for this section keeps the Leshem
+  // Yichud text in the SAME array entry as the rubric note (joined by a
+  // <br><br>, not a separate paragraph) - an earlier fetch here only read
+  // a truncated preview of that entry and concluded (wrongly) that no
+  // Leshem Yichud existed at all, and deleted it. Re-verified against the
+  // full untruncated fetch: it's there, right after the rubric note.
   let opening = `<div class="siddur-section-title">סֵֽדֶר תִּקּוּן חֲצוֹת</div>`;
   opening += siddurParasFromText(`[[HAL]]${tc.rubricNote}[[/HAL]]\n\n${tc.leshemYichud}`);
   opening += siddurParasFromText(`${tc.ana}\n\n${tc.mahNomar}`);
@@ -7198,7 +7204,6 @@ function siddurTikunChatzotHTML(info){
   leah += siddurTehillimChapterHTML(24);
   leah += siddurTehillimChapterHTML(67);
   leah += siddurTehillimChapterHTML(111);
-  leah += siddurParasFromText(tc.leahPs111Addendum);
   leah += siddurTehillimChapterHTML(51);
   if(!info.skipTachanun){
     leah += siddurParasFromText(`[[HAL]]${tc.leahSkipNote2}[[/HAL]]\n\n${tc.leahAdAnaBichya}\n\n${tc.leahTakumTerachem}`, true);
