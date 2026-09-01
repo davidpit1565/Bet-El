@@ -7246,10 +7246,22 @@ function siddurArvitShemaHTML(){
    in the Shacharit flow); it's now merged in as this section's opening
    paragraph instead of a standalone chip/section (one fewer section
    overall) - followed by Akeidah/Tamid/13-Midot, then the standalone
-   Kaddish Derabbanan. Pitum HaKetoret renders inline here (reusing the
-   app's existing PRAYERS_EXTRA.pitumHaketoret text, not a duplicate copy)
-   like every other paragraph in Korbanot - it's a required, always-said
-   part of the daily reading, not an optional link-out. ---- */
+   Kaddish Derabbanan. Pitum HaKetoret renders inline here as the real
+   standard Shacharit Korbanot recitation (Sefaria: Weekday Shacharit,
+   Incense Offering) - SIDDUR.pitumHaketoretShort (already used elsewhere,
+   reused rather than duplicated) followed by
+   SIDDUR.korbanot.pitumHaketoretRest (Ana Bekoach through the sacrifice-
+   order list). This replaced a mismatch: PRAYERS_EXTRA.pitumHaketoret.text
+   is a different, much longer kabbalistic "Ketores + kavanot" composition
+   (its own [[NOTE]]-per-word kavanot, Genesis 43:11, Exodus 12:21, the
+   Menorah passage, all of Eshet Chayil and Tehillim 91) that belongs to
+   that standalone Prayers-tab entry, not to the daily Korbanot reading -
+   it stays untouched there, just no longer reused here. Verified against
+   two independent Sefaria editions (Shaliehsaboo Edition, the primary
+   text used throughout this file, and Torat Emet 357 as a cross-check -
+   they agree on content, differing only in orthography/nikud/spacing).
+   It's a required, always-said part of the daily reading, not an
+   optional link-out. ---- */
 function siddurKorbanotHTML(){
   const k = SIDDUR.korbanot;
   // Leshem Yichud's own text ends before "Hareni Mekabel" (accepting the
@@ -7267,7 +7279,7 @@ function siddurKorbanotHTML(){
   html += `<div class="siddur-section-title">פָּרָשַׁת הַתָּמִיד</div>`;
   html += `<div class="prayer-para">${k.parashatHatamid}</div>`;
   html += `<div class="siddur-section-title">פִּטּוּם הַקְּטֹרֶת</div>`;
-  html += siddurParasFromText(PRAYERS_EXTRA.pitumHaketoret.text);
+  html += siddurParasFromText(`${SIDDUR.pitumHaketoretShort}\n\n${k.pitumHaketoretRest}`, true);
   html += `<div class="siddur-section-title">שְׁלֹשׁ עֶשְׂרֵה מִדּוֹת שֶׁהַתּוֹרָה נִדְרֶשֶׁת בָּהֶן</div>`;
   html += `<div class="prayer-para">${k.midot13}</div>`;
   html += `<div class="prayer-para">${k.yehudaBenTeima}</div>`;
