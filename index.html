@@ -6845,7 +6845,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'musaf'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף', tikunChatzot:'תִּקּוּן חֲצוֹת'};
 function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
@@ -6856,8 +6856,13 @@ function renderSiddurHome(){
 }
 function drawSiddurHome(){
   const info = siddurDayInfo(currentHDate());
-  const tiles = ['birkot','shacharit','mincha','arvit'];
+  const tiles = ['birkot','talitTefilin','shacharit','mincha','arvit'];
   if(info.isRoshChodesh) tiles.push('musaf');
+  // Tikun Chatzot is an occasional, day-independent reading (unlike the
+  // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
+  // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
+  // between Arvit and it, not before Shacharit/Mincha.
+  tiles.push('tikunChatzot');
   app.innerHTML = `
   ${topbar('סִדּוּר','prayers')}
   <div class="view">
@@ -7069,6 +7074,108 @@ function siddurBirkotHashacharHTML(){
     if(n.startsWith('והערב נא')) html += `<div class="prayer-para">${SIDDUR.torahBirkatBefore}</div>`;
   });
   return html;
+}
+/* Seder Talit u'Tefillin - a short standalone prayer, its own siddurHome
+   tile between Birkot HaShachar and Shacharit (not part of the fixed
+   Shacharit flow itself). Sourced from Sefaria: Siddur Edot HaMizrach,
+   Weekday Shacharit > Order of Talit / Order of Tefillin - cross-checked
+   against the Torat Emet 357 edition, which prints a much shorter form
+   with no Leshem Yichud at all; the fuller, primary edition is used here
+   to match this app's own house convention of every "Seder X" opening
+   with a Leshem Yichud. Both Leshem Yichud paragraphs already have their
+   Biblical quotes (Vihi Noam/Tehillim 90:17, Bemidbar 15:38-39, Devarim
+   11:18) de-cantillated at data-prep time in data/siddur.json's
+   talitTefilin.*LeshemYichud fields - every Leshem Yichud in this app
+   drops trope from the verses it quotes. The four Torah portions
+   traditionally read while wearing tefillin are all included: Kadesh Li
+   and Vehaya Ki Yeviacha (Exodus 13:1-16) come from Sefaria's own Order of
+   Tefillin leaf; Shema (Devarim 6:4-9) and Vehaya Im Shamoa (Devarim
+   11:13-21) are NOT part of that Sefaria leaf (it only quotes the two
+   Exodus passages) - they're reused as-is from
+   SIDDUR.birkotKriatShema.veahavta/.vehaya, the identical text the main
+   Shacharit Shema already uses, rather than duplicated. */
+function siddurTalitTefilinHTML(){
+  const tt = SIDDUR.talitTefilin;
+  const talit = `<div class="siddur-section-title">סֵֽדֶר עֲטִיפַת טַלִּית</div>`
+    + siddurParasFromText(`${tt.talitLeshemYichud}\n\n${tt.talitBracha}`);
+
+  let tefilin = `<div class="siddur-section-title">סֵֽדֶר הַנָּחַת תְּפִלִּין</div>`;
+  tefilin += siddurParasFromText(`${tt.tefilinLeshemYichud}\n\n${tt.tefilinBracha}`);
+  tefilin += siddurParasFromText(`[[HAL]]${tt.tefilinBrachaAltNote}[[/HAL]]\n\n${tt.tefilinBrachaAlt}`);
+  tefilin += siddurParasFromText(`[[HAL]]${tt.tefilinFingerWrapNote}[[/HAL]]\n\n${tt.tefilinFingerWrapVerses}`);
+  tefilin += siddurParasFromText(`[[HAL]]${tt.tefilinKadeshLiNote}[[/HAL]]\n\n${tt.tefilinKadeshLi}\n\n${tt.tefilinVehayaKiYeviacha}`);
+  tefilin += siddurParasFromText(`[[NOTE]]שְׁתֵּי הַפָּרָשִׁיּוֹת הַבָּאוֹת הֵן שְׁתֵּי הַפָּרָשִׁיּוֹת הַנּוֹסָפוֹת הַכְּתוּבוֹת בַּתְּפִלִּין - קְרִיאַת שְׁמַע וְהָיָה אִם שָׁמֹעַ, הַנֶּאֱמָרוֹת גַּם כְּחֵלֶק מִקְּרִיאַת שְׁמַע שֶׁל שַׁחֲרִית; מוּבָאוֹת כָּאן לְמִי שֶׁמַּשְׁלִים בְּעַצְמוֹ אֶת אַרְבַּע הַפָּרָשִׁיּוֹת מִיָּד לְאַחַר הַנָּחַת הַתְּפִלִּין`);
+  const shemaLine = SIDDUR.shemaLine || 'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:';
+  tefilin += siddurParasFromText(`${shemaLine}\n\n(בְּלַחַשׁ) בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:`, true);
+  tefilin += siddurParasFromText(`${SIDDUR.birkotKriatShema.veahavta}\n\n${SIDDUR.birkotKriatShema.vehaya}`);
+  return {talit, tefilin};
+}
+/* Seder Tikun Chatzot (Midnight Rite) - its own siddurHome tile, appended
+   after Arvit (and after whatever tiles other in-progress work adds -
+   see the tiles list in drawSiddurHome - this one is meant to always stay
+   last). Sourced from Sefaria: Siddur Edot HaMizrach, The Midnight Rite >
+   LeShem Yichud / Tikkun Rachel / Tikkun Leah - cross-checked against the
+   Torat Emet 357 edition, a shorter alternate that omits a few of the
+   non-Psalm piyutim below (it even says so explicitly, in its own rubric,
+   rather than silently dropping them) but agrees on every Psalm and on
+   both Vidui-style paragraphs. The Leshem Yichud here likewise has its
+   quoted Vihi Noam de-cantillated at data-prep time (data/siddur.json's
+   tikunChatzot.leshemYichud). Petach Eliyahu (the Zohar passage
+   customarily recited immediately before Tikkun Rachel/Leah) is reused
+   from the existing PRAYERS_EXTRA.petichatEliyahu entry rather than
+   duplicated, and shown here as this reader's own first section - it
+   also stays reachable on its own under "Tefilot Nosafot" unchanged; see
+   the build report for why its flat-list position wasn't moved. Every
+   full Psalm chapter here (137, 79, 42, 43, 20, 24, 67, 111, 51, 126)
+   reuses window.TEHILLIM via siddurTehillimChapterHTML rather than
+   storing a duplicate copy - exactly like Pesukei D'Zimra's Ashrei/
+   145-150 and Mincha's own Tehillim 84/67/93/102 already do. Tehillim 20
+   in Tikkun Leah and the closing "Ad Ana Bichya / Takum Terachem Tzion"
+   refrain are both explicitly gated by Sefaria's own rubric to days WITH
+   Tachanun - reusing the same info.skipTachanun flag Shacharit's own
+   Ashrei/Tehillim 20 pairing already relies on, rather than just printing
+   a static note that the reader has to apply themselves. */
+function siddurTikunChatzotHTML(info){
+  const tc = SIDDUR.tikunChatzot;
+  const petach = `<div class="siddur-section-title">פֶּתַח אֵלִיָּהוּ</div>`
+    + siddurParasFromText(PRAYERS_EXTRA.petichatEliyahu.text);
+
+  let opening = `<div class="siddur-section-title">סֵֽדֶר תִּקּוּן חֲצוֹת</div>`;
+  opening += siddurParasFromText(`[[HAL]]${tc.rubricNote}[[/HAL]]\n\n${tc.leshemYichud}`);
+  opening += siddurParasFromText(`${tc.ana}\n\n${tc.mahNomar}`);
+
+  let rachel = `<div class="siddur-section-title">תִּקּוּן רָחֵל</div>`;
+  rachel += siddurTehillimChapterHTML(137);
+  rachel += siddurTehillimChapterHTML(79);
+  rachel += siddurParasFromText(tc.rachelZechorHashem);
+  rachel += siddurParasFromText(tc.rachelHabetMishamayim);
+  rachel += siddurParasFromText(tc.rachelVeatah);
+  rachel += siddurParasFromText(`[[HAL]]${tc.rachelOyLiNote}[[/HAL]]\n\n${tc.rachelOyLi}`);
+  rachel += siddurParasFromText(tc.rachelAlChomotayich);
+  rachel += siddurParasFromText(tc.rachelAtahTakum);
+
+  let leah = `<div class="siddur-section-title">תִּקּוּן לֵאָה</div>`;
+  leah += siddurTehillimChapterHTML(42);
+  leah += siddurTehillimChapterHTML(43);
+  // Tehillim 20 is said only on days WITH Tachanun (same rule as the
+  // regular Shacharit Ashrei's own Tehillim 20) - Sefaria's rubric note
+  // sits at exactly this point in the text, immediately before it.
+  if(!info.skipTachanun){
+    leah += siddurParasFromText(`[[HAL]]${tc.leahSkipNote1}[[/HAL]]`);
+    leah += siddurTehillimChapterHTML(20);
+  }
+  leah += siddurTehillimChapterHTML(24);
+  leah += siddurTehillimChapterHTML(67);
+  leah += siddurTehillimChapterHTML(111);
+  leah += siddurParasFromText(tc.leahPs111Addendum);
+  leah += siddurTehillimChapterHTML(51);
+  if(!info.skipTachanun){
+    leah += siddurParasFromText(`[[HAL]]${tc.leahSkipNote2}[[/HAL]]\n\n${tc.leahAdAnaBichya}\n\n${tc.leahTakumTerachem}`, true);
+  }
+  leah += siddurParasFromText(`[[HAL]]${tc.leahCustomNote}[[/HAL]]\n\n${tc.leahBonehYerushalayim}`);
+  leah += siddurTehillimChapterHTML(126);
+
+  return {petach, opening, rachel, leah};
 }
 function siddurShirShelYomHTML(dateObj){
   const day = dateObj.getDay();
@@ -7560,6 +7667,16 @@ function siddurSections(dateObj, info, prayer){
     push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
   } else if(prayer==='birkot'){
     push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurBirkotHashacharHTML());
+  } else if(prayer==='talitTefilin'){
+    const tt = siddurTalitTefilinHTML();
+    push('talit','טַלִּית', tt.talit);
+    push('tefilin','תְּפִלִּין', tt.tefilin);
+  } else if(prayer==='tikunChatzot'){
+    const chz = siddurTikunChatzotHTML(info);
+    push('petach','פֶּתַח אֵלִיָּהוּ', chz.petach);
+    push('opening','לְשֵׁם יִחוּד', chz.opening);
+    push('rachel','תִּקּוּן רָחֵל', chz.rachel);
+    push('leah','תִּקּוּן לֵאָה', chz.leah);
   }
   return list;
 }
