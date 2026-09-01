@@ -7395,6 +7395,12 @@ function siddurSections(dateObj, info, prayer){
     push('kaveh','קַוֵּה', siddurKavehClosingHTML());
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
   } else if(prayer==='mincha'){
+    // Mincha's own Leshem Yichud ("she'tiken Yitzchak Avinu" - distinct
+    // wording from Shacharit's/Arvit's own, each naming its own Patriarch)
+    // followed by Tefila LeMoshe (Psalm 84, reused from window.TEHILLIM) -
+    // both previously present in SIDDUR.minchaOpening/newly added but never
+    // rendered anywhere (Sefaria: Weekday Mincha > Offerings, opening).
+    push('opening','לְשֵׁם יִחוּד', `<div class="prayer-para">${SIDDUR.minchaOpening.leshemYichud}</div>`+siddurTehillimChapterHTML(84));
     // Mincha's own Korbanot-analog Pitum HaKetoret, right at the start
     // (verified: Weekday Mincha > Offerings has the identical SHORTER
     // form used in Shacharit's closing Kaveh sequence - ends after Bar
@@ -7402,25 +7408,46 @@ function siddurSections(dateObj, info, prayer){
     // checked). Note: neither edition shows Ein Keloheinu alongside it
     // here (only Pitum HaKetoret itself) - see the build report.
     push('pitum','פִּטּוּם הַקְּטֹרֶת', siddurParasFromText(SIDDUR.pitumHaketoretShort, true));
-    push('ashrei','אַשְׁרֵי', siddurParasFromText(SIDDUR.ashreiUvaLetzion.ashreiIntro, true)+siddurTehillimChapterHTML(145));
+    // Ashrei intro + Tehillim 145, then Tichon Tefilati ("May my prayer be
+    // set before You as incense...") right after - previously unused data
+    // (SIDDUR.minchaOpening.tichonTefilati), now wired in at its real
+    // Sefaria position (Weekday Mincha > Offerings, right before the
+    // Chatzi Kaddish that opens the Amida).
+    push('ashrei','אַשְׁרֵי', siddurParasFromText(SIDDUR.ashreiUvaLetzion.ashreiIntro, true)+siddurTehillimChapterHTML(145)+`<div class="prayer-para">${SIDDUR.minchaOpening.tichonTefilati}</div>`);
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {mincha:true}));
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
-    push('tachanun','תַּחֲנוּן', `<div class="siddur-tachanun-strip">${info.skipTachanun ? 'הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן' : 'הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל'}</div>`);
+    // Full Tachanun/Vidui text (see siddurTachanunCoreHTML) - previously
+    // just a one-line "said/not said today" strip with no actual text.
+    // Mincha's own Vidui has no Monday/Thursday addition (unlike
+    // Shacharit's) and its own internal Kaddish here is the fuller Kaddish
+    // Titkabel (pushed separately right below, already correctly placed),
+    // not a plain Chatzi Kaddish - so this reuses only the shared core.
+    push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן</div>` : `<div class="siddur-tachanun-strip">הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל</div>`+siddurTachanunCoreHTML());
     push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel));
     // Tehillim 67 ("Elokim Yechonenu") every weekday EXCEPT Friday, when
     // Tehillim 93 ("Hashem Malach") is said instead - verified via two
     // independent Sefaria editions (Weekday Mincha > Vidui in both): this
     // is unconditional on the day of the week, NOT tied to Tachanun being
     // said/skipped (a correction from an earlier round, which had wrongly
-    // conditioned it on info.skipTachanun). Traditionally laid out in a
-    // menorah shape in print for Tehillim 67 - a distinct convention from
+    // conditioned it on info.skipTachanun). On public fast days, Tehillim
+    // 102 ("Tefila LeAni") replaces both of those instead (same source,
+    // both editions agree) - takes priority over the Friday swap since the
+    // source conditions it on the fast day alone. Traditionally laid out in
+    // a menorah shape in print for Tehillim 67 - a distinct convention from
     // this app's own [[MENORAH]] marker (a Temple-menorah SVG placed
     // after Pitum HaKetoret's "Vaya'as et haMenorah" passage, not a
     // text-layout mechanism) - rendered here as plain text; see the
     // build report.
     const isFriday = dateObj.getDay()===5;
-    push('psalm6793', isFriday?'תְּהִלִּים צג':'תְּהִלִּים סז', siddurTehillimChapterHTML(isFriday?93:67));
+    const ps6793 = info.isFastDay ? {ch:102, he:'תְּהִלִּים קב'} : (isFriday ? {ch:93, he:'תְּהִלִּים צג'} : {ch:67, he:'תְּהִלִּים סז'});
+    push('psalm6793', ps6793.he, siddurTehillimChapterHTML(ps6793.ch));
+    // A second, closing Kaddish Titkabel right before Aleinu (Sefaria:
+    // Weekday Mincha > Vidui, "Yehei Shlama" note after the Tehillim) -
+    // distinct occurrence from the one already pushed above right after
+    // Tachanun; both editions checked show this same full Kaddish Titkabel
+    // text recited twice in Mincha, so it's reused rather than duplicated.
+    push('kaddishT2','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel));
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
   } else if(prayer==='arvit'){
     let opening = `<div class="prayer-para">${SIDDUR.arvitBlessings.leshemYichud}</div>`;
