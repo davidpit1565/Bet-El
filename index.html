@@ -6858,7 +6858,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'musaf'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
 function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
@@ -6875,7 +6875,7 @@ function drawSiddurHome(){
   // the build notes) so it's always offered.
   if(info.omerDay) tiles.push('omer');
   tiles.push('levana');
-  if(info.isRoshChodesh) tiles.push('musaf');
+  if(info.isRoshChodesh) tiles.push('musaf','roshChodesh');
   // Tikun Chatzot is an occasional, day-independent reading (unlike the
   // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
   // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
@@ -7378,6 +7378,87 @@ function siddurHallelHTML(info){
   if(info.hallelBlessing) html += `<div class="prayer-para">${h.closing_yehalelucha}</div>`;
   return html;
 }
+/* ---- Seder Rosh Chodesh: the standalone tile packaging the WHOLE Rosh
+   Chodesh service (Hallel through the end of Musaf) into one continuous
+   reader, sourced from Sefaria's Siddur Edot HaMizrach > Rosh Hodesh node
+   tree (8 leaves: Rosh Hodesh/Hallel/Uva LeSion/Song of the Day/Mussaf/
+   Barchi Nafshi/Kaveh/Incense Offering/Alenu - cross-checked against both
+   the Shaliehsaboo Edition and Torat Emet 357). Every leaf turned out to
+   be either identical to something this app already renders elsewhere
+   (Hallel proper, the weekday Torah-reading machinery, Shir Shel Yom, the
+   Kaveh/Ketoret/Alenu closing sequence) - reused verbatim below, never
+   re-stored - or a short genuinely-new piece (data/siddur.json's
+   roshChodeshExtra), which is the ONLY new liturgical text this section
+   introduces. The standalone 'musaf' tile/section is untouched; this
+   reader also renders Musaf itself (via the same siddurMusafHTML) so the
+   two tiles intentionally overlap for a user who wants the complete
+   service in one place. */
+function siddurRoshChodeshHallelTailHTML(info, dateObj){
+  // Sefaria's own "Hallel" node for Rosh Chodesh continues past Hallel
+  // proper (already rendered by siddurHallelHTML) with: the closing
+  // Kaddish Titkabel (reused verbatim - identical text to
+  // SIDDUR.kaddishTitkabel, cross-checked in both editions), 3x a short
+  // verse (Bereshit 24:1) + "Hashem yishmereni", the pre-Torah-reading
+  // declaration, Berich Shmei, the day's Torah reading (reused via the
+  // existing siddurTorahReadingHTML/SIDDUR_TORAH_ROSH_CHODESH machinery -
+  // same verses, same blessings), a closing Chatzi Kaddish, and finally
+  // "Yehi chasdecha" leading into Ashrei (Tehillim 145, pushed by the
+  // caller as its own 'ashrei' section together with Uva LeSion).
+  const e = SIDDUR.roshChodeshExtra;
+  let html = siddurParasFromText(SIDDUR.kaddishTitkabel);
+  html += siddurParasFromText(`${e.veAvrahamZaken}\n\n${e.veAvrahamZaken}\n\n${e.veAvrahamZaken}\n\n${e.hashemYishmereni}`, true);
+  html += siddurParasFromText(e.preTorahDeclaration, true);
+  html += `<div class="siddur-section-title">בְּרִיךְ שְׁמֵהּ</div>`;
+  html += siddurParasFromText(e.berichShmei);
+  html += siddurTorahReadingHTML(dateObj, info, {});
+  html += siddurChatziKaddishHTML();
+  html += siddurParasFromText(e.yihyuChasdecha);
+  return html;
+}
+/* Uva LeSion here is the identical weekday Uva LeSion/Baruch Elokeinu/Beit
+   Yaakov text (SIDDUR.ashreiUvaLetzion.uvaLetzion, reused verbatim) with
+   one Rosh-Chodesh-specific addition at the end: Tehillim 124 ("Shir
+   HaMaalot Lulei Hashem") - reused from window.TEHILLIM, not duplicated. */
+function siddurRoshChodeshUvaLesionHTML(){
+  let html = `<div class="siddur-section-title">וּבָא לְצִיּוֹן גּוֹאֵל</div>`;
+  html += siddurParasFromText(SIDDUR.ashreiUvaLetzion.uvaLetzion, true, 'siddur-text-small');
+  html += siddurTehillimChapterHTML(124);
+  return html;
+}
+/* Song of the Day: Sefaria's node here is the SAME day-of-week Shir Shel
+   Yom already implemented (siddurShirShelYomHTML, reused verbatim - not a
+   Rosh-Chodesh-specific additional psalm), immediately followed by the
+   "returning the Torah to the ark" declaration (Yehalelu/Hashem Hu
+   HaElokim/Hashiveinu - new content, roshChodeshExtra.yehaleluReturn) and
+   the Leshem Yichud for Musaf (new content; the one Biblical verse it
+   quotes, Tehillim 90:17, has its cantillation trope stripped per house
+   style for Leshem Yichud text), then a Chatzi Kaddish (tefillin are
+   removed here, per the source's own rubric). */
+function siddurRoshChodeshSongOfDayTailHTML(dateObj){
+  const e = SIDDUR.roshChodeshExtra;
+  let html = siddurShirShelYomHTML(dateObj);
+  html += siddurParasFromText(e.yehaleluReturn, true);
+  html += `<div class="siddur-section-title">לְשֵׁם יִחוּד לְמוּסָף</div>`;
+  html += siddurParasFromText(e.leshemYichudMusaf);
+  html += `<div class="siddur-halacha-note">חוֹלְצִין תְּפִלִּין</div>`;
+  html += siddurChatziKaddishHTML();
+  return html;
+}
+/* Barchi Nafshi: Tehillim 104 in full (reused from window.TEHILLIM), then
+   a Kaddish that is the plain Chatzi Kaddish core immediately followed by
+   "Yehei Shlama"/"Oseh Shalom" - no "Al Yisrael" paragraph and no
+   "Titkabel tzlotana" line, unlike the two other Kaddish variants this
+   app already stores. Composed here from SIDDUR.kaddishTitkabel's own
+   paragraphs (skipping only its "Titkabel tzlotana" paragraph) rather
+   than storing this exact same core/Yehei-Shlama/Oseh-Shalom text a third
+   time. */
+function siddurBarchiNafshiHTML(){
+  let html = `<div class="siddur-section-title">בָּרְכִי נַפְשִׁי</div>`;
+  html += siddurTehillimChapterHTML(104);
+  const kParas = SIDDUR.kaddishTitkabel.split('\n\n').filter((_,i)=>i!==1); // drop the "Titkabel tzlotana" paragraph only
+  html += siddurParasFromText(kParas.join('\n\n'));
+  return html;
+}
 function siddurAccordionHTML(id, title, body){
   return `<div class="siddur-accordion" data-sidacc="${id}">
     <div class="siddur-accordion-head" data-sidacc-btn="${id}"><span>${title}</span><span class="siddur-accordion-chev">${I.chev}</span></div>
@@ -7792,6 +7873,16 @@ function siddurSections(dateObj, info, prayer){
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('arvit', info));
   } else if(prayer==='musaf'){
     push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
+  } else if(prayer==='roshChodesh'){
+    push('note','הֲלָכָה לְמַעֲשֶׂה', `<div class="siddur-halacha-note">בְּרֹאשׁ חֹדֶשׁ מִתְפַּלְּלִים שַׁחֲרִית כְּבְכָל יוֹם וּמוֹסִיפִים "יַעֲלֶה וְיָבֹא", וְאַחַר חֲזָרַת הַשָּׁ"ץ אוֹמְרִים הַלֵּל בְּדִלּוּג וּבְלֹא בְּרָכָה תְּחִלָּה וָסוֹף.</div>`);
+    push('hallel','הַלֵּל', siddurHallelHTML(info)+siddurRoshChodeshHallelTailHTML(info, dateObj));
+    let al = siddurTehillimChapterHTML(145)+siddurRoshChodeshUvaLesionHTML();
+    push('ashrei','אַשְׁרֵי וּבָא לְצִיּוֹן', al);
+    push('shirShelYom','שִׁיר שֶׁל יוֹם', siddurRoshChodeshSongOfDayTailHTML(dateObj));
+    push('musaf','מוּסָף', siddurMusafHTML(info));
+    push('barchiNafshi','בָּרְכִי נַפְשִׁי', siddurBarchiNafshiHTML());
+    push('kaveh','קַוֵּה', siddurKavehClosingHTML());
+    push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
   } else if(prayer==='birkot'){
     push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurBirkotHashacharHTML());
   } else if(prayer==='talitTefilin'){
