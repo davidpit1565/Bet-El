@@ -6857,8 +6857,8 @@ function renderPrayerReader(){
 }
 
 /* ================= SIDDUR (screens) ================= */
-let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'musaf'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
+let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
 function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
@@ -6875,7 +6875,10 @@ function drawSiddurHome(){
   // the build notes) so it's always offered.
   if(info.omerDay) tiles.push('omer');
   tiles.push('levana');
-  if(info.isRoshChodesh) tiles.push('musaf','roshChodesh');
+  // Rosh Chodesh is one combined tile (Hallel through Musaf's own closing
+  // Alenu, all in one continuous reader per user request) rather than a
+  // separate standalone Musaf tile alongside it.
+  if(info.isRoshChodesh) tiles.push('roshChodesh');
   // Tikun Chatzot is an occasional, day-independent reading (unlike the
   // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
   // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
@@ -7389,10 +7392,9 @@ function siddurHallelHTML(info){
    Kaveh/Ketoret/Alenu closing sequence) - reused verbatim below, never
    re-stored - or a short genuinely-new piece (data/siddur.json's
    roshChodeshExtra), which is the ONLY new liturgical text this section
-   introduces. The standalone 'musaf' tile/section is untouched; this
-   reader also renders Musaf itself (via the same siddurMusafHTML) so the
-   two tiles intentionally overlap for a user who wants the complete
-   service in one place. */
+   introduces. Per user request, there is no separate standalone Musaf
+   tile - this one reader covers Hallel through Musaf's own closing
+   Alenu (Musaf rendered inline via the same siddurMusafHTML). */
 function siddurRoshChodeshHallelTailHTML(info, dateObj){
   // Sefaria's own "Hallel" node for Rosh Chodesh continues past Hallel
   // proper (already rendered by siddurHallelHTML) with: the closing
@@ -7871,8 +7873,6 @@ function siddurSections(dateObj, info, prayer){
     post += `<div class="siddur-section-title">בָּרְכוּ</div><div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
     push('postAmidah','קַדִּישׁ · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('arvit', info));
-  } else if(prayer==='musaf'){
-    push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
   } else if(prayer==='roshChodesh'){
     push('note','הֲלָכָה לְמַעֲשֶׂה', `<div class="siddur-halacha-note">בְּרֹאשׁ חֹדֶשׁ מִתְפַּלְּלִים שַׁחֲרִית כְּבְכָל יוֹם וּמוֹסִיפִים "יַעֲלֶה וְיָבֹא", וְאַחַר חֲזָרַת הַשָּׁ"ץ אוֹמְרִים הַלֵּל בְּדִלּוּג וּבְלֹא בְּרָכָה תְּחִלָּה וָסוֹף.</div>`);
     push('hallel','הַלֵּל', siddurHallelHTML(info)+siddurRoshChodeshHallelTailHTML(info, dateObj));
