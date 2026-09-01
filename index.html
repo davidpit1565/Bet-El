@@ -7596,7 +7596,12 @@ function siddurShemaCoreHTML(s, opts){
   // inline spans now, not paragraph-splitting [[HAL]] blocks, so each is
   // already one single continuous paragraph.
   const shemaOpen = `${SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}\n\n<span class="siddur-whisper">(בלחש)</span> בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:`;
-  let html = siddurParasFromText(shemaOpen, true);
+  // The kavana note before Shema (the mitzvah of reading it twice daily,
+  // yichud hashem) is sourced from Sefaria's Weekday Shacharit leaf
+  // specifically - shown there (opts.kavanaNote) but not assumed to be
+  // identical for Arvit's own Shema, which isn't sourced from that leaf.
+  let html = opts.kavanaNote && s.shemaKavanaNote ? siddurParasFromText(`[[HAL]]${s.shemaKavanaNote}[[/HAL]]`) : '';
+  html += siddurParasFromText(shemaOpen, true);
   html += siddurParasFromText(opts.skipTefillinNotes ? siddurStripHaliAsides(s.veahavta, 'תפלין') : s.veahavta);
   html += siddurParasFromText(opts.skipTefillinNotes ? siddurStripHaliAsides(s.vehaya, 'תפלין') : s.vehaya);
   html += siddurParasFromText(opts.skipTzitzitNotes ? siddurStripHaliAsides(s.vayomer, 'ציצי') : s.vayomer);
@@ -7616,7 +7621,7 @@ function siddurBirkotShemaHTML(){
   html += `<div class="siddur-section-title">אַהֲבַת עוֹלָם</div>`;
   html += siddurParasFromText(s.ahavahRabbah, true);
   html += `<div class="siddur-section-title">קְרִיאַת שְׁמַע</div>`;
-  html += siddurShemaCoreHTML(s);
+  html += siddurShemaCoreHTML(s, {kavanaNote:true});
   html += `<div class="siddur-section-title">בִּרְכַּת גָּאַל יִשְׂרָאֵל</div>`;
   html += siddurParasFromText(s.emetVeyatziv, true);
   return html;
