@@ -6858,7 +6858,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'musaf'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף', tikunChatzot:'תִּקּוּן חֲצוֹת'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵֽדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', musaf:'מוּסָף', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
 function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
@@ -6870,6 +6870,11 @@ function renderSiddurHome(){
 function drawSiddurHome(){
   const info = siddurDayInfo(currentHDate());
   const tiles = ['birkot','talitTefilin','shacharit','mincha','arvit'];
+  // Sefirat HaOmer only appears as its own tile during the actual 49-day
+  // count; Birkat HaLevana has no date-gating yet (a follow-up item - see
+  // the build notes) so it's always offered.
+  if(info.omerDay) tiles.push('omer');
+  tiles.push('levana');
   if(info.isRoshChodesh) tiles.push('musaf');
   // Tikun Chatzot is an occasional, day-independent reading (unlike the
   // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
@@ -7607,6 +7612,69 @@ function siddurKorbanotHTML(){
   return html;
 }
 
+/* ---- Sefirat HaOmer, now its own real Siddur-home tile (Arvit's own
+   section list used to carry just the bare blessing+count as a one-line
+   insert - this replaces that with the full traditional flow): the Leshem
+   Yichud preamble (Sefaria: Siddur Edot HaMizrach > Counting of the Omer,
+   cross-checked against the Torat Emet 357 edition - both agree on
+   substance, differing only in nikud/trope conventions), the existing
+   blessing+day-count (kept byte-for-byte as before - omerCountText itself
+   is untouched), that day's own Kabbalistic sefirot-combination line
+   (SIDDUR.omerKavanot, one of 49 verified against the same source table -
+   days 41-49 specifically, since a pasted reference version of this table
+   had gotten visibly garbled for exactly that range), Tehillim 67 (reused
+   from window.TEHILLIM, same convention as its other appearances in this
+   Siddur), and the closing Ana BeKoach + "HaRachaman hu yachazir avodat
+   beit hamikdash limkomah" line - stored as SIDDUR.omerAnaBekoach rather
+   than reusing the old PRAYERS_EXTRA.anaBekoach field (that field was
+   deliberately deleted this session as a duplicate of Birkot HaShachar's
+   own Ana BeKoach; this is a distinct usage context, part of the Omer
+   sequence itself, not a re-duplication of that removed entry). ---- */
+function siddurOmerHTML(info){
+  let html = `<div class="siddur-section-title">לְשֵׁם יִחוּד</div>`;
+  html += siddurParasFromText(SIDDUR.omerLeshemYichud);
+  html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">סְפִירַת הָעֹֽמֶר · יוֹם ${info.omerDay}</span>בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָֽׁנוּ בְּמִצְוֹתָיו וְצִוָּֽנוּ עַל סְפִירַת הָעֹֽמֶר: הַיּוֹם ${omerCountText(info.omerDay)}</div>`;
+  // The day-specific kavana line is printed directly under that day's own
+  // blessing+count, tight/no-divider between them (house style: a run of
+  // short paired liturgical lines, same treatment as Ana BeKoach's own
+  // 7 lines just below).
+  html += `<div class="prayer-para siddur-para-nodivider">${SIDDUR.omerKavanot[info.omerDay-1]}</div>`;
+  html += siddurTehillimChapterHTML(67);
+  html += siddurParasFromText(SIDDUR.omerAnaBekoach, true);
+  html += `<div class="prayer-para siddur-para-nodivider">${SIDDUR.omerClosing}</div>`;
+  return html;
+}
+/* ---- Birkat HaLevana (Blessing of the Moon) - a brand new section, not
+   present anywhere in the app before now. Sourced the same way as the Omer
+   above (Sefaria: Siddur Edot HaMizrach > Blessing of the Moon, cross-
+   checked against Torat Emet 357). Reuses window.TEHILLIM for the two full
+   psalms (121, 150 - Sefaria's own citation labels on both read "verses
+   1-2" but the quoted body is each psalm's complete text, so the full-
+   chapter helper is the right fit, not a partial quote) and reuses
+   SIDDUR.kaddishDerabbanan verbatim for the Kaddish (byte-identical to the
+   source's own "קדיש על ישראל" here - verified before reusing rather than
+   duplicating a third copy of that Aramaic text). No date-gating is
+   applied yet (traditionally said only from ~3 days after Rosh Chodesh
+   through the 15th, not Friday night/Motzei Shabbat, not Yom Kippur night)
+   - out of scope per the build brief, flagged as a follow-up; the tile is
+   always offered on the Siddur home screen for now. ---- */
+function siddurLevanaHTML(){
+  const L = SIDDUR.levana;
+  let html = `<div class="siddur-section-title">בִּרְכַּת הַלְּבָנָה</div>`;
+  html += siddurParasFromText(L.opening);
+  html += `<div class="siddur-section-title">לְשֵׁם יִחוּד</div>`;
+  html += siddurParasFromText(L.leshemYichud);
+  html += `<div class="prayer-para">${L.blessing}</div>`;
+  html += siddurParasFromText(L.ceremony);
+  html += siddurTehillimChapterHTML(121);
+  html += siddurTehillimChapterHTML(150);
+  html += siddurParasFromText(L.tanaDevei);
+  html += `<div class="siddur-section-title">קַדִּישׁ</div>`;
+  html += siddurParasFromText(SIDDUR.kaddishDerabbanan);
+  html += siddurParasFromText(L.closing);
+  return html;
+}
+
 /* ---- the list of sections for a prayer: rendered concatenated into one
    continuous scroll by drawSiddurReader (not page-switched one-at-a-time
    like renderChokReader's ck-secnav-wrap/ck-secchip strip) - each entry's
@@ -7717,9 +7785,6 @@ function siddurSections(dateObj, info, prayer){
     post += `<div class="siddur-section-title">בָּרְכוּ</div><div class="prayer-para">${SIDDUR.arvitBlessings.barchu}</div>`;
     push('postAmidah','קַדִּישׁ · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('arvit', info));
-    if(info.omerDay){
-      push('omer','סְפִירַת הָעֹמֶר', `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">סְפִירַת הָעֹֽמֶר · יוֹם ${info.omerDay}</span>בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָֽׁנוּ בְּמִצְוֹתָיו וְצִוָּֽנוּ עַל סְפִירַת הָעֹֽמֶר: הַיּוֹם ${omerCountText(info.omerDay)}</div>`);
-    }
   } else if(prayer==='musaf'){
     push('musaf','מוּסָף שֶׁל רֹאשׁ חֹדֶשׁ', siddurMusafHTML(info));
   } else if(prayer==='birkot'){
@@ -7728,6 +7793,14 @@ function siddurSections(dateObj, info, prayer){
     const tt = siddurTalitTefilinHTML();
     push('talit','טַלִּית', tt.talit);
     push('tefilin','תְּפִלִּין', tt.tefilin);
+  } else if(prayer==='omer'){
+    // Promoted from an inline insert at the end of Arvit to its own real
+    // Siddur-home tile+reader (by explicit request) - only ever opened on
+    // days info.omerDay is truthy (drawSiddurHome only offers the tile
+    // then), so no "no content today" fallback branch is needed here.
+    push('omer','סְפִירַת הָעֹמֶר', siddurOmerHTML(info));
+  } else if(prayer==='levana'){
+    push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML());
   } else if(prayer==='tikunChatzot'){
     const chz = siddurTikunChatzotHTML(info);
     push('petach','פֶּתַח אֵלִיָּהוּ', chz.petach);
