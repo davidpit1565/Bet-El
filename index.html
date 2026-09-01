@@ -5999,11 +5999,11 @@ function renderLibrary(){
       <div class="q-tile round-card" data-cat="chok" onclick="go('chokBooks')">
         <div class="qt">חוק לישראל</div>
       </div>
-      <div class="q-tile round-card" data-cat="zohar" onclick="go('zoharList')">
-        <div class="qt">תיקוני הזוהר</div>
-      </div>
       <div class="q-tile round-card" data-cat="shnayim" onclick="go('smList')">
         <div class="qt">שניים מקרא ואחד תרגום</div>
+      </div>
+      <div class="q-tile round-card" data-cat="zohar" onclick="go('zoharList')">
+        <div class="qt">תיקוני הזוהר</div>
       </div>
     </div>
     ${ornament()}
@@ -7031,9 +7031,13 @@ function siddurBirkotHashacharHTML(){
   paras.forEach(line=>{
     line = line.trim();
     const n = ckNorm(line);
-    if(n.startsWith('הנותן לשכוי')) tight = true;
+    // Each of these paragraphs opens with the full "ברוך אתה ה'..." preamble,
+    // so the distinguishing phrase sits mid-paragraph - match by substring,
+    // not by prefix, or `tight` never turns on/off at all.
+    if(n.includes('הנותן לשכוי')) tight = true;
     const isTight = tight;
-    if(n.startsWith('ואשה מברכת')) tight = false;
+    if(n.includes('ואשה מברכת')) tight = false;
+    if(n.includes('וצונו על דברי תורה')) html += `<div class="siddur-section-title">בִּרְכוֹת הַתּוֹרָה</div>`;
     html += `<div class="prayer-para${isTight?' prayer-para-tight':''}">${line}</div>`;
     // Birkot HaTorah's 3rd blessing ("asher bachar banu") is the same text
     // already stored as SIDDUR.torahBirkatBefore (reused for aliyot) -
