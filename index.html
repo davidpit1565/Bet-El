@@ -5955,6 +5955,14 @@ function renderPrayersGroup(){
    (TORAH/CYC/MCYC) - no new source content, only new browsing UI - except
    Nevi'im/Ketuvim, which ships its own new data files (see below). */
 let LIB = {};
+// One continuous ordered list (was two separate grids - Tikkunei HaZohar,
+// Chok LeYisrael and Shnayim Mikra sat in their own "flagship" grid below
+// the free-browse categories). Per the app owner's explicit ordering
+// request: Tikkunei HaZohar right after Musar, Zohar/Tanya stay adjacent,
+// Chok LeYisrael and Shnayim Mikra adjacent to each other at the end.
+// cssCat lets a few of these reuse an existing q-tile[data-cat] color rule
+// under a different routing key (tikkuneiZohar needs its own key, distinct
+// from the free-browse "zohar" category, but the same orange styling).
 const LIBRARY_CATS = [
   {key:'torah', label:'תּוֹרָה'},
   {key:'neviim', label:'נְבִיאִים'},
@@ -5965,8 +5973,11 @@ const LIBRARY_CATS = [
   {key:'rambam', label:'רַמְבַּ״ם'},
   {key:'benishchai'},
   {key:'musar', label:'מוּסָר'},
+  {key:'tikkuneiZohar', label:'תִּיקּוּנֵי הַזֹּהַר', cssCat:'zohar'},
   {key:'zohar', label:'זֹהַר'},
   {key:'tanya', label:'תַּנְיָא'},
+  {key:'chokLeyisrael', label:'חוֹק לְיִשְׂרָאֵל', cssCat:'chok'},
+  {key:'shnayimMikra', label:'שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם', cssCat:'shnayim'},
 ];
 function libCatLabel(key){
   if(key==='benishchai') return (BIC_UI[S.lang]||BIC_UI.he).title;
@@ -5982,6 +5993,9 @@ function openLibraryCat(key){
   if(key==='gemara') return go('libraryGemaraMasechtot');
   if(key==='rambam') return go('libraryRambamSefarim');
   if(key==='zohar') return go('libraryZoharParts');
+  if(key==='tikkuneiZohar') return go('zoharList');
+  if(key==='chokLeyisrael') return go('chokBooks');
+  if(key==='shnayimMikra') return go('smList');
   if(key==='tanya') return go('libraryTanyaParts');
   if(key==='mishnah') return go('libraryMishnahSedarim');
   if(key==='neviim' || key==='ketuvim'){ LIB.nkCat=key; return go('libraryNKBooks'); }
@@ -5991,20 +6005,9 @@ function renderLibrary(){
   ${topbar('עִיּוּן בַּסְּפָרִים','prayers')}
   <div class="view">
     <div class="quick-grid">
-      ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.key}">
+      ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.cssCat||c.key}">
         <div class="qt">${libCatLabel(c.key)}</div>
       </div>`).join('')}
-    </div>
-    <div class="quick-grid" style="margin-top:12px">
-      <div class="q-tile round-card" data-cat="chok" onclick="go('chokBooks')">
-        <div class="qt">חוק לישראל</div>
-      </div>
-      <div class="q-tile round-card" data-cat="shnayim" onclick="go('smList')">
-        <div class="qt">שניים מקרא ואחד תרגום</div>
-      </div>
-      <div class="q-tile round-card" data-cat="zohar" onclick="go('zoharList')">
-        <div class="qt">תיקוני הזוהר</div>
-      </div>
     </div>
     ${ornament()}
   </div>`;
@@ -7061,6 +7064,42 @@ function siddurShirShelYomHTML(dateObj){
 function siddurChatziKaddishHTML(){
   return `<div class="prayer-para">${SIDDUR.kaddishDerabbanan.split('\n\n')[0]}</div>`;
 }
+/* ---- Tachanun (Nefilat Apayim): the individual's confession (Vidui),
+   the 13 Attributes of Mercy, Psalm 25 (reused from window.TEHILLIM, said
+   sitting with the head resting on the arm), then Hashem Elokei
+   Yisrael/Avinu Malkeinu/Ozreinu - identical wording in both Shacharit
+   and Mincha (Sefaria: Weekday Shacharit > Vidui and Weekday Mincha >
+   Vidui agree verbatim on this whole core). This whole section was
+   previously just a one-line "Tachanun said/not said today" strip with
+   NO actual text at all - SIDDUR.tachanun's fields existed nowhere in the
+   render code until now. ---- */
+function siddurTachanunCoreHTML(){
+  let html = siddurParasFromText(SIDDUR.tachanun.confession);
+  html += siddurParasFromText(SIDDUR.tachanun.midot13);
+  html += `<div class="siddur-halacha-note">יֵשֵׁב וְיֹאמַר בִּנְפִילַת אַפַּיִם:</div>`;
+  html += siddurTehillimChapterHTML(25);
+  html += siddurParasFromText(SIDDUR.tachanun.afterNefilat);
+  return html;
+}
+/* Shacharit's own Tachanun additionally has a Monday/Thursday-only piyut
+   block (Keil Melech Yoshev.../Anshei Emuna Avadu, an alphabetical-acrostic
+   Selichot-style piyut) before its own internal Chatzi Kaddish - on the
+   other 4 weekdays that same Kaddish is said right away instead. Mincha's
+   own Vidui node has no such addition (verified: no analogous rubric there
+   in either Sefaria edition checked) so it's Shacharit-only, handled by the
+   caller passing dateObj. On fast days a note points to the additional
+   fast-day supplications this app doesn't include (out of scope - same
+   link-out treatment as the Selichot callout elsewhere). */
+function siddurTachanunHTML(info, dateObj){
+  if(info.skipTachanun) return `<div class="siddur-tachanun-strip">הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן</div>`;
+  let html = `<div class="siddur-tachanun-strip">הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל</div>`;
+  html += siddurTachanunCoreHTML();
+  if(info.isFastDay) html += `<div class="siddur-halacha-note">${SIDDUR.tachanun.fastDayNote}</div>`;
+  const isMonThu = dateObj.getDay()===1 || dateObj.getDay()===4;
+  if(isMonThu) html += siddurParasFromText(SIDDUR.tachanun.mondayThursdayExtra);
+  html += siddurChatziKaddishHTML();
+  return html;
+}
 /* ---- The 4 verses traditionally added right after Aleinu Leshabeach
    (Proverbs 3:25, Isaiah 8:10, Isaiah 46:4, Psalm 140:14) - shared by
    Shacharit/Mincha/Arvit so the text lives in one place. Not located
@@ -7341,7 +7380,7 @@ function siddurSections(dateObj, info, prayer){
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
-    push('tachanun','תַּחֲנוּן', `<div class="siddur-tachanun-strip">${info.skipTachanun ? 'הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן' : 'הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל'}</div>`+(siddurIsSelichotSeason(dateObj)?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר</span><span>${I.chev}</span></div>`:''));
+    push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(dateObj)?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר</span><span>${I.chev}</span></div>`:''));
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {}));
     push('hallel','הַלֵּל', siddurHallelHTML(info));
     // Between Ashrei (Tehillim 145) and Uva LeTzion, on days WITH Tachanun,
