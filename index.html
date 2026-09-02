@@ -5751,7 +5751,7 @@ function omerWeeksWords(weeks){
 function omerCountText(day){
   if(!(day>=1 && day<=49)) return '';
   const weeks=Math.floor(day/7), rem=day%7;
-  let s = omerNumWords(day,'יָמִים') + ' לָעֹמֶר';
+  let s = omerNumWords(day,'יָמִים') + ' לָעֹֽמֶר';
   if(day>=7) s += ', שֶׁהֵם ' + omerWeeksWords(weeks) + omerRemainderWords(rem);
   return s + ':';
 }
@@ -7732,9 +7732,15 @@ function siddurOmerHTML(info){
   // short paired liturgical lines, same treatment as Ana BeKoach's own
   // 7 lines just below).
   html += `<div class="prayer-para siddur-para-nodivider">${SIDDUR.omerKavanot[info.omerDay-1]}</div>`;
+  // Source order (Sefaria: Counting of the Omer) is count -> kavana ->
+  // "HaRachaman hu yachazir avodat beit hamikdash" -> Tehillim 67
+  // (Lamnatzeach) -> Ana BeKoach -> the whispered Baruch Shem (the last
+  // line of SIDDUR.omerAnaBekoach). omerClosing used to be emitted last,
+  // after Ana BeKoach - re-verified against the source node and moved
+  // back to its real place, immediately after the day's count.
+  html += `<div class="prayer-para siddur-para-nodivider">${SIDDUR.omerClosing}</div>`;
   html += siddurTehillimChapterHTML(67);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach, true);
-  html += `<div class="prayer-para siddur-para-nodivider">${SIDDUR.omerClosing}</div>`;
   return html;
 }
 /* ---- Birkat HaLevana (Blessing of the Moon) - a brand new section, not
