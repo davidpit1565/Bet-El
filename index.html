@@ -21,6 +21,15 @@
 /* ===================== BET EL · TEHILLIM ===================== */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* Taamey Frank CLM - the same font Sefaria's own reader uses for vocalized
+   Hebrew text (self-hosted from ./fonts, GPLv2 with a font-embedding
+   exception - see fonts/LICENSE-TaameyFrankCLM.txt). Chosen over the
+   Google-Fonts serif stack because multi-mark combinations (e.g. tsere +
+   meteg on one letter, as in כּוֹנְנֵֽהוּ) render with much clearer mark
+   separation in it than in David Libre/Frank Ruhl Libre/Noto Serif Hebrew -
+   verified letter-by-letter, not just at a glance. */
+@font-face{font-family:'Taamey Frank CLM';font-weight:400;font-style:normal;src:url('./fonts/TaameyFrankCLM-Medium.ttf') format('truetype');font-display:swap}
+@font-face{font-family:'Taamey Frank CLM';font-weight:700;font-style:normal;src:url('./fonts/TaameyFrankCLM-Bold.ttf') format('truetype');font-display:swap}
 :root{
   --gold:#d4af5f; --gold-bright:#f3e3af; --gold-deep:#b8860b;
   --gold-grad:linear-gradient(135deg,#a9791f 0%,#e6c874 38%,#f7ecc4 52%,#d9b25f 68%,#a9791f 100%);
@@ -28,8 +37,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   --spring: cubic-bezier(.34,1.56,.64,1);
   --spring-soft: cubic-bezier(.22,1.28,.36,1);
   --lg-sheen: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 12%, transparent 45%);
-  --font-sacred:"Noto Serif Hebrew",Georgia,"Times New Roman",serif;
-  --font-reading:"David Libre","Frank Ruhl Libre","Noto Serif Hebrew",Georgia,serif;
+  --font-sacred:"Taamey Frank CLM","Noto Serif Hebrew",Georgia,"Times New Roman",serif;
+  --font-reading:"Taamey Frank CLM","Noto Serif Hebrew","David Libre","Frank Ruhl Libre",Georgia,serif;
   --font-ui:"Heebo","Assistant",system-ui,-apple-system,sans-serif;
   --fs-scale:1;
   --ease:cubic-bezier(.22,.61,.36,1);
@@ -7783,6 +7792,12 @@ function siddurSections(dateObj, info, prayer){
   const list = [];
   const push = (key, he, html) => { if(html) list.push({key, he, html}); };
   if(prayer==='shacharit'){
+    // Sefaria's own node order places "Hanna's Prayer" (I Samuel 2:1-10 + a
+    // few appended verses) as its own section right before the Morning
+    // Prayer/Akeida sequence (Weekday Shacharit > Order of Talit > Order of
+    // Tefillin > Hanna's Prayer > Morning Prayer) - previously missing
+    // entirely from this app.
+    push('hannahPrayer','תְּפִלַּת חַנָּה', siddurParasFromText(SIDDUR.hannahPrayer));
     push('korbanot','קָרְבָּנוֹת', siddurKorbanotHTML());
     push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurParasFromText(SIDDUR.kaddishDerabbanan));
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
