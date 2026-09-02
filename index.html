@@ -1112,6 +1112,25 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card{
   transition: transform .5s var(--spring), box-shadow .3s ease, background-color .3s ease;
 }
+/* A visible mouse-hover affordance ("what am I about to press") on every
+   interactive surface above - reuses that same transition (transform/
+   box-shadow) rather than declaring new timing, so hover-in and press-down
+   read as one continuous system rather than two different animation
+   languages. Gated to hover:hover+pointer:fine so touch taps (which fire a
+   synthetic hover on release, then never un-hover) never trigger or get
+   stuck showing it - this is a mouse/trackpad-only affordance. Placed
+   before the :active rules below in source order (equal specificity) so
+   an actual press always wins visually over a lingering hover. */
+@media (hover:hover) and (pointer:fine){
+  .card:hover,.q-tile:hover,.set-item:hover,.pace-opt:hover,.ob-row:hover,
+  .btn:hover,.icon-btn:hover,.cal-nav:hover,.rnav-btn:hover,.dd-portion:hover,
+  .reader-tools .rt-fab:hover,.nav-item:hover,.sm-week-card:hover{
+    transform:translateY(-1px);
+    box-shadow:0 0 0 1.5px rgba(212,175,95,.55), var(--card-shadow), inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  .ps-cell:hover,.cal-cell:hover{ box-shadow:0 0 0 1.5px rgba(212,175,95,.55) inset; }
+  .btn-gold:hover{ box-shadow:0 0 0 1.5px rgba(255,255,255,.55), 0 12px 30px -10px rgba(184,134,11,.8), inset 0 1px 0 rgba(255,255,255,.35); }
+}
 .card:active,.q-tile:active,.set-item:active,.pace-opt:active,.ob-row:active,
 .dd-portion:active,.sm-week-card:active{ transform:scale(.965); transition-duration:.12s; }
 .btn:active,.icon-btn:active,.cal-nav:active,.reader-tools .rt-fab:active{ transform:scale(.9); transition-duration:.1s; }
