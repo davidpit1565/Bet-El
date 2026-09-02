@@ -7797,9 +7797,36 @@ function siddurSections(dateObj, info, prayer){
     if(!info.skipTachanun) al += siddurTehillimChapterHTML(20);
     al += `<div class="siddur-section-title">וּבָא לְצִיּוֹן גּוֹאֵל</div>`+siddurParasFromText(SIDDUR.ashreiUvaLetzion.uvaLetzion, true, 'siddur-text-small');
     push('ashrei','אַשְׁרֵי וּבָא לְצִיּוֹן', al);
-    push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
+    // Sefaria's own "Uva LeSion" node ends with an explicit rubric naming
+    // this Kaddish "קדיש תתקבל" (Kaddish Titkabel) - the fuller Kaddish,
+    // not a plain Chatzi Kaddish (a previous-round error, corrected here
+    // the same way Mincha's analogous Kaddish was fixed: reusing
+    // SIDDUR.kaddishTitkabel verbatim rather than storing it again).
+    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel));
+    // Beit Yaakov: Sefaria places this as its OWN node right after Uva
+    // LeSion's Kaddish and before Song of the Day - previously missing
+    // entirely from this app. Tefila LeDavid (Tehillim 86) is said only on
+    // days WITH Tachanun (Sefaria's own rubric there: "בימים שאין אומרים
+    // תחנון אין אומרים תפלה לדוד" - same info.skipTachanun flag already
+    // used for Tehillim 20 above), then the Beit Yaakov verses themselves
+    // (Yishayahu 2:5 + Melachim I 8:57-60, SIDDUR.ashreiUvaLetzion.beitYaakov
+    // - new content), then Tehillim 124 ("Shir HaMaalot Lulei Hashem") -
+    // reused from window.TEHILLIM like everywhere else, not duplicated.
+    let by = `<div class="siddur-section-title">בֵּית יַעֲקֹב</div>`;
+    if(!info.skipTachanun) by += siddurTehillimChapterHTML(86);
+    by += siddurParasFromText(SIDDUR.ashreiUvaLetzion.beitYaakov, true, 'siddur-text-small');
+    by += siddurTehillimChapterHTML(124);
+    push('beitYaakov','בֵּית יַעֲקֹב', by);
     push('shirShelYom','שִׁיר שֶׁל יוֹם', siddurShirShelYomHTML(dateObj));
-    push('kaddish2','קַדִּישׁ', siddurChatziKaddishHTML());
+    // The second, closing Kaddish right after Song of the Day - Sefaria's
+    // own rubric here explicitly names it 'קדיש "יהא שלמא"' (distinct from
+    // the fuller Kaddish Titkabel just above): same Yitgadal opening but
+    // skipping the Titkabel tzlotana paragraph entirely, straight to Yehei
+    // Shlama/Oseh Shalom - the same derivation already used by
+    // siddurBarchiNafshiHTML() and Mincha's own second Kaddish, rather than
+    // storing this exact text again.
+    const kaddishYeheiShlamaParas2 = SIDDUR.kaddishTitkabel.split('\n\n').filter((_,i)=>i!==1);
+    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas2.join('\n\n')));
     push('kaveh','קַוֵּה', siddurKavehClosingHTML());
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('shacharit', info));
   } else if(prayer==='mincha'){
