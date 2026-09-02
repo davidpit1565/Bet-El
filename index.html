@@ -7262,7 +7262,7 @@ function siddurTachanunCoreHTML(){
   html += siddurParasFromText(SIDDUR.tachanun.midot13);
   html += `<div class="siddur-halacha-note">יֵשֵׁב וְיֹאמַר בִּנְפִילַת אַפַּיִם:</div>`;
   html += siddurTehillimChapterHTML(25);
-  html += siddurParasFromText(SIDDUR.tachanun.afterNefilat);
+  html += siddurParasFromText(SIDDUR.tachanun.afterNefilat, true);
   return html;
 }
 /* Shacharit's own Tachanun additionally has a Monday/Thursday-only piyut
@@ -7327,7 +7327,7 @@ function siddurKavehClosingHTML(){
   // node, and Torat Emet 357's matching node).
   html += siddurParasFromText(SIDDUR.pitumHaketoretShort, true);
   html += siddurParasFromText(SIDDUR.tanaDeveiEliyahu, true);
-  html += siddurParasFromText(SIDDUR.kaddishDerabbanan);
+  html += siddurParasFromText(SIDDUR.kaddishDerabbanan, true);
   html += `<div class="siddur-section-title">בָּרְכוּ</div>`;
   html += siddurParasFromText(SIDDUR.arvitBlessings.barchu, true);
   return html;
@@ -7416,7 +7416,7 @@ function siddurRoshChodeshHallelTailHTML(info, dateObj){
   // "Yehi chasdecha" leading into Ashrei (Tehillim 145, pushed by the
   // caller as its own 'ashrei' section together with Uva LeSion).
   const e = SIDDUR.roshChodeshExtra;
-  let html = siddurParasFromText(SIDDUR.kaddishTitkabel);
+  let html = siddurParasFromText(SIDDUR.kaddishTitkabel, true);
   html += siddurParasFromText(`${e.veAvrahamZaken}\n\n${e.veAvrahamZaken}\n\n${e.veAvrahamZaken}\n\n${e.hashemYishmereni}`, true);
   html += siddurParasFromText(e.preTorahDeclaration, true);
   html += `<div class="siddur-section-title">בְּרִיךְ שְׁמֵהּ</div>`;
@@ -7467,7 +7467,7 @@ function siddurBarchiNafshiHTML(){
   let html = `<div class="siddur-section-title">בָּרְכִי נַפְשִׁי</div>`;
   html += siddurTehillimChapterHTML(104);
   const kParas = SIDDUR.kaddishTitkabel.split('\n\n').filter((_,i)=>i!==1); // drop the "Titkabel tzlotana" paragraph only
-  html += siddurParasFromText(kParas.join('\n\n'));
+  html += siddurParasFromText(kParas.join('\n\n'), true);
   return html;
 }
 function siddurAccordionHTML(id, title, body){
@@ -7778,7 +7778,7 @@ function siddurLevanaHTML(){
   html += siddurTehillimChapterHTML(150);
   html += siddurParasFromText(L.tanaDevei);
   html += `<div class="siddur-section-title">קַדִּישׁ</div>`;
-  html += siddurParasFromText(SIDDUR.kaddishDerabbanan);
+  html += siddurParasFromText(SIDDUR.kaddishDerabbanan, true);
   html += siddurParasFromText(L.closing);
   return html;
 }
@@ -7799,7 +7799,7 @@ function siddurSections(dateObj, info, prayer){
     // entirely from this app.
     push('hannahPrayer','תְּפִלַּת חַנָּה', siddurParasFromText(SIDDUR.hannahPrayer));
     push('korbanot','קָרְבָּנוֹת', siddurKorbanotHTML());
-    push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurParasFromText(SIDDUR.kaddishDerabbanan));
+    push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurParasFromText(SIDDUR.kaddishDerabbanan, true));
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
@@ -7817,7 +7817,7 @@ function siddurSections(dateObj, info, prayer){
     // not a plain Chatzi Kaddish (a previous-round error, corrected here
     // the same way Mincha's analogous Kaddish was fixed: reusing
     // SIDDUR.kaddishTitkabel verbatim rather than storing it again).
-    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel));
+    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel, true));
     // Beit Yaakov: Sefaria places this as its OWN node right after Uva
     // LeSion's Kaddish and before Song of the Day - previously missing
     // entirely from this app. Tefila LeDavid (Tehillim 86) is said only on
@@ -7841,7 +7841,7 @@ function siddurSections(dateObj, info, prayer){
     // siddurBarchiNafshiHTML() and Mincha's own second Kaddish, rather than
     // storing this exact text again.
     const kaddishYeheiShlamaParas2 = SIDDUR.kaddishTitkabel.split('\n\n').filter((_,i)=>i!==1);
-    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas2.join('\n\n')));
+    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas2.join('\n\n'), true));
     push('kaveh','קַוֵּה', siddurKavehClosingHTML());
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('shacharit', info));
   } else if(prayer==='mincha'){
@@ -7886,7 +7886,7 @@ function siddurSections(dateObj, info, prayer){
     // Titkabel (pushed separately right below, already correctly placed),
     // not a plain Chatzi Kaddish - so this reuses only the shared core.
     push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן</div>` : `<div class="siddur-tachanun-strip">הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל</div>`+siddurTachanunCoreHTML());
-    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel));
+    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(SIDDUR.kaddishTitkabel, true));
     // Tehillim 67 ("Elokim Yechonenu") every weekday EXCEPT Friday, when
     // Tehillim 93 ("Hashem Malach") is said instead - verified via two
     // independent Sefaria editions (Weekday Mincha > Vidui in both): this
@@ -7916,7 +7916,7 @@ function siddurSections(dateObj, info, prayer){
     // by siddurBarchiNafshiHTML() for this identical Kaddish shape, rather
     // than storing this exact text a second time.
     const kaddishYeheiShlamaParas = SIDDUR.kaddishTitkabel.split('\n\n').filter((_,i)=>i!==1);
-    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas.join('\n\n')));
+    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas.join('\n\n'), true));
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('mincha', info));
   } else if(prayer==='arvit'){
     let opening = `<div class="prayer-para">${SIDDUR.arvitBlessings.leshemYichud}</div>`;
@@ -7992,7 +7992,10 @@ function drawSiddurReader(){
   if(!secs.length){ toast('אֵין תֹּכֶן לְהַיּוֹם'); return go('siddurHome'); }
   if(SID_OBS){ SID_OBS.disconnect(); SID_OBS=null; }
   app.innerHTML = `
-  ${topbar(SIDDUR_PRAYER_NAMES[p],'siddurHome')}
+  <div class="topbar">
+  <button class="icon-btn tb-back" onclick="go('siddurHome')">${I.prev}</button>
+  <div class="tb-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
+  ${toolsFab({scroll:true})}</div>
   <div class="view prayer-reader-page">
     <div class="prayer-reader-header">
       <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
@@ -8031,6 +8034,7 @@ function drawSiddurReader(){
     }, {rootMargin:'-15% 0px -70% 0px', threshold:0});
     anchors.forEach(a=>SID_OBS.observe(a));
   }
+  wireToolsFab();
   tr(app);
 }
 
