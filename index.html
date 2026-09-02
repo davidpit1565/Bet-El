@@ -7792,6 +7792,12 @@ function siddurSections(dateObj, info, prayer){
   const list = [];
   const push = (key, he, html) => { if(html) list.push({key, he, html}); };
   if(prayer==='shacharit'){
+    // Sefaria's own node order places "Hanna's Prayer" (I Samuel 2:1-10 + a
+    // few appended verses) as its own section right before the Morning
+    // Prayer/Akeida sequence (Weekday Shacharit > Order of Talit > Order of
+    // Tefillin > Hanna's Prayer > Morning Prayer) - previously missing
+    // entirely from this app.
+    push('hannahPrayer','תְּפִלַּת חַנָּה', siddurParasFromText(SIDDUR.hannahPrayer));
     push('korbanot','קָרְבָּנוֹת', siddurKorbanotHTML());
     push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurParasFromText(SIDDUR.kaddishDerabbanan));
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
