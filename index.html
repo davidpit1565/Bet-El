@@ -434,9 +434,16 @@ a.set-item{text-decoration:none;color:inherit}
 .toggle{width:50px;height:29px;border-radius:999px;background:var(--line);border:1px solid var(--line-strong);
   position:relative;cursor:pointer;transition:.25s var(--ease);flex:none}
 .toggle::after{content:"";position:absolute;top:2px;right:2px;width:23px;height:23px;border-radius:50%;
-  background:var(--ink-soft);transition:.25s var(--ease)}
+  background:var(--ink-soft);transition:.2s var(--ease)}
 .toggle.on{background:var(--gold-grad)}
 .toggle.on::after{right:calc(100% - 25px);background:#2a1e05}
+/* iOS-style momentary stretch on press, in the direction the knob is
+   about to travel - a small physical cue that this is a draggable switch,
+   not just a flat button. Reverts on release via the same .2s transition
+   already declared above (not part of the shared Liquid Glass rule group,
+   since the effect is direction-aware and specific to this one control). */
+.toggle:active::after{width:29px}
+.toggle.on:active::after{right:calc(100% - 31px)}
 /* segmented */
 .seg{display:flex;background:var(--line);border-radius:11px;padding:3px;gap:3px}
 .seg button{border:none;background:transparent;color:var(--ink-soft);padding:8px 14px;border-radius:9px;
@@ -1134,6 +1141,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   }
   .ps-cell:hover,.cal-cell:hover{ box-shadow:0 0 0 1.5px rgba(212,175,95,.55) inset; }
   .btn-gold:hover{ box-shadow:0 0 0 1.5px rgba(255,255,255,.55), 0 12px 30px -10px rgba(184,134,11,.8), inset 0 1px 0 rgba(255,255,255,.35); }
+  .toggle:hover{ border-color:rgba(212,175,95,.65); }
 }
 .card:active,.q-tile:active,.set-item:active,.pace-opt:active,.ob-row:active,
 .dd-portion:active,.sm-week-card:active{ transform:scale(.965); transition-duration:.12s; }
