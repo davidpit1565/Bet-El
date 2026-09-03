@@ -6225,7 +6225,7 @@ const LIB_CATEGORY_SEARCH=[
    searchable a moment after the screen opens, without the user having to
    first visit the Mishnah section themselves. */
 function libPrefetchSearchData(){
-  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex()].forEach(p=>{
+  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex()].forEach(p=>{
     p.then(()=>{ if(TAB==='library') libDrawSearch(); }).catch(()=>{});
   });
 }
@@ -6270,9 +6270,43 @@ function libSearchHits(q){
   if(LEYNING && name){
     individualParshaKeys().forEach(k=>{
       const nm=ckSkel(ckBare(parshaName(k)));
-      if(libBareMatch(nameSkel,nm)) hits.push({group:'תּוֹרָה', label:parshaName(k), action:()=>{
+      if(!libBareMatch(nameSkel,nm)) return;
+      hits.push({group:'תּוֹרָה', label:parshaName(k), action:()=>{
         LIB.torahBook=LEYNING[k].book; LIB.torahParsha=k; LIB.torahAliyah=num||1; go('libraryTorahReader');
       }});
+      /* Ben Ish Chai is parasha-indexed too (its own standalone section,
+         not a library* TAB) - a parasha-name hit is exactly the natural
+         entry point into it as well, one per track that actually has
+         content for this parasha (bicNearestAvailableKey only matters for
+         the current week's default; here we want the parasha the user
+         actually typed, so a missing key on one track is just skipped). */
+      if(BIC_INDEX){
+        ['year1','year2'].forEach(track=>{
+          if(bicParshiot(track).some(p=>p.key===k)){
+            hits.push({group:ckBicUI().title, label:parshaName(k)+' · '+(track==='year1'?'שָׁנָה א׳':'שָׁנָה ב׳'), action:()=>openBicReader(track,k,0)});
+          }
+        });
+      }
+    });
+  }
+  if(TANYA_IDX && name){
+    TANYA_IDX.parts.forEach(p=>{
+      const nm=ckSkel(ckBare(p.he));
+      if(!libBareMatch(nameSkel,nm)) return;
+      let first=-1;
+      for(let i=0;i<TANYA_IDX.order.length;i++){ if(TANYA_IDX.order[i].part===p.key){ first=i; break; } }
+      if(first>=0) hits.push({group:'תַּנְיָא', label:p.he, action:()=>{ LIB.tanyaIndex=first; go('libraryTanyaReader'); }});
+    });
+  }
+  if(name){
+    /* Musar's own name-match is a bare work-name lookup only (not
+       per-gate/chapter - musarSections()'s head-grouping logic is more
+       involved than the other categories' flat order[] arrays), opening
+       straight into that work's reading for today via openMusarYomi. */
+    MUSAR_WORKS.forEach(w=>{
+      const label=ckMusarUI()[w.key];
+      const nm=ckSkel(ckBare(label));
+      if(libBareMatch(nameSkel,nm)) hits.push({group:'מוּסָר', label, action:()=>openMusarYomi(w.key)});
     });
   }
   if(num!=null && num>=1 && num<=150 && (!name || /תהל|מזמור/.test(nameSkel))){
