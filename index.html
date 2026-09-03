@@ -486,7 +486,7 @@ a.set-item{text-decoration:none;color:inherit}
              transform .26s cubic-bezier(.4,0,.68,.06),
              filter .26s cubic-bezier(.4,0,.68,.06),
              visibility .26s}
-.bic-collapse{max-height:300px;overflow:hidden;opacity:1;transform:translateY(0);
+.bic-collapse{max-height:460px;overflow:hidden;opacity:1;transform:translateY(0);
   transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .3s,transform .3s}
 .bic-collapse.collapsed{max-height:0;opacity:0;transform:translateY(-8px);pointer-events:none}
 /* the round mark-complete control flanked by prev/next arrows, matching
@@ -4776,13 +4776,13 @@ function renderChokReader(){
         ).join('')}
       </div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
-      </div>
       <div class="ck-secnav-wrap">
         <button class="sm-aliyah-chip ck-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
         <div class="sm-aliyah-nav ck-secnav">
           ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${sec.he}</button>`).join('')}
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
+      </div>
       </div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
@@ -9371,19 +9371,28 @@ render();
   }, {passive:true});
 })();
 (function initNavScrollHide(){
-  let lastY = 0, ticking = false;
-  const THRESHOLD = 6;
+  let lastY = 0, ticking = false, accum = 0, lastDir = 0;
+  const THRESHOLD = 10, COMMIT = 28;
   function getY(){
     const se = document.scrollingElement || document.documentElement;
     return Math.max(se.scrollTop||0, document.body.scrollTop||0, window.scrollY||0);
   }
   lastY = getY();
-  /* Chrome (bottom nav + any .bic-collapse reader header) hides on scroll-down
-     and reveals on scroll-up - but must NOT reappear on its own just because
-     the user stopped scrolling: an idle timer that force-reveals it fights a
-     reader who deliberately scrolled past it to read undisturbed. Revealing
-     is instead an explicit user action - scroll up, or a tap/touch anywhere
-     on the screen - never a timeout. */
+  /* Chrome (bottom nav + the reader header's own .bic-collapse portion)
+     hides on scroll-down and reveals on scroll-up - matching the
+     convention almost every polished reading surface uses (Medium,
+     mobile Safari's own reader chrome, YouTube): chrome tucks away only
+     while you keep scrolling in one direction, and comes back the moment
+     you scroll the other way. Earlier this also revealed on any tap/touch
+     anywhere on the screen, meant to make it feel more "responsive" - in
+     practice that meant tapping a verse to open its commentary, or any
+     other in-content tap, snapped the header back open mid-read, which
+     read as a jarring, unprofessional jump rather than a helpful reveal.
+     Reveal is now scroll-direction only. A small per-direction distance
+     (COMMIT) must accumulate before acting, so a few pixels of scroll
+     jitter (inertial deceleration, a bounce at the top) can't flicker the
+     header open/closed - direction has to actually change or continue for
+     a real, deliberate scroll before anything toggles. */
   function set(hide){
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
@@ -9396,17 +9405,18 @@ render();
     ticking = false;
     const y = getY();
     const dy = y - lastY;
-    if(y < 40){ set(false); }
-    else if(dy > THRESHOLD){ set(true); }
-    else if(dy < -THRESHOLD){ set(false); }
     lastY = y;
+    if(y < 40){ set(false); accum = 0; lastDir = 0; return; }
+    if(Math.abs(dy) < THRESHOLD) return;
+    const dir = dy > 0 ? 1 : -1;
+    accum = dir === lastDir ? accum + Math.abs(dy) : Math.abs(dy);
+    lastDir = dir;
+    if(accum < COMMIT) return;
+    set(dir === 1);
   }
   const raf = ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(onScroll); } };
   document.addEventListener('scroll', raf, {passive:true, capture:true});
   window.addEventListener('scroll', raf, {passive:true});
-  const reveal=()=>set(false);
-  document.addEventListener('touchstart', reveal, {passive:true, capture:true});
-  document.addEventListener('mousedown', reveal, {capture:true});
 })();
 function checkNotification(){
   if(!notifReady()) return;
