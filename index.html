@@ -1730,7 +1730,7 @@ function openPrayer(prayerKey, fromGroup){
   }
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false };
+const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false, pushEnabled:false };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
@@ -8925,6 +8925,7 @@ function renderSettings(){
     <div class="set-group">
       <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
+      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ</div><div class="si-d">${S.pushEnabled?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
     </div>
 
     <div class="set-group">
@@ -8941,6 +8942,15 @@ function renderSettings(){
   </div>`;
   document.getElementById('tgTheme').onclick=()=>{ toggleTheme(); renderSettings(); };
   document.getElementById('tgWake').onclick=()=>{ S.keepAwake=!S.keepAwake; saveS(); applyWakeLock(); renderSettings(); };
+  const tgp=document.getElementById('tgPush');
+  if(tgp) tgp.onclick=async()=>{
+    if(S.pushEnabled){ S.pushEnabled=false; saveS(); renderSettings(); try{ await window.disablePush(); }catch(e){} return; }
+    tgp.classList.add('on'); // optimistic - permission prompt can take a moment
+    const ok = await (window.enablePush?window.enablePush():Promise.resolve(false));
+    S.pushEnabled=ok; saveS();
+    if(!ok) toast('לֹא הֻפְעַל - נִדְרֶשֶׁת הַרְשָׁאַת הוֹדָעוֹת');
+    renderSettings();
+  };
   document.getElementById('fsMinus').onclick=()=>{ changeFont(-0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
   document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
   app.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{ S.division=b.dataset.div; saveS(); renderSettings(); });
@@ -9457,6 +9467,7 @@ window.shareQR = shareQR;
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
   import { getFirestore, doc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getDatabase, ref, push, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getMessaging, getToken, deleteToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
   const firebaseConfig = {
     apiKey: "AIzaSyC-_4GaF_IMR_Xy5d6LEFAT_1lvygCcfRQ",
     authDomain: "bet-el-e6812.firebaseapp.com",
@@ -9529,6 +9540,44 @@ window.shareQR = shareQR;
       }
     });
   } catch (e) {}
+
+  /* Real push notifications (announcing new content) - see CLAUDE.md
+     "Standing open items". Broadcast-to-everyone by design: a campaign
+     sent from Firebase Console > Engage > Messaging, targeted at "this
+     app" (no topic needed - Analytics is already linked, which is what
+     lets Console's App-target reach every registered token). This module
+     only needs to get a token and hand it to Firebase; storing it in
+     Firestore too is just a convenience record, not required for that to
+     work. window.enablePush/disablePush are called from the Settings
+     toggle in the main script (a classic script can't import this
+     module's bindings, so they're exposed on window instead). */
+  const VAPID_KEY = 'BN48abUdvf3DMSrY2d1P54Pea0BEpSySb90FRaxMclSaT26MqB2rhOpwMbvbu6M9bYuR94jWLCIO1EqKAe26X1g';
+  let messaging = null;
+  window.enablePush = async function(){
+    try{
+      if(!(await isSupported())) return false;
+      const perm = await Notification.requestPermission();
+      if(perm !== 'granted') return false;
+      const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+      if(!messaging) messaging = getMessaging(firebaseApp);
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+      if(!token) return false;
+      try{ await setDoc(doc(db, 'pushTokens', token), { token, ua: navigator.userAgent, lang: navigator.language, updatedAt: Date.now() }); }catch(e){}
+      onMessage(messaging, (payload) => {
+        const n = payload.notification || {};
+        try{ new Notification(n.title || 'תָּמִיד', { body: n.body || '', icon: './icon-192.png' }); }catch(e){}
+      });
+      return true;
+    }catch(e){ console.error('[betel push] enable failed:', e); return false; }
+  };
+  window.disablePush = async function(){
+    try{
+      if(!messaging) messaging = getMessaging(firebaseApp);
+      const reg = await navigator.serviceWorker.getRegistration('./firebase-messaging-sw.js');
+      const token = reg ? await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg }).catch(()=>null) : null;
+      if(token) await deleteToken(messaging).catch(()=>{});
+    }catch(e){}
+  };
 </script>
 </body>
 </html>

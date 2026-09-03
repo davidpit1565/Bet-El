@@ -8,7 +8,7 @@
     "check:blocking": "node scripts/check-blocking-resources.mjs",
     "serve:local": "python3 -c \"from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler; ThreadingHTTPServer(('127.0.0.1', 8899), SimpleHTTPRequestHandler).serve_forever()\"",
     "test:sweep": "node scripts/regression-sweep.mjs",
-    "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js manifest.json capacitor-core.js capacitor-local-notifications.js icon-192.png icon-512.png www/ && cp -r data www/data && cp -r fonts www/fonts && npx cap sync"
+    "cap:sync": "rm -rf www && mkdir -p www && cp index.html sw.js firebase-messaging-sw.js manifest.json capacitor-core.js capacitor-local-notifications.js icon-192.png icon-512.png www/ && cp -r data www/data && cp -r fonts www/fonts && npx cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
