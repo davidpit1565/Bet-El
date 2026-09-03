@@ -1193,6 +1193,16 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   .quick-grid>.q-tile{animation:none}
 }
 
+/* "marked as done" checkmark pop - the plain-swap alternative (a chevron,
+   or the still-in-progress category icon) never gets this: only the
+   checkmark itself, right where a completed item's list row/tracker ring
+   re-renders it in. A small overshoot-then-settle (spring, not ease-out -
+   this one specific moment of "got it recorded" earns a livelier feel
+   than routine entrances get) rather than a plain fade. */
+@keyframes checkPopIn{0%{opacity:0;transform:scale(.3) rotate(-20deg)}60%{opacity:1;transform:scale(1.2) rotate(6deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+.check-pop{display:inline-flex;animation:checkPopIn .4s var(--spring) both}
+@media (prefers-reduced-motion: reduce){.check-pop{animation:none}}
+
 /* ================= HOME: ornamented hero frame + rich tile wash =========
    A bordered "plaque" frame (gold double border, star corners, reusing the
    existing ORN flourish) around the greeting/date/zman - and a soft per-
@@ -4405,7 +4415,7 @@ function drawChokList(){
         const done = chokIsDone(key,d);
         return `<div class="prayer-row" data-day="${d}">
           <span class="prayer-row-title">${chokRowLabel(d,di)}${isToday?' · הַיּוֹם':''}</span>
-          ${done?I.check:I.chev}
+          ${done?'<span class="check-pop">'+I.check+'</span>':I.chev}
         </div>`;
       }).join('')}
     </div>
@@ -5301,7 +5311,7 @@ function renderHome(){
           <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר</div>
           <div class="sm-week-name">יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים${done?' · הוּשְׁלַם':''}</div>
         </div>
-        <span class="sm-week-chev">${done?I.check:I.chev}</span>
+        <span class="sm-week-chev">${done?'<span class="check-pop">'+I.check+'</span>':I.chev}</span>
       </div>`;
     })()}
     <div class="stats-row">
@@ -5404,48 +5414,48 @@ function renderTracker(){
     </div>
 
     ${ckLine?`<div class="sm-week-card ${chokDoneToday?'tr-done':''} ${chokCel?'tr-celebrate':''}" id="trackChok">
-      <div class="sm-week-icon tr-ring" style="--pct:${chokDoneToday?100:0}"><span class="tr-ring-inner">${chokDoneToday?I.check:I.crown}</span></div>
+      <div class="sm-week-icon tr-ring" style="--pct:${chokDoneToday?100:0}"><span class="tr-ring-inner">${chokDoneToday?'<span class="check-pop">'+I.check+'</span>':I.crown}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">חוֹק לְיִשְׂרָאֵל · קְרִיאַת הַיּוֹם</div>
         <div class="sm-week-name">${ckLine.text}${chokDoneToday?' · הוּשְׁלַם':' · עֲדַיִן לֹא הוּשְׁלַם'}</div>
       </div>
-      <span class="sm-week-chev">${chokDoneToday?I.check:I.chev}</span>
+      <span class="sm-week-chev">${chokDoneToday?'<span class="check-pop">'+I.check+'</span>':I.chev}</span>
     </div>`:''}
 
     <div class="sm-week-card ${tehillimDone?'tr-done':''} ${tehillimCel?'tr-celebrate':''}" id="trackTehillim">
-      <div class="sm-week-icon tr-ring" style="--pct:${tehillimPct}"><span class="tr-ring-inner">${tehillimDone?I.check:I.book}</span></div>
+      <div class="sm-week-icon tr-ring" style="--pct:${tehillimPct}"><span class="tr-ring-inner">${tehillimDone?'<span class="check-pop">'+I.check+'</span>':I.book}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">תְּהִלִּים · קְרִיאַת הַיּוֹם</div>
         <div class="sm-week-name">${readInPortion}/${chs.length} פְּרָקִים${tehillimDone?' · הוּשְׁלַם':''}</div>
       </div>
-      <span class="sm-week-chev">${tehillimDone?I.check:I.chev}</span>
+      <span class="sm-week-chev">${tehillimDone?'<span class="check-pop">'+I.check+'</span>':I.chev}</span>
     </div>
 
     ${cd?`<div class="sm-week-card ${zoharDoneToday?'tr-done':''} ${zoharCel?'tr-celebrate':''}" id="trackZohar">
-      <div class="sm-week-icon tr-ring" style="--pct:${zoharDoneToday?100:0}"><span class="tr-ring-inner">${zoharDoneToday?I.check:I.zoharFlame}</span></div>
+      <div class="sm-week-icon tr-ring" style="--pct:${zoharDoneToday?100:0}"><span class="tr-ring-inner">${zoharDoneToday?'<span class="check-pop">'+I.check+'</span>':I.zoharFlame}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">תִּיקּוּנֵי הַזֹּהַר · יוֹם ${heNum(cd)} לְמִנְיַן הָאַרְבָּעִים</div>
         <div class="sm-week-name">${zoharDoneToday?'הוּשְׁלַם הַיּוֹם':'עֲדַיִן לֹא הוּשְׁלַם'} · ${zoharTotalDone}/${ZOHAR?ZOHAR.length:40} בַּמַּחְזוֹר</div>
       </div>
-      <span class="sm-week-chev">${zoharDoneToday?I.check:I.chev}</span>
+      <span class="sm-week-chev">${zoharDoneToday?'<span class="check-pop">'+I.check+'</span>':I.chev}</span>
     </div>`:''}
 
     ${weekParshaKey?`<div class="sm-week-card ${parshaDone?'tr-done':''} ${parshaCel?'tr-celebrate':''}" id="trackShnayim">
-      <div class="sm-week-icon tr-ring" style="--pct:${parshaDone?100:0}"><span class="tr-ring-inner">${parshaDone?I.check:I.scroll}</span></div>
+      <div class="sm-week-icon tr-ring" style="--pct:${parshaDone?100:0}"><span class="tr-ring-inner">${parshaDone?'<span class="check-pop">'+I.check+'</span>':I.scroll}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">שְׁנַיִם מִקְרָא · פָּרָשַׁת הַשָּׁבוּעַ</div>
         <div class="sm-week-name">${parshaName(weekParshaKey)}${parshaDone?' · הוּשְׁלְמָה':' · עֲדַיִן לֹא הוּשְׁלְמָה'}</div>
       </div>
-      <span class="sm-week-chev">${parshaDone?I.check:I.chev}</span>
+      <span class="sm-week-chev">${parshaDone?'<span class="check-pop">'+I.check+'</span>':I.chev}</span>
     </div>`:''}
 
     ${bicP?`<div class="sm-week-card ${bicDone?'tr-done':''} ${bicCel?'tr-celebrate':''}" id="trackBic">
-      <div class="sm-week-icon tr-ring" style="--pct:${bicPct}"><span class="tr-ring-inner">${bicDone?I.check:I.candle}</span></div>
+      <div class="sm-week-icon tr-ring" style="--pct:${bicPct}"><span class="tr-ring-inner">${bicDone?'<span class="check-pop">'+I.check+'</span>':I.candle}</span></div>
       <div class="sm-week-text">
         <div class="sm-week-tag">${ckBicUI().title} · ${parshaName(bicKey)}</div>
         <div class="sm-week-name">${bicDoneN}/${bicTotal} ${ckBicUI().halachot}${bicDone?' · הוּשְׁלַם':''}</div>
       </div>
-      <span class="sm-week-chev">${bicDone?I.check:I.chev}</span>
+      <span class="sm-week-chev">${bicDone?'<span class="check-pop">'+I.check+'</span>':I.chev}</span>
     </div>`:''}
     ${ornament()}
   </div>`;
@@ -8297,7 +8307,7 @@ function drawShnayimBookList(){
   </div>
   <div class="view">
     <div class="prayers-list">
-      ${keys.map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${parshaName(k)}</span>${smIsDone(k)?I.check:I.chev}</div>`).join('')}
+      ${keys.map(k=>`<div class="prayer-row" data-k="${k}"><span class="prayer-row-title">${parshaName(k)}</span>${smIsDone(k)?'<span class="check-pop">'+I.check+'</span>':I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
@@ -8473,7 +8483,7 @@ function drawZoharList(){
     </div>`:''}
     <div class="empty-note" style="padding:14px 4px;text-align:center"><div style="font-size:13px;line-height:1.8">מִנְהַג אַרְבָּעִים הַיּוֹם מֵרֹאשׁ חֹדֶשׁ אֱלוּל וְעַד יוֹם כִּפּוּר</div></div>
     <div class="prayers-list">
-      ${ZOHAR.map(d=>`<div class="prayer-row" data-day="${d.day}"><span class="prayer-row-title">יוֹם ${heNum(d.day)} · ${localizeHebDateStr(d.hebDate)}${d.day===todayCd?' · הַיּוֹם':''}</span>${done.includes(d.day)?I.check:I.chev}</div>`).join('')}
+      ${ZOHAR.map(d=>`<div class="prayer-row" data-day="${d.day}"><span class="prayer-row-title">יוֹם ${heNum(d.day)} · ${localizeHebDateStr(d.hebDate)}${d.day===todayCd?' · הַיּוֹם':''}</span>${done.includes(d.day)?'<span class="check-pop">'+I.check+'</span>':I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
