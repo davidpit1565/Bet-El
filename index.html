@@ -1143,6 +1143,28 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   }
 }
 
+/* ================= Staggered entrance for quick-grid tile lists ==========
+   Every quick-grid screen re-renders its tiles as fresh DOM each time it's
+   opened (go() replaces app.innerHTML wholesale), so a one-shot CSS
+   animation on .q-tile naturally replays on every visit with no JS needed.
+   Entering elements only, ease-out (--spring-soft), transform+opacity only,
+   well under ~300ms per tile, staggered 40ms/tile - per Emil Kowalski's
+   design-engineering guidance for multi-element entrances. */
+@keyframes tileEnter{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.quick-grid>.q-tile{animation:tileEnter .32s var(--spring-soft) both}
+.quick-grid>.q-tile:nth-child(1){animation-delay:0ms}
+.quick-grid>.q-tile:nth-child(2){animation-delay:40ms}
+.quick-grid>.q-tile:nth-child(3){animation-delay:80ms}
+.quick-grid>.q-tile:nth-child(4){animation-delay:120ms}
+.quick-grid>.q-tile:nth-child(5){animation-delay:160ms}
+.quick-grid>.q-tile:nth-child(6){animation-delay:200ms}
+.quick-grid>.q-tile:nth-child(7){animation-delay:240ms}
+.quick-grid>.q-tile:nth-child(8){animation-delay:280ms}
+.quick-grid>.q-tile:nth-child(n+9){animation-delay:320ms}
+@media (prefers-reduced-motion: reduce){
+  .quick-grid>.q-tile{animation:none}
+}
+
 /* ================= HOME: ornamented hero frame + rich tile wash =========
    A bordered "plaque" frame (gold double border, star corners, reusing the
    existing ORN flourish) around the greeting/date/zman - and a soft per-
