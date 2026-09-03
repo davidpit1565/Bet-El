@@ -461,6 +461,16 @@ a.set-item{text-decoration:none;color:inherit}
 .seg button{border:none;background:transparent;color:var(--ink-soft);padding:8px 14px;border-radius:9px;
   font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer;transition:.2s var(--ease)}
 .seg button.on{background:var(--gold-grad);color:#2a1e05}
+/* A 3-way segment (e.g. division method) squeezed next to its own label in
+   the normal side-by-side .set-item row has too little width for a label
+   like "חָדְשִׁי (5 לְיוֹם)" - it wrapped onto 2-3 ragged lines with an
+   orphaned closing paren alone on its own line, which read as broken/
+   unpolished rather than just tight. Stacking the label above and letting
+   the segment take the full card width below gives every button enough
+   room to stay on one line. */
+.set-item.set-item-stack{flex-direction:column;align-items:stretch;gap:12px}
+.set-item.set-item-stack .seg{width:100%}
+.set-item.set-item-stack .seg button{flex:1;text-align:center;white-space:nowrap}
 /* stepper */
 .stepper{display:flex;align-items:center;gap:4px;background:var(--line);border-radius:11px;padding:3px}
 .stepper button{width:34px;height:34px;border:none;background:transparent;color:var(--gold);font-size:20px;font-weight:700;cursor:pointer;border-radius:8px}
@@ -1730,7 +1740,7 @@ function openPrayer(prayerKey, fromGroup){
   }
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false, pushEnabled:false };
+const DEF = { theme:'dark', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false, pushEnabled:false };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
@@ -8946,7 +8956,7 @@ function renderSettings(){
         <select id="selMusarWork" class="fld-select" style="width:auto;min-width:170px">
           ${MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>`<option value="${w.key}" ${(S.musarWork||'reshit')===w.key?'selected':''}>${ckMusarUI()[w.key]}</option>`).join('')}
         </select></div>`:''}
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${ckDivisionLabel()}</div></div></div>
+      <div class="set-item set-item-stack"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${ckDivisionLabel()}</div></div></div>
         <div class="seg"><button data-div="monthlyStd" class="${S.division!=='monthly'&&S.division!=='weekly'?'on':''}">חָדְשִׁי</button><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי (5 לְיוֹם)</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
     </div>
 
