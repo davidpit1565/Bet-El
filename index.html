@@ -6187,6 +6187,205 @@ function libCatLabel(key){
   const c=LIBRARY_CATS.find(x=>x.key===key);
   return c ? ckChrome(c.label) : key;
 }
+/* ================= LIBRARY: unified reference/name search =================
+   One search box on the Library home screen. Deliberately reference/name
+   based, not full-text (searching every word of every verse across the
+   whole library would need pre-building a real search index over millions
+   of words - a separate, much bigger undertaking the user explicitly chose
+   NOT to do). Recognizes: bare category names ("גמרא" -> that category's own
+   home list), Torah parasha names, Tehillim chapter numbers, Siddur prayer
+   names, and (once their data has loaded - kicked off in the background as
+   soon as this screen opens, see libPrefetchSearchData below) Gemara/
+   Rambam/Mishnah/Zohar masechet-or-sefer(+chapter) references and Neviim/
+   Ketuvim book(+chapter) references. Reuses ckNorm/ckSkel/ckNum/ckBare -
+   plain text utilities despite the "ck" prefix, not actually tied to the
+   Chok LeYisrael flow - but NOT ckSearch/ckBuildIndex/ckOpenHit themselves,
+   since those route into Chok's own day-cycle screens (chokUnit, openChok)
+   rather than the Library's free-browse readers this box targets. */
+const LIB_CATEGORY_SEARCH=[
+  {label:'תּוֹרָה', words:['תורה','חומש'], open:()=>go('libraryTorahBooks')},
+  {label:'נְבִיאִים', words:['נביאים'], open:()=>{ LIB.nkCat='neviim'; go('libraryNKBooks'); }},
+  {label:'כְּתוּבִים', words:['כתובים'], open:()=>{ LIB.nkCat='ketuvim'; go('libraryNKBooks'); }},
+  {label:'מִשְׁנָה', words:['משנה'], open:()=>go('libraryMishnahSedarim')},
+  {label:'גְּמָרָא', words:['גמרא','תלמוד'], open:()=>go('libraryGemaraMasechtot')},
+  {label:'רַמְבַּ״ם', words:['רמבם','הלכה','הלכות'], open:()=>go('libraryRambamSefarim')},
+  {label:(BIC_UI.he||{}).title||'בֶּן אִישׁ חַי', words:['בן איש חי','בניש'], open:()=>go('bicHome')},
+  {label:'מוּסָר', words:['מוסר'], open:()=>go('musarList')},
+  {label:'תִּיקּוּנֵי הַזֹּהַר', words:['תיקוני הזהר'], open:()=>go('zoharList')},
+  {label:'זֹהַר', words:['זהר'], open:()=>go('libraryZoharParts')},
+  {label:'תַּנְיָא', words:['תניא'], open:()=>go('libraryTanyaParts')},
+  {label:'שְׁנַיִם מִקְרָא', words:['שנים מקרא','שניים מקרא'], open:()=>go('smList')},
+  {label:'תְּהִלִּים', words:['תהלים','תהילים'], open:()=>go('tehillim')},
+  {label:'סִדּוּר', words:['סידור','סדור'], open:()=>go('siddurHome')},
+];
+/* Fires all the relevant background data fetches the moment the Library
+   home screen opens (each ensureX() is itself cached/idempotent, so this is
+   safe to call every time), then re-draws the search results once each
+   resolves - so a reference that needs e.g. Mishnah's index just becomes
+   searchable a moment after the screen opens, without the user having to
+   first visit the Mishnah section themselves. */
+function libPrefetchSearchData(){
+  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex()].forEach(p=>{
+    p.then(()=>{ if(TAB==='library') libDrawSearch(); }).catch(()=>{});
+  });
+}
+function libBareMatch(nameSkel, candidateSkel){
+  return !!candidateSkel && !!nameSkel && (nameSkel.indexOf(candidateSkel)>=0 || candidateSkel.indexOf(nameSkel)>=0);
+}
+/* Splits off one trailing chapter/daf number (digit or Hebrew numeral) from
+   the query, e.g. "ברכות ב"/"ברכות פרק ב"/"ברכות 2" all yield name="ברכות
+   (פרק)" + num=2 - matching then treats the name as a substring either way,
+   so a leftover counter-word in "name" (like "פרק") never breaks the match
+   since the real book/masechet name still appears inside it.
+   A single bare word (no preceding name at all) is NEVER read as a Hebrew
+   numeral unless it's a plain digit string - ckNum happily sums gematria
+   for ANY string of Hebrew letters, so a whole-word query like "בראשית" or
+   "גמרא" would otherwise silently be misread as a number (913, 244...)
+   with nothing left to match a name against. A numeral is only inferred
+   from a trailing Hebrew-letter token when it's short (a real chapter/daf
+   number, not a multi-letter word) or explicitly follows a counter word
+   like "פרק"/"דף". */
+function libParseNameNum(raw){
+  const toks=raw.split(' ').filter(Boolean);
+  if(!toks.length) return {name:'', num:null};
+  if(toks.length===1){
+    return /^\d+$/.test(toks[0]) ? {name:'', num:+toks[0]} : {name:toks[0], num:null};
+  }
+  const last=toks[toks.length-1], prev=toks[toks.length-2];
+  const eligible = /^\d+$/.test(last) || last.length<=3 || CK_COUNTER.test(prev);
+  const num = eligible ? ckNum(last) : null;
+  if(num!=null) return {name:toks.slice(0,-1).join(' '), num};
+  return {name:toks.join(' '), num:null};
+}
+function libSearchHits(q){
+  const raw=ckNorm(q);
+  if(raw.length<2) return [];
+  const nSkel=ckSkel(raw);
+  const hits=[];
+  LIB_CATEGORY_SEARCH.forEach(c=>{
+    if(c.words.some(w=>libBareMatch(nSkel,ckSkel(w)))) hits.push({group:'קָטֵגוֹרְיָה',label:c.label,action:c.open});
+  });
+  const {name,num}=libParseNameNum(raw);
+  const nameSkel=ckSkel(name);
+  if(LEYNING && name){
+    individualParshaKeys().forEach(k=>{
+      const nm=ckSkel(ckBare(parshaName(k)));
+      if(libBareMatch(nameSkel,nm)) hits.push({group:'תּוֹרָה', label:parshaName(k), action:()=>{
+        LIB.torahBook=LEYNING[k].book; LIB.torahParsha=k; LIB.torahAliyah=num||1; go('libraryTorahReader');
+      }});
+    });
+  }
+  if(num!=null && num>=1 && num<=150 && (!name || /תהל|מזמור/.test(nameSkel))){
+    hits.push({group:'תְּהִלִּים', label:'תְּהִלִּים פֶּרֶק '+heNum(num), action:()=>openReader([num],{start:num})});
+  }
+  /* SIDDUR_PRAYER_NAMES is the small top-level list (Shacharit/Mincha/
+     Arvit/Rosh Chodesh/... - the big daily services, opened via
+     openSiddurPrayer). PRAYERS_EXTRA is a separate, larger collection of
+     individual standalone prayers (Birkat HaMazon, Tikun Chatzot...),
+     opened via openPrayer - genuinely two different readers/state shapes,
+     both need searching. */
+  for(const k in SIDDUR_PRAYER_NAMES){
+    const t=ckSkel(ckBare(SIDDUR_PRAYER_NAMES[k]));
+    if(libBareMatch(nSkel,t)) hits.push({group:'סִדּוּר', label:SIDDUR_PRAYER_NAMES[k], action:()=>openSiddurPrayer(k)});
+  }
+  for(const k in PRAYERS_EXTRA){
+    const p=PRAYERS_EXTRA[k];
+    if(!p||!p.ready||PRAYER_KEYS_HIDDEN.includes(k)) continue;
+    const t=ckSkel(ckBare(p.title||''));
+    if(libBareMatch(nSkel,t)) hits.push({group:'סִדּוּר', label:p.title, action:()=>openPrayer(k)});
+  }
+  if(CYC && CYC.daf && name){
+    for(const key in CYC.daf.heNames){
+      const nm=ckSkel(ckBare(CYC.daf.heNames[key]));
+      if(!libBareMatch(nameSkel,nm)) continue;
+      if(num!=null){
+        const idx=CYC.daf.order.findIndex(e=>e.t===key && e.daf===num);
+        if(idx>=0) hits.push({group:'גְּמָרָא', label:CYC.daf.heNames[key]+' דַּף '+heNum(num), action:()=>{ LIB.gemaraIndex=idx; LIB.gemaraSide='a'; go('libraryGemaraReader'); }});
+      } else {
+        const idx=CYC.daf.order.findIndex(e=>e.t===key);
+        if(idx>=0) hits.push({group:'גְּמָרָא', label:CYC.daf.heNames[key], action:()=>{ LIB.gemaraIndex=idx; LIB.gemaraSide='a'; go('libraryGemaraReader'); }});
+      }
+    }
+  }
+  if(CYC && CYC.rambam && name){
+    /* CYC.rambam.heNames values are the full formal citation, e.g. "מִשְׁנֵה
+       תּוֹרָה, הִלְכוֹת תְּשׁוּבָה" - matching against that whole string would
+       make every single Rambam chapter match a bare "משנה" query too (the
+       "מִשְׁנֵה" in "מִשְׁנֵה תּוֹרָה" skeleton-collapses to the exact same
+       "משנה" the Mishnah category itself matches on), so only the "הִלְכוֹת
+       ..." part after the fixed prefix participates in matching. Split on
+       the comma every value has after that prefix rather than hand-typing
+       the pointed prefix text itself - retyping vowelled Hebrew is a known
+       hazard in this codebase (combining marks can come out in a different,
+       visually-identical-but-string-unequal order than the source data). */
+    for(const key in CYC.rambam.heNames){
+      const full=CYC.rambam.heNames[key];
+      const commaAt=full.indexOf(',');
+      const short=commaAt>=0 ? full.slice(commaAt+1).trim() : full;
+      const nm=ckSkel(ckBare(short));
+      if(!libBareMatch(nameSkel,nm)) continue;
+      if(num!=null){
+        const idx=CYC.rambam.order.findIndex(e=>e.book===key && e.ch===num);
+        if(idx>=0) hits.push({group:'רַמְבַּ״ם', label:short+' פֶּרֶק '+heNum(num), action:()=>{ LIB.rambamBook=key; LIB.rambamIndex=idx; go('libraryRambamReader'); }});
+      } else {
+        const idx=CYC.rambam.order.findIndex(e=>e.book===key);
+        if(idx>=0) hits.push({group:'רַמְבַּ״ם', label:short, action:()=>{ LIB.rambamBook=key; LIB.rambamIndex=idx; go('libraryRambamReader'); }});
+      }
+    }
+  }
+  if(CYC && CYC.zohar && num!=null && (/זהר|^דף/.test(nSkel) || !name.trim())){
+    const idx=CYC.zohar.order.findIndex(e=>e.daf===num);
+    if(idx>=0) hits.push({group:'זֹהַר', label:'זֹהַר דַּף '+heNum(num), action:()=>{ LIB.zoharIndex=idx; go('libraryZoharReader'); }});
+  }
+  if(MISHNAH_IDX && name){
+    MISHNAH_IDX.sedarim.forEach(sd=>{
+      sd.tractates.forEach(t=>{
+        const nm=ckSkel(ckBare(mishTractateName(t.masechet)));
+        if(!libBareMatch(nameSkel,nm)) return;
+        if(num!=null){
+          const ci=t.chapters.findIndex(c=>c.ch===num);
+          if(ci>=0) hits.push({group:'מִשְׁנָה', label:mishTractateName(t.masechet)+' פֶּרֶק '+heNum(num), action:()=>{ LIB.mishnahSeder=sd.seder; LIB.mishnahTractate=t.masechet; LIB.mishnahChIdx=ci; go('libraryMishnahReader'); }});
+        } else {
+          hits.push({group:'מִשְׁנָה', label:mishTractateName(t.masechet), action:()=>{ LIB.mishnahSeder=sd.seder; LIB.mishnahTractate=t.masechet; LIB.mishnahChIdx=0; go('libraryMishnahReader'); }});
+        }
+      });
+    });
+  }
+  if(name){
+    /* Psalms is excluded here - it already has its own dedicated Tehillim
+       category shortcut and chapter-number search above, which is the
+       fuller reader; without this exclusion "תהלים" would show two
+       identically-labeled hits routing to two different screens. */
+    ['neviim','ketuvim'].forEach(cat=>{
+      (NK_BOOKS[cat]||[]).forEach(b=>{
+        if(b.k==='Psalms') return;
+        const nm=ckSkel(ckBare(b.he));
+        if(!libBareMatch(nameSkel,nm)) return;
+        hits.push({group:cat==='neviim'?'נְבִיאִים':'כְּתוּבִים', label:b.he+(num?' פֶּרֶק '+heNum(num):''), action:()=>{ LIB.nkCat=cat; LIB.nkBook=b.k; LIB.nkChapter=num||1; go('libraryNKReader'); }});
+      });
+    });
+  }
+  return hits.slice(0,60);
+}
+function libDrawSearch(){
+  const box=document.getElementById('libResults'); if(!box) return;
+  const inp=document.getElementById('libSearchQ'); const q=inp?inp.value:'';
+  const grid=document.querySelector('.view>.quick-grid');
+  const active=ckNorm(q).length>=2;
+  if(grid) grid.style.display=active?'none':'';
+  if(!active){ box.innerHTML=''; return; }
+  const hits=libSearchHits(q);
+  if(!hits.length){ box.innerHTML=`<div class="empty-note">לֹא נִמְצָא</div>`; return; }
+  const groups={};
+  hits.forEach(h=>{ (groups[h.group]=groups[h.group]||[]).push(h); });
+  box.innerHTML=Object.keys(groups).map(g=>`
+    <div class="ck-grp">${g}</div>
+    <div class="prayers-list">${groups[g].map((h,ix)=>
+      `<div class="prayer-row" data-g="${g}" data-i="${ix}"><span class="prayer-row-title">${h.label}</span>${I.chev}</div>`).join('')}
+    </div>`).join('');
+  box.querySelectorAll('.prayer-row').forEach(r=>r.onclick=()=>{ groups[r.dataset.g][+r.dataset.i].action(); });
+  tr(box);
+}
 function openLibraryCat(key){
   haptic();
   if(key==='musar') return go('musarList');
@@ -6206,6 +6405,8 @@ function renderLibrary(){
   app.innerHTML=`
   ${topbar('עִיּוּן בַּסְּפָרִים','prayers')}
   <div class="view">
+    <div class="search-box">${I.search}<input id="libSearchQ" placeholder="פָּרָשָׁה · מַסֶּכֶת וּפֶרֶק · רַמְבַּ״ם · דַּף זֹהַר · תְּהִלִּים · תְּפִלָּה"/></div>
+    <div id="libResults"></div>
     <div class="quick-grid">
       ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.cssCat||c.key}">
         <div class="qt">${libCatLabel(c.key)}</div>
@@ -6214,6 +6415,8 @@ function renderLibrary(){
     ${ornament()}
   </div>`;
   app.querySelectorAll('[data-libcat]').forEach(t=>t.onclick=()=>openLibraryCat(t.dataset.libcat));
+  document.getElementById('libSearchQ').oninput=libDrawSearch;
+  libPrefetchSearchData();
   tr(app);
 }
 
