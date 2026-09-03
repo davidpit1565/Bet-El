@@ -4250,6 +4250,33 @@ function ckAnimClass(){
   CK_NAV_DIR=0;
   return c;
 }
+/* Shared horizontal-swipe-to-navigate gesture, scoped to a single reading-
+   content element (never the whole screen) so it can't compete with an
+   existing horizontal-scrolling strip elsewhere on the same page (the
+   day/section chip rows already scroll via touch) and never fires on an
+   ordinary vertical scroll: it requires a fast (<600ms), clearly-more-
+   horizontal-than-vertical drag past a real distance threshold. RTL swipe
+   convention, matching how the existing prev/next buttons already read:
+   dragging left (finger moves right-to-left, dx<0) reveals what's next -
+   the same direction the next button's own slide-in animation already
+   enters from (see ckSlideInR/ckSlideInL above). A vertical scroll never
+   calls preventDefault, so native scrolling is untouched either way. */
+function wireSwipeNav(el, onNext, onPrev){
+  if(!el) return;
+  let x0=null, y0=null, t0=0;
+  el.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1){ x0=null; return; }
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
+  }, {passive:true});
+  el.addEventListener('touchend', e=>{
+    if(x0==null) return;
+    const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0;
+    x0=null;
+    if(dt>600 || Math.abs(dx)<60 || Math.abs(dy)>Math.abs(dx)*0.6) return;
+    haptic(10);
+    if(dx<0){ if(onNext) onNext(); } else { if(onPrev) onPrev(); }
+  }, {passive:true});
+}
 const CHOK_DAY_SHORT={sun:'א׳',mon:'ב׳',tue:'ג׳',wed:'ד׳',thu:'ה׳',night:'לֵיל ו׳',fri:'ו׳'};
 const CHOK_DAY_SHORT_BY_LANG={
   en:{sun:'Sun',mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',night:'Fri night',fri:'Fri'},
@@ -4797,6 +4824,9 @@ function renderChokReader(){
   });
   const onSecChip=app.querySelector('.ck-secchip.on');
   if(onSecChip) onSecChip.scrollIntoView({inline:'center', block:'nearest'});
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(CK.sec<secs.length-1) goSec(CK.sec+1); },
+    ()=>{ if(CK.sec>0) goSec(CK.sec-1); });
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
   app.querySelectorAll('.ck-track-btn[data-halchoice]').forEach(b=>b.onclick=()=>{
     const v=b.dataset.halchoice;
@@ -5708,6 +5738,7 @@ function wireReader(){
   const done=document.getElementById('rDone'); if(done) done.onclick=()=>{
     haptic(); markRead(RD.chapters[RD.idx]); finishReading();
   };
+  wireSwipeNav(document.getElementById('chWrap'), ()=>{ if(next&&!next.disabled) next.click(); }, ()=>{ if(prev&&!prev.disabled) prev.click(); });
   // tools
   document.getElementById('tMinus').onclick=()=>changeFont(-0.1);
   document.getElementById('tPlus').onclick=()=>changeFont(0.1);
