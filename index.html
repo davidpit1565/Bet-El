@@ -655,7 +655,11 @@ a.set-item{text-decoration:none;color:inherit}
 .ps-cell.fav{border-color:var(--line-strong)}
 
 /* verse search results */
-.empty-note{text-align:center;color:var(--muted);font-size:14px;padding:26px 10px}
+.empty-note{text-align:center;color:var(--muted);font-size:14px;padding:26px 10px;animation:fade .3s var(--ease)}
+.empty-note::before{content:'';display:block;width:34px;height:34px;margin:0 auto 12px;opacity:.3;
+  background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Ccircle cx='10' cy='10' r='6.5'/%3E%3Cpath d='M14.7 14.7L20 20' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Ccircle cx='10' cy='10' r='6.5'/%3E%3Cpath d='M14.7 14.7L20 20' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;}
 .res-count{font-size:12px;color:var(--gold);font-weight:700;margin:2px 2px 10px;letter-spacing:.3px}
 .res-item{display:block;width:100%;text-align:right;background:var(--panel);border:var(--glass-border);
   border-radius:13px;padding:13px 15px;margin-bottom:9px;cursor:pointer;backdrop-filter:blur(8px);transition:.15s var(--ease)}
