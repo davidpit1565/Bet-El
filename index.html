@@ -316,7 +316,7 @@ body::before{ /* subtle starfield/texture */
   border-radius:12px;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px);transition:.2s var(--ease)}
 .reader-tools .rt-fab:active{transform:scale(.92)}
 .reader-tools .rt-fab svg{width:19px;height:19px}
-.reader-tools .rt-panel{position:absolute;top:calc(100% + 8px);left:0;z-index:36;
+.reader-tools .rt-panel{position:absolute;top:calc(100% + 8px);left:0;z-index:36;transform-origin:top left;
   display:flex;align-items:center;gap:4px;background:var(--panel-solid);border:var(--glass-border);border-radius:999px;
   padding:7px 9px;box-shadow:var(--card-shadow);backdrop-filter:blur(12px);animation:rise .2s var(--ease)}
 .reader-tools.collapsed .rt-panel{display:none}
