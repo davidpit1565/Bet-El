@@ -2682,7 +2682,7 @@ function chokSectionsFor(key,day){
     });
     const thuList=chokSectionsFor(key,'thu');
     if(!items.length) return thuList;
-    const tzeruf={key:'tzeruf',he:'תּוֹרָה · לֵיל שִׁשִּׁי',items,kind:'torah',refs};
+    const tzeruf={key:'tzeruf',he:'תּוֹרָה',items,kind:'torah',refs};
     const ti=thuList.findIndex(x=>x.key==='torah');
     if(ti>=0) thuList.splice(ti+1,0,tzeruf); else thuList.unshift(tzeruf);
     return thuList;
