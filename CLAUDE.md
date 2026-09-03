@@ -196,23 +196,24 @@ in English as usual.
   common source of sandbox flakiness unrelated to the app.
 
 ## Standing open items
-- **Firebase push notifications**: there is currently no real push
-  infrastructure (no FCM, no server-side send capability) - the existing
-  "reminder" toggle in Settings is a local, per-device notification only.
-  The user wants to add real push (e.g. to announce new content) via the
-  Firebase console themselves, at their computer - don't build this
-  without them present.
-- **Chok LeYisrael schedule explainer page**: an in-app page/table
-  explaining what's studied each day and in what order, in plain language
-  for end users (not a technical/internal document, no jargon like
-  "cycle"/"anchor", no justifying the design vs. the traditional printed
-  Chok LeYisrael). Content has been drafted and iterated on with the user
-  across several rounds; the latest agreed direction has one line per
-  section (Torah/Nevi'im+Ketuvim/Tehillim/Mishnah/Gemara/Zohar/Halacha/
-  Musar) stating its concrete daily unit (e.g. "one Gemara daf a day",
-  "5 chapters a day on the monthly Tehillim division, or the day's fixed
-  chapters on the weekly division"), a mature/adult tone, and the Musar
-  line naming all 6 books without the word "classic". Placement in the
-  app is not yet decided. The current agreed draft text is saved at
-  `docs/chok-leyisrael-explainer-draft.md` - confirm with the user before
-  building, since it may have evolved further.
+- **Firebase push notifications**: real push infrastructure now exists
+  (FCM Web Push) - a Settings toggle ("הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ") requests
+  permission, registers `firebase-messaging-sw.js`, and stores the FCM
+  token in Firestore's `pushTokens` collection. Broadcast-to-everyone by
+  design (no topic needed - Analytics is already linked, so a campaign
+  from Firebase Console > Engage > Messaging targeted at the app itself
+  reaches every registered token): https://console.firebase.google.com/project/bet-el-e6812/messaging
+  **Whenever a new book, section, or other significant content is added
+  to the app, remind the user that this is a good moment to send an
+  announcement campaign** - don't send one yourself, just flag it.
+- **Chok LeYisrael schedule explainer page**: built - `TAB==='chokExplainer'`
+  (`renderChokExplainer()`), reachable from Chok LeYisrael's own topbar
+  (info button), Settings, and the onboarding welcome screen. Uses the
+  text from `docs/chok-leyisrael-explainer-draft.md` as confirmed by the
+  user (still accurate as of the build) - if that content ever needs to
+  change again, edit `CK_EXPLAINER_ITEMS` in index.html directly.
+- **App Store QR code**: `shareQR()`/`appQrImage()` (index.html) generates
+  a share image whose QR code currently encodes the PWA's own URL
+  (`location.href`). Once the app is published on the App Store, update
+  the QR target (and probably add an "also on the App Store" line) to
+  point there instead - don't guess an App Store URL before it exists.
