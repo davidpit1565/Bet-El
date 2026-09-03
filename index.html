@@ -9143,7 +9143,7 @@ async function appQrImage(){
   ctx.strokeStyle='rgba(230,200,116,.18)'; ctx.lineWidth=1; ctx.strokeRect(44,44,W-88,H-88);
   await new Promise(res=>{ const im=new Image(); im.onload=()=>{ const lw=200, lh=im.height*(lw/im.width); ctx.drawImage(im,(W-lw)/2,70,lw,lh); res(); }; im.onerror=res; im.src=LOGO; });
   ctx.textAlign='center'; ctx.fillStyle=th.gold; ctx.font='900 60px "Frank Ruhl Libre",serif';
-  ctx.fillText('בֵּית אֵ-ל', W/2, 340);
+  ctx.fillText('תָּמִיד', W/2, 340);
   ctx.fillStyle=th.cream; ctx.font='400 32px "Heebo",sans-serif';
   ctx.fillText(ckChrome('אַפְּלִיקַצְיַת הַלִּמּוּד הַיּוֹמִי'), W/2, 388);
   ctx.strokeStyle=th.line; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(150,430); ctx.lineTo(W-150,430); ctx.stroke();

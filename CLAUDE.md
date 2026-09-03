@@ -212,3 +212,8 @@ in English as usual.
   text from `docs/chok-leyisrael-explainer-draft.md` as confirmed by the
   user (still accurate as of the build) - if that content ever needs to
   change again, edit `CK_EXPLAINER_ITEMS` in index.html directly.
+- **App Store QR code**: `shareQR()`/`appQrImage()` (index.html) generates
+  a share image whose QR code currently encodes the PWA's own URL
+  (`location.href`). Once the app is published on the App Store, update
+  the QR target (and probably add an "also on the App Store" line) to
+  point there instead - don't guess an App Store URL before it exists.
