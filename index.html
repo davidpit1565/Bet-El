@@ -2900,6 +2900,9 @@ function renderMusarYomiReader(){
   document.getElementById('myNext').onclick=()=>{ MUSAR_YOMI_START=(start+3)%n; renderMusarYomiReader(); forceScrollTop(); };
   const pick=document.getElementById('mySecPick'); if(pick) pick.onchange=()=>{ MUSAR_YOMI_START=+pick.value; renderMusarYomiReader(); forceScrollTop(); };
   const tb=document.getElementById('myToday'); if(tb) tb.onclick=()=>{ MUSAR_YOMI_START=null; renderMusarYomiReader(); forceScrollTop(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>document.getElementById('myNext').click(),
+    ()=>document.getElementById('myPrev').click());
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
@@ -4715,6 +4718,9 @@ function renderBicReader(){
   });
   const onChip=app.querySelector('.ck-daychip.on'); if(onChip) onChip.scrollIntoView({inline:'center',block:'nearest'});
   document.getElementById('bicMark').onclick=()=>{ bicToggleDone(track,BIC.parasha,BIC.pos); renderBicReader(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(BIC.pos<items.length-1) goPos(BIC.pos+1); },
+    ()=>{ if(BIC.pos>0) goPos(BIC.pos-1); });
   app.querySelectorAll('.ck-comm-btn[data-bic]').forEach(b=>b.onclick=()=>bicToggleComm(b));
 }
 
@@ -6636,6 +6642,7 @@ function renderLibraryTorahReader(){
     LIB.torahAliyah=newN;
     renderLibraryTorahReader(); forceScrollTop();
   });
+  wireSwipeNav(app.querySelector('.sm-verses'), libtStepNext, libtStepPrev);
   tr(app);
 }
 
@@ -6745,6 +6752,9 @@ function renderLibraryGemaraReader(){
   const prevBtn=document.getElementById('libgPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>goTo(list[pos-1]);
   const nextBtn=document.getElementById('libgNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>goTo(list[pos+1]);
   document.getElementById('libgDafPick').onchange=function(){ goTo(list[+this.value]); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(pos<list.length-1) goTo(list[pos+1]); },
+    ()=>{ if(pos>0) goTo(list[pos-1]); });
   tr(app);
 }
 
@@ -6851,6 +6861,9 @@ function renderLibraryRambamReader(){
   const prevBtn=document.getElementById('librPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.rambamIndex=i-1; renderLibraryRambamReader(); forceScrollTop(); };
   const nextBtn=document.getElementById('librNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.rambamIndex=i+1; renderLibraryRambamReader(); forceScrollTop(); };
   document.getElementById('librChPick').onchange=function(){ LIB.rambamIndex=+this.value; renderLibraryRambamReader(); forceScrollTop(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(i<rg.last){ LIB.rambamIndex=i+1; renderLibraryRambamReader(); forceScrollTop(); } },
+    ()=>{ if(i>rg.first){ LIB.rambamIndex=i-1; renderLibraryRambamReader(); forceScrollTop(); } });
   tr(app);
 }
 
@@ -6931,6 +6944,9 @@ function renderLibraryZoharReader(){
   const prevBtn=document.getElementById('libzPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.zoharIndex=i-1; renderLibraryZoharReader(); forceScrollTop(); };
   const nextBtn=document.getElementById('libzNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.zoharIndex=i+1; renderLibraryZoharReader(); forceScrollTop(); };
   document.getElementById('libzDafPick').onchange=function(){ LIB.zoharIndex=+this.value; renderLibraryZoharReader(); forceScrollTop(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(i<rg.last){ LIB.zoharIndex=i+1; renderLibraryZoharReader(); forceScrollTop(); } },
+    ()=>{ if(i>rg.first){ LIB.zoharIndex=i-1; renderLibraryZoharReader(); forceScrollTop(); } });
   tr(app);
 }
 
@@ -7011,6 +7027,9 @@ function renderLibraryTanyaReader(){
   const prevBtn=document.getElementById('libtPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.tanyaIndex=i-1; renderLibraryTanyaReader(); forceScrollTop(); };
   const nextBtn=document.getElementById('libtNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.tanyaIndex=i+1; renderLibraryTanyaReader(); forceScrollTop(); };
   document.getElementById('libtChPick').onchange=function(){ LIB.tanyaIndex=+this.value; renderLibraryTanyaReader(); forceScrollTop(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(i<rg.last){ LIB.tanyaIndex=i+1; renderLibraryTanyaReader(); forceScrollTop(); } },
+    ()=>{ if(i>rg.first){ LIB.tanyaIndex=i-1; renderLibraryTanyaReader(); forceScrollTop(); } });
   tr(app);
 }
 
@@ -7122,6 +7141,9 @@ function renderLibraryMishnahReader(){
   const prevBtn=document.getElementById('libmPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.mishnahChIdx=ci-1; renderLibraryMishnahReader(); forceScrollTop(); };
   const nextBtn=document.getElementById('libmNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.mishnahChIdx=ci+1; renderLibraryMishnahReader(); forceScrollTop(); };
   document.getElementById('libmChPick').onchange=function(){ LIB.mishnahChIdx=+this.value; renderLibraryMishnahReader(); forceScrollTop(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(ci<t.chapters.length-1){ LIB.mishnahChIdx=ci+1; renderLibraryMishnahReader(); forceScrollTop(); } },
+    ()=>{ if(ci>0){ LIB.mishnahChIdx=ci-1; renderLibraryMishnahReader(); forceScrollTop(); } });
   tr(app);
 }
 
@@ -7272,6 +7294,9 @@ function renderLibraryNKReader(){
     const prevBtn=document.getElementById('libnPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); };
     const nextBtn=document.getElementById('libnNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); };
     document.getElementById('libnChPick').onchange=function(){ LIB.nkChapter=+this.value; renderLibraryNKReader(); forceScrollTop(); };
+    wireSwipeNav(app.querySelector('.sm-verses'),
+      ()=>{ if(ch<nCh){ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); } },
+      ()=>{ if(ch>1){ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); } });
     tr(app);
   });
 }
@@ -8725,6 +8750,7 @@ function renderShnayimReader(){
     else { smBookmarkSet({key:SM.key, mode:SM.mode, n:SM.n, c, v}); toast('סֻמַּן הַמָּקוֹם'); }
     renderShnayimReader();
   });
+  wireSwipeNav(app.querySelector('.sm-verses'), smStepNext, smStepPrev);
   if(SM_SCROLL_TO){
     const row=app.querySelector(`.sm-verse-row[data-c="${SM_SCROLL_TO.c}"][data-v="${SM_SCROLL_TO.v}"]`);
     SM_SCROLL_TO=null;
@@ -8835,6 +8861,7 @@ function renderZoharReader(){
   document.getElementById('zhBack').onclick=()=>go('zoharList');
   const prevBtn=document.getElementById('zhPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>zhStep(-1);
   const nextBtn=document.getElementById('zhNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>zhStep(1);
+  wireSwipeNav(app.querySelector('.zh-pdf-canvas'), ()=>zhStep(1), ()=>zhStep(-1));
   const toggleBtn=document.getElementById('zhToggleDone');
   if(toggleBtn) toggleBtn.onclick=()=>{
     haptic(); stopAutoScroll();
