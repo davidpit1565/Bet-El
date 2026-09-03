@@ -140,6 +140,9 @@ body::before{ /* subtle starfield/texture */
 .ob-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:14px 16px}
 .ob-rt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
 .ob-rd{font-size:14px;color:var(--muted);margin-top:2px;line-height:1.4}
+.ob-explainer-link{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;
+  font-size:13.5px;color:var(--gold);cursor:pointer;margin-bottom:16px}
+.ob-explainer-link svg{width:15px;height:15px;flex-shrink:0}
 
 /* Chok LeYisrael first-open pace questions - no icons, plain option cards */
 .pace-view{padding-top:36px}
@@ -196,6 +199,15 @@ body::before{ /* subtle starfield/texture */
   box-shadow:var(--card-shadow);backdrop-filter:blur(12px);position:relative;overflow:hidden}
 .card::after{content:"";position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
   background:linear-gradient(135deg,rgba(212,175,95,.06),transparent 40%)}
+/* "what do we study each day" explainer (Chok LeYisrael) */
+.ck-explainer-intro{font-size:14px;color:var(--muted);line-height:1.7;text-align:center;margin:4px 0 16px}
+.ck-explainer-row{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.ck-explainer-row:first-child{padding-top:0}
+.ck-explainer-row:last-child{padding-bottom:0;border-bottom:none}
+.ck-explainer-ico{flex:none;width:38px;height:38px;border-radius:50%;background:var(--panel-2);color:var(--gold);display:grid;place-items:center}
+.ck-explainer-ico svg{width:19px;height:19px}
+.ck-explainer-title{font-family:var(--font-sacred);font-size:17px;font-weight:700;margin-bottom:3px}
+.ck-explainer-text{font-size:13.5px;color:var(--ink-soft);line-height:1.6}
 .card-title{font-family:var(--font-sacred);font-size:15px;color:var(--gold);letter-spacing:1px;margin-bottom:2px;
   display:flex;align-items:center;gap:8px}
 .daily-mode-tag{display:inline-block;font-size:11px;color:var(--gold);
@@ -1429,6 +1441,7 @@ const I = {
   doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/></svg>',
   wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7.5 7.5c1.5-4 6-5.5 9-2.5s1.5 7.5-2 9M10.5 16.5l3 3-6 1.5 1.5-6"/></svg>',
   flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3c0 4.5-4 6-4 10a4 4 0 0 0 8 0c0-3-2-4.5-2-7.5-1.5 2-2 3-3.5 3.5C11.5 7.5 12 5 12 3z"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h10v6a5 5 0 0 1-10 0z"/><path d="M12 14v4M9 21h6M4 3v3a3 3 0 0 0 3 3M20 3v3a3 3 0 0 1-3 3"/></svg>',
@@ -2888,9 +2901,11 @@ function renderOnboard(){
       ${row('בֶּן אִישׁ חַי','הֲלָכָה יוֹמִית לְפִי פָּרָשַׁת הַשָּׁבוּעַ, בִּשְׁנֵי מַחְזוֹרֵי לִמּוּד')}
       ${row('חֲסִידוּת · תַּנְיָא הַיּוֹמִי','קֶטַע הַתַּנְיָא שֶׁל הַיּוֹם, לְפִי הַמַּחְזוֹר הַשָּׁנָתִי מִי״ט כִּסְלֵו')}
     </div>
+    <div class="ob-explainer-link" id="obExplainerLink">${I.info} מָה בְּדִיּוּק לוֹמְדִים כָּל יוֹם בְּחוֹק לְיִשְׂרָאֵל?</div>
     <button class="btn btn-gold" id="obStart">הַתְחֵל</button>
     <div style="height:20px"></div>
   </div>`;
+  document.getElementById('obExplainerLink').onclick=()=>{ CK_EXPLAINER_BACK='onboard'; go('chokExplainer'); };
   document.getElementById('obStart').onclick=()=>{
     localStorage.setItem('betel_onboard_v1','1');
     if(!localStorage.getItem('betel_chok_pace_v1')){
@@ -4309,6 +4324,37 @@ function renderChokParshiot(){
   });
   tr(app);
 }
+/* ---- "what do we study each day" explainer page (Settings/user-facing
+   Chok LeYisrael docs/chok-leyisrael-explainer-draft.md - see CLAUDE.md
+   "Standing open items"). CK_EXPLAINER_BACK is set by each of the 3 entry
+   points (Chok LeYisrael home, Settings, onboarding) right before go() so
+   the back button returns wherever the reader actually came from. */
+let CK_EXPLAINER_BACK='chokList';
+const CK_EXPLAINER_ITEMS=[
+  {icon:'scroll', title:'תּוֹרָה', text:'פָּרָשַׁת הַשָּׁבוּעַ, מְחֻלֶּקֶת לְשִׁשָּׁה חֲלָקִים לְאֹרֶךְ יְמֵי הַשָּׁבוּעַ'},
+  {icon:'book', title:'נְבִיאִים וּכְתוּבִים', text:'קֶטַע יוֹמִי מִסִּפְרֵי הַנְּבִיאִים אוֹ הַכְּתוּבִים, נִבְחָר בְּהַתְאָמָה לְפָרָשַׁת הַשָּׁבוּעַ'},
+  {icon:'crown', title:'תְּהִלִּים', text:'5 פְּרָקִים לְיוֹם לְפִי חֲלוּקָה חָדְשִׁית (מַשְׁלִימִים אֶת כָּל 150 הַפְּרָקִים בְּכָל חֹדֶשׁ), אוֹ פִּרְקֵי הַיּוֹם הַקְּבוּעִים לְפִי חֲלוּקָה שְׁבוּעִית - לִבְחִירָתְךָ'},
+  {icon:'split', title:'מִשְׁנָה', text:'פֶּרֶק מִשְׁנָה אֶחָד לְיוֹם, בְּרֶצֶף, עַד הַשְׁלָמַת כָּל 525 הַפְּרָקִים'},
+  {icon:'bookmarkOn', title:'גְּמָרָא', text:'דַּף גְּמָרָא אֶחָד לְיוֹם, כְּמִנְהַג לוֹמְדֵי הַדַּף הַיּוֹמִי'},
+  {icon:'zoharFlame', title:'זֹהַר', text:'עַמּוּד זֹהַר אֶחָד לְיוֹם'},
+  {icon:'doc', title:'הֲלָכָה', text:'פֶּרֶק רַמְבַּ"ם אֶחָד לְיוֹם (מַחְזוֹר שֶׁל שָׁלֹשׁ שָׁנִים), אוֹ שְׁלֹשָׁה פְּרָקִים לְיוֹם (מַחְזוֹר שֶׁל שָׁנָה) - לִבְחִירָתְךָ'},
+  {icon:'heart', title:'מוּסָר', text:'שְׁלֹשָׁה קְטָעִים לְיוֹם, מִתּוֹךְ אֶחָד מִשִּׁשָּׁה סִפְרֵי מוּסָר לִבְחִירָתְךָ: רֵאשִׁית חָכְמָה, שַׁעֲרֵי תְשׁוּבָה, שַׁעֲרֵי קְדֻשָּׁה, מְסִלַּת יְשָׁרִים, אָרְחוֹת צַדִּיקִים, וּפֶלֶא יוֹעֵץ'},
+];
+function renderChokExplainer(){
+  app.innerHTML=`
+  ${topbar('מָה לוֹמְדִים כָּל יוֹם', CK_EXPLAINER_BACK)}
+  <div class="view">
+    <p class="ck-explainer-intro">בְּכָל יוֹם לוֹמְדִים קֶטַע קָבוּעַ מִכָּל אֶחָד מִשְּׁמוֹנָה הַתְּחוּמִים הַבָּאִים:</p>
+    <div class="card">
+      ${CK_EXPLAINER_ITEMS.map(it=>`
+        <div class="ck-explainer-row">
+          <span class="ck-explainer-ico">${I[it.icon]}</span>
+          <div><div class="ck-explainer-title">${it.title}</div><div class="ck-explainer-text">${it.text}</div></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+  tr(app);
+}
 function renderChokList(){
   const key0=ckWeekKeyFor(chokDayDate());
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}<div class="view">${smSkeleton()}</div>`;
@@ -4329,7 +4375,7 @@ function drawChokList(){
   const y=ckYear(), vd=CK.day?null:null;
   const _anim=ckAnimClass();
   app.innerHTML=`
-  ${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot')}
+  ${topbar('חוֹק לְיִשְׂרָאֵל','chokParshiot', `<button class="icon-btn" id="ckExplainerBtn" aria-label="מָה לוֹמְדִים כָּל יוֹם">${I.info}</button>`)}
   <div class="view">
     ${miss.length?`<div class="sm-week-card" id="ckMakeupCard">
       <div class="sm-week-icon">${I.bookmarkOn}</div>
@@ -4380,6 +4426,8 @@ function drawChokList(){
   });
   const mk=document.getElementById('ckMakeupCard');
   if(mk) mk.onclick=()=>{ const m=miss[0]; openChok(m.key,m.day); };
+  const eb=document.getElementById('ckExplainerBtn');
+  if(eb) eb.onclick=()=>{ CK_EXPLAINER_BACK='chokList'; go('chokExplainer'); };
   CK.book=ckBookOf(key)||CK.book;
   tr(app);
 }
@@ -5037,6 +5085,7 @@ function render(){
     else if(TAB==='chokParshiot') renderChokParshiot();
     else if(TAB==='chokList') renderChokList();
     else if(TAB==='chokReader') renderChokReader();
+    else if(TAB==='chokExplainer') renderChokExplainer();
     else if(TAB==='bicHome') renderBicHome();
     else if(TAB==='bicParshiot') renderBicParshiot();
     else if(TAB==='bicReader') renderBicReader();
@@ -8586,6 +8635,7 @@ function renderSettings(){
           <option value="he">עברית</option><option value="en">English</option><option value="fr">Français</option><option value="ru">Русский</option><option value="ka">ქართული</option>
         </select></div>
       <div class="set-item" id="settingsTracker" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.tracker}</span><div><div class="si-t">מַעֲקַב קְרִיאָה</div><div class="si-d">תְּהִלִּים · תִּיקּוּנֵי הַזֹּהַר · שְׁנַיִם מִקְרָא</div></div></div>${I.chev}</div>
+      <div class="set-item" id="settingsChokExplainer" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.info}</span><div><div class="si-t">מָה לוֹמְדִים כָּל יוֹם</div><div class="si-d">הֶסְבֵּר קָצָר עַל סֵדֶר הַלִּמּוּד בְּחוֹק לְיִשְׂרָאֵל</div></div></div>${I.chev}</div>
     </div>
 
     <div class="set-group">
@@ -8682,6 +8732,7 @@ function renderSettings(){
   document.getElementById('shareApp').onclick=shareApp;
   document.getElementById('shareAppQR').onclick=shareQR;
   document.getElementById('settingsTracker').onclick=()=>go('tracker');
+  document.getElementById('settingsChokExplainer').onclick=()=>{ CK_EXPLAINER_BACK='settings'; go('chokExplainer'); };
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
   document.getElementById('bkExport').onclick=()=>{
     const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
@@ -8925,14 +8976,14 @@ function ckMilestoneCheck(count){
 /* ================= UI bits ================= */
 const ORN='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 4.2L18 4.8l-1.4 4.4L21 11l-4.4 1.8L18 17l-4.4-1.4L12 20l-1.6-4.4L6 17l1.4-4.2L3 11l4.4-1.8L6 4.8l4.4 1.4z" opacity=".85"/></svg>';
 function ornament(){ return `<div class="ornament">${ORN}</div>`; }
-function topbar(title, backTo){
+function topbar(title, backTo, rightHtml){
   const left = backTo
     ? `<button class="icon-btn tb-back" onclick="go('${backTo}')">${I.prev}</button>`
     : `<img class="tb-mark" src="${LOGO}" alt=""/>`;
   return `<div class="topbar">
   ${left}
   <div class="tb-title gold-text">${title}</div>
-  <div style="width:34px"></div></div>`;
+  ${rightHtml||'<div style="width:34px"></div>'}</div>`;
 }
 let toastT;
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t);} if(S.lang!=='he'&&I18N[S.lang]){const d=I18N[S.lang];if(d[msg])msg=d[msg];else for(const k in d){if(k.length>2&&msg.includes(k))msg=msg.split(k).join(d[k]);}} t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
