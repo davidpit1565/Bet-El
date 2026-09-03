@@ -1705,6 +1705,29 @@ function openPrayer(prayerKey, fromGroup){
 
 const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
+/* Animates a number counting up (or down) to its new value instead of just
+   snapping to it - used for the live Firebase-backed stat counters
+   (visits/currently-online), which otherwise just replace their text the
+   instant a snapshot arrives and read as flat/lifeless. Exposed on window
+   since the Firebase listeners live in their own <script type="module">
+   block, outside this IIFE. Ease-out cubic (never linear - a count that
+   slows into its landing value reads as more deliberate), respects
+   prefers-reduced-motion by jumping straight to the final value. */
+function animateCountUp(el, from, to, duration){
+  if(!el) return;
+  to = Number(to)||0;
+  from = Number(from)||0;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || from===to){ el.textContent = to.toLocaleString('he-IL'); return; }
+  duration = duration||700;
+  const start = performance.now();
+  const ease = t => 1-Math.pow(1-t,3);
+  (function step(now){
+    const t = Math.min(1, (now-start)/duration);
+    el.textContent = Math.round(from + (to-from)*ease(t)).toLocaleString('he-IL');
+    if(t<1) requestAnimationFrame(step);
+  })(start);
+}
+window.animateCountUp = animateCountUp;
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); }
 /* ---------- i18n ---------- */
@@ -9182,10 +9205,12 @@ window.shareQR = shareQR;
   // Public visit counter (Firestore stats/visits), shown on the home page
   const db = getFirestore(firebaseApp);
   const visitsRef = doc(db, "stats", "visits");
-  let lastVisitCount = null;
+  let lastVisitCount = null, lastPaintedVisitCount = null;
   window.__paintVisitCount = function(){
     const el = document.getElementById('visitCount');
-    if(el && lastVisitCount != null) el.textContent = lastVisitCount.toLocaleString('he-IL');
+    if(!el || lastVisitCount == null) return;
+    window.animateCountUp(el, lastPaintedVisitCount || 0, lastVisitCount);
+    lastPaintedVisitCount = lastVisitCount;
   };
   onSnapshot(visitsRef, (snap) => {
     if(snap.exists()){
@@ -9212,7 +9237,7 @@ window.shareQR = shareQR;
       const el = document.getElementById('liveCount');
       if(!el || window.__liveCount == null) return;
       const changed = window.__lastPaintedLiveCount != null && window.__lastPaintedLiveCount !== window.__liveCount;
-      el.textContent = window.__liveCount.toLocaleString('he-IL');
+      window.animateCountUp(el, window.__lastPaintedLiveCount || 0, window.__liveCount);
       window.__lastPaintedLiveCount = window.__liveCount;
       if(changed){
         const card = el.closest('.stat-card');
