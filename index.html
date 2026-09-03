@@ -87,8 +87,6 @@ body::before{ /* subtle starfield/texture */
 [data-theme="light"] body::before{opacity:.25;
   background:radial-gradient(1px 1px at 20% 30%,rgba(150,116,44,.4),transparent),radial-gradient(1px 1px at 70% 60%,rgba(150,116,44,.3),transparent);}
 #app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 16px calc(var(--nav-h) + 30px + env(safe-area-inset-bottom))}
-.view{animation:fade .45s var(--ease)}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 ::selection{background:rgba(212,175,95,.3)}
 
 /* ---------- scrollbar ---------- */
@@ -931,8 +929,13 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .yahr-selects select,.yahr-name-in{flex:1;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;padding:8px;color:var(--text);font-family:var(--font-ui);font-size:14px;direction:rtl}
 
 
-.view{animation:viewFadeIn .55s var(--spring-soft) both}
-@keyframes viewFadeIn{from{opacity:0;transform:translateY(14px) scale(.975);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+/* Screen-transition fade: go() re-renders #app on every navigation, which
+   happens far more often than a one-off view (dozens of times per
+   session) - so this stays quick (well under Emil Kowalski's ~300ms
+   guidance) and only animates transform+opacity, never filter/blur
+   (expensive to composite, and not worth it at this frequency). */
+.view{animation:viewFadeIn .22s var(--spring-soft) both}
+@keyframes viewFadeIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.view{animation:none}}
 
 
