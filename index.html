@@ -4595,15 +4595,14 @@ function renderBicHome(){
   const weekKeys=ckSplitPair(weekKey);
   const cards=[];
   ['year1','year2'].forEach(track=>{
-    const usedKeys=new Set();
     weekKeys.forEach(wk=>{
+      /* Always one card per canonical name per track, even on a doubled
+         week where both halves land in the same year2 content gap and
+         resolve to the identical nearest neighbor - the user wants a
+         card for each of this week's own parshiot every time, not a
+         deduped one, so two cards can legitimately show the same
+         fallback parasha's content side by side. */
       const key=bicNearestAvailableKey(track,wk);
-      /* Both halves of a doubled week can land in the same content gap
-         (year2 is missing 6 parshiot) and resolve to the identical nearest
-         neighbor - skip the second card rather than showing the same
-         parasha twice. */
-      if(usedKeys.has(key)) return;
-      usedKeys.add(key);
       const p=bicParshiot(track).find(x=>x.key===key);
       if(!p) return;
       const unitKey=track+'/'+(BIC_INDEX[track].unitOf[key]||'');
