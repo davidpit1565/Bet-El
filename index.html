@@ -2835,6 +2835,7 @@ function renderZoharYomiReader(){
           <div class="sm-aliyah-tag">${parshaName(cur.key)} · ${rowLabel}</div>
           <button class="sm-aliyah-chip ck-arrow" id="zyNext" ${nextStep?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
         </div>
+        <div class="ck-viewdate">${localizeHebDateStr(hd.renderGematriya(true))}</div>
         ${!isToday?`<div class="sm-aliyah-tag">לֹא הַיּוֹם הַנּוֹכְחִי · <button class="ck-track-btn" id="zyToday" style="display:inline;padding:2px 10px">${ckMusarUI().today}</button></div>`:''}
         ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       </div>
