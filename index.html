@@ -496,7 +496,7 @@ a.set-item{text-decoration:none;color:inherit}
              transform .26s cubic-bezier(.4,0,.68,.06),
              filter .26s cubic-bezier(.4,0,.68,.06),
              visibility .26s}
-.bic-collapse{max-height:460px;overflow:hidden;opacity:1;transform:translateY(0);
+.bic-collapse{max-height:var(--bic-ch,460px);overflow:hidden;opacity:1;transform:translateY(0);
   transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .3s,transform .3s}
 .bic-collapse.collapsed{max-height:0;opacity:0;transform:translateY(-8px);pointer-events:none}
 /* the round mark-complete control flanked by prev/next arrows, matching
@@ -9674,7 +9674,20 @@ render();
     const bicHead=document.querySelector('.bic-collapse');
     nav.classList.toggle('nav-hidden', hide);
     if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
-    if(bicHead) bicHead.classList.toggle('collapsed', hide);
+    if(bicHead){
+      /* .bic-collapse's CSS transitions max-height over a fixed .3s, but a
+         reader whose header content is much shorter than the old fixed
+         460px guess (true for e.g. Chok LeYisrael's own, taller-than-
+         Ben-Ish-Chai's-original header, which is still well under 460px)
+         reaches its real height long before that duration elapses - the
+         reveal looks like an abrupt snap instead of a smooth glide. Set the
+         transition's actual target to this header's own measured height
+         (stable across collapsed/expanded, since overflow:hidden only clips
+         the visible box, not the content's layout height) so .3s always
+         means .3s, on any reader. */
+      bicHead.style.setProperty('--bic-ch', bicHead.scrollHeight+'px');
+      bicHead.classList.toggle('collapsed', hide);
+    }
   }
   function onScroll(){
     ticking = false;
