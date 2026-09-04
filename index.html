@@ -496,7 +496,7 @@ a.set-item{text-decoration:none;color:inherit}
              transform .26s cubic-bezier(.4,0,.68,.06),
              filter .26s cubic-bezier(.4,0,.68,.06),
              visibility .26s}
-.bic-collapse{max-height:460px;overflow:hidden;opacity:1;transform:translateY(0);
+.bic-collapse{max-height:var(--bic-ch,460px);overflow:hidden;opacity:1;transform:translateY(0);
   transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .3s,transform .3s}
 .bic-collapse.collapsed{max-height:0;opacity:0;transform:translateY(-8px);pointer-events:none}
 /* the round mark-complete control flanked by prev/next arrows, matching
@@ -2495,6 +2495,12 @@ function bicBookOf(coverName){
   const hit=BIC_TORAH_BOOKS.find(([,names])=>names.includes(coverName));
   return hit?hit[0]:null;
 }
+/* BIC_TORAH_BOOKS' own [0] is used as a stable identity key (dataset attr,
+   filter comparisons) and is always Hebrew - bookName() takes the English
+   canonical name instead, so this maps back to it just for display, the
+   same way the Library's own Torah book grid is already localized. */
+const BIC_BOOK_EN={'בְּרֵאשִׁית':'Genesis','שְׁמוֹת':'Exodus','וַיִּקְרָא':'Leviticus','בְּמִדְבַּר':'Numbers','דְּבָרִים':'Deuteronomy'};
+function bicBookLabel(heName){ return bookName(BIC_BOOK_EN[heName])||heName; }
 function bicNearestAvailableKey(track,targetKey){
   const list=bicParshiot(track); if(!list.length) return null;
   if(list.some(p=>p.key===targetKey)) return targetKey;
@@ -3326,16 +3332,24 @@ function ckWeekSunday(key,hyear){
     const il=/Jerusalem/.test(LOC.tz);
     const start=new HDate(1,7,hyear).greg(), end=new HDate(1,7,hyear+1).greg();
     const evs=HebrewCalendar.calendar({start,end,sedrot:true,il,location:hebLocation()});
+    /* This Gregorian window spans one full Torah-reading cycle, but a
+       cycle-boundary parasha (Nitzavim/Vayeilech/Ha'azinu, read right
+       before AND right after Rosh Hashanah) can appear twice inside it:
+       once as the tail of the outgoing cycle near the window's start, and
+       once as this year's own occurrence near the window's end. Keep the
+       LAST match, not the first, so a boundary parasha resolves to its own
+       year's reading instead of the leftover one from the prior cycle. */
+    let found=null;
     for(const e of evs){
       const desc=e.getDesc?e.getDesc():'';
       if(!/^Parashat /.test(desc)) continue;
       const k=desc.replace('Parashat ','').trim();
       if(k===key || ckSplitPair(k).indexOf(key)>=0){
         const sat=e.getDate().greg();
-        const sun=new Date(sat.getFullYear(),sat.getMonth(),sat.getDate()-6);
-        return sun;
+        found=new Date(sat.getFullYear(),sat.getMonth(),sat.getDate()-6);
       }
     }
+    return found;
   }catch(e){}
   return null;
 }
@@ -3349,7 +3363,26 @@ function ckDateFor(cur){
   const sun=ckWeekSunday(cur.key,y)||ckWeekSunday(cur.key,y+1)||ckWeekSunday(cur.key,y-1);
   if(!sun) return chokDayDate();
   const di = cur.day==='night' ? 4 : Math.max(0, CHOK_DAYS.indexOf(cur.day));
-  return addDays(sun,di);
+  const guess=addDays(sun,di);
+  /* The week Rosh Hashanah falls in has no "Parashat X" event of its own -
+     ckWeekKeyFor extends the previous real parasha's name to cover it (so
+     Chok LeYisrael's study schedule keeps moving through a holiday week
+     instead of stalling), but ckWeekSunday's own direct search for that
+     bare name has no idea about that extension and can instead match some
+     OTHER year's genuine, unrelated occurrence of the same name - producing
+     a same-week-looking result dated a full year off. Confirm the guess
+     actually resolves back to the key it was built from before trusting
+     it, and otherwise search nearby weeks (within the same target year)
+     for the one that really does. */
+  if(ckWeekKeyFor(guess)===cur.key && new HDate(guess).getFullYear()===y) return guess;
+  for(let w=1; w<=6; w++){
+    for(const sign of [1,-1]){
+      const candSun=addDays(sun, sign*7*w);
+      const cand=addDays(candSun, di);
+      if(ckWeekKeyFor(cand)===cur.key && new HDate(cand).getFullYear()===y) return cand;
+    }
+  }
+  return guess;
 }
 function ckViewDate(){ return ckDateFor(CK); }
 function ckViewHDate(){ return new HDate(ckViewDate()); }
@@ -4000,6 +4033,13 @@ function ckTrackPosition(){
     if(rows[i].getBoundingClientRect().bottom>90){ seg=i; break; }
     seg=i;
   }
+  /* Segment 0 of section 0 means "still at the very top" - indistinguishable
+     from never having read at all, so treat it as no bookmark rather than
+     saving one. Otherwise "restart" (which resets to section/segment 0 and
+     clears the bookmark) followed by leaving via the back button - which
+     always re-tracks the current position first - would immediately
+     re-save a bookmark there, silently undoing the restart. */
+  if(CK.sec===0 && seg===0){ ckBmClear(CK.key,CK.day); return; }
   ckBmSet(CK.key,CK.day,CK.sec,seg);
 }
 let ckTrackTimer=null;
@@ -4356,10 +4396,26 @@ function stepChokDayFrom(cur,dir){
   const i=CHOK_ROWS.findIndex(r=>r[0]===cur.day);
   const j=i+dir;
   if(j>=0 && j<CHOK_ROWS.length) return {key:cur.key, day:CHOK_ROWS[j][0], year:ckYearOf(cur)};
-  const list=CHOK.parshiot, first=ckKeysOf(cur.key)[0]||cur.key;
-  const p=list.indexOf(first)+dir;
-  if(p<0||p>=list.length) return null;
-  return {key:list[p], day:CHOK_ROWS[dir>0?0:CHOK_ROWS.length-1][0], year:ckYearOf(cur)};
+  /* Crossing a week boundary: ask the calendar for the actual adjacent
+     week's parasha (2 days forward from Friday, or 2 back from Sunday,
+     skipping Shabbat which has no chok reading) instead of stepping by
+     index through CHOK.parshiot's flat annual list. A combined week's two
+     canonical names (e.g. "Nitzavim"/"Vayeilech") sit as separate adjacent
+     entries in that list, but whether a given individual name is combined
+     with its neighbor in a *specific* year is a calendar fact, not a fixed
+     property of the list - looking up a bare component's own Sunday via
+     ckWeekSunday can silently match some OTHER year's solo occurrence of
+     that same name (this genuinely happens: 'Vayeilech' alone resolves to
+     a completely different year than the combined "Nitzavim-Vayeilech" week
+     it's actually part of this year), producing a same-week-but-wrong-year
+     jump. Asking the calendar for a real Gregorian date's parasha instead
+     always returns the correct key (combined or not) for that exact year. */
+  const nextDate=addDays(ckDateFor(cur), dir>0?2:-2);
+  const key=ckWeekKeyFor(nextDate);
+  if(!key) return null;
+  const year=new HDate(nextDate).getFullYear();
+  if(year<CK_YEAR_MIN||year>CK_YEAR_MAX) return null;
+  return {key, day:dir>0?'sun':'fri', year};
 }
 function ckStepDay(dir){ return stepChokDayFrom(CK,dir); }
 function renderChokBooks(){
@@ -4595,15 +4651,14 @@ function renderBicHome(){
   const weekKeys=ckSplitPair(weekKey);
   const cards=[];
   ['year1','year2'].forEach(track=>{
-    const usedKeys=new Set();
     weekKeys.forEach(wk=>{
+      /* Always one card per canonical name per track, even on a doubled
+         week where both halves land in the same year2 content gap and
+         resolve to the identical nearest neighbor - the user wants a
+         card for each of this week's own parshiot every time, not a
+         deduped one, so two cards can legitimately show the same
+         fallback parasha's content side by side. */
       const key=bicNearestAvailableKey(track,wk);
-      /* Both halves of a doubled week can land in the same content gap
-         (year2 is missing 6 parshiot) and resolve to the identical nearest
-         neighbor - skip the second card rather than showing the same
-         parasha twice. */
-      if(usedKeys.has(key)) return;
-      usedKeys.add(key);
       const p=bicParshiot(track).find(x=>x.key===key);
       if(!p) return;
       const unitKey=track+'/'+(BIC_INDEX[track].unitOf[key]||'');
@@ -4664,7 +4719,7 @@ function renderBicParshiot(){
       if(book) counts[book]=(counts[book]||0)+1;
     });
     const tiles=BIC_TORAH_BOOKS.map(([book])=>`<div class="q-tile round-card" data-cat="benishchai" data-bicbook="${book}">
-      <div class="qt">${book}</div>
+      <div class="qt">${bicBookLabel(book)}</div>
       <div class="qd">${heNum(counts[book]||0)} ${t.parshiotWord}</div>
     </div>`).join('');
     app.innerHTML=`${topbar(t.title,'home')}
@@ -4698,7 +4753,7 @@ function renderBicParshiot(){
   app.innerHTML=`
   <div class="topbar">
     <button class="icon-btn tb-back" id="bicBookBack">${I.prev}</button>
-    <div class="tb-title gold-text">${BIC_PARSHIOT_BOOK}</div>
+    <div class="tb-title gold-text">${bicBookLabel(BIC_PARSHIOT_BOOK)}</div>
     <div style="width:34px"></div>
   </div>
   <div class="view">
@@ -7453,6 +7508,14 @@ function sidTrackPosition(){
     if(paras[i].getBoundingClientRect().bottom>90){ idx=i; break; }
     idx=i;
   }
+  /* Position 0 means "still at the very top" - indistinguishable from never
+     having read at all, so treat it as no bookmark rather than saving one.
+     Otherwise tapping "restart" (which scrolls to top and clears the
+     bookmark) then leaving via the back button - which always re-tracks the
+     current position before navigating away - would immediately re-save a
+     bookmark at position 0, silently undoing the restart (the next visit
+     would show a pointless "continue from the beginning" resume banner). */
+  if(idx===0){ sidBmClear(SID.prayer); return; }
   const sec=paras[idx].closest('[data-sidanchor]');
   sidBmSet(SID.prayer,idx,sec?sec.dataset.sidanchor:null);
 }
@@ -9611,7 +9674,20 @@ render();
     const bicHead=document.querySelector('.bic-collapse');
     nav.classList.toggle('nav-hidden', hide);
     if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
-    if(bicHead) bicHead.classList.toggle('collapsed', hide);
+    if(bicHead){
+      /* .bic-collapse's CSS transitions max-height over a fixed .3s, but a
+         reader whose header content is much shorter than the old fixed
+         460px guess (true for e.g. Chok LeYisrael's own, taller-than-
+         Ben-Ish-Chai's-original header, which is still well under 460px)
+         reaches its real height long before that duration elapses - the
+         reveal looks like an abrupt snap instead of a smooth glide. Set the
+         transition's actual target to this header's own measured height
+         (stable across collapsed/expanded, since overflow:hidden only clips
+         the visible box, not the content's layout height) so .3s always
+         means .3s, on any reader. */
+      bicHead.style.setProperty('--bic-ch', bicHead.scrollHeight+'px');
+      bicHead.classList.toggle('collapsed', hide);
+    }
   }
   function onScroll(){
     ticking = false;
