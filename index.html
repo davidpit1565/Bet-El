@@ -6953,14 +6953,21 @@ function renderLibraryZoharParts(){
     return;
   }
   const list=libZoharParts();
+  const todayIndex=ckCycleIndex(CYC.zohar,currentHDate());
+  const todayEntry=CYC.zohar.order[todayIndex];
   app.innerHTML=`
   ${topbar('זֹהַר','library')}
   <div class="view">
+    <div class="ck-today" id="libzTodayCard">
+      <div class="ck-today-tag">הַיּוֹם</div>
+      <div class="ck-today-name">${ckZoharPartName(todayEntry.part)}</div>
+    </div>
     <div class="prayers-list">
       ${list.map(p=>`<div class="prayer-row round-card prayer-row-feature" data-cat="zohar" data-part="${p}"><span class="prayer-row-title">${ckZoharPartName(p)}</span>${I.chev}</div>`).join('')}
     </div>
     ${ornament()}
   </div>`;
+  document.getElementById('libzTodayCard').onclick=()=>{ LIB.zoharIndex=todayIndex; go('libraryZoharReader'); };
   app.querySelectorAll('[data-part]').forEach(r=>r.onclick=()=>{
     const rg=libZoharRangeFor(r.dataset.part);
     LIB.zoharIndex=rg.first; go('libraryZoharReader');
@@ -6982,6 +6989,7 @@ function renderLibraryZoharReader(){
     return;
   }
   const rg=libZoharRangeFor(e.part);
+  const lastIndex=CYC.zohar.order.length-1;
   const segs=ckCycleSegs('zohar',i);
   app.innerHTML=`
   <div class="reader view">
@@ -6992,14 +7000,14 @@ function renderLibraryZoharReader(){
       </div>
       <div class="bic-collapse">
         <div class="ck-daynav-wrap">
-          <button class="sm-aliyah-chip ck-arrow" id="libzPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
+          <button class="sm-aliyah-chip ck-arrow" id="libzPrev" ${i<=0?'disabled':''} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
           <select class="fld-select" id="libzDafPick" style="max-width:220px">
             ${Array.from({length:rg.last-rg.first+1},(_,k)=>rg.first+k).map(ix=>{
               const ee=CYC.zohar.order[ix];
               return `<option value="${ix}" ${ix===i?'selected':''}>${ckChrome('דַּף')} ${heNum(ee.daf)} ${ee.side}</option>`;
             }).join('')}
           </select>
-          <button class="sm-aliyah-chip ck-arrow" id="libzNext" ${i>=rg.last?'disabled':''}>${I.next}</button>
+          <button class="sm-aliyah-chip ck-arrow" id="libzNext" ${i>=lastIndex?'disabled':''} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
         </div>
       </div>
     </div>
@@ -7009,12 +7017,21 @@ function renderLibraryZoharReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('libzBack').onclick=()=>go('libraryZoharParts');
+  /* Prev/next (and swipe below) cross freely over the whole cycle rather
+     than stopping at the edge of whichever "part" the reader was opened
+     into - each index here is one calendar day's worth of Zohar, so
+     stepping past a part boundary should keep going into the next
+     part/day rather than dead-ending, letting the whole thing be browsed
+     day by day exactly like Zohar Yomi. The dropdown stays scoped to the
+     current part (rg is recomputed from the current index on every
+     render, so it re-centers automatically once a part boundary is
+     crossed). */
   const prevBtn=document.getElementById('libzPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.zoharIndex=i-1; renderLibraryZoharReader(); forceScrollTop(); };
   const nextBtn=document.getElementById('libzNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.zoharIndex=i+1; renderLibraryZoharReader(); forceScrollTop(); };
   document.getElementById('libzDafPick').onchange=function(){ LIB.zoharIndex=+this.value; renderLibraryZoharReader(); forceScrollTop(); };
   wireSwipeNav(app.querySelector('.sm-verses'),
-    ()=>{ if(i<rg.last){ LIB.zoharIndex=i+1; renderLibraryZoharReader(); forceScrollTop(); } },
-    ()=>{ if(i>rg.first){ LIB.zoharIndex=i-1; renderLibraryZoharReader(); forceScrollTop(); } });
+    ()=>{ if(i<lastIndex){ LIB.zoharIndex=i+1; renderLibraryZoharReader(); forceScrollTop(); } },
+    ()=>{ if(i>0){ LIB.zoharIndex=i-1; renderLibraryZoharReader(); forceScrollTop(); } });
   tr(app);
 }
 
