@@ -2547,14 +2547,19 @@ function bicToggleDone(track,parashaKey,pos){
   d[k]=[...set]; bicSaveDone();
 }
 function bicProgress(track,parashaKey,total){ return {done:bicDoneSet(track,parashaKey).length, total}; }
-function ensureChokData(key){
+/* Parameterized over an explicit HDate for the same reason as
+   stepChokDayFrom/ckDateFor above - Zohar Yomi's own day-cursor needs the
+   cycle blocks for the day it is browsing to, not for whatever CK/today
+   currently is. */
+function ensureChokDataFor(key,hd){
   return ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureChokWeek(key))
-    .then(()=>ensureCycDay(ckViewHDate()))
+    .then(()=>ensureCycDay(hd))
     .then(()=>ensureMusarCycles())
-    .then(()=>ensureMusarDay(S.musarWork||'reshit',ckViewHDate()))
+    .then(()=>ensureMusarDay(S.musarWork||'reshit',hd))
     .then(()=>ensureTanyaCycle())
-    .then(()=>ensureTanyaDay(ckViewHDate()));
+    .then(()=>ensureTanyaDay(hd));
 }
+function ensureChokData(key){ return ensureChokDataFor(key, ckViewHDate()); }
 /* A few weeks of the year have no weekly parasha of their own - the Shabbat
    of Chol HaMoed. Chok LeYisrael does not pause for them: it goes on to the
    portion after the one last read, which is how וְזֹאת הַבְּרָכָה is reached
@@ -2672,10 +2677,10 @@ function chokTehillimVerses(hd){
 const CK_NO_NUM={zohar:1, musar:1, tanya:1};
 
 /* the sections shown for a given weekday, in study order */
-function chokSectionsFor(key,day){
+function chokSectionsFor(key,day,hdOverride){
   const keys=ckKeysOf(key);
   if(!keys.length) return [];
-  const hd=ckViewHDate(), my=chokMishnahYear(hd);
+  const hd=hdOverride||ckViewHDate(), my=chokMishnahYear(hd);
   if(day==='night'){
     /* Leil Shishi adds its own extra Torah portion (tzeruf), but every
        other subject - Nevi'im/Ketuvim, Tehillim, Mishnah, Gemara, Zohar,
@@ -2689,7 +2694,7 @@ function chokSectionsFor(key,day){
       const t=((CHOK.schedule[k]||{}).night||{}).tzeruf;
       refs=refs.concat(t||[]); items=items.concat(chokTorahVerses(t));
     });
-    const thuList=chokSectionsFor(key,'thu');
+    const thuList=chokSectionsFor(key,'thu',hdOverride);
     if(!items.length) return thuList;
     const tzeruf={key:'tzeruf',he:'תּוֹרָה',items,kind:'torah',refs};
     const ti=thuList.findIndex(x=>x.key==='torah');
@@ -2786,16 +2791,28 @@ function chokSectionsFor(key,day){
    LeYisrael - same content, own screen, same relationship as the daily
    Tehillim reader has to Chok LeYisrael's own Tehillim section. Distinct
    from Tikkunei HaZohar (renderZoharReader/openZohar), which is a
-   different text studied only in the 40 days before Rosh Hashanah. */
+   different text studied only in the 40 days before Rosh Hashanah.
+   Browsable like Musar Yomi: ZY_STATE is null on "today" (openZoharYomi
+   resets it) or an explicit {key,day,year} once the reader has stepped
+   away - its own day-cursor, kept independent of the main Chok reader's
+   CK so browsing here never disturbs a Chok LeYisrael reading in
+   progress. Every date-dependent lookup below is threaded an explicit
+   hd computed from that cursor instead of reading the global "view
+   date", for the same reason. */
+let ZY_STATE=null;
+function openZoharYomi(){ ZY_STATE=null; go('zoharYomi'); }
 function renderZoharYomiReader(){
   const t=ckTodayLine();
-  if(!t) return go('home');
-  if(!CHOK||!ckWeekReady(t.key)||!TORAH||!ckCycReady()){
+  const cur=ZY_STATE||(t&&{key:t.key,day:t.day,year:null});
+  if(!cur) return go('home');
+  const isToday=!ZY_STATE;
+  const hd=new HDate(ckDateFor(cur));
+  if(!CHOK||!ckWeekReady(cur.key)||!TORAH||!ckCycReady(hd)){
     app.innerHTML=`${topbar('זֹהַר הַיּוֹמִי','home')}<div class="view">${smSkeleton()}</div>`;
-    ensureChokData(t.key).then(()=>{ if(TAB==='zoharYomi'){ renderZoharYomiReader(); tr(app); } });
+    ensureChokDataFor(cur.key,hd).then(()=>{ if(TAB==='zoharYomi'){ renderZoharYomiReader(); tr(app); } });
     return;
   }
-  const secs=chokSectionsFor(t.key,t.day);
+  const secs=chokSectionsFor(cur.key,cur.day,hd);
   const s=secs.find(x=>x.key==='zohar');
   if(!s){ toast('אֵין זֹהַר לַיּוֹם הַזֶּה'); return go('home'); }
   const body=s.items.map((it,ix)=>{
@@ -2803,7 +2820,8 @@ function renderZoharYomiReader(){
     return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${it}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
   }).join('');
   const srcLine=chokSourceLine(s);
-  const rowLabel=chokRowLabel(t.day,CHOK_DAYS.indexOf(t.day));
+  const rowLabel=chokRowLabel(cur.day,CHOK_DAYS.indexOf(cur.day));
+  const prevStep=stepChokDayFrom(cur,-1), nextStep=stepChokDayFrom(cur,1);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -2812,7 +2830,12 @@ function renderZoharYomiReader(){
         <div class="reader-title">זֹהַר הַיּוֹמִי</div>
       </div>
       <div class="bic-collapse">
-        <div class="sm-aliyah-tag">${parshaName(t.key)} · ${rowLabel}</div>
+        <div class="ck-daynav-wrap">
+          <button class="sm-aliyah-chip ck-arrow" id="zyPrev" ${prevStep?'':'disabled'} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
+          <div class="sm-aliyah-tag">${parshaName(cur.key)} · ${rowLabel}</div>
+          <button class="sm-aliyah-chip ck-arrow" id="zyNext" ${nextStep?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
+        </div>
+        ${!isToday?`<div class="sm-aliyah-tag">לֹא הַיּוֹם הַנּוֹכְחִי · <button class="ck-track-btn" id="zyToday" style="display:inline;padding:2px 10px">${ckMusarUI().today}</button></div>`:''}
         ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       </div>
     </div>
@@ -2820,6 +2843,12 @@ function renderZoharYomiReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('zyBack').onclick=()=>go('home');
+  const zp=document.getElementById('zyPrev'); if(zp&&!zp.disabled) zp.onclick=()=>{ ZY_STATE=prevStep; renderZoharYomiReader(); forceScrollTop(); };
+  const zn=document.getElementById('zyNext'); if(zn&&!zn.disabled) zn.onclick=()=>{ ZY_STATE=nextStep; renderZoharYomiReader(); forceScrollTop(); };
+  const zt=document.getElementById('zyToday'); if(zt) zt.onclick=()=>{ ZY_STATE=null; renderZoharYomiReader(); forceScrollTop(); };
+  wireSwipeNav(app.querySelector('.sm-verses'),
+    ()=>{ if(nextStep){ ZY_STATE=nextStep; renderZoharYomiReader(); forceScrollTop(); } },
+    ()=>{ if(prevStep){ ZY_STATE=prevStep; renderZoharYomiReader(); forceScrollTop(); } });
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
@@ -3309,15 +3338,19 @@ function ckWeekSunday(key,hyear){
   }catch(e){}
   return null;
 }
-function ckViewDate(){
-  if(!CK.key) return chokDayDate();
-  const y=CK.year||ckCurYear();
+/* Parameterized over an explicit {key,day,year} for the same reason as
+   stepChokDayFrom above - lets an independent day-cursor compute its own
+   date without going through the global CK. */
+function ckDateFor(cur){
+  if(!cur||!cur.key) return chokDayDate();
+  const y=ckYearOf(cur);
   // a week can straddle Rosh Hashanah, so look either side before giving up
-  const sun=ckWeekSunday(CK.key,y)||ckWeekSunday(CK.key,y+1)||ckWeekSunday(CK.key,y-1);
+  const sun=ckWeekSunday(cur.key,y)||ckWeekSunday(cur.key,y+1)||ckWeekSunday(cur.key,y-1);
   if(!sun) return chokDayDate();
-  const di = CK.day==='night' ? 4 : Math.max(0, CHOK_DAYS.indexOf(CK.day));
+  const di = cur.day==='night' ? 4 : Math.max(0, CHOK_DAYS.indexOf(cur.day));
   return addDays(sun,di);
 }
+function ckViewDate(){ return ckDateFor(CK); }
 function ckViewHDate(){ return new HDate(ckViewDate()); }
 function ckCivilAbs(){ return chokDayHDate().abs(); }
 function ckCycleIndex(cfg,hd){
@@ -4310,18 +4343,24 @@ function ckDayShort(d){ return (CHOK_DAY_SHORT_BY_LANG[S.lang]||CHOK_DAY_SHORT)[
 /* Chok LeYisrael has been kept this way for far longer than the app, so the
    years reach back as far as the app knows how to place a parasha. */
 const CK_YEAR_MIN=5784, CK_YEAR_MAX=5830;
-function ckYear(){ return CK.year||ckCurYear(); }
+function ckYear(){ return ckYearOf(CK); }
+function ckYearOf(cur){ return (cur&&cur.year)||ckCurYear(); }
 function ckYearHe(y){ return heNum(y%1000)+' לִפְרַט קָטָן'; }
-/* stepping past Friday goes on to the next week, and past Sunday back a week */
-function ckStepDay(dir){
-  const i=CHOK_ROWS.findIndex(r=>r[0]===CK.day);
+/* stepping past Friday goes on to the next week, and past Sunday back a week.
+   Parameterized over an explicit {key,day,year} (rather than always reading
+   the global CK) so a second, independent day-cursor - Zohar Yomi's own -
+   can reuse the exact same stepping rules without touching the Chok
+   LeYisrael reader's own position. */
+function stepChokDayFrom(cur,dir){
+  const i=CHOK_ROWS.findIndex(r=>r[0]===cur.day);
   const j=i+dir;
-  if(j>=0 && j<CHOK_ROWS.length) return {key:CK.key, day:CHOK_ROWS[j][0], year:ckYear()};
-  const list=CHOK.parshiot, first=ckKeysOf(CK.key)[0]||CK.key;
+  if(j>=0 && j<CHOK_ROWS.length) return {key:cur.key, day:CHOK_ROWS[j][0], year:ckYearOf(cur)};
+  const list=CHOK.parshiot, first=ckKeysOf(cur.key)[0]||cur.key;
   const p=list.indexOf(first)+dir;
   if(p<0||p>=list.length) return null;
-  return {key:list[p], day:CHOK_ROWS[dir>0?0:CHOK_ROWS.length-1][0], year:ckYear()};
+  return {key:list[p], day:CHOK_ROWS[dir>0?0:CHOK_ROWS.length-1][0], year:ckYearOf(cur)};
 }
+function ckStepDay(dir){ return stepChokDayFrom(CK,dir); }
 function renderChokBooks(){
   app.innerHTML=`${topbar('חוֹק לְיִשְׂרָאֵל','library')}<div class="view">${smSkeleton()}</div>`;
   ensureChokIndex().then(()=>ensureShnayimData()).then(()=>ensureCycles()).then(()=>{
@@ -4544,26 +4583,46 @@ function renderBicHome(){
     return;
   }
   const t=ckBicUI(), weekKey=currentParshaKey();
-  const cards=['year1','year2'].map(track=>{
-    const key=bicNearestAvailableKey(track,weekKey);
-    const p=bicParshiot(track).find(x=>x.key===key);
-    if(!p) return '';
-    const unitKey=track+'/'+(BIC_INDEX[track].unitOf[key]||'');
-    const total=BIC_WEEK[unitKey]?bicFlatItems(track,key).length:p.n;
-    const prog=bicProgress(track,key,total);
-    const pct=total?Math.round(100*prog.done/total):0;
-    return `<div class="sm-week-card" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
-      <div class="sm-week-text">
-        <div class="sm-week-tag">${t[track]} · ${heNum(p.n)} ${t.halachot}</div>
-        <div class="sm-week-name">${bicParshaName(p)}</div>
-      </div>
-      <div>
-        <div class="qd" style="margin-bottom:4px">${t.yourProgress} · ${heNum(prog.done)} ${t.outOf} ${heNum(total)}</div>
-        <div class="reader-progress"><i style="width:${pct}%"></i></div>
-      </div>
-      <button class="btn btn-gold" data-bicstart="${track}" data-bicparasha="${key}">${prog.done?t.continueLearning:t.startLearning} ${I.chev}</button>
-    </div>`;
-  }).join('');
+  /* A doubled calendar week (e.g. Behar-Bechukotai) is one combined hebcal
+     key, but bicNearestAvailableKey/bicParshiot only know the two canonical
+     names separately (each may even sit in a different BIC unit) - so an
+     exact-match lookup against the combined key always missed, silently
+     falling through to the nearest neighbor (Bereshit, at the very start of
+     CHOK.parshiot's order). Split it first and build one card per canonical
+     name per track, so a doubled week shows all four cards instead of two
+     wrong ones. */
+  const weekKeys=ckSplitPair(weekKey);
+  const cards=[];
+  ['year1','year2'].forEach(track=>{
+    const usedKeys=new Set();
+    weekKeys.forEach(wk=>{
+      const key=bicNearestAvailableKey(track,wk);
+      /* Both halves of a doubled week can land in the same content gap
+         (year2 is missing 6 parshiot) and resolve to the identical nearest
+         neighbor - skip the second card rather than showing the same
+         parasha twice. */
+      if(usedKeys.has(key)) return;
+      usedKeys.add(key);
+      const p=bicParshiot(track).find(x=>x.key===key);
+      if(!p) return;
+      const unitKey=track+'/'+(BIC_INDEX[track].unitOf[key]||'');
+      const total=BIC_WEEK[unitKey]?bicFlatItems(track,key).length:p.n;
+      const prog=bicProgress(track,key,total);
+      const pct=total?Math.round(100*prog.done/total):0;
+      cards.push(`<div class="sm-week-card" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
+        <div class="sm-week-text">
+          <div class="sm-week-tag">${t[track]} · ${heNum(p.n)} ${t.halachot}</div>
+          <div class="sm-week-name">${bicParshaName(p)}</div>
+        </div>
+        <div>
+          <div class="qd" style="margin-bottom:4px">${t.yourProgress} · ${heNum(prog.done)} ${t.outOf} ${heNum(total)}</div>
+          <div class="reader-progress"><i style="width:${pct}%"></i></div>
+        </div>
+        <button class="btn btn-gold" data-bicstart="${track}" data-bicparasha="${key}">${prog.done?t.continueLearning:t.startLearning} ${I.chev}</button>
+      </div>`);
+    });
+  });
+  const cardsHtml=cards.join('');
   app.innerHTML=`${topbar(t.title,'home')}
   <div class="view">
     ${bicMiniTabs('week')}
@@ -4573,7 +4632,7 @@ function renderBicHome(){
         <div class="sm-week-name">${parshaName(weekKey)}</div>
       </div>
     </div>
-    ${cards}
+    ${cardsHtml}
     ${ornament()}
   </div>`;
   wireBicMiniTabs('week');
@@ -5398,7 +5457,7 @@ function renderHome(){
   if(window.__paintLiveCount) window.__paintLiveCount();
   app.querySelectorAll('[data-nav]').forEach(e=>e.onclick=()=>go(e.dataset.nav));
   const hpc=document.getElementById('homeParshaCard'); if(hpc) hpc.onclick=()=>openShnayim(weekParshaKey);
-  const hzc=document.getElementById('homeZoharCard'); if(hzc) hzc.onclick=()=>go('zoharYomi');
+  const hzc=document.getElementById('homeZoharCard'); if(hzc) hzc.onclick=()=>openZoharYomi();
   const hpr=document.getElementById('homePrayerCard');
   if(hpr) hpr.onclick=()=>openSiddurPrayer(homeNowPrayerKey());
   const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');
