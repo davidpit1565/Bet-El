@@ -1900,6 +1900,12 @@ for(const _lg in I18N){
   for(const _k in _d) _nd[_k.normalize('NFC')]=_d[_k];
   I18N[_lg]=_nd;
 }
+const TR_SORTED_KEYS=new WeakMap();
+function trSortedKeys(dict){
+  let keys=TR_SORTED_KEYS.get(dict);
+  if(!keys){ keys=Object.keys(dict).filter(k=>k.length>2).sort((a,b)=>b.length-a.length); TR_SORTED_KEYS.set(dict,keys); }
+  return keys;
+}
 function tr(node){
   if(S.lang==='he') return;
   const dict=I18N[S.lang]; if(!dict) return;
@@ -1909,9 +1915,12 @@ function tr(node){
     const raw=n.nodeValue.normalize('NFC'); if(raw!==n.nodeValue) n.nodeValue=raw;
     const t=n.nodeValue.trim(); if(!t) continue;
     if(dict[t]!=null){ n.nodeValue=n.nodeValue.replace(t,dict[t]); continue; }
-    // partial: replace known phrases inside mixed strings
+    /* partial: replace known phrases inside mixed strings - longest keys
+       first, so a specific phrase (e.g. "Year 1") wins over a shorter
+       substring of it (e.g. "Year ") that would otherwise consume the
+       match first and strand the remainder untranslated. */
     let v=n.nodeValue, changed=false;
-    for(const k in dict){ if(k.length>2 && v.includes(k)){ v=v.split(k).join(dict[k]); changed=true; } }
+    for(const k of trSortedKeys(dict)){ if(v.includes(k)){ v=v.split(k).join(dict[k]); changed=true; } }
     if(changed) n.nodeValue=v;
   }
   node.querySelectorAll('input[placeholder]').forEach(i=>{ const p=i.placeholder.trim(); if(dict[p]) i.placeholder=dict[p]; });
