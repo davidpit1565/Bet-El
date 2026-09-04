@@ -7620,13 +7620,26 @@ const SIDDUR_SHIR_SHEL_YOM = {
    "Baruch Ata..." blessings (from "HaNoten LaSechvi Vina" through the
    "she'asani isha"/"ke'ratzono" pair) given the same tight, no-divider
    spacing already used for Birkat HaMazon's "HaRachaman Hu" run. ---- */
+/* Non-Hebrew rendering swaps in PRAYERS_TRANSLIT's transliteration per
+   paragraph, but the tight-spacing/section-title/insert markers below are
+   always detected against the HEBREW paragraph at that same index - a
+   transliterated paragraph obviously can't be substring-matched in Hebrew,
+   and the paragraph count/order is identical across every language, so
+   indexing the Hebrew array in lockstep is simpler and more robust than
+   duplicating the marker phrases in every language. */
 function siddurBirkotHashacharHTML(){
-  let html = `<div class="prayer-para">${SIDDUR.modehAni}</div>`;
-  const paras = (PRAYERS_EXTRA.birkotHashachar.text||'').split('\n\n');
+  const lang=(S.lang&&PRAYERS_TRANSLIT[S.lang])?S.lang:null;
+  const t=lang?PRAYERS_TRANSLIT[lang]:null;
+  const modehAni=(t&&t.modehAni)||SIDDUR.modehAni;
+  const torahBirkatBefore=(t&&t.torahBirkatBefore)||SIDDUR.torahBirkatBefore;
+  let html = `<div class="prayer-para">${modehAni}</div>`;
+  const heParas = (PRAYERS_EXTRA.birkotHashachar.text||'').split('\n\n');
+  const trParas = (t&&t.birkotHashachar)?t.birkotHashachar.split('\n\n'):null;
   let tight = false;
-  paras.forEach(line=>{
-    line = line.trim();
-    const n = ckNorm(line);
+  heParas.forEach((heLine,i)=>{
+    heLine = heLine.trim();
+    const line = (trParas&&trParas[i]!=null)?trParas[i].trim():heLine;
+    const n = ckNorm(heLine);
     // Each of these paragraphs opens with the full "ברוך אתה ה'..." preamble,
     // so the distinguishing phrase sits mid-paragraph - match by substring,
     // not by prefix, or `tight` never turns on/off at all.
@@ -7638,7 +7651,7 @@ function siddurBirkotHashacharHTML(){
     // Birkot HaTorah's 3rd blessing ("asher bachar banu") is the same text
     // already stored as SIDDUR.torahBirkatBefore (reused for aliyot) -
     // inserted here right after "veha'arev na" rather than duplicating it.
-    if(n.startsWith('והערב נא')) html += `<div class="prayer-para">${SIDDUR.torahBirkatBefore}</div>`;
+    if(n.startsWith('והערב נא')) html += `<div class="prayer-para">${torahBirkatBefore}</div>`;
   });
   return html;
 }
@@ -8496,8 +8509,11 @@ function renderSiddurReader(){
   app.innerHTML = `${topbar(SIDDUR_PRAYER_NAMES[SID.prayer],'siddurHome')}<div class="view">${siddurSkeleton()}</div>`;
   // Torah reading needs TORAH (data/torah-data.json etc, the same source
   // Shnayim Mikra and the Chok LeYisrael day-view already use) - loaded
-  // lazily here too, alongside the Siddur's own data.
-  Promise.all([ensureSiddurData(), ensureShnayimData()]).then(()=>{ if(TAB==='siddurReader') drawSiddurReader(); });
+  // lazily here too, alongside the Siddur's own data. Birkot HaShachar's
+  // transliteration (the one Siddur prayer that isn't Hebrew-only, per
+  // explicit user request) reuses the same PRAYERS_TRANSLIT loader every
+  // other individual prayer reader already uses.
+  Promise.all([ensureSiddurData(), ensureShnayimData(), ensurePrayersTranslit()]).then(()=>{ if(TAB==='siddurReader') drawSiddurReader(); });
 }
 /* Continuous-scroll reader: every section from siddurSections() is
    concatenated in order into one scrollable page (no more page-switching
