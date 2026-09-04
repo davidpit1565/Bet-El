@@ -7343,9 +7343,56 @@ function renderPrayerReader(){
 }
 
 /* ================= SIDDUR (screens) ================= */
-let SID = { prayer: null }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
+let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
 const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
-function openSiddurPrayer(p){ SID.prayer=p; go('siddurReader'); }
+/* where you stopped - same shape as Chok LeYisrael's ckBm-/ckResume/ckRestart:
+   tracked as you read (topmost paragraph on screen), offering to resume or
+   restart only when the reader is opened, never clearing on its own. */
+function sidBmAll(){ try{ return JSON.parse(localStorage.getItem('betel_siddur_bm')||'{}'); }catch(e){ return {}; } }
+function sidBmGet(prayer){ return sidBmAll()[prayer]||null; }
+function sidBmSet(prayer,para,sec){
+  const a=sidBmAll(); a[prayer]={para,sec};
+  try{ localStorage.setItem('betel_siddur_bm',JSON.stringify(a)); }catch(e){}
+}
+function sidBmClear(prayer){
+  const a=sidBmAll(); delete a[prayer];
+  try{ localStorage.setItem('betel_siddur_bm',JSON.stringify(a)); }catch(e){}
+}
+function sidTrackPosition(){
+  if(TAB!=='siddurReader'||!SID.prayer) return;
+  const paras=app.querySelectorAll('.prayer-para');
+  if(!paras.length) return;
+  let idx=0;
+  for(let i=0;i<paras.length;i++){
+    if(paras[i].getBoundingClientRect().bottom>90){ idx=i; break; }
+    idx=i;
+  }
+  const sec=paras[idx].closest('[data-sidanchor]');
+  sidBmSet(SID.prayer,idx,sec?sec.dataset.sidanchor:null);
+}
+let sidTrackTimer=null;
+function sidTrackScroll(){
+  clearTimeout(sidTrackTimer);
+  sidTrackTimer=setTimeout(()=>{ try{ sidTrackPosition(); }catch(e){} }, 400);
+}
+function sidResume(){
+  const bm=SID.resumeTo; SID.resumeTo=null; SID.showResume=false;
+  if(!bm) return;
+  const banner=app.querySelector('.ck-resume'); if(banner) banner.remove();
+  const paras=app.querySelectorAll('.prayer-para');
+  const el=paras[Math.min(bm.para||0, paras.length-1)];
+  if(el) el.scrollIntoView({block:'center'});
+}
+function sidRestart(){
+  SID.resumeTo=null; SID.showResume=false;
+  sidBmClear(SID.prayer);
+  drawSiddurReader(); forceScrollTop();
+}
+function openSiddurPrayer(p){
+  const bm=sidBmGet(p);
+  SID={prayer:p,resumeTo:bm,showResume:!!bm};
+  go('siddurReader');
+}
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
 }
@@ -8478,6 +8525,13 @@ function drawSiddurReader(){
       <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
       ${(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
     </div>
+    ${SID.showResume&&SID.resumeTo?`<div class="ck-resume">
+      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he}</b></div>
+      <div class="ck-resume-btns">
+        <button class="ck-resume-btn primary" id="sidResumeGo">הַמְשֵׁךְ מִשָּׁם</button>
+        <button class="ck-resume-btn" id="sidResumeNew">מֵהַתְחָלָה</button>
+      </div>
+    </div>`:''}
     <div class="prayer-reader-divider"></div>
     <div class="prayer-reader-text notranslate">
       ${secs.map(sec=>`<section id="sid-sec-${sec.key}" data-sidanchor="${sec.key}">${sec.html}</section>`).join('')}
@@ -8489,6 +8543,10 @@ function drawSiddurReader(){
   </div>`:''}`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
   const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openPrayer('selichotEdotHamizrach');
+  document.querySelector('.tb-back').onclick=()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); };
+  const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
+  const rn=document.getElementById('sidResumeNew'); if(rn) rn.onclick=sidRestart;
+  document.addEventListener('scroll', sidTrackScroll, {passive:true, capture:true});
   const dots = app.querySelectorAll('.sid-dot[data-siddot]');
   dots.forEach(d=>d.onclick=()=>{
     const target = document.getElementById('sid-sec-'+d.dataset.siddot);
