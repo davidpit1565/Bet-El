@@ -2505,10 +2505,27 @@ function bicNearestAvailableKey(track,targetKey){
   const list=bicParshiot(track); if(!list.length) return null;
   if(list.some(p=>p.key===targetKey)) return targetKey;
   const order=CHOK&&CHOK.parshiot;
+  const avail=new Set(list.map(p=>p.key));
+  /* A combined week's own key (e.g. "Nitzavim-Vayeilech") never appears
+     literally as one entry - a track can carry the two canonical names as
+     separate entries instead (as year1 does for this exact week) - so
+     check each component directly before falling back to a neighbor
+     search. ckSplitPair returns the key unchanged (as a 1-element array)
+     when it isn't combined, so this is a no-op for an ordinary single-
+     parasha week. */
+  for(const k of ckSplitPair(targetKey)) if(avail.has(k)) return k;
   if(order&&order.length){
-    const avail=new Set(list.map(p=>p.key));
-    const ti=order.indexOf(targetKey);
-    if(ti>=0){
+    /* Neither component has its own entry (a content gap, e.g. year2's 6
+       missing parshiot) - search from each component's own position in
+       `order` for the nearest available neighbor. Searching from the bare
+       combined key's own position always missed (it never appears in
+       `order`, which only ever lists the 54 single canonical names),
+       falling through to the "no position found" fallback below and
+       returning list[0] (Bereshit) for ANY combined-key week regardless of
+       where it actually falls in the year. */
+    for(const k of ckSplitPair(targetKey)){
+      const ti=order.indexOf(k);
+      if(ti<0) continue;
       for(let d=1;d<order.length;d++){
         if(ti-d>=0 && avail.has(order[ti-d])) return order[ti-d];
         if(ti+d<order.length && avail.has(order[ti+d])) return order[ti+d];
@@ -5488,6 +5505,17 @@ function renderHome(){
       </div>
     </div>
 
+    <div class="quick-grid">
+      ${(function(){
+        const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
+        const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
+        return `<div class="q-tile" data-cat="benishchai" id="homeBicCard">
+          <div class="qt">${ckBicUI().title}</div>
+          <div class="qd">${p?bicParshaName(p):(weekParshaKey?parshaName(weekParshaKey):'')}</div>
+        </div>`;
+      })()}
+    </div>
+
     ${(function(){
       const cd=zoharCycleDay(hd); if(!cd) return '';
       const done = zoharDone().includes(cd);
@@ -5517,6 +5545,11 @@ function renderHome(){
   const hpr=document.getElementById('homePrayerCard');
   if(hpr) hpr.onclick=()=>openSiddurPrayer(homeNowPrayerKey());
   const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');
+  const hbc=document.getElementById('homeBicCard');
+  if(hbc){
+    hbc.onclick=()=>openBic();
+    if(!BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
+  }
   const htc=document.getElementById('homeTikkuneiCard');
   if(htc){
     const cd=zoharCycleDay(hd);
