@@ -3633,7 +3633,7 @@ function bicBody(items,track){
    code paths - S.musarWork stays 'reshit' (the original fixed weekly
    schedule) for everyone until they explicitly pick one of these. */
 let MCYC=null, musarLoadPromise=null;
-const MCYC_BLOCK={};
+const MCYC_BLOCK={}, MCYC_BLOCK_I18N={};
 const MUSAR_BLOCK=40;
 function ensureMusarCycles(){
   if(MCYC) return Promise.resolve();
@@ -3644,9 +3644,15 @@ function ensureMusarCycles(){
 }
 function ckMusarBlockOf(i){ return Math.floor(i/MUSAR_BLOCK); }
 function ensureMusarBlock(work,b){
-  const k=work+'/'+b;
-  if(MCYC_BLOCK[k]) return Promise.resolve();
-  return fetch('data/chok-'+work+'/'+b+'.json').then(r=>r.json()).then(d=>{ MCYC_BLOCK[k]=d; });
+  const k=work+'/'+b, lang=S.lang;
+  const base=MCYC_BLOCK[k] ? null
+    : fetch('data/chok-'+work+'/'+b+'.json').then(r=>r.json()).then(d=>{ MCYC_BLOCK[k]=d; });
+  const i18nKey=lang+'/'+k;
+  const i18n=(lang==='he'||MCYC_BLOCK_I18N[i18nKey]!==undefined) ? null
+    : fetch('data/chok-'+work+'/'+b+'.'+lang+'.json')
+        .then(r=>r.ok?r.json():null).then(d=>{ MCYC_BLOCK_I18N[i18nKey]=d||null; })
+        .catch(()=>{ MCYC_BLOCK_I18N[i18nKey]=null; });
+  return Promise.all([base,i18n]);
 }
 /* same 1-vs-3-a-day idea as ckRambamTrack, one shared choice across whichever
    extra Musar work is active */
@@ -3664,9 +3670,11 @@ function ckMusarIndexes(work,hd){
   return out;
 }
 function ckMusarSegs(work,i){
-  const b=MCYC_BLOCK[work+'/'+ckMusarBlockOf(i)]||{};
+  const k=work+'/'+ckMusarBlockOf(i);
+  const b=MCYC_BLOCK[k]||{};
+  const bi18n=MCYC_BLOCK_I18N[S.lang+'/'+k];
   const ref=MCYC[work].order[i].ref;
-  return b[ref]||[];
+  return (bi18n&&bi18n[ref])||b[ref]||[];
 }
 function ckMusarReady(work,hd){
   if(!MCYC||!MCYC[work]) return false;
