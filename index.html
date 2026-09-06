@@ -2616,7 +2616,16 @@ function bicFlatItems(track,parashaKey){
   const unit=idx.unitOf[parashaKey]; if(!unit) return [];
   const wk=BIC_WEEK[track+'/'+unit]; if(!wk) return [];
   const items=[];
-  if(wk.intro&&wk.intro.length) items.push({type:'intro', paragraphs:wk.intro, unit});
+  /* Unlike every other item here (halacha paragraphs, keyed by dayIdx/
+     itemIdx and looked up per-item via bicI18nItem), the intro has no day/
+     item position of its own to key off of - it's one block per unit, not
+     one per day. Look its translation up directly off the same
+     BIC_WEEK_I18N cache ensureBicWeek() already populated, rather than
+     forcing it through bicI18nItem's per-day indexing (which would always
+     return null for it since it has no dayIdx/itemIdx). */
+  const i18n=(S.lang!=='he')?BIC_WEEK_I18N[S.lang+'/'+track+'/'+unit]:null;
+  const introParas=(i18n&&i18n.intro&&i18n.intro.length)?i18n.intro:wk.intro;
+  if(introParas&&introParas.length) items.push({type:'intro', paragraphs:introParas, unit});
   (wk.days||[]).forEach((day,dayIdx)=>{
     day.forEach((h,itemIdx)=>{ items.push({...h, type:'halacha', unit, dayIdx, itemIdx}); });
   });
