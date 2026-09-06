@@ -4427,12 +4427,16 @@ function ckAnimClass(){
    existing horizontal-scrolling strip elsewhere on the same page (the
    day/section chip rows already scroll via touch) and never fires on an
    ordinary vertical scroll: it requires a fast (<600ms), clearly-more-
-   horizontal-than-vertical drag past a real distance threshold. RTL swipe
-   convention, matching how the existing prev/next buttons already read:
-   dragging left (finger moves right-to-left, dx<0) reveals what's next -
-   the same direction the next button's own slide-in animation already
-   enters from (see ckSlideInR/ckSlideInL above). A vertical scroll never
-   calls preventDefault, so native scrolling is untouched either way. */
+   horizontal-than-vertical drag past a real distance threshold. Direction
+   is mirrored per the page's actual text direction (checked live off
+   documentElement.dir, which setLang already keeps in sync with S.lang -
+   see the dir= assignment near applyLang), not hardcoded to one convention:
+   in RTL (Hebrew) a left-to-right drag (dx>0) reveals what's next, matching
+   how a Hebrew reader's next page/section always sits further along in the
+   right-to-left reading order; in LTR languages a right-to-left drag
+   (dx<0, the universal carousel convention) reveals what's next instead.
+   A vertical scroll never calls preventDefault, so native scrolling is
+   untouched either way. */
 function wireSwipeNav(el, onNext, onPrev){
   if(!el) return;
   let x0=null, y0=null, t0=0;
@@ -4446,7 +4450,9 @@ function wireSwipeNav(el, onNext, onPrev){
     x0=null;
     if(dt>600 || Math.abs(dx)<60 || Math.abs(dy)>Math.abs(dx)*0.6) return;
     haptic(10);
-    if(dx<0){ if(onNext) onNext(); } else { if(onPrev) onPrev(); }
+    const rtl=document.documentElement.dir!=='ltr';
+    const forward = rtl ? dx>0 : dx<0;
+    if(forward){ if(onNext) onNext(); } else { if(onPrev) onPrev(); }
   }, {passive:true});
 }
 const CHOK_DAY_SHORT={sun:'א׳',mon:'ב׳',tue:'ג׳',wed:'ד׳',thu:'ה׳',night:'לֵיל ו׳',fri:'ו׳'};
