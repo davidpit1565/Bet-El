@@ -949,9 +949,6 @@ input,select,button{max-width:100%;box-sizing:border-box}
 /* short standalone verses (e.g. the 4 after Aleinu) read better centered
    than flush to the paragraph's start edge. */
 .siddur-verse-centered{text-align:center}
-/* Uva LeTzion is read quickly/quietly - a touch smaller than the default
-   prayer-para size, mirroring how other "read quickly" text is treated. */
-.siddur-text-small{font-size:14.5px}
 /* the single-letter counting markers (א ב ג...) in Yishtabach's 13-synonym
    list aren't part of the prayer text itself - de-emphasize them. */
 .siddur-enum-marker{font-size:.72em;color:var(--muted);opacity:.8;font-family:var(--font-ui)}
@@ -8974,7 +8971,7 @@ function siddurSections(dateObj, info, prayer){
     // reused from window.TEHILLIM like everywhere else, not duplicated.
     let by = `<div class="siddur-section-title">${ckChrome('בֵּית יַעֲקֹב')}</div>`;
     if(!info.skipTachanun) by += siddurTehillimChapterHTML(86);
-    by += siddurParasFromText(aul.beitYaakov, true, 'siddur-text-small');
+    by += siddurParasFromText(aul.beitYaakov, true);
     by += siddurTehillimChapterHTML(124);
     push('beitYaakov','בֵּית יַעֲקֹב', by);
     push('shirShelYom','שִׁיר שֶׁל יוֹם', siddurShirShelYomHTML(dateObj));
