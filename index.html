@@ -1444,8 +1444,22 @@ const I = {
   crown:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-2 12H5L3 8z" opacity=".95"/><circle cx="3" cy="7" r="1.4"/><circle cx="21" cy="7" r="1.4"/><circle cx="12" cy="3.5" r="1.6"/></svg>',
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>',
   pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
-  next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>',
-  prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>',
+  /* next/prev are directional chevrons, not fixed shapes - "next" must point
+     the way a reader actually advances, and that's mirrored by language: in
+     RTL (Hebrew) the next page/section sits further along the right-to-left
+     reading order, so "next" points left (‹) and "prev" points right (›);
+     in LTR it's the reverse, matching the universal next=› / prev=‹
+     convention. Getters (not plain strings) so every call site - all of
+     which just interpolate ${I.next}/${I.prev} at render time - picks up
+     the icon for whatever document.documentElement.dir is *right now*,
+     the same live check wireSwipeNav already uses for the swipe gesture
+     itself, so the arrows and the gesture always agree. */
+  get next(){ return document.documentElement.dir==='ltr'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>'; },
+  get prev(){ return document.documentElement.dir==='ltr'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>'; },
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
   tracker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3v3h6V3"/><path d="M8.5 12.5l2 2 4-4.5"/><path d="M8 17.5h8"/></svg>',
   qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><rect x="14.5" y="3.5" width="6" height="6" rx="1"/><rect x="3.5" y="14.5" width="6" height="6" rx="1"/><path d="M14.5 14.5h3v3h-3zM19.5 14.5v3M14.5 19.5h3M17.5 17.5h.01"/></svg>',
@@ -2652,7 +2666,37 @@ function ckWeekKeyFor(dd){
     if(!next) continue;
     const ks=ckKeysOf(next), first=ks[0]||next;
     const i=CHOK.parshiot.indexOf(first);
-    if(i>=0){ const n=CHOK.parshiot.length; return CHOK.parshiot[((i-w)%n+n)%n]; }
+    if(i<0) continue;
+    const n=CHOK.parshiot.length;
+    /* Don't just count back `w` raw list-positions from `next` - a combined
+       week (e.g. Nitzavim-Vayeilech) already studies BOTH of its names
+       within that one single real week (chokSectionsFor concatenates every
+       constituent parasha's own day-content together there, rather than
+       spreading them across two weeks), so those names are already fully
+       covered and must never be handed to a later gap week as if they were
+       still owed. Find the last real reading before this gap (`prevKey`)
+       and only count the list-positions after its own components as
+       actually available to make up; a gap week whose distance from
+       prevKey (`fw`) reaches or exceeds that available count has nothing
+       left to show and should land on `next` directly instead - matching
+       how the coming Shabbat's own parasha is already read in part every
+       Monday and Thursday, so it becomes "this week"'s reading the moment
+       the previous one is done, not something still to catch up on later.
+       A gap that runs multiple weeks (Sukkot into Simchat Torah) but has
+       only one real name left to give out (וְזֹאת הַבְּרָכָה) just keeps
+       repeating that same last available name until `next` genuinely
+       arrives, rather than inventing a jump past it. */
+    let prevKey=null, fw=1;
+    for(let pw=1;pw<=5;pw++){ const p=parshaKeyForDate(addDays(dd,-7*pw)); if(p){ prevKey=p; fw=pw; break; } }
+    if(prevKey){
+      const covered=ckKeysOf(prevKey).map(x=>CHOK.parshiot.indexOf(x)).filter(x=>x>=0);
+      const m=covered.length?Math.max(...covered):-1;
+      const avail=((i-(m+1))%n+n)%n;
+      if(avail<=0) return next;
+      const idx=Math.min(fw-1,avail-1);
+      return CHOK.parshiot[(m+1+idx)%n];
+    }
+    return CHOK.parshiot[((i-w)%n+n)%n];
   }
   return null;
 }
