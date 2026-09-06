@@ -3459,23 +3459,28 @@ const BIC_UI={
   he:{title:'בֶּן אִישׁ חַי', year1:'שָׁנָה א׳', year2:'שָׁנָה ב׳', halacha:'הֲלָכָה', biur:'בֵּיאוּר', noBiur:'אֵין בֵּיאוּר לַהֲלָכָה הַזֹּאת',
     prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', prevHalacha:'הַהֲלָכָה הַקּוֹדֶמֶת', nextHalacha:'הַהֲלָכָה הַבָּאָה',
     intro:'פְּתִיחָה', introChip:'פ׳', outOf:'מִתּוֹךְ', halachot:'הֲלָכוֹת', startLearning:'הַתְחֵל לִלְמֹד', continueLearning:'הַמְשֵׁךְ לִלְמֹד',
-    yourProgress:'הַהִתְקַדְּמוּת שֶׁלְּךָ', weekParasha:'פָּרָשַׁת הַשָּׁבוּעַ', weekTab:'הַשָּׁבוּעַ', allParshiotTab:'כׇּל הַפָּרָשִׁיּוֹת', markDone:'סַמֵּן כְּהוּשְׁלַם', parshiotWord:'פָּרָשִׁיּוֹת'},
+    yourProgress:'הַהִתְקַדְּמוּת שֶׁלְּךָ', weekParasha:'פָּרָשַׁת הַשָּׁבוּעַ', weekTab:'הַשָּׁבוּעַ', allParshiotTab:'כׇּל הַפָּרָשִׁיּוֹת', markDone:'סַמֵּן כְּהוּשְׁלַם', parshiotWord:'פָּרָשִׁיּוֹת',
+    fallbackNote:'פָּרָשָׁה חֲלוּפִית · אֵין עֲדַיִן תֹּכֶן לְ'},
   en:{title:'Ben Ish Chai', year1:'Year 1', year2:'Year 2', halacha:'Halacha', biur:'Explanation', noBiur:'No explanation for this halacha',
     prevDay:'Previous day', nextDay:'Next day', prevHalacha:'Previous halacha', nextHalacha:'Next halacha',
     intro:'Introduction', introChip:'I', outOf:'of', halachot:'halachot', startLearning:'Start learning', continueLearning:'Continue learning',
-    yourProgress:'Your progress', weekParasha:"This week's parasha", weekTab:'This week', allParshiotTab:'All parshiot', markDone:'Mark complete', parshiotWord:'parshiot'},
+    yourProgress:'Your progress', weekParasha:"This week's parasha", weekTab:'This week', allParshiotTab:'All parshiot', markDone:'Mark complete', parshiotWord:'parshiot',
+    fallbackNote:'Alternate parasha · no content yet for'},
   fr:{title:"Ben Ish 'Haï", year1:'Année 1', year2:'Année 2', halacha:'Halakha', biur:'Explication', noBiur:'Aucune explication pour cette halakha',
     prevDay:'Jour précédent', nextDay:'Jour suivant', prevHalacha:'Halakha précédente', nextHalacha:'Halakha suivante',
     intro:'Introduction', introChip:'I', outOf:'sur', halachot:'halakhot', startLearning:"Commencer à étudier", continueLearning:"Continuer l'étude",
-    yourProgress:'Votre progression', weekParasha:'Paracha de la semaine', weekTab:'Cette semaine', allParshiotTab:'Toutes les parachiot', markDone:'Marquer comme terminé', parshiotWord:'parachiot'},
+    yourProgress:'Votre progression', weekParasha:'Paracha de la semaine', weekTab:'Cette semaine', allParshiotTab:'Toutes les parachiot', markDone:'Marquer comme terminé', parshiotWord:'parachiot',
+    fallbackNote:"Paracha alternative · pas encore de contenu pour"},
   ru:{title:'Бен Иш Хай', year1:'Год 1', year2:'Год 2', halacha:'Ѓалаха', biur:'Разъяснение', noBiur:'Нет разъяснения к этой Ѓалахе',
     prevDay:'Предыдущий день', nextDay:'Следующий день', prevHalacha:'Предыдущая Ѓалаха', nextHalacha:'Следующая Ѓалаха',
     intro:'Введение', introChip:'В', outOf:'из', halachot:'Ѓалахот', startLearning:'Начать изучение', continueLearning:'Продолжить изучение',
-    yourProgress:'Ваш прогресс', weekParasha:'Недельная глава', weekTab:'На этой неделе', allParshiotTab:'Все главы', markDone:'Отметить как выполненное', parshiotWord:'глав'},
+    yourProgress:'Ваш прогресс', weekParasha:'Недельная глава', weekTab:'На этой неделе', allParshiotTab:'Все главы', markDone:'Отметить как выполненное', parshiotWord:'глав',
+    fallbackNote:'Альтернативная глава · пока нет материала для'},
   ka:{title:'ბენ იშ ხაი', year1:'პირველი წელი', year2:'მეორე წელი', halacha:'ალახა', biur:'განმარტება', noBiur:'ამ ალახაზე განმარტება არ არის',
     prevDay:'წინა დღე', nextDay:'შემდეგი დღე', prevHalacha:'წინა ალახა', nextHalacha:'შემდეგი ალახა',
     intro:'შესავალი', introChip:'შ', outOf:'დან', halachot:'ალახები', startLearning:'დაწყება სწავლის', continueLearning:'სწავლის გაგრძელება',
-    yourProgress:'თქვენი პროგრესი', weekParasha:'ამ კვირის პარაშა', weekTab:'ამ კვირას', allParshiotTab:'ყველა პარაშა', markDone:'დასრულებულად მონიშვნა', parshiotWord:'პარაშა'},
+    yourProgress:'თქვენი პროგრესი', weekParasha:'ამ კვირის პარაშა', weekTab:'ამ კვირას', allParshiotTab:'ყველა პარაშა', markDone:'დასრულებულად მონიშვნა', parshiotWord:'პარაშა',
+    fallbackNote:'ალტერნატიული პარაშა · ჯერ არ არის მასალა'},
 };
 function ckBicUI(){ return BIC_UI[S.lang]||BIC_UI.he; }
 /* the biur (plain-language explanation) shown per halacha, same expand/
@@ -4689,10 +4694,17 @@ function renderBicHome(){
       const total=BIC_WEEK[unitKey]?bicFlatItems(track,key).length:p.n;
       const prog=bicProgress(track,key,total);
       const pct=total?Math.round(100*prog.done/total):0;
+      /* key!==wk means this track has no real content for this week's own
+         parasha (a content gap, mainly year2's 6 missing parshiot) and is
+         showing the nearest one that does have content instead - flag that
+         plainly rather than let it silently look like this week's own
+         parasha, which it isn't. */
+      const isFallback=key!==wk;
       cards.push(`<div class="sm-week-card" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
         <div class="sm-week-text">
           <div class="sm-week-tag">${t[track]} · ${heNum(p.n)} ${t.halachot}</div>
           <div class="sm-week-name">${bicParshaName(p)}</div>
+          ${isFallback?`<div class="qd" style="color:var(--gold,#b8963f)">${t.fallbackNote} ${parshaName(wk)}</div>`:''}
         </div>
         <div>
           <div class="qd" style="margin-bottom:4px">${t.yourProgress} · ${heNum(prog.done)} ${t.outOf} ${heNum(total)}</div>
@@ -5437,6 +5449,8 @@ function renderHome(){
   const weekParshaKey=currentParshaKey();
   const read=readSet();
   const tehDoneToday = chs.length>0 && chs.every(c=>read.has(c));
+  const hh=CYC?nextHolidayHalacha():null;
+  if(!CYC) ensureCycles().then(()=>{ if(TAB==='home') render(); });
   app.innerHTML = `
   ${topbar('תָּמִיד')}
   <div class="view">
@@ -5455,6 +5469,7 @@ function renderHome(){
     </div>
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>יוֹם הַיָּאהְרְצַיְיט · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
     ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.moon2}<span>רֹאשׁ חֹדֶשׁ · <b>אַל תִּשְׁכַּח לְהַזְכִּיר יַעֲלֶה וְיָבֹא</b></span></div>`:''}
+    ${hh?`<div class="yahrzeit-strip" id="homeHolidayHalachaBanner" style="cursor:pointer">${I.cal}<span>${holidayHalachaUI().title} · <b>${hh.name}</b> · ${holidayHalachaUI().inDays(hh.days)}</span></div>`:''}
     ${(function(){
       const st=shabbatTimes(hd); if(!st.candle) return '';
       const title = st.chanukahNight ? `חֲנוּכָּה · נֵר ${heNum(st.chanukahNight)}`
@@ -5552,6 +5567,8 @@ function renderHome(){
   const hpr=document.getElementById('homePrayerCard');
   if(hpr) hpr.onclick=()=>openSiddurPrayer(homeNowPrayerKey());
   const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');
+  const hhb=document.getElementById('homeHolidayHalachaBanner');
+  if(hhb) hhb.onclick=()=>{ LIB.rambamIndex=hh.idx; go('libraryRambamReader'); };
   const hbc=document.getElementById('homeBicCard');
   if(hbc){
     hbc.onclick=()=>openBic();
@@ -6189,6 +6206,54 @@ function nextHoliday(){
   }catch(err){}
   return null;
 }
+/* Rambam's Mishneh Torah has a dedicated sefer/chapter range for practical
+   halachot of some (not all) major holidays - map each to where its own
+   chapters begin, so the Home screen can nudge toward studying them
+   starting a month out, the same lead time real preparation needs. Only
+   fires for holidays that actually have a matching sefer here - Shavuot,
+   Lag BaOmer and Tu BiShvat have no equivalent standalone Rambam
+   treatment, so they're left out rather than guessing at one. Chapter
+   numbers verified directly against the data: Shofar (Rosh Hashanah) is
+   chapters 1-2 of "Shofar, Sukkah and Lulav", Sukkah/Lulav (Sukkot) is
+   3-8 of the same sefer; Megillah (Purim) is chapters 1-2 and Chanukah is
+   3-4 of "Scroll of Esther and Hanukkah". */
+const HOLIDAY_HALACHA_MAP=[
+  {re:/רֹאשׁ הַשָּׁנָה/, book:'Mishneh Torah, Shofar, Sukkah and Lulav', ch:1},
+  {re:/כִּפּוּר/, book:'Mishneh Torah, Rest on the Tenth of Tishrei', ch:1},
+  {re:/סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת/, book:'Mishneh Torah, Shofar, Sukkah and Lulav', ch:3},
+  {re:/חֲנֻכָּה/, book:'Mishneh Torah, Scroll of Esther and Hanukkah', ch:3},
+  {re:/פּוּרִים/, book:'Mishneh Torah, Scroll of Esther and Hanukkah', ch:1},
+  {re:/פֶּסַח/, book:'Mishneh Torah, Leavened and Unleavened Bread', ch:1},
+  {re:/בְּאָב/, book:'Mishneh Torah, Fasts', ch:1},
+];
+function nextHolidayHalacha(){
+  try{
+    if(!CYC||!CYC.rambam) return null;
+    const today=currentHDate(); const gs=today.greg(); const ge=new Date(gs); ge.setDate(ge.getDate()+400);
+    const il=/Jerusalem/.test(LOC.tz);
+    const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
+    for(const ev of evs){
+      const d=ev.getDate(); if(d.abs()<=today.abs()) continue;
+      const nm=ev.render('he');
+      const m=HOLIDAY_HALACHA_MAP.find(x=>x.re.test(nm));
+      if(!m) continue;
+      const days=d.abs()-today.abs();
+      if(days>30) return null;
+      const idx=CYC.rambam.order.findIndex(e=>e.book===m.book && e.ch===m.ch);
+      if(idx<0) return null;
+      return {name:(S.lang==='he'?nm:holidayName(ev.render('en'))), days, idx};
+    }
+  }catch(err){}
+  return null;
+}
+const HOLIDAY_HALACHA_UI={
+  he:{title:'הִלְכוֹת הֶחָג הַקָּרֵב', inDays:n=>n===1?'מָחָר':'בְּעוֹד '+heNum(n)+' יָמִים'},
+  en:{title:"Upcoming holiday's halachot", inDays:n=>n===1?'tomorrow':'in '+n+' days'},
+  fr:{title:'Halakhot de la fête à venir', inDays:n=>n===1?'demain':'dans '+n+' jours'},
+  ru:{title:'Ѓалахот приближающегося праздника', inDays:n=>n===1?'завтра':'через '+n+' дн.'},
+  ka:{title:'მომავალი დღესასწაულის ალახები', inDays:n=>n===1?'ხვალ':n+' დღეში'},
+};
+function holidayHalachaUI(){ return HOLIDAY_HALACHA_UI[S.lang]||HOLIDAY_HALACHA_UI.he; }
 let CAL=null; // {hd: first-of-month HDate}
 function renderCalendar(){
   if(!CAL){ const t=currentHDate(); CAL={ y:t.getFullYear(), m:t.getMonth() }; }
@@ -6298,11 +6363,24 @@ function renderDayDetail(hd, events){
   const now=new Date(); const isToday=hd.abs()===currentHDate().abs();
   let nextKey=null;
   if(isToday){ const nx=zlist.find(z=>z.date&&z.date>now); if(nx)nextKey=nx.key; }
+  /* The parasha itself only ever showed up here as one of `events` (a
+     literal "Parashat X" HebrewCalendar event, which only exists on the
+     Shabbat it's read) - every other day of that same week showed nothing
+     at all, reading as if the parasha never advances until you happen to
+     land exactly on Saturday. ckWeekKeyFor is the same gap-week-aware
+     lookup the Home screen and Ben Ish Chai already use - it resolves the
+     week's parasha for ANY day, including a "gap week" with no literal
+     reading of its own (e.g. the week leading into Rosh Hashanah). Falls
+     back to null gracefully before CHOK loads (re-renders once it does,
+     the same way the Home screen's own cards do). */
+  const weekKey = CHOK ? ckWeekKeyFor(g) : null;
+  if(!CHOK) ensureChokIndex().then(()=>{ if(TAB==='calendar') renderDayDetail(hd,events); });
   el.innerHTML=`
   <div class="day-detail card">
     <div class="dd-date">${dowName(hd)} · ${heNum(hd.getDate())} ${monthName(hd)}</div>
     <div class="dd-greg">${g.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     ${events.length?`<div class="dd-events">${events.map(e=>`<span class="dd-event">${e}</span>`).join('')}</div>`:''}
+    ${weekKey?`<div class="dd-portion" style="margin-bottom:10px"><div class="lbl">פָּרָשַׁת הַשָּׁבוּעַ</div><div class="val">${parshaName(weekKey)}</div></div>`:''}
     <div style="display:flex;gap:10px">
       <div class="dd-portion" style="flex:1" data-open="${mRange[0]},${mRange[1]}"><div class="lbl">קְרִיאָה חָדְשִׁית</div><div class="val">${heNum(mRange[0])}–${heNum(mRange[1])}</div></div>
       <div class="dd-portion" style="flex:1" data-open="${wRange[0]},${wRange[1]}"><div class="lbl">קְרִיאָה שְׁבוּעִית</div><div class="val">${heNum(wRange[0])}–${heNum(wRange[1])}</div></div>
