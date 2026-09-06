@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl" data-theme="light">
+<html lang="he" dir="rtl" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
 <title>תָּמִיד</title>
-<meta name="theme-color" content="#efe6d2"/>
+<meta name="theme-color" content="#080d19"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -10198,7 +10198,12 @@ window.shareQR = shareQR;
 </script>
 <script>
   if('serviceWorker' in navigator && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())){
-    window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+    // Registered right away rather than gated on window 'load': this script
+    // tag already runs after the whole DOM is parsed, and tying it to 'load'
+    // means a slow/unreachable external resource (Google Fonts, Firebase)
+    // delays - or on a fully blocked connection, indefinitely postpones -
+    // offline support for no real benefit.
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
   }
 </script>
 <script>
