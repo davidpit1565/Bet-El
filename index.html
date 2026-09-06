@@ -2148,7 +2148,14 @@ function parshaKeyForDate(dateObj){
     return ev ? ev.getDesc().replace('Parashat ','').trim() : null;
   }catch(e){ return null; }
 }
-function currentParshaKey(){ return parshaKeyForDate(new Date()); }
+/* A plain parshaKeyForDate() lookup returns null for a "gap week" that has
+   no literal "Parashat X" event of its own (e.g. the week leading into
+   Rosh Hashanah) - every caller here (Shnayim Mikra's home card, Ben Ish
+   Chai's "this week" card, etc.) wants the same "what are we currently
+   studying" answer Chok LeYisrael's own gap-week extension already
+   computes (ckWeekKeyFor), not a bare null that renders as a literal
+   "null" string wherever it's interpolated. */
+function currentParshaKey(){ return ckWeekKeyFor(new Date()); }
 function parseVref(s){ const [c,v]=s.split(':').map(Number); return {c,v}; }
 function versesInRange(book,b,e){
   const {c:c1,v:v1}=parseVref(b), {c:c2,v:v2}=parseVref(e);
