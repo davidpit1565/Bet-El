@@ -5449,6 +5449,8 @@ function renderHome(){
   const weekParshaKey=currentParshaKey();
   const read=readSet();
   const tehDoneToday = chs.length>0 && chs.every(c=>read.has(c));
+  const hh=CYC?nextHolidayHalacha():null;
+  if(!CYC) ensureCycles().then(()=>{ if(TAB==='home') render(); });
   app.innerHTML = `
   ${topbar('תָּמִיד')}
   <div class="view">
@@ -5467,6 +5469,7 @@ function renderHome(){
     </div>
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>יוֹם הַיָּאהְרְצַיְיט · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
     ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.moon2}<span>רֹאשׁ חֹדֶשׁ · <b>אַל תִּשְׁכַּח לְהַזְכִּיר יַעֲלֶה וְיָבֹא</b></span></div>`:''}
+    ${hh?`<div class="yahrzeit-strip" id="homeHolidayHalachaBanner" style="cursor:pointer">${I.cal}<span>${holidayHalachaUI().title} · <b>${hh.name}</b> · ${holidayHalachaUI().inDays(hh.days)}</span></div>`:''}
     ${(function(){
       const st=shabbatTimes(hd); if(!st.candle) return '';
       const title = st.chanukahNight ? `חֲנוּכָּה · נֵר ${heNum(st.chanukahNight)}`
@@ -5564,6 +5567,8 @@ function renderHome(){
   const hpr=document.getElementById('homePrayerCard');
   if(hpr) hpr.onclick=()=>openSiddurPrayer(homeNowPrayerKey());
   const hmc=document.getElementById('homeMusarCard'); if(hmc) hmc.onclick=()=>go('musarList');
+  const hhb=document.getElementById('homeHolidayHalachaBanner');
+  if(hhb) hhb.onclick=()=>{ LIB.rambamIndex=hh.idx; go('libraryRambamReader'); };
   const hbc=document.getElementById('homeBicCard');
   if(hbc){
     hbc.onclick=()=>openBic();
@@ -6201,6 +6206,54 @@ function nextHoliday(){
   }catch(err){}
   return null;
 }
+/* Rambam's Mishneh Torah has a dedicated sefer/chapter range for practical
+   halachot of some (not all) major holidays - map each to where its own
+   chapters begin, so the Home screen can nudge toward studying them
+   starting a month out, the same lead time real preparation needs. Only
+   fires for holidays that actually have a matching sefer here - Shavuot,
+   Lag BaOmer and Tu BiShvat have no equivalent standalone Rambam
+   treatment, so they're left out rather than guessing at one. Chapter
+   numbers verified directly against the data: Shofar (Rosh Hashanah) is
+   chapters 1-2 of "Shofar, Sukkah and Lulav", Sukkah/Lulav (Sukkot) is
+   3-8 of the same sefer; Megillah (Purim) is chapters 1-2 and Chanukah is
+   3-4 of "Scroll of Esther and Hanukkah". */
+const HOLIDAY_HALACHA_MAP=[
+  {re:/רֹאשׁ הַשָּׁנָה/, book:'Mishneh Torah, Shofar, Sukkah and Lulav', ch:1},
+  {re:/כִּפּוּר/, book:'Mishneh Torah, Rest on the Tenth of Tishrei', ch:1},
+  {re:/סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת/, book:'Mishneh Torah, Shofar, Sukkah and Lulav', ch:3},
+  {re:/חֲנֻכָּה/, book:'Mishneh Torah, Scroll of Esther and Hanukkah', ch:3},
+  {re:/פּוּרִים/, book:'Mishneh Torah, Scroll of Esther and Hanukkah', ch:1},
+  {re:/פֶּסַח/, book:'Mishneh Torah, Leavened and Unleavened Bread', ch:1},
+  {re:/בְּאָב/, book:'Mishneh Torah, Fasts', ch:1},
+];
+function nextHolidayHalacha(){
+  try{
+    if(!CYC||!CYC.rambam) return null;
+    const today=currentHDate(); const gs=today.greg(); const ge=new Date(gs); ge.setDate(ge.getDate()+400);
+    const il=/Jerusalem/.test(LOC.tz);
+    const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
+    for(const ev of evs){
+      const d=ev.getDate(); if(d.abs()<=today.abs()) continue;
+      const nm=ev.render('he');
+      const m=HOLIDAY_HALACHA_MAP.find(x=>x.re.test(nm));
+      if(!m) continue;
+      const days=d.abs()-today.abs();
+      if(days>30) return null;
+      const idx=CYC.rambam.order.findIndex(e=>e.book===m.book && e.ch===m.ch);
+      if(idx<0) return null;
+      return {name:(S.lang==='he'?nm:holidayName(ev.render('en'))), days, idx};
+    }
+  }catch(err){}
+  return null;
+}
+const HOLIDAY_HALACHA_UI={
+  he:{title:'הִלְכוֹת הֶחָג הַקָּרֵב', inDays:n=>n===1?'מָחָר':'בְּעוֹד '+heNum(n)+' יָמִים'},
+  en:{title:"Upcoming holiday's halachot", inDays:n=>n===1?'tomorrow':'in '+n+' days'},
+  fr:{title:'Halakhot de la fête à venir', inDays:n=>n===1?'demain':'dans '+n+' jours'},
+  ru:{title:'Ѓалахот приближающегося праздника', inDays:n=>n===1?'завтра':'через '+n+' дн.'},
+  ka:{title:'მომავალი დღესასწაულის ალახები', inDays:n=>n===1?'ხვალ':n+' დღეში'},
+};
+function holidayHalachaUI(){ return HOLIDAY_HALACHA_UI[S.lang]||HOLIDAY_HALACHA_UI.he; }
 let CAL=null; // {hd: first-of-month HDate}
 function renderCalendar(){
   if(!CAL){ const t=currentHDate(); CAL={ y:t.getFullYear(), m:t.getMonth() }; }
