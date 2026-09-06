@@ -403,7 +403,9 @@ a.set-item{text-decoration:none;color:inherit}
    unpredictable live video read as noisy/undignified, not the quiet,
    precise feel a study app calls for). */
 .compass-full{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;
-  background:radial-gradient(circle at 50% 18%, #1a2c52 0%, #0c1730 60%, #080d19 100%);overflow:hidden}
+  background:radial-gradient(circle at 50% 18%, #1a2c52 0%, #0c1730 60%, #080d19 100%);overflow:hidden;
+  animation:fade .3s var(--ease)}
+@media (prefers-reduced-motion: reduce){.compass-full{animation:none}}
 .compass-fhead{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
   padding:16px 16px 10px;flex:none}
 .compass-close{border:1px solid rgba(255,255,255,.35);background:rgba(20,25,40,.55);color:#f3e9d0;
@@ -1174,9 +1176,21 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .btn:active,.icon-btn:active,.cal-nav:active,.reader-tools .rt-fab:active{ transform:scale(.9); transition-duration:.1s; }
 .ps-cell:active,.cal-cell:active{ transform:scale(.88); transition-duration:.1s; }
 .nav-item:active{ transform:scale(.9); transition-duration:.1s; }
+/* These small controls (per-chapter/per-day mark buttons, the dedication
+   list's delete button, chok's track/lang/year/commentary pills, the
+   siddur side dot-nav) sit right next to buttons above that already get a
+   press animation, but were missing one of their own - a real "why does
+   this one button feel dead" inconsistency on otherwise identical rows. */
+.zh-mark-btn,.sm-mark-btn,.ded-del,.ck-track-btn,.ck-resume-btn,.ck-yr-btn,
+.ck-today,.sid-dot{ transition:transform .2s var(--ease); }
+.zh-mark-btn:active,.sm-mark-btn:active,.ded-del:active{ transform:scale(.88); transition-duration:.1s; }
+.ck-track-btn:active,.ck-resume-btn:active,.ck-comm-btn:active,.ck-today:active{ transform:scale(.96); transition-duration:.1s; }
+.ck-yr-btn:active{ transform:scale(.88); transition-duration:.1s; }
+.sid-dot:active{ transform:scale(.75); transition-duration:.1s; }
 @media (prefers-reduced-motion: reduce){
   .card,.q-tile,.set-item,.pace-opt,.ob-row,.btn,.icon-btn,.cal-nav,.ps-cell,.cal-cell,
-  .rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card,.nav-pill{
+  .rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card,.nav-pill,
+  .zh-mark-btn,.sm-mark-btn,.ded-del,.ck-track-btn,.ck-resume-btn,.ck-yr-btn,.ck-today,.sid-dot{
     transition:none!important;
   }
 }
@@ -5877,6 +5891,7 @@ function chapterHTML(ch){
 function renderContinuous(chs,hd){
   TAB='reader'; RD=null; stopAutoScroll();
   app.innerHTML=`
+  <div class="reader view">
   <div class="reader-head">
     <div class="reader-top">
       <button class="icon-btn" id="rBack">${I.prev}</button>
@@ -5890,6 +5905,7 @@ function renderContinuous(chs,hd){
   ${prayerBlock('after')}
   <div style="padding:4px 2px 30px">
     <button class="btn btn-gold" id="flowDone" style="width:100%">${I.check}<span>סִיַּמְתִּי אֶת הַקְּרִיאָה</span></button>
+  </div>
   </div>`;
   document.getElementById('rBack').onclick=()=>go('home');
   forceScrollTop();
@@ -7134,6 +7150,7 @@ function renderLibraryRambamReader(){
         <div class="reader-title">${ckRambamName(e.book)}</div>
       </div>
       <div class="bic-collapse">
+        <div class="sm-aliyah-tag">${ckChrome('רַמְבַּ״ם')}</div>
         <div class="ck-daynav-wrap">
           <button class="sm-aliyah-chip ck-arrow" id="librPrev" ${i<=rg.first?'disabled':''}>${I.prev}</button>
           <select class="fld-select" id="librChPick" style="max-width:220px">
@@ -7144,7 +7161,7 @@ function renderLibraryRambamReader(){
       </div>
     </div>
     <div class="sm-verses notranslate">
-      ${segs.map(t=>`<div class="sm-verse-row ck-nonum"><div class="sm-he">${t}</div></div>`).join('')}
+      ${segs.map((t,ix)=>`<div class="sm-verse-row" id="rambamHalacha${ix+1}"><span class="sm-vnum">${heNum(ix+1)}</span><div class="sm-he">${t}</div></div>`).join('')}
     </div>
     <div style="height:26px"></div>
   </div>`;
@@ -7712,8 +7729,15 @@ function openSiddurPrayer(p){
 function siddurSkeleton(){
   return `<div class="skel-wrap">${[0,1,2,3].map(()=>`<div class="skel-line w100"></div><div class="skel-line w80"></div>`).join('')}</div>`;
 }
+/* drawSiddurHome() renders a quick-grid of tiles, not text lines - a
+   text-line skeleton (siddurSkeleton) here would flash a different shape
+   than the real content and cause a layout jump once it resolves, so this
+   screen gets its own tile-shaped placeholder instead. */
+function siddurHomeSkeleton(){
+  return `<div class="quick-grid">${[0,1,2,3,4,5].map(()=>`<div class="q-tile skel-tile"><div class="skel-line w60" style="margin:0"></div></div>`).join('')}</div>`;
+}
 function renderSiddurHome(){
-  app.innerHTML = `${topbar('סִדּוּר','prayers')}<div class="view">${siddurSkeleton()}</div>`;
+  app.innerHTML = `${topbar('סִדּוּר','prayers')}<div class="view">${siddurHomeSkeleton()}</div>`;
   ensureSiddurData().then(()=>{ if(TAB==='siddurHome') drawSiddurHome(); });
 }
 function drawSiddurHome(){
