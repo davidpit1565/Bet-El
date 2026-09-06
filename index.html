@@ -6298,11 +6298,24 @@ function renderDayDetail(hd, events){
   const now=new Date(); const isToday=hd.abs()===currentHDate().abs();
   let nextKey=null;
   if(isToday){ const nx=zlist.find(z=>z.date&&z.date>now); if(nx)nextKey=nx.key; }
+  /* The parasha itself only ever showed up here as one of `events` (a
+     literal "Parashat X" HebrewCalendar event, which only exists on the
+     Shabbat it's read) - every other day of that same week showed nothing
+     at all, reading as if the parasha never advances until you happen to
+     land exactly on Saturday. ckWeekKeyFor is the same gap-week-aware
+     lookup the Home screen and Ben Ish Chai already use - it resolves the
+     week's parasha for ANY day, including a "gap week" with no literal
+     reading of its own (e.g. the week leading into Rosh Hashanah). Falls
+     back to null gracefully before CHOK loads (re-renders once it does,
+     the same way the Home screen's own cards do). */
+  const weekKey = CHOK ? ckWeekKeyFor(g) : null;
+  if(!CHOK) ensureChokIndex().then(()=>{ if(TAB==='calendar') renderDayDetail(hd,events); });
   el.innerHTML=`
   <div class="day-detail card">
     <div class="dd-date">${dowName(hd)} · ${heNum(hd.getDate())} ${monthName(hd)}</div>
     <div class="dd-greg">${g.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     ${events.length?`<div class="dd-events">${events.map(e=>`<span class="dd-event">${e}</span>`).join('')}</div>`:''}
+    ${weekKey?`<div class="dd-portion" style="margin-bottom:10px"><div class="lbl">פָּרָשַׁת הַשָּׁבוּעַ</div><div class="val">${parshaName(weekKey)}</div></div>`:''}
     <div style="display:flex;gap:10px">
       <div class="dd-portion" style="flex:1" data-open="${mRange[0]},${mRange[1]}"><div class="lbl">קְרִיאָה חָדְשִׁית</div><div class="val">${heNum(mRange[0])}–${heNum(mRange[1])}</div></div>
       <div class="dd-portion" style="flex:1" data-open="${wRange[0]},${wRange[1]}"><div class="lbl">קְרִיאָה שְׁבוּעִית</div><div class="val">${heNum(wRange[0])}–${heNum(wRange[1])}</div></div>
