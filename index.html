@@ -6311,6 +6311,14 @@ function nextHolidayHalacha(){
     for(const ev of evs){
       const d=ev.getDate(); if(d.abs()<=today.abs()) continue;
       const nm=ev.render('he');
+      // "עֶרֶב X" ("the eve of X") is hebcal's own separate event for the day
+      // before X, always rendered before X itself - without this guard it
+      // matches the same regex as the holiday it precedes (e.g. "עֶרֶב רֹאשׁ
+      // הַשָּׁנָה" contains "רֹאשׁ הַשָּׁנָה"), showing "the eve of Rosh
+      // Hashanah" as the banner's holiday name while still linking to Rosh
+      // Hashanah's own halachot - a name/content mismatch. Skip it and let
+      // the loop reach the real holiday event a day or two later instead.
+      if(/^עֶרֶב\s/.test(nm)) continue;
       const m=HOLIDAY_HALACHA_MAP.find(x=>x.re.test(nm));
       if(!m) continue;
       const days=d.abs()-today.abs();
