@@ -934,9 +934,18 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .siddur-halacha-note{display:block;font-family:var(--font-ui);font-size:12.5px;font-style:italic;
   color:var(--muted);text-align:center;margin:8px 0;line-height:1.5}
 /* [[HALI]] inline variant: a halacha note sitting mid-sentence inside an
-   otherwise-continuous passage - stays in the flow, no block/line break. */
+   otherwise-continuous passage - stays in the flow, no block/line break.
+   line-height is unitless (CSS recomputes it against the element's OWN
+   font-size, not the inherited px value), so shrinking font-size here
+   without compensating would give this span a smaller line box than the
+   surrounding text; wherever the note wraps onto its own line(s) that
+   reads as a visual paragraph gap before the following text, exactly the
+   bug this ratio correction avoids. .prayer-reader-text (the only
+   ancestor that sets line-height) always uses line-height:2.05, so
+   dividing that by the same .72 font-size ratio recovers an identical
+   absolute line height. */
 .siddur-halacha-note-inline{font-family:var(--font-ui);font-size:.72em;font-style:italic;
-  color:var(--muted);opacity:.85}
+  color:var(--muted);opacity:.85;line-height:2.847}
 /* short standalone verses (e.g. the 4 after Aleinu) read better centered
    than flush to the paragraph's start edge. */
 .siddur-verse-centered{text-align:center}
@@ -8530,7 +8539,7 @@ function siddurRoshChodeshHallelTailHTML(info, dateObj){
    HaMaalot Lulei Hashem") - reused from window.TEHILLIM, not duplicated. */
 function siddurRoshChodeshUvaLesionHTML(){
   let html = `<div class="siddur-section-title">${ckChrome('וּבָא לְצִיּוֹן גּוֹאֵל')}</div>`;
-  html += siddurParasFromText(PT('ashreiUvaLetzion','uvaLetzion')||SIDDUR.ashreiUvaLetzion.uvaLetzion, true, 'siddur-text-small');
+  html += siddurParasFromText(PT('ashreiUvaLetzion','uvaLetzion')||SIDDUR.ashreiUvaLetzion.uvaLetzion, true);
   html += siddurTehillimChapterHTML(124);
   return html;
 }
@@ -8946,7 +8955,7 @@ function siddurSections(dateObj, info, prayer){
     const aul = trAUL ? Object.assign({}, SIDDUR.ashreiUvaLetzion, trAUL) : SIDDUR.ashreiUvaLetzion;
     let al = siddurParasFromText(aul.ashreiIntro, true)+siddurTehillimChapterHTML(145);
     if(!info.skipTachanun) al += siddurTehillimChapterHTML(20);
-    al += `<div class="siddur-section-title">${ckChrome('וּבָא לְצִיּוֹן גּוֹאֵל')}</div>`+siddurParasFromText(aul.uvaLetzion, true, 'siddur-text-small');
+    al += `<div class="siddur-section-title">${ckChrome('וּבָא לְצִיּוֹן גּוֹאֵל')}</div>`+siddurParasFromText(aul.uvaLetzion, true);
     push('ashrei','אַשְׁרֵי וּבָא לְצִיּוֹן', al);
     // Sefaria's own "Uva LeSion" node ends with an explicit rubric naming
     // this Kaddish "קדיש תתקבל" (Kaddish Titkabel) - the fuller Kaddish,
