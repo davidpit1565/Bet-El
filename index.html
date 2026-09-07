@@ -2929,33 +2929,34 @@ function chokSectionsFor(key,day,hdOverride){
    from Tikkunei HaZohar (renderZoharReader/openZohar), which is a
    different text studied only in the 40 days before Rosh Hashanah.
    Browsable like Musar Yomi: ZY_STATE is null on "today" (openZoharYomi
-   resets it) or an explicit {key,day,year} once the reader has stepped
-   away - its own day-cursor, kept independent of the main Chok reader's
-   CK so browsing here never disturbs a Chok LeYisrael reading in
-   progress. Every date-dependent lookup below is threaded an explicit
-   hd computed from that cursor instead of reading the global "view
-   date", for the same reason. */
+   resets it) or an actual Date object once the reader has stepped away -
+   its own day-cursor, kept independent of the main Chok reader's CK so
+   browsing here never disturbs a Chok LeYisrael reading in progress.
+   Deliberately a real Date, not a {key,day,year} parasha-relative cursor
+   (as this used to be, and as Musar Yomi's own MUSAR_YOMI_START still
+   is): Zohar Yomi's own cycle (CYC.zohar, via ckCycleIndex) runs on a
+   pure date track, unrelated to the parasha calendar shown alongside it,
+   and reconstructing a date FROM a parasha name + weekday is only lossy
+   in general - it breaks outright whenever one parasha name spans more
+   than one real calendar week, which happens every year right before
+   Rosh Hashanah (this year, "Ha'azinu" names both the pre-Rosh-Hashanah
+   gap week and its own real reading week after) - the reconstruction
+   can resolve to either, silently shifting the Zohar page by up to a
+   full week and even wandering into the wrong Hebrew year at the parasha
+   name's OTHER real annual occurrence. Stepping by a real day (skipping
+   Saturday, which has no Chok LeYisrael portion) sidesteps all of that;
+   the parasha key/weekday needed for the Torah/Mishnah content shown
+   alongside the Zohar are looked up FROM this real date via
+   chokSlotFor(), never the other way around. */
 let ZY_STATE=null;
 function openZoharYomi(){ ZY_STATE=null; go('zoharYomi'); }
 function renderZoharYomiReader(){
-  const t=ckTodayLine();
-  const cur=ZY_STATE||(t&&{key:t.key,day:t.day,year:null});
-  if(!cur) return go('home');
   const isToday=!ZY_STATE;
-  /* Zohar Yomi's own cycle (CYC.zohar, via ckCycleIndex) runs on a pure
-     date track, unlike the parasha-keyed Torah/Mishnah content also shown
-     alongside it. Reconstructing "today" through ckDateFor(cur) - which
-     rebuilds a date from cur.key/cur.day (the parasha name + weekday) - is
-     only actually necessary when browsing to an arbitrary day via
-     ZY_STATE, since that's the only state we have for it. For today
-     itself we already have the real date; going through the parasha
-     reconstruction is not just unnecessary but actively wrong whenever a
-     single parasha name spans more than one real calendar week (e.g.
-     Ha'azinu covering both the pre-Rosh-Hashanah gap week and its own
-     proper reading week the week after) - ckWeekSunday can then resolve
-     to the WRONG one of those weeks, shifting the Zohar page by up to a
-     full week. */
-  const hd=isToday ? chokDayHDate() : new HDate(ckDateFor(cur));
+  const viewDate=ZY_STATE||chokDayDate();
+  const slot=chokSlotFor(viewDate);
+  if(!slot) return go('home');
+  const cur={key:slot.key,day:slot.day};
+  const hd=new HDate(viewDate);
   if(!CHOK||!ckWeekReady(cur.key)||!TORAH||!ckCycReady(hd)){
     app.innerHTML=`${topbar('זֹהַר הַיּוֹמִי','home')}<div class="view">${smSkeleton()}</div>`;
     ensureChokDataFor(cur.key,hd).then(()=>{ if(TAB==='zoharYomi'){ renderZoharYomiReader(); tr(app); } });
@@ -2968,9 +2969,9 @@ function renderZoharYomiReader(){
     const tag=(s.tags&&s.tags[ix])||(CK_NO_NUM[s.key]?'':heNum(ix+1));
     return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${it}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
   }).join('');
-  const srcLine=chokSourceLine(s);
-  const rowLabel=chokRowLabel(cur.day,CHOK_DAYS.indexOf(cur.day));
-  const prevStep=stepChokDayFrom(cur,-1), nextStep=stepChokDayFrom(cur,1);
+  const srcLine=chokSourceLine(s,hd);
+  const stepDate=dir=>{ let d=addDays(viewDate,dir); if(d.getDay()===6) d=addDays(d,dir); return d; };
+  const prevDate=stepDate(-1), nextDate=stepDate(1);
   app.innerHTML=`
   <div class="reader view">
     <div class="reader-head">
@@ -2980,11 +2981,10 @@ function renderZoharYomiReader(){
       </div>
       <div class="bic-collapse">
         <div class="ck-daynav-wrap">
-          <button class="sm-aliyah-chip ck-arrow" id="zyPrev" ${prevStep?'':'disabled'} aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
-          <div class="sm-aliyah-tag">${parshaName(cur.key)} · ${rowLabel}</div>
-          <button class="sm-aliyah-chip ck-arrow" id="zyNext" ${nextStep?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
+          <button class="sm-aliyah-chip ck-arrow" id="zyPrev" aria-label="הַיּוֹם הַקּוֹדֵם">${I.prev}</button>
+          <div class="sm-aliyah-tag">${localizeHebDateStr(hd.renderGematriya(true))}</div>
+          <button class="sm-aliyah-chip ck-arrow" id="zyNext" aria-label="הַיּוֹם הַבָּא">${I.next}</button>
         </div>
-        <div class="ck-viewdate">${localizeHebDateStr(hd.renderGematriya(true))}</div>
         ${!isToday?`<div class="sm-aliyah-tag">לֹא הַיּוֹם הַנּוֹכְחִי · <button class="ck-track-btn" id="zyToday" style="display:inline;padding:2px 10px">${ckMusarUI().today}</button></div>`:''}
         ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       </div>
@@ -2993,12 +2993,12 @@ function renderZoharYomiReader(){
     <div style="height:26px"></div>
   </div>`;
   document.getElementById('zyBack').onclick=()=>go('home');
-  const zp=document.getElementById('zyPrev'); if(zp&&!zp.disabled) zp.onclick=()=>{ ZY_STATE=prevStep; renderZoharYomiReader(); forceScrollTop(); };
-  const zn=document.getElementById('zyNext'); if(zn&&!zn.disabled) zn.onclick=()=>{ ZY_STATE=nextStep; renderZoharYomiReader(); forceScrollTop(); };
+  document.getElementById('zyPrev').onclick=()=>{ ZY_STATE=prevDate; renderZoharYomiReader(); forceScrollTop(); };
+  document.getElementById('zyNext').onclick=()=>{ ZY_STATE=nextDate; renderZoharYomiReader(); forceScrollTop(); };
   const zt=document.getElementById('zyToday'); if(zt) zt.onclick=()=>{ ZY_STATE=null; renderZoharYomiReader(); forceScrollTop(); };
   wireSwipeNav(app.querySelector('.sm-verses'),
-    ()=>{ if(nextStep){ ZY_STATE=nextStep; renderZoharYomiReader(); forceScrollTop(); } },
-    ()=>{ if(prevStep){ ZY_STATE=prevStep; renderZoharYomiReader(); forceScrollTop(); } });
+    ()=>{ ZY_STATE=nextDate; renderZoharYomiReader(); forceScrollTop(); },
+    ()=>{ ZY_STATE=prevDate; renderZoharYomiReader(); forceScrollTop(); });
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
@@ -3250,10 +3250,10 @@ function chokRefLabel(ref, sec){
   }
   return ref;
 }
-function chokSourceLine(sec){
+function chokSourceLine(sec,hd){
   if(sec.kind==='musarcyc') return ckMusarSourceLabel(sec.musarWork,sec.mIdx);
   if(sec.kind==='tanyacyc') return ckTanyaLabel(sec.tIdx);
-  if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,ckViewHDate()));
+  if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,hd||ckViewHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
   if(CYC&&sec.kind==='daf'){
     const rec=ckDafRec(sec.dIdx)||{};
