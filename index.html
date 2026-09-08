@@ -1097,6 +1097,8 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .sm-aliyah-chip{flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line-strong);
   color:var(--ink-soft);border-radius:999px;padding:6px 13px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
 .sm-aliyah-chip.on{background:var(--gold-grad);color:#2a1e05;border-color:transparent}
+.sm-yichud-section{padding:16px 18px;margin:12px 0;background:var(--card-2,rgba(0,0,0,.03));border:1px solid var(--line);border-radius:12px}
+.sm-yichud-text{font-family:var(--font-sacred);font-size:15px;line-height:2;color:var(--ink);text-align:center;letter-spacing:.01em}
 
 /* section nav: every section title (Torah, Nevi'im, Tehillim, ...) sits
    in one horizontally scrollable strip so the full list is discoverable
@@ -9471,6 +9473,18 @@ function renderShnayimReader(){
           ${entry.aliyot.map((_,i)=>`<button class="sm-aliyah-chip ${!isHaft&&n===i+1?'on':''}" data-n="${i+1}">${heNum(i+1)}</button>`).join('')}
           ${(entry.haft||entry.seph)?`<button class="sm-aliyah-chip ${isHaft?'on':''}" data-n="haft">הַפְטָרָה</button>`:''}
         </div>
+      </div>
+    </div>
+    <div class="sm-yichud-section">
+      <div class="sm-yichud-text">
+        שֵׁם יִחוּד קוּדְשָׁא בְּרִיךְ הוּא וּשְׁכִינְתֵּיהּ<br><br>
+        יאהדונהי<br><br>
+        בִּדְחִילוּ וּרְחִימוּ וּרְחִימוּ וּדְחִילוּ<br><br>
+        יאההויהה     איההיוהה<br><br>
+        לְיַחֲדָא שֵׁם י״ה בְּו״ה<br>
+        בְּיִחוּדָא שָׁלִים<br><br>
+        יהוה<br><br>
+        בְּשֵׁם כָּל יִשְׂרָאֵל, הִנֵּה אֲנַחְנוּ בָּאִים לִקְרֹא הַפָּרָשָׁה שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם בִּנִגּוּנֶיהָ וּטְעָמֶיהָ כְּנֶגֶד הַתִּפְאֶרֶת וְהַיְסוֹד
       </div>
     </div>
     <div class="sm-verses notranslate">
