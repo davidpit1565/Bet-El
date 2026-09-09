@@ -235,6 +235,7 @@ body::before{ /* subtle starfield/texture */
   font-size:16px;font-weight:700;letter-spacing:.3px;position:relative;transition:.2s var(--ease)}
 .btn-gold{background:var(--gold-grad);color:#2a1e05;box-shadow:0 10px 26px -10px rgba(184,134,11,.7)}
 .btn-gold:active{transform:translateY(1px) scale(.99)}
+.btn:disabled{opacity:.4;pointer-events:none;box-shadow:none}
 @media (hover:hover){.btn-gold:hover{box-shadow:0 14px 32px -10px rgba(184,134,11,.85);transform:translateY(-1px)}}
 .btn-ghost{background:var(--panel);border:var(--glass-border);color:var(--gold)}
 @media (hover:hover){.btn-ghost:hover{border-color:var(--line-strong)}}
@@ -667,6 +668,11 @@ a.set-item{text-decoration:none;color:inherit}
 .fld-select{-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);background-position:calc(0% + 14px) center,calc(0% + 19px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
 .time-input{max-width:130px;text-align:center;font-family:var(--font-sacred);font-weight:700;font-size:16px}
 .fld-input:focus,.fld-select:focus,.time-input:focus{border-color:var(--gold)}
+.fld-col{display:flex;flex-direction:column;gap:10px;text-align:right;margin:16px 0 6px}
+.fld-col textarea.fld-input{resize:vertical;font-family:var(--font-ui)}
+.fb-count{font-size:11px;color:var(--ink-soft);text-align:left;margin-top:-4px}
+.rate-stars{display:flex;justify-content:center;gap:4px;color:var(--gold);margin:6px 0 18px}
+.rate-stars svg{width:26px;height:26px;fill:var(--gold);stroke:var(--gold)}
 
 /* chip row (tehillim filters) */
 .chip-row{display:flex;gap:8px;margin:12px 0 14px;flex-wrap:wrap}
@@ -9847,6 +9853,12 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
+      <h3>מִשׁוֹב וְתִמְיכָה</h3>
+      <div class="set-item" id="openFeedback" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.wrench}</span><div><div class="si-t">דִּוּוּחַ וְהַצָּעוֹת לְשִׁפּוּר</div><div class="si-d">דִּוּוּחַ עַל תַּקָּלוֹת וְהַצָּעוֹת לְשִׁפּוּר</div></div></div>${I.chev}</div>
+      <div class="set-item" id="openRate" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.star}</span><div><div class="si-t">דַּרְגוּ אוֹתָנוּ בָּ-App Store</div><div class="si-d">דֵּרוּג עוֹזֵר לָנוּ לְהַגִּיעַ לְעוֹד אֲנָשִׁים</div></div></div>${I.chev}</div>
+    </div>
+
+    <div class="set-group">
       <h3>מִשְׁפָּטִי</h3>
       <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מְדִינִיּוּת פְּרָטִיּוּת</div><div class="si-d">מָה נִשְׁמָר וְאֵיפֹה</div></div></div>${I.chev}</a>
       <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תְּנָאֵי שִׁמּוּשׁ</div><div class="si-d">תְּנָאִים לְשִׁמּוּשׁ בָּאַפְּלִיקַצְיָה</div></div></div>${I.chev}</a>
@@ -9873,6 +9885,8 @@ function renderSettings(){
   document.getElementById('openCompass').onclick=()=>go('kotelCompass');
   document.getElementById('shareApp').onclick=shareApp;
   document.getElementById('shareAppQR').onclick=shareQR;
+  document.getElementById('openFeedback').onclick=openFeedbackForm;
+  document.getElementById('openRate').onclick=()=>window.open(APP_REVIEW_URL,'_blank');
   document.getElementById('settingsTracker').onclick=()=>go('tracker');
   document.getElementById('settingsChokExplainer').onclick=()=>{ CK_EXPLAINER_BACK='settings'; go('chokExplainer'); };
   document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('הַמַּעֲקָב אֻפַּס'); };
@@ -9948,8 +9962,7 @@ function shareChapter(ch){
   shareDirect(ckChrome('שִׁתּוּף פֶּרֶק ')+heNum(ch), text);
 }
 function shareApp(){
-  const url=location.href.split('#')[0];
-  const text='📖 תמיד — אפליקציית הלימוד היומי\nחוק לישראל · תהילים יומי · זוהר יומי · לוח עברי וזמני היום:\n'+url;
+  const text='📖 תמיד — אפליקציית הלימוד היומי\nחוק לישראל · תהילים יומי · זוהר יומי · לוח עברי וזמני היום:\n'+APP_STORE_URL;
   shareDirect(ckChrome('שִׁתּוּף הָאַפְּלִיקַצְיָה'), text);
 }
 function shareQR(){
@@ -9959,6 +9972,68 @@ function shareQR(){
    people straight there (a real install) rather than to the PWA's own
    URL - see the CLAUDE.md note this fulfills. */
 const APP_STORE_URL = 'https://apps.apple.com/app/%D7%AA%D7%9E%D7%99%D7%93/id6807186847';
+const APP_REVIEW_URL = APP_STORE_URL+'?action=write-review';
+const SUPPORT_EMAIL = 'info@bet-el.be';
+
+/* ================= FEEDBACK / RATE US ================= */
+/* A static app with no backend can't submit a form directly, so "Send"
+   just hands the filled-in fields to the device's own mail app via a
+   mailto: link (pre-filled subject+body) - same destination as the
+   support.html mailto link, just reachable from inside the app too. */
+function openFeedbackForm(){
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML=`<div class="modal">
+    <button class="close-x" data-close>${I.x}</button>
+    <div class="m-crown">${I.wrench}</div>
+    <h3 class="gold-text">${ckChrome('דִּוּוּחַ וְהַצָּעוֹת לְשִׁפּוּר')}</h3>
+    <p>${ckChrome('אָנוּ מַעֲרִיכִים אֶת הַזְּמַן שֶׁלָּךְ. נִשְׂמַח לִשְׁמֹעַ הַצָּעוֹת לְשִׁפּוּר אוֹ לְקַבֵּל דִּוּוּחַ עַל תַּקָּלוֹת')}</p>
+    <div class="fld-col">
+      <input class="fld-input" id="fbName" placeholder="${ckChrome('הַכְנֵס אֶת שִׁמְךָ')}"/>
+      <input class="fld-input" id="fbEmail" type="email" placeholder="${ckChrome('הַכְנֵס אֶת הָאִימֵייל שֶׁלָּךְ')}"/>
+      <textarea class="fld-input" id="fbMsg" rows="4" maxlength="500" placeholder="${ckChrome('הַכְנֵס אֶת הוֹדָעָתְךָ')}"></textarea>
+      <div class="fb-count" id="fbCount">0/500</div>
+    </div>
+    <button class="btn btn-gold" id="fbSend" disabled><span>${ckChrome('שְׁלַח')}</span></button>
+  </div>`;
+  document.body.appendChild(ov);
+  const nameEl=ov.querySelector('#fbName'), emailEl=ov.querySelector('#fbEmail'), msgEl=ov.querySelector('#fbMsg');
+  const countEl=ov.querySelector('#fbCount'), sendBtn=ov.querySelector('#fbSend');
+  const refresh=()=>{
+    countEl.textContent=msgEl.value.length+'/500';
+    sendBtn.disabled = !(nameEl.value.trim() && emailEl.value.trim() && msgEl.value.trim());
+  };
+  [nameEl,emailEl,msgEl].forEach(el=>el.addEventListener('input',refresh));
+  sendBtn.onclick=()=>{
+    const subject=encodeURIComponent('משוב מהאפליקציה — תמיד');
+    const body=encodeURIComponent('שם: '+nameEl.value.trim()+'\nאימייל: '+emailEl.value.trim()+'\n\n'+msgEl.value.trim());
+    location.href='mailto:'+SUPPORT_EMAIL+'?subject='+subject+'&body='+body;
+    ov.remove();
+  };
+  ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
+  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+}
+function openRateModal(){
+  localStorage.setItem('betel_rate_prompt_shown','1');
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML=`<div class="modal">
+    <button class="close-x" data-close>${I.x}</button>
+    <div class="m-crown">${I.star}</div>
+    <h3 class="gold-text">${ckChrome('אָהַבְתָּ אֶת תמיד?')}</h3>
+    <p>${ckChrome('דֵּרוּג וּבִיקוֹרֶת עוֹזְרִים לָנוּ לְהַמְשִׁיךְ לְשַׁפֵּר אֶת הָאַפְּלִיקַצְיָה.')}</p>
+    <div class="rate-stars">${I.star}${I.star}${I.star}${I.star}${I.star}</div>
+    <button class="btn btn-gold" id="rateGoBtn"><span>${ckChrome('דַּרְגוּ עַכְשָׁו')}</span></button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#rateGoBtn').onclick=()=>{ window.open(APP_REVIEW_URL,'_blank'); ov.remove(); };
+  ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
+  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+}
+function maybeShowRatePrompt(){
+  if(localStorage.getItem('betel_rate_prompt_shown')) return;
+  let firstTs=+localStorage.getItem('betel_first_launch_ts');
+  if(!firstTs){ firstTs=Date.now(); localStorage.setItem('betel_first_launch_ts', String(firstTs)); return; }
+  if(Date.now()-firstTs >= 24*60*60*1000) openRateModal();
+}
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
   const th = { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
@@ -10184,6 +10259,7 @@ applyLang();
 if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; TAB='chokPace'; }
 buildNav();
 render();
+maybeShowRatePrompt();
 /* Drag along the bottom nav itself to scrub between tabs, like sliding a
    finger across a segmented control: the pill follows the finger live
    (no transition lag) while dragging, and lifting the finger navigates to
