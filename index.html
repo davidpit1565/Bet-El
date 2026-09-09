@@ -6693,15 +6693,19 @@ function renderPrayersList(){
   app.innerHTML = `
   ${topbar('תְּפִלּוֹת')}
   <div class="view">
-    <div class="prayers-list">
-      <div class="prayer-row round-card prayer-row-feature prayer-row-lib" data-cat="library" onclick="go('library')">
-        <span class="prayer-row-title">סְפָרִים</span>
+    <div class="search-box">${I.search}<input id="libSearchQ" placeholder="פָּרָשָׁה · מַסֶּכֶת וּפֶרֶק · רַמְבַּ״ם · דַּף זֹהַר · תְּהִלִּים · תְּפִלָּה"/></div>
+    <div id="libResults"></div>
+    <div id="libBrowse">
+      <div class="prayers-list">
+        <div class="prayer-row round-card prayer-row-feature prayer-row-lib" data-cat="library" onclick="go('library')">
+          <span class="prayer-row-title">סְפָרִים</span>
+        </div>
       </div>
-    </div>
-    <div class="quick-grid quick-grid-primary" style="margin-top:14px">
-      ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile round-card" data-cat="${g}" data-praygroup="${g}">
-        <div class="qt">${PRAYER_GROUPS[g].he}</div>
-      </div>`).join('')}
+      <div class="quick-grid quick-grid-primary" style="margin-top:14px">
+        ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile round-card" data-cat="${g}" data-praygroup="${g}">
+          <div class="qt">${PRAYER_GROUPS[g].he}</div>
+        </div>`).join('')}
+      </div>
     </div>
     ${ornament()}
   </div>`;
@@ -6709,6 +6713,8 @@ function renderPrayersList(){
     if(t.dataset.praygroup==='siddur') return go('siddurHome');
     PR.group=t.dataset.praygroup; go('prayersGroup');
   });
+  document.getElementById('libSearchQ').oninput=libDrawSearch;
+  libPrefetchSearchData();
   tr(app);
 }
 function renderPrayersGroup(){
@@ -6772,7 +6778,12 @@ function libCatLabel(key){
   return c ? ckChrome(c.label) : key;
 }
 /* ================= LIBRARY: unified reference/name search =================
-   One search box on the Library home screen. Deliberately reference/name
+   One search box on renderPrayersList() - the top-level "תְּפִלּוֹת" screen
+   that is the real single entry point covering Books/Siddur/Additional
+   Prayers/Blessings together (not on renderLibrary(), the "עִיּוּן בַּסְּפָרִים"
+   screen one level in, which only covers Books - the search needs to live
+   where all four sections are visible side by side, per explicit user
+   request). Deliberately reference/name
    based, not full-text (searching every word of every verse across the
    whole library would need pre-building a real search index over millions
    of words - a separate, much bigger undertaking the user explicitly chose
@@ -7021,9 +7032,9 @@ function libSearchHits(q){
 function libDrawSearch(){
   const box=document.getElementById('libResults'); if(!box) return;
   const inp=document.getElementById('libSearchQ'); const q=inp?inp.value:'';
-  const grid=document.querySelector('.view>.quick-grid');
+  const browse=document.getElementById('libBrowse');
   const active=ckNorm(q).length>=2;
-  if(grid) grid.style.display=active?'none':'';
+  if(browse) browse.style.display=active?'none':'';
   if(!active){ box.innerHTML=''; return; }
   const hits=libSearchHits(q);
   if(!hits.length){ box.innerHTML=`<div class="empty-note">${ckChrome('לֹא נִמְצָא')}</div>`; return; }
@@ -7056,8 +7067,6 @@ function renderLibrary(){
   app.innerHTML=`
   ${topbar('עִיּוּן בַּסְּפָרִים','prayers')}
   <div class="view">
-    <div class="search-box">${I.search}<input id="libSearchQ" placeholder="פָּרָשָׁה · מַסֶּכֶת וּפֶרֶק · רַמְבַּ״ם · דַּף זֹהַר · תְּהִלִּים · תְּפִלָּה"/></div>
-    <div id="libResults"></div>
     <div class="quick-grid">
       ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.cssCat||c.key}">
         <div class="qt">${libCatLabel(c.key)}</div>
@@ -7066,8 +7075,6 @@ function renderLibrary(){
     ${ornament()}
   </div>`;
   app.querySelectorAll('[data-libcat]').forEach(t=>t.onclick=()=>openLibraryCat(t.dataset.libcat));
-  document.getElementById('libSearchQ').oninput=libDrawSearch;
-  libPrefetchSearchData();
   tr(app);
 }
 
