@@ -21,7 +21,7 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   const n = payload.notification || {};
-  self.registration.showNotification(n.title || 'תָּמִיד', {
+  self.registration.showNotification(n.title || 'תמיד', {
     body: n.body || '',
     icon: './icon-192.png',
     badge: './icon-192.png',
