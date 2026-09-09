@@ -1616,7 +1616,7 @@ function localizeHebDateStr(str){
 /* ---------- settings ---------- */
 const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending updated formulas
 const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed times, ready to reveal now
-const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן','שְׁמוּאֵל בֶּן אַבְרָהָם','אֵלִיָּהוּ בֶּן אַהֲרֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
+const MEMORIAL = ['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן','שְׁמוּאֵל בֶּן אַבְרָהָם','אֵלִיָּהוּ בֶּן אַהֲרֹן','אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי'];
 /* Personal dedication names are Hebrew proper names with no meaning to
    translate - like sacred-text bodies, they get phonetic transliteration
    per language instead (never left showing raw Hebrew when another
@@ -1642,7 +1642,7 @@ const DED_NAMES_TRANSLIT = {
 function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
 const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
 function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
-function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.row1.map(dedName).join(' · ')}<br>${MEMORIAL.row2.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
+function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1658,8 +1658,8 @@ function socialLinksHTML(){
   ).join('')}</div>`;
 }
 /* those who helped build this app */
-const HATZLACHA = {row1:['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית'],row2:['דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
-function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.row1.map(dedName).join(' · ')}<br>${HATZLACHA.row2.map(dedName).join(' · ')}</div></div>`; }
+const HATZLACHA = ['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין'];
+function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(dedName).join(' · ')}</div></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
