@@ -9924,10 +9924,14 @@ function shareApp(){
 function shareQR(){
   shareGeneratedImage(appQrImage, 'tamid-app-qr.png', 'תָּמִיד');
 }
+/* Now that the app is live on the App Store, the share QR should send
+   people straight there (a real install) rather than to the PWA's own
+   URL - see the CLAUDE.md note this fulfills. */
+const APP_STORE_URL = 'https://apps.apple.com/app/%D7%AA%D7%9E%D7%99%D7%93/id6807186847';
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
   const th = { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
-  const url = location.href.split('#')[0];
+  const url = APP_STORE_URL;
   const W=1080, H=1400;
   const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
@@ -9957,7 +9961,7 @@ async function appQrImage(){
     ctx.textAlign='center'; ctx.fillStyle=th.cream; ctx.font='500 28px "Heebo",sans-serif';
     ctx.fillText(ckChrome('לֹא נִטְעַן הַקּוֹד — הִכָּנְסוּ יְשִׁירוֹת:'), W/2, qrY+qrSize/2-20);
     ctx.fillStyle=th.gold; ctx.font='700 30px "Heebo",sans-serif';
-    ctx.fillText(url.replace(/^https?:\/\//,''), W/2, qrY+qrSize/2+30);
+    ctx.fillText(decodeURIComponent(url).replace(/^https?:\/\//,''), W/2, qrY+qrSize/2+30);
   }
   if(qrLoaded){
     ctx.fillStyle=th.cream; ctx.font='500 30px "Heebo",sans-serif';
