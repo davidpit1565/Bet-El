@@ -1792,7 +1792,7 @@ function openPrayer(prayerKey, fromGroup){
   }
 }
 
-const DEF = { theme:'dark', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false, pushEnabled:false };
+const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
@@ -3125,6 +3125,9 @@ function renderOnboard(){
   document.getElementById('obExplainerLink').onclick=()=>{ CK_EXPLAINER_BACK='onboard'; go('chokExplainer'); };
   document.getElementById('obStart').onclick=()=>{
     localStorage.setItem('betel_onboard_v1','1');
+    if(S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
+      (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
+    }
     if(!localStorage.getItem('betel_chok_pace_v1')){
       CK_PACE_PENDING_TAB='home'; CK_PACE_STEP=0; TAB='chokPace';
     } else {
@@ -9720,6 +9723,12 @@ function renderSettings(){
     </div>`:''}
 
     <div class="set-group">
+      <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
+      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ</div><div class="si-d">${S.pushEnabled?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
+    </div>
+
+    <div class="set-group">
       <h3>קְרִיאָה יוֹמִית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">שָׂפָה</div><div class="si-d">שְׂפַת הַמִּמְשָׁק</div></div></div>
         <select id="selLang" class="fld-select" style="width:auto;min-width:120px">
@@ -9742,6 +9751,12 @@ function renderSettings(){
         </select></div>`:''}
       <div class="set-item set-item-stack"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${ckDivisionLabel()}</div></div></div>
         <div class="seg"><button data-div="monthlyStd" class="${S.division!=='monthly'&&S.division!=='weekly'?'on':''}">חָדְשִׁי</button><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי (5 לְיוֹם)</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
+    </div>
+
+    <div class="set-group">
+      <h3>מִקּוּם וּזְמַנִּים</h3>
+      <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי</div><div class="si-d">אִתּוּר אוֹטוֹמָטִי לְפִי GPS</div></div></div>${I.refresh}</div>
+      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
     </div>
 
     <div class="set-group">
@@ -9769,13 +9784,6 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
-      <h3>מִקּוּם וּזְמַנִּים</h3>
-      <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי</div><div class="si-d">אִתּוּר אוֹטוֹמָטִי לְפִי GPS</div></div></div>${I.refresh}</div>
-      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
-    </div>
-
-
-    <div class="set-group">
       <h3>יָאהְרְצַיְיט · זִכָּרוֹן</h3>
       <div class="yahr-list" id="yahrList">
         ${getYahrzeits().map((y,i)=>`<div class="yahr-row"><div><div>${y.name}</div><div class="yahr-hdate">${yahrzeitHebLabel(y)}</div></div><button class="icon-btn yahr-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אֵין זִכְרוֹנוֹת עֲדַיִן</div>'}
@@ -9791,24 +9799,18 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
-      <h3>מִשְׁפָּטִי</h3>
-      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מְדִינִיּוּת פְּרָטִיּוּת</div><div class="si-d">מָה נִשְׁמָר וְאֵיפֹה</div></div></div>${I.chev}</a>
-      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תְּנָאֵי שִׁמּוּשׁ</div><div class="si-d">תְּנָאִים לְשִׁמּוּשׁ בָּאַפְּלִיקַצְיָה</div></div></div>${I.chev}</a>
-    </div>
-
-    <div class="set-group">
-      <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
-      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ</div><div class="si-d">${S.pushEnabled?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
-    </div>
-
-    <div class="set-group">
       <h3>שִׁתּוּף</h3>
       <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
       <div class="set-item" id="shareAppQR" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.qr}</span><div><div class="si-t">שַׁתֵּף קוֹד QR</div><div class="si-d">תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkExport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">גִּבּוּי לְקֹבֶץ</div><div class="si-d">שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkImport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">שִׁחְזוּר מִגִּבּוּי</div><div class="si-d">טְעִינַת קֹבֶץ גִּבּוּי קַיָּם</div></div></div>${I.chev}</div>
       <div class="set-item" id="resetProg" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">אִפּוּס מַעֲקַב הַיּוֹם</div><div class="si-d">נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ</div></div></div></div>
+    </div>
+
+    <div class="set-group">
+      <h3>מִשְׁפָּטִי</h3>
+      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מְדִינִיּוּת פְּרָטִיּוּת</div><div class="si-d">מָה נִשְׁמָר וְאֵיפֹה</div></div></div>${I.chev}</a>
+      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תְּנָאֵי שִׁמּוּשׁ</div><div class="si-d">תְּנָאִים לְשִׁמּוּשׁ בָּאַפְּלִיקַצְיָה</div></div></div>${I.chev}</a>
     </div>
 
     <div class="ornament">${ORN}</div>
