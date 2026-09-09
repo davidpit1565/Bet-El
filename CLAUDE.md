@@ -212,8 +212,7 @@ in English as usual.
   text from `docs/chok-leyisrael-explainer-draft.md` as confirmed by the
   user (still accurate as of the build) - if that content ever needs to
   change again, edit `CK_EXPLAINER_ITEMS` in index.html directly.
-- **App Store QR code**: `shareQR()`/`appQrImage()` (index.html) generates
-  a share image whose QR code currently encodes the PWA's own URL
-  (`location.href`). Once the app is published on the App Store, update
-  the QR target (and probably add an "also on the App Store" line) to
-  point there instead - don't guess an App Store URL before it exists.
+- **App Store QR code**: done - the app was approved and is live on the
+  App Store (id6807186847) as of 2026-09-09. `appQrImage()` (index.html)
+  now encodes `APP_STORE_URL` (`https://apps.apple.com/app/...`) instead
+  of the PWA's own `location.href`.

@@ -877,9 +877,6 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-row-feature[data-cat="rambam"]{--cat-color:#969e46;background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
 .prayer-row-feature[data-cat="tanya"]{--cat-color:#589b4b;background-image:linear-gradient(150deg,rgba(88,155,75,.22),var(--panel) 60%)}
 .prayer-row-feature[data-cat="library"]{--cat-color:#3d5a8a;background-image:linear-gradient(150deg,rgba(61,90,138,.22),var(--panel) 60%)}
-.prayer-row-feature[data-cat="brachot"]{--cat-color:#a34f97}
-.prayer-row-feature[data-cat="siddur"]{--cat-color:#7a9a3f}
-.prayer-row-feature[data-cat="more"]{--cat-color:#8c7a6b}
 :root .prayer-row-feature[data-cat="torah"],[data-theme="dark"] .prayer-row-feature[data-cat="torah"]{background-image:linear-gradient(150deg,rgba(214,110,130,.3),var(--panel) 62%)}
 :root .prayer-row-feature[data-cat="neviim"],[data-theme="dark"] .prayer-row-feature[data-cat="neviim"]{background-image:linear-gradient(150deg,rgba(96,152,204,.3),var(--panel) 62%)}
 :root .prayer-row-feature[data-cat="ketuvim"],[data-theme="dark"] .prayer-row-feature[data-cat="ketuvim"]{background-image:linear-gradient(150deg,rgba(222,160,80,.3),var(--panel) 62%)}
@@ -1686,7 +1683,7 @@ const PRAYERS_EXTRA = {
     title: 'אגרת הרמב"ן',
     subtitle: 'מִכְתָּב מוּסָר מִן הָרַמְבַּ"ן לִבְנוֹ',
     ready: true,
-    text: 'שָׁמַע בְּנִי מוּסַר אָבִיךָ, וְאַל תִּטֹּשׁ תּוֹרַת אִמֶּךָ. וְתִהְיוּ רְגִילִים לְדַבֵּר כָּל דְּבְרֵיכֶם בְּנַחַת, לְכָל אָדָם וּבְכָל עֵת, וּבַזֶּה תִּנָּצְלוּ מִן הַכַּעַס, שֶׁהוּא מִדָּה רָעָה לְהַחְטִיא אֶת בְּנֵי אָדָם. כַּאֲשֶׁר אָמְרוּ רַבּוֹתֵינוּ זִכְרוֹנָם לִבְרָכָה: כָּל הַכּוֹעֵס — כָּל מִינֵי גֵּיהִנֹּם שׁוֹלְטִים בּוֹ.\n\nוְתִנָּצְלוּ מִן הַכַּעַס, תַּעֲלֶה עַל לִבְּךָ מִדַּת הָעֲנָוָה, כִּי הִיא מִדָּה טוֹבָה מִכָּל הַמִּדּוֹת הַטּוֹבוֹת. וּכְמוֹ שֶׁאָמְרוּ רַבּוֹתֵינוּ זִכְרוֹנָם לִבְרָכָה: לְעוֹלָם יְהֵא אָדָם עָנָו כְּהִלֵּל וְאַל יְהֵא קַפְּדָן כְּשַׁמַּאי. וּבַעֲבוּר זֹאת תָּגֵל וְתִשְׂמַח לְבָבְךָ בְּיִרְאָתְךָ, כַּכָּתוּב: יְרֵא ה\' אַשְׁרֵי כָּל יְרֵא ה\' הַהֹלֵךְ בִּדְרָכָיו.\n\nוְעַתָּה בְּנִי, הֱוֵי רָגִיל לְדַבֵּר כָּל דְּבָרֶיךָ בְּנַחַת, לְכָל אָדָם, בְּכָל עֵת, וּבְזֶה תִּנָּצֵל מִן הַכַּעַס שֶׁהוּא חֵטְא גָּדוֹל, שֶׁהִשְׁוָה אוֹתוֹ הַכָּתוּב לַעֲבוֹדָה זָרָה. וּכְשֶׁתִּנָּצֵל מִן הַכַּעַס תַּעֲלֶה עַל לִבְּךָ מִדַּת הָעֲנָוָה שֶׁהִיא הַטּוֹבָה שֶׁבַּמִּדּוֹת הַטּוֹבוֹת. שֶׁנֶּאֱמַר: עֵקֶב עֲנָוָה יִרְאַת ה\'.\n\nוּבַעֲבוּר הָעֲנָוָה, תַּעֲלֶה עַל לִבְּךָ יִרְאַת חֵטְא, כִּי בִּהְיוֹת הָאָדָם עָנָו שָׁפָל רוּחַ לִפְנֵי כָל אָדָם, וְנִבְהָל וְנִרְעָשׁ מֵחֵטְאוֹ, כִּי מִגְּדֻלַּת ה\' יִתְבָּרַךְ, וּמִגֹּדֶל כְּבוֹד תּוֹרָתוֹ, יַחְשֹׁב בְּלִבּוֹ תָּמִיד: אֲנִי עוֹמֵד לִפְנֵי בּוֹרְאִי, וְכָל בְּנֵי הָעוֹלָם כְּאַיִן וְאֶפֶס נֶגְדּוֹ.\n\nוּתְדַבֵּר כָּל דְּבָרֶיךָ בְּנַחַת, וְרֹאשְׁךָ כָּפוּף, וְעֵינֶיךָ יַבִּיטוּ לְמַטָּה לָאָרֶץ וְלִבְּךָ לְמַעְלָה. וְאַל תַּבִּיט בִּפְנֵי הָאָדָם בְּדַבֶּרְךָ עִמּוֹ. וְכָל אָדָם יִהְיֶה חָשׁוּב בְּעֵינֶיךָ, כְּמוֹ שֶׁתַּחְשֹׁב אוֹתוֹ גָּדוֹל מִמְּךָ. אִם חָכָם הוּא אוֹ עָשִׁיר — עָלֶיךָ לְכַבְּדוֹ, וְאִם רָשׁ הוּא וְאַתָּה עָשִׁיר מִמֶּנּוּ, אוֹ חָכָם מִמֶּנּוּ — חֲשֹׁב בְּלִבְּךָ שֶׁאַתָּה חַיָּב וְהוּא זַכַּאי, שֶׁאִם הוּא חוֹטֵא — הוּא שׁוֹגֵג, וְאַתָּה מֵזִיד.\n\nוּבְכָל דְּבָרֶיךָ, מַעֲשֶׂיךָ וּמַחְשְׁבוֹתֶיךָ, וּבְכָל עֵת, חֲשֹׁב בְּלִבְּךָ כְּאִלּוּ אַתָּה עוֹמֵד לִפְנֵי הַקָּדוֹשׁ בָּרוּךְ הוּא, וּשְׁכִינָתוֹ עָלֶיךָ, כִּי כְּבוֹדוֹ מָלֵא הָעוֹלָם. וְיִהְיוּ דְּבָרֶיךָ בְּאֵימָה וּבְיִרְאָה כְּעֶבֶד לִפְנֵי רַבּוֹ. וְלֹא תִּתְנַהֵג בַּעֲשִׂיָּה שֶׁל דֶּרֶךְ אֶרֶץ, וְלֹא בַּעֲסָקֶיךָ עִם בְּנֵי אָדָם, אֶלָּא כְּמוֹ שֶׁתִּתְנַהֵג בְּבֵית הַכְּנֶסֶת בִּתְפִלָּתְךָ.\n\nוְעַתָּה בְּנִי, הֱוֵי זָהִיר לִקְרוֹת סֵפֶר הַזֶּה תָּמִיד, כְּמוֹ שֶׁתִּקְרָא בַּתְּפִלָּה, וְתִקְרָא אוֹתוֹ פַּעַם אַחַת בְּשַׁבָּת, וְתִשְׁמֹר כָּל הָאָמוּר בּוֹ, כִּי בּוֹ תָּשׂוּב אֶל ה\' אֱלֹהֶיךָ.'
+    text: 'שָׁמַע בְּנִי מוּסַר אָבִיךָ, וְאַל תִּטֹּשׁ תּוֹרַת אִמֶּךָ. וְתִהְיוּ רְגִילִים לְדַבֵּר כָּל דְּבְרֵיכֶם בְּנַחַת, לְכָל אָדָם וּבְכָל עֵת, וּבַזֶּה תִּנָּצְלוּ מִן הַכַּעַס, שֶׁהוּא מִדָּה רָעָה לְהַחְטִיא אֶת בְּנֵי אָדָם. כַּאֲשֶׁר אָמְרוּ רַבּוֹתֵינוּ זִכְרוֹנָם לִבְרָכָה: כָּל הַכּוֹעֵס — כָּל מִינֵי גֵּיהִנֹּם שׁוֹלְטִים בּוֹ.\n\nוְתִנָּצְלוּ מִן הַכַּעַס, תַּעֲלֶה עַל לִבְּךָ מִדַּת הָעֲנָוָה, כִּי הִיא מִדָּה טוֹבָה מִכָּל הַמִּדּוֹת הַטּוֹבוֹת. וּכְמוֹ שֶׁאָמְרוּ רַבּוֹתֵינוּ זִכְרוֹנָם לִבְרָכָה: לְעוֹלָם יְהֵא אָדָם עָנָו כְּהִלֵּל וְאַל יְהֵא קַפְּדָן כְּשַׁמַּאי. וּבַעֲבוּר זֹאת תָּגֵל וְתִשְׂמַח לְבָבְךָ בְּיִרְאָתְךָ, כַּכָּתוּב: יְרֵא ה\' אַשְׁרֵי כָּל יְרֵא ה\' הַהֹלֵךְ בִּדְרָכָיו.\n\nוְעַתָּה בְּנִי, הֱוֵי רָגִיל לְדַבֵּר כָּל דְּבָרֶיךָ בְּנַחַת, לְכָל אָדָם, בְּכָל עֵת, וּבְזֶה תִּנָּצֵל מִן הַכַּעַס שֶׁהוּא חֵטְא גָּדוֹל, שֶׁהִשְׁוָה אוֹתוֹ הַכָּתוּב לַעֲבוֹדָה זָרָה. וּכְשֶׁתִּנָּצֵל מִן הַכַּעַס תַּעֲלֶה עַל לִבְּךָ מִדַּת הָעֲנָוָה שֶׁהִיא הַטּוֹבָה שֶׁבַּמִּדּוֹת הַטּוֹבוֹת. שֶׁנֶּאֱמַר: עֵקֶב עֲנָוָה יִרְאַת ה\'.\n\nוּבַעֲבוּר הָעֲנָוָה, תַּעֲלֶה עַל לִבְּךָ יִרְאַת חֵטְא, כִּי בִּהְיוֹת הָאָדָם עָנָו שָׁפָל רוּחַ לִפְנֵי כָל אָדָם, וְנִבְהָל וְנִרְעָשׁ מֵחֵטְאוֹ, כִּי מִגְּדֻלַּת ה\' יִתְבָּרַךְ, וּמִגֹּדֶל כְּבוֹד תּוֹרָתוֹ, יַחְשֹׁב בְּלִבּוֹ תָּמִיד: אֲנִי עוֹמֵד לִפְנֵי בּוֹרְאִי, וְכָל בְּנֵי הָעוֹלָם כְּאַיִן וְאֶפֶס נֶגְדּוֹ.\n\nוּתְדַבֵּר כָּל דְּבָרֶיךָ בְּנַחַת, וְרֹאשְׁךָ כָּפוּף, וְעֵינֶיךָ יַבִּיטוּ לְמַטָּה לָאָרֶץ וְלִבְּךָ לְמַעְלָה. וְאַל תַּבִּיט בִּפְנֵי הָאָדָם בְּדַבֶּרְךָ עִמּוֹ. וְכָל אָדָם יִהְיֶה חָשׁוּב בְּעֵינֶיךָ, כְּמוֹ שֶׁתַּחְשֹׁב אוֹתוֹ גָּדוֹל מִמְּךָ. אִם חָכָם הוּא אוֹ עָשִׁיר — עָלֶיךָ לְכַבְּדוֹ, וְאִם רָשׁ הוּא וְאַתָּה עָשִׁיר מִמֶּנּוּ, אוֹ חָכָם מִמֶּנּוּ — חֲשֹׁב בְּלִבְּךָ שֶׁאַתָּה חַיָּב וְהוּא זַכַּאי, שֶׁאִם הוּא חוֹטֵא — הוּא שׁוֹגֵג, וְאַתָּה מֵזִיד.\n\nוּבְכָל דְּבָרֶיךָ, מַעֲשֶׂיךָ וּמַחְשְׁבוֹתֶיךָ, וּבְכָל עֵת, חֲשֹׁב בְּלִבְּךָ כְּאִלּוּ אַתָּה עוֹמֵד לִפְנֵי הַקָּדוֹשׁ בָּרוּךְ הוּא, וּשְׁכִינָתוֹ עָלֶיךָ, כִּי כְּבוֹדוֹ מָלֵא הָעוֹלָם. וְיִהְיוּ דְּבָרֶיךָ בְּאֵימָה וּבְיִרְאָה כְּעֶבֶד לִפְנֵי רַבּוֹ. וְלֹא תִּתְנַהֵג בַּעֲשִׂיָּה שֶׁל דֶּרֶךְ אֶרֶץ, וְלֹא בַּעֲסָקֶיךָ עִם בְּנֵי אָדָם, אֶלָּא כְּמוֹ שֶׁתִּתְנַהֵג בְּבֵית הַכְּנֶסֶת בִּתְפִלָּתְךָ.\n\nוְעַתָּה בְּנִי, הֱוֵי זָהִיר לִקְרוֹת סֵפֶר הַזֶּה תָּמִיד, כְּמוֹ שֶׁתִּקְרָא בַּתְּפִלָּה, וְתִקְרָא אוֹתוֹ פַּעַם אַחַת בְּשַׁבָּת, וְתִשְׁמֹר כָּל הָאָמוּר בּוֹ, כִּי בּוֹ תָּשׁוּב אֶל ה\' אֱלֹהֶיךָ.'
   },
   birkotHashachar: {
     title: 'ברכות השחר',
@@ -1755,7 +1752,7 @@ const PRAYER_GROUPS = {
 // siddurBirkotHashacharHTML() reads from for the real Siddur reader - keep
 // the entry, just don't let it show up a second time in the flat Tefilot
 // Nosafot list/search.
-const PRAYER_KEYS_HIDDEN = ['birkotHashachar'];
+const PRAYER_KEYS_HIDDEN = ['birkotHashachar', 'selichotEdotHamizrach'];
 function prayerGroupKeys(group){
   const g=PRAYER_GROUPS[group];
   if(g.keys) return g.keys;
@@ -6720,15 +6717,15 @@ function renderPrayersGroup(){
   app.innerHTML = `
   ${topbar(PRAYER_GROUPS[group].he,'prayers')}
   <div class="view">
-    <div class="prayers-list">
-      ${ready.length ? ready.map(key => `
-        <div class="prayer-row prayer-row-feature" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
-          <span class="prayer-row-title">${PRAYERS_EXTRA[key].title}</span>
+    ${ready.length ? `<div class="quick-grid">
+      ${ready.map(key => `
+        <div class="q-tile round-card" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
+          <div class="qt">${PRAYERS_EXTRA[key].title}</div>
         </div>
-      `).join('') : `<div class="empty-note" style="padding:40px 20px;text-align:center">
-        <div style="font-size:15px;line-height:1.8">הַתְּפִלּוֹת כָּאן יוֹפִיעוּ בְּקָרוֹב<br>בְּנֻסָּח מְדֻיָּק וּמְנֻקָּד</div>
-      </div>`}
-    </div>
+      `).join('')}
+    </div>` : `<div class="empty-note" style="padding:40px 20px;text-align:center">
+      <div style="font-size:15px;line-height:1.8">הַתְּפִלּוֹת כָּאן יוֹפִיעוּ בְּקָרוֹב<br>בְּנֻסָּח מְדֻיָּק וּמְנֻקָּד</div>
+    </div>`}
     ${ornament()}
   </div>`;
   tr(app);
@@ -7900,7 +7897,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת', selichot:'סְלִיחוֹת'};
 /* where you stopped - same shape as Chok LeYisrael's ckBm-/ckResume/ckRestart:
    tracked as you read (topmost paragraph on screen), offering to resume or
    restart only when the reader is opened, never clearing on its own. */
@@ -7983,6 +7980,9 @@ function drawSiddurHome(){
   // Alenu, all in one continuous reader per user request) rather than a
   // separate standalone Musaf tile alongside it.
   if(info.isRoshChodesh) tiles.push('roshChodesh');
+  // Selichot: same seasonal gate as the in-context Tachanun link
+  // (siddurIsSelichotSeason) - Elul through Aseret Yemei Teshuva.
+  if(siddurIsSelichotSeason(currentHDate())) tiles.push('selichot');
   // Tikun Chatzot is an occasional, day-independent reading (unlike the
   // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
   // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
@@ -9006,6 +9006,14 @@ function siddurLevanaHTML(){
 function siddurSections(dateObj, info, prayer){
   const list = [];
   const push = (key, he, html) => { if(html) list.push({key, he, html}); };
+  // Selichot is one long continuous text (PRAYERS_EXTRA.selichotEdotHamizrach),
+  // not several distinct named parts like every other Siddur prayer - a
+  // single synthetic section through siddurParasFromText gives it the same
+  // paragraph/divider look as the rest of the Siddur reader.
+  if(prayer==='selichot'){
+    push('selichot','סְלִיחוֹת', siddurParasFromText(PRAYERS_EXTRA.selichotEdotHamizrach.text));
+    return list;
+  }
   if(prayer==='shacharit'){
     // Sefaria's own node order places "Hanna's Prayer" (I Samuel 2:1-10 + a
     // few appended verses) as its own section right before the Morning
@@ -9018,7 +9026,7 @@ function siddurSections(dateObj, info, prayer){
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
-    push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(dateObj)?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>${ckChrome('סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר')}</span><span>${I.chev}</span></div>`:''));
+    push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(currentHDate())?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>${ckChrome('סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר')}</span><span>${I.chev}</span></div>`:''));
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {}));
     push('hallel','הַלֵּל', siddurHallelHTML(info));
     // Between Ashrei (Tehillim 145) and Uva LeTzion, on days WITH Tachanun,
@@ -9225,7 +9233,7 @@ function drawSiddurReader(){
   <div class="view prayer-reader-page">
     <div class="prayer-reader-header">
       <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
-      ${(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
+      ${p==='selichot'?`<div class="prayer-reader-subtitle">${PRAYERS_EXTRA.selichotEdotHamizrach.subtitle}</div>`:(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
     </div>
     ${SID.showResume&&SID.resumeTo?`<div class="ck-resume">
       <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he}</b></div>
@@ -9244,7 +9252,7 @@ function drawSiddurReader(){
     ${secs.map((sec,ix)=>`<button class="sid-dot${ix===0?' on':''}" data-siddot="${sec.key}" aria-label="${sec.he}"></button>`).join('')}
   </div>`:''}`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
-  const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openPrayer('selichotEdotHamizrach');
+  const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openSiddurPrayer('selichot');
   document.querySelector('.tb-back').onclick=()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); };
   const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
   const rn=document.getElementById('sidResumeNew'); if(rn) rn.onclick=sidRestart;
@@ -9916,10 +9924,14 @@ function shareApp(){
 function shareQR(){
   shareGeneratedImage(appQrImage, 'tamid-app-qr.png', 'תָּמִיד');
 }
+/* Now that the app is live on the App Store, the share QR should send
+   people straight there (a real install) rather than to the PWA's own
+   URL - see the CLAUDE.md note this fulfills. */
+const APP_STORE_URL = 'https://apps.apple.com/app/%D7%AA%D7%9E%D7%99%D7%93/id6807186847';
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
   const th = { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
-  const url = location.href.split('#')[0];
+  const url = APP_STORE_URL;
   const W=1080, H=1400;
   const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
@@ -9949,7 +9961,7 @@ async function appQrImage(){
     ctx.textAlign='center'; ctx.fillStyle=th.cream; ctx.font='500 28px "Heebo",sans-serif';
     ctx.fillText(ckChrome('לֹא נִטְעַן הַקּוֹד — הִכָּנְסוּ יְשִׁירוֹת:'), W/2, qrY+qrSize/2-20);
     ctx.fillStyle=th.gold; ctx.font='700 30px "Heebo",sans-serif';
-    ctx.fillText(url.replace(/^https?:\/\//,''), W/2, qrY+qrSize/2+30);
+    ctx.fillText(decodeURIComponent(url).replace(/^https?:\/\//,''), W/2, qrY+qrSize/2+30);
   }
   if(qrLoaded){
     ctx.fillStyle=th.cream; ctx.font='500 30px "Heebo",sans-serif';
