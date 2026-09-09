@@ -12,3 +12,6 @@ Thumbs.db
 
 # Capacitor web asset copy - regenerate with `npm run cap:sync`
 /www
+
+# Isolated worktrees for background Claude Code agents
+/.claude/worktrees/
