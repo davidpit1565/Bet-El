@@ -6811,7 +6811,7 @@ const LIB_CATEGORY_SEARCH=[
    searchable a moment after the screen opens, without the user having to
    first visit the Mishnah section themselves. */
 function libPrefetchSearchData(){
-  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex(), ensureChokIndex()].forEach(p=>{
+  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex(), ensureChokIndex(), ensureZoharData()].forEach(p=>{
     p.then(()=>{ if(TAB==='library') libDrawSearch(); }).catch(()=>{});
   });
 }
@@ -6870,6 +6870,11 @@ function libSearchHits(q){
       hits.push({group:'תּוֹרָה', label:parshaName(k), action:()=>{
         LIB.torahBook=LEYNING[k].book; LIB.torahParsha=k; LIB.torahAliyah=num||1; go('libraryTorahReader');
       }});
+      /* Shnayim Mikra reads the same parshiot too, its own standalone
+         reader (openShnayim) rather than a library* TAB - same
+         parasha-indexed cross-hit pattern as Ben Ish Chai/Chok LeYisrael
+         below. */
+      hits.push({group:'שְׁנַיִם מִקְרָא', label:parshaName(k), action:()=>openShnayim(k)});
       /* Ben Ish Chai is parasha-indexed too (its own standalone section,
          not a library* TAB) - a parasha-name hit is exactly the natural
          entry point into it as well, one per track that actually has
@@ -6974,6 +6979,14 @@ function libSearchHits(q){
   if(CYC && CYC.zohar && num!=null && (/זהר|^דף/.test(nSkel) || !name.trim())){
     const idx=CYC.zohar.order.findIndex(e=>e.daf===num);
     if(idx>=0) hits.push({group:'זֹהַר', label:'זֹהַר דַּף '+heNum(num), action:()=>{ LIB.zoharIndex=idx; go('libraryZoharReader'); }});
+  }
+  /* Tikkunei HaZohar has no body text (scanned pages, see ZOHAR/openZohar) -
+     only a "יוֹם N" reference makes sense to search here, gated on the
+     word תיקון so a bare number doesn't also surface a 40-day-cycle hit for
+     every random number query. */
+  if(ZOHAR && num!=null && /תיקון/.test(name)){
+    const entry=ZOHAR.find(d=>d.day===num);
+    if(entry) hits.push({group:'תִּיקּוּנֵי הַזֹּהַר', label:'יוֹם '+heNum(num), action:()=>openZohar(num)});
   }
   if(MISHNAH_IDX && name){
     MISHNAH_IDX.sedarim.forEach(sd=>{
