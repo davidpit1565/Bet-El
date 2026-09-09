@@ -1752,7 +1752,7 @@ const PRAYER_GROUPS = {
 // siddurBirkotHashacharHTML() reads from for the real Siddur reader - keep
 // the entry, just don't let it show up a second time in the flat Tefilot
 // Nosafot list/search.
-const PRAYER_KEYS_HIDDEN = ['birkotHashachar'];
+const PRAYER_KEYS_HIDDEN = ['birkotHashachar', 'selichotEdotHamizrach'];
 function prayerGroupKeys(group){
   const g=PRAYER_GROUPS[group];
   if(g.keys) return g.keys;
@@ -7897,7 +7897,7 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
-const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת'};
+const SIDDUR_PRAYER_NAMES = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת', selichot:'סְלִיחוֹת'};
 /* where you stopped - same shape as Chok LeYisrael's ckBm-/ckResume/ckRestart:
    tracked as you read (topmost paragraph on screen), offering to resume or
    restart only when the reader is opened, never clearing on its own. */
@@ -7980,6 +7980,9 @@ function drawSiddurHome(){
   // Alenu, all in one continuous reader per user request) rather than a
   // separate standalone Musaf tile alongside it.
   if(info.isRoshChodesh) tiles.push('roshChodesh');
+  // Selichot: same seasonal gate as the in-context Tachanun link
+  // (siddurIsSelichotSeason) - Elul through Aseret Yemei Teshuva.
+  if(siddurIsSelichotSeason(currentHDate())) tiles.push('selichot');
   // Tikun Chatzot is an occasional, day-independent reading (unlike the
   // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
   // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
@@ -9003,6 +9006,14 @@ function siddurLevanaHTML(){
 function siddurSections(dateObj, info, prayer){
   const list = [];
   const push = (key, he, html) => { if(html) list.push({key, he, html}); };
+  // Selichot is one long continuous text (PRAYERS_EXTRA.selichotEdotHamizrach),
+  // not several distinct named parts like every other Siddur prayer - a
+  // single synthetic section through siddurParasFromText gives it the same
+  // paragraph/divider look as the rest of the Siddur reader.
+  if(prayer==='selichot'){
+    push('selichot','סְלִיחוֹת', siddurParasFromText(PRAYERS_EXTRA.selichotEdotHamizrach.text));
+    return list;
+  }
   if(prayer==='shacharit'){
     // Sefaria's own node order places "Hanna's Prayer" (I Samuel 2:1-10 + a
     // few appended verses) as its own section right before the Morning
@@ -9015,7 +9026,7 @@ function siddurSections(dateObj, info, prayer){
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
-    push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(dateObj)?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>${ckChrome('סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר')}</span><span>${I.chev}</span></div>`:''));
+    push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(currentHDate())?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>${ckChrome('סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר')}</span><span>${I.chev}</span></div>`:''));
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {}));
     push('hallel','הַלֵּל', siddurHallelHTML(info));
     // Between Ashrei (Tehillim 145) and Uva LeTzion, on days WITH Tachanun,
@@ -9222,7 +9233,7 @@ function drawSiddurReader(){
   <div class="view prayer-reader-page">
     <div class="prayer-reader-header">
       <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
-      ${(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
+      ${p==='selichot'?`<div class="prayer-reader-subtitle">${PRAYERS_EXTRA.selichotEdotHamizrach.subtitle}</div>`:(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
     </div>
     ${SID.showResume&&SID.resumeTo?`<div class="ck-resume">
       <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he}</b></div>
@@ -9241,7 +9252,7 @@ function drawSiddurReader(){
     ${secs.map((sec,ix)=>`<button class="sid-dot${ix===0?' on':''}" data-siddot="${sec.key}" aria-label="${sec.he}"></button>`).join('')}
   </div>`:''}`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
-  const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openPrayer('selichotEdotHamizrach');
+  const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openSiddurPrayer('selichot');
   document.querySelector('.tb-back').onclick=()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); };
   const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
   const rn=document.getElementById('sidResumeNew'); if(rn) rn.onclick=sidRestart;
