@@ -9953,7 +9953,7 @@ function shareApp(){
   shareDirect(ckChrome('שִׁתּוּף הָאַפְּלִיקַצְיָה'), text);
 }
 function shareQR(){
-  shareGeneratedImage(appQrImage, 'tamid-app-qr.png', 'תמיד');
+  shareGeneratedImage(appQrImage, 'tamid-app-qr.png', APP_STORE_URL);
 }
 /* Now that the app is live on the App Store, the share QR should send
    people straight there (a real install) rather than to the PWA's own
@@ -10002,7 +10002,7 @@ async function appQrImage(){
   ctx.fillText(ckChrome('קְהִלַּת בֵּית אֵ-ל'), W/2, H-70);
   return cv;
 }
-async function shareGeneratedImage(genFn, filename, shareTitle){
+async function shareGeneratedImage(genFn, filename, shareText){
   toast('מֵכִין תְּמוּנָה…');
   try{
     const cv=await genFn();
@@ -10010,7 +10010,10 @@ async function shareGeneratedImage(genFn, filename, shareTitle){
       if(!blob){ toast('שְׁגִיאָה בְּיִצִּירַת תְּמוּנָה'); return; }
       const file=new File([blob],filename,{type:'image/png'});
       if(navigator.canShare && navigator.canShare({files:[file]})){
-        try{ await navigator.share({files:[file],title:shareTitle}); }catch(e){}
+        /* No title/caption text on purpose - just the image plus the direct
+           App Store link as the share text, so recipients get a tappable
+           link to the app without any extra wording layered on top. */
+        try{ await navigator.share(shareText?{files:[file],text:shareText}:{files:[file]}); }catch(e){}
       } else {
         const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove();
         toast('הַתְּמוּנָה נִשְׁמְרָה');
