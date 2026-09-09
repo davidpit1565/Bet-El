@@ -10063,14 +10063,14 @@ function celebrateMilestone(count, tier){
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
   if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
 }
-/* the highest hundred-tier (200,300,400,...) this device has already
+/* the highest hundred-tier (300,400,500,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
    device opening the app after the fact still gets shown whichever
    tiers it missed (just the latest one, not a backlog of every one) */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
-  if(tier>=200 && tier>last){
+  if(tier>=300 && tier>last){
     localStorage.setItem('betel_milestone_last', String(tier));
     try{ window.celebrateMilestone(count, tier); }catch(e){}
   }
