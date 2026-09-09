@@ -805,6 +805,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .dedication-panel + .dedication-panel{margin-top:10px}
 .ded-panel-label{font-size:11.5px;letter-spacing:.14em;color:var(--gold);opacity:.95;margin-bottom:5px}
 .ded-panel-names{color:var(--muted);font-size:12.5px;line-height:1.85;opacity:.9}
+.ded-name-nowrap{white-space:nowrap}
 .ded-panel-foot{margin-top:6px;font-size:10.5px;letter-spacing:.5px;color:var(--muted);opacity:.7}
 .dedication-memorial .ded-panel-label{color:var(--muted);opacity:.85}
 [data-theme="dark"] .ded-panel-names{color:#8d97ad}
@@ -1639,7 +1640,7 @@ const DED_NAMES_TRANSLIT = {
 function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
 const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
 function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
-function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
+function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1656,7 +1657,7 @@ function socialLinksHTML(){
 }
 /* those who helped build this app */
 const HATZLACHA = ['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין'];
-function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(dedName).join(' · ')}</div></div>`; }
+function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -6776,8 +6777,9 @@ function libCatLabel(key){
    whole library would need pre-building a real search index over millions
    of words - a separate, much bigger undertaking the user explicitly chose
    NOT to do). Recognizes: bare category names ("גמרא" -> that category's own
-   home list), Torah parasha names, Tehillim chapter numbers, Siddur prayer
-   names, and (once their data has loaded - kicked off in the background as
+   home list), Torah/Chok LeYisrael/Ben Ish Chai parasha names, Tehillim
+   chapter numbers, Siddur prayer names, Additional Prayers/Blessings titles,
+   and (once their data has loaded - kicked off in the background as
    soon as this screen opens, see libPrefetchSearchData below) Gemara/
    Rambam/Mishnah/Zohar masechet-or-sefer(+chapter) references and Neviim/
    Ketuvim book(+chapter) references. Reuses ckNorm/ckSkel/ckNum/ckBare -
@@ -6797,6 +6799,7 @@ const LIB_CATEGORY_SEARCH=[
   {label:'תִּיקּוּנֵי הַזֹּהַר', words:['תיקוני הזהר','tikkune hazohar','tikkunei hazohar','тикуней азоар','ტიკუნეი ჰაზოჰარი'], open:()=>go('zoharList')},
   {label:'זֹהַר', words:['זהר','zohar','зоар','ზოჰარი'], open:()=>go('libraryZoharParts')},
   {label:'תַּנְיָא', words:['תניא','tanya','таня','თანია'], open:()=>go('libraryTanyaParts')},
+  {label:'חוֹק לְיִשְׂרָאֵל', words:['חוק לישראל','חוק ליסראל','chok leyisrael','chok laisrael','хок лейисраэль','ხოკ ლეისრაელი'], open:()=>go('chokBooks')},
   {label:'שְׁנַיִם מִקְרָא', words:['שנים מקרא','שניים מקרא','shnayim mikra','шнаим микра','შნაიმ მიკრა'], open:()=>go('smList')},
   {label:'תְּהִלִּים', words:['תהלים','תהילים','tehillim','tehilim','теилим','თეილიმი'], open:()=>go('tehillim')},
   {label:'סִדּוּר', words:['סידור','סדור','siddur','siddour','сидур','სიდური'], open:()=>go('siddurHome')},
@@ -6808,7 +6811,7 @@ const LIB_CATEGORY_SEARCH=[
    searchable a moment after the screen opens, without the user having to
    first visit the Mishnah section themselves. */
 function libPrefetchSearchData(){
-  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex()].forEach(p=>{
+  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex(), ensureChokIndex()].forEach(p=>{
     p.then(()=>{ if(TAB==='library') libDrawSearch(); }).catch(()=>{});
   });
 }
@@ -6880,6 +6883,12 @@ function libSearchHits(q){
           }
         });
       }
+      /* Chok LeYisrael reads the same weekly parshiot as Torah/Shnayim
+         Mikra above, day 0 (Sunday's portion) being the natural landing
+         spot - same pattern as the Ben Ish Chai cross-hit just above. */
+      if(CHOK && CHOK.parshiot && CHOK.parshiot.includes(k)){
+        hits.push({group:'חוֹק לְיִשְׂרָאֵל', label:parshaName(k), action:()=>openChok(k,0)});
+      }
     });
   }
   if(TANYA_IDX && name){
@@ -6919,7 +6928,9 @@ function libSearchHits(q){
     const p=PRAYERS_EXTRA[k];
     if(!p||!p.ready||PRAYER_KEYS_HIDDEN.includes(k)) continue;
     const t=ckSkel(ckBare(p.title||''));
-    if(libBareMatch(nSkel,t)) hits.push({group:'סִדּוּר', label:p.title, action:()=>openPrayer(k)});
+    if(!libBareMatch(nSkel,t)) continue;
+    const group=PRAYER_GROUPS.brachot.keys.includes(k) ? PRAYER_GROUPS.brachot.he : PRAYER_GROUPS.more.he;
+    hits.push({group, label:p.title, action:()=>openPrayer(k)});
   }
   if(CYC && CYC.daf && name){
     for(const key in CYC.daf.heNames){
@@ -7980,14 +7991,14 @@ function drawSiddurHome(){
   // Alenu, all in one continuous reader per user request) rather than a
   // separate standalone Musaf tile alongside it.
   if(info.isRoshChodesh) tiles.push('roshChodesh');
+  // Tikun Chatzot is an occasional, day-independent reading (unlike the
+  // fixed Shacharit/Mincha/Arvit flow above) - appended before Selichot
+  // per the user's explicit ordering request (Selichot must come last,
+  // after Tikun Chatzot, not right after Birkat HaLevana).
+  tiles.push('tikunChatzot');
   // Selichot: same seasonal gate as the in-context Tachanun link
   // (siddurIsSelichotSeason) - Elul through Aseret Yemei Teshuva.
   if(siddurIsSelichotSeason(currentHDate())) tiles.push('selichot');
-  // Tikun Chatzot is an occasional, day-independent reading (unlike the
-  // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
-  // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
-  // between Arvit and it, not before Shacharit/Mincha.
-  tiles.push('tikunChatzot');
   app.innerHTML = `
   ${topbar('סִדּוּר','prayers')}
   <div class="view">
