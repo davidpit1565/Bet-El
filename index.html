@@ -1616,7 +1616,7 @@ function localizeHebDateStr(str){
 /* ---------- settings ---------- */
 const ZMANIM_LIVE = false; // full zmanim list temporarily disabled pending updated formulas
 const ZMANIM_READY = ['sunrise','chatzot','sunset']; // astronomically-fixed times, ready to reveal now
-const MEMORIAL = {'row1':['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן','שְׁמוּאֵל בֶּן אַבְרָהָם','אֵלִיָּהוּ בֶּן אַהֲרֹן'],'row2':['אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי']};
+const MEMORIAL = ['דָּנִיֵּאל בֶּן מִיכָאֵל','יוֹכֶבֶד גוּגוֹלִי בַּת סִימוֹן','שְׁמוּאֵל בֶּן אַבְרָהָם','אֵלִיָּהוּ בֶּן אַהֲרֹן','אֲבִישַׁי בֶּן יִשָּׂשכָר','נָדָב יְהוּדָה בֶּן אֲבִישַׁי','יִשָּׂשכָר בֶּן אֲבִישַׁי'];
 /* Personal dedication names are Hebrew proper names with no meaning to
    translate - like sacred-text bodies, they get phonetic transliteration
    per language instead (never left showing raw Hebrew when another
@@ -1642,7 +1642,7 @@ const DED_NAMES_TRANSLIT = {
 function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
 const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
 function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
-function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.row1.map(dedName).join(' · ')}<br>${MEMORIAL.row2.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
+function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1658,8 +1658,8 @@ function socialLinksHTML(){
   ).join('')}</div>`;
 }
 /* those who helped build this app */
-const HATZLACHA = {row1:['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית'],row2:['דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
-function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.row1.map(dedName).join(' · ')}<br>${HATZLACHA.row2.map(dedName).join(' · ')}</div></div>`; }
+const HATZLACHA = ['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין'];
+function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(dedName).join(' · ')}</div></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -1792,7 +1792,7 @@ function openPrayer(prayerKey, fromGroup){
   }
 }
 
-const DEF = { theme:'dark', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:false, pushEnabled:false };
+const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
@@ -3125,6 +3125,9 @@ function renderOnboard(){
   document.getElementById('obExplainerLink').onclick=()=>{ CK_EXPLAINER_BACK='onboard'; go('chokExplainer'); };
   document.getElementById('obStart').onclick=()=>{
     localStorage.setItem('betel_onboard_v1','1');
+    if(S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
+      (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
+    }
     if(!localStorage.getItem('betel_chok_pace_v1')){
       CK_PACE_PENDING_TAB='home'; CK_PACE_STEP=0; TAB='chokPace';
     } else {
@@ -9720,6 +9723,12 @@ function renderSettings(){
     </div>`:''}
 
     <div class="set-group">
+      <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
+      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ</div><div class="si-d">${S.pushEnabled?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
+    </div>
+
+    <div class="set-group">
       <h3>קְרִיאָה יוֹמִית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">שָׂפָה</div><div class="si-d">שְׂפַת הַמִּמְשָׁק</div></div></div>
         <select id="selLang" class="fld-select" style="width:auto;min-width:120px">
@@ -9742,6 +9751,12 @@ function renderSettings(){
         </select></div>`:''}
       <div class="set-item set-item-stack"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שִׁיטַת חֲלוּקָה</div><div class="si-d">${ckDivisionLabel()}</div></div></div>
         <div class="seg"><button data-div="monthlyStd" class="${S.division!=='monthly'&&S.division!=='weekly'?'on':''}">חָדְשִׁי</button><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חָדְשִׁי (5 לְיוֹם)</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שְׁבוּעִי</button></div></div>
+    </div>
+
+    <div class="set-group">
+      <h3>מִקּוּם וּזְמַנִּים</h3>
+      <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי</div><div class="si-d">אִתּוּר אוֹטוֹמָטִי לְפִי GPS</div></div></div>${I.refresh}</div>
+      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
     </div>
 
     <div class="set-group">
@@ -9769,13 +9784,6 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
-      <h3>מִקּוּם וּזְמַנִּים</h3>
-      <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">הִשְׁתַּמֵּשׁ בַּמִּקּוּם שֶׁלִּי</div><div class="si-d">אִתּוּר אוֹטוֹמָטִי לְפִי GPS</div></div></div>${I.refresh}</div>
-      <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מַצְפֵּן</div><div class="si-d">כִּוּוּן לְקֹדֶש הַקֳּדָשִׁים בִּירוּשָׁלַיִם</div></div></div>${I.chev}</div>
-    </div>
-
-
-    <div class="set-group">
       <h3>יָאהְרְצַיְיט · זִכָּרוֹן</h3>
       <div class="yahr-list" id="yahrList">
         ${getYahrzeits().map((y,i)=>`<div class="yahr-row"><div><div>${y.name}</div><div class="yahr-hdate">${yahrzeitHebLabel(y)}</div></div><button class="icon-btn yahr-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אֵין זִכְרוֹנוֹת עֲדַיִן</div>'}
@@ -9791,24 +9799,18 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
-      <h3>מִשְׁפָּטִי</h3>
-      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מְדִינִיּוּת פְּרָטִיּוּת</div><div class="si-d">מָה נִשְׁמָר וְאֵיפֹה</div></div></div>${I.chev}</a>
-      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תְּנָאֵי שִׁמּוּשׁ</div><div class="si-d">תְּנָאִים לְשִׁמּוּשׁ בָּאַפְּלִיקַצְיָה</div></div></div>${I.chev}</a>
-    </div>
-
-    <div class="set-group">
-      <h3>תִּזְכּוֹרֶת יוֹמִית</h3>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעַת תִּזְכּוֹרֶת לִקְרִיאָה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
-      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ</div><div class="si-d">${S.pushEnabled?'מֻפְעָל':'לֹא הֻפְעַל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
-    </div>
-
-    <div class="set-group">
       <h3>שִׁתּוּף</h3>
       <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שַׁתֵּף אֶת הָאַפְּלִיקַצְיָה</div><div class="si-d">שְׁלַח לַחֲבֵרִים בַּקְּהִלָּה</div></div></div>${I.chev}</div>
       <div class="set-item" id="shareAppQR" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.qr}</span><div><div class="si-t">שַׁתֵּף קוֹד QR</div><div class="si-d">תְּמוּנָה מְעֻצֶּבֶת לִסְרִיקָה</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkExport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">גִּבּוּי לְקֹבֶץ</div><div class="si-d">שְׁמִירַת הִתְקַדְּמוּת, מוּעֲדָפִים וְהַגְדָּרוֹת</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkImport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">שִׁחְזוּר מִגִּבּוּי</div><div class="si-d">טְעִינַת קֹבֶץ גִּבּוּי קַיָּם</div></div></div>${I.chev}</div>
       <div class="set-item" id="resetProg" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">אִפּוּס מַעֲקַב הַיּוֹם</div><div class="si-d">נַקֵּה סִימוּן פְּרָקִים שֶׁנִּקְרְאוּ</div></div></div></div>
+    </div>
+
+    <div class="set-group">
+      <h3>מִשְׁפָּטִי</h3>
+      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מְדִינִיּוּת פְּרָטִיּוּת</div><div class="si-d">מָה נִשְׁמָר וְאֵיפֹה</div></div></div>${I.chev}</a>
+      <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תְּנָאֵי שִׁמּוּשׁ</div><div class="si-d">תְּנָאִים לְשִׁמּוּשׁ בָּאַפְּלִיקַצְיָה</div></div></div>${I.chev}</a>
     </div>
 
     <div class="ornament">${ORN}</div>
@@ -10061,14 +10063,14 @@ function celebrateMilestone(count, tier){
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
   if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
 }
-/* the highest hundred-tier (200,300,400,...) this device has already
+/* the highest hundred-tier (300,400,500,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
    device opening the app after the fact still gets shown whichever
    tiers it missed (just the latest one, not a backlog of every one) */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
-  if(tier>=200 && tier>last){
+  if(tier>=300 && tier>last){
     localStorage.setItem('betel_milestone_last', String(tier));
     try{ window.celebrateMilestone(count, tier); }catch(e){}
   }
