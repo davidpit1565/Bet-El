@@ -9295,7 +9295,7 @@ function smMarkDone(key){
 function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
 function smIsDone(key){ try{return JSON.parse(localStorage.getItem('betel_sm_done')||'[]').includes(key);}catch(e){return false;} }
 function individualParshaKeys(){ return Object.keys(LEYNING).filter(k=>LEYNING[k].parsha.length===1); }
-function openShnayim(key){ SM={key,n:1,mode:'torah'}; go('smReader'); }
+function openShnayim(key){ SM={key,n:0,mode:'torah'}; go('smReader'); }
 function smSkeleton(){
   return `<div class="skel-wrap">
     <div class="skel-line tall w40"></div>
@@ -9418,15 +9418,19 @@ function smStepNext(){
   const entry=LEYNING[SM.key];
   CK_NAV_DIR=1;
   if(SM.mode!=='haftarah'){
-    if(SM.n<7){ SM.n++; }
+    const n = SM.n!==undefined ? SM.n : 0;
+    if(n<7){ SM.n=(n||0)+1; }
     else if(entry.haft){ SM.mode='haftarah'; }
   }
   renderShnayimReader(); forceScrollTop();
 }
 function smStepPrev(){
   CK_NAV_DIR=-1;
-  if(SM.mode==='haftarah'){ SM.mode='torah'; }
-  else if(SM.n>1){ SM.n--; }
+  if(SM.mode==='haftarah'){ SM.mode='torah'; SM.n=7; }
+  else {
+    const n = SM.n!==undefined ? SM.n : 0;
+    if(n>0){ SM.n=n-1; }
+  }
   renderShnayimReader(); forceScrollTop();
 }
 function smFinish(){
@@ -9443,9 +9447,14 @@ function renderShnayimReader(){
   const entry=LEYNING[SM.key];
   if(!entry){ toast('פָּרָשָׁה לֹא נִמְצְאָה'); return go('smList'); }
   const isHaft = SM.mode==='haftarah';
-  const n = SM.n||1;
+  const n = SM.n!==undefined ? SM.n : 0;
+  const isYichudPage = n===0 && !isHaft;
   let verses, tag, pct;
-  if(isHaft){
+  if(isYichudPage){
+    verses = [];
+    tag = 'יִחוּד שֵׁמוֹת';
+    pct = 0;
+  } else if(isHaft){
     const seg = entry.seph || entry.haft;
     verses = haftarahVerses(seg).map(v=>({c:v.c,v:v.v,he:v.he,targum:null}));
     tag = 'הפטרה' + (entry.seph?' · נוסח ספרדי':'');
@@ -9454,10 +9463,10 @@ function renderShnayimReader(){
     const range=entry.aliyot[n-1];
     verses = versesInRange(entry.book, range[0], range[1]);
     tag = 'עלייה '+heNum(n)+(n===7&&entry.maftir?' (מפטיר)':'');
-    pct = Math.round((n/7)*100);
+    pct = Math.round(((n-1+1)/8)*100);
   }
   const isLastPage = isHaft || (n===7 && !entry.haft);
-  const canGoPrev = isHaft || n>1;
+  const canGoPrev = n>0;
   const _anim=ckAnimClass();
   app.innerHTML=`
   <div class="reader view">
@@ -9475,7 +9484,7 @@ function renderShnayimReader(){
         </div>
       </div>
     </div>
-    <div class="sm-yichud-section">
+    ${isYichudPage?`<div class="sm-yichud-section">
       <div class="sm-yichud-text">
         שֵׁם יִחוּד קוּדְשָׁא בְּרִיךְ הוּא וּשְׁכִינְתֵּיהּ<br><br>
         יאהדונהי<br><br>
@@ -9486,8 +9495,8 @@ function renderShnayimReader(){
         יהוה<br><br>
         בְּשֵׁם כָּל יִשְׂרָאֵל, הִנֵּה אֲנַחְנוּ בָּאִים לִקְרֹא הַפָּרָשָׁה שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם בִּנִגּוּנֶיהָ וּטְעָמֶיהָ כְּנֶגֶד הַתִּפְאֶרֶת וְהַיְסוֹד
       </div>
-    </div>
-    <div class="sm-verses notranslate">
+    </div>`:''}`
+    <div class="sm-verses notranslate" ${isYichudPage?'style="display:none"':''}>
       ${verses.map(v=>{
         const bm=smBookmarkGet(); const marked = !!bm && bm.key===SM.key && bm.mode===SM.mode && bm.c===v.c && bm.v===v.v;
         return `<div class="sm-verse-row" data-c="${v.c}" data-v="${v.v}"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><button class="sm-mark-btn ${marked?'on':''}" data-c="${v.c}" data-v="${v.v}">${marked?I.bookmarkOn:I.bookmark}</button><div class="sm-he">${v.he}</div>${!isHaft?`<div class="sm-he">${v.he}</div>`:''}${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">${ckChrome('תרגום')}</span><div class="sm-targum">${v.targum}</div>`:''}</div>`;
