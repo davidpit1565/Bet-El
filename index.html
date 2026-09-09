@@ -805,6 +805,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .dedication-panel + .dedication-panel{margin-top:10px}
 .ded-panel-label{font-size:11.5px;letter-spacing:.14em;color:var(--gold);opacity:.95;margin-bottom:5px}
 .ded-panel-names{color:var(--muted);font-size:12.5px;line-height:1.85;opacity:.9}
+.ded-name-nowrap{white-space:nowrap}
 .ded-panel-foot{margin-top:6px;font-size:10.5px;letter-spacing:.5px;color:var(--muted);opacity:.7}
 .dedication-memorial .ded-panel-label{color:var(--muted);opacity:.85}
 [data-theme="dark"] .ded-panel-names{color:#8d97ad}
@@ -1639,7 +1640,7 @@ const DED_NAMES_TRANSLIT = {
 function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
 const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
 function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
-function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(dedName).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
+function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1656,7 +1657,7 @@ function socialLinksHTML(){
 }
 /* those who helped build this app */
 const HATZLACHA = ['אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','אִילַיִי מִיכָאֵל בֶּן אִירִית','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין'];
-function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(dedName).join(' · ')}</div></div>`; }
+function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -7990,14 +7991,14 @@ function drawSiddurHome(){
   // Alenu, all in one continuous reader per user request) rather than a
   // separate standalone Musaf tile alongside it.
   if(info.isRoshChodesh) tiles.push('roshChodesh');
+  // Tikun Chatzot is an occasional, day-independent reading (unlike the
+  // fixed Shacharit/Mincha/Arvit flow above) - appended before Selichot
+  // per the user's explicit ordering request (Selichot must come last,
+  // after Tikun Chatzot, not right after Birkat HaLevana).
+  tiles.push('tikunChatzot');
   // Selichot: same seasonal gate as the in-context Tachanun link
   // (siddurIsSelichotSeason) - Elul through Aseret Yemei Teshuva.
   if(siddurIsSelichotSeason(currentHDate())) tiles.push('selichot');
-  // Tikun Chatzot is an occasional, day-independent reading (unlike the
-  // fixed Shacharit/Mincha/Arvit flow above) - appended last so sibling
-  // in-progress tiles from parallel work (e.g. Omer, Birkat HaLevana) land
-  // between Arvit and it, not before Shacharit/Mincha.
-  tiles.push('tikunChatzot');
   app.innerHTML = `
   ${topbar('סִדּוּר','prayers')}
   <div class="view">
