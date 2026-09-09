@@ -8008,11 +8008,12 @@ function renderSiddurHome(){
 function drawSiddurHome(){
   const info = siddurDayInfo(currentHDate());
   const tiles = ['birkot','talitTefilin','shacharit','mincha','arvit'];
-  // Sefirat HaOmer only appears as its own tile during the actual 49-day
-  // count; Birkat HaLevana has no date-gating yet (a follow-up item - see
-  // the build notes) so it's always offered.
-  if(info.omerDay) tiles.push('omer');
+  // Birkat HaLevana has no date-gating yet (a follow-up item - see the
+  // build notes) so it's always offered. Sefirat HaOmer only appears as
+  // its own tile during the actual 49-day count, and per explicit user
+  // ordering request comes right after Birkat HaLevana, not before it.
   tiles.push('levana');
+  if(info.omerDay) tiles.push('omer');
   // Rosh Chodesh is one combined tile (Hallel through Musaf's own closing
   // Alenu, all in one continuous reader per user request) rather than a
   // separate standalone Musaf tile alongside it.
