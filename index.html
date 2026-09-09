@@ -6776,8 +6776,9 @@ function libCatLabel(key){
    whole library would need pre-building a real search index over millions
    of words - a separate, much bigger undertaking the user explicitly chose
    NOT to do). Recognizes: bare category names ("גמרא" -> that category's own
-   home list), Torah parasha names, Tehillim chapter numbers, Siddur prayer
-   names, and (once their data has loaded - kicked off in the background as
+   home list), Torah/Chok LeYisrael/Ben Ish Chai parasha names, Tehillim
+   chapter numbers, Siddur prayer names, Additional Prayers/Blessings titles,
+   and (once their data has loaded - kicked off in the background as
    soon as this screen opens, see libPrefetchSearchData below) Gemara/
    Rambam/Mishnah/Zohar masechet-or-sefer(+chapter) references and Neviim/
    Ketuvim book(+chapter) references. Reuses ckNorm/ckSkel/ckNum/ckBare -
@@ -6797,6 +6798,7 @@ const LIB_CATEGORY_SEARCH=[
   {label:'תִּיקּוּנֵי הַזֹּהַר', words:['תיקוני הזהר','tikkune hazohar','tikkunei hazohar','тикуней азоар','ტიკუნეი ჰაზოჰარი'], open:()=>go('zoharList')},
   {label:'זֹהַר', words:['זהר','zohar','зоар','ზოჰარი'], open:()=>go('libraryZoharParts')},
   {label:'תַּנְיָא', words:['תניא','tanya','таня','თანია'], open:()=>go('libraryTanyaParts')},
+  {label:'חוֹק לְיִשְׂרָאֵל', words:['חוק לישראל','חוק ליסראל','chok leyisrael','chok laisrael','хок лейисраэль','ხოკ ლეისრაელი'], open:()=>go('chokBooks')},
   {label:'שְׁנַיִם מִקְרָא', words:['שנים מקרא','שניים מקרא','shnayim mikra','шнаим микра','შნაიმ მიკრა'], open:()=>go('smList')},
   {label:'תְּהִלִּים', words:['תהלים','תהילים','tehillim','tehilim','теилим','თეილიმი'], open:()=>go('tehillim')},
   {label:'סִדּוּר', words:['סידור','סדור','siddur','siddour','сидур','სიდური'], open:()=>go('siddurHome')},
@@ -6808,7 +6810,7 @@ const LIB_CATEGORY_SEARCH=[
    searchable a moment after the screen opens, without the user having to
    first visit the Mishnah section themselves. */
 function libPrefetchSearchData(){
-  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex()].forEach(p=>{
+  [ensureShnayimData(), ensureCycles(), ensureMishnahIndex(), ensureTanyaCycle(), ensureBicIndex(), ensureChokIndex()].forEach(p=>{
     p.then(()=>{ if(TAB==='library') libDrawSearch(); }).catch(()=>{});
   });
 }
@@ -6880,6 +6882,12 @@ function libSearchHits(q){
           }
         });
       }
+      /* Chok LeYisrael reads the same weekly parshiot as Torah/Shnayim
+         Mikra above, day 0 (Sunday's portion) being the natural landing
+         spot - same pattern as the Ben Ish Chai cross-hit just above. */
+      if(CHOK && CHOK.parshiot && CHOK.parshiot.includes(k)){
+        hits.push({group:'חוֹק לְיִשְׂרָאֵל', label:parshaName(k), action:()=>openChok(k,0)});
+      }
     });
   }
   if(TANYA_IDX && name){
@@ -6919,7 +6927,9 @@ function libSearchHits(q){
     const p=PRAYERS_EXTRA[k];
     if(!p||!p.ready||PRAYER_KEYS_HIDDEN.includes(k)) continue;
     const t=ckSkel(ckBare(p.title||''));
-    if(libBareMatch(nSkel,t)) hits.push({group:'סִדּוּר', label:p.title, action:()=>openPrayer(k)});
+    if(!libBareMatch(nSkel,t)) continue;
+    const group=PRAYER_GROUPS.brachot.keys.includes(k) ? PRAYER_GROUPS.brachot.he : PRAYER_GROUPS.more.he;
+    hits.push({group, label:p.title, action:()=>openPrayer(k)});
   }
   if(CYC && CYC.daf && name){
     for(const key in CYC.daf.heNames){
