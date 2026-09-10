@@ -5940,7 +5940,7 @@ function renderTehillim(){
   app.innerHTML = `
   ${topbar('ספר תהלים')}
   <div class="view">
-    <div class="search-box">${I.search}<input id="psSearch" placeholder="חִפּוּשׂ פֶּרֶק (מִסְפָּר) אוֹ מִלָּה בַּפְּסוּקִים…"/></div>
+    <div class="search-box">${I.search}<input id="psSearch" placeholder="חיפוש פרק (מספר) או מילה בפסוקים…"/></div>
     <div class="chip-row">
       <button class="chip on" data-f="all">הַכֹּל</button>
       <button class="chip" data-f="fav">${I.bookmark}<span>מוּעֲדָפִים</span></button>
@@ -6065,8 +6065,8 @@ function chapterHTML(ch){
   const verses=trv||T[ch]||[];
   const body=verses.map((v,i)=>`<span class="verse${trv?' latin':''}">${v}</span> `).join('');
   return `<div class="chapter" data-ch="${ch}">
-    <div class="chapter-title">מִזְמוֹר <span class="num">${heNum(ch)}</span></div>
-    <div class="chapter-cap">פֶּרֶק ${ch} · ${verses.length} פְּסוּקִים</div>
+    <div class="chapter-title">מזמור <span class="num">${heNum(ch)}</span></div>
+    <div class="chapter-cap">פרק ${ch} · ${verses.length} פסוקים</div>
     <div class="psalm-body notranslate">${body}</div>
   </div>`;
 }
