@@ -247,19 +247,19 @@ body::before{ /* subtle starfield/texture */
 /* quick tiles */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .quick-grid:has(>.q-tile:only-child)>.q-tile{grid-column:1/-1}
-.q-tile{background:var(--panel);border:var(--glass-border);border-radius:var(--radius-sm);padding:16px 14px;
-  display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
+.q-tile{background:var(--panel);border:var(--glass-border);border-radius:var(--radius-sm);padding:20px 17px;
+  min-height:88px;display:flex;flex-direction:column;justify-content:center;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
 .q-tile:active{transform:scale(.97)}
 @media (hover:hover){.q-tile:hover{border-color:var(--line-strong);box-shadow:0 12px 26px -14px rgba(0,0,0,.4)}}
 .q-tile.done{border-color:var(--gold);box-shadow:0 0 0 1px rgba(212,175,95,.35) inset,0 6px 18px -8px rgba(212,175,95,.45)}
 .q-tile .qi{color:var(--gold);width:38px;height:38px;border-radius:50%;background:var(--panel-2);display:grid;place-items:center}.q-tile .qi svg{width:20px;height:20px}
-.q-tile .qt{font-family:var(--font-sacred);font-size:18px;font-weight:700}
-.q-tile .qd{font-size:14px;color:var(--muted)}
+.q-tile .qt{font-family:var(--font-sacred);font-size:19px;font-weight:700}
+.q-tile .qd{font-size:14.5px;color:var(--muted)}
 /* the home screen's very first row (today's Chok LeYisrael + Tehillim) are
    the two daily anchor obligations - give them a touch more presence than
    the five secondary tiles below so the grid isn't six identical boxes */
-.quick-grid-primary .q-tile{padding:19px 16px 18px}
-.quick-grid-primary .q-tile .qt{font-size:19.5px}
+.quick-grid-primary .q-tile{padding:25px 19px;min-height:104px}
+.quick-grid-primary .q-tile .qt{font-size:21px}
 .quick-grid-primary .q-tile{box-shadow:0 14px 30px -16px rgba(0,0,0,.4),var(--card-shadow)}
 
 /* ================= TEHILLIM GRID ================= */
