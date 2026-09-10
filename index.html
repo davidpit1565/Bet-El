@@ -1647,7 +1647,7 @@ const DED_NAMES_TRANSLIT = {
 function dedName(he){ const t=DED_NAMES_TRANSLIT[S.lang]; return (t&&t[he])||he; }
 const TNTZBH_TRANSLIT={en:'T.N.Tz.B.H.',fr:'T.N.Tz.B.H.',ru:'Т.Н.Ц.Б.Х.',ka:'თ.ნ.ც.ბ.ჰ.'};
 function tntzbh(){ return TNTZBH_TRANSLIT[S.lang]||'ת.נ.צ.ב.ה'; }
-function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לְעִלּוּי נִשְׁמַת')}</div><div class="ded-panel-names">${MEMORIAL.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
+function memorialHTML(){ return `<div class="dedication-panel dedication-memorial notranslate"><div class="ded-panel-label">${ckChrome('לעלוי נשמת')}</div><div class="ded-panel-names">${MEMORIAL.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div><div class="ded-panel-foot">${tntzbh()}</div></div>`; }
 /* Rav's social links, shown right under the memorial dedication on the home
    screen - each its own platform icon, opening in a new tab/browser rather
    than trying to deep-link into each app (simplest, and works identically
@@ -1664,7 +1664,7 @@ function socialLinksHTML(){
 }
 /* those who helped build this app */
 const HATZLACHA = ['שַׁי שָׁלוֹם בֶּן שָׂרָה','אִילַיִי מִיכָאֵל בֶּן אִירִית','אֵלִיָּהוּ בֶּן נוּרִית פְּנִינָה','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין'];
-function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('לְהַצְלָחַת')}</div><div class="ded-panel-names">${HATZLACHA.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div></div>`; }
+function hatzlachaHTML(){ return `<div class="dedication-panel dedication-hatzlacha notranslate"><div class="ded-panel-label">${ckChrome('להצלחת')}</div><div class="ded-panel-names">${HATZLACHA.map(n=>`<span class="ded-name-nowrap">${dedName(n)}</span>`).join(' · ')}</div></div>`; }
 
 /* ================= ADDITIONAL PRAYERS ================= */
 const PRAYERS_EXTRA = {
@@ -2126,7 +2126,7 @@ function startCompass(){
   }
 }
 /* ---------- shnayim mikra (parashat hashavua) ---------- */
-const PARSHA_HE_NAMES = {"Bereshit":"בְּרֵאשִׁית","Noach":"נֹחַ","Lech-Lecha":"לֶךְ־לְךָ","Vayera":"וַיֵּרָא","Chayei Sara":"חַיֵּי שָׂרָה","Toldot":"תּוֹלְדוֹת","Vayetzei":"וַיֵּצֵא","Vayishlach":"וַיִּשְׁלַח","Vayeshev":"וַיֵּשֶׁב","Miketz":"מִקֵּץ","Vayigash":"וַיִּגַּשׁ","Vayechi":"וַיְחִי","Shemot":"שְׁמוֹת","Vaera":"וָאֵרָא","Bo":"בֹּא","Beshalach":"בְּשַׁלַּח","Yitro":"יִתְרוֹ","Mishpatim":"מִשְׁפָּטִים","Terumah":"תְּרוּמָה","Tetzaveh":"תְּצַוֶּה","Ki Tisa":"כִּי תִשָּׂא","Vayakhel":"וַיַּקְהֵל","Pekudei":"פְקוּדֵי","Vayikra":"וַיִּקְרָא","Tzav":"צַו","Shmini":"שְּׁמִינִי","Tazria":"תַזְרִיעַ","Metzora":"מְצֹרָע","Achrei Mot":"אַחֲרֵי מוֹת","Kedoshim":"קְדֹשִׁים","Emor":"אֱמוֹר","Behar":"בְּהַר","Bechukotai":"בְּחֻקֹּתַי","Bamidbar":"בְּמִדְבַּר","Nasso":"נָשׂא","Beha'alotcha":"בְּהַעֲלֹתְךָ","Sh'lach":"שְׁלַח־לְךָ","Korach":"קֹרַח","Chukat":"חֻקַּת","Balak":"בָּלָק","Pinchas":"פִּינְחָס","Matot":"מַטּוֹת","Masei":"מַסְעֵי","Devarim":"דְּבָרִים","Vaetchanan":"וָאֶתְחַנַּן","Eikev":"עֵקֶב","Re'eh":"רְאֵה","Shoftim":"שׁוֹפְטִים","Ki Teitzei":"כִּי־תֵצֵא","Ki Tavo":"כִּי־תָבוֹא","Nitzavim":"נִצָּבִים","Vayeilech":"וַיֵּלֶךְ","Ha'azinu":"הַאֲזִינוּ","Vezot Haberakhah":"וְזֹאת הַבְּרָכָה","Vayakhel-Pekudei":"וַיַּקְהֵל־פְקוּדֵי","Tazria-Metzora":"תַזְרִיעַ־מְצֹרָע","Achrei Mot-Kedoshim":"אַחֲרֵי מוֹת־קְדֹשִׁים","Behar-Bechukotai":"בְּהַר־בְּחֻקֹּתַי","Chukat-Balak":"חֻקַּת־בָּלָק","Matot-Masei":"מַטּוֹת־מַסְעֵי","Nitzavim-Vayeilech":"נִצָּבִים־וַיֵּלֶךְ"};
+const PARSHA_HE_NAMES = {"Bereshit":"בראשית","Noach":"נח","Lech-Lecha":"לך־לך","Vayera":"וירא","Chayei Sara":"חיי שרה","Toldot":"תולדות","Vayetzei":"ויצא","Vayishlach":"וישלח","Vayeshev":"וישב","Miketz":"מקץ","Vayigash":"ויגש","Vayechi":"ויחי","Shemot":"שמות","Vaera":"וארא","Bo":"בא","Beshalach":"בשלח","Yitro":"יתרו","Mishpatim":"משפטים","Terumah":"תרומה","Tetzaveh":"תצוה","Ki Tisa":"כי תשא","Vayakhel":"ויקהל","Pekudei":"פקודי","Vayikra":"ויקרא","Tzav":"צו","Shmini":"שמיני","Tazria":"תזריע","Metzora":"מצרע","Achrei Mot":"אחרי מות","Kedoshim":"קדשים","Emor":"אמור","Behar":"בהר","Bechukotai":"בחקתי","Bamidbar":"במדבר","Nasso":"נשא","Beha'alotcha":"בהעלתך","Sh'lach":"שלח־לך","Korach":"קרח","Chukat":"חקת","Balak":"בלק","Pinchas":"פינחס","Matot":"מטות","Masei":"מסעי","Devarim":"דברים","Vaetchanan":"ואתחנן","Eikev":"עקב","Re'eh":"ראה","Shoftim":"שופטים","Ki Teitzei":"כי־תצא","Ki Tavo":"כי־תבוא","Nitzavim":"נצבים","Vayeilech":"וילך","Ha'azinu":"האזינו","Vezot Haberakhah":"וזאת הברכה","Vayakhel-Pekudei":"ויקהל־פקודי","Tazria-Metzora":"תזריע־מצרע","Achrei Mot-Kedoshim":"אחרי מות־קדשים","Behar-Bechukotai":"בהר־בחקתי","Chukat-Balak":"חקת־בלק","Matot-Masei":"מטות־מסעי","Nitzavim-Vayeilech":"נצבים־וילך"};
 const PARSHA_FR_NAMES={"Bereshit":"Béréchit","Noach":"Noakh","Lech-Lecha":"Lékh-lékha","Vayera":"Vayyéra","Chayei Sara":"Khayyé sara","Toldot":"Toldot","Vayetzei":"Vayyétsé","Vayishlach":"Vayyichlakh","Vayeshev":"Vayyéchév","Miketz":"Mikkéts","Vayigash":"Vayyiggach","Vayechi":"Vaykhi","Shemot":"Chémot","Vaera":"Vaéra","Bo":"Bo","Beshalach":"Béchallakh","Yitro":"Yitro","Mishpatim":"Michpatim","Terumah":"Térouma","Tetzaveh":"Tétsavvé","Ki Tisa":"Ki tissa","Vayakhel":"Vayyakhél","Pekudei":"Fékoudé","Vayikra":"Vayyikra","Tzav":"Tsav","Shmini":"Chémini","Tazria":"Tazria","Metzora":"Métsora","Achrei Mot":"Akharé mot","Kedoshim":"Kédochim","Emor":"Émor","Behar":"Béhar","Bechukotai":"Békhoukkotay","Bamidbar":"Bémidbar","Nasso":"Nas","Beha'alotcha":"Béhaalotkha","Sh'lach":"Chélakh-lékha","Korach":"Korakh","Chukat":"Khoukkat","Balak":"Balak","Pinchas":"Pinkhas","Matot":"Mattot","Masei":"Massé","Devarim":"Dévarim","Vaetchanan":"Vaétkhannan","Eikev":"Ékév","Re'eh":"Réé","Shoftim":"Choftim","Ki Teitzei":"Ki-tétsé","Ki Tavo":"Ki-tavo","Nitzavim":"Nitstsavim","Vayeilech":"Vayyélékh","Ha'azinu":"Haazinou","Vezot Haberakhah":"Vézot habbérakha","Vayakhel-Pekudei":"Vayyakhél-fékoudé","Tazria-Metzora":"Tazria-métsora","Achrei Mot-Kedoshim":"Akharé mot-kédochim","Behar-Bechukotai":"Béhar-békhoukkotay","Chukat-Balak":"Khoukkat-balak","Matot-Masei":"Mattot-massé","Nitzavim-Vayeilech":"Nitstsavim-vayyélékh"};
 const PARSHA_RU_NAMES={"Bereshit":"Берешит","Noach":"Ноах","Lech-Lecha":"Лех-леха","Vayera":"Ваййера","Chayei Sara":"Хаййе сара","Toldot":"Толдот","Vayetzei":"Ваййеце","Vayishlach":"Ваййишлах","Vayeshev":"Ваййешев","Miketz":"Миккец","Vayigash":"Ваййиггаш","Vayechi":"Вайхи","Shemot":"Шемот","Vaera":"Ваера","Bo":"Бо","Beshalach":"Бешаллах","Yitro":"Йитро","Mishpatim":"Мишпатим","Terumah":"Терума","Tetzaveh":"Тецавве","Ki Tisa":"Ки тисса","Vayakhel":"Ваййакгел","Pekudei":"Фекуде","Vayikra":"Ваййикра","Tzav":"Цав","Shmini":"Шемини","Tazria":"Тазриа","Metzora":"Мецора","Achrei Mot":"Ахаре мот","Kedoshim":"Кедошим","Emor":"Емор","Behar":"Бегар","Bechukotai":"Бехуккотай","Bamidbar":"Бемидбар","Nasso":"Нас","Beha'alotcha":"Бегаалотха","Sh'lach":"Шелах-леха","Korach":"Корах","Chukat":"Хуккат","Balak":"Балак","Pinchas":"Пинхас","Matot":"Маттот","Masei":"Масе","Devarim":"Деварим","Vaetchanan":"Ваетханнан","Eikev":"Екев","Re'eh":"Рее","Shoftim":"Шофтим","Ki Teitzei":"Ки-теце","Ki Tavo":"Ки-таво","Nitzavim":"Ниццавим","Vayeilech":"Ваййелех","Ha'azinu":"Гаазину","Vezot Haberakhah":"Везот габбераха","Vayakhel-Pekudei":"Ваййакгел-фекуде","Tazria-Metzora":"Тазриа-мецора","Achrei Mot-Kedoshim":"Ахаре мот-кедошим","Behar-Bechukotai":"Бегар-бехуккотай","Chukat-Balak":"Хуккат-балак","Matot-Masei":"Маттот-масе","Nitzavim-Vayeilech":"Ниццавим-ваййелех"};
 function parshaName(key){
@@ -2266,18 +2266,18 @@ function hebLocation(){
 
 /* ---------- zmanim ---------- */
 const ZDEFS = [
-  ['alotHaShachar','עֲלוֹת הַשַּׁחַר','zDawn'],
-  ['misheyakir','זְמַן טַלִּית וּתְפִלִּין','zEye'],
-  ['sunrise','נֵץ הַחַמָּה','zSunrise'],
-  ['sofZmanShma','סוֹף זְמַן קְרִיאַת שְׁמַע','zHourglass'],
-  ['sofZmanTfilla','סוֹף זְמַן תְּפִלָּה','zClockCheck'],
-  ['chatzot','חֲצוֹת הַיּוֹם','zSunHigh'],
-  ['minchaGedola','מִנְחָה גְּדוֹלָה','zSunAfternoon'],
-  ['minchaKetana','מִנְחָה קְטַנָּה','zSunLow'],
-  ['plagHaMincha','פְּלַג הַמִּנְחָה','zDusk'],
-  ['sunset','שְׁקִיעַת הַחַמָּה','zDusk'],
-  ['tzeit','צֵאת הַכּוֹכָבִים','zNightfall'],
-  ['chatzotNight','חֲצוֹת הַלַּיְלָה','zMoonHigh'],
+  ['alotHaShachar','עלות השחר','zDawn'],
+  ['misheyakir','זמן טלית ותפלין','zEye'],
+  ['sunrise','נץ החמה','zSunrise'],
+  ['sofZmanShma','סוף זמן קריאת שמע','zHourglass'],
+  ['sofZmanTfilla','סוף זמן תפלה','zClockCheck'],
+  ['chatzot','חצות היום','zSunHigh'],
+  ['minchaGedola','מנחה גדולה','zSunAfternoon'],
+  ['minchaKetana','מנחה קטנה','zSunLow'],
+  ['plagHaMincha','פלג המנחה','zDusk'],
+  ['sunset','שקיעת החמה','zDusk'],
+  ['tzeit','צאת הכוכבים','zNightfall'],
+  ['chatzotNight','חצות הלילה','zMoonHigh'],
 ];
 function zmanimFor(dateObj){ return new Zmanim(hebLocation(), dateObj, false); }
 function fmtTime(d){ if(!d||isNaN(d)) return '—';
@@ -2383,7 +2383,7 @@ function dedList(){
   return L;
 }
 function saveDedList(L){ localStorage.setItem('betel_dedl', JSON.stringify(L)); }
-function dedLabel(t){ const map={refua:'לִרְפוּאַת',iluy:'לְעִלּוּי נִשְׁמַת',hatzlacha:'לְהַצְלָחַת',zivug:'לְזִוּוּג הָגוּן',zera:'לְזֶרַע שֶׁל קַיָּמָא',parnasa:'לְפַרְנָסָה טוֹבָה',shalombayit:'לִשְׁלוֹם בַּיִת',arichut:'לַאֲרִיכוּת יָמִים וְשָׁנִים טוֹבוֹת',general:'לִזְכוּת'}; return map[t]||'לִזְכוּת'; }
+function dedLabel(t){ const map={refua:'לרפואת',iluy:'לעלוי נשמת',hatzlacha:'להצלחת',zivug:'לזווג הגון',zera:'לזרע של קימא',parnasa:'לפרנסה טובה',shalombayit:'לשלום בית',arichut:'לאריכות ימים ושנים טובות',general:'לזכות'}; return map[t]||'לזכות'; }
 function dedLines(){ return dedList().map(d=>dedLabel(d.t)+' '+d.n); }
 function dedicationLine(){
   const L=dedLines(); return L.length?L.join(' · '):'';
@@ -2439,11 +2439,11 @@ function toggleAutoScroll(btn){
 /* ================= CHOK LEYISRAEL ================= */
 let CHOK=null, CHOK_WEEK={}, chokLoadPromise=null;
 const CHOK_DAYS=['sun','mon','tue','wed','thu','fri'];
-const CHOK_DAY_HE=['יוֹם רִאשׁוֹן','יוֹם שֵׁנִי','יוֹם שְׁלִישִׁי','יוֹם רְבִיעִי','יוֹם חֲמִישִׁי','יוֹם שִׁשִּׁי'];
+const CHOK_DAY_HE=['יום ראשון','יום שני','יום שלישי','יום רביעי','יום חמישי','יום שישי'];
 /* the sixth Hebrew day begins Thursday at sunset, so 'ליל שישי' is studied
    Thursday evening - between Thursday's portion and Friday's, as in the sheets */
 const CHOK_ROWS=[['sun',0],['mon',1],['tue',2],['wed',3],['thu',4],['night',-1],['fri',5]];
-const CHOK_NIGHT_HE='לֵיל שִׁשִּׁי';
+const CHOK_NIGHT_HE='ליל שישי';
 /* a compound like "יוֹם רְבִיעִי" cannot go through the generic Hebrew-string
    dictionary: it already has its own entry for the bare word "יוֹם" (used
    elsewhere for counting days), and that shorter match would fire first and
@@ -4288,8 +4288,8 @@ function ckBuildIndex(){
   if(CHOK){
     CHOK.parshiot.forEach(k=>{
       CHOK_ROWS.forEach(([d,di])=>out.push({
-        t:'chok', label:'פָּרָשַׁת '+parshaName(k)+' · '+chokRowLabel(d,di),
-        group:'חוֹק לְיִשְׂרָאֵל', s:ckNorm('פרשת '+parshaName(k)+' '+chokRowLabel(d,di)), key:k, day:d}));
+        t:'chok', label:'פרשת '+parshaName(k)+' · '+chokRowLabel(d,di),
+        group:'חוק לישראל', s:ckNorm('פרשת '+parshaName(k)+' '+chokRowLabel(d,di)), key:k, day:d}));
     });
     // the Mishnah of the three-year cycle, by tractate and chapter
     const seen={};
@@ -4519,7 +4519,7 @@ function ckTodayLine(){
   const slot=chokSlotFor();
   if(!slot) return null;
   return {key:slot.key, day:slot.day,
-          text:'פָּרָשַׁת '+parshaName(slot.key)+' · '+chokRowLabel(slot.day,slot.dayIdx)};
+          text:'פרשת '+parshaName(slot.key)+' · '+chokRowLabel(slot.day,slot.dayIdx)};
 }
 
 /* ---------- week list ---------- */
@@ -5606,7 +5606,7 @@ try{
 
 /* ================= HOME ================= */
 function greeting(){ const h=new Date().getHours();
-  if(h<5) return 'לַיְלָה טוֹב'; if(h<12) return 'בֹּקֶר טוֹב'; if(h<17) return 'צָהֳרַיִם טוֹבִים'; if(h<21) return 'עֶרֶב טוֹב'; return 'לַיְלָה טוֹב'; }
+  if(h<5) return 'לילה טוב'; if(h<12) return 'בקר טוב'; if(h<17) return 'צהרים טובים'; if(h<21) return 'ערב טוב'; return 'לילה טוב'; }
 /* the hour/minute abbreviations after a countdown number are too short
    (2 chars) for tr()'s substring pass, which only matches keys over 2
    chars to avoid false hits on common short strings - so they need their
@@ -5620,11 +5620,11 @@ function nextZmanText(){
   let diff=Math.round((z.date-now)/60000); if(diff<0) return null;
   const u = S.lang && ZMAN_UNITS[S.lang];
   let t;
-  if(diff<60) t = u ? ckChrome('בְּעוֹד')+' '+diff+' '+u.m : 'בְּעוֹד '+diff+' דַּקּוֹת';
+  if(diff<60) t = u ? ckChrome('בעוד')+' '+diff+' '+u.m : 'בעוד '+diff+' דקות';
   else {
     const hh=Math.floor(diff/60),mm=diff%60;
-    t = u ? ckChrome('בְּעוֹד')+' '+hh+u.h+(mm?' '+mm+u.m:'')
-          : 'בְּעוֹד '+hh+'ש\''+(mm?' '+mm+'ד\'':'');
+    t = u ? ckChrome('בעוד')+' '+hh+u.h+(mm?' '+mm+u.m:'')
+          : 'בעוד '+hh+'ש\''+(mm?' '+mm+'ד\'':'');
   }
   return {label:z.label, t, time:fmtTime(z.date)};
 }
@@ -5937,6 +5937,11 @@ function renderTracker(){
    replace. The following whitespace collapse absorbs the extra space this -
    or a stray double space already in the query - introduces. */
 function stripNik(x){ return (x||'').replace(/\u05BE/g,' ').replace(/[\u0591-\u05C7]/g,'').replace(/[\u05F3\u05F4'"׳״:.,]/g,'').replace(/\s+/g,' ').trim(); }
+/* unlike stripNik() (search normalization - also drops maqaf/geresh/punctuation),
+   this keeps everything except the vowel/cantillation marks themselves, for
+   de-vocalizing a display string (e.g. a holiday name rendered with nikud by
+   the third-party hebcal library) without disturbing maqaf-joined compounds. */
+function deNikud(x){ return (x||'').replace(/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g,''); }
 function renderTehillim(){
   app.innerHTML = `
   ${topbar('ספר תהלים')}
@@ -6211,7 +6216,7 @@ function shabbatTimes(hd){
       if(chMatch){ chanukahNight=+chMatch[1]; if(t) candle=t; return; }
       if(t && /Candle/i.test(d)){ candle=t; return; }
       if(t && /Havdalah/i.test(d)){ havdala=t; return; }
-      if(!t && (f&CHAG_EREV) && !label) label=ev.render('he');
+      if(!t && (f&CHAG_EREV) && !label) label=deNikud(ev.render('he'));
     });
     return {candle,havdala,chanukahNight,label};
   }catch(err){ return {candle:null,havdala:null,chanukahNight:null,label:null}; }
@@ -6463,7 +6468,7 @@ function nextHoliday(){
     const il=/Jerusalem/.test(LOC.tz);
     const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
     const majors=/(רֹאשׁ הַשָּׁנָה|כִּפּוּר|סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת|חֲנֻכָּה|חֲנוּכָּה|פּוּרִים|פֶּסַח|שָׁבוּעוֹת|בְּאָב|בָּעֹמֶר|בָּעוֹמֶר|בִּשְׁבָט)/;
-    for(const ev of evs){ const d=ev.getDate(); if(d.abs()<=today.abs()) continue; const nm=ev.render('he'); if(majors.test(nm)) return {name:(S.lang==='he'?nm:holidayName(ev.render('en'))), days:d.abs()-today.abs()}; }
+    for(const ev of evs){ const d=ev.getDate(); if(d.abs()<=today.abs()) continue; const nm=ev.render('he'); if(majors.test(nm)) return {name:(S.lang==='he'?deNikud(nm):holidayName(ev.render('en'))), days:d.abs()-today.abs()}; }
   }catch(err){}
   return null;
 }
@@ -6528,13 +6533,13 @@ function nextHolidayHalacha(){
       if(days>30) return null;
       const idx=CYC.rambam.order.findIndex(e=>e.book===m.book && e.ch===m.ch);
       if(idx<0) return null;
-      return {name:(S.lang==='he'?nm:holidayName(ev.render('en'))), days, idx};
+      return {name:(S.lang==='he'?deNikud(nm):holidayName(ev.render('en'))), days, idx};
     }
   }catch(err){}
   return null;
 }
 const HOLIDAY_HALACHA_UI={
-  he:{title:'הִלְכוֹת הֶחָג הַקָּרֵב', inDays:n=>n===1?'מָחָר':'בְּעוֹד '+heNum(n)+' יָמִים'},
+  he:{title:'הלכות החג הקרב', inDays:n=>n===1?'מחר':'בעוד '+heNum(n)+' ימים'},
   en:{title:"Upcoming holiday's halachot", inDays:n=>n===1?'tomorrow':'in '+n+' days'},
   fr:{title:'Halakhot de la fête à venir', inDays:n=>n===1?'demain':'dans '+n+' jours'},
   ru:{title:'Ѓалахот приближающегося праздника', inDays:n=>n===1?'завтра':'через '+n+' дн.'},
