@@ -244,9 +244,10 @@ body::before{ /* subtle starfield/texture */
 .btn-row{display:flex;gap:10px;margin-top:12px}
 .btn-row .btn{font-size:14px;padding:13px}
 
-/* quick tiles */
-.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.quick-grid:has(>.q-tile:only-child)>.q-tile{grid-column:1/-1}
+/* quick tiles - one continuous reflowing grid (not fixed 2-up pairs), so it
+   naturally shows more columns as the viewport grows (phone -> iPad ->
+   wider) without any width breakpoint or leftover empty-column gaps. */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}
 .q-tile{background:var(--panel);border:var(--glass-border);border-radius:var(--radius-sm);padding:20px 17px;
   min-height:88px;display:flex;flex-direction:column;justify-content:center;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
 .q-tile:active{transform:scale(.97)}
@@ -255,12 +256,11 @@ body::before{ /* subtle starfield/texture */
 .q-tile .qi{color:var(--gold);width:38px;height:38px;border-radius:50%;background:var(--panel-2);display:grid;place-items:center}.q-tile .qi svg{width:20px;height:20px}
 .q-tile .qt{font-family:var(--font-sacred);font-size:19px;font-weight:700}
 .q-tile .qd{font-size:14.5px;color:var(--muted)}
-/* the home screen's very first row (today's Chok LeYisrael + Tehillim) are
-   the two daily anchor obligations - give them a touch more presence than
-   the five secondary tiles below so the grid isn't six identical boxes */
-.quick-grid-primary .q-tile{padding:25px 19px;min-height:104px}
-.quick-grid-primary .q-tile .qt{font-size:21px}
-.quick-grid-primary .q-tile{box-shadow:0 14px 30px -16px rgba(0,0,0,.4),var(--card-shadow)}
+/* today's Chok LeYisrael + Tehillim are the two daily anchor obligations -
+   give them a touch more presence than the other tiles in the same grid
+   (same column width, just taller/bolder) so the grid isn't identical boxes */
+.q-tile.primary{padding:25px 19px;min-height:104px;box-shadow:0 14px 30px -16px rgba(0,0,0,.4),var(--card-shadow)}
+.q-tile.primary .qt{font-size:21px}
 
 /* ================= TEHILLIM GRID ================= */
 .section-head{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 14px}
@@ -858,7 +858,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
    library screen carries one consistent color language. */
 .prayer-row-feature{border-inline-start:3px solid var(--cat-color,var(--gold));padding-inline-start:15px}
 .prayer-row-feature .prayer-row-title{font-size:18px}
-/* The Library entry row sits above the (now bigger, quick-grid-primary-sized)
+/* The Library entry row sits above the (now bigger, .q-tile.primary-sized)
    Prayers group tiles below it - give it matching extra padding+font so it
    doesn't look smaller than what it leads into. */
 .prayer-row-lib{padding:20px 18px}
@@ -5740,23 +5740,20 @@ function renderHome(){
     })()}
     ${dedHTML('')}
 
-    <div class="quick-grid quick-grid-primary">
+    <div class="quick-grid">
       ${(function(){
         if(!CHOK) return '';
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
-        return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
+        return `<div class="q-tile primary${done?' done':''}" data-cat="chok" id="homeChokCard">
           <div class="qt">${heTitle('חוק לישראל','חוֹק לְיִשְׂרָאֵל')}</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
-      <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
+      <div class="q-tile primary${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
         <div class="qt">${heTitle('תהלים היומי','תְּהִלִּים הַיּוֹמִי')}</div>
         <div class="qd">${rangeLabel} · ${chs.length} פרקים</div>
       </div>
-    </div>
-
-    <div class="quick-grid">
       ${(function(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
@@ -5769,9 +5766,6 @@ function renderHome(){
         <div class="qt">${heTitle('שנים מקרא','שְׁנַיִם מִקְרָא')}</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
-    </div>
-
-    <div class="quick-grid">
       ${(function(){
         const key=homeNowPrayerKey();
         return `<div class="q-tile" data-cat="siddur" id="homePrayerCard">
@@ -5783,9 +5777,6 @@ function renderHome(){
         <div class="qt">${heTitle('מוסר','מוּסָר')}</div>
         <div class="qd">${ckMusarUI()[S.musarWork||'reshit']}</div>
       </div>
-    </div>
-
-    <div class="quick-grid">
       ${(function(){
         const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
         const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
@@ -6759,8 +6750,8 @@ function renderPrayersList(){
           <span class="prayer-row-title">${heTitle('ספרים','סְפָרִים')}</span>
         </div>
       </div>
-      <div class="quick-grid quick-grid-primary" style="margin-top:14px">
-        ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile round-card" data-cat="${g}" data-praygroup="${g}">
+      <div class="quick-grid" style="margin-top:14px">
+        ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile primary round-card" data-cat="${g}" data-praygroup="${g}">
           <div class="qt">${heTitle(PRAYER_GROUPS[g].he, PRAYER_GROUPS_NIKUD[g])}</div>
         </div>`).join('')}
       </div>
