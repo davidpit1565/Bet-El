@@ -1744,6 +1744,22 @@ const PRAYERS_EXTRA = {
     text: 'יְהִי רָצוֹן מִלְּפָנֶיךָ ה\' אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, שֶׁתּוֹלִיכֵנוּ לְשָׁלוֹם וְתַצְעִידֵנוּ לְשָׁלוֹם, וְתַדְרִיכֵנוּ לְשָׁלוֹם, וְתִסְמְכֵנוּ לְשָׁלוֹם, וְתַגִּיעֵנוּ לִמְחוֹז חֶפְצֵנוּ לְחַיִּים וּלְשִׂמְחָה וּלְשָׁלוֹם.\n\nוְתַצִּילֵנוּ מִכַּף כָּל אוֹיֵב וְאוֹרֵב וְלִסְטִים וְחַיּוֹת רָעוֹת בַּדֶּרֶךְ, וּמִכָּל מִינֵי פֻּרְעָנֻיּוֹת הַמִּתְרַגְּשׁוֹת וּבָאוֹת לָעוֹלָם.\n\nוְתִשְׁלַח בְּרָכָה בְּכָל מַעֲשֵׂה יָדֵינוּ, וְתִתְּנֵנוּ לְחֵן וּלְחֶסֶד וּלְרַחֲמִים בְּעֵינֶיךָ וּבְעֵינֵי כָל רוֹאֵינוּ.\n\nוְתִשְׁמַע קוֹל תַּחֲנוּנֵנוּ, כִּי אֵל שׁוֹמֵעַ תְּפִלָּה וְתַחֲנוּן אָתָּה. בָּרוּךְ אַתָּה ה\', שׁוֹמֵעַ תְּפִלָּה.\n\n[[NOTE]]וְיֵשׁ הַמּוֹסִיפִים פְּסוּקִים אֵלֶּה לִשְׁמִירָה:\n\nהַמַּלְאָךְ הַגֹּאֵל אֹתִי מִכָּל רָע יְבָרֵךְ אֶת הַנְּעָרִים וְיִקָּרֵא בָהֶם שְׁמִי וְשֵׁם אֲבֹתַי אַבְרָהָם וְיִצְחָק, וְיִדְגּוּ לָרֹב בְּקֶרֶב הָאָרֶץ.\n\nוְיַעֲקֹב הָלַךְ לְדַרְכּוֹ וַיִּפְגְּעוּ בוֹ מַלְאֲכֵי אֱלֹהִים. וַיֹּאמֶר יַעֲקֹב כַּאֲשֶׁר רָאָם: מַחֲנֵה אֱלֹהִים זֶה, וַיִּקְרָא שֵׁם הַמָּקוֹם הַהוּא מַחֲנָיִם — ג׳ פְּעָמִים\n\nוַיִּסְעוּ וַיְהִי חִתַּת אֱלֹהִים עַל הֶעָרִים אֲשֶׁר סְבִיבוֹתֵיהֶם וְלֹא רָדְפוּ אַחֲרֵי בְּנֵי יַעֲקֹב. לִישׁוּעָתְךָ קִוִּיתִי ה׳ — ג׳ פְּעָמִים\n\n[[NOTE]]וְאַחַר כָּךְ יֹאמַר שִׁיר לַמַּעֲלוֹת:\n\nשִׁיר לַמַּעֲלוֹת. אֶשָּׂא עֵינַי אֶל הֶהָרִים, מֵאַיִן יָבֹא עֶזְרִי. עֶזְרִי מֵעִם ה׳, עֹשֵׂה שָׁמַיִם וָאָרֶץ. אַל יִתֵּן לַמּוֹט רַגְלֶךָ, אַל יָנוּם שֹׁמְרֶךָ. הִנֵּה לֹא יָנוּם וְלֹא יִישָׁן, שׁוֹמֵר יִשְׂרָאֵל. ה׳ שֹׁמְרֶךָ, ה׳ צִלְּךָ עַל יַד יְמִינֶךָ. יוֹמָם הַשֶּׁמֶשׁ לֹא יַכֶּכָּה, וְיָרֵחַ בַּלָּיְלָה. ה׳ יִשְׁמָרְךָ מִכָּל רָע, יִשְׁמֹר אֶת נַפְשֶׁךָ. ה׳ יִשְׁמָר צֵאתְךָ וּבוֹאֶךָ, מֵעַתָּה וְעַד עוֹלָם.'
   }
 };
+/* PRAYERS_EXTRA[key].title is also the tr()-lookup key for en/fr/ru/ka
+   transliterations, so it stays plain there; this side-table supplies the
+   nikud'd form shown on the big tile button (renderPrayersGroup) when the
+   language is Hebrew (see heTitle()). */
+const PRAYERS_EXTRA_TITLE_NIKUD = {
+  hataratNedarim:'סֵדֶר הַתָּרַת נְדָרִים וּקְלָלוֹת',
+  igeretHaramban:'אִגֶּרֶת הָרַמְבַּ"ן',
+  birkotHashachar:'בִּרְכוֹת הַשַּׁחַר',
+  pitumHaketoret:'פִּטּוּם הַקְּטֹרֶת',
+  asaretZikrot:'עֲשֶׂרֶת הַזְּכִירוֹת',
+  shloshaEsreIkkarim:'שְׁלֹשָׁה עָשָׂר עִקָּרִים',
+  perekShira:'פֶּרֶק שִׁירָה',
+  tefilatHashela:'תְּפִלַּת הַשֶּׁל"ה עַל הַבָּנִים',
+  petichatEliyahu:'פֶּתַח אֵלִיָּהוּ',
+  tefilatHaderech:'תְּפִלַּת הַדֶּרֶךְ',
+};
 
 /* Groups the "תפילות" home screen into three colored tiles (matching the
    Library's category-tile look) instead of one flat list - ברכות, סידור
@@ -1752,10 +1768,15 @@ const PRAYERS_EXTRA = {
    automatically (prayerGroupKeys computes it by exclusion), so a new
    PRAYERS_EXTRA entry never needs a matching edit here to show up somewhere. */
 const PRAYER_GROUPS = {
-  siddur: {he:'סידור', keys:[]}, // now a real full screen (siddurHome/siddurReader), not a flat prayer list - see renderSiddurHome/renderSiddurReader. tefilatHaderech falls through to "more" below (prayerGroupKeys collects any key no other group claims).
+  siddur: {he:'סדור', keys:[]}, // now a real full screen (siddurHome/siddurReader), not a flat prayer list - see renderSiddurHome/renderSiddurReader. tefilatHaderech falls through to "more" below (prayerGroupKeys collects any key no other group claims).
+  // (spelling matches the Siddur topbar's own 'סדור' so both share the same I18N translation entry)
   brachot: {he:'ברכות', keys:['birkatHamazon']},
   more: {he:'תפילות נוספות', keys:null},
 };
+/* Library screen's own big tile titles keep nikud (see heTitle()) - the
+   plain PRAYER_GROUPS.he values above stay as the tr()-translatable/lookup
+   form used everywhere else (search groups, etc). */
+const PRAYER_GROUPS_NIKUD = {siddur:'סִדּוּר', brachot:'בְּרָכוֹת', more:'תְּפִלּוֹת נוֹסָפוֹת'};
 // PRAYERS_EXTRA.birkotHashachar's text is also the data source
 // siddurBirkotHashacharHTML() reads from for the real Siddur reader - keep
 // the entry, just don't let it show up a second time in the flat Tefilot
@@ -2126,7 +2147,7 @@ function startCompass(){
   }
 }
 /* ---------- shnayim mikra (parashat hashavua) ---------- */
-const PARSHA_HE_NAMES = {"Bereshit":"בראשית","Noach":"נח","Lech-Lecha":"לך־לך","Vayera":"וירא","Chayei Sara":"חיי שרה","Toldot":"תולדות","Vayetzei":"ויצא","Vayishlach":"וישלח","Vayeshev":"וישב","Miketz":"מקץ","Vayigash":"ויגש","Vayechi":"ויחי","Shemot":"שמות","Vaera":"וארא","Bo":"בא","Beshalach":"בשלח","Yitro":"יתרו","Mishpatim":"משפטים","Terumah":"תרומה","Tetzaveh":"תצוה","Ki Tisa":"כי תשא","Vayakhel":"ויקהל","Pekudei":"פקודי","Vayikra":"ויקרא","Tzav":"צו","Shmini":"שמיני","Tazria":"תזריע","Metzora":"מצרע","Achrei Mot":"אחרי מות","Kedoshim":"קדשים","Emor":"אמור","Behar":"בהר","Bechukotai":"בחקתי","Bamidbar":"במדבר","Nasso":"נשא","Beha'alotcha":"בהעלתך","Sh'lach":"שלח־לך","Korach":"קרח","Chukat":"חקת","Balak":"בלק","Pinchas":"פינחס","Matot":"מטות","Masei":"מסעי","Devarim":"דברים","Vaetchanan":"ואתחנן","Eikev":"עקב","Re'eh":"ראה","Shoftim":"שופטים","Ki Teitzei":"כי־תצא","Ki Tavo":"כי־תבוא","Nitzavim":"נצבים","Vayeilech":"וילך","Ha'azinu":"האזינו","Vezot Haberakhah":"וזאת הברכה","Vayakhel-Pekudei":"ויקהל־פקודי","Tazria-Metzora":"תזריע־מצרע","Achrei Mot-Kedoshim":"אחרי מות־קדשים","Behar-Bechukotai":"בהר־בחקתי","Chukat-Balak":"חקת־בלק","Matot-Masei":"מטות־מסעי","Nitzavim-Vayeilech":"נצבים־וילך"};
+const PARSHA_HE_NAMES = {"Bereshit":"בְּרֵאשִׁית","Noach":"נֹחַ","Lech-Lecha":"לֶךְ־לְךָ","Vayera":"וַיֵּרָא","Chayei Sara":"חַיֵּי שָׂרָה","Toldot":"תּוֹלְדוֹת","Vayetzei":"וַיֵּצֵא","Vayishlach":"וַיִּשְׁלַח","Vayeshev":"וַיֵּשֶׁב","Miketz":"מִקֵּץ","Vayigash":"וַיִּגַּשׁ","Vayechi":"וַיְחִי","Shemot":"שְׁמוֹת","Vaera":"וָאֵרָא","Bo":"בֹּא","Beshalach":"בְּשַׁלַּח","Yitro":"יִתְרוֹ","Mishpatim":"מִשְׁפָּטִים","Terumah":"תְּרוּמָה","Tetzaveh":"תְּצַוֶּה","Ki Tisa":"כִּי תִשָּׂא","Vayakhel":"וַיַּקְהֵל","Pekudei":"פְקוּדֵי","Vayikra":"וַיִּקְרָא","Tzav":"צַו","Shmini":"שְּׁמִינִי","Tazria":"תַזְרִיעַ","Metzora":"מְצֹרָע","Achrei Mot":"אַחֲרֵי מוֹת","Kedoshim":"קְדֹשִׁים","Emor":"אֱמוֹר","Behar":"בְּהַר","Bechukotai":"בְּחֻקֹּתַי","Bamidbar":"בְּמִדְבַּר","Nasso":"נָשׂא","Beha'alotcha":"בְּהַעֲלֹתְךָ","Sh'lach":"שְׁלַח־לְךָ","Korach":"קֹרַח","Chukat":"חֻקַּת","Balak":"בָּלָק","Pinchas":"פִּינְחָס","Matot":"מַטּוֹת","Masei":"מַסְעֵי","Devarim":"דְּבָרִים","Vaetchanan":"וָאֶתְחַנַּן","Eikev":"עֵקֶב","Re'eh":"רְאֵה","Shoftim":"שׁוֹפְטִים","Ki Teitzei":"כִּי־תֵצֵא","Ki Tavo":"כִּי־תָבוֹא","Nitzavim":"נִצָּבִים","Vayeilech":"וַיֵּלֶךְ","Ha'azinu":"הַאֲזִינוּ","Vezot Haberakhah":"וְזֹאת הַבְּרָכָה","Vayakhel-Pekudei":"וַיַּקְהֵל־פְקוּדֵי","Tazria-Metzora":"תַזְרִיעַ־מְצֹרָע","Achrei Mot-Kedoshim":"אַחֲרֵי מוֹת־קְדֹשִׁים","Behar-Bechukotai":"בְּהַר־בְּחֻקֹּתַי","Chukat-Balak":"חֻקַּת־בָּלָק","Matot-Masei":"מַטּוֹת־מַסְעֵי","Nitzavim-Vayeilech":"נִצָּבִים־וַיֵּלֶךְ"};
 const PARSHA_FR_NAMES={"Bereshit":"Béréchit","Noach":"Noakh","Lech-Lecha":"Lékh-lékha","Vayera":"Vayyéra","Chayei Sara":"Khayyé sara","Toldot":"Toldot","Vayetzei":"Vayyétsé","Vayishlach":"Vayyichlakh","Vayeshev":"Vayyéchév","Miketz":"Mikkéts","Vayigash":"Vayyiggach","Vayechi":"Vaykhi","Shemot":"Chémot","Vaera":"Vaéra","Bo":"Bo","Beshalach":"Béchallakh","Yitro":"Yitro","Mishpatim":"Michpatim","Terumah":"Térouma","Tetzaveh":"Tétsavvé","Ki Tisa":"Ki tissa","Vayakhel":"Vayyakhél","Pekudei":"Fékoudé","Vayikra":"Vayyikra","Tzav":"Tsav","Shmini":"Chémini","Tazria":"Tazria","Metzora":"Métsora","Achrei Mot":"Akharé mot","Kedoshim":"Kédochim","Emor":"Émor","Behar":"Béhar","Bechukotai":"Békhoukkotay","Bamidbar":"Bémidbar","Nasso":"Nas","Beha'alotcha":"Béhaalotkha","Sh'lach":"Chélakh-lékha","Korach":"Korakh","Chukat":"Khoukkat","Balak":"Balak","Pinchas":"Pinkhas","Matot":"Mattot","Masei":"Massé","Devarim":"Dévarim","Vaetchanan":"Vaétkhannan","Eikev":"Ékév","Re'eh":"Réé","Shoftim":"Choftim","Ki Teitzei":"Ki-tétsé","Ki Tavo":"Ki-tavo","Nitzavim":"Nitstsavim","Vayeilech":"Vayyélékh","Ha'azinu":"Haazinou","Vezot Haberakhah":"Vézot habbérakha","Vayakhel-Pekudei":"Vayyakhél-fékoudé","Tazria-Metzora":"Tazria-métsora","Achrei Mot-Kedoshim":"Akharé mot-kédochim","Behar-Bechukotai":"Béhar-békhoukkotay","Chukat-Balak":"Khoukkat-balak","Matot-Masei":"Mattot-massé","Nitzavim-Vayeilech":"Nitstsavim-vayyélékh"};
 const PARSHA_RU_NAMES={"Bereshit":"Берешит","Noach":"Ноах","Lech-Lecha":"Лех-леха","Vayera":"Ваййера","Chayei Sara":"Хаййе сара","Toldot":"Толдот","Vayetzei":"Ваййеце","Vayishlach":"Ваййишлах","Vayeshev":"Ваййешев","Miketz":"Миккец","Vayigash":"Ваййиггаш","Vayechi":"Вайхи","Shemot":"Шемот","Vaera":"Ваера","Bo":"Бо","Beshalach":"Бешаллах","Yitro":"Йитро","Mishpatim":"Мишпатим","Terumah":"Терума","Tetzaveh":"Тецавве","Ki Tisa":"Ки тисса","Vayakhel":"Ваййакгел","Pekudei":"Фекуде","Vayikra":"Ваййикра","Tzav":"Цав","Shmini":"Шемини","Tazria":"Тазриа","Metzora":"Мецора","Achrei Mot":"Ахаре мот","Kedoshim":"Кедошим","Emor":"Емор","Behar":"Бегар","Bechukotai":"Бехуккотай","Bamidbar":"Бемидбар","Nasso":"Нас","Beha'alotcha":"Бегаалотха","Sh'lach":"Шелах-леха","Korach":"Корах","Chukat":"Хуккат","Balak":"Балак","Pinchas":"Пинхас","Matot":"Маттот","Masei":"Масе","Devarim":"Деварим","Vaetchanan":"Ваетханнан","Eikev":"Екев","Re'eh":"Рее","Shoftim":"Шофтим","Ki Teitzei":"Ки-теце","Ki Tavo":"Ки-таво","Nitzavim":"Ниццавим","Vayeilech":"Ваййелех","Ha'azinu":"Гаазину","Vezot Haberakhah":"Везот габбераха","Vayakhel-Pekudei":"Ваййакгел-фекуде","Tazria-Metzora":"Тазриа-мецора","Achrei Mot-Kedoshim":"Ахаре мот-кедошим","Behar-Bechukotai":"Бегар-бехуккотай","Chukat-Balak":"Хуккат-балак","Matot-Masei":"Маттот-масе","Nitzavim-Vayeilech":"Ниццавим-ваййелех"};
 function parshaName(key){
@@ -2160,7 +2181,7 @@ function bookName(book){
   if(S.lang==='fr') return PARSHA_FR_NAMES[BOOK_PARSHA_KEY[book]]||book;
   if(S.lang==='ru') return PARSHA_RU_NAMES[BOOK_PARSHA_KEY[book]]||book;
   if(S.lang==='ka') return PARSHA_KA_NAMES[BOOK_PARSHA_KEY[book]]||book;
-  return stripNik(BOOK_HE_NAMES[book]);
+  return BOOK_HE_NAMES[book];
 }
 let TORAH=null, HAFTARAH=null, LEYNING=null, TORAH_TRANSLIT={};
 let smLoadPromise=null;
@@ -3791,7 +3812,11 @@ function ckTanyaLabel(orderIndex){
    word like "אות" (paragraph) would also match every biblical "sign" verse
    translated elsewhere in the app if it were a normal dictionary entry. */
 const MUSAR_UI={
-  he:{reshit:'ראשית חכמה', teshuva:'שערי תשובה', kedusha:'שערי קדושה', mesilat:'מסלת ישרים', orchot:'ארחות צדיקים', peleyoetz:'פלא יועץ',
+  he:{reshit:'רֵאשִׁית חָכְמָה', teshuva:'שַׁעֲרֵי תְשׁוּבָה', kedusha:'שַׁעֲרֵי קְדוּשָׁה', mesilat:'מְסִלַּת יְשָׁרִים', orchot:'אָרְחוֹת צַדִּיקִים', peleyoetz:'פֶּלֶא יוֹעֵץ',
+      /* gate/chapter/intro/para stay plain - they build the reader's own
+         section headers (e.g. "שער ג'"), which keep the no-nikud reader-
+         chrome convention established earlier, unlike the work titles
+         above which act as buttons (musar list, work switcher). */
       gate:'שער', chapter:'פרק', intro:'הקדמה', para:'אות', today:'היום'},
   en:{reshit:'Reshit Chokhmah', teshuva:"Sha'arei Teshuvah", kedusha:"Sha'arei Kedusha", mesilat:'Mesillat Yesharim', orchot:'Orchot Tzadikim', peleyoetz:'Pele Yoetz',
       gate:'Gate', chapter:'Chapter', intro:'Introduction', para:'Paragraph', today:'Today'},
@@ -5647,6 +5672,12 @@ function homeNowPrayerKey(){
   }catch(e){}
   return 'arvit';
 }
+/* the home screen's big tile titles (.qt) keep nikud on request, but the
+   underlying Hebrew string is also what tr()'s exact-match dictionary
+   lookup keys on for en/fr/ru/ka - so a nikud'd literal there would
+   silently stop translating for those languages (tr() is a no-op for
+   'he' itself, so this only matters once S.lang is something else). */
+function heTitle(plain,nikud){ return (S.lang && S.lang!=='he') ? plain : nikud; }
 function renderHome(){
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
@@ -5700,12 +5731,12 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
-          <div class="qt">חוק לישראל</div>
+          <div class="qt">${heTitle('חוק לישראל','חוֹק לְיִשְׂרָאֵל')}</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
       <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
-        <div class="qt">תהלים היומי</div>
+        <div class="qt">${heTitle('תהלים היומי','תְּהִלִּים הַיּוֹמִי')}</div>
         <div class="qd">${rangeLabel} · ${chs.length} פרקים</div>
       </div>
     </div>
@@ -5715,12 +5746,12 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="zohar" id="homeZoharCard">
-          <div class="qt">זהר היומי</div>
+          <div class="qt">${heTitle('זהר היומי','זֹהַר הַיּוֹמִי')}</div>
           <div class="qd">לפי סדר עמוד ליום</div>
         </div>`;
       })()}
       ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" data-cat="shnayim" id="homeParshaCard">
-        <div class="qt">שנים מקרא</div>
+        <div class="qt">${heTitle('שנים מקרא','שְׁנַיִם מִקְרָא')}</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
     </div>
@@ -5729,12 +5760,12 @@ function renderHome(){
       ${(function(){
         const key=homeNowPrayerKey();
         return `<div class="q-tile" data-cat="siddur" id="homePrayerCard">
-          <div class="qt">${SIDDUR_PRAYER_NAMES[key]}</div>
+          <div class="qt">${heTitle(SIDDUR_PRAYER_NAMES[key], SIDDUR_PRAYER_NAMES_NIKUD[key]||SIDDUR_PRAYER_NAMES[key])}</div>
           <div class="qd">עכשו</div>
         </div>`;
       })()}
       <div class="q-tile" data-cat="musar" id="homeMusarCard">
-        <div class="qt">מוסר</div>
+        <div class="qt">${heTitle('מוסר','מוּסָר')}</div>
         <div class="qd">${ckMusarUI()[S.musarWork||'reshit']}</div>
       </div>
     </div>
@@ -5744,7 +5775,7 @@ function renderHome(){
         const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
         const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
         return `<div class="q-tile" data-cat="benishchai" id="homeBicCard">
-          <div class="qt">${ckBicUI().title}</div>
+          <div class="qt">${heTitle(ckBicUI().title,'בֶּן אִישׁ חַי')}</div>
           <div class="qd">${p?bicParshaName(p):(weekParshaKey?parshaName(weekParshaKey):'')}</div>
         </div>`;
       })()}
@@ -6710,12 +6741,12 @@ function renderPrayersList(){
     <div id="libBrowse">
       <div class="prayers-list">
         <div class="prayer-row round-card prayer-row-feature prayer-row-lib" data-cat="library" onclick="go('library')">
-          <span class="prayer-row-title">ספרים</span>
+          <span class="prayer-row-title">${heTitle('ספרים','סְפָרִים')}</span>
         </div>
       </div>
       <div class="quick-grid quick-grid-primary" style="margin-top:14px">
         ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile round-card" data-cat="${g}" data-praygroup="${g}">
-          <div class="qt">${PRAYER_GROUPS[g].he}</div>
+          <div class="qt">${heTitle(PRAYER_GROUPS[g].he, PRAYER_GROUPS_NIKUD[g])}</div>
         </div>`).join('')}
       </div>
     </div>
@@ -6739,7 +6770,7 @@ function renderPrayersGroup(){
     ${ready.length ? `<div class="quick-grid">
       ${ready.map(key => `
         <div class="q-tile round-card" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
-          <div class="qt">${PRAYERS_EXTRA[key].title}</div>
+          <div class="qt">${heTitle(PRAYERS_EXTRA[key].title, PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</div>
         </div>
       `).join('')}
     </div>` : `<div class="empty-note" style="padding:40px 20px;text-align:center">
@@ -6788,6 +6819,16 @@ function libCatLabel(key){
   if(key==='benishchai') return (BIC_UI[S.lang]||BIC_UI.he).title;
   const c=LIBRARY_CATS.find(x=>x.key===key);
   return c ? ckChrome(c.label) : key;
+}
+/* Library screen's own big tile titles keep nikud (see heTitle()) -
+   libCatLabel() above stays the plain tr()-translatable form used
+   everywhere else (search groups, etc). */
+const LIBRARY_CATS_NIKUD = {torah:'תּוֹרָה', neviim:'נְבִיאִים', ketuvim:'כְּתוּבִים', mishnah:'מִשְׁנָה',
+  gemara:'גְּמָרָא', rambam:'רמב״ם', musar:'מוּסָר', tikkuneiZohar:'תִּיקּוּנֵי הַזֹּהַר', zohar:'זֹהַר',
+  tanya:'תַּנְיָא', chokLeyisrael:'חוֹק לְיִשְׂרָאֵל', shnayimMikra:'שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם'};
+function libCatTileLabel(key){
+  if(key==='benishchai') return heTitle((BIC_UI[S.lang]||BIC_UI.he).title,'בֶּן אִישׁ חַי');
+  return heTitle(libCatLabel(key), LIBRARY_CATS_NIKUD[key]||libCatLabel(key));
 }
 /* ================= LIBRARY: unified reference/name search =================
    One search box on renderPrayersList() - the top-level "תְּפִלּוֹת" screen
@@ -7081,7 +7122,7 @@ function renderLibrary(){
   <div class="view">
     <div class="quick-grid">
       ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.cssCat||c.key}">
-        <div class="qt">${libCatLabel(c.key)}</div>
+        <div class="qt">${libCatTileLabel(c.key)}</div>
       </div>`).join('')}
     </div>
     ${ornament()}
@@ -7647,7 +7688,7 @@ function ensureMishnahIndex(){
   return mishnahLoadPromise;
 }
 const SEDER_UI={
-  he:{Zeraim:'זרעים',Moed:'מועד',Nashim:'נשים',Nezikin:'נזיקין',Kodashim:'קדשים',Taharot:'טהרות'},
+  he:{Zeraim:'זְרָעִים',Moed:'מוֹעֵד',Nashim:'נָשִׁים',Nezikin:'נְזִיקִין',Kodashim:'קָדָשִׁים',Taharot:'טָהֳרוֹת'},
   en:{Zeraim:'Zeraim',Moed:'Moed',Nashim:'Nashim',Nezikin:'Nezikin',Kodashim:'Kodashim',Taharot:'Taharot'},
   fr:{Zeraim:'Zeraïm',Moed:'Moed',Nashim:'Nashim',Nezikin:'Nezikin',Kodashim:'Kodachim',Taharot:'Taharot'},
   ru:{Zeraim:'Зраим',Moed:'Моэд',Nashim:'Нашим',Nezikin:'Незикин',Kodashim:'Кодашим',Taharot:'Таарот'},
@@ -7941,6 +7982,11 @@ function renderPrayerReader(){
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
 const SIDDUR_PRAYER_NAMES = {birkot:'ברכות השחר', talitTefilin:'סדר טלית ותפלין', shacharit:'שחרית', mincha:'מנחה', arvit:'ערבית', roshChodesh:'סדר ראש חדש', omer:'ספירת העמר', levana:'ברכת הלבנה', tikunChatzot:'תקון חצות', selichot:'סליחות'};
+/* home screen's own "current prayer" tile only - shown big/bold like a
+   title rather than read as a sentence, so (per the nikud-on-request
+   above) it keeps nikud there while every other use of
+   SIDDUR_PRAYER_NAMES (reader title, siddur list, search) stays plain. */
+const SIDDUR_PRAYER_NAMES_NIKUD = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת', selichot:'סְלִיחוֹת'};
 /* where you stopped - same shape as Chok LeYisrael's ckBm-/ckResume/ckRestart:
    tracked as you read (topmost paragraph on screen), offering to resume or
    restart only when the reader is opened, never clearing on its own. */
@@ -8037,7 +8083,7 @@ function drawSiddurHome(){
   <div class="view">
     <div class="quick-grid">
       ${tiles.map(p=>`<div class="q-tile round-card" data-cat="siddur" data-sidp="${p}">
-        <div class="qt">${SIDDUR_PRAYER_NAMES[p]}</div>
+        <div class="qt">${heTitle(SIDDUR_PRAYER_NAMES[p], SIDDUR_PRAYER_NAMES_NIKUD[p]||SIDDUR_PRAYER_NAMES[p])}</div>
       </div>`).join('')}
     </div>
     <div style="font-family:var(--font-ui);font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7">
