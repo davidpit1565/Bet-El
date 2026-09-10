@@ -244,9 +244,10 @@ body::before{ /* subtle starfield/texture */
 .btn-row{display:flex;gap:10px;margin-top:12px}
 .btn-row .btn{font-size:14px;padding:13px}
 
-/* quick tiles */
-.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.quick-grid:has(>.q-tile:only-child)>.q-tile{grid-column:1/-1}
+/* quick tiles - one continuous reflowing grid (not fixed 2-up pairs), so it
+   naturally shows more columns as the viewport grows (phone -> iPad ->
+   wider) without any width breakpoint or leftover empty-column gaps. */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}
 .q-tile{background:var(--panel);border:var(--glass-border);border-radius:var(--radius-sm);padding:20px 17px;
   min-height:88px;display:flex;flex-direction:column;justify-content:center;gap:8px;cursor:pointer;transition:.2s var(--ease);backdrop-filter:blur(8px)}
 .q-tile:active{transform:scale(.97)}
@@ -255,12 +256,11 @@ body::before{ /* subtle starfield/texture */
 .q-tile .qi{color:var(--gold);width:38px;height:38px;border-radius:50%;background:var(--panel-2);display:grid;place-items:center}.q-tile .qi svg{width:20px;height:20px}
 .q-tile .qt{font-family:var(--font-sacred);font-size:19px;font-weight:700}
 .q-tile .qd{font-size:14.5px;color:var(--muted)}
-/* the home screen's very first row (today's Chok LeYisrael + Tehillim) are
-   the two daily anchor obligations - give them a touch more presence than
-   the five secondary tiles below so the grid isn't six identical boxes */
-.quick-grid-primary .q-tile{padding:25px 19px;min-height:104px}
-.quick-grid-primary .q-tile .qt{font-size:21px}
-.quick-grid-primary .q-tile{box-shadow:0 14px 30px -16px rgba(0,0,0,.4),var(--card-shadow)}
+/* today's Chok LeYisrael + Tehillim are the two daily anchor obligations -
+   give them a touch more presence than the other tiles in the same grid
+   (same column width, just taller/bolder) so the grid isn't identical boxes */
+.q-tile.primary{padding:25px 19px;min-height:104px;box-shadow:0 14px 30px -16px rgba(0,0,0,.4),var(--card-shadow)}
+.q-tile.primary .qt{font-size:21px}
 
 /* ================= TEHILLIM GRID ================= */
 .section-head{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 14px}
@@ -858,7 +858,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
    library screen carries one consistent color language. */
 .prayer-row-feature{border-inline-start:3px solid var(--cat-color,var(--gold));padding-inline-start:15px}
 .prayer-row-feature .prayer-row-title{font-size:18px}
-/* The Library entry row sits above the (now bigger, quick-grid-primary-sized)
+/* The Library entry row sits above the (now bigger, .q-tile.primary-sized)
    Prayers group tiles below it - give it matching extra padding+font so it
    doesn't look smaller than what it leads into. */
 .prayer-row-lib{padding:20px 18px}
@@ -1334,6 +1334,21 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 [data-theme="light"] .q-tile[data-cat="brachot"]{background-image:linear-gradient(150deg,rgba(163,79,151,.22),var(--panel) 60%)}
 [data-theme="light"] .q-tile[data-cat="siddur"]{background-image:linear-gradient(150deg,rgba(122,154,63,.22),var(--panel) 60%)}
 [data-theme="light"] .q-tile[data-cat="more"]{background-image:linear-gradient(150deg,rgba(140,122,107,.22),var(--panel) 60%)}
+/* iPad/tablet: the whole app used to stay phone-width (640px) even on a
+   much bigger screen. Widen the shared #app column moderately - enough to
+   fill an iPad meaningfully and let the (already-paired, 2-per-row)
+   quick-grid tiles grow to a more comfortable size - while staying short
+   of a true desktop-wide layout, which would hurt reading comfort on
+   long-form screens (Tehillim/Siddur/Gemara text lines get uncomfortably
+   long past ~800px). Each quick-grid is its own fixed 2-tile pair in the
+   markup (not a reflowing list), so bumping the column COUNT here would
+   leave the many 2-item rows with an empty gap - only the container width
+   changes. Placed last in the stylesheet so it wins over the
+   same-specificity base rules defined earlier (#app/.bottom-nav etc). */
+@media (min-width:700px){
+  #app{max-width:760px}
+  .bottom-nav{max-width:720px}
+}
 </style>
 </head>
 <body>
@@ -5414,7 +5429,8 @@ const CK_NOTIF={
       smTitle:'שְׁנַיִם מִקְרָא', smBody:'יוֹם שִׁשִּׁי · שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם לִכְבוֹד שַׁבָּת קֹדֶשׁ',
       tehTitle:'תְּהִלִּים', tehBody:'עוֹד ', tehSuffix:' פְּרָקִים לְסִיּוּם תְּהִלִּים שֶׁל הַיּוֹם — כָּל כָּךְ קָרוֹב',
       bicTitle:'בֶּן אִישׁ חַי', bicBody:'הֲלָכָה יוֹמִית מְחַכָּה לְךָ בְּבֶן אִישׁ חַי: ',
-      musarTitle:'מוּסָר', musarBody:'כַּמָּה דַּקּוֹת שֶׁל מוּסָר לַנֶּפֶשׁ מְחַכּוֹת לְךָ הַיּוֹם בְּ'},
+      musarTitle:'מוּסָר', musarBody:'כַּמָּה דַּקּוֹת שֶׁל מוּסָר לַנֶּפֶשׁ מְחַכּוֹת לְךָ הַיּוֹם בְּ',
+      updateTitle:'גִּרְסָה חֲדָשָׁה זְמִינָה', updateBody:'עַדְכְּנוּ לַגִּרְסָה הָאַחֲרוֹנָה בְּ-App Store'},
   en:{chokTitle:'Chok LeYisrael', nightBody:"Friday night · today's Chok LeYisrael is waiting — finish before Shabbat",
       presunsetPrefix:'You’ve completed ', presunsetJoin:' out of ', presunsetSuffix:' parts of this week’s Chok LeYisrael — finish before sunset',
       chokMorningBody:'Today’s Chok LeYisrael is ready for you — a few minutes of Torah',
@@ -5422,7 +5438,8 @@ const CK_NOTIF={
       smTitle:'Shnayim Mikra', smBody:'Friday · Shnayim Mikra veEchad Targum in honor of the holy Shabbat',
       tehTitle:'Tehillim', tehBody:'Just ', tehSuffix:' more chapters to finish today’s Tehillim — so close',
       bicTitle:'Ben Ish Chai', bicBody:"Today's halacha is waiting for you in Ben Ish Chai: ",
-      musarTitle:'Musar', musarBody:'A few minutes of Musar for the soul await you today in '},
+      musarTitle:'Musar', musarBody:'A few minutes of Musar for the soul await you today in ',
+      updateTitle:'A new version is available', updateBody:'Update to the latest version on the App Store'},
   fr:{chokTitle:'Chok LeYisraël', nightBody:"Vendredi soir · le Chok LeYisraël du jour t'attend — termine avant Chabbat",
       presunsetPrefix:'Tu as terminé ', presunsetJoin:' sur ', presunsetSuffix:' parties du Chok LeYisraël de cette semaine — termine avant le coucher du soleil',
       chokMorningBody:'Le Chok LeYisraël du jour est prêt pour toi — quelques minutes de Torah',
@@ -5430,7 +5447,8 @@ const CK_NOTIF={
       smTitle:'Chnayim Mikra', smBody:'Vendredi · Chnayim mikra véékhad targoum en l’honneur du Chabbat saint',
       tehTitle:'Tehilim', tehBody:'Encore ', tehSuffix:' chapitres pour terminer les Tehilim d’aujourd’hui — si proche',
       bicTitle:"Ben Ish 'Haï", bicBody:"Aujourd'hui, une halacha t'attend dans Ben Ish 'Haï : ",
-      musarTitle:'Moussar', musarBody:"Quelques minutes de Moussar pour l'âme t'attendent aujourd'hui dans "},
+      musarTitle:'Moussar', musarBody:"Quelques minutes de Moussar pour l'âme t'attendent aujourd'hui dans ",
+      updateTitle:'Une nouvelle version est disponible', updateBody:"Mettez à jour vers la dernière version sur l'App Store"},
   ru:{chokTitle:'Хок ЛеИсраэль', nightBody:'Ночь пятницы · сегодняшний Хок ЛеИсраэль ждёт вас — завершите до Шаббата',
       presunsetPrefix:'Вы завершили ', presunsetJoin:' из ', presunsetSuffix:' частей Хок ЛеИсраэль на этой неделе — завершите до заката',
       chokMorningBody:'Сегодняшний Хок ЛеИсраэль готов для вас — несколько минут Торы',
@@ -5438,7 +5456,8 @@ const CK_NOTIF={
       smTitle:'Шнайим микра', smBody:'Пятница · Шнайим микра веехад таргум в честь святой субботы',
       tehTitle:'Теилим', tehBody:'Ещё ', tehSuffix:' глав до конца сегодняшних Теилим — совсем близко',
       bicTitle:'Бен Иш Хай', bicBody:'Сегодня вас ждёт ѓалаха в Бен Иш Хай: ',
-      musarTitle:'Мусар', musarBody:'Несколько минут Мусара для души ждут вас сегодня в '},
+      musarTitle:'Мусар', musarBody:'Несколько минут Мусара для души ждут вас сегодня в ',
+      updateTitle:'Доступна новая версия', updateBody:'Обновитесь до последней версии в App Store'},
   ka:{chokTitle:'ხოყ ლეისრაელ', nightBody:'პარასკევის საღამო · დღევანდელი ხოყ ლეისრაელი გელოდებათ — დაასრულეთ შაბათამდე',
       presunsetPrefix:'დაასრულეთ ', presunsetJoin:'-დან ', presunsetSuffix:' ხოყ ლეისრაელის ნაწილი ამ კვირას — დაასრულეთ მზის ჩასვლამდე',
       chokMorningBody:'დღევანდელი ხოყ ლეისრაელ მზადაა თქვენთვის — რამდენიმე წუთი თორას',
@@ -5446,7 +5465,8 @@ const CK_NOTIF={
       smTitle:'შნაიიმ მიკრა', smBody:'პარასკევი · შნაიიმ მიკრა ვეეხად თარგუმი წმინდა შაბათის პატივსაცემად',
       tehTitle:'თეილიმი', tehBody:'კიდევ ', tehSuffix:' თავი დარჩა დღევანდელი თეილიმის დასასრულებლად — ისე ახლოსაა',
       bicTitle:'ბენ იშ ხაი', bicBody:'დღეს ბენ იშ ხაიში ჰალახა გელოდებათ: ',
-      musarTitle:'მუსარი', musarBody:'რამდენიმე წუთი მუსარი სულისთვის გელოდებათ დღეს '},
+      musarTitle:'მუსარი', musarBody:'რამდენიმე წუთი მუსარი სულისთვის გელოდებათ დღეს ',
+      updateTitle:'ხელმისაწვდომია ახალი ვერსია', updateBody:'განაახლეთ უახლეს ვერსიამდე App Store-ში'},
 };
 function ckNotifText(){ return CK_NOTIF[S.lang]||CK_NOTIF.he; }
 function ckNotifDir(){ return (S.lang&&S.lang!=='he')?'ltr':'rtl'; }
@@ -5524,6 +5544,11 @@ function checkAppUpdate(){
     if(appUpdateVerGt(cur.version, info.version)){
       APP_UPDATE_INFO = {version:cur.version, url:cur.trackViewUrl};
       localStorage.setItem('betel_update_info', JSON.stringify(APP_UPDATE_INFO));
+      if(notifReady() && localStorage.getItem('betel_update_notified_v')!==cur.version){
+        localStorage.setItem('betel_update_notified_v', cur.version);
+        const t=ckNotifText();
+        fireNotif(t.updateTitle, t.updateBody, ckNotifDir(), S.lang||'he');
+      }
     } else {
       APP_UPDATE_INFO = null;
       localStorage.removeItem('betel_update_info');
@@ -5725,23 +5750,20 @@ function renderHome(){
     })()}
     ${dedHTML('')}
 
-    <div class="quick-grid quick-grid-primary">
+    <div class="quick-grid">
       ${(function(){
         if(!CHOK) return '';
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
-        return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
+        return `<div class="q-tile primary${done?' done':''}" data-cat="chok" id="homeChokCard">
           <div class="qt">${heTitle('חוק לישראל','חוֹק לְיִשְׂרָאֵל')}</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
-      <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
+      <div class="q-tile primary${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
         <div class="qt">${heTitle('תהלים היומי','תְּהִלִּים הַיּוֹמִי')}</div>
         <div class="qd">${rangeLabel} · ${chs.length} פרקים</div>
       </div>
-    </div>
-
-    <div class="quick-grid">
       ${(function(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
@@ -5754,9 +5776,6 @@ function renderHome(){
         <div class="qt">${heTitle('שנים מקרא','שְׁנַיִם מִקְרָא')}</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
-    </div>
-
-    <div class="quick-grid">
       ${(function(){
         const key=homeNowPrayerKey();
         return `<div class="q-tile" data-cat="siddur" id="homePrayerCard">
@@ -5768,9 +5787,6 @@ function renderHome(){
         <div class="qt">${heTitle('מוסר','מוּסָר')}</div>
         <div class="qd">${ckMusarUI()[S.musarWork||'reshit']}</div>
       </div>
-    </div>
-
-    <div class="quick-grid">
       ${(function(){
         const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
         const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
@@ -6744,8 +6760,8 @@ function renderPrayersList(){
           <span class="prayer-row-title">${heTitle('ספרים','סְפָרִים')}</span>
         </div>
       </div>
-      <div class="quick-grid quick-grid-primary" style="margin-top:14px">
-        ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile round-card" data-cat="${g}" data-praygroup="${g}">
+      <div class="quick-grid" style="margin-top:14px">
+        ${Object.keys(PRAYER_GROUPS).map(g=>`<div class="q-tile primary round-card" data-cat="${g}" data-praygroup="${g}">
           <div class="qt">${heTitle(PRAYER_GROUPS[g].he, PRAYER_GROUPS_NIKUD[g])}</div>
         </div>`).join('')}
       </div>
@@ -10473,10 +10489,42 @@ function checkMusarNotification(){
     fireNotif(t.musarTitle,t.musarBody+ckMusarUI()[work],ckNotifDir(),S.lang||'he');
   }).catch(()=>{});
 }
-try{checkNotification();}catch(e){}
-try{checkBicNotification();}catch(e){}
-try{checkAppUpdate();}catch(e){}
-try{checkMusarNotification();}catch(e){}
+/* Notifications default to on (S.notifEnabled defaults true), but the OS
+   permission itself still has to be granted - mirror the geolocation
+   auto-ask below instead of leaving it stuck behind a manual Settings
+   toggle. NOTIF_NATIVE_GRANTED is just a JS variable that resets to false
+   on every cold native launch (it's not the real OS permission), so this
+   also re-syncs it silently every boot via checkPermissions() (never
+   prompts) before any of the checkXNotification() calls run - otherwise
+   they'd all wrongly see notifReady()===false on a fresh launch even
+   though the user already granted permission in an earlier session. Only
+   prompts for real (requestPermissions) once, the very first time the OS
+   hasn't been asked yet; never auto-reprompts after an explicit denial. */
+function notifBootSync(){
+  if(!S.notifEnabled) return Promise.resolve();
+  const ln=notifLocalPlugin();
+  if(ln){
+    return ln.checkPermissions().then(p=>{
+      if(p.display==='granted') NOTIF_NATIVE_GRANTED=true;
+      else if(p.display==='prompt' && !localStorage.getItem('betel_notif_tried')){
+        localStorage.setItem('betel_notif_tried','1');
+        return notifRequestPermission();
+      }
+    }).catch(()=>{});
+  }
+  if(typeof Notification!=='undefined' && Notification.permission==='default' && !localStorage.getItem('betel_notif_tried')){
+    localStorage.setItem('betel_notif_tried','1');
+    return notifRequestPermission().catch(()=>{});
+  }
+  return Promise.resolve();
+}
+notifBootSync().then(()=>{
+  try{checkNotification();}catch(e){}
+  try{checkBicNotification();}catch(e){}
+  try{checkAppUpdate();}catch(e){}
+  try{checkMusarNotification();}catch(e){}
+  if(TAB==='settings'||TAB==='home') render();
+}).catch(()=>{});
 try{announceChokFeature();}catch(e){}
 try{announceBenishchaiFeature();}catch(e){}
 try{announceSelichotFeature();}catch(e){}
