@@ -5647,6 +5647,12 @@ function homeNowPrayerKey(){
   }catch(e){}
   return 'arvit';
 }
+/* the home screen's big tile titles (.qt) keep nikud on request, but the
+   underlying Hebrew string is also what tr()'s exact-match dictionary
+   lookup keys on for en/fr/ru/ka - so a nikud'd literal there would
+   silently stop translating for those languages (tr() is a no-op for
+   'he' itself, so this only matters once S.lang is something else). */
+function heTitle(plain,nikud){ return (S.lang && S.lang!=='he') ? plain : nikud; }
 function renderHome(){
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
@@ -5700,12 +5706,12 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="chok" id="homeChokCard">
-          <div class="qt">חוק לישראל</div>
+          <div class="qt">${heTitle('חוק לישראל','חוֹק לְיִשְׂרָאֵל')}</div>
           <div class="qd">${t.text}</div>
         </div>`;
       })()}
       <div class="q-tile${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
-        <div class="qt">תהלים היומי</div>
+        <div class="qt">${heTitle('תהלים היומי','תְּהִלִּים הַיּוֹמִי')}</div>
         <div class="qd">${rangeLabel} · ${chs.length} פרקים</div>
       </div>
     </div>
@@ -5715,12 +5721,12 @@ function renderHome(){
         const t=ckTodayLine(); if(!t) return '';
         const done = chokIsDone(t.key,t.day);
         return `<div class="q-tile${done?' done':''}" data-cat="zohar" id="homeZoharCard">
-          <div class="qt">זהר היומי</div>
+          <div class="qt">${heTitle('זהר היומי','זֹהַר הַיּוֹמִי')}</div>
           <div class="qd">לפי סדר עמוד ליום</div>
         </div>`;
       })()}
       ${weekParshaKey?`<div class="q-tile${smIsDone(weekParshaKey)?' done':''}" data-cat="shnayim" id="homeParshaCard">
-        <div class="qt">שנים מקרא</div>
+        <div class="qt">${heTitle('שנים מקרא','שְׁנַיִם מִקְרָא')}</div>
         <div class="qd">${parshaName(weekParshaKey)}</div>
       </div>`:''}
     </div>
@@ -5729,12 +5735,12 @@ function renderHome(){
       ${(function(){
         const key=homeNowPrayerKey();
         return `<div class="q-tile" data-cat="siddur" id="homePrayerCard">
-          <div class="qt">${SIDDUR_PRAYER_NAMES[key]}</div>
+          <div class="qt">${heTitle(SIDDUR_PRAYER_NAMES[key], SIDDUR_PRAYER_NAMES_NIKUD[key]||SIDDUR_PRAYER_NAMES[key])}</div>
           <div class="qd">עכשו</div>
         </div>`;
       })()}
       <div class="q-tile" data-cat="musar" id="homeMusarCard">
-        <div class="qt">מוסר</div>
+        <div class="qt">${heTitle('מוסר','מוּסָר')}</div>
         <div class="qd">${ckMusarUI()[S.musarWork||'reshit']}</div>
       </div>
     </div>
@@ -5744,7 +5750,7 @@ function renderHome(){
         const track=bicTrack(), key=BIC_INDEX?bicNearestAvailableKey(track,weekParshaKey):weekParshaKey;
         const p=BIC_INDEX&&key?bicParshiot(track).find(x=>x.key===key):null;
         return `<div class="q-tile" data-cat="benishchai" id="homeBicCard">
-          <div class="qt">${ckBicUI().title}</div>
+          <div class="qt">${heTitle(ckBicUI().title,'בֶּן אִישׁ חַי')}</div>
           <div class="qd">${p?bicParshaName(p):(weekParshaKey?parshaName(weekParshaKey):'')}</div>
         </div>`;
       })()}
@@ -7941,6 +7947,11 @@ function renderPrayerReader(){
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
 const SIDDUR_PRAYER_NAMES = {birkot:'ברכות השחר', talitTefilin:'סדר טלית ותפלין', shacharit:'שחרית', mincha:'מנחה', arvit:'ערבית', roshChodesh:'סדר ראש חדש', omer:'ספירת העמר', levana:'ברכת הלבנה', tikunChatzot:'תקון חצות', selichot:'סליחות'};
+/* home screen's own "current prayer" tile only - shown big/bold like a
+   title rather than read as a sentence, so (per the nikud-on-request
+   above) it keeps nikud there while every other use of
+   SIDDUR_PRAYER_NAMES (reader title, siddur list, search) stays plain. */
+const SIDDUR_PRAYER_NAMES_NIKUD = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת', selichot:'סְלִיחוֹת'};
 /* where you stopped - same shape as Chok LeYisrael's ckBm-/ckResume/ckRestart:
    tracked as you read (topmost paragraph on screen), offering to resume or
    restart only when the reader is opened, never clearing on its own. */
