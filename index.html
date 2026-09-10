@@ -10489,10 +10489,42 @@ function checkMusarNotification(){
     fireNotif(t.musarTitle,t.musarBody+ckMusarUI()[work],ckNotifDir(),S.lang||'he');
   }).catch(()=>{});
 }
-try{checkNotification();}catch(e){}
-try{checkBicNotification();}catch(e){}
-try{checkAppUpdate();}catch(e){}
-try{checkMusarNotification();}catch(e){}
+/* Notifications default to on (S.notifEnabled defaults true), but the OS
+   permission itself still has to be granted - mirror the geolocation
+   auto-ask below instead of leaving it stuck behind a manual Settings
+   toggle. NOTIF_NATIVE_GRANTED is just a JS variable that resets to false
+   on every cold native launch (it's not the real OS permission), so this
+   also re-syncs it silently every boot via checkPermissions() (never
+   prompts) before any of the checkXNotification() calls run - otherwise
+   they'd all wrongly see notifReady()===false on a fresh launch even
+   though the user already granted permission in an earlier session. Only
+   prompts for real (requestPermissions) once, the very first time the OS
+   hasn't been asked yet; never auto-reprompts after an explicit denial. */
+function notifBootSync(){
+  if(!S.notifEnabled) return Promise.resolve();
+  const ln=notifLocalPlugin();
+  if(ln){
+    return ln.checkPermissions().then(p=>{
+      if(p.display==='granted') NOTIF_NATIVE_GRANTED=true;
+      else if(p.display==='prompt' && !localStorage.getItem('betel_notif_tried')){
+        localStorage.setItem('betel_notif_tried','1');
+        return notifRequestPermission();
+      }
+    }).catch(()=>{});
+  }
+  if(typeof Notification!=='undefined' && Notification.permission==='default' && !localStorage.getItem('betel_notif_tried')){
+    localStorage.setItem('betel_notif_tried','1');
+    return notifRequestPermission().catch(()=>{});
+  }
+  return Promise.resolve();
+}
+notifBootSync().then(()=>{
+  try{checkNotification();}catch(e){}
+  try{checkBicNotification();}catch(e){}
+  try{checkAppUpdate();}catch(e){}
+  try{checkMusarNotification();}catch(e){}
+  if(TAB==='settings'||TAB==='home') render();
+}).catch(()=>{});
 try{announceChokFeature();}catch(e){}
 try{announceBenishchaiFeature();}catch(e){}
 try{announceSelichotFeature();}catch(e){}
