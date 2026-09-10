@@ -1334,6 +1334,21 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 [data-theme="light"] .q-tile[data-cat="brachot"]{background-image:linear-gradient(150deg,rgba(163,79,151,.22),var(--panel) 60%)}
 [data-theme="light"] .q-tile[data-cat="siddur"]{background-image:linear-gradient(150deg,rgba(122,154,63,.22),var(--panel) 60%)}
 [data-theme="light"] .q-tile[data-cat="more"]{background-image:linear-gradient(150deg,rgba(140,122,107,.22),var(--panel) 60%)}
+/* iPad/tablet: the whole app used to stay phone-width (640px) even on a
+   much bigger screen. Widen the shared #app column moderately - enough to
+   fill an iPad meaningfully and let the (already-paired, 2-per-row)
+   quick-grid tiles grow to a more comfortable size - while staying short
+   of a true desktop-wide layout, which would hurt reading comfort on
+   long-form screens (Tehillim/Siddur/Gemara text lines get uncomfortably
+   long past ~800px). Each quick-grid is its own fixed 2-tile pair in the
+   markup (not a reflowing list), so bumping the column COUNT here would
+   leave the many 2-item rows with an empty gap - only the container width
+   changes. Placed last in the stylesheet so it wins over the
+   same-specificity base rules defined earlier (#app/.bottom-nav etc). */
+@media (min-width:700px){
+  #app{max-width:760px}
+  .bottom-nav{max-width:720px}
+}
 </style>
 </head>
 <body>
