@@ -171,6 +171,7 @@ body::before{ /* subtle starfield/texture */
 .pace-opt{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;cursor:pointer}
 .pace-opt:active{border-color:var(--gold)}
 .pace-opt-t{font-family:var(--font-sacred);font-size:17px;font-weight:700}
+.pace-lang-list .pace-opt-t{font-family:var(--font-ui)}
 .pace-opt-d{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.5}
 .pace-soon{margin-top:2px;text-align:center;font-size:14px;color:var(--muted)}
 .pace-foot{text-align:center;font-size:14px;color:var(--muted);margin-top:14px;line-height:1.5}
@@ -3998,7 +3999,7 @@ function renderChokPace(){
     app.innerHTML=`<div class="view pace-view pace-lang">
       <div class="hero"><img class="hero-logo" src="${LOGO}" alt="תמיד"/></div>
       <div class="pace-q">${t.langQ}</div>
-      <div class="pace-list">${CK_PACE_LANGS.map(l=>optRow(l.code,l.label)).join('')}</div>
+      <div class="pace-list pace-lang-list">${CK_PACE_LANGS.map(l=>optRow(l.code,l.label)).join('')}</div>
     </div>`;
     app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
       S.lang=el.dataset.paceOpt; saveS(); applyLang(); buildNav();
