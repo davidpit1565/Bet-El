@@ -8025,12 +8025,12 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
-const SIDDUR_PRAYER_NAMES = {birkot:'ברכות השחר', talitTefilin:'סדר טלית ותפלין', shacharit:'שחרית', mincha:'מנחה', arvit:'ערבית', roshChodesh:'סדר ראש חדש', omer:'ספירת העמר', levana:'ברכת הלבנה', tikunChatzot:'תקון חצות', selichot:'סליחות'};
+const SIDDUR_PRAYER_NAMES = {birkot:'ברכות השחר', talitTefilin:'סדר טלית ותפלין', shacharit:'שחרית', mincha:'מנחה', arvit:'ערבית', roshChodesh:'סדר ראש חדש', omer:'ספירת העמר', levana:'ברכת הלבנה', kriatShemaAlHamita:'קריאת שמע שעל המיטה', tikunChatzot:'תקון חצות', selichot:'סליחות'};
 /* home screen's own "current prayer" tile only - shown big/bold like a
    title rather than read as a sentence, so (per the nikud-on-request
    above) it keeps nikud there while every other use of
    SIDDUR_PRAYER_NAMES (reader title, siddur list, search) stays plain. */
-const SIDDUR_PRAYER_NAMES_NIKUD = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', tikunChatzot:'תִּקּוּן חֲצוֹת', selichot:'סְלִיחוֹת'};
+const SIDDUR_PRAYER_NAMES_NIKUD = {birkot:'בִּרְכוֹת הַשַּׁחַר', talitTefilin:'סֵדֶר טַלִּית וּתְפִלִּין', shacharit:'שַׁחֲרִית', mincha:'מִנְחָה', arvit:'עַרְבִית', roshChodesh:'סֵדֶר רֹאשׁ חֹדֶשׁ', omer:'סְפִירַת הָעֹמֶר', levana:'בִּרְכַּת הַלְּבָנָה', kriatShemaAlHamita:'קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', tikunChatzot:'תִּקּוּן חֲצוֹת', selichot:'סְלִיחוֹת'};
 /* where you stopped - same shape as Chok LeYisrael's ckBm-/ckResume/ckRestart:
    tracked as you read (topmost paragraph on screen), offering to resume or
    restart only when the reader is opened, never clearing on its own. */
@@ -8109,6 +8109,11 @@ function drawSiddurHome(){
   // its own tile during the actual 49-day count, and per explicit user
   // ordering request comes right after Birkat HaLevana, not before it.
   tiles.push('levana');
+  // Kriat Shema Al HaMita (Bedtime Shema) - a brand new section, sourced
+  // the same way as Birkat HaLevana right above it (Sefaria: Siddur Edot
+  // HaMizrach > Bedtime Shema) - per explicit user request it sits right
+  // after Birkat HaLevana, before Sefirat HaOmer.
+  tiles.push('kriatShemaAlHamita');
   if(info.omerDay) tiles.push('omer');
   // Rosh Chodesh is one combined tile (Hallel through Musaf's own closing
   // Alenu, all in one continuous reader per user request) rather than a
@@ -9144,6 +9149,54 @@ function siddurLevanaHTML(){
   html += siddurParasFromText(lf('closing'));
   return html;
 }
+/* ---- Kriat Shema Al HaMita (Bedtime Shema) - a brand new section, added
+   right after Birkat HaLevana per explicit user request. Sourced from
+   Sefaria: Siddur Edot HaMizrach > Bedtime Shema, cross-checked frame by
+   frame against a screen recording the user supplied of the same text in
+   another reference app (identical down to the truncated Psalm 91 quote,
+   which stops mid-verse 9 in both sources - not a transcription error).
+   Deliberately stores its own veahavta/vehaya/vayomer copies rather than
+   reusing SIDDUR.birkotKriatShema's (those carry inline tefilin-touching
+   asides that make no sense at bedtime; Sefaria's own Bedtime Shema quote
+   has none). The Shema line + whispered Baruch Shem reuse the same
+   PT('shemaLine')/PT('baruchShemKavod') fallback pattern already used by
+   siddurBirkotShemaHTML/siddurArvitShemaHTML rather than storing a third
+   copy. The seven Ana BeKoach night-verses are shown as a static reference
+   list (as both the source and the video present them) rather than
+   picking "tonight's" verse - no existing precedent in this app for
+   mapping a Hebrew-calendar night to a weekday, and getting it wrong would
+   be worse than just listing all seven. No i18n yet (no PRAYERS_TRANSLIT
+   entry) - stays Hebrew-only in every language for now, like Birkat
+   HaLevana's own Tehillim quotes. ---- */
+function siddurKriatShemaAlHamitaHTML(){
+  const K = SIDDUR.kriatShemaAlHamita;
+  let html = `<div class="siddur-section-title">${ckChrome('קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה')}</div>`;
+  html += siddurParasFromText(K.timingNote);
+  html += `<div class="siddur-section-title">${ckChrome('לְשֵׁם יִחוּד')}</div>`;
+  html += siddurParasFromText(K.leshemYichud);
+  html += siddurParasFromText(K.mochelNote);
+  html += siddurParasFromText(K.mochelText);
+  html += siddurParasFromText(K.brachaNote);
+  html += siddurParasFromText(K.hamapil);
+  html += siddurParasFromText(K.shemaCareNote);
+  html += `<div class="siddur-section-title">${ckChrome('קְרִיאַת שְׁמַע')}</div>`;
+  html += siddurParasFromText(`${PT('shemaLine')||SIDDUR.shemaLine||'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד:'}\n\n<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`, true);
+  html += siddurParasFromText(K.veahavta);
+  html += siddurParasFromText(K.vehaya);
+  html += siddurParasFromText(K.vayomer);
+  html += siddurParasFromText(K.yaalzu);
+  html += siddurParasFromText(K.hinehMitato);
+  html += siddurParasFromText(K.yevarechecha);
+  html += siddurParasFromText(K.psalm91);
+  html += siddurParasFromText(K.viduiNote);
+  html += siddurParasFromText(K.viduiText);
+  html += siddurParasFromText(K.anaBekoachNote);
+  html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
+  html += siddurParasFromText(K.nightVerses);
+  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
+  html += siddurParasFromText(K.closing);
+  return html;
+}
 
 /* ---- the list of sections for a prayer: rendered concatenated into one
    continuous scroll by drawSiddurReader (not page-switched one-at-a-time
@@ -9335,6 +9388,8 @@ function siddurSections(dateObj, info, prayer){
     push('omer','סְפִירַת הָעֹמֶר', siddurOmerHTML(info));
   } else if(prayer==='levana'){
     push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML());
+  } else if(prayer==='kriatShemaAlHamita'){
+    push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML());
   } else if(prayer==='tikunChatzot'){
     const chz = siddurTikunChatzotHTML(info);
     push('petach','פֶּתַח אֵלִיָּהוּ', chz.petach);
