@@ -55,7 +55,7 @@ English equivalents:
 תַּאֲרִיכִים עִבְרִיִּים, זְמַנֵּי כְּנִיסַת וְיַצִיאַת שַׁבָּת, וּזְמַנֵּי תְּפִלָּה לְפִי הַמִּקּוּם שֶׁלְּךָ.
 
 🔔 תַּזְכּוֹרוֹת יוֹמִיּוֹת
-הוֹדָעָה קְבוּעָה בְּשָׁעָה 08:00 בַּבֹּקֶר לְכָל אֶחָד מִסֵּדְרֵי הַלִּמּוּד, כְּדֵי שֶׁלֹּא תַּחְמִיץ יוֹם.
+תַּזְכּוֹרוֹת עֲדִינוֹת לְכָל סֵדֶר לִמּוּד בְּמַהֲלָךְ הַיּוֹם, כְּדֵי שֶׁלֹּא תַּחְמִיץ יוֹם.
 
 🌐 חֲמֵשׁ שָׂפוֹת
 עִבְרִית, אַנְגְּלִית, צָרְפָתִית, רוּסִית וְגֵאוֹרְגִּית.
@@ -97,7 +97,7 @@ Hebrew dates, candle-lighting/Havdalah times, and prayer times for your
 location.
 
 🔔 Daily Reminders
-One fixed 08:00 reminder for each study track, so no day slips by.
+Gentle reminders for each study track throughout the day, so no day slips by.
 
 🌐 Five Languages
 Hebrew, English, French, Russian and Georgian.
