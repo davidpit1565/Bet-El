@@ -109,8 +109,13 @@ study companion, for the merit of the many.
 ## Keywords (Apple "Keywords" field, ≤100 chars total, comma-separated, no spaces after commas)
 
 ```
-torah,chok leyisrael,tehillim,psalms,zohar,ben ish chai,musar,halacha,hebrew calendar,jewish study
+tamid,torah,chok leyisrael,tehillim,psalms,zohar,ben ish chai,musar,halacha,jewish study
 ```
+
+**Important — searching "Tamid" in English:** Apple's search index weighs the App Name and Subtitle far more heavily than the Keywords field. Since the app's official name is the Hebrew "תָּמִיד" (with "Tamid" only as an emergency ASCII fallback if Hebrew is rejected), a plain English search for "Tamid" may not surface the app at all even with it in Keywords. To fix this properly, do ONE of the following in App Store Connect:
+- Add an English localization for the app (App Store Connect lets you add a secondary language's App Name/Subtitle/Description) with the App Name or Subtitle containing "Tamid" for English-language storefronts/searches, e.g. Subtitle: `Tamid - Daily Torah Study`.
+- Or, if you want one universal listing, consider changing the primary App Name itself to include "Tamid" (e.g. `תמיד - Tamid`), which guarantees it's indexed for that term everywhere.
+This wasn't set up when the listing copy above was first drafted - worth fixing in App Store Connect now, independent of the version 1.2 build/binary itself.
 
 ## Category
 
