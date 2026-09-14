@@ -5508,6 +5508,34 @@ function fireNotif(title,body,dir,lang){
   }
   try{ new Notification(title,{body,dir,lang}); }catch(e){}
 }
+/* The daily reminder is only ever actually delivered when checkNotification()
+   (a foreground setInterval + visibilitychange listener) happens to run
+   while the app is open, since fireNotif()'s native branch above schedules
+   its notification for ~300ms in the future - i.e. "fire immediately", not
+   a real future reminder. On iOS/Android that JS loop is suspended the
+   moment the app is backgrounded, so a user who doesn't have the app open
+   right when the condition becomes true never gets reminded at all -
+   defeating the whole purpose of a reminder. This schedules one real,
+   OS-level repeating daily notification (survives the app being fully
+   closed) as a reliable baseline, independent of the foreground checks
+   above (which still run and can fire additional native notifications like
+   the Ben Ish Chai/Tehillim/Musar chapter-specific ones when the app
+   happens to be open - those are a bonus, not the primary reminder path
+   anymore). Uses the Chok LeYisrael title/body since it's already a fully
+   generic (no dynamic chapter count) string translated in all 5 languages,
+   unlike tehBody/bicBody/musarBody which are built by concatenating a
+   dynamic suffix that can't be known ahead of a native OS-scheduled fire. */
+const NOTIF_DAILY_ID=555555, NOTIF_DAILY_HOUR=9, NOTIF_DAILY_MIN=0;
+function notifScheduleDaily(){
+  const ln=notifLocalPlugin(); if(!ln) return;
+  const t=ckNotifText();
+  try{ ln.schedule({notifications:[{id:NOTIF_DAILY_ID, title:t.chokTitle, body:t.chokMorningBody,
+    schedule:{on:{hour:NOTIF_DAILY_HOUR,minute:NOTIF_DAILY_MIN}, allowWhileIdle:true}}]}); }catch(e){}
+}
+function notifCancelDaily(){
+  const ln=notifLocalPlugin(); if(!ln) return;
+  try{ ln.cancel({notifications:[{id:NOTIF_DAILY_ID}]}); }catch(e){}
+}
 
 /* App Store update check: only meaningful inside the native iOS/Android
    shell (there's no "installed version" to compare on the plain web PWA).
@@ -10016,8 +10044,9 @@ function renderSettings(){
       if(!notifLocalPlugin() && typeof Notification==='undefined'){ toast('הדפדפן אינו תומך בהתראות'); return; }
       const granted=await notifRequestPermission();
       S.notifEnabled=granted; saveS(); renderSettings();
+      if(granted) notifScheduleDaily();
       toast(granted?'הודעות הפעלו':'לא נתנה הרשאה');
-    } else { S.notifEnabled=false; saveS(); renderSettings(); toast('הודעות כבו'); }
+    } else { S.notifEnabled=false; saveS(); renderSettings(); notifCancelDaily(); toast('הודעות כבו'); }
   };
   tr(app);
 }
@@ -10523,7 +10552,7 @@ function notifBootSync(){
         localStorage.setItem('betel_notif_tried','1');
         return notifRequestPermission();
       }
-    }).catch(()=>{});
+    }).then(()=>{ if(notifReady()) notifScheduleDaily(); }).catch(()=>{});
   }
   if(typeof Notification!=='undefined' && Notification.permission==='default' && !localStorage.getItem('betel_notif_tried')){
     localStorage.setItem('betel_notif_tried','1');
