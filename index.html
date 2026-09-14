@@ -8549,14 +8549,27 @@ function siddurTachanunCoreHTML(){
    other 4 weekdays that same Kaddish is said right away instead. Mincha's
    own Vidui node has no such addition (verified: no analogous rubric there
    in either Sefaria edition checked) so it's Shacharit-only, handled by the
-   caller passing dateObj. On fast days a note points to the additional
-   fast-day supplications this app doesn't include (out of scope - same
-   link-out treatment as the Selichot callout elsewhere). */
+   caller passing dateObj. On the 4 minor public fasts (Tzom Gedaliah,
+   Asara B'Tevet, Ta'anit Esther, Tzom Tammuz), the day-specific Selichot
+   (nusach Edot HaMizrach, "Siddur Edot HaMizrach, Fast Days and Mourning")
+   are shown here too, inline via an accordion right where they're
+   actually said (after Tachanun's own Vidui/Nefilat Apayim, before the
+   Torah reading) - not a separate standalone screen like the Elul/Aseret
+   Yemei Teshuva Selichot (PRAYERS_EXTRA.selichotEdotHamizrach), since
+   these aren't a standalone service; they're a short mid-Shacharit
+   insertion whose content differs per fast day (data/siddur.json's
+   tachanun.fastSelichot, keyed by the same fast-day name as
+   SIDDUR_FAST_DAYS/info.fastDayName). Falls back to the old plain-text
+   pointer note only if that day's key is somehow missing. */
 function siddurTachanunHTML(info, dateObj){
   if(info.skipTachanun) return `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div>`;
   let html = `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`;
   html += siddurTachanunCoreHTML();
-  if(info.isFastDay) html += `<div class="siddur-halacha-note">${PT('tachanun','fastDayNote')||SIDDUR.tachanun.fastDayNote}</div>`;
+  if(info.isFastDay){
+    const fastSel = (PT('tachanun','fastSelichot')||SIDDUR.tachanun.fastSelichot||{})[info.fastDayName];
+    if(fastSel) html += siddurAccordionHTML('fastSelichot', ckChrome('סְלִיחוֹת לְ')+ckChrome(info.fastDayHe||''), siddurParasFromText(fastSel));
+    else html += `<div class="siddur-halacha-note">${PT('tachanun','fastDayNote')||SIDDUR.tachanun.fastDayNote}</div>`;
+  }
   const isMonThu = dateObj.getDay()===1 || dateObj.getDay()===4;
   if(isMonThu) html += siddurParasFromText(PT('tachanun','mondayThursdayExtra')||SIDDUR.tachanun.mondayThursdayExtra);
   html += siddurChatziKaddishHTML();
