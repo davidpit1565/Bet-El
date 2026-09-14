@@ -1,5 +1,49 @@
 # Publishing to the App Store and Google Play — step-by-step
 
+## Quick checklist: every time you push an update (copy-paste, from a fresh Terminal)
+
+Run this exact sequence every time, even in a brand-new Terminal window that
+has never seen this project before:
+
+```
+cd ~/Bet-El          # <- replace with wherever you cloned/downloaded this repo on your Mac
+git checkout main
+git pull origin main
+```
+
+(If `cd ~/Bet-El` says "No such file or directory", find the real folder
+first — open Finder, locate the project folder, right-click it → "New
+Terminal at Folder", then run `pwd` there once to see its real path, and use
+that instead of `~/Bet-El` every time from then on.)
+
+Then in Xcode:
+1. Open `ios/App/App.xcworkspace` (double-click it in Finder, or
+   `open ios/App/App.xcworkspace` from that same Terminal).
+2. Top toolbar: device dropdown must say **"Any iOS Device (arm64)"**, not a
+   simulator.
+3. **Product → Clean Build Folder** (⇧⌘K) — do this every time, avoids stale
+   errors like the one below.
+4. **Product → Archive**. Wait for it to finish (a few minutes).
+5. In the Organizer window that opens: select the new archive → **Distribute
+   App → App Store Connect → Upload** → follow the wizard through to the end.
+
+If it fails with **"must contain a higher version than the previously
+approved version"**: someone already used that version number on Apple's
+side. Bump both numbers a step further in
+`ios/App/App.xcodeproj/project.pbxproj` (`MARKETING_VERSION` and
+`CURRENT_PROJECT_VERSION`, both appear twice in the file), commit, push,
+`git pull` again, then repeat steps 3–5. (This app's history: 1.0 build 1 =
+original release; 1.1 was already used somewhere and rejected; 1.2 build 3
+is the next one to try.)
+
+Once the upload succeeds, finish it in the browser at
+https://appstoreconnect.apple.com : open the app → add a version (or use the
+one waiting for a build) → under **Build**, pick the build you just uploaded
+→ fill in "What's New in This Version" → **Save** → **Submit for Review**.
+
+---
+
+
 Status as of this writing: `ios/` and `android/` native Capacitor projects
 both exist and are kept in sync via `npm run cap:sync` (runs `npx cap sync`
 with no platform arg, syncing both). App icons and splash screens for both
