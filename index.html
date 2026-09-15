@@ -711,6 +711,33 @@ a.set-item{text-decoration:none;color:inherit}
 .next-hol b{color:var(--gold);font-family:var(--font-sacred);font-size:15px}
 .next-hol svg{width:16px;height:16px;color:var(--gold);flex:none}
 
+/* upcoming holidays - horizontal scroll strip of several, not just one */
+.cal-upcoming-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px 4px;-webkit-overflow-scrolling:touch}
+.cal-upcoming-scroll::-webkit-scrollbar{display:none}
+.cal-upcoming-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;padding:10px 14px;min-width:96px;text-align:center}
+.cal-upcoming-chip svg{width:15px;height:15px;color:var(--gold)}
+.cal-upcoming-chip span{font-size:12px;color:var(--ink-soft);font-family:var(--font-ui)}
+.cal-upcoming-chip b{color:var(--gold);font-family:var(--font-sacred);font-size:13px}
+
+/* calendar view mode toggle (Hebrew / civil) */
+.cal-mode-toggle{margin:0 0 12px}
+
+/* month event list */
+.cal-month-ev-card{margin-top:16px}
+.cal-month-ev-list{display:flex;flex-direction:column;gap:2px;max-height:280px;overflow-y:auto}
+.cal-month-ev-row{display:flex;align-items:center;gap:12px;padding:8px 4px;border-radius:10px;cursor:pointer;transition:.15s var(--ease)}
+.cal-month-ev-row:active{background:var(--panel-2)}
+.cal-month-ev-day{flex:none;width:28px;text-align:center;font-family:var(--font-sacred);font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.cal-month-ev-txt{font-size:13px;color:var(--ink)}
+
+/* share-day button on the day-detail card */
+.dd-share-btn{display:flex;align-items:center;gap:6px;margin:10px auto 0;background:var(--panel-2);
+  border:1px solid var(--line-strong);border-radius:999px;padding:8px 16px;color:var(--ink-soft);
+  font-family:var(--font-ui);font-size:12.5px;cursor:pointer;width:fit-content}
+.dd-share-btn svg{width:14px;height:14px}
+.dd-share-btn:active{transform:scale(.95)}
+
 /* shabbat/holiday times */
 .shabbat-times{margin:12px 0;padding:12px 14px;border-radius:13px;
   background:linear-gradient(135deg,rgba(212,175,95,.08),transparent);display:flex;flex-direction:column;gap:9px}
@@ -1833,7 +1860,7 @@ function openPrayer(prayerKey, fromGroup){
   }
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true };
+const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true, calRegion:'auto' };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
@@ -2231,7 +2258,7 @@ function zoharCycleDay(hd){
 }
 function parshaKeyForDate(dateObj){
   try{
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     const day=dateObj.getDay();
     const sat=new Date(dateObj); sat.setDate(dateObj.getDate()+(6-day)); sat.setHours(12,0,0,0);
     const start=new Date(sat); start.setDate(sat.getDate()-1);
@@ -2296,7 +2323,7 @@ function haftarahVerses(h){
   return out;
 }
 function hebLocation(){
-  const il = /Jerusalem/.test(LOC.tz);
+  const il = calIsIL();
   return new Location(LOC.lat, LOC.lon, il, LOC.tz, LOC.name, il?'IL':'');
 }
 
@@ -3518,7 +3545,7 @@ function chokDayHDate(){ return new HDate(chokDayDate()); }
 function ckCurYear(){ return chokDayHDate().getFullYear(); }
 function ckWeekSunday(key,hyear){
   try{
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     const start=new HDate(1,7,hyear).greg(), end=new HDate(1,7,hyear+1).greg();
     const evs=HebrewCalendar.calendar({start,end,sedrot:true,il,location:hebLocation()});
     /* This Gregorian window spans one full Torah-reading cycle, but a
@@ -5250,7 +5277,7 @@ function chokIsYomTov(dateObj){
   try{
     const s=new Date(dateObj); s.setHours(0,0,0,0);
     const e=new Date(dateObj); e.setHours(23,59,59,0);
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     const evs=HebrewCalendar.calendar({start:s,end:e,il});
     const CHAG=1, EREV=1048576, CHOL_HAMOED=2097152;
     return evs.some(ev=>{
@@ -6281,7 +6308,7 @@ function finishReading(){
 function shabbatTimes(hd){
   try{
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     const evs=HebrewCalendar.calendar({start:s,end:e,candlelighting:true,location:hebLocation(),il,locale:'he'});
     let candle=null,havdala=null,chanukahNight=null,label=null;
     const CHAG_EREV = 1|1048576; // @hebcal/core flags.CHAG | flags.EREV
@@ -6299,7 +6326,7 @@ function shabbatTimes(hd){
 function isRoshChodeshToday(hd){
   try{
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     const evs=HebrewCalendar.calendar({start:s,end:e,il,locale:'he'});
     return evs.some(ev=>/^Rosh Chodesh/i.test((ev.getDesc&&ev.getDesc())||''));
   }catch(err){ return false; }
@@ -6364,7 +6391,7 @@ function siddurDayInfo(hd){
     isTalSeason:false,
   };
   try{
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     info.isNisan = hd.getMonth()===HMONTHS.NISAN;
     /* "the 10 days between Rosh Hashana and Yom Kippur" - as used by this
        app, that's Tishrei 3-9: Rosh Hashana itself (1-2 Tishrei) and Yom
@@ -6537,15 +6564,17 @@ function holidayName(en){
   if(m) return {fr:'Roch Hachana ', ru:'Рош ха-Шана ', ka:'როშ ჰაშანა '}[S.lang]+m[1];
   return table[en]||en;
 }
-function nextHoliday(){
-  try{
-    const today=currentHDate(); const gs=today.greg(); const ge=new Date(gs); ge.setDate(ge.getDate()+400);
-    const il=/Jerusalem/.test(LOC.tz);
-    const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
-    const majors=/(רֹאשׁ הַשָּׁנָה|כִּפּוּר|סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת|חֲנֻכָּה|חֲנוּכָּה|פּוּרִים|פֶּסַח|שָׁבוּעוֹת|בְּאָב|בָּעֹמֶר|בָּעוֹמֶר|בִּשְׁבָט)/;
-    for(const ev of evs){ const d=ev.getDate(); if(d.abs()<=today.abs()) continue; const nm=ev.render('he'); if(majors.test(nm)) return {name:(S.lang==='he'?deNikud(nm):holidayName(ev.render('en'))), days:d.abs()-today.abs()}; }
-  }catch(err){}
-  return null;
+/* Israel/Diaspora is auto-detected from LOC.tz everywhere in this app
+   (every call site used to inline the same `/Jerusalem/.test(LOC.tz)`
+   regex directly, in a couple of slightly different spellings) -
+   S.calRegion lets a user override that explicitly
+   (e.g. an Israeli visiting/living abroad who still wants a one-day Yom
+   Tov, or the reverse), defaulting to 'auto' so nothing changes for
+   anyone who never touches the new Settings toggle. */
+function calIsIL(){
+  if(S.calRegion==='il') return true;
+  if(S.calRegion==='chul') return false;
+  return /Jerusalem/.test(LOC.tz);
 }
 /* Rambam's Mishneh Torah has a dedicated sefer/chapter range for practical
    halachot of some (not all) major holidays - map each to where its own
@@ -6589,7 +6618,7 @@ function nextHolidayHalacha(){
   try{
     if(!CYC||!CYC.rambam) return null;
     const today=currentHDate(); const gs=today.greg(); const ge=new Date(gs); ge.setDate(ge.getDate()+400);
-    const il=/Jerusalem/.test(LOC.tz);
+    const il=calIsIL();
     const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
     for(const ev of evs){
       const d=ev.getDate(); if(d.abs()<=today.abs()) continue;
@@ -6621,38 +6650,146 @@ const HOLIDAY_HALACHA_UI={
   ka:{title:'მომავალი დღესასწაულის ალახები', inDays:n=>n===1?'ხვალ':n+' დღეში'},
 };
 function holidayHalachaUI(){ return HOLIDAY_HALACHA_UI[S.lang]||HOLIDAY_HALACHA_UI.he; }
-let CAL=null; // {hd: first-of-month HDate}
-function renderCalendar(){
-  if(!CAL){ const t=currentHDate(); CAL={ y:t.getFullYear(), m:t.getMonth() }; }
-  const first=new HDate(1, CAL.m, CAL.y);
-  const len=first.daysInMonth();
-  const today=currentHDate();
-  // events for the month (holidays + parsha)
-  const gStart=first.greg(); const gEnd=new HDate(len,CAL.m,CAL.y).greg();
+/* CAL now tracks BOTH a Hebrew (y/m) and a civil (gy/gm, JS 0-based month)
+   "currently displayed month" independently, plus one mode-agnostic
+   selected day (selHY/selHM/selHD, always in Hebrew terms since every
+   HDate in this app is built that way) - so switching the civil/Hebrew
+   toggle always lands on the month containing whatever day you last
+   touched, in EITHER system, rather than losing your place. Every place
+   that changes the selection (today/jump-panel/initial load) goes through
+   calSetSelected() so both coordinate pairs and the selection stay in
+   sync; a plain day-cell click only updates the selection, not either
+   month pointer, since the clicked day is already inside the visible
+   month by definition. */
+let CAL=null;
+function calSetSelected(hd){
+  CAL.selHY=hd.getFullYear(); CAL.selHM=hd.getMonth(); CAL.selHD=hd.getDate();
+  CAL.y=hd.getFullYear(); CAL.m=hd.getMonth();
+  const g=hd.greg(); CAL.gy=g.getFullYear(); CAL.gm=g.getMonth();
+}
+function calPrevMonth(){
+  CK_NAV_DIR=-1;
+  if(CAL.civil){ const d=new Date(CAL.gy,CAL.gm-1,1); CAL.gy=d.getFullYear(); CAL.gm=d.getMonth(); }
+  else{ let m=CAL.m-1,y=CAL.y; if(m<1){m=13;y--;} while(!monthExists(m,y)){m--; if(m<1){m=13;y--;}} CAL.m=m; CAL.y=y; }
+  renderCalendar();
+}
+function calNextMonth(){
+  CK_NAV_DIR=1;
+  if(CAL.civil){ const d=new Date(CAL.gy,CAL.gm+1,1); CAL.gy=d.getFullYear(); CAL.gm=d.getMonth(); }
+  else{ let m=CAL.m+1,y=CAL.y; if(!monthExists(m,y)){ m=1;y++; } CAL.m=m; CAL.y=y; }
+  renderCalendar();
+}
+/* the two most major upcoming holidays used to mean just one - Rosh
+   Hashana through Tu BiShvat all grouped into ~10 "families", each
+   family's soonest still-upcoming day (skipping every subsequent day of
+   a multi-day holiday, e.g. only "Sukkot I" ever shows, not all 8 days)
+   surfaces once, nearest-first. */
+const MAJOR_HOLIDAY_GROUPS=[/רֹאשׁ הַשָּׁנָה/, /כִּפּוּר/, /סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת/, /חֲנֻכָּה|חֲנוּכָּה/, /פּוּרִים/, /פֶּסַח/, /שָׁבוּעוֹת/, /תִּשְׁעָה בְּאָב/, /בָּעֹמֶר|בָּעוֹמֶר/, /בִּשְׁבָט/];
+function nextHolidaysList(n){
+  const out=[];
+  try{
+    const today=currentHDate(); const gs=today.greg(); const ge=new Date(gs); ge.setDate(ge.getDate()+400);
+    const il=calIsIL();
+    const evs=HebrewCalendar.calendar({start:gs,end:ge,il,locale:'he'});
+    const seenGroups=new Set();
+    for(const ev of evs){
+      const d=ev.getDate(); if(d.abs()<=today.abs()) continue;
+      const nm=ev.render('he');
+      // "עֶרֶב X" (the eve of X) is hebcal's own separate event for the day
+      // before X, always rendered right before X itself - skip it so the
+      // group's first hit is the holiday itself, not its eve (same fix
+      // nextHolidayHalacha() already applies for the same reason).
+      if(/^עֶרֶב\s/.test(nm)) continue;
+      const gi=MAJOR_HOLIDAY_GROUPS.findIndex(re=>re.test(nm));
+      if(gi<0 || seenGroups.has(gi)) continue;
+      seenGroups.add(gi);
+      out.push({name:(S.lang==='he'?deNikud(nm):holidayName(ev.render('en'))), days:d.abs()-today.abs()});
+      if(out.length>=n) break;
+    }
+  }catch(err){}
+  return out;
+}
+function nextHoliday(){ return nextHolidaysList(1)[0]||null; }
+/* the month grid's own event lookup - shared by both display modes and by
+   the new month-events list below it - now keyed by absolute day number
+   (hd.abs()) instead of a "day-month" string, since that's the one key
+   that means the same thing whichever calendar is currently on screen.
+   omer/molad/shabbatMevarchim are new: hebcal itself renders the full
+   Omer-count day ("ט״ז בעומר") and the Shabbat Mevarchim molad
+   announcement text, so they ride the exact same event-chip rendering
+   the day-detail card already had for every other holiday - no new UI
+   needed for either. */
+function calMonthEvents(gStart,gEnd){
   const evMap={};
   try{
-    const evs=HebrewCalendar.calendar({start:gStart,end:gEnd,sedrot:true,il:/Jerusalem/.test(LOC.tz),locale:'he',noModern:false});
-    evs.forEach(e=>{ const d=e.getDate(); const key=d.getDate()+'-'+d.getMonth(); (evMap[key]=evMap[key]||[]).push(S.lang==='he'?e.render('he'):holidayName(e.render('en'))); });
+    const evs=HebrewCalendar.calendar({start:gStart,end:gEnd,sedrot:true,omer:true,molad:true,shabbatMevarchim:true,il:calIsIL(),locale:'he',noModern:false});
+    evs.forEach(e=>{ const abs=e.getDate().abs(); (evMap[abs]=evMap[abs]||[]).push(S.lang==='he'?e.render('he'):holidayName(e.render('en'))); });
   }catch(e){}
-  const selDay = (CAL.sel && CAL.sel.m===CAL.m && CAL.sel.y===CAL.y)? CAL.sel.d : (today.getMonth()===CAL.m&&today.getFullYear()===CAL.y? today.getDate():1);
+  return evMap;
+}
+function calMonthEventsHTML(evMap,firstAbs,len){
+  const rows=[];
+  for(let i=0;i<len;i++){
+    const abs=firstAbs+i; if(!evMap[abs]) continue;
+    const hd=new HDate(abs);
+    const dayLabel=CAL.civil?String(hd.greg().getDate()):heNum(hd.getDate());
+    rows.push(`<div class="cal-month-ev-row" data-abs="${abs}"><span class="cal-month-ev-day">${dayLabel}</span><span class="cal-month-ev-txt">${evMap[abs].join(' · ')}</span></div>`);
+  }
+  if(!rows.length) return '';
+  return `<div class="card conv-card cal-month-ev-card">
+    <div class="card-title">${I.cal} אירועי החודש</div>
+    <div class="cal-month-ev-list">${rows.join('')}</div>
+  </div>`;
+}
+function renderCalendar(){
+  if(!CAL){ CAL={civil:false}; calSetSelected(currentHDate()); }
+  const today=currentHDate();
+  let firstHD,lastHD,len,startDow,monthLabel,yearLabel;
+  if(CAL.civil){
+    len=new Date(CAL.gy,CAL.gm+1,0).getDate();
+    firstHD=new HDate(new Date(CAL.gy,CAL.gm,1));
+    lastHD=new HDate(new Date(CAL.gy,CAL.gm,len));
+    startDow=new Date(CAL.gy,CAL.gm,1).getDay();
+    monthLabel=new Date(CAL.gy,CAL.gm,1).toLocaleDateString(civilDateLocale(),{month:'long'});
+    yearLabel=String(CAL.gy);
+  } else {
+    firstHD=new HDate(1,CAL.m,CAL.y);
+    len=firstHD.daysInMonth();
+    lastHD=new HDate(len,CAL.m,CAL.y);
+    startDow=firstHD.getDay();
+    monthLabel=monthName(firstHD);
+    yearLabel=heNum(CAL.y);
+  }
+  const firstAbs=firstHD.abs(), lastAbs=lastHD.abs();
+  const evMap=calMonthEvents(firstHD.greg(), lastHD.greg());
+  const todayAbs=today.abs();
+  const wantedAbs=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY).abs():todayAbs;
+  const selAbs=(wantedAbs>=firstAbs && wantedAbs<=lastAbs)?wantedAbs:((todayAbs>=firstAbs&&todayAbs<=lastAbs)?todayAbs:firstAbs);
+  const selHD=new HDate(selAbs);
   // build grid
   let cells='';
-  const startDow=first.getDay();
   for(let i=0;i<startDow;i++) cells+='<div class="cal-cell empty"></div>';
   for(let d=1;d<=len;d++){
-    const hd=new HDate(d,CAL.m,CAL.y); const dow=hd.getDay();
-    const key=d+'-'+CAL.m; const hasEv=!!evMap[key];
-    const isToday=(hd.abs()===today.abs());
-    const cls=['cal-cell']; if(isToday)cls.push('today'); if(hasEv)cls.push('hol'); if(dow===6)cls.push('sat'); if(d===selDay)cls.push('sel');
-    cells+=`<div class="${cls.join(' ')}" data-day="${d}"><div class="hd">${heNum(d)}</div><div class="gd">${hd.greg().getDate()}/${hd.greg().getMonth()+1}</div></div>`;
+    let hd,mainNum,subNum;
+    if(CAL.civil){ hd=new HDate(new Date(CAL.gy,CAL.gm,d)); mainNum=String(d); subNum=heNum(hd.getDate())+' '+monthName(hd); }
+    else{ hd=new HDate(d,CAL.m,CAL.y); mainNum=heNum(d); const g=hd.greg(); subNum=g.getDate()+'/'+(g.getMonth()+1); }
+    const abs=hd.abs(); const dow=hd.getDay(); const hasEv=!!evMap[abs];
+    const isToday=abs===todayAbs, isSel=abs===selAbs;
+    const cls=['cal-cell']; if(isToday)cls.push('today'); if(hasEv)cls.push('hol'); if(dow===6)cls.push('sat'); if(isSel)cls.push('sel');
+    cells+=`<div class="${cls.join(' ')}" data-abs="${abs}"><div class="hd">${mainNum}</div><div class="gd">${subNum}</div></div>`;
   }
   const _anim=ckAnimClass();
+  const upcoming=nextHolidaysList(5);
   app.innerHTML=`
   ${topbar('לוח עברי')}
   <div class="view">
+    <div class="conv-dir cal-mode-toggle">
+      <button class="chip ${!CAL.civil?'on':''}" data-mode="heb">${I.cal} לוח עברי</button>
+      <button class="chip ${CAL.civil?'on':''}" data-mode="civil">${I.cal} לוח לועזי</button>
+    </div>
     <div class="cal-head">
       <button class="cal-nav" id="calPrevM">${I.prev}</button>
-      <div class="cal-month ${_anim}"><div class="m">${monthName(first)}</div><div class="y">${heNum(CAL.y)}</div></div>
+      <div class="cal-month ${_anim}"><div class="m">${monthLabel}</div><div class="y">${yearLabel}</div></div>
       <button class="cal-nav" id="calNextM">${I.next}</button>
     </div>
     <div class="cal-actions-row">
@@ -6667,9 +6804,10 @@ function renderCalendar(){
       </div>
       <button class="btn btn-gold" id="jmpGo" style="margin-top:10px">${I.check}<span>קפץ</span></button>
     </div>
-    ${(function(){const nh=nextHoliday(); return nh?`<div class="next-hol">${I.star||I.cal}<span>החג הקרוב · <b>${nh.name}</b> · בעוד ${heNum(nh.days)} ${nh.days===1?'יום':'ימים'}</span></div>`:'';})()}
-    <div class="cal-grid">${DOW_SHORT.map((d,i)=>`<div class="cal-dow">${dowShort(i)}</div>`).join('')}${cells}</div>
+    ${upcoming.length?`<div class="cal-upcoming-scroll">${upcoming.map(h=>`<div class="cal-upcoming-chip">${I.star||I.cal}<span>${h.name}</span><b>${h.days===1?'מחר':'בעוד '+heNum(h.days)+' ימים'}</b></div>`).join('')}</div>`:''}
+    <div class="cal-grid" id="calGrid">${DOW_SHORT.map((d,i)=>`<div class="cal-dow">${dowShort(i)}</div>`).join('')}${cells}</div>
     <div id="dayDetail"></div>
+    ${calMonthEventsHTML(evMap,firstAbs,len)}
 
     <div class="card conv-card">
       <div class="card-title">${I.refresh} ממיר תאריכים</div>
@@ -6689,13 +6827,36 @@ function renderCalendar(){
     </div>
     ${ornament()}
   </div>`;
-  document.getElementById('calToday').onclick=()=>{ const t=currentHDate(); CAL={y:t.getFullYear(),m:t.getMonth(),sel:t.getDate()}; renderCalendar(); };
+  document.getElementById('calToday').onclick=()=>{ calSetSelected(currentHDate()); renderCalendar(); };
   wireCalJump();
   wireConverter();
-  document.getElementById('calPrevM').onclick=()=>{ CK_NAV_DIR=-1; let m=CAL.m-1,y=CAL.y; if(m<1){m=13;y--;} while(!monthExists(m,y)){m--; if(m<1){m=13;y--;}} CAL={y,m}; renderCalendar(); };
-  document.getElementById('calNextM').onclick=()=>{ CK_NAV_DIR=1; let m=CAL.m+1,y=CAL.y; if(!monthExists(m,y)){ m=1;y++; } CAL={y,m}; renderCalendar(); };
-  app.querySelectorAll('[data-day]').forEach(c=>c.onclick=()=>{ CAL.sel={d:+c.dataset.day,m:CAL.m,y:CAL.y}; renderCalendar(); });
-  renderDayDetail(new HDate(selDay,CAL.m,CAL.y), evMap[selDay+'-'+CAL.m]||[]);
+  document.getElementById('calPrevM').onclick=calPrevMonth;
+  document.getElementById('calNextM').onclick=calNextMonth;
+  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+    const civil=b.dataset.mode==='civil'; if(civil===CAL.civil) return;
+    CAL.civil=civil;
+    if(civil){ const g=selHD.greg(); CAL.gy=g.getFullYear(); CAL.gm=g.getMonth(); }
+    else { CAL.y=selHD.getFullYear(); CAL.m=selHD.getMonth(); }
+    renderCalendar();
+  });
+  app.querySelectorAll('[data-abs]').forEach(c=>c.onclick=()=>{ const hd=new HDate(+c.dataset.abs); CAL.selHY=hd.getFullYear(); CAL.selHM=hd.getMonth(); CAL.selHD=hd.getDate(); renderCalendar(); });
+  // swipe left/right on the grid to move a month, mirroring how every
+  // native phone calendar/photos app already behaves - left flicks
+  // forward in time, right flicks back, regardless of RTL UI direction
+  // (matches the Hebcal app's own calendar screen, not the OS's text
+  // direction).
+  const gridEl=document.getElementById('calGrid');
+  if(gridEl){
+    let tsX=null, tsY=null;
+    gridEl.addEventListener('touchstart',e=>{ const t=e.changedTouches[0]; tsX=t.clientX; tsY=t.clientY; },{passive:true});
+    gridEl.addEventListener('touchend',e=>{
+      if(tsX==null) return;
+      const t=e.changedTouches[0]; const dx=t.clientX-tsX, dy=t.clientY-tsY;
+      tsX=null;
+      if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?calNextMonth():calPrevMonth(); }
+    },{passive:true});
+  }
+  renderDayDetail(selHD, evMap[selAbs]||[]);
   tr(app);
 }
 function monthExists(m,y){ try{ const h=new HDate(1,m,y); return h.getMonth()===m; }catch(e){ return false; } }
@@ -6709,7 +6870,7 @@ function wireCalJump(){
   };
   document.getElementById('jmpGo').onclick=()=>{
     const y=+document.getElementById('jmpYear').value, m=+document.getElementById('jmpMon').value, d=+document.getElementById('jmpDay').value;
-    CAL={y,m,sel:{d,m,y}}; panel.style.display='none'; renderCalendar();
+    calSetSelected(new HDate(d,m,y)); panel.style.display='none'; renderCalendar();
   };
 }
 function fillJumpSelects(){
@@ -6717,9 +6878,9 @@ function fillJumpSelects(){
   const d=document.getElementById('jmpDay'), m=document.getElementById('jmpMon'), y=document.getElementById('jmpYear');
   const today=currentHDate();
   y.innerHTML=''; for(let yy=today.getFullYear()-120; yy<=today.getFullYear()+120; yy++){ const o=document.createElement('option'); o.value=yy; o.textContent=heNum(yy); y.appendChild(o); }
-  y.value=CAL.y||today.getFullYear();
-  function fillM(){ const cur=+m.value||CAL.m||today.getMonth(); m.innerHTML=''; hMonths(+y.value).forEach(mm=>{ const o=document.createElement('option'); o.value=mm.v; o.textContent=mm.t; m.appendChild(o); }); m.value=Math.min(cur, m.options.length)||today.getMonth(); }
-  function fillD(){ const cur=+d.value||CAL.sel||today.getDate(); const dim=new HDate(1,+m.value,+y.value).daysInMonth(); d.innerHTML=''; for(let dd=1;dd<=dim;dd++){ const o=document.createElement('option'); o.value=dd; o.textContent=heNum(dd); d.appendChild(o); } d.value=Math.min(cur,dim); }
+  y.value=CAL.selHY||today.getFullYear();
+  function fillM(){ const cur=+m.value||CAL.selHM||today.getMonth(); m.innerHTML=''; hMonths(+y.value).forEach(mm=>{ const o=document.createElement('option'); o.value=mm.v; o.textContent=mm.t; m.appendChild(o); }); m.value=Math.min(cur, m.options.length)||today.getMonth(); }
+  function fillD(){ const cur=+d.value||CAL.selHD||today.getDate(); const dim=new HDate(1,+m.value,+y.value).daysInMonth(); d.innerHTML=''; for(let dd=1;dd<=dim;dd++){ const o=document.createElement('option'); o.value=dd; o.textContent=heNum(dd); d.appendChild(o); } d.value=Math.min(cur,dim); }
   fillM(); fillD();
   y.onchange=()=>{fillM();fillD();}; m.onchange=fillD;
 }
@@ -6764,8 +6925,26 @@ function renderDayDetail(hd, events){
       ${st.candle?`<div class="sb-row"><span class="zi">${I.candle}</span><span class="zname">הַדְלָקַת נֵרוֹת</span><span class="ztime gold-text">${fmtTime(st.candle)}</span></div>`:''}
       ${st.havdala?`<div class="sb-row"><span class="zi">${I.moon2}</span><span class="zname">צֵאת הַשַּׁבָּת / חַג</span><span class="ztime gold-text">${fmtTime(st.havdala)}</span></div>`:''}
     </div>`;})()}
+    <button class="dd-share-btn" id="ddShare">${I.share}<span>שתף את פרטי היום</span></button>
   </div>`;
   el.querySelectorAll('[data-open]').forEach(d=>d.onclick=()=>{ const [a,b]=d.dataset.open.split(',').map(Number); openReader(chaptersOf([a,b]),{daily:false}); });
+  const shareBtn=document.getElementById('ddShare'); if(shareBtn) shareBtn.onclick=()=>shareDayDetail(hd,events,weekKey);
+}
+/* Composes the same info already on screen (Hebrew+civil date, events,
+   parasha, candle-lighting/havdala when relevant) as plain text, reusing
+   the exact same navigator.share/clipboard fallback pattern sharePrayer()
+   already uses elsewhere rather than inventing a second one. */
+function shareDayDetail(hd,events,weekKey){
+  const g=hd.greg();
+  const lines=[`${dowName(hd)} · ${heNum(hd.getDate())} ${monthName(hd)}`, g.toLocaleDateString(civilDateLocale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'})];
+  if(events.length) lines.push(events.join(' · '));
+  if(weekKey) lines.push('פרשת השבוע: '+parshaName(weekKey));
+  const st=shabbatTimes(hd);
+  if(st.candle) lines.push('הדלקת נרות: '+fmtTime(st.candle));
+  if(st.havdala) lines.push('צאת השבת/חג: '+fmtTime(st.havdala));
+  const text=lines.join('\n')+'\n\n— בית א״ל';
+  if(navigator.share){ navigator.share({text}).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>toast('הַטֶּקְסְט הֹעֻתַּק')).catch(()=>{}); }
 }
 
 /* ================= ADDITIONAL PRAYERS ================= */
@@ -9967,6 +10146,8 @@ function renderSettings(){
       <h3>מקום וזמנים</h3>
       <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">השתמש במקום שלי</div><div class="si-d">אתור אוטומטי לפי GPS</div></div></div>${I.refresh}</div>
       <div class="set-item" id="openCompass" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.compass}</span><div><div class="si-t">מצפן</div><div class="si-d">כוון לקדש הקדשים בירושלים</div></div></div>${I.chev}</div>
+      <div class="set-item set-item-stack"><div class="si-l"><span class="si-ico">${I.cal}</span><div><div class="si-t">ישראל / חוץ לארץ</div><div class="si-d">קובע יום טוב שני, חול המועד וכדומה בלוח השנה</div></div></div>
+        <div class="seg"><button data-region="auto" class="${(S.calRegion||'auto')==='auto'?'on':''}">אוטומטי</button><button data-region="il" class="${S.calRegion==='il'?'on':''}">ישראל</button><button data-region="chul" class="${S.calRegion==='chul'?'on':''}">חוץ לארץ</button></div></div>
     </div>
 
     <div class="set-group">
@@ -10046,6 +10227,7 @@ function renderSettings(){
   document.getElementById('fsMinus').onclick=()=>{ changeFont(-0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
   document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
   app.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{ S.division=b.dataset.div; saveS(); renderSettings(); });
+  app.querySelectorAll('[data-region]').forEach(b=>b.onclick=()=>{ S.calRegion=b.dataset.region; saveS(); renderSettings(); });
   document.getElementById('useGPS').onclick=()=>{ toast('מאתר מקום…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'המקום עדכן לפי GPS':'לא התקבלה הרשאת מקום'); renderSettings(); }); };
   document.getElementById('openCompass').onclick=()=>go('kotelCompass');
   document.getElementById('shareApp').onclick=shareApp;
