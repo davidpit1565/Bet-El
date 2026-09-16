@@ -384,6 +384,41 @@ body::before{ /* subtle starfield/texture */
 .cal-cell.sel{outline:2px solid var(--gold);outline-offset:-2px}
 .cal-cell.hol::after{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
 .cal-cell.sat{background:var(--panel-2)}
+/* Fast days and personal yahrzeits get their own marker colors instead of
+   the generic gold "something's happening" dot, so a glance at the grid
+   already tells the two apart from an ordinary holiday - a day can only
+   ever show one dot, so priority is fast > yahrzeit > any other event. */
+.cal-cell.fast::after{background:#d9614f}
+.cal-cell.yahr::after{background:#8b7bd8}
+.cal-view-switch{margin:0 0 10px}
+.cal-filter-row{margin:0 0 12px}
+.cal-filter-row .chip{font-size:12px;padding:6px 11px}
+.cal-agenda-list{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.cal-agenda-row{display:flex;align-items:center;gap:12px;padding:10px 6px;border-radius:12px;cursor:pointer;transition:.15s var(--ease)}
+.cal-agenda-row:active{background:var(--panel-2)}
+.cal-agenda-row.today{background:linear-gradient(160deg,rgba(212,175,95,.14),transparent)}
+.cal-agenda-date{flex:none;width:48px;text-align:center;display:flex;flex-direction:column}
+.cal-agenda-date .d{font-family:var(--font-sacred);font-weight:700;font-size:17px;color:var(--gold)}
+.cal-agenda-date .m{font-size:10px;color:var(--muted)}
+.cal-agenda-events{display:flex;flex-direction:column;gap:3px}
+.cal-agenda-ev{font-size:13px;color:var(--ink)}
+.cal-agenda-ev.fast{color:#d9614f}
+.cal-agenda-ev.yahr{color:#8b7bd8}
+.cal-year-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cal-ymini{padding:10px;cursor:pointer}
+.cal-ymini-title{font-family:var(--font-sacred);font-weight:700;text-align:center;margin-bottom:6px;font-size:13px}
+.cal-ymini-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px}
+.cal-ymini-dow span{text-align:center;font-size:8px;color:var(--muted)}
+.cal-ymini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cal-ymini-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ink);position:relative;font-variant-numeric:tabular-nums}
+.cal-ymini-cell.empty{pointer-events:none}
+.cal-ymini-cell.today{border-radius:50%;background:var(--gold-grad);color:#2a1e05;font-weight:700}
+.cal-ymini-cell.hol::after{content:"";position:absolute;bottom:0;width:3px;height:3px;border-radius:50%;background:var(--gold)}
+.cal-ymini-cell.fast::after{content:"";position:absolute;bottom:0;width:3px;height:3px;border-radius:50%;background:#d9614f}
+.cal-ymini-cell.yahr::after{content:"";position:absolute;bottom:0;width:3px;height:3px;border-radius:50%;background:#8b7bd8}
+.cal-hol-search-results{max-height:260px;overflow-y:auto;margin-top:10px}
+.cal-hol-search-row{padding:10px 6px;border-radius:10px;cursor:pointer;font-size:14px}
+.cal-hol-search-row:active{background:var(--panel-2)}
 
 /* day detail */
 .day-detail{margin-top:16px}
@@ -2532,6 +2567,7 @@ function todaysYahrzeits(){
   try{const hd=currentHDate(),m=hd.getMonth(),d=hd.getDate(); return getYahrzeits().filter(y=>+y.hm===m&&+y.hd===d);}catch(e){return [];}
 }
 function yahrzeitHebLabel(y){ return heNum(+y.hd)+' ב'+(HEB_MONTHS_HE[(+y.hm)-1]||''); }
+function yahrzeitsOnHD(hd){ try{ const m=hd.getMonth(), d=hd.getDate(); return getYahrzeits().filter(y=>+y.hm===m && +y.hd===d); }catch(e){ return []; } }
 function toggleFav(ch){ if(FAV.has(ch))FAV.delete(ch); else FAV.add(ch); saveFav(); }
 function isFav(ch){ return FAV.has(ch); }
 /* dedication line */
@@ -5712,7 +5748,7 @@ function render(){
   try{
     if(TAB==='home') renderHome();
     else if(TAB==='tehillim') renderTehillim();
-    else if(TAB==='calendar') renderCalendar();
+    else if(TAB==='calendar') renderCalendarView();
     else if(TAB==='prayers') renderPrayersList();
     else if(TAB==='prayersGroup') renderPrayersGroup();
     else if(TAB==='prayerReader') renderPrayerReader();
@@ -6787,20 +6823,57 @@ function calPrevMonth(){
   CK_NAV_DIR=-1;
   if(CAL.civil){ const d=new Date(CAL.gy,CAL.gm-1,1); CAL.gy=d.getFullYear(); CAL.gm=d.getMonth(); }
   else{ let m=CAL.m-1,y=CAL.y; if(m<1){m=13;y--;} while(!monthExists(m,y)){m--; if(m<1){m=13;y--;}} CAL.m=m; CAL.y=y; }
-  renderCalendar();
+  renderCalMonth();
 }
 function calNextMonth(){
   CK_NAV_DIR=1;
   if(CAL.civil){ const d=new Date(CAL.gy,CAL.gm+1,1); CAL.gy=d.getFullYear(); CAL.gm=d.getMonth(); }
   else{ let m=CAL.m+1,y=CAL.y; if(!monthExists(m,y)){ m=1;y++; } CAL.m=m; CAL.y=y; }
-  renderCalendar();
+  renderCalMonth();
 }
 /* the two most major upcoming holidays used to mean just one - Rosh
    Hashana through Tu BiShvat all grouped into ~10 "families", each
    family's soonest still-upcoming day (skipping every subsequent day of
    a multi-day holiday, e.g. only "Sukkot I" ever shows, not all 8 days)
    surfaces once, nearest-first. */
-const MAJOR_HOLIDAY_GROUPS=[/רֹאשׁ הַשָּׁנָה/, /כִּפּוּר/, /סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת/, /חֲנֻכָּה|חֲנוּכָּה/, /פּוּרִים/, /פֶּסַח/, /שָׁבוּעוֹת/, /תִּשְׁעָה בְּאָב/, /בָּעֹמֶר|בָּעוֹמֶר/, /בִּשְׁבָט/];
+/* One shared list backs both the upcoming-holidays grouping below AND the
+   calendar's "search and jump to a holiday" panel, so the two never drift
+   into naming the same holiday differently. */
+const HOLIDAY_JUMP_LIST=[
+  {label:'רֹאשׁ הַשָּׁנָה', re:/רֹאשׁ הַשָּׁנָה(?!\s*לְמַעְשַׂר)/},
+  {label:'יוֹם כִּפּוּר', re:/כִּפּוּר/},
+  {label:'סֻכּוֹת / שִׂמְחַת תּוֹרָה', re:/סֻכּוֹת|שְׂמְחַת|שְׁמִינִי עֲצֶרֶת/},
+  {label:'חֲנֻכָּה', re:/חֲנֻכָּה|חֲנוּכָּה/},
+  {label:'ט״וּ בִּשְׁבָט', re:/בִּשְׁבָט/},
+  {label:'פּוּרִים', re:/פּוּרִים(?!\s*קָטָן)/},
+  {label:'פֶּסַח', re:/פֶּסַח(?!\s*שֵׁנִי)/},
+  {label:'לַ״ג בָּעֹמֶר', re:/בָּעֹמֶר|בָּעוֹמֶר/},
+  {label:'שָׁבוּעוֹת', re:/שָׁבוּעוֹת/},
+  {label:'תִּשְׁעָה בְּאָב', re:/תִּשְׁעָה בְּאָב/},
+  {label:'רֹאשׁ חֹדֶשׁ', re:/^רֹאשׁ חֹדֶשׁ/},
+];
+const MAJOR_HOLIDAY_GROUPS=HOLIDAY_JUMP_LIST.map(h=>h.re);
+/* Searches forward, then (failing that) backward, for the nearest real
+   occurrence of a HOLIDAY_JUMP_LIST entry - used by the calendar's holiday
+   search panel. Mirrors nextHolidaysList's own event loop/skip-eve logic. */
+function findHolidayOccurrence(re, fromHD){
+  fromHD = fromHD || currentHDate();
+  const il=calIsIL();
+  for(const dir of [1,-1]){
+    const gs=fromHD.greg(); const ge=new Date(gs); ge.setDate(ge.getDate()+dir*400);
+    const evs=HebrewCalendar.calendar({start:dir>0?gs:ge, end:dir>0?ge:gs, il, locale:'he'});
+    const list=dir>0?evs:evs.slice().reverse();
+    for(const ev of list){
+      const d=ev.getDate();
+      if(dir>0 && d.abs()<=fromHD.abs()) continue;
+      if(dir<0 && d.abs()>=fromHD.abs()) continue;
+      const nm=ev.render('he');
+      if(/^עֶרֶב\s/.test(nm)) continue;
+      if(re.test(nm)) return d;
+    }
+  }
+  return null;
+}
 function nextHolidaysList(n){
   const out=[];
   try{
@@ -6835,13 +6908,70 @@ function nextHoliday(){ return nextHolidaysList(1)[0]||null; }
    announcement text, so they ride the exact same event-chip rendering
    the day-detail card already had for every other holiday - no new UI
    needed for either. */
-function calMonthEvents(gStart,gEnd){
-  const evMap={};
+/* hebcal's own getCategories() (holiday/major/minor/modern/cholhamoed/
+   fast/roshchodesh/mevarchim/parashat/molad/omer/shabbat) is collapsed
+   into the 6 user-facing filter groups below, plus 'yahrzeit' for this
+   app's own personal-yahrzeit data (never something hebcal itself knows
+   about). Fast days get their own group even though hebcal also tags
+   them 'holiday', since the whole point of a "fast days" filter/marker
+   color is to single them out from an ordinary holiday. */
+function calCatGroup(cats){
+  if(cats.includes('fast')) return 'fast';
+  if(cats.includes('roshchodesh')||cats.includes('mevarchim')) return 'roshchodesh';
+  if(cats.includes('parashat')) return 'parasha';
+  if(cats.includes('molad')||cats.includes('omer')) return 'omer';
+  return 'holiday';
+}
+const CAL_FILTER_DEFS=[
+  {key:'holiday', label:'חַגִּים וּמוֹעֲדִים'},
+  {key:'fast', label:'צוֹמוֹת'},
+  {key:'roshchodesh', label:'רֹאשׁ חֹדֶשׁ'},
+  {key:'parasha', label:'פָּרָשַׁת הַשָּׁבוּעַ'},
+  {key:'omer', label:'מוֹלָד וְעֹמֶר'},
+  {key:'yahrzeit', label:'יָארְצַייט'},
+];
+function calLoadFilters(){
+  let f={}; try{ f=JSON.parse(localStorage.getItem('betel_cal_filters')||'{}'); }catch(e){}
+  CAL_FILTER_DEFS.forEach(d=>{ if(typeof f[d.key]!=='boolean') f[d.key]=true; });
+  return f;
+}
+function calSaveFilters(f){ localStorage.setItem('betel_cal_filters', JSON.stringify(f)); }
+/* Raw per-day event map for a Gregorian range: abs -> [{text,cat}], hebcal
+   events plus this app's own personal yahrzeits overlaid day-by-day.
+   Yahrzeits have no year of their own (see getYahrzeits()), so there's no
+   single hebcal query that can return them - checking each day directly
+   is cheap enough for the ranges this is ever called with (a month, a
+   year, or a 60-day agenda window). */
+function calRawEvents(gStart,gEnd){
+  const map={};
   try{
     const evs=HebrewCalendar.calendar({start:gStart,end:gEnd,sedrot:true,omer:true,molad:true,shabbatMevarchim:true,il:calIsIL(),locale:'he',noModern:false});
-    evs.forEach(e=>{ const abs=e.getDate().abs(); (evMap[abs]=evMap[abs]||[]).push(S.lang==='he'?e.render('he'):holidayName(e.render('en'))); });
+    evs.forEach(e=>{
+      const abs=e.getDate().abs();
+      const cats=(e.getCategories&&e.getCategories())||[];
+      const text=S.lang==='he'?e.render('he'):holidayName(e.render('en'));
+      (map[abs]=map[abs]||[]).push({text, cat:calCatGroup(cats)});
+    });
   }catch(e){}
-  return evMap;
+  try{
+    const yList=getYahrzeits();
+    if(yList.length){
+      const startAbs=new HDate(gStart).abs(), endAbs=new HDate(gEnd).abs();
+      for(let abs=startAbs; abs<=endAbs; abs++){
+        const hd=new HDate(abs);
+        yahrzeitsOnHD(hd).forEach(y=>(map[abs]=map[abs]||[]).push({text:'יוֹם הַיָּארְצַייט · '+y.name, cat:'yahrzeit'}));
+      }
+    }
+  }catch(e){}
+  return map;
+}
+function calFilterMap(map, filters){
+  const out={};
+  Object.keys(map).forEach(abs=>{
+    const kept=map[abs].filter(e=>filters[e.cat]!==false);
+    if(kept.length) out[abs]=kept;
+  });
+  return out;
 }
 function calMonthEventsHTML(evMap,firstAbs,len){
   const rows=[];
@@ -6849,7 +6979,7 @@ function calMonthEventsHTML(evMap,firstAbs,len){
     const abs=firstAbs+i; if(!evMap[abs]) continue;
     const hd=new HDate(abs);
     const dayLabel=CAL.civil?String(hd.greg().getDate()):heNum(hd.getDate());
-    rows.push(`<div class="cal-month-ev-row" data-abs="${abs}"><span class="cal-month-ev-day">${dayLabel}</span><span class="cal-month-ev-txt">${evMap[abs].join(' · ')}</span></div>`);
+    rows.push(`<div class="cal-month-ev-row" data-abs="${abs}"><span class="cal-month-ev-day">${dayLabel}</span><span class="cal-month-ev-txt">${evMap[abs].map(e=>e.text).join(' · ')}</span></div>`);
   }
   if(!rows.length) return '';
   return `<div class="card conv-card cal-month-ev-card">
@@ -6857,8 +6987,170 @@ function calMonthEventsHTML(evMap,firstAbs,len){
     <div class="cal-month-ev-list">${rows.join('')}</div>
   </div>`;
 }
-function renderCalendar(){
-  if(!CAL){ CAL={civil:false}; calSetSelected(currentHDate()); }
+function calFilterChipsHTML(){
+  return `<div class="chip-row cal-filter-row">${CAL_FILTER_DEFS.map(d=>`<button class="chip ${CAL.filters[d.key]?'on':''}" data-filt="${d.key}">${d.label}</button>`).join('')}</div>`;
+}
+function wireCalFilters(rerender){
+  document.querySelectorAll('[data-filt]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.filt; CAL.filters[k]=!CAL.filters[k]; calSaveFilters(CAL.filters); rerender();
+  });
+}
+const CAL_VIEW_TABS=[{key:'month',label:'חֹדֶשׁ'},{key:'agenda',label:'אַגֶ׳נְדָה'},{key:'year',label:'שָׁנָה'}];
+function calViewSwitchHTML(){
+  return `<div class="conv-dir cal-view-switch">${CAL_VIEW_TABS.map(t=>`<button class="chip ${CAL.view===t.key?'on':''}" data-view="${t.key}">${t.label}</button>`).join('')}</div>`;
+}
+function wireCalViewSwitch(){
+  document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.view===CAL.view) return;
+    CAL.view=b.dataset.view; renderCalendarView();
+  });
+}
+/* Dispatches to whichever of the 3 calendar screens is current - a plain
+   month grid (renderCalMonth, the original/default view), a rolling
+   agenda list of only the days with something happening (renderCalAgenda),
+   or a 12-month year overview (renderCalYear). All three share CAL's
+   civil/Hebrew mode and event-type filters. */
+function renderCalendarView(){
+  if(!CAL){ CAL={civil:false, view:'month', filters:calLoadFilters(), agendaStartAbs:null}; calSetSelected(currentHDate()); }
+  if(CAL.view==='agenda') return renderCalAgenda();
+  if(CAL.view==='year') return renderCalYear();
+  return renderCalMonth();
+}
+function renderCalAgenda(){
+  if(!CAL) return renderCalendarView();
+  const today=currentHDate();
+  if(CAL.agendaStartAbs==null) CAL.agendaStartAbs=today.abs();
+  const startAbs=CAL.agendaStartAbs, winLen=60, endAbs=startAbs+winLen-1;
+  const raw=calRawEvents(new HDate(startAbs).greg(), new HDate(endAbs).greg());
+  const evMap=calFilterMap(raw, CAL.filters);
+  const dayAbsList=[]; for(let abs=startAbs; abs<=endAbs; abs++){ if(evMap[abs]) dayAbsList.push(abs); }
+  app.innerHTML=`
+  ${topbar('לוח עברי')}
+  <div class="view">
+    ${calViewSwitchHTML()}
+    ${calFilterChipsHTML()}
+    <div class="cal-actions-row">
+      <button class="today-btn" id="calAgPrev">${I.prev}<span>60 קוֹדְמִים</span></button>
+      <button class="today-btn" id="calAgToday">${I.cal}<span>הַיּוֹם</span></button>
+      <button class="today-btn" id="calAgNext">${I.next}<span>עוֹד 60</span></button>
+    </div>
+    <div class="cal-agenda-list">
+      ${dayAbsList.length ? dayAbsList.map(abs=>{
+        const hd=new HDate(abs); const isToday=abs===today.abs();
+        return `<div class="cal-agenda-row ${isToday?'today':''}" data-abs="${abs}">
+          <div class="cal-agenda-date"><span class="d">${heNum(hd.getDate())}</span><span class="m">${monthName(hd)}</span></div>
+          <div class="cal-agenda-events">${evMap[abs].map(e=>`<span class="cal-agenda-ev ${e.cat==='fast'?'fast':(e.cat==='yahrzeit'?'yahr':'')}">${e.text}</span>`).join('')}</div>
+        </div>`;
+      }).join('') : `<div class="si-d" style="padding:26px 0;text-align:center">אֵין אֵירוּעִים בַּטְּוָח הַזֶּה</div>`}
+    </div>
+    ${ornament()}
+  </div>`;
+  wireCalViewSwitch();
+  wireCalFilters(renderCalAgenda);
+  document.getElementById('calAgPrev').onclick=()=>{ CAL.agendaStartAbs-=winLen; renderCalAgenda(); };
+  document.getElementById('calAgNext').onclick=()=>{ CAL.agendaStartAbs+=winLen; renderCalAgenda(); };
+  document.getElementById('calAgToday').onclick=()=>{ CAL.agendaStartAbs=today.abs(); renderCalAgenda(); };
+  app.querySelectorAll('.cal-agenda-row[data-abs]').forEach(r=>r.onclick=()=>{
+    calSetSelected(new HDate(+r.dataset.abs)); CAL.view='month'; renderCalendarView();
+  });
+  tr(app);
+}
+/* One mini month for the year-overview screen - y/m are Hebrew (civil
+   false) or Gregorian y / 0-based m (civil true), matching whichever
+   system CAL.civil currently has the year view showing. */
+function calMiniMonthHTML(y,m,civil){
+  let firstHD,len,startDow,label;
+  if(civil){ len=new Date(y,m+1,0).getDate(); firstHD=new HDate(new Date(y,m,1)); startDow=new Date(y,m,1).getDay(); label=new Date(y,m,1).toLocaleDateString(civilDateLocale(),{month:'short'}); }
+  else{ firstHD=new HDate(1,m,y); len=firstHD.daysInMonth(); startDow=firstHD.getDay(); label=monthName(firstHD); }
+  const lastHD = civil ? new HDate(new Date(y,m,len)) : new HDate(len,m,y);
+  const raw=calRawEvents(firstHD.greg(), lastHD.greg());
+  const evMap=calFilterMap(raw, CAL.filters);
+  const todayAbs=currentHDate().abs();
+  let cells='';
+  for(let i=0;i<startDow;i++) cells+='<div class="cal-ymini-cell empty"></div>';
+  for(let d=1;d<=len;d++){
+    const hd = civil ? new HDate(new Date(y,m,d)) : new HDate(d,m,y);
+    const abs=hd.abs(); const evs=evMap[abs]||[];
+    const hasFast=evs.some(e=>e.cat==='fast'), hasYahr=evs.some(e=>e.cat==='yahrzeit');
+    const cls=['cal-ymini-cell']; if(abs===todayAbs)cls.push('today');
+    if(hasFast)cls.push('fast'); else if(hasYahr)cls.push('yahr'); else if(evs.length)cls.push('hol');
+    cells+=`<div class="${cls.join(' ')}" data-abs="${abs}">${civil?d:heNum(d)}</div>`;
+  }
+  return `<div class="cal-ymini card" data-jump-y="${y}" data-jump-m="${m}">
+    <div class="cal-ymini-title">${label}</div>
+    <div class="cal-ymini-dow">${DOW_SHORT.map((d,i)=>`<span>${dowShort(i)[0]}</span>`).join('')}</div>
+    <div class="cal-ymini-grid">${cells}</div>
+  </div>`;
+}
+function renderCalYear(){
+  if(!CAL) return renderCalendarView();
+  const civil=CAL.civil;
+  const y = civil ? (CAL.gy||currentHDate().greg().getFullYear()) : (CAL.y||currentHDate().getFullYear());
+  const monthsCount = civil ? 12 : (HDate.monthsInYear?HDate.monthsInYear(y):12);
+  const months=[]; for(let i=0;i<monthsCount;i++) months.push(civil?i:i+1);
+  app.innerHTML=`
+  ${topbar('לוח עברי')}
+  <div class="view">
+    ${calViewSwitchHTML()}
+    <div class="conv-dir cal-mode-toggle">
+      <button class="chip ${!civil?'on':''}" data-mode="heb">${I.cal} לוח עברי</button>
+      <button class="chip ${civil?'on':''}" data-mode="civil">${I.cal} לוח לועזי</button>
+    </div>
+    <div class="cal-head">
+      <button class="cal-nav" id="calYPrev">${I.prev}</button>
+      <div class="cal-month"><div class="m">${civil?'שָׁנָה לוֹעֲזִית':'שָׁנָה עִבְרִית'}</div><div class="y">${civil?y:heNum(y)}</div></div>
+      <button class="cal-nav" id="calYNext">${I.next}</button>
+    </div>
+    ${calFilterChipsHTML()}
+    <div class="cal-year-grid">${months.map(m=>calMiniMonthHTML(y,m,civil)).join('')}</div>
+    ${ornament()}
+  </div>`;
+  wireCalViewSwitch();
+  wireCalFilters(renderCalYear);
+  document.getElementById('calYPrev').onclick=()=>{ if(civil) CAL.gy=y-1; else CAL.y=y-1; renderCalYear(); };
+  document.getElementById('calYNext').onclick=()=>{ if(civil) CAL.gy=y+1; else CAL.y=y+1; renderCalYear(); };
+  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ CAL.civil=b.dataset.mode==='civil'; renderCalYear(); });
+  app.querySelectorAll('.cal-ymini-cell[data-abs]').forEach(c=>c.onclick=(ev)=>{
+    ev.stopPropagation(); calSetSelected(new HDate(+c.dataset.abs)); CAL.view='month'; renderCalendarView();
+  });
+  app.querySelectorAll('.cal-ymini').forEach(card=>card.onclick=()=>{
+    const yy=+card.dataset.jumpY, mm=+card.dataset.jumpM;
+    if(civil){CAL.gy=yy;CAL.gm=mm;} else {CAL.y=yy;CAL.m=mm;}
+    CAL.view='month'; renderCalendarView();
+  });
+  tr(app);
+}
+function calHolSearchResultsHTML(q){
+  // ckSkel bridges plene/defective spelling (e.g. a typed "חנוכה" against
+  // the nikud source's "חֲנֻכָּה") the same way the main ckBuildIndex search does.
+  const nq=ckSkel(ckNorm(q||''));
+  const matches = nq ? HOLIDAY_JUMP_LIST.filter(h=>ckSkel(ckNorm(h.label)).includes(nq)) : HOLIDAY_JUMP_LIST;
+  if(!matches.length) return `<div class="si-d">לֹא נִמְצָא</div>`;
+  return matches.map(h=>`<div class="cal-hol-search-row" data-idx="${HOLIDAY_JUMP_LIST.indexOf(h)}">${h.label}</div>`).join('');
+}
+function wireCalHolSearch(){
+  const btn=document.getElementById('calHolSearchBtn'), panel=document.getElementById('calHolSearchPanel');
+  if(!btn||!panel) return;
+  const inp=document.getElementById('calHolSearchInput'), results=document.getElementById('calHolSearchResults');
+  btn.onclick=()=>{
+    const open=panel.style.display==='none';
+    panel.style.display=open?'':'none';
+    if(open){ inp.value=''; results.innerHTML=calHolSearchResultsHTML(''); inp.focus(); }
+  };
+  inp.oninput=()=>{ results.innerHTML=calHolSearchResultsHTML(inp.value); wireCalHolSearchRows(); };
+  wireCalHolSearchRows();
+}
+function wireCalHolSearchRows(){
+  document.querySelectorAll('.cal-hol-search-row[data-idx]').forEach(r=>r.onclick=()=>{
+    const h=HOLIDAY_JUMP_LIST[+r.dataset.idx];
+    const hd=findHolidayOccurrence(h.re, currentHDate());
+    document.getElementById('calHolSearchPanel').style.display='none';
+    if(hd){ calSetSelected(hd); renderCalMonth(); toast(h.label); }
+    else toast('לֹא נִמְצָא בַּטְּוָח');
+  });
+}
+function renderCalMonth(){
+  if(!CAL) return renderCalendarView();
   const today=currentHDate();
   let firstHD,lastHD,len,startDow,monthLabel,yearLabel;
   if(CAL.civil){
@@ -6877,7 +7169,7 @@ function renderCalendar(){
     yearLabel=heNum(CAL.y);
   }
   const firstAbs=firstHD.abs(), lastAbs=lastHD.abs();
-  const evMap=calMonthEvents(firstHD.greg(), lastHD.greg());
+  const evMap=calFilterMap(calRawEvents(firstHD.greg(), lastHD.greg()), CAL.filters);
   const todayAbs=today.abs();
   const wantedAbs=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY).abs():todayAbs;
   const selAbs=(wantedAbs>=firstAbs && wantedAbs<=lastAbs)?wantedAbs:((todayAbs>=firstAbs&&todayAbs<=lastAbs)?todayAbs:firstAbs);
@@ -6889,9 +7181,12 @@ function renderCalendar(){
     let hd,mainNum,subNum;
     if(CAL.civil){ hd=new HDate(new Date(CAL.gy,CAL.gm,d)); mainNum=String(d); subNum=heNum(hd.getDate())+' '+monthName(hd); }
     else{ hd=new HDate(d,CAL.m,CAL.y); mainNum=heNum(d); const g=hd.greg(); subNum=g.getDate()+'/'+(g.getMonth()+1); }
-    const abs=hd.abs(); const dow=hd.getDay(); const hasEv=!!evMap[abs];
+    const abs=hd.abs(); const dow=hd.getDay(); const dayEvs=evMap[abs]||[];
+    const hasFast=dayEvs.some(e=>e.cat==='fast'), hasYahr=dayEvs.some(e=>e.cat==='yahrzeit');
     const isToday=abs===todayAbs, isSel=abs===selAbs;
-    const cls=['cal-cell']; if(isToday)cls.push('today'); if(hasEv)cls.push('hol'); if(dow===6)cls.push('sat'); if(isSel)cls.push('sel');
+    const cls=['cal-cell']; if(isToday)cls.push('today');
+    if(hasFast)cls.push('fast'); else if(hasYahr)cls.push('yahr'); else if(dayEvs.length)cls.push('hol');
+    if(dow===6)cls.push('sat'); if(isSel)cls.push('sel');
     cells+=`<div class="${cls.join(' ')}" data-abs="${abs}"><div class="hd">${mainNum}</div><div class="gd">${subNum}</div></div>`;
   }
   const _anim=ckAnimClass();
@@ -6899,6 +7194,7 @@ function renderCalendar(){
   app.innerHTML=`
   ${topbar('לוח עברי')}
   <div class="view">
+    ${calViewSwitchHTML()}
     <div class="conv-dir cal-mode-toggle">
       <button class="chip ${!CAL.civil?'on':''}" data-mode="heb">${I.cal} לוח עברי</button>
       <button class="chip ${CAL.civil?'on':''}" data-mode="civil">${I.cal} לוח לועזי</button>
@@ -6911,6 +7207,7 @@ function renderCalendar(){
     <div class="cal-actions-row">
       <button class="today-btn" id="calToday">${I.cal}<span>היום</span></button>
       <button class="today-btn" id="calJumpBtn">${I.search}<span>קפץ לתאריך</span></button>
+      <button class="today-btn" id="calHolSearchBtn">${I.search}<span>חיפוש חג</span></button>
     </div>
     <div class="card conv-card" id="calJumpPanel" style="display:none;margin-top:10px">
       <div class="conv-row">
@@ -6920,6 +7217,11 @@ function renderCalendar(){
       </div>
       <button class="btn btn-gold" id="jmpGo" style="margin-top:10px">${I.check}<span>קפץ</span></button>
     </div>
+    <div class="card conv-card" id="calHolSearchPanel" style="display:none;margin-top:10px">
+      <input type="text" id="calHolSearchInput" class="fld-input" placeholder="חִפְשׂוּ חַג..."/>
+      <div class="cal-hol-search-results" id="calHolSearchResults"></div>
+    </div>
+    ${calFilterChipsHTML()}
     ${upcoming.length?`<div class="cal-upcoming-scroll">${upcoming.map(h=>`<div class="cal-upcoming-chip">${I.star||I.cal}<span>${h.name}</span><b>${h.days===1?'מחר':'בעוד '+heNum(h.days)+' ימים'}</b></div>`).join('')}</div>`:''}
     <div class="cal-grid" id="calGrid">${DOW_SHORT.map((d,i)=>`<div class="cal-dow">${dowShort(i)}</div>`).join('')}${cells}</div>
     <div id="dayDetail"></div>
@@ -6943,9 +7245,12 @@ function renderCalendar(){
     </div>
     ${ornament()}
   </div>`;
-  document.getElementById('calToday').onclick=()=>{ calSetSelected(currentHDate()); renderCalendar(); };
+  document.getElementById('calToday').onclick=()=>{ calSetSelected(currentHDate()); renderCalMonth(); };
   wireCalJump();
+  wireCalHolSearch();
   wireConverter();
+  wireCalViewSwitch();
+  wireCalFilters(renderCalMonth);
   document.getElementById('calPrevM').onclick=calPrevMonth;
   document.getElementById('calNextM').onclick=calNextMonth;
   app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
@@ -6953,9 +7258,9 @@ function renderCalendar(){
     CAL.civil=civil;
     if(civil){ const g=selHD.greg(); CAL.gy=g.getFullYear(); CAL.gm=g.getMonth(); }
     else { CAL.y=selHD.getFullYear(); CAL.m=selHD.getMonth(); }
-    renderCalendar();
+    renderCalMonth();
   });
-  app.querySelectorAll('[data-abs]').forEach(c=>c.onclick=()=>{ const hd=new HDate(+c.dataset.abs); CAL.selHY=hd.getFullYear(); CAL.selHM=hd.getMonth(); CAL.selHD=hd.getDate(); renderCalendar(); });
+  app.querySelectorAll('[data-abs]').forEach(c=>c.onclick=()=>{ const hd=new HDate(+c.dataset.abs); CAL.selHY=hd.getFullYear(); CAL.selHM=hd.getMonth(); CAL.selHD=hd.getDate(); renderCalMonth(); });
   // swipe left/right on the grid to move a month, mirroring how every
   // native phone calendar/photos app already behaves - left flicks
   // forward in time, right flicks back, regardless of RTL UI direction
@@ -6972,7 +7277,7 @@ function renderCalendar(){
       if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?calNextMonth():calPrevMonth(); }
     },{passive:true});
   }
-  renderDayDetail(selHD, evMap[selAbs]||[]);
+  renderDayDetail(selHD, (evMap[selAbs]||[]).map(e=>e.text));
   tr(app);
 }
 function monthExists(m,y){ try{ const h=new HDate(1,m,y); return h.getMonth()===m; }catch(e){ return false; } }
@@ -6986,7 +7291,7 @@ function wireCalJump(){
   };
   document.getElementById('jmpGo').onclick=()=>{
     const y=+document.getElementById('jmpYear').value, m=+document.getElementById('jmpMon').value, d=+document.getElementById('jmpDay').value;
-    calSetSelected(new HDate(d,m,y)); panel.style.display='none'; renderCalendar();
+    calSetSelected(new HDate(d,m,y)); panel.style.display='none'; renderCalMonth();
   };
 }
 function fillJumpSelects(){
