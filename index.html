@@ -9387,7 +9387,7 @@ function siddurKriatShemaAlHamitaHTML(){
   html += siddurParasFromText(K.anaBekoachNote);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
   html += siddurParasFromText(K.nightVerses, false, 'siddur-night-verse');
-  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
+  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`, false, 'siddur-night-verse');
   html += siddurParasFromText(K.closing);
   return html;
 }
