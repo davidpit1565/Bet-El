@@ -115,6 +115,16 @@ body::before{ /* subtle starfield/texture */
   margin:0 -16px;padding-left:20px;padding-right:20px;
   background:linear-gradient(to bottom,var(--bg) 30%,transparent);
 }
+/* env(safe-area-inset-top) has been reported to resolve to 0 on first
+   paint in the native iOS app shell (contentInset:"never" hands safe-area
+   handling entirely to CSS, and WKWebView doesn't always have its real
+   safeAreaInsets available before the first layout pass) - this floor
+   only applies inside that shell (see the ios-native-safe-top class,
+   set once at boot from Capacitor.getPlatform()), never in a browser
+   tab or the installed PWA, where safe-area-inset-top is already
+   correct and a flat floor would just add unwanted empty space. */
+.ios-native-safe-top .topbar{padding-top:calc(8px + max(env(safe-area-inset-top),44px))}
+.ios-native-safe-top .reader-head{padding-top:calc(8px + max(env(safe-area-inset-top),44px))}
 .topbar .tb-title{font-family:var(--font-sacred);font-weight:700;font-size:20px;letter-spacing:.5px}
 .topbar .tb-mark{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
 .topbar .tb-back{width:34px;height:34px;min-width:34px;border-radius:10px}
@@ -953,6 +963,11 @@ input,select,button{max-width:100%;box-sizing:border-box}
    quieter than the surrounding prayer text, never at the same size/weight. */
 .pk-marker{font-size:.75em;color:var(--muted);vertical-align:baseline}
 .siddur-whisper{font-size:.85em;color:var(--muted)}
+/* Kriat Shema Al HaMita's seven Ana BeKoach night-verses: at the full
+   21px reader size, "ליל א: אנא בכח..." plus its roshei-tevot marker
+   wraps to 2-3 lines each - shrinking just these lines (not the whole
+   reader) is what actually gets each night onto one row on a phone. */
+.siddur-night-verse{font-size:.68em;line-height:1.7;margin-bottom:8px;padding-bottom:0}
 /* Siddur: day-conditional insertions (Yaale V'Yavo, Al HaNissim, Aneinu,
    Aseret Yemei Teshuva swaps, Hallel) get a colored left rule + small tag
    so it's visually clear *why* a line is there today, instead of blending
@@ -9371,7 +9386,7 @@ function siddurKriatShemaAlHamitaHTML(){
   html += siddurParasFromText(K.viduiText);
   html += siddurParasFromText(K.anaBekoachNote);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
-  html += siddurParasFromText(K.nightVerses);
+  html += siddurParasFromText(K.nightVerses, false, 'siddur-night-verse');
   html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
   html += siddurParasFromText(K.closing);
   return html;
@@ -10601,6 +10616,16 @@ function buildNav(){
   requestAnimationFrame(placeNavPill);
 }
 window.addEventListener('resize', placeNavPill);
+/* Native iOS Capacitor shell (capacitor.config.json: ios.contentInset =
+   "never") relies entirely on env(safe-area-inset-top) to keep sticky
+   headers clear of the notch/Dynamic Island - unlike a plain mobile
+   browser tab, where that value is legitimately 0 and must stay 0 (the
+   browser's own chrome already reserves the space). Flagging only the
+   native app with this class lets .ios-native-safe-top apply a floor
+   under env() without adding unwanted top padding on the web/PWA. */
+if(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()==='ios'){
+  document.documentElement.classList.add('ios-native-safe-top');
+}
 applySettings();
 applyWakeLock();
 applyLang();
