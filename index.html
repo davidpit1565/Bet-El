@@ -1425,6 +1425,23 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @media (min-width:700px){
   #app{max-width:760px}
   .bottom-nav{max-width:720px}
+  .cal-year-grid{grid-template-columns:repeat(3,1fr)}
+}
+/* iPad landscape and wider (also covers "My Mac (Designed for iPad)" and
+   any resized Mac/desktop browser window) - the 760px cap above is close
+   to iPad PORTRAIT's own full width already, but leaves a wide dead
+   margin on either side once the window/screen is meaningfully wider than
+   that. Widen the reading column further here rather than stretching it
+   to the full window width - a Tehillim/Torah reader at 1000px+ of prose
+   per line is harder to read, not easier, so this still caps well short
+   of the viewport. Grids built with `auto-fill,minmax(...)` (quick-tiles,
+   the parasha/day picker, etc.) already reflow into more columns on their
+   own as #app widens - only the year calendar's fixed 2/3-column grid
+   needs an explicit bump to actually use the extra room. */
+@media (min-width:1024px){
+  #app{max-width:980px}
+  .bottom-nav{max-width:760px}
+  .cal-year-grid{grid-template-columns:repeat(4,1fr)}
 }
 </style>
 </head>
