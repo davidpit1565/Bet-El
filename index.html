@@ -991,6 +991,16 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-note{margin:4px 0 14px;font-size:14px;font-weight:700;color:var(--gold);text-align:center;
   font-family:var(--font-ui);letter-spacing:.2px}
 .prayer-para:last-child{border:none;margin-bottom:0}
+/* [[COLLAPSE:...]] wraps a paragraph in the existing .siddur-accordion
+   widget (see siddurAccordionHTML/siddurToggleAccordion) - reused here so
+   Kaddish/Leshem-Yichud/Birkat-HaOreach/Zimun text collapses with the same
+   tap target and chevron as the app's one existing accordion use (the
+   fast-day Selichot insert inside Tachanun), instead of introducing a
+   second expand/collapse widget with its own look.  A .siddur-accordion
+   nested inside .prayer-para needs its own vertical rhythm since it's not
+   itself a .prayer-para (siddurCollapseHTML wraps the body in one, but the
+   accordion shell sits outside that spacing). */
+.siddur-collapse-wrap{margin-bottom:16px;padding-bottom:12px}
 /* Enumeration letters inside Pitum HaKetoret's ten-spices list (Sefaria
    prints them smaller/de-emphasized than the words being read, since
    they're just a reference aid, not part of the recited text) and
@@ -1048,7 +1058,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
    fit for arbitrary named text blocks here). */
 .siddur-accordion{margin:14px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .siddur-accordion-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
-  padding:14px 16px;font-family:var(--font-ui);font-weight:700;font-size:15px;cursor:pointer;background:var(--panel)}
+  padding:14px 16px;font-family:var(--font-sacred);font-weight:700;font-size:15px;cursor:pointer;background:var(--panel)}
 .siddur-accordion-chev{transition:transform .2s}
 .siddur-accordion.open .siddur-accordion-chev{transform:rotate(90deg)}
 .siddur-accordion-body{display:none;padding:4px 16px 16px}
@@ -1850,7 +1860,7 @@ const PRAYERS_EXTRA = {
     title: 'תפילת הדרך',
     subtitle: 'לְאוֹמְרָהּ בְּצֵאתְךָ לַדֶּרֶךְ',
     ready: true,
-    text: 'יְהִי רָצוֹן מִלְּפָנֶיךָ ה\' אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, שֶׁתּוֹלִיכֵנוּ לְשָׁלוֹם וְתַצְעִידֵנוּ לְשָׁלוֹם, וְתַדְרִיכֵנוּ לְשָׁלוֹם, וְתִסְמְכֵנוּ לְשָׁלוֹם, וְתַגִּיעֵנוּ לִמְחוֹז חֶפְצֵנוּ לְחַיִּים וּלְשִׂמְחָה וּלְשָׁלוֹם.\n\nוְתַצִּילֵנוּ מִכַּף כָּל אוֹיֵב וְאוֹרֵב וְלִסְטִים וְחַיּוֹת רָעוֹת בַּדֶּרֶךְ, וּמִכָּל מִינֵי פֻּרְעָנֻיּוֹת הַמִּתְרַגְּשׁוֹת וּבָאוֹת לָעוֹלָם.\n\nוְתִשְׁלַח בְּרָכָה בְּכָל מַעֲשֵׂה יָדֵינוּ, וְתִתְּנֵנוּ לְחֵן וּלְחֶסֶד וּלְרַחֲמִים בְּעֵינֶיךָ וּבְעֵינֵי כָל רוֹאֵינוּ.\n\nוְתִשְׁמַע קוֹל תַּחֲנוּנֵנוּ, כִּי אֵל שׁוֹמֵעַ תְּפִלָּה וְתַחֲנוּן אָתָּה. בָּרוּךְ אַתָּה ה\', שׁוֹמֵעַ תְּפִלָּה.\n\n[[NOTE]]וְיֵשׁ הַמּוֹסִיפִים פְּסוּקִים אֵלֶּה לִשְׁמִירָה:\n\nהַמַּלְאָךְ הַגֹּאֵל אֹתִי מִכָּל רָע יְבָרֵךְ אֶת הַנְּעָרִים וְיִקָּרֵא בָהֶם שְׁמִי וְשֵׁם אֲבֹתַי אַבְרָהָם וְיִצְחָק, וְיִדְגּוּ לָרֹב בְּקֶרֶב הָאָרֶץ.\n\nוְיַעֲקֹב הָלַךְ לְדַרְכּוֹ וַיִּפְגְּעוּ בוֹ מַלְאֲכֵי אֱלֹהִים. וַיֹּאמֶר יַעֲקֹב כַּאֲשֶׁר רָאָם: מַחֲנֵה אֱלֹהִים זֶה, וַיִּקְרָא שֵׁם הַמָּקוֹם הַהוּא מַחֲנָיִם — ג׳ פְּעָמִים\n\nוַיִּסְעוּ וַיְהִי חִתַּת אֱלֹהִים עַל הֶעָרִים אֲשֶׁר סְבִיבוֹתֵיהֶם וְלֹא רָדְפוּ אַחֲרֵי בְּנֵי יַעֲקֹב. לִישׁוּעָתְךָ קִוִּיתִי ה׳ — ג׳ פְּעָמִים\n\n[[NOTE]]וְאַחַר כָּךְ יֹאמַר שִׁיר לַמַּעֲלוֹת:\n\nשִׁיר לַמַּעֲלוֹת. אֶשָּׂא עֵינַי אֶל הֶהָרִים, מֵאַיִן יָבֹא עֶזְרִי. עֶזְרִי מֵעִם ה׳, עֹשֵׂה שָׁמַיִם וָאָרֶץ. אַל יִתֵּן לַמּוֹט רַגְלֶךָ, אַל יָנוּם שֹׁמְרֶךָ. הִנֵּה לֹא יָנוּם וְלֹא יִישָׁן, שׁוֹמֵר יִשְׂרָאֵל. ה׳ שֹׁמְרֶךָ, ה׳ צִלְּךָ עַל יַד יְמִינֶךָ. יוֹמָם הַשֶּׁמֶשׁ לֹא יַכֶּכָּה, וְיָרֵחַ בַּלָּיְלָה. ה׳ יִשְׁמָרְךָ מִכָּל רָע, יִשְׁמֹר אֶת נַפְשֶׁךָ. ה׳ יִשְׁמָר צֵאתְךָ וּבוֹאֶךָ, מֵעַתָּה וְעַד עוֹלָם.'
+    text: 'יְהִי רָצוֹן מִלְּפָנֶיךָ ה\' אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, שֶׁתּוֹלִיכֵנוּ לְשָׁלוֹם וְתַצְעִידֵנוּ לְשָׁלוֹם, וְתַדְרִיכֵנוּ לְשָׁלוֹם, וְתִסְמְכֵנוּ לְשָׁלוֹם, וְתַגִּיעֵנוּ לִמְחוֹז חֶפְצֵנוּ לְחַיִּים וּלְשִׂמְחָה וּלְשָׁלוֹם.\n\nוְתַצִּילֵנוּ מִכַּף כָּל אוֹיֵב וְאוֹרֵב וְלִסְטִים וְחַיּוֹת רָעוֹת בַּדֶּרֶךְ, וּמִכָּל מִינֵי פֻּרְעָנֻיּוֹת הַמִּתְרַגְּשׁוֹת וּבָאוֹת לָעוֹלָם.\n\nוְתִשְׁלַח בְּרָכָה בְּכָל מַעֲשֵׂה יָדֵינוּ, וְתִתְּנֵנוּ לְחֵן וּלְחֶסֶד וּלְרַחֲמִים בְּעֵינֶיךָ וּבְעֵינֵי כָל רוֹאֵינוּ.\n\nוְתִשְׁמַע קוֹל תַּחֲנוּנֵנוּ, כִּי אֵל שׁוֹמֵעַ תְּפִלָּה וְתַחֲנוּן אָתָּה. בָּרוּךְ אַתָּה ה\', שׁוֹמֵעַ תְּפִלָּה.\n\n[[COLLAPSE:וְיֵשׁ הַמּוֹסִיפִים פְּסוּקִים אֵלֶּה לִשְׁמִירָה]]הַמַּלְאָךְ הַגֹּאֵל אֹתִי מִכָּל רָע יְבָרֵךְ אֶת הַנְּעָרִים וְיִקָּרֵא בָהֶם שְׁמִי וְשֵׁם אֲבֹתַי אַבְרָהָם וְיִצְחָק, וְיִדְגּוּ לָרֹב בְּקֶרֶב הָאָרֶץ.<br><br>וְיַעֲקֹב הָלַךְ לְדַרְכּוֹ וַיִּפְגְּעוּ בוֹ מַלְאֲכֵי אֱלֹהִים. וַיֹּאמֶר יַעֲקֹב כַּאֲשֶׁר רָאָם: מַחֲנֵה אֱלֹהִים זֶה, וַיִּקְרָא שֵׁם הַמָּקוֹם הַהוּא מַחֲנָיִם — ג׳ פְּעָמִים<br><br>וַיִּסְעוּ וַיְהִי חִתַּת אֱלֹהִים עַל הֶעָרִים אֲשֶׁר סְבִיבוֹתֵיהֶם וְלֹא רָדְפוּ אַחֲרֵי בְּנֵי יַעֲקֹב. לִישׁוּעָתְךָ קִוִּיתִי ה׳ — ג׳ פְּעָמִים[[/COLLAPSE]]\n\n[[NOTE]]וְאַחַר כָּךְ יֹאמַר שִׁיר לַמַּעֲלוֹת:\n\nשִׁיר לַמַּעֲלוֹת. אֶשָּׂא עֵינַי אֶל הֶהָרִים, מֵאַיִן יָבֹא עֶזְרִי. עֶזְרִי מֵעִם ה׳, עֹשֵׂה שָׁמַיִם וָאָרֶץ. אַל יִתֵּן לַמּוֹט רַגְלֶךָ, אַל יָנוּם שֹׁמְרֶךָ. הִנֵּה לֹא יָנוּם וְלֹא יִישָׁן, שׁוֹמֵר יִשְׂרָאֵל. ה׳ שֹׁמְרֶךָ, ה׳ צִלְּךָ עַל יַד יְמִינֶךָ. יוֹמָם הַשֶּׁמֶשׁ לֹא יַכֶּכָּה, וְיָרֵחַ בַּלָּיְלָה. ה׳ יִשְׁמָרְךָ מִכָּל רָע, יִשְׁמֹר אֶת נַפְשֶׁךָ. ה׳ יִשְׁמָר צֵאתְךָ וּבוֹאֶךָ, מֵעַתָּה וְעַד עוֹלָם.'
   }
 };
 /* Birkat HaMazon is rebuilt fresh every time it's opened (see openPrayer),
@@ -1885,22 +1895,21 @@ function birkatHamazonDayText(hd){
   const isRealSukkot = (di.cholHaMoedChag==='sukkot') || (di.yaaleVeyavoChag==='sukkot');
   const paragraphs = [
     'אֲבָרְכָה אֶת יְיָ בְּכָל עֵת תָּמִיד תְּהִלָּתוֹ בְּפִי: סוֹף דָּבָר הַכֹּל נִשְׁמָע אֶת הָאֱלֹהִים יְרָא וְאֶת מִצְוֹתָיו שְׁמוֹר כִּי זֶה כָּל הָאָדָם: תְּהִלַּת יְיָ יְדַבֶּר פִּי וִיבָרֵךְ כָּל בָּשָׂר שֵׁם קָדְשׁוֹ לְעוֹלָם וָעֶד: וַאֲנַחְנוּ נְבָרֵךְ יָהּ מֵעַתָּה וְעַד עוֹלָם הַלְלוּיָהּ: וַיְדַבֵּר אֵלַי, זֶה הַשֻּׁלְחָן אֲשֶׁר לִפְנֵי יְיָ:',
-    '[[NOTE]]נאמר כשמברכים בזימון (שלושה או יותר)',
-    `הַמְזַמֵּן: הַב לָן וְנִבְרִיךְ לְמַלְכָּא עִלָּאָה קַדִּישָׁא. עוֹנִים: שָׁמַיִם. הַמְזַמֵּן: בִּרְשׁוּת מַלְכָּא עִלָּאָה קַדִּישָׁא וּבִרְשׁוּתְכֶם${di.isShabbat?' וּבִרְשׁוּת שַׁבָּת מַלְכְּתָא':''} נְבָרֵךְ (בעשרה: אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלּוֹ. עוֹנִים: בָּרוּךְ (בעשרה: אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלּוֹ וּבְטוּבוֹ חָיִינוּ. הַמְזַמֵּן: בָּרוּךְ (בעשרה: אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלּוֹ וּבְטוּבוֹ חָיִינוּ.`,
+    `[[COLLAPSE:הַזִּמּוּן (נֶאֱמָר בִּשְׁלוֹשָׁה אוֹ יוֹתֵר)]]הַמְזַמֵּן: הַב לָן וְנִבְרִיךְ לְמַלְכָּא עִלָּאָה קַדִּישָׁא. עוֹנִים: שָׁמַיִם. הַמְזַמֵּן: בִּרְשׁוּת מַלְכָּא עִלָּאָה קַדִּישָׁא וּבִרְשׁוּתְכֶם${di.isShabbat?' וּבִרְשׁוּת שַׁבָּת מַלְכְּתָא':''} נְבָרֵךְ (בעשרה: אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלּוֹ. עוֹנִים: בָּרוּךְ (בעשרה: אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלּוֹ וּבְטוּבוֹ חָיִינוּ. הַמְזַמֵּן: בָּרוּךְ (בעשרה: אֱלֹהֵינוּ) שֶׁאָכַלְנוּ מִשֶּׁלּוֹ וּבְטוּבוֹ חָיִינוּ.[[/COLLAPSE]]`,
     'בָּרוּךְ אַתָּה יְיָ, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם הָאֵל הַזָּן אוֹתָנוּ וְאֶת הָעוֹלָם כֻּלּוֹ בְּטוּבוֹ בְּחֵן בְּחֶסֶד בְּרֵיוַח וּבְרַחֲמִים רַבִּים. נֹתֵן לֶחֶם לְכָל בָּשָׂר כִּי לְעוֹלָם חַסְדּוֹ: וּבְטוּבוֹ הַגָּדוֹל תָּמִיד לֹא חָסַר לָנוּ וְאַל יֶחְסַר לָנוּ מָזוֹן תָּמִיד לְעוֹלָם וָעֶד. כִּי הוּא אֵל זָן וּמְפַרְנֵס לַכֹּל וְשֻׁלְחָנוֹ עָרוּךְ לַכֹּל וְהִתְקִין מִחְיָה וּמָזוֹן לְכָל בְּרִיּוֹתָיו אֲשֶׁר בָּרָא בְרַחֲמָיו וּבְרוֹב חֲסָדָיו כָּאָמוּר פּוֹתֵחַ אֶת יָדֶךָ וּמַשְׂבִּיעַ לְכָל חַי רָצוֹן: בָּרוּךְ אַתָּה יְיָ, הַזָּן אֶת הַכֹּל:',
     'נוֹדֶה לְךָ יְיָ אֱלֹהֵינוּ עַל שֶׁהִנְחַלְתָּ לַאֲבוֹתֵינוּ אֶרֶץ חֶמְדָּה טוֹבָה וּרְחָבָה בְּרִית וְתוֹרָה חַיִּים וּמָזוֹן. עַל שֶׁהוֹצֵאתָנוּ מֵאֶרֶץ מִצְרַיִם וּפְדִיתָנוּ מִבֵּית עֲבָדִים. וְעַל בְּרִיתְךָ שֶׁחָתַמְתָּ בִּבְשָׂרֵנוּ, וְעַל תּוֹרָתְךָ שֶׁלִּמַּדְתָּנוּ, וְעַל חֻקֵּי רְצוֹנָךְ שֶׁהוֹדַעְתָּנוּ, וְעַל חַיִּים וּמָזוֹן שֶׁאַתָּה זָן וּמְפַרְנֵס אוֹתָנוּ.',
   ];
   if(di.isChanukah || di.isPurim){
     paragraphs.push('[[NOTE]]שָׁכַח וְנִזְכַּר לִפְנֵי תֵּבַת "ה\'" שֶׁל בִּרְכַּת "עַל הָאָרֶץ" - חוֹזֵר לְאָמְרוֹ. אַחַר תֵּבַת "ה\'" - יְסַיֵּם "עַל הָאָרֶץ וְעַל הַמָּזוֹן" וְטוֹב שֶׁיֹּאמַר אוֹתוֹ בְּהָרַחֲמָן (חֲזוֹן עוֹבַדְיָה חֲנֻכָּה עַמּ\' קצ"ו)');
     paragraphs.push('וְעַל הַנִּסִּים וְעַל הַפֻּרְקָן. וְעַל הַגְּבוּרוֹת. וְעַל הַתְּשׁוּעוֹת וְעַל הַנִּפְלָאוֹת וְעַל הַנֶּחָמוֹת שֶׁעָשִׂיתָ לַאֲבוֹתֵינוּ בַּיָּמִים הָהֵם בַּזְּמַן הַזֶּה:');
-    if(di.isChanukah) paragraphs.push('בִּימֵי מַתִּתְיָה בֶן יוֹחָנָן כֹּהֵן גָּדוֹל חַשְׁמוֹנַאי וּבָנָיו, כְּשֶׁעָמְדָה מַלְכוּת יָוָן הָרְשָׁעָה עַל עַמְּךָ יִשְׂרָאֵל, לְשַׁכְּחָם תּוֹרָתָךְ, וּלְהַעֲבִירָם מֵחֻקֵּי רְצוֹנָךְ. וְאַתָּה בְרַחֲמֶיךָ הָרַבִּים, עָמַדְתָּ לָהֶם בְּעֵת צָרָתָם, רַבְתָּ אֶת רִיבָם, דַּנְתָּ אֶת דִּינָם, נָקַמְתָּ אֶת נִקְמָתָם, מָסַרְתָּ גִּבּוֹרִים בְּיַד חֲלָשִׁים, וְרַבִּים בְּיַד מְעַטִּים, וּרְשָׁעִים בְּיַד צַדִּיקִים, וּטְמֵאִים בְּיַד טְהוֹרִים, וְזֵדִים בְּיַד עוֹסְקֵי תוֹרָתֶךָ. לְךָ עָשִׂיתָ שֵׁם גָּדוֹל וְקָדוֹשׁ בְּעוֹלָמָךְ, וּלְעַמְּךָ יִשְׂרָאֵל עָשִׂיתָ תְּשׁוּעָה גְדוֹלָה וּפֻרְקָן כְּהַיּוֹם הַזֶּה. וְאַחַר כָּךְ בָּאוּ בָנֶיךָ לִדְבִיר בֵּיתֶךָ, וּפִנּוּ אֶת הֵיכָלֶךָ, וְטִהֲרוּ אֶת מִקְדָּשֶׁךָ, וְהִדְלִיקוּ נֵרוֹת בְּחַצְרוֹת קָדְשֶׁךָ, וְקָבְעוּ שְׁמוֹנַת יְמֵי חֲנֻכָּה אֵלּוּ בְּהַלֵּל וּבְהוֹדָאָה. וְעָשִׂיתָ עִמָּהֶם נִסִּים וְנִפְלָאוֹת, וְנוֹדֶה לְשִׁמְךָ הַגָּדוֹל סֶלָה:');
-    if(di.isPurim) paragraphs.push('בִּימֵי מָרְדְּכַי וְאֶסְתֵּר בְּשׁוּשַׁן הַבִּירָה, כְּשֶׁעָמַד עֲלֵיהֶם הָמָן הָרָשָׁע, בִּקֵּשׁ לְהַשְׁמִיד לַהֲרוֹג וּלְאַבֵּד אֶת כָּל הַיְּהוּדִים, מִנַּעַר וְעַד זָקֵן, טַף וְנָשִׁים, בְּיוֹם אֶחָד, בִּשְׁלֹשָׁה עָשָׂר לְחֹדֶשׁ שְׁנֵים עָשָׂר הוּא חֹדֶשׁ אֲדָר, וּשְׁלָלָם לָבוֹז. וְאַתָּה בְרַחֲמֶיךָ הָרַבִּים, הֵפַרְתָּ אֶת עֲצָתוֹ, וְקִלְקַלְתָּ אֶת מַחֲשַׁבְתּוֹ, וַהֲשֵׁבוֹתָ לּוֹ גְּמוּלוֹ בְּרֹאשׁוֹ, וְתָלוּ אוֹתוֹ וְאֶת בָּנָיו עַל הָעֵץ. וְעָשִׂיתָ עִמָּהֶם נִסִּים וְנִפְלָאוֹת וְנוֹדֶה לְשִׁמְךָ הַגָּדוֹל, סֶלָה:');
+    if(di.isChanukah) paragraphs.push(`[[COLLAPSE:${ckChrome('חֲנֻכָּה')}]]בִּימֵי מַתִּתְיָה בֶן יוֹחָנָן כֹּהֵן גָּדוֹל חַשְׁמוֹנַאי וּבָנָיו, כְּשֶׁעָמְדָה מַלְכוּת יָוָן הָרְשָׁעָה עַל עַמְּךָ יִשְׂרָאֵל, לְשַׁכְּחָם תּוֹרָתָךְ, וּלְהַעֲבִירָם מֵחֻקֵּי רְצוֹנָךְ. וְאַתָּה בְרַחֲמֶיךָ הָרַבִּים, עָמַדְתָּ לָהֶם בְּעֵת צָרָתָם, רַבְתָּ אֶת רִיבָם, דַּנְתָּ אֶת דִּינָם, נָקַמְתָּ אֶת נִקְמָתָם, מָסַרְתָּ גִּבּוֹרִים בְּיַד חֲלָשִׁים, וְרַבִּים בְּיַד מְעַטִּים, וּרְשָׁעִים בְּיַד צַדִּיקִים, וּטְמֵאִים בְּיַד טְהוֹרִים, וְזֵדִים בְּיַד עוֹסְקֵי תוֹרָתֶךָ. לְךָ עָשִׂיתָ שֵׁם גָּדוֹל וְקָדוֹשׁ בְּעוֹלָמָךְ, וּלְעַמְּךָ יִשְׂרָאֵל עָשִׂיתָ תְּשׁוּעָה גְדוֹלָה וּפֻרְקָן כְּהַיּוֹם הַזֶּה. וְאַחַר כָּךְ בָּאוּ בָנֶיךָ לִדְבִיר בֵּיתֶךָ, וּפִנּוּ אֶת הֵיכָלֶךָ, וְטִהֲרוּ אֶת מִקְדָּשֶׁךָ, וְהִדְלִיקוּ נֵרוֹת בְּחַצְרוֹת קָדְשֶׁךָ, וְקָבְעוּ שְׁמוֹנַת יְמֵי חֲנֻכָּה אֵלּוּ בְּהַלֵּל וּבְהוֹדָאָה. וְעָשִׂיתָ עִמָּהֶם נִסִּים וְנִפְלָאוֹת, וְנוֹדֶה לְשִׁמְךָ הַגָּדוֹל סֶלָה:[[/COLLAPSE]]`);
+    if(di.isPurim) paragraphs.push(`[[COLLAPSE:${ckChrome('פּוּרִים')}]]בִּימֵי מָרְדְּכַי וְאֶסְתֵּר בְּשׁוּשַׁן הַבִּירָה, כְּשֶׁעָמַד עֲלֵיהֶם הָמָן הָרָשָׁע, בִּקֵּשׁ לְהַשְׁמִיד לַהֲרוֹג וּלְאַבֵּד אֶת כָּל הַיְּהוּדִים, מִנַּעַר וְעַד זָקֵן, טַף וְנָשִׁים, בְּיוֹם אֶחָד, בִּשְׁלֹשָׁה עָשָׂר לְחֹדֶשׁ שְׁנֵים עָשָׂר הוּא חֹדֶשׁ אֲדָר, וּשְׁלָלָם לָבוֹז. וְאַתָּה בְרַחֲמֶיךָ הָרַבִּים, הֵפַרְתָּ אֶת עֲצָתוֹ, וְקִלְקַלְתָּ אֶת מַחֲשַׁבְתּוֹ, וַהֲשֵׁבוֹתָ לּוֹ גְּמוּלוֹ בְּרֹאשׁוֹ, וְתָלוּ אוֹתוֹ וְאֶת בָּנָיו עַל הָעֵץ. וְעָשִׂיתָ עִמָּהֶם נִסִּים וְנִפְלָאוֹת וְנוֹדֶה לְשִׁמְךָ הַגָּדוֹל, סֶלָה:[[/COLLAPSE]]`);
   }
   paragraphs.push('וְעַל הַכֹּל יְיָ אֱלֹהֵינוּ אֲנַחְנוּ מוֹדִים לָךְ וּמְבָרְכִים אֶת שְׁמָךְ כָּאָמוּר וְאָכַלְתָּ וְשָׂבָעְתָּ וּבֵרַכְתָּ אֶת יְיָ אֱלֹהֶיךָ, עַל הָאָרֶץ הַטּוֹבָה אֲשֶׁר נָתַן לָךְ: בָּרוּךְ אַתָּה יְיָ עַל הָאָרֶץ וְעַל הַמָּזוֹן.');
   paragraphs.push('רַחֵם יְיָ אֱלֹהֵינוּ עָלֵינוּ וְעַל יִשְׂרָאֵל עַמָּךְ וְעַל יְרוּשָׁלַיִם עִירָךְ וְעַל הַר צִיּוֹן מִשְׁכַּן כְּבוֹדָךְ וְעַל הֵיכָלָךְ וְעַל מְעוֹנָךְ וְעַל דְּבִירָךְ וְעַל הַבַּיִת הַגָּדוֹל וְהַקָּדוֹשׁ שֶׁנִּקְרָא שִׁמְךָ עָלָיו. אָבִינוּ רְעֵנוּ זוּנֵנוּ פַּרְנְסֵנוּ כַּלְכְּלֵנוּ הַרְוִיחֵנוּ הַרְוַח לָנוּ מְהֵרָה מִכָּל צָרוֹתֵינוּ. וְנָא אַל תַּצְרִיכֵנוּ יְיָ אֱלֹהֵינוּ לִידֵי מַתְּנוֹת בָּשָׂר וָדָם וְלֹא לִידֵי הַלְוָאָתָם אֶלָּא לְיָדְךָ הַמְּלֵאָה וְהָרְחָבָה הָעֲשִׁירָה וְהַפְּתוּחָה. יְהִי רָצוֹן שֶׁלֹּא נֵבוֹשׁ בָּעוֹלָם הַזֶּה וְלֹא נִכָּלֵם לְעוֹלָם הַבָּא וּמַלְכוּת בֵּית דָּוִד מְשִׁיחָךְ תַּחֲזִירֶנָּה לִמְקוֹמָהּ בִּמְהֵרָה בְיָמֵינוּ.');
   if(yaaleChag){
     paragraphs.push('[[NOTE]]אִם שָׁכַח לוֹמַר יַעֲלֶה וְיָבֹא וְנִזְכַּר קֹדֶם שֶׁהִתְחִיל בִּרְכַּת הַטּוֹב וְהַמֵּיטִיב, יֹאמַר: "בָּרוּךְ שֶׁנָּתַן רָאשֵׁי חֳדָשִׁים לְעַמּוֹ יִשְׂרָאֵל לְזִכָּרוֹן" (בְּלֹא שֵׁם וּמַלְכוּת). אִם נִזְכַּר אַחַר שֶׁהִתְחִיל בִּרְכַּת הַטּוֹב וְהַמֵּיטִיב, אֵינוֹ חוֹזֵר. (שֻׁלְחָן עָרוּךְ תכ"ד; יבִיע אוֹמֵר ח"ו סִימָן כ"ח)');
-    paragraphs.push(`אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, יַעֲלֶה וְיָבֹא וְיַגִּיעַ וְיֵרָאֶה וְיֵרָצֶה וְיִשָּׁמַע וְיִפָּקֵד וְיִזָּכֵר זִכְרוֹנֵנוּ וְזִכְרוֹן אֲבוֹתֵינוּ, זִכְרוֹן יְרוּשָׁלַיִם עִירָךְ, וְזִכְרוֹן מָשִׁיחַ בֶּן דָּוִד עַבְדָּךְ, וְזִכְרוֹן כָּל עַמְּךָ בֵּית יִשְׂרָאֵל לְפָנֶיךָ לִפְלֵיטָה לְטוֹבָה לְחֵן לְחֶסֶד וּלְרַחֲמִים, לְחַיִּים טוֹבִים וּלְשָׁלוֹם. ${birkatHamazonYaaleVeyavoPhrase(yaaleChag, yaaleIsYomTovProper)} לְרַחֵם בּוֹ עָלֵינוּ וּלְהוֹשִׁיעֵנוּ. זָכְרֵנוּ יְיָ אֱלֹהֵינוּ בּוֹ לְטוֹבָה, וּפָקְדֵנוּ בוֹ לִבְרָכָה, וְהוֹשִׁיעֵנוּ בוֹ לְחַיִּים טוֹבִים, בִּדְבַר יְשׁוּעָה וְרַחֲמִים, חוּס וְחָנֵּנוּ וַחֲמוֹל וְרַחֵם עָלֵינוּ וְהוֹשִׁיעֵנוּ, כִּי אֵלֶיךָ עֵינֵינוּ כִּי אֵל מֶלֶךְ חַנּוּן וְרַחוּם אָתָּה.`);
+    paragraphs.push(`[[COLLAPSE:${ckChrome('יַעֲלֶה וְיָבֹא')}]]אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, יַעֲלֶה וְיָבֹא וְיַגִּיעַ וְיֵרָאֶה וְיֵרָצֶה וְיִשָּׁמַע וְיִפָּקֵד וְיִזָּכֵר זִכְרוֹנֵנוּ וְזִכְרוֹן אֲבוֹתֵינוּ, זִכְרוֹן יְרוּשָׁלַיִם עִירָךְ, וְזִכְרוֹן מָשִׁיחַ בֶּן דָּוִד עַבְדָּךְ, וְזִכְרוֹן כָּל עַמְּךָ בֵּית יִשְׂרָאֵל לְפָנֶיךָ לִפְלֵיטָה לְטוֹבָה לְחֵן לְחֶסֶד וּלְרַחֲמִים, לְחַיִּים טוֹבִים וּלְשָׁלוֹם. ${birkatHamazonYaaleVeyavoPhrase(yaaleChag, yaaleIsYomTovProper)} לְרַחֵם בּוֹ עָלֵינוּ וּלְהוֹשִׁיעֵנוּ. זָכְרֵנוּ יְיָ אֱלֹהֵינוּ בּוֹ לְטוֹבָה, וּפָקְדֵנוּ בוֹ לִבְרָכָה, וְהוֹשִׁיעֵנוּ בוֹ לְחַיִּים טוֹבִים, בִּדְבַר יְשׁוּעָה וְרַחֲמִים, חוּס וְחָנֵּנוּ וַחֲמוֹל וְרַחֵם עָלֵינוּ וְהוֹשִׁיעֵנוּ, כִּי אֵלֶיךָ עֵינֵינוּ כִּי אֵל מֶלֶךְ חַנּוּן וְרַחוּם אָתָּה.[[/COLLAPSE]]`);
   }
   paragraphs.push('וְתִבְנֶה יְרוּשָׁלַיִם עִירָךְ בִּמְהֵרָה בְיָמֵינוּ: בָּרוּךְ אַתָּה יְיָ, בּוֹנֵה יְרוּשָׁלָיִם. <span class="siddur-whisper">(ויאמר בלחש:)</span> אמֵָן.');
   paragraphs.push('בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, לָעַד הָאֵל אָבִינוּ מַלְכֵּנוּ אַדִּירֵנוּ בּוֹרְאֵנוּ גּוֹאֲלֵנוּ קְדוֹשֵׁנוּ קְדוֹשׁ יַעֲקֹב רוֹעֵנוּ רוֹעֵה יִשְׂרָאֵל הַמֶּלֶךְ הַטּוֹב וְהַמֵּטִיב לַכֹּל. שֶׁבְּכָל יוֹם וָיוֹם הוּא הֵטִיב לָנוּ, הוּא מֵטִיב לָנוּ, הוּא יֵיטִיב לָנוּ, הוּא גְמָלָנוּ, הוּא גוֹמְלֵנוּ, הוּא יִגְמְלֵנוּ לָעַד חֵן וָחֶסֶד וְרַחֲמִים וְרֵיוַח וְהַצָּלָה וְכָל טוֹב. (יענו: אָמֵן).');
@@ -1925,8 +1934,7 @@ function birkatHamazonDayText(hd){
   if(isRealSukkot) paragraphs.push('הָרַחֲמָן הוּא יְזַכֵּנוּ לֵישֵׁב בְּסֻכַּת עוֹרוֹ שֶׁל לִוְיָתָן: הָרַחֲמָן הוּא יַשְׁפִּיעַ עָלֵינוּ שֶׁפַע קְדֻשָּׁה וְטָהֲרָה מִשִּׁבְעָה אוּשְׁפִּיזִין עִלָּאִין קַדִּישִׁין, זְכוּתָם תְּהֵא מָגֵן וְצִנָּה עָלֵינוּ:');
   if(yaaleChag && yaaleChag!=='roshChodesh') paragraphs.push('הָרַחֲמָן הוּא יַגִּיעֵנוּ לְמוֹעֲדִים אֲחֵרִים הַבָּאִים לִקְרָאתֵנוּ לְשָׁלוֹם:');
   paragraphs.push('הָרַחֲמָן הוּא יִטַּע תּוֹרָתוֹ וְאַהֲבָתוֹ בְּלִבֵּנוּ וְתִהְיֶה יִרְאָתוֹ עַל פָּנֵינוּ לְבִלְתִּי נֶחֱטָא. וְיִהְיוּ כָל מַעֲשֵׂינוּ לְשֵׁם שָׁמָיִם.');
-  paragraphs.push('[[NOTE]]בִּרְכַּת הָאוֹרֵחַ');
-  paragraphs.push('הָרַחֲמָן הוּא יְבָרֵךְ אֶת הַשֻּׁלְחָן הַזֶּה שֶׁאָכַלְנוּ עָלָיו, וִיסַדֵּר בּוֹ כָּל מַעֲדַנֵּי עוֹלָם, וְיִהְיֶה כְשֻׁלְחָנוֹ שֶׁל אַבְרָהָם אָבִינוּ עָלָיו הַשָּׁלוֹם. כָּל רָעֵב מִמֶּנּוּ יֹאכַל, וְכָל צָמֵא מִמֶּנּוּ יִשְׁתֶּה, וְאַל יֶחְסַר מִמֶּנּוּ כָּל טוֹב לָעַד וּלְעוֹלְמֵי עוֹלָמִים, אָמֵן. הָרַחֲמָן הוּא יְבָרֵךְ אֶת בַּעַל הַבַּיִת הַזֶּה וּבַעַל הַסְּעֻדָּה הַזֹּאת, הוּא וּבָנָיו וְאִשְׁתּוֹ וְכָל אֲשֶׁר לוֹ, בְּבָנִים שֶׁיִּחְיוּ וּבִנְכָסִים שֶׁיִּרְבּוּ. בָּרֵךְ יְהֹוָה חֵילוֹ וּפֹעַל יָדָיו תִּרְצֶה, וְיִהְיוּ נְכָסָיו וּנְכָסֵינוּ מֻצְלָחִים וּקְרוֹבִים לָעִיר, וְאַל יִזְדַּקֵּק לְפָנָיו וְלֹא לְפָנֵינוּ שׁוּם דְּבַר חֵטְא וְהִרְהוּר עָוֹן, שָׂשׂ וְשָׂמֵחַ כָּל הַיָּמִים בְּעֹשֶׁר וְכָבוֹד מֵעַתָּה וְעַד עוֹלָם, לֹא יֵבוֹשׁ בָּעוֹלָם הַזֶּה וְלֹא יִכָּלֵם לָעוֹלָם הַבָּא, אָמֵן כֵּן יְהִי רָצוֹן.');
+  paragraphs.push('[[COLLAPSE:בִּרְכַּת הָאוֹרֵחַ]]הָרַחֲמָן הוּא יְבָרֵךְ אֶת הַשֻּׁלְחָן הַזֶּה שֶׁאָכַלְנוּ עָלָיו, וִיסַדֵּר בּוֹ כָּל מַעֲדַנֵּי עוֹלָם, וְיִהְיֶה כְשֻׁלְחָנוֹ שֶׁל אַבְרָהָם אָבִינוּ עָלָיו הַשָּׁלוֹם. כָּל רָעֵב מִמֶּנּוּ יֹאכַל, וְכָל צָמֵא מִמֶּנּוּ יִשְׁתֶּה, וְאַל יֶחְסַר מִמֶּנּוּ כָּל טוֹב לָעַד וּלְעוֹלְמֵי עוֹלָמִים, אָמֵן. הָרַחֲמָן הוּא יְבָרֵךְ אֶת בַּעַל הַבַּיִת הַזֶּה וּבַעַל הַסְּעֻדָּה הַזֹּאת, הוּא וּבָנָיו וְאִשְׁתּוֹ וְכָל אֲשֶׁר לוֹ, בְּבָנִים שֶׁיִּחְיוּ וּבִנְכָסִים שֶׁיִּרְבּוּ. בָּרֵךְ יְהֹוָה חֵילוֹ וּפֹעַל יָדָיו תִּרְצֶה, וְיִהְיוּ נְכָסָיו וּנְכָסֵינוּ מֻצְלָחִים וּקְרוֹבִים לָעִיר, וְאַל יִזְדַּקֵּק לְפָנָיו וְלֹא לְפָנֵינוּ שׁוּם דְּבַר חֵטְא וְהִרְהוּר עָוֹן, שָׂשׂ וְשָׂמֵחַ כָּל הַיָּמִים בְּעֹשֶׁר וְכָבוֹד מֵעַתָּה וְעַד עוֹלָם, לֹא יֵבוֹשׁ בָּעוֹלָם הַזֶּה וְלֹא יִכָּלֵם לָעוֹלָם הַבָּא, אָמֵן כֵּן יְהִי רָצוֹן.[[/COLLAPSE]]');
   paragraphs.push('הָרַחֲמָן הוּא יְחַיֵּינוּ וִיזַכֵּנוּ וִיקָרְבֵנוּ לִימוֹת הַמָּשִׁיחַ וּלְבִנְיַן בֵּית הַמִּקְדָּשׁ וּלְחַיֵּי הָעוֹלָם הַבָּא.');
   paragraphs.push(`${di.isMusafDay?'מִגְדּוֹל':'מַגְדִּיל'} יְשׁוּעוֹת מַלְכּוֹ וְעֹשֶׂה חֶסֶד לִמְשִׁיחוֹ לְדָוִד וּלְזַרְעוֹ עַד עוֹלָם, כְּפִירִים רָשׁוּ וְרָעֵבוּ, וְדֹרְשֵׁי יְיָ לֹא יַחְסְרוּ כָל טוֹב. נַעַר הָיִיתִי גַּם זָקַנְתִּי וְלֹא רָאִיתִי צַדִּיק נֶעֱזָב וְזַרְעוֹ מְבַקֶּשׁ לָחֶם כָּל הַיּוֹם חוֹנֵן וּמַלְוֶה וְזַרְעוֹ לִבְרָכָה מַה שֶׁאָכַלְנוּ יִהְיֶה לְשָׂבְעָה וּמַה שֶׁשָּׁתִינוּ יִהְיֶה לִרְפוּאָה וּמַה שֶׁהוֹתַרְנוּ יִהְיֶה לִבְרָכָה כְּדִכְתִיב: וַיִּתֵּן לִפְנֵיהֶם וַיֹּאכְלוּ וַיּוֹתִירוּ כִּדְבַר יְיָ בְּרוּכִים אַתֶּם לַיְיָ עוֹשֵׂה שָׁמַיִם וָאָרֶץ בָּרוּךְ הַגֶּבֶר אֲשֶׁר יִבְטַח בַּיְיָ, וְהָיָה יְיָ מִבְטָחוֹ יְיָ עֹז לְעַמּוֹ יִתֵּן יְיָ יְבָרֵךְ אֶת עַמּוֹ בַּשָּׁלוֹם: עוֹשֶׂה שָׁלוֹם בִּמְרוֹמָיו, הוּא בְרַחֲמָיו יַעֲשֶׂה שָׁלוֹם עָלֵינוּ וְעַל כָּל עַמּוֹ יִשְׂרָאֵל, וְאִמְרוּ אָמֵן:`);
   return paragraphs.join('\n\n');
@@ -8607,6 +8615,8 @@ function renderPrayerReader(){
   const fullText = lines.map(line => {
     if(line==='[[MENORAH]]') return `<div class="prayer-menorah-wrap">${menorahSVG()}</div>`;
     if(line.startsWith('[[NOTE]]')) return `<div class="prayer-note">${line.slice(8)}</div>`;
+    const coll=line.match(/^\[\[COLLAPSE:([^\]]*)\]\]([\s\S]*)\[\[\/COLLAPSE\]\]$/);
+    if(coll) return siddurCollapseHTML(coll[1], coll[2]);
     /* the "הרחמן הוא..." run in Birkat HaMazon is ~25 short one-line
        blessings in a row - each got the same border+margin as a full
        paragraph, making the list read as a wall of dividers. Detect the
@@ -8637,6 +8647,7 @@ function renderPrayerReader(){
     </div>
     <div style="height:80px"></div>
   </div>`;
+  app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
   tr(app);
 }
 
@@ -8781,15 +8792,32 @@ function drawSiddurHome(){
    sentence/verse (e.g. Veahavta's "touch the tefillin" asides mid-verse) -
    rendered as a small muted inline span in the flow of the same
    paragraph, never forcing a paragraph break around it. */
+/* [[COLLAPSE:Title]]...[[/COLLAPSE]] - a tap-to-expand section for text
+   that's part of a prayer but not something every reader needs open by
+   default (a Zimun's leader-dialogue, Birkat HaOreach's guest-blessing
+   addition, a Leshem Yichud preamble, a Kaddish's full text where only the
+   fact that "a Kaddish is said here" matters to most readers). Built on
+   the existing .siddur-accordion widget (siddurAccordionHTML/
+   siddurToggleAccordion, already used for Tachanun's fast-day Selichot
+   insert) rather than a new widget, so every collapsible section in the
+   app shares one look and one click handler. Each gets its own counter-
+   based id since a single reader screen can contain several. */
+let SIDDUR_COLLAPSE_SEQ = 0;
+function siddurCollapseHTML(title, bodyHtml){
+  const id = 'coll' + (SIDDUR_COLLAPSE_SEQ++);
+  return `<div class="siddur-collapse-wrap">${siddurAccordionHTML(id, title, `<div class="prayer-para">${bodyHtml}</div>`)}</div>`;
+}
 function siddurParasFromText(text, tight, extraClass){
   const parts = (text||'').split('\n\n');
-  const lastParaIdx = (()=>{ for(let i=parts.length-1;i>=0;i--){ const t=parts[i].trim(); if(!/^\[\[HAL\]\]|^\[\[NOTE\]\]|^\[\[MENORAH\]\]$/.test(t)) return i; } return -1; })();
+  const lastParaIdx = (()=>{ for(let i=parts.length-1;i>=0;i--){ const t=parts[i].trim(); if(!/^\[\[HAL\]\]|^\[\[NOTE\]\]|^\[\[MENORAH\]\]$|^\[\[COLLAPSE:/.test(t)) return i; } return -1; })();
   return parts.map((line,i)=>{
     line=line.trim();
     const hal=line.match(/^\[\[HAL\]\]([\s\S]*)\[\[\/HAL\]\]$/);
     if(hal) return `<div class="siddur-halacha-note">${hal[1]}</div>`;
     if(line==='[[MENORAH]]') return `<div class="prayer-menorah-wrap">${menorahSVG()}</div>`;
     if(line.startsWith('[[NOTE]]')) return `<div class="siddur-halacha-note">${line.slice(8)}</div>`;
+    const coll=line.match(/^\[\[COLLAPSE:([^\]]*)\]\]([\s\S]*)\[\[\/COLLAPSE\]\]$/);
+    if(coll) return siddurCollapseHTML(coll[1], coll[2]);
     line = line.replace(/\[\[HALI\]\]([\s\S]*?)\[\[\/HALI\]\]/g, '<span class="siddur-halacha-note-inline">$1</span>');
     const nodiv = tight && i!==lastParaIdx;
     return `<div class="prayer-para${nodiv?' siddur-para-nodivider':''}${extraClass?' '+extraClass:''}">${line}</div>`;
@@ -9054,10 +9082,10 @@ function siddurTalitTefilinHTML(){
   const t=(lang&&PRAYERS_TRANSLIT[lang].talitTefilin)?PRAYERS_TRANSLIT[lang].talitTefilin:null;
   const tf = (k)=> (t&&t[k])||tt[k];
   const talit = `<div class="siddur-section-title">${ckChrome('סֵדֶר עֲטִיפַת טַלִּית')}</div>`
-    + siddurParasFromText(`${tf('talitLeshemYichud')}\n\n${tf('talitBracha')}`);
+    + siddurParasFromText(`[[COLLAPSE:${ckChrome('לְשֵׁם יִחוּד')}]]${tf('talitLeshemYichud')}[[/COLLAPSE]]\n\n${tf('talitBracha')}`);
 
   let tefilin = `<div class="siddur-section-title">${ckChrome('סֵדֶר הַנָּחַת תְּפִלִּין')}</div>`;
-  tefilin += siddurParasFromText(`${tf('tefilinLeshemYichud')}\n\n${tf('tefilinBracha')}`);
+  tefilin += siddurParasFromText(`[[COLLAPSE:${ckChrome('לְשֵׁם יִחוּד')}]]${tf('tefilinLeshemYichud')}[[/COLLAPSE]]\n\n${tf('tefilinBracha')}`);
   tefilin += siddurParasFromText(`[[HAL]]${tf('tefilinBrachaAltNote')}[[/HAL]]\n\n${tf('tefilinBrachaAlt')}`);
   tefilin += siddurParasFromText(`[[HAL]]${tf('tefilinFingerWrapNote')}[[/HAL]]\n\n${tf('tefilinFingerWrapVerses')}`);
   tefilin += siddurParasFromText(`[[HAL]]${tf('tefilinKadeshLiNote')}[[/HAL]]\n\n${tf('tefilinKadeshLi')}\n\n${tf('tefilinVehayaKiYeviacha')}`);
@@ -9117,7 +9145,7 @@ function siddurTikunChatzotHTML(info){
   // Leshem Yichud existed at all, and deleted it. Re-verified against the
   // full untruncated fetch: it's there, right after the rubric note.
   let opening = `<div class="siddur-section-title">${ckChrome('סֵדֶר תִּקּוּן חֲצוֹת')}</div>`;
-  opening += siddurParasFromText(`[[HAL]]${tf('rubricNote')}[[/HAL]]\n\n${tf('leshemYichud')}`);
+  opening += siddurParasFromText(`[[HAL]]${tf('rubricNote')}[[/HAL]]\n\n[[COLLAPSE:${ckChrome('לְשֵׁם יִחוּד')}]]${tf('leshemYichud')}[[/COLLAPSE]]`);
   opening += siddurParasFromText(`${tf('ana')}\n\n${tf('mahNomar')}`);
 
   let rachel = `<div class="siddur-section-title">${ckChrome('תִּקּוּן רָחֵל')}</div>`;
@@ -9174,7 +9202,7 @@ function siddurShirShelYomHTML(dateObj){
    before the Amida - verbatim match against the standalone Chatzi Kaddish
    there). ---- */
 function siddurChatziKaddishHTML(){
-  return `<div class="prayer-para">${(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan).split('\n\n')[0]}</div>`;
+  return siddurCollapseHTML(ckChrome('חֲצִי קַדִּישׁ'), (PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan).split('\n\n')[0]);
 }
 /* ---- Tachanun (Nefilat Apayim): the individual's confession (Vidui),
    the 13 Attributes of Mercy, Psalm 25 (reused from window.TEHILLIM, said
@@ -9268,7 +9296,7 @@ function siddurKavehClosingHTML(){
   // node, and Torat Emet 357's matching node).
   html += siddurParasFromText(PT('pitumHaketoretShort')||SIDDUR.pitumHaketoretShort, true);
   html += siddurParasFromText(PT('tanaDeveiEliyahu')||SIDDUR.tanaDeveiEliyahu, true);
-  html += siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true);
+  html += siddurCollapseHTML(ckChrome('קַדִּישׁ דְּרַבָּנָן'), siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true));
   html += `<div class="siddur-section-title">${ckChrome('בָּרְכוּ')}</div>`;
   html += siddurParasFromText(PT('arvitBlessings','barchu')||SIDDUR.arvitBlessings.barchu, true);
   return html;
@@ -9364,7 +9392,7 @@ function siddurRoshChodeshHallelTailHTML(info, dateObj){
   const lang=(S.lang&&PRAYERS_TRANSLIT[S.lang])?S.lang:null;
   const t=(lang&&PRAYERS_TRANSLIT[lang].roshChodeshExtra)?PRAYERS_TRANSLIT[lang].roshChodeshExtra:null;
   const ef = (k)=> (t&&t[k])||e[k];
-  let html = siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true);
+  let html = siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true));
   html += siddurParasFromText(`${ef('veAvrahamZaken')}\n\n${ef('veAvrahamZaken')}\n\n${ef('veAvrahamZaken')}\n\n${ef('hashemYishmereni')}`, true);
   html += siddurParasFromText(ef('preTorahDeclaration'), true);
   html += `<div class="siddur-section-title">${ckChrome('בְּרִיךְ שְׁמֵהּ')}</div>`;
@@ -9400,8 +9428,7 @@ function siddurRoshChodeshSongOfDayTailHTML(dateObj){
   const ef = (k)=> (t&&t[k])||e[k];
   let html = siddurShirShelYomHTML(dateObj);
   html += siddurParasFromText(ef('yehaleluReturn'), true);
-  html += `<div class="siddur-section-title">${ckChrome('לְשֵׁם יִחוּד לְמוּסָף')}</div>`;
-  html += siddurParasFromText(ef('leshemYichudMusaf'));
+  html += siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד לְמוּסָף'), ef('leshemYichudMusaf'));
   html += `<div class="siddur-halacha-note">${ckChrome('חוֹלְצִין תְּפִלִּין')}</div>`;
   html += siddurChatziKaddishHTML();
   return html;
@@ -9418,7 +9445,7 @@ function siddurBarchiNafshiHTML(){
   let html = `<div class="siddur-section-title">${ckChrome('בָּרְכִי נַפְשִׁי')}</div>`;
   html += siddurTehillimChapterHTML(104);
   const kParas = (PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel).split('\n\n').filter((_,i)=>i!==1); // drop the "Titkabel tzlotana" paragraph only
-  html += siddurParasFromText(kParas.join('\n\n'), true);
+  html += siddurCollapseHTML(ckChrome('קַדִּישׁ'), siddurParasFromText(kParas.join('\n\n'), true));
   return html;
 }
 function siddurAccordionHTML(id, title, body){
@@ -9699,8 +9726,7 @@ function siddurOmerHTML(info){
   const omerKavanotDay=(t&&t.omerKavanot&&t.omerKavanot[info.omerDay-1])||SIDDUR.omerKavanot[info.omerDay-1];
   const omerClosing=(t&&t.omerClosing)||SIDDUR.omerClosing;
   const omerAnaBekoach=(t&&t.omerAnaBekoach)||SIDDUR.omerAnaBekoach;
-  let html = `<div class="siddur-section-title">${ckChrome('לְשֵׁם יִחוּד')}</div>`;
-  html += siddurParasFromText(omerLeshemYichud);
+  let html = siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), siddurParasFromText(omerLeshemYichud));
   const omerTag = lang?`${OMER_TAG_I18N[lang]} ${info.omerDay}`:`סְפִירַת הָעֹֽמֶר · יוֹם ${info.omerDay}`;
   const omerBlessing = lang?`${OMER_BLESSING_I18N[lang]}: ${omerCountTextI18n(info.omerDay,lang)}`:`בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵֽינוּ מֶֽלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָֽׁנוּ בְּמִצְוֹתָיו וְצִוָּֽנוּ עַל סְפִירַת הָעֹֽמֶר: הַיּוֹם ${omerCountText(info.omerDay)}`;
   html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">${omerTag}</span>${omerBlessing}</div>`;
@@ -9754,15 +9780,13 @@ function siddurLevanaHTML(){
   html += siddurParasFromText(L.opening
     .replace('כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).', ckChrome('כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).'))
     .replace('לפני הברכה יאמר:', ckChrome('לפני הברכה יאמר:')));
-  html += `<div class="siddur-section-title">${ckChrome('לְשֵׁם יִחוּד')}</div>`;
-  html += siddurParasFromText(lf('leshemYichud'));
+  html += siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), siddurParasFromText(lf('leshemYichud')));
   html += `<div class="prayer-para">${lf('blessing')}</div>`;
   html += siddurParasFromText(lf('ceremony'));
   html += siddurTehillimChapterHTML(121);
   html += siddurTehillimChapterHTML(150);
   html += siddurParasFromText(lf('tanaDevei'));
-  html += `<div class="siddur-section-title">${ckChrome('קַדִּישׁ')}</div>`;
-  html += siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true);
+  html += siddurCollapseHTML(ckChrome('קַדִּישׁ'), siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true));
   html += siddurParasFromText(lf('closing'));
   return html;
 }
@@ -9839,7 +9863,7 @@ function siddurSections(dateObj, info, prayer){
     // entirely from this app.
     push('hannahPrayer','תְּפִלַּת חַנָּה', siddurParasFromText(PT('hannahPrayer')||SIDDUR.hannahPrayer));
     push('korbanot','קָרְבָּנוֹת', siddurKorbanotHTML());
-    push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true));
+    push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurCollapseHTML(ckChrome('קַדִּישׁ דְּרַבָּנָן'), siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true)));
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
@@ -9859,7 +9883,7 @@ function siddurSections(dateObj, info, prayer){
     // not a plain Chatzi Kaddish (a previous-round error, corrected here
     // the same way Mincha's analogous Kaddish was fixed: reusing
     // SIDDUR.kaddishTitkabel verbatim rather than storing it again).
-    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true));
+    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true)));
     // Beit Yaakov: Sefaria places this as its OWN node right after Uva
     // LeSion's Kaddish and before Song of the Day - previously missing
     // entirely from this app. Tefila LeDavid (Tehillim 86) is said only on
@@ -9883,7 +9907,7 @@ function siddurSections(dateObj, info, prayer){
     // siddurBarchiNafshiHTML() and Mincha's own second Kaddish, rather than
     // storing this exact text again.
     const kaddishYeheiShlamaParas2 = (PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel).split('\n\n').filter((_,i)=>i!==1);
-    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas2.join('\n\n'), true));
+    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurCollapseHTML(ckChrome('קַדִּישׁ יְהֵא שְׁלָמָא'), siddurParasFromText(kaddishYeheiShlamaParas2.join('\n\n'), true)));
     push('kaveh','קַוֵּה', siddurKavehClosingHTML());
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${PT('aleinu')||SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('shacharit', info));
   } else if(prayer==='mincha'){
@@ -9894,7 +9918,7 @@ function siddurSections(dateObj, info, prayer){
     // rendered anywhere (Sefaria: Weekday Mincha > Offerings, opening).
     const trMO = PT('minchaOpening');
     const mo = trMO ? Object.assign({}, SIDDUR.minchaOpening, trMO) : SIDDUR.minchaOpening;
-    push('opening','לְשֵׁם יִחוּד', `<div class="prayer-para">${mo.leshemYichud}</div>`+siddurTehillimChapterHTML(84));
+    push('opening','לְשֵׁם יִחוּד', siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), mo.leshemYichud)+siddurTehillimChapterHTML(84));
     // Parashat HaTamid (Numbers 28:1-8, the same verses as Shacharit's own
     // Korbanot reading - reused via SIDDUR.korbanot.parashatHatamid rather
     // than duplicated) sits right here in Mincha too, between Tefila
@@ -9932,7 +9956,7 @@ function siddurSections(dateObj, info, prayer){
     // Titkabel (pushed separately right below, already correctly placed),
     // not a plain Chatzi Kaddish - so this reuses only the shared core.
     push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div>` : `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`+siddurTachanunCoreHTML());
-    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true));
+    push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true)));
     // Tehillim 67 ("Elokim Yechonenu") every weekday EXCEPT Friday, when
     // Tehillim 93 ("Hashem Malach") is said instead - verified via two
     // independent Sefaria editions (Weekday Mincha > Vidui in both): this
@@ -9962,12 +9986,12 @@ function siddurSections(dateObj, info, prayer){
     // by siddurBarchiNafshiHTML() for this identical Kaddish shape, rather
     // than storing this exact text a second time.
     const kaddishYeheiShlamaParas = (PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel).split('\n\n').filter((_,i)=>i!==1);
-    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurParasFromText(kaddishYeheiShlamaParas.join('\n\n'), true));
+    push('kaddishT2','קַדִּישׁ יְהֵא שְׁלָמָא', siddurCollapseHTML(ckChrome('קַדִּישׁ יְהֵא שְׁלָמָא'), siddurParasFromText(kaddishYeheiShlamaParas.join('\n\n'), true)));
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${PT('aleinu')||SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('mincha', info));
   } else if(prayer==='arvit'){
     const trAB = PT('arvitBlessings');
     const ab = trAB ? Object.assign({}, SIDDUR.arvitBlessings, trAB) : SIDDUR.arvitBlessings;
-    let opening = `<div class="prayer-para">${ab.leshemYichud}</div>`;
+    let opening = siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), ab.leshemYichud);
     opening += `<div class="prayer-para">${ab.openingVerses}</div>`;
     opening += siddurChatziKaddishHTML();
     opening += `<div class="prayer-para">${ab.vehuRachum}</div>`;
