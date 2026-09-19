@@ -391,8 +391,14 @@ body::before{ /* subtle starfield/texture */
 .cal-cell.fast::after{background:#d9614f}
 .cal-cell.yahr::after{background:#8b7bd8}
 .cal-view-switch{margin:0 0 10px}
-.chip-row.cal-filter-row{margin:0 0 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip-row.cal-filter-row{margin:10px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .cal-filter-row .chip{font-size:12px;padding:6px 4px;width:100%;justify-content:center;text-align:center}
+.cal-filter-toggle{display:flex;align-items:center;gap:5px;background:none;border:none;padding:2px 0;margin:0 0 4px;
+  color:var(--muted);font-family:var(--font-ui);font-size:12px;cursor:pointer}
+.cal-filter-toggle-chev{width:12px;height:12px;display:flex;transition:transform .2s var(--ease)}
+.cal-filter-toggle-chev svg{width:12px;height:12px}
+.cal-filter-toggle-chev.open{transform:rotate(180deg)}
+.cal-filter-panel{overflow:hidden}
 .cal-agenda-list{display:flex;flex-direction:column;gap:2px;margin-top:4px}
 .cal-agenda-row{display:flex;align-items:center;gap:12px;padding:10px 6px;border-radius:12px;cursor:pointer;transition:.15s var(--ease)}
 .cal-agenda-row:active{background:var(--panel-2)}
@@ -7018,7 +7024,19 @@ function calMonthEventsHTML(evMap,firstAbs,len){
 function calFilterChipsHTML(){
   return `<div class="chip-row cal-filter-row">${CAL_FILTER_DEFS.map(d=>`<button class="chip ${CAL.filters[d.key]?'on':''}" data-filt="${d.key}">${d.label}</button>`).join('')}</div>`;
 }
+/* The 6 filter chips are opt-in detail, not something worth a
+   permanent gold block on every visit - collapsed by default behind a
+   quiet text toggle that takes a single line, and stays open/closed
+   across the re-renders each chip click and view/month change trigger
+   (CAL.filterPanelOpen persists on the shared CAL state, same as
+   CAL.civil/CAL.view). */
+function calFilterToggleHTML(){
+  return `<button class="cal-filter-toggle" id="calFilterToggle"><span>סִנּוּן אֵירוּעִים</span><i class="cal-filter-toggle-chev ${CAL.filterPanelOpen?'open':''}">${I.chev}</i></button>
+  <div class="cal-filter-panel" id="calFilterPanel" style="display:${CAL.filterPanelOpen?'':'none'}">${calFilterChipsHTML()}</div>`;
+}
 function wireCalFilters(rerender){
+  const toggle=document.getElementById('calFilterToggle');
+  if(toggle) toggle.onclick=()=>{ CAL.filterPanelOpen=!CAL.filterPanelOpen; rerender(); };
   document.querySelectorAll('[data-filt]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.filt; CAL.filters[k]=!CAL.filters[k]; calSaveFilters(CAL.filters); rerender();
   });
@@ -7039,7 +7057,7 @@ function wireCalViewSwitch(){
    or a 12-month year overview (renderCalYear). All three share CAL's
    civil/Hebrew mode and event-type filters. */
 function renderCalendarView(){
-  if(!CAL){ CAL={civil:false, view:'month', filters:calLoadFilters(), agendaStartAbs:null}; calSetSelected(currentHDate()); }
+  if(!CAL){ CAL={civil:false, view:'month', filters:calLoadFilters(), agendaStartAbs:null, filterPanelOpen:false}; calSetSelected(currentHDate()); }
   if(CAL.view==='agenda') return renderCalAgenda();
   if(CAL.view==='year') return renderCalYear();
   return renderCalMonth();
@@ -7056,7 +7074,7 @@ function renderCalAgenda(){
   ${topbar('לוח עברי')}
   <div class="view">
     ${calViewSwitchHTML()}
-    ${calFilterChipsHTML()}
+    ${calFilterToggleHTML()}
     <div class="cal-actions-row">
       <button class="today-btn" id="calAgPrev">${I.prev}<span>60 קוֹדְמִים</span></button>
       <button class="today-btn" id="calAgToday">${I.cal}<span>הַיּוֹם</span></button>
@@ -7129,7 +7147,7 @@ function renderCalYear(){
       <div class="cal-month"><div class="m">${civil?'שָׁנָה לוֹעֲזִית':'שָׁנָה עִבְרִית'}</div><div class="y">${civil?y:heNum(y)}</div></div>
       <button class="cal-nav" id="calYNext">${I.next}</button>
     </div>
-    ${calFilterChipsHTML()}
+    ${calFilterToggleHTML()}
     <div class="cal-year-grid">${months.map(m=>calMiniMonthHTML(y,m,civil)).join('')}</div>
     ${ornament()}
   </div>`;
@@ -7249,7 +7267,7 @@ function renderCalMonth(){
       <input type="text" id="calHolSearchInput" class="fld-input" placeholder="חִפְשׂוּ חַג..."/>
       <div class="cal-hol-search-results" id="calHolSearchResults"></div>
     </div>
-    ${calFilterChipsHTML()}
+    ${calFilterToggleHTML()}
     ${upcoming.length?`<div class="cal-upcoming-scroll">${upcoming.map(h=>`<div class="cal-upcoming-chip">${I.star||I.cal}<span>${h.name}</span><b>${h.days===1?'מחר':'בעוד '+heNum(h.days)+' ימים'}</b></div>`).join('')}</div>`:''}
     <div class="cal-grid" id="calGrid">${DOW_SHORT.map((d,i)=>`<div class="cal-dow">${dowShort(i)}</div>`).join('')}${cells}</div>
     <div id="dayDetail"></div>
