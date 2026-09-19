@@ -391,8 +391,8 @@ body::before{ /* subtle starfield/texture */
 .cal-cell.fast::after{background:#d9614f}
 .cal-cell.yahr::after{background:#8b7bd8}
 .cal-view-switch{margin:0 0 10px}
-.cal-filter-row{margin:0 0 12px}
-.cal-filter-row .chip{font-size:12px;padding:6px 11px}
+.chip-row.cal-filter-row{margin:0 0 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cal-filter-row .chip{font-size:12px;padding:6px 4px;width:100%;justify-content:center;text-align:center}
 .cal-agenda-list{display:flex;flex-direction:column;gap:2px;margin-top:4px}
 .cal-agenda-row{display:flex;align-items:center;gap:12px;padding:10px 6px;border-radius:12px;cursor:pointer;transition:.15s var(--ease)}
 .cal-agenda-row:active{background:var(--panel-2)}
@@ -757,7 +757,9 @@ a.set-item{text-decoration:none;color:inherit}
 .next-hol svg{width:16px;height:16px;color:var(--gold);flex:none}
 
 /* upcoming holidays - horizontal scroll strip of several, not just one */
-.cal-upcoming-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px 4px;-webkit-overflow-scrolling:touch}
+.cal-upcoming-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 4px 12px;margin:0 -4px 4px;-webkit-overflow-scrolling:touch;
+  -webkit-mask-image:linear-gradient(to right,transparent,black 16px,black calc(100% - 16px),transparent);
+  mask-image:linear-gradient(to right,transparent,black 16px,black calc(100% - 16px),transparent)}
 .cal-upcoming-scroll::-webkit-scrollbar{display:none}
 .cal-upcoming-chip{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;
   background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;padding:10px 14px;min-width:96px;text-align:center}
@@ -799,7 +801,8 @@ a.set-item{text-decoration:none;color:inherit}
   font-family:var(--font-ui);font-size:13.5px;font-weight:700;cursor:pointer;transition:.2s var(--ease)}
 .today-btn:active{transform:scale(.96)}
 .today-btn svg{width:16px;height:16px}
-.cal-actions-row{display:flex;align-items:center;justify-content:center;gap:16px;margin:0 auto 14px;flex-wrap:wrap}
+.cal-actions-row{display:flex;align-items:stretch;gap:8px;margin:0 0 14px}
+.cal-actions-row .today-btn{flex:1;min-width:0;justify-content:center;padding:10px 6px;font-size:12px;white-space:normal;text-align:center}
 
 /* converter */
 .conv-card{margin-top:18px}
