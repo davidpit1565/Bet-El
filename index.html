@@ -148,17 +148,6 @@ body::before{ /* subtle starfield/texture */
 .greeting{font-size:13.5px;color:var(--gold);font-family:var(--font-sacred);margin-top:2px;
   letter-spacing:.08em}
 
-/* ================= ONBOARDING ================= */
-.ob-title{font-family:var(--font-sacred);font-size:24px;font-weight:700;text-align:center;margin-top:14px}
-.ob-sub{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin-top:6px;text-align:center;line-height:1.4}
-.ob-list{display:flex;flex-direction:column;gap:12px;margin:22px 0}
-.ob-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:14px 16px}
-.ob-rt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
-.ob-rd{font-size:14px;color:var(--muted);margin-top:2px;line-height:1.4}
-.ob-explainer-link{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;
-  font-size:13.5px;color:var(--gold);cursor:pointer;margin-bottom:16px}
-.ob-explainer-link svg{width:15px;height:15px;flex-shrink:0}
-
 /* Chok LeYisrael first-open pace questions - no icons, plain option cards */
 .pace-view{padding-top:36px}
 /* the very first screen anyone ever sees (language pick, before S.lang is
@@ -975,13 +964,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
    they're just a reference aid, not part of the recited text) and
    parenthetical stage-directions like "(quietly)" - both should read as
    quieter than the surrounding prayer text, never at the same size/weight. */
-.pk-marker{font-size:.75em;color:var(--muted);vertical-align:baseline}
+.pk-marker{font-size:.85em;color:var(--muted);vertical-align:baseline}
 .siddur-whisper{font-size:.85em;color:var(--muted)}
-/* Kriat Shema Al HaMita's seven Ana BeKoach night-verses: at the full
-   21px reader size, "ליל א: אנא בכח..." plus its roshei-tevot marker
-   wraps to 2-3 lines each - shrinking just these lines (not the whole
-   reader) is what actually gets each night onto one row on a phone. */
-.siddur-night-verse{font-size:.68em;line-height:1.7;margin-bottom:8px;padding-bottom:0}
 /* Siddur: day-conditional insertions (Yaale V'Yavo, Al HaNissim, Aneinu,
    Aseret Yemei Teshuva swaps, Hallel) get a colored left rule + small tag
    so it's visually clear *why* a line is there today, instead of blending
@@ -3286,49 +3270,6 @@ function renderMusarYomiReader(){
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
-/* one-time welcome screen for new users, explaining the app's 5 study
-   tracks now that it is more than just Tehillim. Shown once, gated by
-   its own localStorage flag; buildNav() skips the bottom nav while
-   TAB==='onboard', so obStart rebuilds it on the way out. */
-function renderOnboard(){
-  const row=(title,desc)=>`<div class="ob-row">
-    <div><div class="ob-rt">${title}</div><div class="ob-rd">${desc}</div></div></div>`;
-  app.innerHTML=`
-  <div class="view">
-    <div class="hero"><img class="hero-logo" src="${LOGO}" alt="תמיד"/></div>
-    <div class="ob-title">בְּרוּכִים הַבָּאִים לְתָמִיד</div>
-    <div class="ob-sub">פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם</div>
-    <div class="ob-list">
-      ${row('חוֹק לְיִשְׂרָאֵל','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר')}
-      ${row('תְּהִלִּים הַיּוֹמִי','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר')}
-      ${row('זֹהַר הַיּוֹמִי','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי')}
-      ${row('שְׁנַיִם מִקְרָא','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם')}
-      ${row('תִּיקּוּנֵי הַזֹּהַר','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה')}
-      ${row('מוּסָר','שִׁשָּׁה סִפְרֵי מוּסָר קְלָאסִיִּים בְּקֶצֶב 3 יְחִידוֹת לְיוֹם')}
-      ${row('בֶּן אִישׁ חַי','הֲלָכָה יוֹמִית לְפִי פָּרָשַׁת הַשָּׁבוּעַ, בִּשְׁנֵי מַחְזוֹרֵי לִמּוּד')}
-      ${row('חֲסִידוּת · תַּנְיָא הַיּוֹמִי','קֶטַע הַתַּנְיָא שֶׁל הַיּוֹם, לְפִי הַמַּחְזוֹר הַשָּׁנָתִי מִי״ט כִּסְלֵו')}
-    </div>
-    <div class="ob-explainer-link" id="obExplainerLink">${I.info} מָה בְּדִיּוּק לוֹמְדִים כָּל יוֹם בְּחוֹק לְיִשְׂרָאֵל?</div>
-    <button class="btn btn-gold" id="obStart">הַתְחֵל</button>
-    <div style="height:20px"></div>
-  </div>`;
-  document.getElementById('obExplainerLink').onclick=()=>{ CK_EXPLAINER_BACK='onboard'; go('chokExplainer'); };
-  document.getElementById('obStart').onclick=()=>{
-    localStorage.setItem('betel_onboard_v1','1');
-    if(S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
-      (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
-    }
-    if(!localStorage.getItem('betel_chok_pace_v1')){
-      CK_PACE_PENDING_TAB='home'; CK_PACE_STEP=0; TAB='chokPace';
-    } else {
-      TAB='home';
-    }
-    buildNav();
-    render();
-    forceScrollTop();
-  };
-}
-
 /* ---------- source labels ---------- */
 /* Sefaria's heTitle carries the work's own name; the framing words are ours. */
 /* The names of the works carry nikud, so a prefix is matched on the letters
@@ -4192,8 +4133,8 @@ function renderChokPace(){
     </div>`;
     app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
       S.lang=el.dataset.paceOpt; saveS(); applyLang(); buildNav();
-      if(CK_PACE_AFTER_LANG==='onboard'){ TAB='onboard'; render(); }
-      else { CK_PACE_STEP=-1; renderChokPace(); }
+      if(CK_PACE_AFTER_LANG==='onboard') localStorage.setItem('betel_onboard_v1','1');
+      CK_PACE_STEP=-1; renderChokPace();
       forceScrollTop();
     });
     tr(app);
@@ -4223,7 +4164,13 @@ function renderChokPace(){
       </div>
       <button class="btn btn-gold" id="paceDoneGo">${t.doneBtn}</button>
     </div>`;
-    document.getElementById('paceDoneGo').onclick=()=>{ localStorage.setItem('betel_chok_pace_v1','1'); CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList'); };
+    document.getElementById('paceDoneGo').onclick=()=>{
+      localStorage.setItem('betel_chok_pace_v1','1');
+      if(CK_PACE_AFTER_LANG==='onboard' && S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
+        (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
+      }
+      CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList');
+    };
     tr(app);
     return;
   }
@@ -5781,7 +5728,6 @@ function render(){
     else if(TAB==='libraryMishnahReader') renderLibraryMishnahReader();
     else if(TAB==='libraryNKBooks') renderLibraryNKBooks();
     else if(TAB==='libraryNKReader') renderLibraryNKReader();
-    else if(TAB==='onboard') renderOnboard();
     else if(TAB==='chokPace') renderChokPace();
     else if(TAB==='settings') renderSettings();
     else if(TAB==='tracker') renderTracker();
@@ -9537,8 +9483,7 @@ function siddurKriatShemaAlHamitaHTML(){
   html += siddurParasFromText(K.viduiText);
   html += siddurParasFromText(K.anaBekoachNote);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
-  html += siddurParasFromText(K.nightVerses, false, 'siddur-night-verse');
-  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`, false, 'siddur-night-verse');
+  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
   html += siddurParasFromText(K.closing);
   return html;
 }
@@ -10658,10 +10603,16 @@ function confetti(n){
    that live moment (via Firestore's realtime listener), AND for anyone
    who simply opens the app afterwards and hasn't seen that tier yet, so
    nobody who deserves the moment misses it just for not watching live.
-   1,000 gets a deliberately bigger "explosion" version. Guarded per
-   device (betel_milestone_last) so the same tier never repeats there.
-   Called as window.celebrateMilestone(...) from the module script, since
-   a classic-script function declaration like this one attaches to window
+   Delivered purely as an OS notification (fireNotif), same as the other
+   checkXNotification() reminders below - never an in-app modal, per
+   explicit user request. Only fires while the live count is still within
+   the first 10 users of that hundred (e.g. 300-309, 400-409): a device
+   that only opens the app once the count has already moved well past a
+   tier (e.g. opens at 350) would otherwise see a stale "300!" alert for a
+   milestone that's no longer current. Guarded per device
+   (betel_milestone_last) so the same tier never repeats there. Called as
+   window.celebrateMilestone(...) from the module script, since a
+   classic-script function declaration like this one attaches to window
    and is reachable from a <script type="module">, while the reverse (or
    sharing let/const) is not. */
 const MILESTONE_UI={
@@ -10677,35 +10628,27 @@ const MILESTONE_UI={
       grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
+  if(!notifReady()) return;
   const grand = tier>=1000;
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
   const tierStr=tier.toLocaleString(civilDateLocale());
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
   const body = (grand?t.grandBody:t.body).replace('{n}',tierStr);
-  haptic(grand?60:30);
-  confetti(grand?260:140);
-  if(grand) setTimeout(()=>confetti(220), 450);
-  const ov=document.createElement('div'); ov.className='overlay';
-  ov.innerHTML=`<div class="modal modal-special${grand?' modal-grand':''}">
-    <button class="close-x" data-close>${I.x}</button>
-    <div class="m-crown m-crown-special">${I.flame}</div>
-    <h3 class="gold-text special-title"><span class="sp-sparkle sp1">✦</span><span class="sp-sparkle sp2">✦</span> ${title} <span class="sp-sparkle sp3">✦</span><span class="sp-sparkle sp4">✦</span></h3>
-    <p>${body}</p>
-    <button class="btn btn-gold" data-close><span>${I.heart}</span><span>${t.btn}</span></button>
-  </div>`;
-  document.body.appendChild(ov);
-  ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
-  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
-  if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  fireNotif(title,body,ckNotifDir(),S.lang||'he');
 }
 /* the highest hundred-tier (300,400,500,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
    device opening the app after the fact still gets shown whichever
-   tiers it missed (just the latest one, not a backlog of every one) */
+   tiers it missed (just the latest one, not a backlog of every one) -
+   but only while still inside that tier's own 10-user window (see the
+   comment on celebrateMilestone above); outside it, the count will only
+   keep climbing, so this naturally waits for the next hundred instead of
+   ever firing a stale milestone. */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
+  if(tier<300 || count>=tier+10) return;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
-  if(tier>=300 && tier>last){
+  if(tier>last){
     localStorage.setItem('betel_milestone_last', String(tier));
     try{ window.celebrateMilestone(count, tier); }catch(e){}
   }
@@ -10756,7 +10699,7 @@ function navActiveTab(tab){
 }
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
-  if(TAB==='onboard'||TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
+  if(TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
   const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
@@ -10780,7 +10723,7 @@ if(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatf
 applySettings();
 applyWakeLock();
 applyLang();
-if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; TAB='chokPace'; }
+if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; CK_PACE_PENDING_TAB='home'; TAB='chokPace'; }
 buildNav();
 render();
 maybeShowRatePrompt();
@@ -10984,8 +10927,16 @@ try{announceChokFeature();}catch(e){}
 try{announceBenishchaiFeature();}catch(e){}
 try{announceSelichotFeature();}catch(e){}
 try{ensureChokIndex().then(()=>{ try{chokCheckReminders();}catch(e){} });}catch(e){}
-setInterval(()=>{ try{checkNotification();}catch(e){} try{chokCheckReminders();}catch(e){} }, 60000);
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{chokCheckReminders();}catch(e){} try{applyWakeLock();}catch(e){} } });
+/* checkBicNotification/checkMusarNotification used to only ever run once,
+   at boot (see notifBootSync().then(...) above) - a device opened before
+   their fixed times (9:55/20:00) would see "not yet" and then never be
+   asked again unless the whole app reloaded, so in practice those two
+   almost never actually fired. Folded into the same repeating interval/
+   visibilitychange checks checkNotification() already used, so they get
+   re-evaluated every minute (and the moment the app is foregrounded)
+   like every other foreground reminder here. */
+setInterval(()=>{ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} }, 60000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} try{applyWakeLock();}catch(e){} } });
 try{
   if(navigator.geolocation){
     const ask=()=>requestGPS(ok=>{ if(ok&&TAB!=='reader') render(); });
