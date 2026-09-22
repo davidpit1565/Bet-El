@@ -10652,10 +10652,16 @@ function confetti(n){
    that live moment (via Firestore's realtime listener), AND for anyone
    who simply opens the app afterwards and hasn't seen that tier yet, so
    nobody who deserves the moment misses it just for not watching live.
-   1,000 gets a deliberately bigger "explosion" version. Guarded per
-   device (betel_milestone_last) so the same tier never repeats there.
-   Called as window.celebrateMilestone(...) from the module script, since
-   a classic-script function declaration like this one attaches to window
+   Delivered purely as an OS notification (fireNotif), same as the other
+   checkXNotification() reminders below - never an in-app modal, per
+   explicit user request. Only fires while the live count is still within
+   the first 10 users of that hundred (e.g. 300-309, 400-409): a device
+   that only opens the app once the count has already moved well past a
+   tier (e.g. opens at 350) would otherwise see a stale "300!" alert for a
+   milestone that's no longer current. Guarded per device
+   (betel_milestone_last) so the same tier never repeats there. Called as
+   window.celebrateMilestone(...) from the module script, since a
+   classic-script function declaration like this one attaches to window
    and is reachable from a <script type="module">, while the reverse (or
    sharing let/const) is not. */
 const MILESTONE_UI={
@@ -10671,35 +10677,27 @@ const MILESTONE_UI={
       grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
+  if(!notifReady()) return;
   const grand = tier>=1000;
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
   const tierStr=tier.toLocaleString(civilDateLocale());
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
   const body = (grand?t.grandBody:t.body).replace('{n}',tierStr);
-  haptic(grand?60:30);
-  confetti(grand?260:140);
-  if(grand) setTimeout(()=>confetti(220), 450);
-  const ov=document.createElement('div'); ov.className='overlay';
-  ov.innerHTML=`<div class="modal modal-special${grand?' modal-grand':''}">
-    <button class="close-x" data-close>${I.x}</button>
-    <div class="m-crown m-crown-special">${I.flame}</div>
-    <h3 class="gold-text special-title"><span class="sp-sparkle sp1">✦</span><span class="sp-sparkle sp2">✦</span> ${title} <span class="sp-sparkle sp3">✦</span><span class="sp-sparkle sp4">✦</span></h3>
-    <p>${body}</p>
-    <button class="btn btn-gold" data-close><span>${I.heart}</span><span>${t.btn}</span></button>
-  </div>`;
-  document.body.appendChild(ov);
-  ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
-  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
-  if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  fireNotif(title,body,ckNotifDir(),S.lang||'he');
 }
 /* the highest hundred-tier (300,400,500,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
    device opening the app after the fact still gets shown whichever
-   tiers it missed (just the latest one, not a backlog of every one) */
+   tiers it missed (just the latest one, not a backlog of every one) -
+   but only while still inside that tier's own 10-user window (see the
+   comment on celebrateMilestone above); outside it, the count will only
+   keep climbing, so this naturally waits for the next hundred instead of
+   ever firing a stale milestone. */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
+  if(tier<300 || count>=tier+10) return;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
-  if(tier>=300 && tier>last){
+  if(tier>last){
     localStorage.setItem('betel_milestone_last', String(tier));
     try{ window.celebrateMilestone(count, tier); }catch(e){}
   }
@@ -10978,8 +10976,16 @@ try{announceChokFeature();}catch(e){}
 try{announceBenishchaiFeature();}catch(e){}
 try{announceSelichotFeature();}catch(e){}
 try{ensureChokIndex().then(()=>{ try{chokCheckReminders();}catch(e){} });}catch(e){}
-setInterval(()=>{ try{checkNotification();}catch(e){} try{chokCheckReminders();}catch(e){} }, 60000);
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{chokCheckReminders();}catch(e){} try{applyWakeLock();}catch(e){} } });
+/* checkBicNotification/checkMusarNotification used to only ever run once,
+   at boot (see notifBootSync().then(...) above) - a device opened before
+   their fixed times (9:55/20:00) would see "not yet" and then never be
+   asked again unless the whole app reloaded, so in practice those two
+   almost never actually fired. Folded into the same repeating interval/
+   visibilitychange checks checkNotification() already used, so they get
+   re-evaluated every minute (and the moment the app is foregrounded)
+   like every other foreground reminder here. */
+setInterval(()=>{ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} }, 60000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} try{applyWakeLock();}catch(e){} } });
 try{
   if(navigator.geolocation){
     const ask=()=>requestGPS(ok=>{ if(ok&&TAB!=='reader') render(); });
