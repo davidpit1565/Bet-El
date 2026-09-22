@@ -1966,7 +1966,7 @@ function openPrayer(prayerKey, fromGroup){
   }
 }
 
-const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true, calRegion:'auto' };
+const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', hebrewName:'', remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true, calRegion:'auto' };
 function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
@@ -6112,6 +6112,35 @@ function stripNik(x){ return (x||'').replace(/\u05BE/g,' ').replace(/[\u0591-\u0
    de-vocalizing a display string (e.g. a holiday name rendered with nikud by
    the third-party hebcal library) without disturbing maqaf-joined compounds. */
 function deNikud(x){ return (x||'').replace(/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g,''); }
+/* The segulah of reciting, at the end of every Amidah, a Tehillim verse
+   that both opens with one's own (Hebrew) first name's first letter and
+   closes with its last letter - S.hebrewName is the whole personalization
+   this needs; everything else is derived from it on the fly rather than
+   stored. stripNik() already gives a letters+spaces-only string, so
+   dropping the remaining spaces and taking the two ends is enough to get
+   the name's first/last letter regardless of nikud or a multi-word name. */
+function nameEdgeLetters(name){
+  const s=stripNik(name).replace(/\s+/g,'');
+  if(!s) return null;
+  return {first:s[0], last:s[s.length-1]};
+}
+/* Scans all 150 chapters (same T[ch]||T[String(ch)] pattern used
+   elsewhere) for every verse whose own first/last letter - by the same
+   stripNik-based measure - matches the name's. Cheap enough (~2500
+   verses) to just run fresh each time rather than caching. */
+function tehillimVersesByName(name){
+  const edges=nameEdgeLetters(name); if(!edges) return [];
+  const T=window.TEHILLIM; if(!T) return [];
+  const out=[];
+  for(let ch=1; ch<=150; ch++){
+    const vs=T[ch]||T[String(ch)]||[];
+    vs.forEach((v,vi)=>{
+      const s=stripNik(v).replace(/\s+/g,'');
+      if(s && s[0]===edges.first && s[s.length-1]===edges.last) out.push({ch,vi,text:v});
+    });
+  }
+  return out;
+}
 function renderTehillim(){
   app.innerHTML = `
   ${topbar('ספר תהלים')}
@@ -8961,8 +8990,25 @@ function siddurKavehClosingHTML(){
 // Amida node; a "Kabel Rinat Amecha" line inside Elokai Netzor and a
 // personal-Hebrew-name-verse segulah appeared in only one of the two
 // editions cross-checked and are left out rather than guessed at.
+/* The personal-Hebrew-name-verse segulah this session's user explicitly
+   asked for, mentioned but left out of siddurAmidahClosingHTML above for
+   lack of a source - built as a live search instead of a single printed
+   verse, since the same name/letter pair can genuinely match more than
+   one verse in Tehillim and the user wants all of them, not just one.
+   Reuses the verse-search results look (.res-item/.res-ref/.res-txt from
+   renderTehillim's own search) rather than inventing new styling. */
+function siddurNameVerseHTML(){
+  if(!S.hebrewName) return '';
+  const matches=tehillimVersesByName(S.hebrewName);
+  if(!matches.length) return '';
+  const body=matches.map(m=>
+    `<button class="res-item" data-nv-ch="${m.ch}" data-nv-vi="${m.vi}"><div class="res-ref">${I.book} ${ckChrome('תְּהִלִּים')} ${heNum(m.ch)} · ${ckChrome('פָּסוּק')} ${heNum(m.vi+1)}</div><div class="res-txt">${m.text}</div></button>`
+  ).join('');
+  return siddurCollapseHTML(`${ckChrome('פָּסוּק לְפִי הַשֵּׁם')} · ${S.hebrewName}`, body);
+}
 function siddurAmidahClosingHTML(info){
   let html = siddurParasFromText(`${PT('yihyuLeratzon')||SIDDUR.yihyuLeratzon}\n\n${PT('elokaiNetzor')||SIDDUR.elokaiNetzor}\n\n${PT('yihyuLeratzon')||SIDDUR.yihyuLeratzon}`, true);
+  html += siddurNameVerseHTML();
   const oseShalom = info.isAseretYemeiTeshuva
     ? (PT('oseShalomTeshuva')||SIDDUR.oseShalom.replace('שָׁלוֹם', SIDDUR.oseShalomTeshuvaWord))
     : (PT('oseShalom')||SIDDUR.oseShalom);
@@ -9744,6 +9790,7 @@ function drawSiddurReader(){
     ${secs.map((sec,ix)=>`<button class="sid-dot${ix===0?' on':''}" data-siddot="${sec.key}" aria-label="${sec.he}"></button>`).join('')}
   </div>`:''}`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
+  app.querySelectorAll('[data-nv-ch]').forEach(b=>b.onclick=()=>openReader([+b.dataset.nvCh],{daily:false,verse:+b.dataset.nvVi}));
   const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openSiddurPrayer('selichot');
   document.querySelector('.tb-back').onclick=()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); };
   const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
@@ -10262,6 +10309,14 @@ function renderSettings(){
     </div>
 
     <div class="set-group">
+      <h3>פָּסוּק לְפִי הַשֵּׁם</h3>
+      <div class="set-item col">
+        <div class="si-d" style="margin-bottom:10px">כְּתֹב אֶת שִׁמְךָ הָעִבְרִי, וּבְסוֹף כָּל עֲמִידָה יוֹפִיעוּ כָּל פְּסוּקֵי תְּהִלִּים הַמַּתְחִילִים וּמְסַתְּיְמִים בְּאוֹתִיּוֹת הַשֵּׁם</div>
+        <input id="hebrewNameIn" class="fld-input" placeholder="לְדֻגְמָה: מֵאִיר" value="${S.hebrewName||''}"/>
+      </div>
+    </div>
+
+    <div class="set-group">
       <h3>הקדשת הקריאה</h3>
       <div class="set-item col">
         <div id="dedItems">${dedList().map((d,i)=>`<div class="ded-row"><span class="ded-txt">${dedLabel(d.t)} ${d.n}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין הקדשות עדין</div>'}</div>
@@ -10368,6 +10423,7 @@ function renderSettings(){
   const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); }; }
   const sh=document.getElementById('selHalacha'); if(sh) sh.onchange=()=>{ setHalachaChoice(sh.value); saveS(); renderSettings(); };
   const smw=document.getElementById('selMusarWork'); if(smw) smw.onchange=()=>{ S.musarWork=smw.value; saveS(); renderSettings(); };
+  const hn=document.getElementById('hebrewNameIn'); if(hn) hn.onchange=()=>{ S.hebrewName=hn.value.trim(); saveS(); toast('נשמר'); };
   const da=document.getElementById('dedAdd'); if(da) da.onclick=()=>{
     const t=document.getElementById('dedType').value, n=document.getElementById('dedName').value.trim();
     if(!n){ toast('הזן שם'); return; }
