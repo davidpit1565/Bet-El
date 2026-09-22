@@ -975,13 +975,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
    they're just a reference aid, not part of the recited text) and
    parenthetical stage-directions like "(quietly)" - both should read as
    quieter than the surrounding prayer text, never at the same size/weight. */
-.pk-marker{font-size:.75em;color:var(--muted);vertical-align:baseline}
+.pk-marker{font-size:.85em;color:var(--muted);vertical-align:baseline}
 .siddur-whisper{font-size:.85em;color:var(--muted)}
-/* Kriat Shema Al HaMita's seven Ana BeKoach night-verses: at the full
-   21px reader size, "ליל א: אנא בכח..." plus its roshei-tevot marker
-   wraps to 2-3 lines each - shrinking just these lines (not the whole
-   reader) is what actually gets each night onto one row on a phone. */
-.siddur-night-verse{font-size:.68em;line-height:1.7;margin-bottom:8px;padding-bottom:0}
 /* Siddur: day-conditional insertions (Yaale V'Yavo, Al HaNissim, Aneinu,
    Aseret Yemei Teshuva swaps, Hallel) get a colored left rule + small tag
    so it's visually clear *why* a line is there today, instead of blending
@@ -9537,8 +9532,7 @@ function siddurKriatShemaAlHamitaHTML(){
   html += siddurParasFromText(K.viduiText);
   html += siddurParasFromText(K.anaBekoachNote);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
-  html += siddurParasFromText(K.nightVerses, false, 'siddur-night-verse');
-  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`, false, 'siddur-night-verse');
+  html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
   html += siddurParasFromText(K.closing);
   return html;
 }
