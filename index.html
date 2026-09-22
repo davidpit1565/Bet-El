@@ -148,17 +148,6 @@ body::before{ /* subtle starfield/texture */
 .greeting{font-size:13.5px;color:var(--gold);font-family:var(--font-sacred);margin-top:2px;
   letter-spacing:.08em}
 
-/* ================= ONBOARDING ================= */
-.ob-title{font-family:var(--font-sacred);font-size:24px;font-weight:700;text-align:center;margin-top:14px}
-.ob-sub{font-family:var(--font-sacred);font-size:15px;color:var(--gold);margin-top:6px;text-align:center;line-height:1.4}
-.ob-list{display:flex;flex-direction:column;gap:12px;margin:22px 0}
-.ob-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:14px 16px}
-.ob-rt{font-family:var(--font-sacred);font-size:16px;font-weight:700}
-.ob-rd{font-size:14px;color:var(--muted);margin-top:2px;line-height:1.4}
-.ob-explainer-link{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;
-  font-size:13.5px;color:var(--gold);cursor:pointer;margin-bottom:16px}
-.ob-explainer-link svg{width:15px;height:15px;flex-shrink:0}
-
 /* Chok LeYisrael first-open pace questions - no icons, plain option cards */
 .pace-view{padding-top:36px}
 /* the very first screen anyone ever sees (language pick, before S.lang is
@@ -3281,49 +3270,6 @@ function renderMusarYomiReader(){
   app.querySelectorAll('.ck-comm-btn').forEach(b=>b.onclick=()=>ckToggleComm(b));
 }
 
-/* one-time welcome screen for new users, explaining the app's 5 study
-   tracks now that it is more than just Tehillim. Shown once, gated by
-   its own localStorage flag; buildNav() skips the bottom nav while
-   TAB==='onboard', so obStart rebuilds it on the way out. */
-function renderOnboard(){
-  const row=(title,desc)=>`<div class="ob-row">
-    <div><div class="ob-rt">${title}</div><div class="ob-rd">${desc}</div></div></div>`;
-  app.innerHTML=`
-  <div class="view">
-    <div class="hero"><img class="hero-logo" src="${LOGO}" alt="תמיד"/></div>
-    <div class="ob-title">בְּרוּכִים הַבָּאִים לְתָמִיד</div>
-    <div class="ob-sub">פְּלַטְפוֹרְמָה שְׁלֵמָה לְלִמּוּד יוֹמִי — אִתְּךָ בְּכָל מָקוֹם</div>
-    <div class="ob-list">
-      ${row('חוֹק לְיִשְׂרָאֵל','לִמּוּד יוֹמִי מָלֵא: תּוֹרָה, נְבִיאִים, מִשְׁנָה, זֹהַר, הֲלָכָה וּמוּסָר')}
-      ${row('תְּהִלִּים הַיּוֹמִי','חֲלוּקָה יוֹמִית לְפִי יְמֵי הַחֹדֶשׁ, עַד לְסִיּוּם כָּל הַסֵּפֶר')}
-      ${row('זֹהַר הַיּוֹמִי','קֶטַע הַזֹּהַר שֶׁל הַיּוֹם, מִתּוֹךְ חֹק לְיִשְׂרָאֵל — כְּדַף עַצְמָאִי')}
-      ${row('שְׁנַיִם מִקְרָא','קְרִיאַת פָּרָשַׁת הַשָּׁבוּעַ, פַּעֲמַיִם מִקְרָא וְאֶחָד תַּרְגּוּם')}
-      ${row('תִּיקּוּנֵי הַזֹּהַר','מוֹפִיעַ רַק בְּ-40 הַיָּמִים שֶׁלִּפְנֵי רֹאשׁ הַשָּׁנָה')}
-      ${row('מוּסָר','שִׁשָּׁה סִפְרֵי מוּסָר קְלָאסִיִּים בְּקֶצֶב 3 יְחִידוֹת לְיוֹם')}
-      ${row('בֶּן אִישׁ חַי','הֲלָכָה יוֹמִית לְפִי פָּרָשַׁת הַשָּׁבוּעַ, בִּשְׁנֵי מַחְזוֹרֵי לִמּוּד')}
-      ${row('חֲסִידוּת · תַּנְיָא הַיּוֹמִי','קֶטַע הַתַּנְיָא שֶׁל הַיּוֹם, לְפִי הַמַּחְזוֹר הַשָּׁנָתִי מִי״ט כִּסְלֵו')}
-    </div>
-    <div class="ob-explainer-link" id="obExplainerLink">${I.info} מָה בְּדִיּוּק לוֹמְדִים כָּל יוֹם בְּחוֹק לְיִשְׂרָאֵל?</div>
-    <button class="btn btn-gold" id="obStart">הַתְחֵל</button>
-    <div style="height:20px"></div>
-  </div>`;
-  document.getElementById('obExplainerLink').onclick=()=>{ CK_EXPLAINER_BACK='onboard'; go('chokExplainer'); };
-  document.getElementById('obStart').onclick=()=>{
-    localStorage.setItem('betel_onboard_v1','1');
-    if(S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
-      (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
-    }
-    if(!localStorage.getItem('betel_chok_pace_v1')){
-      CK_PACE_PENDING_TAB='home'; CK_PACE_STEP=0; TAB='chokPace';
-    } else {
-      TAB='home';
-    }
-    buildNav();
-    render();
-    forceScrollTop();
-  };
-}
-
 /* ---------- source labels ---------- */
 /* Sefaria's heTitle carries the work's own name; the framing words are ours. */
 /* The names of the works carry nikud, so a prefix is matched on the letters
@@ -4187,8 +4133,8 @@ function renderChokPace(){
     </div>`;
     app.querySelectorAll('[data-pace-opt]').forEach(el=>el.onclick=()=>{
       S.lang=el.dataset.paceOpt; saveS(); applyLang(); buildNav();
-      if(CK_PACE_AFTER_LANG==='onboard'){ TAB='onboard'; render(); }
-      else { CK_PACE_STEP=-1; renderChokPace(); }
+      if(CK_PACE_AFTER_LANG==='onboard') localStorage.setItem('betel_onboard_v1','1');
+      CK_PACE_STEP=-1; renderChokPace();
       forceScrollTop();
     });
     tr(app);
@@ -4218,7 +4164,13 @@ function renderChokPace(){
       </div>
       <button class="btn btn-gold" id="paceDoneGo">${t.doneBtn}</button>
     </div>`;
-    document.getElementById('paceDoneGo').onclick=()=>{ localStorage.setItem('betel_chok_pace_v1','1'); CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList'); };
+    document.getElementById('paceDoneGo').onclick=()=>{
+      localStorage.setItem('betel_chok_pace_v1','1');
+      if(CK_PACE_AFTER_LANG==='onboard' && S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
+        (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
+      }
+      CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList');
+    };
     tr(app);
     return;
   }
@@ -5776,7 +5728,6 @@ function render(){
     else if(TAB==='libraryMishnahReader') renderLibraryMishnahReader();
     else if(TAB==='libraryNKBooks') renderLibraryNKBooks();
     else if(TAB==='libraryNKReader') renderLibraryNKReader();
-    else if(TAB==='onboard') renderOnboard();
     else if(TAB==='chokPace') renderChokPace();
     else if(TAB==='settings') renderSettings();
     else if(TAB==='tracker') renderTracker();
@@ -10748,7 +10699,7 @@ function navActiveTab(tab){
 }
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
-  if(TAB==='onboard'||TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
+  if(TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
   const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
@@ -10772,7 +10723,7 @@ if(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatf
 applySettings();
 applyWakeLock();
 applyLang();
-if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; TAB='chokPace'; }
+if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; CK_PACE_PENDING_TAB='home'; TAB='chokPace'; }
 buildNav();
 render();
 maybeShowRatePrompt();
