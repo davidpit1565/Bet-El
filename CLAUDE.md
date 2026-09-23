@@ -147,21 +147,39 @@ in English as usual.
   (musar filtered out via `BK_SKIP` - it gets its own per-book section in the
   full booklet); nothing is resolved a second way. `bkBlocks(date)` is one
   block list rendered twice: a reflowing on-screen `.bk-sheet`, and
-  JS-paginated A4 `.bk-page` boxes in `#bkPrint` (`bkPaginate`) shared by
+  JS-paginated **A5** (148x210mm, the printed booklet's real page - type is
+  set for it, not shrunk from A4) `.bk-page` boxes in `#bkPrint` (`bkPaginate`) shared by
   `window.print()` (`@media print` shows only `#bkPrint`) and the PDF
-  export (html2canvas + jsPDF per page, lazy-loaded from cdnjs via
+  export (html2canvas at scale 3 + jsPDF `format:'a5'` per page, lazy-loaded from cdnjs via
   `loadScriptOnce`). Real page boxes are what allow the per-page header band
   (parasha / medallion / day · subject). The Gemara is the real Vilna page
   image from shas.org's Daf PDF API, rendered to an `<img>` with PDF.js;
   shas.org has no CORS header, so the web build fetches the same-origin
   `/shas-daf/<masechta>/<daf>/<amud>` Vercel rewrite (vercel.json) and
   native uses CapacitorHttp; any failure falls back to the citation line.
+  Each fully-rendered amud gets a page of its own in print (`dafPage` in
+  `bkPaginate`): the scan (margins auto-trimmed, white paper multiplied to
+  the booklet ivory in `bkRenderPdfPage`) fills the body, only the header
+  band sits above it, narrowed to the scan's width via `--bk-daf-w`; the
+  Gemara section's title/divider are print-hidden (`dafSec`/`noPrint`
+  blocks), and the shas.org credit moves into that page's footer.
+  `bkBuildPrint` wraps the day in front/back matter built from the same
+  frame/strip/medallion: cover (`bkCoverHtml` - medallion "בֵּית אֵל",
+  icon-512 logo, parasha, Hebrew then civil date, QR), dedication
+  (`bkDedicationHtml`, names from `BK_DEDICATION`, empty = a blank line) and
+  back page (`bkBackHtml`, credits/distribution text + QR). The QR is the
+  App Store link from `appQrSrc()` (shared with `appQrImage()`); QR and logo
+  are preloaded as data: URLs (`bkImgData`/`ensureBkMatter`) so print and
+  html2canvas never wait on a cross-origin image, and print/PDF wait for
+  them like they wait for the daf (`bkPending`). Day pages are numbered on
+  from the cover (first day page = 3).
   `BK_SHAS_CREDIT` (beside every page) and `BK_HB_LICENSE` (once, at the
   end) are license requirements - never drop them. `ckCommFor(id,key)` /
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
   this kind of not-the-reader's-week rendering. Scope so far: ONE day;
   still to build: the Sun-Thu/Leil Shishi/Fri week loop, Musar-by-book, Ben
-  Ish Chai year 1 + 2, cover/dedication/TOC/back/blank pages, and the Motzei
+  Ish Chai year 1 + 2, the TOC and blank printing-convention pages, a real
+  dedication-name input, and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
   emulates the Vercel rewrite, saves screen/print/PDF output).

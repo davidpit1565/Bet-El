@@ -1,7 +1,8 @@
 // Study-booklet check: opens the booklet for a faked date, waits for the real
 // shas.org daf page to render, and captures the on-screen view, the
 // print-media view, Chrome's own print output (page.pdf - the same pipeline
-// window.print() uses) and the in-app "PDF" export. Also re-runs the day with
+// window.print() uses), one PNG per printed A5 page (cover, dedication, the
+// day, back page) and the in-app "PDF" export. Also re-runs the day with
 // no daf proxy at all, to prove the plain-citation fallback doesn't throw.
 //
 // Needs the local server on :8899 (npm run serve:local). The Vercel rewrite
@@ -23,7 +24,7 @@ const b = await chromium.launch({ executablePath: CHROME_PATH, proxy });
 const errs = [];
 
 async function openCtx({ withDafProxy }) {
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Jerusalem', acceptDownloads: true });
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, timezoneId: 'Asia/Jerusalem', acceptDownloads: true });
   await ctx.addInitScript(({ iso }) => {
     localStorage.setItem('betel_onboard_v1', '1');
     localStorage.setItem('betel_chok_pace_v1', '1');
@@ -41,7 +42,7 @@ async function openCtx({ withDafProxy }) {
      hosts through Playwright's Node-side fetch (which does honor
      NODE_EXTRA_CA_CERTS) - the page still receives the exact same bytes.
      Harmless where the browser can reach them directly. */
-  for (const host of ['https://cdnjs.cloudflare.com/**', 'https://fonts.googleapis.com/**', 'https://fonts.gstatic.com/**']) {
+  for (const host of ['https://cdnjs.cloudflare.com/**', 'https://fonts.googleapis.com/**', 'https://fonts.gstatic.com/**', 'https://api.qrserver.com/**']) {
     await ctx.route(host, async route => {
       try { await route.fulfill({ response: await route.fetch() }); } catch (e) { await route.abort(); }
     });
@@ -90,10 +91,22 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
     pages: document.querySelectorAll('#bkPrint .bk-page').length,
     overflow: [...document.querySelectorAll('#bkPrint .bk-pbody')].filter(b => b.scrollHeight > b.clientHeight + 1).length,
     labels: [...document.querySelectorAll('#bkPrint .bk-ph-lbl')].map(e => e.textContent),
+    cover: !!document.querySelector('#bkPrint .bk-page.bk-cover'),
+    dedication: !!document.querySelector('#bkPrint .bk-page.bk-dedic'),
+    back: !!document.querySelector('#bkPrint .bk-page.bk-backpage:last-child'),
+    qrImgs: document.querySelectorAll('#bkPrint .bk-qr img').length,
+    dafPages: [...document.querySelectorAll('#bkPrint .bk-dafpage')].map(pg => {
+      const im = pg.querySelector('.bk-dafimg'), b = pg.querySelector('.bk-pbody');
+      return { img: im ? [im.clientWidth, im.clientHeight] : null, body: [b.clientWidth, b.clientHeight], extra: b.children.length - 1 };
+    }),
   }));
   console.log(JSON.stringify(info, null, 1));
   if (!info.dafImgs) errs.push('no daf image rendered with the proxy in place');
   if (info.overflow) errs.push(info.overflow + ' page(s) overflow their body');
+  if (!info.cover || !info.dedication || !info.back) errs.push('missing cover/dedication/back page');
+  if (info.qrImgs !== 2) errs.push('expected the QR on the cover and the back page, got ' + info.qrImgs);
+  if (info.dafPages.length !== info.dafImgs) errs.push('each scanned amud should get its own page');
+  if (info.dafPages.some(d => d.extra)) errs.push('a daf page carries something besides the scan');
   // the app scrolls <body>, not the window, so walk it one screen at a time
   for (let i = 0; i < 32; i++) {
     const more = await p.evaluate(i => {
@@ -114,10 +127,12 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   console.log('exported PDF:', d.suggestedFilename());
 
   // print media: what window.print() lays out
-  await p.setViewportSize({ width: 820, height: 1160 });
+  await p.setViewportSize({ width: 600, height: 840 });
   await p.emulateMedia({ media: 'print' });
   await p.waitForTimeout(500);
   await p.screenshot({ path: `${OUT}/3-print-media.png`, fullPage: true });
+  const pages = await p.$$('#bkPrint .bk-page');
+  for (let i = 0; i < pages.length; i++) await pages[i].screenshot({ path: `${OUT}/5-page-${String(i + 1).padStart(2, '0')}.png` });
   const pdf = await p.pdf({ preferCSSPageSize: true, printBackground: true });
   writeFileSync(`${OUT}/3-print.pdf`, pdf);
   await ctx.close();
