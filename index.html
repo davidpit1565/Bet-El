@@ -6496,7 +6496,7 @@ function siddurDayInfo(hd){
     isTalSeason:false,
     isShabbat:false,
     isYomTov:false, yaaleVeyavoChag:null, // null|'roshChodesh'|'pesach'|'shavuot'|'sukkot'|'shminiAtzeret'|'roshHashana'
-    isRoshHashana:false, isYomKippur:false,
+    isRoshHashana:false, isYomKippur:false, isTishaBav:false,
     isMusafDay:false,
   };
   try{
@@ -6546,6 +6546,7 @@ function siddurDayInfo(hd){
          function. */
       if(/^Rosh Hashana( \d+)?$|^Rosh Hashana II$/i.test(d)){ info.isYomTov=true; info.isRoshHashana=true; info.yaaleVeyavoChag='roshHashana'; }
       if(/^Yom Kippur$/i.test(d)){ info.isYomTov=true; info.isYomKippur=true; } // no Yaale VeYavo (fast day, no meal)
+      if(/^Tish.a B.Av( \(observed\))?$/i.test(d)) info.isTishaBav=true; // hebcal's own desc uses a curly apostrophe (Tish’a B’Av) - matched loosely here
       if(/^Sukkot (I|II)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='sukkot'; }
       if(/^Shmini Atzeret$|^Simchat Torah$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='shminiAtzeret'; }
       if(/^Pesach (I|II|VII|VIII)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='pesach'; }
@@ -8733,7 +8734,7 @@ const SIDDUR_SHIR_SHEL_YOM = {
    and the paragraph count/order is identical across every language, so
    indexing the Hebrew array in lockstep is simpler and more robust than
    duplicating the marker phrases in every language. */
-function siddurBirkotHashacharHTML(){
+function siddurBirkotHashacharHTML(info){
   const lang=(S.lang&&PRAYERS_TRANSLIT[S.lang])?S.lang:null;
   const t=lang?PRAYERS_TRANSLIT[lang]:null;
   const modehAni=(t&&t.modehAni)||SIDDUR.modehAni;
@@ -8741,11 +8742,18 @@ function siddurBirkotHashacharHTML(){
   let html = `<div class="prayer-para">${modehAni}</div>`;
   const heParas = (PRAYERS_EXTRA.birkotHashachar.text||'').split('\n\n');
   const trParas = (t&&t.birkotHashachar)?t.birkotHashachar.split('\n\n'):null;
+  // "HaMechin Mitzadei Gaver" (thanking Hashem for firm footsteps) is
+  // omitted on Tisha B'Av and Yom Kippur, since wearing leather shoes -
+  // what the blessing refers to - is itself forbidden those days (Ben
+  // Ish Chai, Parashat Vayeshev, Halacha 9, per this session's
+  // siddur-audit workflow).
+  const skipMitzadeiGaver = !!(info && (info.isTishaBav || info.isYomKippur));
   let tight = false;
   heParas.forEach((heLine,i)=>{
     heLine = heLine.trim();
     const line = (trParas&&trParas[i]!=null)?trParas[i].trim():heLine;
     const n = ckNorm(heLine);
+    if(skipMitzadeiGaver && n.includes('המכין מצעדי גבר')) return;
     // Each of these paragraphs opens with the full "ברוך אתה ה'..." preamble,
     // so the distinguishing phrase sits mid-paragraph - match by substring,
     // not by prefix, or `tight` never turns on/off at all.
@@ -9443,7 +9451,14 @@ function siddurKorbanotHTML(){
   html += `<div class="siddur-section-title">${ckChrome('פָּרָשַׁת הַתָּמִיד')}</div>`;
   html += `<div class="prayer-para">${k.parashatHatamid}</div>`;
   html += `<div class="siddur-section-title">${ckChrome('פִּטּוּם הַקְּטֹרֶת')}</div>`;
-  html += siddurParasFromText(`${PT('pitumHaketoretShort')||SIDDUR.pitumHaketoretShort}\n\n${k.pitumHaketoretRest}`, true);
+  // Abaye's baraita on the order of the Temple altar service (between Bar
+  // Kappara's teaching and Ana BeKoach) was missing entirely from
+  // pitumHaketoretShort - a genuine gap this session's siddur-audit
+  // workflow found: this comment block already claimed the fuller
+  // version here included it, but the underlying data field stopped at
+  // Bar Kappara. Verified against Sefaria's own Siddur Edot HaMizrach,
+  // Weekday Shacharit, Incense Offering.
+  html += siddurParasFromText(`${PT('pitumHaketoretShort')||SIDDUR.pitumHaketoretShort}\n\n${k.pitumHaketoretAbaye}\n\n${k.pitumHaketoretRest}`, true);
   html += `<div class="siddur-section-title">${ckChrome('שְׁלֹשׁ עֶשְׂרֵה מִדּוֹת שֶׁהַתּוֹרָה נִדְרֶשֶׁת בָּהֶן')}</div>`;
   html += `<div class="prayer-para">${k.midot13}</div>`;
   html += `<div class="prayer-para">${k.yehudaBenTeima}</div>`;
@@ -9786,7 +9801,7 @@ function siddurSections(dateObj, info, prayer){
     push('kaveh','קַוֵּה', siddurKavehClosingHTML());
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${PT('aleinu')||SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML());
   } else if(prayer==='birkot'){
-    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurBirkotHashacharHTML());
+    push('birkot','בִּרְכוֹת הַשַּׁחַר', siddurBirkotHashacharHTML(info));
   } else if(prayer==='talitTefilin'){
     const tt = siddurTalitTefilinHTML();
     push('talit','טַלִּית', tt.talit);
