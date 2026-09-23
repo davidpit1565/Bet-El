@@ -164,10 +164,15 @@ in English as usual.
   Gemara section's title/divider are print-hidden (`dafSec`/`noPrint`
   blocks), and the shas.org credit moves into that page's footer.
   `bkBuildPrint` wraps the day in front/back matter built from the same
-  frame/strip/medallion: cover (`bkCoverHtml` - medallion "בֵּית אֵל",
-  icon-512 logo, parasha, Hebrew then civil date, QR), dedication
-  (`bkDedicationHtml`, names from `BK_DEDICATION` - the owner's confirmed
-  wording, verbatim, never "fix" it; empty = a blank line with ז״ל) and
+  frame/strip/medallion: cover (`bkCoverHtml`, the owner's pick "variant
+  C": a navy crest panel with the gold medallion and the icon-512 logo -
+  its square tile faded out by `bkFeatherLogo` so it dissolves into the
+  panel - then parasha as the title, Hebrew then civil date, QR), a full
+  sefer-style dedication page
+  (`bkDedicationHtml`: framed, בס״ד, memorial + blessing wording from
+  `BK_UI` dedLead/dedMerit/dedTnzbh/dedBless/dedFoot around the names in
+  `BK_DEDICATION` - the owner's confirmed names, verbatim, never "fix" them;
+  empty = a blank line) and
   back page (`bkBackHtml`, credits/distribution text + QR). The QR is the
   App Store link from `appQrSrc()` (shared with `appQrImage()`); QR and logo
   are preloaded as data: URLs (`bkImgData`/`ensureBkMatter`) so print and
@@ -185,8 +190,7 @@ in English as usual.
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
   this kind of not-the-reader's-week rendering. Scope so far: ONE day;
   still to build: the Sun-Thu/Leil Shishi/Fri week loop, Musar-by-book, Ben
-  Ish Chai year 1 + 2, the TOC and blank printing-convention pages, the cover design (variants
-  under owner review), and the Motzei
+  Ish Chai year 1 + 2, the TOC and blank printing-convention pages, and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
   emulates the Vercel rewrite, saves screen/print/PDF output).

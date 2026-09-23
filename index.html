@@ -1530,27 +1530,62 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-matter .bk-pbody{display:flex;flex-direction:column;align-items:center;text-align:center}
 .bk-matter .bk-ph-row{justify-content:center}
 .bk-strip-foot{flex:none;margin:2.5mm 0 0;border-top:1px solid var(--bk-line);border-bottom:2px solid var(--bk-gold)}
-.bk-cover-medal{margin-top:5mm;padding:6px 26px;box-shadow:0 0 0 3px var(--bk-paper),0 0 0 4px var(--bk-line)}
-.bk-cover-medal b{font-size:27px}
-.bk-cover-medal i svg{width:12px;height:12px}
-.bk-cover-sub{font-family:var(--font-sacred);font-size:12.5px;color:var(--bk-muted);margin-top:3.5mm;letter-spacing:.06em}
-.bk-cover-logo{width:31mm;height:31mm;border-radius:6.5mm;margin-top:7mm;display:block;
-  box-shadow:0 0 0 1.5px var(--bk-gold),0 0 0 4px var(--bk-paper),0 0 0 5px var(--bk-line)}
 .bk-matter .bk-rule{width:62%;margin:7mm auto 5mm}
-.bk-cover-par{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:25px;color:var(--bk-gold-deep)}
-.bk-cover-hd{font-family:var(--font-sacred);font-size:15px;margin-top:2.5mm}
-.bk-cover-gd{font-family:var(--font-ui);font-size:11.5px;color:var(--bk-muted);margin-top:1mm;letter-spacing:.04em}
+/* the cover: a navy crest panel (the app's own share-card navy, retinted to
+   the logo's sampled background so the feathered logo - bkFeatherLogo -
+   dissolves into it with no square edge), the gold medallion on it, then
+   the parasha as the page's title on the ivory. Borders / pseudo-elements
+   only (no inset box-shadow), so html2canvas draws it exactly as print. */
+.bk-cover{padding-top:6mm}
+.bk-cover .bk-pbody{justify-content:flex-start}
+.bk-crest{position:relative;align-self:stretch;display:flex;flex-direction:column;align-items:center;
+  padding:6.5mm 0 6mm;border:1px solid rgba(230,200,116,.7);border-radius:3mm;
+  background:linear-gradient(180deg,#142044 0%,#121c3c 30%,#101933 55%,#0b1226 80%,#070b17 100%);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bk-crest::before{content:'';position:absolute;inset:1.4mm;border:1px solid rgba(230,200,116,.3);border-radius:2mm;pointer-events:none}
+.bk-crest .bk-medal{border-color:#e6c874;color:#f1dc9a;padding:4px 22px;box-shadow:0 0 0 2px #142044,0 0 0 3px rgba(230,200,116,.4)}
+.bk-crest .bk-medal b{font-size:22px;letter-spacing:.06em}
+.bk-crest .bk-medal i svg{width:10px;height:10px}
+.bk-crest-logo{width:72mm;height:72mm;display:block;margin-top:1.5mm}
+.bk-crest-sub{display:flex;align-items:center;gap:3mm;margin-top:-1mm;color:#e6c874;
+  font-family:var(--font-sacred);font-size:13.5px;letter-spacing:.34em;padding-inline-start:.34em}
+.bk-crest-sub::before,.bk-crest-sub::after{content:'';width:12mm;height:1px;background:rgba(230,200,116,.55)}
+.bk-cover-pk{font-family:var(--font-sacred);font-size:14px;letter-spacing:.34em;color:var(--bk-gold);margin-top:9mm;padding-inline-start:.34em}
+.bk-cover-par{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:50px;line-height:1.1;color:var(--bk-gold-deep)}
+.bk-cover-dates{display:flex;flex-direction:column;align-items:center;margin-top:2.5mm;padding-top:2.5mm;border-top:1px solid var(--bk-line);min-width:52mm}
+.bk-cover-hd{font-family:var(--font-sacred);font-size:15px;color:var(--bk-ink)}
+.bk-cover-gd{font-family:var(--font-ui);font-size:11px;color:var(--bk-muted);margin-top:.6mm;letter-spacing:.06em}
+.bk-cover .bk-qr{margin-top:auto;margin-bottom:1mm;gap:1.6mm}
+.bk-cover .bk-qr img{width:31mm;height:31mm;padding:2.2mm}
+.bk-cover .bk-qr-cap{font-size:10.5px;letter-spacing:.06em}
+/* the dedication: a full sefer-style page - an inner double gold frame with
+   corner ornaments, "בס״ד", then the memorial and the blessing, each a
+   small lead-in, a large gold heading, the confirmed name and the closing
+   words, and a line of Avot at the foot */
+.bk-dedic .bk-pbody{padding:3mm 2.5mm 3mm}
+.bk-ded{position:relative;flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  border:1.5px solid var(--bk-gold);border-radius:2mm;padding:11mm 7mm 7mm;min-height:0}
+.bk-ded::before{content:'';position:absolute;inset:1.6mm;border:1px solid var(--bk-line);border-radius:1.2mm;pointer-events:none}
+.bk-ded-c{position:absolute;color:var(--bk-gold);background:var(--bk-paper);padding:1px;line-height:0}
+.bk-ded-c svg{width:11px;height:11px;display:block}
+.bk-ded-c.tr{top:-6.5px;right:-6.5px}.bk-ded-c.tl{top:-6.5px;left:-6.5px}.bk-ded-c.br{bottom:-6.5px;right:-6.5px}.bk-ded-c.bl{bottom:-6.5px;left:-6.5px}
+.bk-ded-bsd{position:absolute;top:3.6mm;right:4.2mm;font-family:var(--font-sacred);font-size:10px;color:var(--bk-muted)}
+.bk-ded-blk{display:flex;flex-direction:column;align-items:center;gap:1.8mm;text-align:center}
+.bk-ded-lead{font-family:var(--font-sacred);font-size:13.5px;letter-spacing:.2em;color:var(--bk-muted);padding-inline-start:.2em}
+.bk-ded-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:35px;line-height:1.15;color:var(--bk-gold-deep)}
+.bk-ded-name{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:20px;line-height:1.55;color:var(--bk-ink);max-width:100mm;text-wrap:balance;margin-top:1mm}
+.bk-ded-blank{display:inline-block;min-width:60mm;border-bottom:1px solid var(--bk-gold);height:1.3em}
+.bk-ded-zl{font-family:var(--font-sacred);font-size:17px;margin-inline-start:6px}
+.bk-ded-txt{font-family:var(--font-sacred);font-size:14px;line-height:1.8;color:var(--bk-ink);max-width:96mm;text-wrap:balance}
+.bk-ded-tnz{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:16px;color:var(--bk-gold-deep);margin-top:1mm}
+.bk-ded .bk-rule{width:46mm;margin:0 auto}
+.bk-ded-foot{font-family:var(--font-sacred);font-size:12px;line-height:1.6;color:var(--bk-muted)}
+.bk-ded-foot small{display:block;font-size:9px;margin-top:.5mm}
+
 .bk-qr{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2mm}
 .bk-qr img{width:40mm;height:40mm;display:block;padding:3mm;border:1px solid var(--bk-gold);border-radius:3mm;background:var(--bk-paper)}
-.bk-cover .bk-qr img{width:46mm;height:46mm}
 .bk-qr-cap{font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
 .bk-qr-url{font-family:var(--font-ui);font-size:9px;color:var(--bk-muted);direction:ltr}
-.bk-ded{margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:3mm}
-.bk-ded-l{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:21px;color:var(--bk-gold-deep)}
-.bk-ded-n{font-family:var(--font-sacred);font-size:19px;display:flex;align-items:baseline;gap:6px}
-.bk-ded-blank{display:inline-block;min-width:52mm;border-bottom:1px solid var(--bk-gold);height:1.1em}
-.bk-ded-name{display:block;max-width:108mm;line-height:1.6;font-size:18px;text-wrap:balance}
-.bk-ded .bk-rule{width:40mm;margin:3mm auto}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
 .bk-back-t span{display:block}
@@ -5382,7 +5417,10 @@ function renderBicReader(){
    notification come next, on top of these same pieces. */
 const BK_UI={
   he:{title:'חוֹבֶרֶת לִמּוּד', brand:'בֵּית אֵל', open:'פְּתַח אֶת הַחוֹבֶרֶת', print:'הַדְפָּסָה', pdf:'הוֹרָדַת PDF',
-      qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל', dedHatzlacha:'וּלְהַצְלָחַת',
+      qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
+      dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
+      dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
+      dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['נוצר מתוך אפליקציית בית אל','כל הטקסטים על פי המקורות המובאים באפליקציה','כל הזכויות שמורות © בית אל'],
       backDist:'ניתן להפיץ חוברת זו לזיכוי הרבים, ובלבד שלא ייעשה בה כל שינוי בתוכן או בעריכה.',
       parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
@@ -5390,7 +5428,10 @@ const BK_UI={
       pdfMaking:'מֵכִין PDF…', pdfPage:'עַמּוּד', pdfOf:'מִתּוֹךְ', pdfFail:'שְׁגִיאָה בִּיצִירַת הַ-PDF', pdfSaved:'הַקֹּבֶץ נִשְׁמַר',
       license:'רִשְׁיוֹן דַּפֵּי הַגְּמָרָא'},
   en:{title:'Study Booklet', brand:'בֵּית אֵל', open:'Open the booklet', print:'Print', pdf:'Download PDF',
-      qrCap:'Get the app', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל', dedHatzlacha:'וּלְהַצְלָחַת',
+      qrCap:'Get the app', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
+      dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
+      dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
+      dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['Created with the Bet El app','All texts follow the sources cited in the app','All rights reserved © Bet El'],
       backDist:'This booklet may be freely distributed for the merit of the public, provided nothing in its content or editing is changed.',
       parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
@@ -5826,7 +5867,7 @@ function bkPaginate(host,blocks,meta){
    on, or get blocked by, a cross-origin image. If the QR can't be fetched
    (offline) the App Store address is printed instead. */
 const BK_IMG={};   // key -> {state:'loading'|'ok'|'fail', p, src}
-function bkImgData(key,url){
+function bkImgData(key,url,process){
   if(BK_IMG[key]) return BK_IMG[key].p;
   const st={state:'loading'}; BK_IMG[key]=st;
   st.p=new Promise(res=>{
@@ -5836,7 +5877,7 @@ function bkImgData(key,url){
     t=setTimeout(()=>done(null),10000);
     im.onload=()=>{
       try{ const cv=document.createElement('canvas'); cv.width=im.naturalWidth; cv.height=im.naturalHeight;
-        cv.getContext('2d').drawImage(im,0,0); done(cv.toDataURL('image/png')); }
+        cv.getContext('2d').drawImage(im,0,0); if(process) process(cv); done(cv.toDataURL('image/png')); }
       catch(e){ done(null); }
     };
     im.onerror=()=>{ console.warn('[booklet] image unavailable:',key); done(null); };
@@ -5845,14 +5886,30 @@ function bkImgData(key,url){
   return st.p;
 }
 const BK_QR_KEY='qr', BK_LOGO_KEY='logo';
+/* The logo is a gold crest on a square navy tile. On the cover's navy panel
+   the tile's edge would show as a faint square, so its background is faded
+   out: opaque inside an ellipse around the crest, transparent by the tile's
+   edge - except anything gold (the crest's own tips reach past the
+   ellipse), which stays opaque. What remains of the tile is its soft
+   centre glow, dissolving into a panel tinted to the tile's own colours. */
+function bkFeatherLogo(cv){
+  const W=cv.width, H=cv.height, ctx=cv.getContext('2d'), im=ctx.getImageData(0,0,W,H), d=im.data;
+  const cx=W/2, cy=H*0.51, ss=(a,b,x)=>{ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); };
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const i=(y*W+x)*4, r=Math.hypot((x-cx)/(W/2),(y-cy)/(H/2));
+    const soft=1-ss(0.70,0.98,r), gold=ss(48,110,d[i]);
+    d[i+3]=Math.round(255*Math.max(soft,gold));
+  }
+  ctx.putImageData(im,0,0);
+}
 function ensureBkMatter(){
-  return Promise.all([bkImgData(BK_QR_KEY,appQrSrc(600,'2b2418','fbf7ee')), bkImgData(BK_LOGO_KEY,'icon-512.png')]);
+  return Promise.all([bkImgData(BK_QR_KEY,appQrSrc(600,'2b2418','fbf7ee')), bkImgData(BK_LOGO_KEY,'icon-512.png',bkFeatherLogo)]);
 }
 function bkMatterPending(){ return [BK_QR_KEY,BK_LOGO_KEY].some(k=>!BK_IMG[k]||BK_IMG[k].state==='loading'); }
 function bkImgSrc(key){ const st=BK_IMG[key]; return st&&st.state==='ok'?st.src:''; }
 /* The dedication names - the owner's confirmed wording, verbatim (do not
-   "correct" it). Empty = a line to write on by hand, with the usual ז״ל;
-   a filled name is printed exactly as given, after "label:". */
+   "correct" it), set inside the page's own traditional dedication wording
+   (BK_UI dedLead/dedMerit/...). Empty = a line to write on by hand. */
 const BK_DEDICATION={niftar:'גַּבְרִיאֵל מִמּוֹסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרְעָיָה, מַזָּל טוֹב', hatzlacha:'אָלוֹן בֶּן חַנָּה נִזִי'};
 function bkMedalHtml(cls){ return `<span class="bk-medal${cls?' '+cls:''}"><i>${ORN}</i><b>${bkUI().brand}</b><i>${ORN}</i></span>`; }
 function bkRuleHtml(){ return `<div class="bk-rule"><span>${ORN}</span></div>`; }
@@ -5868,27 +5925,48 @@ function bkQrHtml(){
   return `<div class="bk-qr">${q?`<img src="${q}" alt=""/><div class="bk-qr-cap">${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>`;
 }
 function bkCoverHtml(date,slot){
-  const t=bkUI(), logo=bkImgSrc(BK_LOGO_KEY)||'icon-512.png', hd=new HDate(date);
-  return bkMatterPage('bk-cover','bk-cover-medal',`
-    <div class="bk-cover-sub">${t.title}</div>
-    <img class="bk-cover-logo" src="${logo}" alt=""/>
-    ${bkRuleHtml()}
-    <div class="bk-cover-par">${bkParashaLine(slot)}</div>
-    <div class="bk-cover-hd">${localizeHebDateStr(hd.renderGematriya(true))}</div>
-    <div class="bk-cover-gd">${date.toLocaleDateString(civilDateLocale())}</div>
-    ${bkQrHtml()}`);
+  const t=bkUI(), logo=bkImgSrc(BK_LOGO_KEY)||'icon-512.png', hd=new HDate(date), q=bkImgSrc(BK_QR_KEY);
+  return `<div class="bk-page bk-matter bk-cover">
+    <div class="bk-pbody">
+      <div class="bk-crest">
+        ${bkMedalHtml('')}
+        <img class="bk-crest-logo" src="${logo}" alt=""/>
+        <div class="bk-crest-sub">${t.title}</div>
+      </div>
+      <div class="bk-cover-pk">${t.parasha}</div>
+      <div class="bk-cover-par">${slot?parshaName(slot.key):''}</div>
+      <div class="bk-cover-dates">
+        <div class="bk-cover-hd">${localizeHebDateStr(hd.renderGematriya(true))}</div>
+        <div class="bk-cover-gd">${date.toLocaleDateString(civilDateLocale())}</div>
+      </div>
+      <div class="bk-qr">${q?`<img src="${q}" alt=""/><div class="bk-qr-cap">${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>
+    </div>
+    <div class="bk-strip bk-strip-foot"></div>
+  </div>`;
 }
 function bkDedicationHtml(){
   const t=bkUI(), D=BK_DEDICATION;
-  const entry=(label,name,suffix)=>name
-    ? `<div class="bk-ded-l">${label}:</div><div class="bk-ded-n bk-ded-name">${name}</div>`
-    : `<div class="bk-ded-l">${label}</div><div class="bk-ded-n"><span class="bk-ded-blank"></span>${suffix?`<span>${suffix}</span>`:''}</div>`;
+  const name=(n,zl)=>n?`<div class="bk-ded-name">${n}</div>`
+    :`<div class="bk-ded-name"><span class="bk-ded-blank"></span>${zl?`<span class="bk-ded-zl">${zl}</span>`:''}</div>`;
+  const corner=c=>`<i class="bk-ded-c ${c}">${ORN}</i>`;
   return bkMatterPage('bk-dedic','',`<div class="bk-ded">
+    ${corner('tr')}${corner('tl')}${corner('br')}${corner('bl')}
+    <div class="bk-ded-bsd">${t.bsd}</div>
+    <div class="bk-ded-blk">
+      <div class="bk-ded-lead">${t.dedLead}</div>
+      <div class="bk-ded-h">${t.dedNiftar}</div>
+      ${name(D.niftar,t.dedZl)}
+      <div class="bk-ded-txt">${t.dedMerit}</div>
+      <div class="bk-ded-tnz">${t.dedTnzbh}</div>
+    </div>
     ${bkRuleHtml()}
-    ${entry(t.dedNiftar,D.niftar,t.dedZl)}
+    <div class="bk-ded-blk">
+      <div class="bk-ded-h">${t.dedHatzlacha}</div>
+      ${name(D.hatzlacha,'')}
+      <div class="bk-ded-txt">${t.dedBless}</div>
+    </div>
     ${bkRuleHtml()}
-    ${entry(t.dedHatzlacha,D.hatzlacha,'')}
-    ${bkRuleHtml()}
+    <div class="bk-ded-foot">${t.dedFoot}<small>${t.dedFootSrc}</small></div>
   </div>`);
 }
 function bkBackHtml(){
