@@ -1858,6 +1858,11 @@ function birkatHamazonDayText(hd){
   }
   paragraphs.push('וְעַל הַכֹּל יְיָ אֱלֹהֵינוּ אֲנַחְנוּ מוֹדִים לָךְ וּמְבָרְכִים אֶת שְׁמָךְ כָּאָמוּר וְאָכַלְתָּ וְשָׂבָעְתָּ וּבֵרַכְתָּ אֶת יְיָ אֱלֹהֶיךָ, עַל הָאָרֶץ הַטּוֹבָה אֲשֶׁר נָתַן לָךְ: בָּרוּךְ אַתָּה יְיָ עַל הָאָרֶץ וְעַל הַמָּזוֹן.');
   paragraphs.push('רַחֵם יְיָ אֱלֹהֵינוּ עָלֵינוּ וְעַל יִשְׂרָאֵל עַמָּךְ וְעַל יְרוּשָׁלַיִם עִירָךְ וְעַל הַר צִיּוֹן מִשְׁכַּן כְּבוֹדָךְ וְעַל הֵיכָלָךְ וְעַל מְעוֹנָךְ וְעַל דְּבִירָךְ וְעַל הַבַּיִת הַגָּדוֹל וְהַקָּדוֹשׁ שֶׁנִּקְרָא שִׁמְךָ עָלָיו. אָבִינוּ רְעֵנוּ זוּנֵנוּ פַּרְנְסֵנוּ כַּלְכְּלֵנוּ הַרְוִיחֵנוּ הַרְוַח לָנוּ מְהֵרָה מִכָּל צָרוֹתֵינוּ. וְנָא אַל תַּצְרִיכֵנוּ יְיָ אֱלֹהֵינוּ לִידֵי מַתְּנוֹת בָּשָׂר וָדָם וְלֹא לִידֵי הַלְוָאָתָם אֶלָּא לְיָדְךָ הַמְּלֵאָה וְהָרְחָבָה הָעֲשִׁירָה וְהַפְּתוּחָה. יְהִי רָצוֹן שֶׁלֹּא נֵבוֹשׁ בָּעוֹלָם הַזֶּה וְלֹא נִכָּלֵם לְעוֹלָם הַבָּא וּמַלְכוּת בֵּית דָּוִד מְשִׁיחָךְ תַּחֲזִירֶנָּה לִמְקוֹמָהּ בִּמְהֵרָה בְיָמֵינוּ.');
+  // Retzei (the Shabbat addition) was missing entirely - a genuine gap
+  // found and confirmed by this session's siddur-audit workflow, not a
+  // stylistic omission (verified against Sefaria's own Siddur Edot
+  // HaMizrach, Post Meal Blessing).
+  if(di.isShabbat) paragraphs.push('רְצֵה וְהַחֲלִיצֵֽנוּ יְיָ אֱלֹהֵֽינוּ בְּמִצְוֹתֶֽיךָ וּבְמִצְוַת יוֹם הַשְּׁבִיעִי, הַשַּׁבָּת הַגָּדוֹל וְהַקָּדוֹשׁ הַזֶּה. כִּי יוֹם גָּדוֹל וְקָדוֹשׁ הוּא מִלְּפָנֶֽיךָ, נִשְׁבּוֹת בּוֹ וְנָנֽוּחַ בּוֹ וְנִתְעַנֵּג בּוֹ כְּמִצְוַת חֻקֵּי רְצוֹנָךְ, וְאַל־תְּהִי צָרָה וְיָגוֹן בְּיוֹם מְנוּחָתֵֽנוּ. וְהַרְאֵֽנוּ בְּנֶחָמַת צִיּוֹן בִּמְהֵרָה בְיָמֵֽינוּ, כִּי אַתָּה הוּא בַּֽעַל הַנֶּחָמוֹת. וַהֲגַם שֶׁאָכַֽלְנוּ וְשָׁתִֽינוּ חָרְבַּן בֵּֽיתְךָֽ הַגָּדוֹל וְהַקָּדוֹשׁ לֹא שָׁכַֽחְנוּ. אַל־תִּשְׁכָּחֵֽנוּ לָנֶֽצַח וְאַל־תִּזְנָחֵֽנוּ לָעַד כִּי אֵל מֶֽלֶךְ גָּדוֹל וְקָדוֹשׁ אָֽתָּה:');
   if(yaaleChag){
     paragraphs.push('[[NOTE]]אִם שָׁכַח לוֹמַר יַעֲלֶה וְיָבֹא וְנִזְכַּר קֹדֶם שֶׁהִתְחִיל בִּרְכַּת הַטּוֹב וְהַמֵּיטִיב, יֹאמַר: "בָּרוּךְ שֶׁנָּתַן רָאשֵׁי חֳדָשִׁים לְעַמּוֹ יִשְׂרָאֵל לְזִכָּרוֹן" (בְּלֹא שֵׁם וּמַלְכוּת). אִם נִזְכַּר אַחַר שֶׁהִתְחִיל בִּרְכַּת הַטּוֹב וְהַמֵּיטִיב, אֵינוֹ חוֹזֵר. (שֻׁלְחָן עָרוּךְ תכ"ד; יבִיע אוֹמֵר ח"ו סִימָן כ"ח)');
     paragraphs.push(`אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ, יַעֲלֶה וְיָבֹא וְיַגִּיעַ וְיֵרָאֶה וְיֵרָצֶה וְיִשָּׁמַע וְיִפָּקֵד וְיִזָּכֵר זִכְרוֹנֵנוּ וְזִכְרוֹן אֲבוֹתֵינוּ, זִכְרוֹן יְרוּשָׁלַיִם עִירָךְ, וְזִכְרוֹן מָשִׁיחַ בֶּן דָּוִד עַבְדָּךְ, וְזִכְרוֹן כָּל עַמְּךָ בֵּית יִשְׂרָאֵל לְפָנֶיךָ לִפְלֵיטָה לְטוֹבָה לְחֵן לְחֶסֶד וּלְרַחֲמִים, לְחַיִּים טוֹבִים וּלְשָׁלוֹם. ${birkatHamazonYaaleVeyavoPhrase(yaaleChag, yaaleIsYomTovProper)} לְרַחֵם בּוֹ עָלֵינוּ וּלְהוֹשִׁיעֵנוּ. זָכְרֵנוּ יְיָ אֱלֹהֵינוּ בּוֹ לְטוֹבָה, וּפָקְדֵנוּ בוֹ לִבְרָכָה, וְהוֹשִׁיעֵנוּ בוֹ לְחַיִּים טוֹבִים, בִּדְבַר יְשׁוּעָה וְרַחֲמִים, חוּס וְחָנֵּנוּ וַחֲמוֹל וְרַחֵם עָלֵינוּ וְהוֹשִׁיעֵנוּ, כִּי אֵלֶיךָ עֵינֵינוּ כִּי אֵל מֶלֶךְ חַנּוּן וְרַחוּם אָתָּה.`);
@@ -1881,13 +1886,21 @@ function birkatHamazonDayText(hd){
     'הָרַחֲמָן הוּא יְבָרֵךְ כָּל אֶחָד וְאֶחָד מִמֶּנּוּ בִּשְׁמוֹ הַגָּדוֹל, כְּמוֹ שֶׁנִּתְבָּרְכוּ אֲבוֹתֵינוּ אַבְרָהָם יִצְחָק וְיַעֲקֹב בַּכֹּל מִכֹּל כֹּל כֵּן יְבָרֵךְ אוֹתָנוּ יַחַד בְּרָכָה שְׁלֵמָה, וְכֵן יְהִי רָצוֹן וְנֹאמַר אָמֵן.',
     'הָרַחֲמָן הוּא יִפְרוֹשׂ עָלֵינוּ סֻכַּת שְׁלוֹמוֹ.',
   ].forEach(l=>paragraphs.push(l));
+  // Both HaRachaman clauses below (Shabbat, Yom Tov) were entirely
+  // missing - confirmed gaps found by this session's siddur-audit
+  // workflow (Sefaria's Post Meal Blessing lists both as separate
+  // labeled clauses, alongside the Rosh Chodesh/Sukkot ones already
+  // handled here).
+  if(di.isShabbat) paragraphs.push('הָרַחֲמָן הוּא יַנְחִילֵֽנוּ עוֹלָם שֶׁכֻּלּוֹ שַׁבָּת וּמְנוּחָה לְחַיֵּי הָעוֹלָמִים:');
   if(di.isRoshChodesh) paragraphs.push('הָרַחֲמָן הוּא יְחַדֵּשׁ עָלֵינוּ אֶת הַחֹדֶשׁ הַזֶּה לְטוֹבָה וְלִבְרָכָה:');
   if(isRealSukkot) paragraphs.push('הָרַחֲמָן הוּא יְזַכֵּנוּ לֵישֵׁב בְּסֻכַּת עוֹרוֹ שֶׁל לִוְיָתָן: הָרַחֲמָן הוּא יַשְׁפִּיעַ עָלֵינוּ שֶׁפַע קְדֻשָּׁה וְטָהֲרָה מִשִּׁבְעָה אוּשְׁפִּיזִין עִלָּאִין קַדִּישִׁין, זְכוּתָם תְּהֵא מָגֵן וְצִנָּה עָלֵינוּ:');
   if(yaaleChag && yaaleChag!=='roshChodesh') paragraphs.push('הָרַחֲמָן הוּא יַגִּיעֵנוּ לְמוֹעֲדִים אֲחֵרִים הַבָּאִים לִקְרָאתֵנוּ לְשָׁלוֹם:');
+  if(yaaleIsYomTovProper) paragraphs.push('הָרַחֲמָן הוּא יַנְחִילֵֽנוּ יוֹם שֶׁכֻּלּוֹ טוֹב:');
   paragraphs.push('הָרַחֲמָן הוּא יִטַּע תּוֹרָתוֹ וְאַהֲבָתוֹ בְּלִבֵּנוּ וְתִהְיֶה יִרְאָתוֹ עַל פָּנֵינוּ לְבִלְתִּי נֶחֱטָא. וְיִהְיוּ כָל מַעֲשֵׂינוּ לְשֵׁם שָׁמָיִם.');
   paragraphs.push('[[COLLAPSE:בִּרְכַּת הָאוֹרֵחַ]]הָרַחֲמָן הוּא יְבָרֵךְ אֶת הַשֻּׁלְחָן הַזֶּה שֶׁאָכַלְנוּ עָלָיו, וִיסַדֵּר בּוֹ כָּל מַעֲדַנֵּי עוֹלָם, וְיִהְיֶה כְשֻׁלְחָנוֹ שֶׁל אַבְרָהָם אָבִינוּ עָלָיו הַשָּׁלוֹם. כָּל רָעֵב מִמֶּנּוּ יֹאכַל, וְכָל צָמֵא מִמֶּנּוּ יִשְׁתֶּה, וְאַל יֶחְסַר מִמֶּנּוּ כָּל טוֹב לָעַד וּלְעוֹלְמֵי עוֹלָמִים, אָמֵן. הָרַחֲמָן הוּא יְבָרֵךְ אֶת בַּעַל הַבַּיִת הַזֶּה וּבַעַל הַסְּעֻדָּה הַזֹּאת, הוּא וּבָנָיו וְאִשְׁתּוֹ וְכָל אֲשֶׁר לוֹ, בְּבָנִים שֶׁיִּחְיוּ וּבִנְכָסִים שֶׁיִּרְבּוּ. בָּרֵךְ יְהֹוָה חֵילוֹ וּפֹעַל יָדָיו תִּרְצֶה, וְיִהְיוּ נְכָסָיו וּנְכָסֵינוּ מֻצְלָחִים וּקְרוֹבִים לָעִיר, וְאַל יִזְדַּקֵּק לְפָנָיו וְלֹא לְפָנֵינוּ שׁוּם דְּבַר חֵטְא וְהִרְהוּר עָוֹן, שָׂשׂ וְשָׂמֵחַ כָּל הַיָּמִים בְּעֹשֶׁר וְכָבוֹד מֵעַתָּה וְעַד עוֹלָם, לֹא יֵבוֹשׁ בָּעוֹלָם הַזֶּה וְלֹא יִכָּלֵם לָעוֹלָם הַבָּא, אָמֵן כֵּן יְהִי רָצוֹן.[[/COLLAPSE]]');
   paragraphs.push('הָרַחֲמָן הוּא יְחַיֵּינוּ וִיזַכֵּנוּ וִיקָרְבֵנוּ לִימוֹת הַמָּשִׁיחַ וּלְבִנְיַן בֵּית הַמִּקְדָּשׁ וּלְחַיֵּי הָעוֹלָם הַבָּא.');
-  paragraphs.push(`${di.isMusafDay?'מִגְדּוֹל':'מַגְדִּיל'} יְשׁוּעוֹת מַלְכּוֹ וְעֹשֶׂה חֶסֶד לִמְשִׁיחוֹ לְדָוִד וּלְזַרְעוֹ עַד עוֹלָם, כְּפִירִים רָשׁוּ וְרָעֵבוּ, וְדֹרְשֵׁי יְיָ לֹא יַחְסְרוּ כָל טוֹב. נַעַר הָיִיתִי גַּם זָקַנְתִּי וְלֹא רָאִיתִי צַדִּיק נֶעֱזָב וְזַרְעוֹ מְבַקֶּשׁ לָחֶם כָּל הַיּוֹם חוֹנֵן וּמַלְוֶה וְזַרְעוֹ לִבְרָכָה מַה שֶׁאָכַלְנוּ יִהְיֶה לְשָׂבְעָה וּמַה שֶׁשָּׁתִינוּ יִהְיֶה לִרְפוּאָה וּמַה שֶׁהוֹתַרְנוּ יִהְיֶה לִבְרָכָה כְּדִכְתִיב: וַיִּתֵּן לִפְנֵיהֶם וַיֹּאכְלוּ וַיּוֹתִירוּ כִּדְבַר יְיָ בְּרוּכִים אַתֶּם לַיְיָ עוֹשֵׂה שָׁמַיִם וָאָרֶץ בָּרוּךְ הַגֶּבֶר אֲשֶׁר יִבְטַח בַּיְיָ, וְהָיָה יְיָ מִבְטָחוֹ יְיָ עֹז לְעַמּוֹ יִתֵּן יְיָ יְבָרֵךְ אֶת עַמּוֹ בַּשָּׁלוֹם: עוֹשֶׂה שָׁלוֹם בִּמְרוֹמָיו, הוּא בְרַחֲמָיו יַעֲשֶׂה שָׁלוֹם עָלֵינוּ וְעַל כָּל עַמּוֹ יִשְׂרָאֵל, וְאִמְרוּ אָמֵן:`);
+  const bhOseShalom = di.isAseretYemeiTeshuva ? 'עוֹשֶׂה הַשָּׁלוֹם בִּמְרוֹמָיו' : 'עוֹשֶׂה שָׁלוֹם בִּמְרוֹמָיו';
+  paragraphs.push(`${di.isMusafDay?'מִגְדּוֹל':'מַגְדִּיל'} יְשׁוּעוֹת מַלְכּוֹ וְעֹשֶׂה חֶסֶד לִמְשִׁיחוֹ לְדָוִד וּלְזַרְעוֹ עַד עוֹלָם, כְּפִירִים רָשׁוּ וְרָעֵבוּ, וְדֹרְשֵׁי יְיָ לֹא יַחְסְרוּ כָל טוֹב. נַעַר הָיִיתִי גַּם זָקַנְתִּי וְלֹא רָאִיתִי צַדִּיק נֶעֱזָב וְזַרְעוֹ מְבַקֶּשׁ לָחֶם כָּל הַיּוֹם חוֹנֵן וּמַלְוֶה וְזַרְעוֹ לִבְרָכָה מַה שֶׁאָכַלְנוּ יִהְיֶה לְשָׂבְעָה וּמַה שֶׁשָּׁתִינוּ יִהְיֶה לִרְפוּאָה וּמַה שֶׁהוֹתַרְנוּ יִהְיֶה לִבְרָכָה כְּדִכְתִיב: וַיִּתֵּן לִפְנֵיהֶם וַיֹּאכְלוּ וַיּוֹתִירוּ כִּדְבַר יְיָ בְּרוּכִים אַתֶּם לַיְיָ עוֹשֵׂה שָׁמַיִם וָאָרֶץ בָּרוּךְ הַגֶּבֶר אֲשֶׁר יִבְטַח בַּיְיָ, וְהָיָה יְיָ מִבְטָחוֹ יְיָ עֹז לְעַמּוֹ יִתֵּן יְיָ יְבָרֵךְ אֶת עַמּוֹ בַּשָּׁלוֹם: ${bhOseShalom}, הוּא בְרַחֲמָיו יַעֲשֶׂה שָׁלוֹם עָלֵינוּ וְעַל כָּל עַמּוֹ יִשְׂרָאֵל, וְאִמְרוּ אָמֵן:`);
   return paragraphs.join('\n\n');
 }
 /* PRAYERS_EXTRA[key].title is also the tr()-lookup key for en/fr/ru/ka
@@ -8588,11 +8601,20 @@ function siddurTorahReadingHTML(dateObj, info, opts){
   html += `<div class="prayer-para">${PT('torahBirkatBefore')||SIDDUR.torahBirkatBefore||''}</div>`;
   html += `<div class="sm-verses notranslate">${siddurTorahBody(verses)}</div>`;
   html += `<div class="prayer-para">${PT('torahBirkatAfter')||SIDDUR.torahBirkatAfter||''}</div>`;
-  // "Yehalelu et Shem Hashem" (Tehillim 148:13-14) - said while returning
-  // the Torah scroll to the ark (Sefaria: Weekday Shacharit > Uva LeSion,
-  // "ומחזירין את ספר התורה למקומו ואומרים יהללו"), right after the
-  // reading's closing blessing. Previously missing.
-  html += siddurParasFromText(PT('torahYehalelu')||SIDDUR.torahYehalelu, true, 'siddur-verse-centered');
+  // "Yehalelu et Shem Hashem" (Tehillim 148:13-14) is said only once the
+  // Torah scroll is actually RETURNED to the ark. On a plain weekday
+  // Shacharit (and on Rosh Chodesh) that doesn't happen right after the
+  // aliyot - Sefaria's own rubric ("ומחזירין את ספר התורה למקומו ואומרים
+  // יהללו") sits at the very END of Uva LeSion/Song of the Day, after
+  // Ashrei, Hallel (Rosh Chodesh), Uva LeSion and Kaddish Titkabel have
+  // all been said - so those callers pass opts.skipYehalelu and place it
+  // themselves at that later point (see siddurSections' 'returnTorah'
+  // push and siddurRoshChodeshSongOfDayTailHTML's yehaleluReturn) instead
+  // of getting it appended here immediately after the closing blessing.
+  // Mincha (the only other caller, fast days only) has no Uva LeSion to
+  // wait for - the sefer really is returned right after the reading there
+  // - so it does NOT pass skipYehalelu and keeps getting it appended here.
+  if(!opts.skipYehalelu) html += siddurParasFromText(PT('torahYehalelu')||SIDDUR.torahYehalelu, true, 'siddur-verse-centered');
   return html;
 }
 
@@ -8642,22 +8664,32 @@ function siddurHallelData(){
 function siddurBlessingParas(b, info, opts){
   opts = opts || {};
   const out = [];
+  const pushTeshuvaInsert = () => { if(b.teshuvaInsert && info.isAseretYemeiTeshuva) out.push({text:b.teshuvaInsert, insert:true, tag:ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')}); };
+  const pushAlHanissim = () => {
+    if(b.alHanissim && (info.isChanukah || info.isPurim)){
+      const al=b.alHanissim;
+      out.push({text:al.head+' '+(info.isChanukah?al.chanukah:al.purim), insert:true, tag:info.isChanukah?ckChrome('עַל הַנִּסִּים')+' · '+ckChrome('חֲנֻכָּה'):ckChrome('עַל הַנִּסִּים')+' · '+ckChrome('פּוּרִים')});
+    }
+  };
   if(b.text) out.push({text:b.text});
   if(b.season) out.push({text: info.isTalSeason ? b.season.summer : b.season.winter});
   if(b.text2) out.push({text:b.text2});
-  if(b.teshuvaInsert && info.isAseretYemeiTeshuva) out.push({text:b.teshuvaInsert, insert:true, tag:ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')});
+  // Modim (blessing 18, the only one with a tail2) has a different
+  // internal order than every other blessing with a teshuvaInsert: Sefaria
+  // has it read tail -> [Al HaNisim] -> teshuvaInsert -> tail2, not
+  // teshuvaInsert first like Avot/Gevurot/Sim Shalom do - a bug found by
+  // this session's siddur-audit workflow (it previously used the same
+  // teshuvaInsert-first order as every other blessing, which is wrong only
+  // for this one).
+  if(!b.tail2) pushTeshuvaInsert();
   if(b.faslInsert && info.isFastDay) out.push({text:b.faslInsert, insert:true, tag:ckChrome('עֲנֵנוּ')+' · '+ckChrome(info.fastDayHe||'')});
   if(b.yaaleVeyavo && !opts.skipYaale && (info.isRoshChodesh || info.isCholHaMoed)){
     const y=b.yaaleVeyavo;
     const occ = info.isRoshChodesh ? y.roshChodesh : (info.cholHaMoedChag==='pesach' ? y.pesach : y.sukkot);
     out.push({text:[y.head,occ,y.tail].join(' '), insert:true, tag:ckChrome('יַעֲלֶה וְיָבֹא')});
   }
-  if(b.tail) out.push({text:b.tail});
-  if(b.alHanissim && (info.isChanukah || info.isPurim)){
-    const al=b.alHanissim;
-    out.push({text:al.head+' '+(info.isChanukah?al.chanukah:al.purim), insert:true, tag:info.isChanukah?ckChrome('עַל הַנִּסִּים')+' · '+ckChrome('חֲנֻכָּה'):ckChrome('עַל הַנִּסִּים')+' · '+ckChrome('פּוּרִים')});
-  }
-  if(b.tail2) out.push({text:b.tail2});
+  if(b.tail2){ pushAlHanissim(); if(b.tail) out.push({text:b.tail}); pushTeshuvaInsert(); out.push({text:b.tail2}); }
+  else { if(b.tail) out.push({text:b.tail}); pushAlHanissim(); }
   let seal = b.seal;
   if(b.sealTeshuva && info.isAseretYemeiTeshuva) seal = b.sealTeshuva;
   if(seal) out.push({text:seal, insert:(seal!==b.seal), tag:ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')});
@@ -8918,8 +8950,17 @@ function siddurTachanunCoreHTML(){
    tachanun.fastSelichot, keyed by the same fast-day name as
    SIDDUR_FAST_DAYS/info.fastDayName). Falls back to the old plain-text
    pointer note only if that day's key is somehow missing. */
+/* On a day Tachanun is skipped, Nusach Edot HaMizrach says these four
+   verses (Tehillim 113:2-4 + the first half of 8:2) in its place, right
+   before the closing Kaddish - shared by both Shacharit's siddurTachanunHTML
+   and Mincha's own inline tachanun push in siddurSections. A gap found by
+   this session's siddur-audit workflow: Shacharit had none of these at
+   all, and Mincha had only the first of the four. */
+function siddurYehiShemHTML(){
+  return `<div class="prayer-para">${ckChrome('יְהִי שֵׁם יְהֹוָה מְבֹרָךְ מֵעַתָּה וְעַד עוֹלָם׃')}</div><div class="prayer-para">${ckChrome('מִמִּזְרַח שֶׁמֶשׁ עַד מְבוֹאוֹ מְהֻלָּל שֵׁם יְהֹוָה׃')}</div><div class="prayer-para">${ckChrome('רָם עַל כָּל גּוֹיִם יְהֹוָה עַל הַשָּׁמַיִם כְּבוֹדוֹ׃')}</div><div class="prayer-para">${ckChrome('יְהֹוָה אֲדֹנֵינוּ מָה אַדִּיר שִׁמְךָ בְּכָל הָאָרֶץ׃')}</div>`;
+}
 function siddurTachanunHTML(info, dateObj){
-  if(info.skipTachanun) return `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div>`;
+  if(info.skipTachanun) return `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div>`+siddurYehiShemHTML();
   let html = `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`;
   html += siddurTachanunCoreHTML();
   if(info.isFastDay){
@@ -9016,8 +9057,11 @@ function siddurAmidahClosingHTML(info){
   // Avinu Malkeinu (Sefaria: Weekday Shacharit > Amida, right after this
   // Yehi Ratzon and before Tachanun) - said only during the Ten Days of
   // Repentance, per the source's own rubric. Previously missing entirely
-  // (no SIDDUR field existed for it at all).
-  if(info.isAseretYemeiTeshuva){
+  // (no SIDDUR field existed for it at all). Also never said on Shabbat
+  // (it resembles the weekday Amida's own middle blessings, which are
+  // themselves skipped on Shabbat) - a gap found by this session's
+  // siddur-audit workflow.
+  if(info.isAseretYemeiTeshuva && !info.isShabbat){
     html += `<div class="siddur-section-title">${ckChrome('אָבִינוּ מַלְכֵּנוּ')}</div>`;
     const trAvinu = PT('avinuMalkeinu');
     html += siddurParasFromText((trAvinu||SIDDUR.avinuMalkeinu).join('\n\n'), true);
@@ -9093,18 +9137,37 @@ function siddurRoshChodeshHallelTailHTML(info, dateObj){
   html += siddurParasFromText(ef('preTorahDeclaration'), true);
   html += `<div class="siddur-section-title">${ckChrome('בְּרִיךְ שְׁמֵהּ')}</div>`;
   html += siddurParasFromText(ef('berichShmei'));
-  html += siddurTorahReadingHTML(dateObj, info, {});
+  // skipYehalelu: this reader already places the correct "return the Torah"
+  // Yehalelu paragraph later, right after Song of the Day
+  // (siddurRoshChodeshSongOfDayTailHTML's ef('yehaleluReturn')) - matching
+  // Sefaria's own Rosh Chodesh rubric there. Without this flag it was being
+  // said TWICE: once (wrongly early) right here after the closing blessing,
+  // and again in its correct place later.
+  html += siddurTorahReadingHTML(dateObj, info, {skipYehalelu:true});
   html += siddurChatziKaddishHTML();
   html += siddurParasFromText(ef('yihyuChasdecha'));
   return html;
 }
-/* Uva LeSion here is the identical weekday Uva LeSion/Baruch Elokeinu/Beit
-   Yaakov text (SIDDUR.ashreiUvaLetzion.uvaLetzion, reused verbatim) with
-   one Rosh-Chodesh-specific addition at the end: Tehillim 124 ("Shir
-   HaMaalot Lulei Hashem") - reused from window.TEHILLIM, not duplicated. */
+/* Uva LeSion here is the identical weekday Uva LeSion/Baruch Elokeinu text
+   (SIDDUR.ashreiUvaLetzion.uvaLetzion, reused verbatim), immediately
+   followed by the Beit Yaakov paragraph itself (SIDDUR.ashreiUvaLetzion.
+   beitYaakov - note: NOT Tefila LeDavid/Tehillim 86, which Sefaria's own
+   Rosh Chodesh Uva LeSion node omits entirely, since Rosh Chodesh is
+   always a no-Tachanun day and that psalm is only ever said on days WITH
+   Tachanun - see the weekday Beit Yaakov section above), then a
+   Rosh-Chodesh-specific closing addition: Tehillim 124 ("Shir HaMaalot
+   Lulei Hashem") - reused from window.TEHILLIM, not duplicated. Verified
+   against Sefaria's own combined "Siddur Edot HaMizrach, Rosh Hodesh, Uva
+   LeSion" node, which bundles exactly these four pieces (Uva LeTzion,
+   Baruch Elokeinu, Beit Yaakov, Tehillim 124) as one unit before Song of
+   the Day - the Beit Yaakov paragraph was previously missing here
+   entirely (a real content gap, not a formatting choice). */
 function siddurRoshChodeshUvaLesionHTML(){
+  const trAUL = PT('ashreiUvaLetzion');
+  const aul = trAUL ? Object.assign({}, SIDDUR.ashreiUvaLetzion, trAUL) : SIDDUR.ashreiUvaLetzion;
   let html = `<div class="siddur-section-title">${ckChrome('וּבָא לְצִיּוֹן גּוֹאֵל')}</div>`;
-  html += siddurParasFromText(PT('ashreiUvaLetzion','uvaLetzion')||SIDDUR.ashreiUvaLetzion.uvaLetzion, true);
+  html += siddurParasFromText(aul.uvaLetzion, true);
+  html += siddurParasFromText(aul.beitYaakov, true);
   html += siddurTehillimChapterHTML(124);
   return html;
 }
@@ -9563,7 +9626,7 @@ function siddurSections(dateObj, info, prayer){
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
     push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(currentHDate())?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>${ckChrome('סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר')}</span><span>${I.chev}</span></div>`:''));
-    push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {}));
+    push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {skipYehalelu:true}));
     push('hallel','הַלֵּל', siddurHallelHTML(info));
     // Between Ashrei (Tehillim 145) and Uva LeTzion, on days WITH Tachanun,
     // Tehillim 20 is said (reusing window.TEHILLIM, not duplicated).
@@ -9579,6 +9642,14 @@ function siddurSections(dateObj, info, prayer){
     // the same way Mincha's analogous Kaddish was fixed: reusing
     // SIDDUR.kaddishTitkabel verbatim rather than storing it again).
     push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true)));
+    // "Yehalelu et Shem Hashem" - said only now, once the Torah scroll is
+    // actually returned to the ark, right after Uva LeSion's Kaddish
+    // Titkabel (Sefaria's own rubric: "ומחזירין את ספר התורה למקומו
+    // ואומרים יהללו" sits at the very end of the Uva LeSion node) - NOT
+    // right after the aliyot's closing blessing, where siddurTorahReadingHTML
+    // used to append it (moved here; see its own comment). Only shown on a
+    // day that actually had a Torah reading today.
+    if(siddurTorahReading(dateObj, info, {})) push('returnTorah','הַחְזָרַת סֵפֶר תּוֹרָה', siddurParasFromText(PT('torahYehalelu')||SIDDUR.torahYehalelu, true, 'siddur-verse-centered'));
     // Beit Yaakov: Sefaria places this as its OWN node right after Uva
     // LeSion's Kaddish and before Song of the Day - previously missing
     // entirely from this app. Tefila LeDavid (Tehillim 86) is said only on
@@ -9654,7 +9725,7 @@ function siddurSections(dateObj, info, prayer){
     // its place, right before Kaddish Titkabel below - per explicit user
     // feedback that Titkabel must follow either real Tachanun or this
     // verse, never the bare "no Tachanun today" note alone.
-    push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div><div class="prayer-para">${ckChrome('יְהִי שֵׁם יְהֹוָה מְבֹרָךְ מֵעַתָּה וְעַד עוֹלָם׃')}</div>` : `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`+siddurTachanunCoreHTML());
+    push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div>`+siddurYehiShemHTML() : `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`+siddurTachanunCoreHTML());
     push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true)));
     // Tehillim 67 ("Elokim Yechonenu") every weekday EXCEPT Friday, when
     // Tehillim 93 ("Hashem Malach") is said instead - verified via two
