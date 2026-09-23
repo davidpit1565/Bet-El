@@ -1438,8 +1438,16 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-rule span svg{width:12px;height:12px;display:block}
 .bk-text{font-family:var(--font-sacred);font-size:calc(19px*var(--fs-scale,1));line-height:1.85;text-align:justify}
 .bk-text.bk-prose+.bk-text.bk-prose{margin-top:6px}
+.bk-cols.bk-prose .bk-p{display:block}
+.bk-cols.bk-prose .bk-p+.bk-p{margin-top:6px}
 .bk-vn{font-family:var(--font-ui);font-size:.62em;font-weight:700;color:var(--bk-gold-deep);vertical-align:.25em;margin-inline-end:3px}
 .bk-tg{font-size:.8em;color:var(--bk-muted)}
+/* verse-per-line (Torah/Neviim/Ketuvim): the number hangs in its own column;
+   a verse continued onto the next page resumes flush with the text */
+.bk-vline{padding-inline-start:2.1em;text-indent:-2.1em}
+.bk-vline+.bk-vline{margin-top:.18em}
+.bk-vline .bk-vn{display:inline-block;min-width:3.4em;text-indent:0;margin-inline-end:.3em;white-space:nowrap}
+.bk-vline.bk-cont{text-indent:0}
 .bk-comm{font-family:var(--font-sacred);font-size:calc(15px*var(--fs-scale,1));line-height:1.75;text-align:justify;
   margin-top:8px;padding-top:6px;border-top:1px dashed var(--bk-line)}
 .bk-comm-l{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;color:var(--bk-gold-deep);margin-inline-end:4px}
@@ -1490,6 +1498,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page .bk-text{font-size:14px;line-height:1.7}
 .bk-page .bk-comm{font-size:11.5px;line-height:1.6;margin-top:5px;padding-top:4px}
 .bk-page .bk-cont{margin-top:0;padding-top:0;border-top:none}
+/* Halacha and Zohar print in two columns, as a sefer page does (~30
+   letters a line instead of ~60). The rule between them is a centred 1px
+   background, not column-rule, which html2canvas does not draw. */
+.bk-page .bk-cols{column-count:2;column-gap:7mm;column-fill:balance;font-size:13.5px;line-height:1.68;
+  background:linear-gradient(var(--bk-line),var(--bk-line)) center top/1px 100% no-repeat}
+.bk-page .bk-cols.bk-prose .bk-p+.bk-p{margin-top:4px}
 .bk-page .bk-daf img{width:auto;max-width:100%;max-height:150mm}
 .bk-page .bk-credit,.bk-page .bk-license{font-size:7px}
 /* a Gemara page: the scanned Vilna amud IS the page. Only the fixed header
@@ -1535,7 +1549,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-ded-l{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:21px;color:var(--bk-gold-deep)}
 .bk-ded-n{font-family:var(--font-sacred);font-size:19px;display:flex;align-items:baseline;gap:6px}
 .bk-ded-blank{display:inline-block;min-width:52mm;border-bottom:1px solid var(--bk-gold);height:1.1em}
-.bk-ded-n .bk-ded-blank:not(:empty){min-width:0;border-bottom:none;height:auto}
+.bk-ded-name{display:block;max-width:108mm;line-height:1.6;font-size:18px;text-wrap:balance}
 .bk-ded .bk-rule{width:40mm;margin:3mm auto}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
@@ -5564,9 +5578,12 @@ function ensureBkDaf(i){
 /* ---------- the day as a list of blocks ----------
    'day'/'sec'/'sub' headings, 'rule' (the divider - only BETWEEN subjects,
    never between verses), 'atom' (anything unbreakable: a daf image, a
-   citation line) and 'flow' (a paragraph of inline pieces - verses run on
-   together, each with its number, as in a printed sefer - which the
-   paginator may split between pieces, or inside one between words). */
+   citation line) and 'flow' (a paragraph of inline pieces, each with its
+   number - Tehillim, Rambam and Mishnah run on as in a printed sefer (Rambam
+   and the Zohar in two columns on the printed page, .bk-cols), while
+   Torah / Neviim / Ketuvim give every verse a flow of its own, .bk-vline -
+   which the paginator may split between pieces, or inside one between
+   words). */
 function bkP(x){ return `<span class="bk-p">${x}</span>`; }
 function bkVerseNum(v,prev){
   return (!prev||prev.c!==v.c||prev.book!==v.book) ? heNum(v.c)+':'+heNum(v.v) : heNum(v.v);
@@ -5583,7 +5600,9 @@ function bkSectionBody(s,slot,B){
       const c=id?ckCommFor(id,slot.key):null;
       if(c) ws.forEach(w=>(c[w]||[]).forEach((t,i)=>comm[w].push(bkP((i===0?`<span class="bk-cn">${n}</span>`:'')+t))));
     });
-    B.push({t:'flow', cls:'bk-text', pieces});
+    /* one verse per block (owner's pick over run-on verses): each verse
+       opens its own line, its number in a hanging column */
+    pieces.forEach(p=>B.push({t:'flow', cls:'bk-text bk-vline', pieces:[p]}));
     ws.forEach(w=>{
       if(!comm[w].length) return;
       B.push({t:'flow', cls:'bk-comm', pieces:[bkP(`<span class="bk-comm-l">${ckCommLabel(w,'')}</span>`)].concat(comm[w])});
@@ -5605,7 +5624,7 @@ function bkSectionBody(s,slot,B){
        that a single-chapter day (the 3-year track) skips its one head, which
        would only repeat the section's source line word for word */
     let pieces=[];
-    const flush=()=>{ if(pieces.length) B.push({t:'flow', cls:'bk-text', pieces}); pieces=[]; };
+    const flush=()=>{ if(pieces.length) B.push({t:'flow', cls:'bk-text bk-cols', pieces}); pieces=[]; };
     const oneChapter=s.items.every(x=>x.i===s.items[0].i);
     s.items.forEach((x,i)=>{
       if(!oneChapter && (i===0||s.items[i-1].i!==x.i)){
@@ -5632,6 +5651,10 @@ function bkSectionBody(s,slot,B){
   /* numbered text (Mishnah, and the bundle fallbacks) runs on with its
      tags; continuous prose (Zohar, Tanya) keeps one paragraph per piece */
   if(CK_NO_NUM[s.key]){
+    /* the Zohar prints in two columns, so its paragraphs are one flow (each
+       paragraph a block piece) that runs down the columns continuously -
+       one flow per paragraph would balance each paragraph separately */
+    if(s.key==='zohar'){ B.push({t:'flow', cls:'bk-text bk-prose bk-cols', pieces:s.items.map(bkP)}); return; }
     s.items.forEach(t=>B.push({t:'flow', cls:'bk-text bk-prose', pieces:[bkP(t)]}));
     return;
   }
@@ -5827,9 +5850,10 @@ function ensureBkMatter(){
 }
 function bkMatterPending(){ return [BK_QR_KEY,BK_LOGO_KEY].some(k=>!BK_IMG[k]||BK_IMG[k].state==='loading'); }
 function bkImgSrc(key){ const st=BK_IMG[key]; return st&&st.state==='ok'?st.src:''; }
-/* The dedication names. Empty = a line to write on by hand; the booklet
-   stays a placeholder until the owner's dedication flow fills these. */
-const BK_DEDICATION={niftar:'', hatzlacha:''};
+/* The dedication names - the owner's confirmed wording, verbatim (do not
+   "correct" it). Empty = a line to write on by hand, with the usual ז״ל;
+   a filled name is printed exactly as given, after "label:". */
+const BK_DEDICATION={niftar:'גַּבְרִיאֵל מִמּוֹסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרְעָיָה, מַזָּל טוֹב', hatzlacha:'אָלוֹן בֶּן חַנָּה נִזִי'};
 function bkMedalHtml(cls){ return `<span class="bk-medal${cls?' '+cls:''}"><i>${ORN}</i><b>${bkUI().brand}</b><i>${ORN}</i></span>`; }
 function bkRuleHtml(){ return `<div class="bk-rule"><span>${ORN}</span></div>`; }
 function bkMatterPage(cls,medalCls,inner){
@@ -5856,13 +5880,14 @@ function bkCoverHtml(date,slot){
 }
 function bkDedicationHtml(){
   const t=bkUI(), D=BK_DEDICATION;
+  const entry=(label,name,suffix)=>name
+    ? `<div class="bk-ded-l">${label}:</div><div class="bk-ded-n bk-ded-name">${name}</div>`
+    : `<div class="bk-ded-l">${label}</div><div class="bk-ded-n"><span class="bk-ded-blank"></span>${suffix?`<span>${suffix}</span>`:''}</div>`;
   return bkMatterPage('bk-dedic','',`<div class="bk-ded">
     ${bkRuleHtml()}
-    <div class="bk-ded-l">${t.dedNiftar}</div>
-    <div class="bk-ded-n"><span class="bk-ded-blank">${D.niftar||''}</span><span>${t.dedZl}</span></div>
+    ${entry(t.dedNiftar,D.niftar,t.dedZl)}
     ${bkRuleHtml()}
-    <div class="bk-ded-l">${t.dedHatzlacha}</div>
-    <div class="bk-ded-n"><span class="bk-ded-blank">${D.hatzlacha||''}</span></div>
+    ${entry(t.dedHatzlacha,D.hatzlacha,'')}
     ${bkRuleHtml()}
   </div>`);
 }

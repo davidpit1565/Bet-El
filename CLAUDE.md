@@ -166,20 +166,27 @@ in English as usual.
   `bkBuildPrint` wraps the day in front/back matter built from the same
   frame/strip/medallion: cover (`bkCoverHtml` - medallion "בֵּית אֵל",
   icon-512 logo, parasha, Hebrew then civil date, QR), dedication
-  (`bkDedicationHtml`, names from `BK_DEDICATION`, empty = a blank line) and
+  (`bkDedicationHtml`, names from `BK_DEDICATION` - the owner's confirmed
+  wording, verbatim, never "fix" it; empty = a blank line with ז״ל) and
   back page (`bkBackHtml`, credits/distribution text + QR). The QR is the
   App Store link from `appQrSrc()` (shared with `appQrImage()`); QR and logo
   are preloaded as data: URLs (`bkImgData`/`ensureBkMatter`) so print and
   html2canvas never wait on a cross-origin image, and print/PDF wait for
   them like they wait for the daf (`bkPending`). Day pages are numbered on
-  from the cover (first day page = 3).
+  from the cover (first day page = 3). Torah/Neviim/Ketuvim print one verse
+  per line (`.bk-vline`, number in a hanging column - the owner's pick over
+  run-on verses); Tehillim/Rambam/Mishnah still run on. Halacha (Rambam)
+  and Zohar print in two columns (`.bk-cols`, CSS columns inside `.bk-page`
+  only; the Zohar is ONE flow with block paragraphs so it runs down the
+  columns continuously; the centre rule is a 1px background gradient
+  because html2canvas doesn't draw `column-rule`).
   `BK_SHAS_CREDIT` (beside every page) and `BK_HB_LICENSE` (once, at the
   end) are license requirements - never drop them. `ckCommFor(id,key)` /
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
   this kind of not-the-reader's-week rendering. Scope so far: ONE day;
   still to build: the Sun-Thu/Leil Shishi/Fri week loop, Musar-by-book, Ben
-  Ish Chai year 1 + 2, the TOC and blank printing-convention pages, a real
-  dedication-name input, and the Motzei
+  Ish Chai year 1 + 2, the TOC and blank printing-convention pages, the cover design (variants
+  under owner review), and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
   emulates the Vercel rewrite, saves screen/print/PDF output).
