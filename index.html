@@ -6496,6 +6496,7 @@ function siddurDayInfo(hd){
     isTalSeason:false,
     isShabbat:false,
     isYomTov:false, yaaleVeyavoChag:null, // null|'roshChodesh'|'pesach'|'shavuot'|'sukkot'|'shminiAtzeret'|'roshHashana'
+    isPesachLastDays:false,
     isRoshHashana:false, isYomKippur:false, isTishaBav:false,
     isMusafDay:false,
   };
@@ -6549,7 +6550,7 @@ function siddurDayInfo(hd){
       if(/^Tish.a B.Av( \(observed\))?$/i.test(d)) info.isTishaBav=true; // hebcal's own desc uses a curly apostrophe (Tish’a B’Av) - matched loosely here
       if(/^Sukkot (I|II)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='sukkot'; }
       if(/^Shmini Atzeret$|^Simchat Torah$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='shminiAtzeret'; }
-      if(/^Pesach (I|II|VII|VIII)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='pesach'; }
+      if((m=/^Pesach (I|II|VII|VIII)$/i.exec(d))){ info.isYomTov=true; info.yaaleVeyavoChag='pesach'; info.isPesachLastDays=(m[1]==='VII'||m[1]==='VIII'); }
       if(/^Shavuot( I| II)?$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='shavuot'; }
     });
     if(info.isRoshChodesh && !info.yaaleVeyavoChag) info.yaaleVeyavoChag='roshChodesh';
@@ -6572,14 +6573,26 @@ function siddurDayInfo(hd){
      one-line change. */
   info.skipTachanun = info.isRoshChodesh || info.isNisan || info.isLagBaOmer || info.isErevYomKippur
     || info.isChanukah || info.isTuBishvat || info.isPurim || info.isIsruChag;
-  /* Hallel: Rosh Chodesh + Chol HaMoed Pesach = half, NO blessing before or
-     after (Edot HaMizrach/Sephardi practice per Shulchan Aruch - Ashkenazim
-     differ and do bless it). Chol HaMoed Sukkot + Chanukah = full, WITH
-     blessing, not in dispute. The "no blessing on Chol HaMoed Pesach" half
-     is inferred by the same principle as Rosh Chodesh rather than
-     independently confirmed - flagged per the build brief. */
-  if(info.isChanukah || (info.isCholHaMoed && info.cholHaMoedChag==='sukkot')){ info.hallel='full'; info.hallelBlessing=true; }
-  else if(info.isRoshChodesh || (info.isCholHaMoed && info.cholHaMoedChag==='pesach')){ info.hallel='half'; info.hallelBlessing=false; }
+  /* Hallel: Rosh Chodesh + Chol HaMoed Pesach + Pesach's last days (VII/
+     VIII) = half, NO blessing before or after (Edot HaMizrach/Sephardi
+     practice per Shulchan Aruch - Ashkenazim differ and do bless it).
+     Chanukah, Chol HaMoed Sukkot, and every actual Yom Tov day EXCEPT
+     Pesach's last days and Rosh Hashana/Yom Kippur (which have no Hallel
+     at all) = full, WITH blessing, not in dispute. This previously only
+     covered Chanukah/Chol HaMoed/Rosh Chodesh - real Yom Tov days
+     themselves (Sukkot I/II, Shmini Atzeret/Simchat Torah, Pesach I/II,
+     Shavuot) fell through to no Hallel at all, a genuine gap this
+     session's siddur-audit workflow found. The "no blessing on Chol
+     HaMoed Pesach/Pesach's last days" half is inferred by the same
+     principle as Rosh Chodesh rather than independently confirmed -
+     flagged per the build brief. */
+  if(info.isChanukah || (info.isCholHaMoed && info.cholHaMoedChag==='sukkot')
+    || (info.isYomTov && info.yaaleVeyavoChag==='sukkot')
+    || (info.isYomTov && info.yaaleVeyavoChag==='shminiAtzeret')
+    || (info.isYomTov && info.yaaleVeyavoChag==='shavuot')
+    || (info.isYomTov && info.yaaleVeyavoChag==='pesach' && !info.isPesachLastDays)){ info.hallel='full'; info.hallelBlessing=true; }
+  else if(info.isRoshChodesh || (info.isCholHaMoed && info.cholHaMoedChag==='pesach')
+    || (info.isYomTov && info.yaaleVeyavoChag==='pesach' && info.isPesachLastDays)){ info.hallel='half'; info.hallelBlessing=false; }
   // Musaf is said: Shabbat, Rosh Chodesh, Chol HaMoed, every Yom Tov
   // (including Rosh Hashana/Yom Kippur) - drives Birkat HaMazon's closing
   // "Magdil"(weekday)/"Migdol"(Musaf day) line.
