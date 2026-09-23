@@ -6496,6 +6496,7 @@ function siddurDayInfo(hd){
     isTalSeason:false,
     isShabbat:false,
     isYomTov:false, yaaleVeyavoChag:null, // null|'roshChodesh'|'pesach'|'shavuot'|'sukkot'|'shminiAtzeret'|'roshHashana'
+    isPesachLastDays:false,
     isRoshHashana:false, isYomKippur:false, isTishaBav:false,
     isMusafDay:false,
   };
@@ -6549,7 +6550,7 @@ function siddurDayInfo(hd){
       if(/^Tish.a B.Av( \(observed\))?$/i.test(d)) info.isTishaBav=true; // hebcal's own desc uses a curly apostrophe (Tish’a B’Av) - matched loosely here
       if(/^Sukkot (I|II)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='sukkot'; }
       if(/^Shmini Atzeret$|^Simchat Torah$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='shminiAtzeret'; }
-      if(/^Pesach (I|II|VII|VIII)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='pesach'; }
+      if((m=/^Pesach (I|II|VII|VIII)$/i.exec(d))){ info.isYomTov=true; info.yaaleVeyavoChag='pesach'; info.isPesachLastDays=(m[1]==='VII'||m[1]==='VIII'); }
       if(/^Shavuot( I| II)?$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='shavuot'; }
     });
     if(info.isRoshChodesh && !info.yaaleVeyavoChag) info.yaaleVeyavoChag='roshChodesh';
@@ -6572,14 +6573,26 @@ function siddurDayInfo(hd){
      one-line change. */
   info.skipTachanun = info.isRoshChodesh || info.isNisan || info.isLagBaOmer || info.isErevYomKippur
     || info.isChanukah || info.isTuBishvat || info.isPurim || info.isIsruChag;
-  /* Hallel: Rosh Chodesh + Chol HaMoed Pesach = half, NO blessing before or
-     after (Edot HaMizrach/Sephardi practice per Shulchan Aruch - Ashkenazim
-     differ and do bless it). Chol HaMoed Sukkot + Chanukah = full, WITH
-     blessing, not in dispute. The "no blessing on Chol HaMoed Pesach" half
-     is inferred by the same principle as Rosh Chodesh rather than
-     independently confirmed - flagged per the build brief. */
-  if(info.isChanukah || (info.isCholHaMoed && info.cholHaMoedChag==='sukkot')){ info.hallel='full'; info.hallelBlessing=true; }
-  else if(info.isRoshChodesh || (info.isCholHaMoed && info.cholHaMoedChag==='pesach')){ info.hallel='half'; info.hallelBlessing=false; }
+  /* Hallel: Rosh Chodesh + Chol HaMoed Pesach + Pesach's last days (VII/
+     VIII) = half, NO blessing before or after (Edot HaMizrach/Sephardi
+     practice per Shulchan Aruch - Ashkenazim differ and do bless it).
+     Chanukah, Chol HaMoed Sukkot, and every actual Yom Tov day EXCEPT
+     Pesach's last days and Rosh Hashana/Yom Kippur (which have no Hallel
+     at all) = full, WITH blessing, not in dispute. This previously only
+     covered Chanukah/Chol HaMoed/Rosh Chodesh - real Yom Tov days
+     themselves (Sukkot I/II, Shmini Atzeret/Simchat Torah, Pesach I/II,
+     Shavuot) fell through to no Hallel at all, a genuine gap this
+     session's siddur-audit workflow found. The "no blessing on Chol
+     HaMoed Pesach/Pesach's last days" half is inferred by the same
+     principle as Rosh Chodesh rather than independently confirmed -
+     flagged per the build brief. */
+  if(info.isChanukah || (info.isCholHaMoed && info.cholHaMoedChag==='sukkot')
+    || (info.isYomTov && info.yaaleVeyavoChag==='sukkot')
+    || (info.isYomTov && info.yaaleVeyavoChag==='shminiAtzeret')
+    || (info.isYomTov && info.yaaleVeyavoChag==='shavuot')
+    || (info.isYomTov && info.yaaleVeyavoChag==='pesach' && !info.isPesachLastDays)){ info.hallel='full'; info.hallelBlessing=true; }
+  else if(info.isRoshChodesh || (info.isCholHaMoed && info.cholHaMoedChag==='pesach')
+    || (info.isYomTov && info.yaaleVeyavoChag==='pesach' && info.isPesachLastDays)){ info.hallel='half'; info.hallelBlessing=false; }
   // Musaf is said: Shabbat, Rosh Chodesh, Chol HaMoed, every Yom Tov
   // (including Rosh Hashana/Yom Kippur) - drives Birkat HaMazon's closing
   // "Magdil"(weekday)/"Migdol"(Musaf day) line.
@@ -9401,10 +9414,11 @@ function siddurBirkotShemaHTML(){
    passage is an Ashkenazi-specific addition; flagged in the build notes
    as a deliberate deviation from the literal brief, backed by the
    sourced text rather than assumed. ---- */
-function siddurArvitShemaHTML(){
+function siddurArvitShemaHTML(info){
   const trA = PT('arvitBlessings'), trS = PT('birkotKriatShema');
   const a = trA ? Object.assign({}, SIDDUR.arvitBlessings, trA) : SIDDUR.arvitBlessings;
   const s = trS ? Object.assign({}, SIDDUR.birkotKriatShema, trS) : SIDDUR.birkotKriatShema;
+  const isShabbatOrYomTov = !!(info && (info.isShabbat || info.isYomTov));
   let html = `<div class="siddur-section-title">${ckChrome('בָּרְכוּ')}</div>`;
   html += siddurParasFromText(a.barchu, true);
   html += `<div class="siddur-section-title">${ckChrome('הַמַּעֲרִיב עֲרָבִים')}</div>`;
@@ -9416,7 +9430,15 @@ function siddurArvitShemaHTML(){
   html += `<div class="siddur-section-title">${ckChrome('בִּרְכַּת גָּאַל יִשְׂרָאֵל')}</div>`;
   html += `<div class="prayer-para">${a.emetVeemunah}</div>`;
   html += `<div class="siddur-section-title">${ckChrome('הַשְׁכִּיבֵנוּ')}</div>`;
-  html += `<div class="prayer-para">${a.hashkiveinu}</div>`;
+  // Hashkiveinu's closing seal differs on Shabbat/Yom Tov - Edot HaMizrach's
+  // own text diverges right after "וְהָגֵן בַּעֲדֵנוּ" (the weekday version
+  // continues with a list of dangers/plagues; Shabbat/Yom Tov's moves
+  // straight to a shorter seal naming Yerushalayim) - previously always
+  // used the weekday wording regardless of day, a genuine gap this
+  // session's siddur-audit workflow found. Veshameru (Exodus 31:16-17) is
+  // said right after, on Shabbat only.
+  html += `<div class="prayer-para">${isShabbatOrYomTov && a.hashkiveinuShabbat ? a.hashkiveinuShabbat : a.hashkiveinu}</div>`;
+  if(info && info.isShabbat) html += `<div class="prayer-para">${a.veshameru}</div>`;
   return html;
 }
 /* ---- Korbanot: Leshem Yichud used to be its own separate section (item 1
@@ -9545,8 +9567,48 @@ function siddurOmerHTML(info){
    through the 15th, not Friday night/Motzei Shabbat, not Yom Kippur night)
    - out of scope per the build brief, flagged as a follow-up; the tile is
    always offered on the Siddur home screen for now. ---- */
-function siddurLevanaHTML(){
+/* Birkat HaLevana's real halachic date window - Ben Ish Chai's own
+   7-days-after-the-molad opening (this Sephardic siddur's own custom,
+   matching the same source already cited elsewhere in this file for
+   Birkot HaShachar) through the halachic midpoint between one molad and
+   the next. The vendored hebcal build already computes both exactly, via
+   each MoladEvent's own .molad object (getTchilasZmanKidushLevana7Days/
+   getSofZmanKidushLevanaBetweenMoldos) - no hand-rolled molad arithmetic
+   needed. Tishrei is the one gap: hebcal never emits a molad-announcement
+   event for it (there's no Shabbat Mevarchim before Rosh Hashana), so
+   this returns null there and Levana stays unconditionally available for
+   that month rather than risk a wrong date range from computing it by
+   hand. Motzei Shabbat/Yom Kippur night (time-of-day, not date) are left
+   for the person to know themselves, same as Tikun Chatzot's Friday
+   night exclusion. */
+function siddurLevanaWindow(dateObj){
+  try{
+    const hd = new HDate(dateObj);
+    const evs = HebrewCalendar.calendar({start:hd.subtract(45,'d'), end:hd.add(2,'d'), molad:true});
+    const nowMs = dateObj.getTime();
+    let best = null;
+    evs.forEach(e=>{
+      if(!e.molad) return;
+      const instMs = e.molad.getInstant().epochMilliseconds;
+      if(instMs<=nowMs && (!best || instMs>best.instMs)) best = {instMs, molad:e.molad};
+    });
+    if(!best) return null;
+    const start = best.molad.getTchilasZmanKidushLevana7Days().epochMilliseconds;
+    const end = best.molad.getSofZmanKidushLevanaBetweenMoldos().epochMilliseconds;
+    return {inWindow: nowMs>=start && nowMs<=end, start:new Date(start), end:new Date(end)};
+  }catch(e){ return null; }
+}
+function siddurLevanaHTML(dateObj){
   const L = SIDDUR.levana;
+  const win = siddurLevanaWindow(dateObj||new Date());
+  let noteHtml = '';
+  if(win && !win.inWindow){
+    const fmt = (d)=> localizeHebDateStr(new HDate(d).renderGematriya(true));
+    const noteText = win.start.getTime()>Date.now()
+      ? `${ckChrome('הַיָּמִים לְבִרְכַּת הַלְּבָנָה הַחֹדֶשׁ מַתְחִילִים בְּ')}${fmt(win.start)}${ckChrome(' וּמִסְתַּיְּמִים בְּ')}${fmt(win.end)}${ckChrome('.')}`
+      : `${ckChrome('הַזְּמַן לְבִרְכַּת הַלְּבָנָה הַחֹדֶשׁ הִסְתַּיֵּם (הָיָה עַד')} ${fmt(win.end)}${ckChrome(').')}`;
+    noteHtml = `<div class="siddur-halacha-note">${noteText}</div>`;
+  }
   // Non-Hebrew rendering swaps in PRAYERS_TRANSLIT per field, same
   // (t&&t.field)||SIDDUR.field fallback pattern as siddurBirkotHashacharHTML.
   // L.opening (Tehillim 19:2-15) is deliberately NOT translated here - no
@@ -9557,7 +9619,7 @@ function siddurLevanaHTML(){
   const lang=(S.lang&&PRAYERS_TRANSLIT[S.lang])?S.lang:null;
   const t=(lang&&PRAYERS_TRANSLIT[lang].levana)?PRAYERS_TRANSLIT[lang].levana:null;
   const lf = (k)=> (t&&t[k])||L[k];
-  let html = `<div class="siddur-section-title">${ckChrome('בִּרְכַּת הַלְּבָנָה')}</div>`;
+  let html = noteHtml + `<div class="siddur-section-title">${ckChrome('בִּרְכַּת הַלְּבָנָה')}</div>`;
   // The two [[NOTE]] rubric asides embedded inside L.opening (when to look
   // at the moon; the cue before the blessing) are instructional text, not
   // part of the Tehillim quotes around them - translate just those two via
@@ -9787,12 +9849,20 @@ function siddurSections(dateObj, info, prayer){
   } else if(prayer==='arvit'){
     const trAB = PT('arvitBlessings');
     const ab = trAB ? Object.assign({}, SIDDUR.arvitBlessings, trAB) : SIDDUR.arvitBlessings;
+    // The opening verses before Barchu, and whether Vehu Rachum is said at
+    // all, both depend on the day - previously always used the weekday
+    // verses and always said Vehu Rachum, even on Shabbat/Yom Tov, a
+    // genuine gap this session's siddur-audit workflow found. Vehu Rachum
+    // itself is weekday-only (omitted Friday night and on Yom Tov); the
+    // Shabbat/Yom Tov opening verses are a different, longer quote
+    // ("Yimloch Hashem" through "Kol HaNeshama").
+    const isShabbatOrYomTovArvit = info.isShabbat || info.isYomTov;
     let opening = siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), ab.leshemYichud);
-    opening += `<div class="prayer-para">${ab.openingVerses}</div>`;
+    opening += `<div class="prayer-para">${isShabbatOrYomTovArvit && ab.openingVersesShabbat ? ab.openingVersesShabbat : ab.openingVerses}</div>`;
     opening += siddurChatziKaddishHTML();
-    opening += `<div class="prayer-para">${ab.vehuRachum}</div>`;
+    if(!isShabbatOrYomTovArvit) opening += `<div class="prayer-para">${ab.vehuRachum}</div>`;
     push('opening','לְשֵׁם יִחוּד', opening);
-    push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML());
+    push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML(info));
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
     // Arvit has no chazan repetition, so the Kaddish right after the
@@ -9829,7 +9899,7 @@ function siddurSections(dateObj, info, prayer){
     // then), so no "no content today" fallback branch is needed here.
     push('omer','סְפִירַת הָעֹמֶר', siddurOmerHTML(info));
   } else if(prayer==='levana'){
-    push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML());
+    push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML(dateObj));
   } else if(prayer==='kriatShemaAlHamita'){
     push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML());
   } else if(prayer==='tikunChatzot'){
