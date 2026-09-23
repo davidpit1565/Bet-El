@@ -9545,8 +9545,48 @@ function siddurOmerHTML(info){
    through the 15th, not Friday night/Motzei Shabbat, not Yom Kippur night)
    - out of scope per the build brief, flagged as a follow-up; the tile is
    always offered on the Siddur home screen for now. ---- */
-function siddurLevanaHTML(){
+/* Birkat HaLevana's real halachic date window - Ben Ish Chai's own
+   7-days-after-the-molad opening (this Sephardic siddur's own custom,
+   matching the same source already cited elsewhere in this file for
+   Birkot HaShachar) through the halachic midpoint between one molad and
+   the next. The vendored hebcal build already computes both exactly, via
+   each MoladEvent's own .molad object (getTchilasZmanKidushLevana7Days/
+   getSofZmanKidushLevanaBetweenMoldos) - no hand-rolled molad arithmetic
+   needed. Tishrei is the one gap: hebcal never emits a molad-announcement
+   event for it (there's no Shabbat Mevarchim before Rosh Hashana), so
+   this returns null there and Levana stays unconditionally available for
+   that month rather than risk a wrong date range from computing it by
+   hand. Motzei Shabbat/Yom Kippur night (time-of-day, not date) are left
+   for the person to know themselves, same as Tikun Chatzot's Friday
+   night exclusion. */
+function siddurLevanaWindow(dateObj){
+  try{
+    const hd = new HDate(dateObj);
+    const evs = HebrewCalendar.calendar({start:hd.subtract(45,'d'), end:hd.add(2,'d'), molad:true});
+    const nowMs = dateObj.getTime();
+    let best = null;
+    evs.forEach(e=>{
+      if(!e.molad) return;
+      const instMs = e.molad.getInstant().epochMilliseconds;
+      if(instMs<=nowMs && (!best || instMs>best.instMs)) best = {instMs, molad:e.molad};
+    });
+    if(!best) return null;
+    const start = best.molad.getTchilasZmanKidushLevana7Days().epochMilliseconds;
+    const end = best.molad.getSofZmanKidushLevanaBetweenMoldos().epochMilliseconds;
+    return {inWindow: nowMs>=start && nowMs<=end, start:new Date(start), end:new Date(end)};
+  }catch(e){ return null; }
+}
+function siddurLevanaHTML(dateObj){
   const L = SIDDUR.levana;
+  const win = siddurLevanaWindow(dateObj||new Date());
+  let noteHtml = '';
+  if(win && !win.inWindow){
+    const fmt = (d)=> localizeHebDateStr(new HDate(d).renderGematriya(true));
+    const noteText = win.start.getTime()>Date.now()
+      ? `${ckChrome('הַיָּמִים לְבִרְכַּת הַלְּבָנָה הַחֹדֶשׁ מַתְחִילִים בְּ')}${fmt(win.start)}${ckChrome(' וּמִסְתַּיְּמִים בְּ')}${fmt(win.end)}${ckChrome('.')}`
+      : `${ckChrome('הַזְּמַן לְבִרְכַּת הַלְּבָנָה הַחֹדֶשׁ הִסְתַּיֵּם (הָיָה עַד')} ${fmt(win.end)}${ckChrome(').')}`;
+    noteHtml = `<div class="siddur-halacha-note">${noteText}</div>`;
+  }
   // Non-Hebrew rendering swaps in PRAYERS_TRANSLIT per field, same
   // (t&&t.field)||SIDDUR.field fallback pattern as siddurBirkotHashacharHTML.
   // L.opening (Tehillim 19:2-15) is deliberately NOT translated here - no
@@ -9557,7 +9597,7 @@ function siddurLevanaHTML(){
   const lang=(S.lang&&PRAYERS_TRANSLIT[S.lang])?S.lang:null;
   const t=(lang&&PRAYERS_TRANSLIT[lang].levana)?PRAYERS_TRANSLIT[lang].levana:null;
   const lf = (k)=> (t&&t[k])||L[k];
-  let html = `<div class="siddur-section-title">${ckChrome('בִּרְכַּת הַלְּבָנָה')}</div>`;
+  let html = noteHtml + `<div class="siddur-section-title">${ckChrome('בִּרְכַּת הַלְּבָנָה')}</div>`;
   // The two [[NOTE]] rubric asides embedded inside L.opening (when to look
   // at the moon; the cue before the blessing) are instructional text, not
   // part of the Tehillim quotes around them - translate just those two via
@@ -9829,7 +9869,7 @@ function siddurSections(dateObj, info, prayer){
     // then), so no "no content today" fallback branch is needed here.
     push('omer','סְפִירַת הָעֹמֶר', siddurOmerHTML(info));
   } else if(prayer==='levana'){
-    push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML());
+    push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML(dateObj));
   } else if(prayer==='kriatShemaAlHamita'){
     push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML());
   } else if(prayer==='tikunChatzot'){
