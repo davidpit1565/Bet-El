@@ -8837,6 +8837,12 @@ function siddurTalitTefilinHTML(){
    Tachanun - reusing the same info.skipTachanun flag Shacharit's own
    Ashrei/Tehillim 20 pairing already relies on, rather than just printing
    a static note that the reader has to apply themselves. */
+// Days Tikun Chatzot itself is not said at all, per its own rubricNote
+// (Friday night is excluded there too, but that's time-of-day dependent,
+// not date-dependent, so it's left for the person to know themselves).
+function siddurTikunChatzotSkipToday(info){
+  return !!(info.isYomTov || (info.isCholHaMoed && info.cholHaMoedChag==='pesach'));
+}
 function siddurTikunChatzotHTML(info){
   const tc = SIDDUR.tikunChatzot;
   // Non-Hebrew rendering swaps in PRAYERS_TRANSLIT per field, same
@@ -8862,6 +8868,16 @@ function siddurTikunChatzotHTML(info){
   opening += siddurParasFromText(`[[HAL]]${tf('rubricNote')}[[/HAL]]\n\n[[COLLAPSE:${ckChrome('לְשֵׁם יִחוּד')}]]${tf('leshemYichud')}[[/COLLAPSE]]`);
   opening += siddurParasFromText(`${tf('ana')}\n\n${tf('mahNomar')}`);
 
+  // Tikun Rachel is replaced entirely by Tikun Leah on days without
+  // Tachanun, the Omer, and Aseret Yemei Teshuva - per this section's own
+  // rubricNote (shown above in `opening`), which previously wasn't wired
+  // into which of the two actually gets said (both rendered unconditionally
+  // side by side, though halachically only one is ever said on a given
+  // day). The rubric's other exclusions (after the molad before Rosh
+  // Chodesh, a house of mourning/a groom/a brit day, the Shmita year) are
+  // personal-circumstance calls the app has no way to detect, so they're
+  // left for the person to apply themselves.
+  const sayRachelToday = !(info.skipTachanun || info.omerDay || info.isAseretYemeiTeshuva);
   let rachel = `<div class="siddur-section-title">${ckChrome('תִּקּוּן רָחֵל')}</div>`;
   rachel += siddurTehillimChapterHTML(137);
   rachel += siddurTehillimChapterHTML(79);
@@ -8892,7 +8908,7 @@ function siddurTikunChatzotHTML(info){
   leah += siddurParasFromText(`[[HAL]]${tf('leahCustomNote')}[[/HAL]]\n\n${tf('leahBonehYerushalayim')}`);
   leah += siddurTehillimChapterHTML(126);
 
-  return {petach, opening, rachel, leah};
+  return {petach, opening, rachel, leah, sayRachelToday};
 }
 function siddurShirShelYomHTML(dateObj){
   const day = dateObj.getDay();
@@ -9818,10 +9834,14 @@ function siddurSections(dateObj, info, prayer){
     push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML());
   } else if(prayer==='tikunChatzot'){
     const chz = siddurTikunChatzotHTML(info);
+    if(siddurTikunChatzotSkipToday(info)) push('note','הֲלָכָה לְמַעֲשֶׂה', `<div class="siddur-halacha-note">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תִּקּוּן חֲצוֹת.')}</div>`);
     push('petach','פֶּתַח אֵלִיָּהוּ', chz.petach);
     push('opening','לְשֵׁם יִחוּד', chz.opening);
-    push('rachel','תִּקּוּן רָחֵל', chz.rachel);
-    push('leah','תִּקּוּן לֵאָה', chz.leah);
+    // Only one of the two is ever said on a given day (see the
+    // sayRachelToday comment inside siddurTikunChatzotHTML) - showing both
+    // side by side, as before, wrongly implied either is fine any day.
+    if(chz.sayRachelToday) push('rachel','תִּקּוּן רָחֵל', chz.rachel);
+    else push('leah','תִּקּוּן לֵאָה', chz.leah);
   }
   return list;
 }
