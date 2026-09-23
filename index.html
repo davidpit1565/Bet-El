@@ -9650,7 +9650,11 @@ function siddurSections(dateObj, info, prayer){
     // Shacharit's) and its own internal Kaddish here is the fuller Kaddish
     // Titkabel (pushed separately right below, already correctly placed),
     // not a plain Chatzi Kaddish - so this reuses only the shared core.
-    push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div>` : `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`+siddurTachanunCoreHTML());
+    // On a day with no Tachanun, "יְהִי שֵׁם" (Tehillim 113:2) is said in
+    // its place, right before Kaddish Titkabel below - per explicit user
+    // feedback that Titkabel must follow either real Tachanun or this
+    // verse, never the bare "no Tachanun today" note alone.
+    push('tachanun','תַּחֲנוּן', info.skipTachanun ? `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תַּחֲנוּן')}</div><div class="prayer-para">${ckChrome('יְהִי שֵׁם יְהֹוָה מְבֹרָךְ מֵעַתָּה וְעַד עוֹלָם׃')}</div>` : `<div class="siddur-tachanun-strip">${ckChrome('הַיּוֹם אוֹמְרִים תַּחֲנוּן כָּרָגִיל')}</div>`+siddurTachanunCoreHTML());
     push('kaddishT','קַדִּישׁ תִּתְקַבֵּל', siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true)));
     // Tehillim 67 ("Elokim Yechonenu") every weekday EXCEPT Friday, when
     // Tehillim 93 ("Hashem Malach") is said instead - verified via two
@@ -9694,11 +9698,16 @@ function siddurSections(dateObj, info, prayer){
     push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML());
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
-    let post = siddurChatziKaddishHTML();
+    // Arvit has no chazan repetition, so the Kaddish right after the
+    // (silent) Amida is the fuller Kaddish Titkabel, not a plain Chatzi
+    // Kaddish - a correction per explicit user feedback (Chatzi Kaddish
+    // only ever precedes an Amida, as it does above at 'kaddish1', never
+    // follows one).
+    let post = siddurCollapseHTML(ckChrome('קַדִּישׁ תִּתְקַבֵּל'), siddurParasFromText(PT('kaddishTitkabel')||SIDDUR.kaddishTitkabel, true));
     post += siddurTehillimChapterHTML(121);
     post += siddurChatziKaddishHTML();
     post += `<div class="siddur-section-title">${ckChrome('בָּרְכוּ')}</div>`+siddurParasFromText(ab.barchu, true);
-    push('postAmidah','קַדִּישׁ · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
+    push('postAmidah','קַדִּישׁ תִּתְקַבֵּל · שִׁיר לַמַּעֲלוֹת · בָּרְכוּ', post);
     push('aleinu','עָלֵינוּ לְשֶׁבַח', `<div class="prayer-para">${PT('aleinu')||SIDDUR.aleinu}</div>`+siddurAfterAleinuHTML('arvit', info));
   } else if(prayer==='roshChodesh'){
     push('note','הֲלָכָה לְמַעֲשֶׂה', `<div class="siddur-halacha-note">${ckChrome('בְּרֹאשׁ חֹדֶשׁ מִתְפַּלְּלִים שַׁחֲרִית כְּבְכָל יוֹם וּמוֹסִיפִים "יַעֲלֶה וְיָבֹא", וְאַחַר חֲזָרַת הַשָּׁ"ץ אוֹמְרִים הַלֵּל בְּדִלּוּג וּבְלֹא בְּרָכָה תְּחִלָּה וָסוֹף.')}</div>`);
