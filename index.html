@@ -1339,6 +1339,9 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 [data-theme="light"] .q-tile[data-cat="shnayim"]{background-image:linear-gradient(150deg,rgba(58,168,124,.24),var(--panel) 60%)}
 [data-theme="light"] .q-tile[data-cat="benishchai"]{background-image:linear-gradient(150deg,rgba(56,163,165,.24),var(--panel) 60%)}
 [data-theme="light"] .q-tile[data-cat="musar"]{background-image:linear-gradient(150deg,rgba(150,98,168,.24),var(--panel) 60%)}
+.q-tile[data-cat="booklet"]{--cat-color:#a2803f;background-image:linear-gradient(150deg,rgba(162,128,63,.26),var(--panel) 60%)}
+:root .q-tile[data-cat="booklet"],[data-theme="dark"] .q-tile[data-cat="booklet"]{background-image:linear-gradient(150deg,rgba(196,160,88,.4),var(--panel) 62%)}
+[data-theme="light"] .q-tile[data-cat="booklet"]{background-image:linear-gradient(150deg,rgba(162,128,63,.26),var(--panel) 60%)}
 /* Library category grid reuses the same per-category wash as the home
    tiles (see the HOME comment above) for its 5 categories that don't
    already have one from the home screen - so every tile across both
@@ -1403,6 +1406,90 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 @media (min-width:1024px){
   #app{max-width:980px}
   .bottom-nav{max-width:760px}
+}
+/* ===================== STUDY BOOKLET =====================
+   Its own fixed paper palette (warm ivory + muted bronze), the same in
+   light and dark app themes - it is a picture of the printed page. Flat
+   borders/gradients only (no backdrop-filter, see the Liquid Glass note).
+   One set of content classes (.bk-text/.bk-comm/...) is sized twice: for
+   the reflowing on-screen sheet, and for the A4 page boxes print/PDF use. */
+.bk-view{--bk-paper:#fbf7ee;--bk-ink:#2b2418;--bk-muted:#6f6350;--bk-gold:#a2803f;--bk-gold-deep:#7d5f2a;--bk-line:rgba(162,128,63,.38)}
+.bk-actions{display:flex;gap:8px;justify-content:center;margin:10px 0 6px}
+.bk-actions .ck-track-btn{display:inline-flex;align-items:center;gap:6px}
+.bk-actions .ck-track-btn svg{width:17px;height:17px}
+.bk-sheet{background:var(--bk-paper);color:var(--bk-ink);border:1px solid var(--bk-line);border-radius:14px;
+  padding:16px 16px 20px;margin-top:12px;box-shadow:0 10px 28px -18px rgba(0,0,0,.6);direction:rtl}
+.bk-day{text-align:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--bk-line)}
+.bk-day-t{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:23px;color:var(--bk-gold-deep)}
+.bk-day-s{font-family:var(--font-sacred);font-size:16px;margin-top:2px}
+.bk-day-d{font-family:var(--font-ui);font-size:12.5px;color:var(--bk-muted);margin-top:2px}
+.bk-sec{margin:4px 0 8px;text-align:center}
+.bk-sec-t{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:19px;color:var(--bk-gold-deep);letter-spacing:.02em}
+.bk-sec-src{font-family:var(--font-ui);font-size:12px;color:var(--bk-muted);margin-top:1px}
+.bk-sub{font-family:var(--font-sacred);font-weight:700;font-size:15px;color:var(--bk-gold-deep);text-align:center;margin:8px 0 4px}
+.bk-rule{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--bk-gold)}
+.bk-rule::before,.bk-rule::after{content:'';flex:1;height:1px;background:var(--bk-line)}
+.bk-rule span svg{width:12px;height:12px;display:block}
+.bk-text{font-family:var(--font-sacred);font-size:calc(19px*var(--fs-scale,1));line-height:1.85;text-align:justify}
+.bk-text.bk-prose+.bk-text.bk-prose{margin-top:6px}
+.bk-vn{font-family:var(--font-ui);font-size:.62em;font-weight:700;color:var(--bk-gold-deep);vertical-align:.25em;margin-inline-end:3px}
+.bk-tg{font-size:.8em;color:var(--bk-muted)}
+.bk-comm{font-family:var(--font-sacred);font-size:calc(15px*var(--fs-scale,1));line-height:1.75;text-align:justify;
+  margin-top:8px;padding-top:6px;border-top:1px dashed var(--bk-line)}
+.bk-comm-l{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;color:var(--bk-gold-deep);margin-inline-end:4px}
+.bk-cn{font-family:var(--font-ui);font-size:.7em;font-weight:700;color:var(--bk-gold-deep);margin-inline-end:3px}
+.bk-comm b{font-weight:700}
+.bk-cite{font-family:var(--font-sacred);font-size:16px;text-align:center;padding:8px 0}
+.bk-cite.bk-loading{color:var(--bk-muted)}
+.bk-daf{margin:6px 0 10px;text-align:center}
+.bk-daf img{display:block;width:100%;height:auto;margin:0 auto;border:1px solid var(--bk-line);background:#fff}
+.bk-daf figcaption{margin-top:4px}
+.bk-daf-cite{font-family:var(--font-sacred);font-size:13px;color:var(--bk-gold-deep)}
+.bk-credit,.bk-license{font-family:Georgia,"Times New Roman",serif;font-size:9.5px;line-height:1.45;color:var(--bk-muted);text-align:center}
+.bk-license{text-align:justify;margin-top:6px}
+/* the page boxes: laid out at real A4 size but invisible on screen (they
+   exist for print and the PDF export; .bk-capture shows them for capture) */
+.bk-print{position:fixed;top:0;left:0;width:210mm;opacity:0;pointer-events:none;z-index:-1}
+.bk-print.bk-capture{position:absolute;opacity:1;z-index:auto}
+.bk-page{width:210mm;height:297mm;padding:9mm 13mm 7mm;background:var(--bk-paper);color:var(--bk-ink);
+  display:flex;flex-direction:column;overflow:hidden;direction:rtl;position:relative;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bk-page::after{content:'';position:absolute;inset:5mm;border:1px solid var(--bk-line);pointer-events:none}
+.bk-ph{flex:none;margin-bottom:4mm}
+.bk-strip{height:5px;border-top:2px solid var(--bk-gold);border-bottom:1px solid var(--bk-line);margin-bottom:3mm}
+.bk-ph-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bk-ph-side{flex:1;font-family:var(--font-sacred);font-size:12px;color:var(--bk-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-ph-lbl{text-align:left}
+.bk-medal{flex:none;display:inline-flex;align-items:center;gap:6px;padding:3px 14px;border:1px solid var(--bk-gold);
+  border-radius:999px;box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line);color:var(--bk-gold-deep)}
+.bk-medal b{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:14px;letter-spacing:.04em}
+.bk-medal i svg{width:9px;height:9px;display:block}
+.bk-pbody{flex:1;min-height:0;overflow:hidden;position:relative}
+.bk-pf{flex:none;text-align:center;font-family:var(--font-sacred);font-size:11px;color:var(--bk-muted);padding-top:2mm}
+.bk-pf span::before,.bk-pf span::after{content:'—';margin:0 6px;color:var(--bk-line)}
+.bk-page .bk-day{padding-bottom:6px;margin-bottom:8px}
+.bk-page .bk-day-t{font-size:22px}
+.bk-page .bk-day-s{font-size:14px}
+.bk-page .bk-day-d{font-size:10.5px}
+.bk-page .bk-sec{margin:2px 0 5px}
+.bk-page .bk-sec-t{font-size:16.5px}
+.bk-page .bk-sec-src{font-size:10px}
+.bk-page .bk-sub{font-size:13px;margin:5px 0 2px}
+.bk-page .bk-rule{margin:8px 0 6px}
+.bk-page .bk-text{font-size:14.5px;line-height:1.72}
+.bk-page .bk-comm{font-size:11.8px;line-height:1.62;margin-top:5px;padding-top:4px}
+.bk-page .bk-cont{margin-top:0;padding-top:0;border-top:none}
+.bk-page .bk-daf img{width:auto;max-width:100%;max-height:218mm}
+.bk-page .bk-credit,.bk-page .bk-license{font-size:8px}
+@media print{
+  @page{size:A4;margin:0}
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;background-image:none!important}
+  body:has(#bkPrint)>*:not(#app){display:none!important}
+  body:has(#bkPrint) #app,body:has(#bkPrint) .bk-view{padding:0!important;margin:0!important;max-width:none!important;width:auto!important}
+  body:has(#bkPrint) .bk-view>:not(#bkPrint){display:none!important}
+  #bkPrint{position:static;opacity:1;z-index:auto;width:auto}
+  .bk-page{break-after:page;page-break-after:always}
+  .bk-page:last-child{break-after:auto;page-break-after:auto}
 }
 </style>
 </head>
@@ -1585,6 +1672,7 @@ const I = {
   users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M15.3 14.3c2.4.4 4.2 2.4 4.2 5"/></svg>',
   liveDot:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="currentColor"/></svg>',
   pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4"/><path d="M9 13.5h1.4a1.3 1.3 0 0 0 0-2.6H9v5.2M13 16.1V11h1.3a1.9 1.9 0 0 1 0 3.8H13z"/></svg>',
+  printer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 8V3.5h10V8"/><rect x="3.5" y="8" width="17" height="8" rx="1.8"/><path d="M7 13.5h10V20.5H7z"/><circle cx="17" cy="10.8" r=".6" fill="currentColor"/></svg>',
   bookmark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   bookmarkOn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>',
   compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-4 2 2-5z" fill="currentColor" stroke="none"/></svg>',
@@ -2963,8 +3051,8 @@ function chokBundleSegs(key,refs){
   return out;
 }
 /* same segments, but carried as verses so a commentary can hang off each one */
-function ckTargumFor(book,c,v){
-  const t=((ckCommFor(book+' '+c+':'+v))||{}).targum;
+function ckTargumFor(book,c,v,key){
+  const t=((ckCommFor(book+' '+c+':'+v,key))||{}).targum;
   return (t&&t.length)?t.join(' '):null;
 }
 function chokVerseSegs(key,refs){
@@ -2975,7 +3063,7 @@ function chokVerseSegs(key,refs){
     if(!p){ segs.forEach(t=>out.push({he:t})); return; }
     let c=p.c1, v=p.v1;
     segs.forEach(t=>{
-      out.push({book:p.book, c, v, he:t, targum:ckTargumFor(p.book,c,v)});
+      out.push({book:p.book, c, v, he:t, targum:ckTargumFor(p.book,c,v,key)});
       v++;
       if(c<p.c2 && v>(HAFTARAH&&HAFTARAH[p.book]&&HAFTARAH[p.book][c]?HAFTARAH[p.book][c].length:0)){ c++; v=1; }
     });
@@ -3408,7 +3496,7 @@ function chokSourceLine(sec,hd){
     return (refs.length?refs.join('  ·  '):'');
   }
   if(sec.key==='tehillim'){
-    const r=portionFor(ckViewHDate());
+    const r=portionFor(hd||ckViewHDate());
     const dash = (S.lang&&S.lang!=='he') ? '-' : CK_DASH;
     if(S.lang&&S.lang!=='he') return ckChrome('סֵפֶר תְּהִלִּים')+' · '+(r[0]===r[1]?ckChrome('פֶּרֶק')+' '+heNum(r[0]):ckChrome('פְּרָקִים')+' '+heNum(r[0])+dash+heNum(r[1]));
     return 'סֵפֶר תְּהִלִּים · '+(r[0]===r[1]?'פֶּרֶק '+heNum(r[0]):'פְּרָקִים '+heNum(r[0])+CK_DASH+heNum(r[1]));
@@ -3462,10 +3550,15 @@ function ckCommLabel(w,id){
   }
   return (S.lang&&S.lang!=='he') ? ckChrome(CK_COMM[w].he) : CK_COMM[w].he;
 }
-function ckCommFor(id){
+/* `key` is optional: the Chok reader always means its own open week (CK.key),
+   but anything rendering a week other than the reader's (the study booklet,
+   or chokVerseSegs building a specific parasha's verses) passes the parasha
+   it is actually rendering, so the lookup never depends on whichever week
+   the reader last happened to open. */
+function ckCommFor(id,key){
   if(/^daf:/.test(id||'')) return ckDafCommFor(id);
   // a doubled week keeps a bundle per parasha, so look in each of them
-  const ks=ckKeysOf(CK.key);
+  const ks=ckKeysOf(key||CK.key);
   for(let i=0;i<ks.length;i++){
     const c=((CHOK_WEEK[ks[i]]||{})._comm||{})[id];
     if(c) return c;
@@ -5193,6 +5286,555 @@ function renderBicReader(){
   app.querySelectorAll('.ck-comm-btn[data-bic]').forEach(b=>b.onclick=()=>bicToggleComm(b));
 }
 
+/* ================= STUDY BOOKLET (חוֹבֶרֶת לִמּוּד) =================
+   A printable / PDF booklet of exactly what the Chok LeYisrael reader shows
+   for a day: chokSlotFor() + chokSectionsFor() over a real date - the same
+   two calls renderZoharYomiReader() already uses to read a day other than
+   the reader's own - so no citation is ever resolved a second way here.
+   Two renderings of one block list (bkBlocks):
+   - on screen, a reflowing sheet at phone width (.bk-sheet);
+   - print and PDF share one set of JS-paginated A4 page boxes (#bkPrint),
+     because only real page boxes can carry the per-page header band
+     (parasha on one side, day + subject on the other) - Chrome's @page
+     margin boxes cannot take a per-section running label.
+   Scope of this round (owner review): ONE day. The week loop (Sun-Thu,
+   Leil Shishi, Fri), the Musar-by-book and Ben Ish Chai year 1/2 sections,
+   the cover/dedication/TOC/back pages and the Motzei Shabbat notification
+   come next, on top of these same pieces. */
+const BK_UI={
+  he:{title:'חוֹבֶרֶת לִמּוּד', brand:'בֵּית אֵל', open:'פְּתַח אֶת הַחוֹבֶרֶת', print:'הַדְפָּסָה', pdf:'PDF',
+      parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
+      contents:'תֹּכֶן הַיּוֹם', empty:'אֵין לִמּוּד לַיּוֹם הַזֶּה', dafWait:'מַמְתִּין לְדַף הַגְּמָרָא…', loading:'טוֹעֵן…',
+      pdfMaking:'מֵכִין PDF…', pdfPage:'עַמּוּד', pdfOf:'מִתּוֹךְ', pdfFail:'שְׁגִיאָה בִּיצִירַת הַ-PDF', pdfSaved:'הַקֹּבֶץ נִשְׁמַר',
+      license:'רִשְׁיוֹן דַּפֵּי הַגְּמָרָא'},
+  en:{title:'Study Booklet', brand:'בֵּית אֵל', open:'Open the booklet', print:'Print', pdf:'PDF',
+      parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
+      contents:"Today's contents", empty:'No study for this day', dafWait:'Waiting for the Gemara page…', loading:'Loading…',
+      pdfMaking:'Preparing PDF…', pdfPage:'page', pdfOf:'of', pdfFail:'Could not create the PDF', pdfSaved:'File saved',
+      license:'Gemara page license'},
+};
+function bkUI(){ return BK_UI[S.lang]||BK_UI.he; }
+/* Musar is its own per-book section in the full booklet (one header per
+   work, the week's days listed underneath), not part of each day. */
+const BK_SKIP={musar:1};
+/* The printed day carries Rashi (and the Metzudot where the bundle has
+   them) always-open under the text; Or HaChaim, Bartenura and the daf's own
+   commentaries stay app-only. Which section each one belongs to still comes
+   from CK_COMM's own `on` list. */
+const BK_COMM_W=['rashi','mdavid','mzion'];
+let BK_DATE=null, BK_ACTION=null;
+/* null = "today's" Chok LeYisrael day; on Shabbat (no portion) that is the
+   coming Sunday, the day a booklet is printed for. */
+function bkDefaultDate(){ const d=chokDayDate(); return d.getDay()===6?addDays(d,1):d; }
+function bkDate(){ return BK_DATE||bkDefaultDate(); }
+function bkStepDate(from,dir){ let d=addDays(from,dir); if(d.getDay()===6) d=addDays(d,dir); return d; }
+function openBooklet(){
+  BK_DATE=null; BK_ACTION=null;
+  // a daf that failed to load last time gets a fresh try
+  Object.keys(BK_DAF).forEach(k=>{ if(BK_DAF[k].state==='fail') delete BK_DAF[k]; });
+  go('bookletHome');
+}
+function bkSlot(date){ return CHOK?chokSlotFor(date):null; }
+function bkReady(date){
+  if(!CHOK) return false;
+  const slot=bkSlot(date); if(!slot) return true;
+  const hd=new HDate(date);
+  return ckWeekReady(slot.key) && !!TORAH && ckCycReady(hd) && ckTanyaReady(hd);
+}
+function ensureBookletDay(date){
+  return ensureChokIndex().then(()=>{
+    const slot=chokSlotFor(date); if(!slot) return;
+    return ensureChokDataFor(slot.key,new HDate(date));
+  });
+}
+function bkSections(date){
+  const slot=bkSlot(date); if(!slot) return {slot:null,hd:null,secs:[]};
+  const hd=new HDate(date);
+  return {slot, hd, secs:chokSectionsFor(slot.key,slot.day,hd).filter(s=>!BK_SKIP[s.key])};
+}
+function bkParashaLine(slot){ return slot?bkUI().parasha+' '+parshaName(slot.key):''; }
+
+/* ---------- the daf: the real scanned Vilna page from shas.org ----------
+   The page shown is the same perpetual-cycle daf the reader shows (CYC.daf
+   via ckCycleIndex, see chokSectionsFor's gemara branch), fetched as a PDF
+   from shas.org's Daf PDF API and drawn to an <img> with PDF.js so it sits
+   in the page flow, prints, and survives html2canvas for the PDF export.
+   shas.org sends no CORS header, so the browser can't read it directly:
+   the web build goes through a same-origin Vercel rewrite (vercel.json,
+   /shas-daf/<masechta>/<daf>/<amud>), the native shells through
+   CapacitorHttp (a native request, not subject to CORS). Any failure (no
+   network, no proxy on a plain static server, an amud the tractate doesn't
+   have) falls back to the plain citation line - never a crash.
+   API keys use shas.org's own spelling; Kinnim, Tamid and Middot sit inside
+   the Meilah volume there, and this app's daf numbers for them are already
+   that volume's Vilna numbers, so their aliases map straight across. */
+const BK_SHAS_KEY={'Berakhot':'berachos','Shabbat':'shabbos','Eruvin':'eruvin','Pesachim':'pesachim','Shekalim':'shekalim',
+  'Yoma':'yoma','Sukkah':'sukkah','Beitzah':'beitzah','Rosh Hashanah':'rosh-hashanah','Taanit':'taanis','Megillah':'megillah',
+  'Moed Katan':'moed-katan','Chagigah':'chagigah','Yevamot':'yevamos','Ketubot':'kesubos','Nedarim':'nedarim','Nazir':'nazir',
+  'Sotah':'sotah','Gittin':'gittin','Kiddushin':'kiddushin','Bava Kamma':'bava-kamma','Bava Metzia':'bava-metzia',
+  'Bava Batra':'bava-basra','Sanhedrin':'sanhedrin','Makkot':'makkos','Shevuot':'shevuos','Avodah Zarah':'avodah-zarah',
+  'Horayot':'horayos','Zevachim':'zevachim','Menachot':'menachos','Chullin':'chullin','Bekhorot':'bechoros','Arakhin':'arachin',
+  'Temurah':'temurah','Keritot':'kereisos','Meilah':'meilah','Kinnim':'kinim','Tamid':'tamid','Middot':'middos','Niddah':'niddah'};
+/* Required by shas.org / HebrewBooks.org for free non-commercial
+   redistribution: this credit beside every page (shas.org's own attribution
+   wording, verbatim), and the full HebrewBooks.org Paragraph 1 license text
+   once in the booklet (bkLicenseBlocks). Do not shorten or drop either. */
+const BK_SHAS_CREDIT='Scanned Shas provided courtesy of shas.org (http://shas.org/dafviewer), hebrewbooks.org (https://www.hebrewbooks.org/shas) and Moznaim (הוצאת ח. וגשל); Redistributed free for non-commercial, educational use under the HebrewBooks License (https://web.archive.org/web/20101028043253/http://hebrewbooks.org/media/terms.html).';
+const BK_HB_LICENSE='1. Limited License: The Society for the Preservation of Hebrew Books hereby grants you a limited, nonexclusive right and license, solely for your personal use, to use the Site view, download, and print the Publications, subject to the following restrictions: (a) No commercial use: a Publication may be used for personal use (including educational use) and not for any commercial purpose; (b) No resale: you may not sell a copy of any Publication (or bundle any Publication with any other product that is sold for a fee), and you may not charge any fee for the use of any Publication; and (c) Local Law: you may not use any Publication in violation of applicable law. Subject to applicable law, you may distribute print or electronic copies of any Publication to any third party free of charge for personal use only and for use in accordance with the terms of this license. If you distribute copies of the Publications to any third party, you must retain any attribution notices that appear in such copies, and you must provide the third party with a complete copy of the limited license set out in this Paragraph 1 of these Terms of Use, including the restrictions on further distribution. Aside from the limited license granted under Paragraph 1 of these Terms of Use, you may not sell, license, or otherwise redistribute the Publications or any material that is provided on the Site and nothing contained herein shall be construed as conferring to you, by implication or otherwise, any license or right to use any copyright, patent, trademark, or other proprietary right of the Society or any third party.';
+const BK_DAF={};   // 'masechta/daf/amud' -> {state:'loading'|'ok'|'fail', p, src, w, h}
+function bkDafKey(e,side){ return BK_SHAS_KEY[e.t]+'/'+e.daf+'/'+side; }
+/* the amudim the reader itself has text for (a tractate's last daf can end
+   on amud a); Shekalim/Kinnim/Middot carry no amud split in the app's data
+   but are still two amudim on the printed Vilna page, so ask for both */
+function bkDafSides(i){
+  const e=ckDafEntry(i); if(e.whole) return ['a','b'];
+  const g=((ckDafRec(i)||{}).g)||{};
+  const s=['a','b'].filter(x=>g[x]&&g[x].length);
+  return s.length?s:['a','b'];
+}
+function bkDafPending(i){
+  const e=ckDafEntry(i); if(!BK_SHAS_KEY[e.t]) return false;
+  return bkDafSides(i).some(side=>{ const st=BK_DAF[bkDafKey(e,side)]; return !st||st.state==='loading'; });
+}
+/* External libraries, fetched only when the booklet actually needs them -
+   never at boot, and never as a static <script> tag (see
+   scripts/check-blocking-resources.mjs). A failed load clears its promise
+   so the next attempt retries instead of staying poisoned. */
+const BK_LIB={
+  pdfjs:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  pdfjsWorker:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  html2canvas:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+};
+const scriptLoadPromises={};
+function loadScriptOnce(src){
+  if(scriptLoadPromises[src]) return scriptLoadPromises[src];
+  scriptLoadPromises[src]=new Promise((res,rej)=>{
+    const s=document.createElement('script'); s.src=src; s.async=true; s.crossOrigin='anonymous';
+    s.onload=()=>res(); s.onerror=()=>{ s.remove(); rej(new Error('script load failed: '+src)); };
+    document.head.appendChild(s);
+  }).catch(e=>{ delete scriptLoadPromises[src]; throw e; });
+  return scriptLoadPromises[src];
+}
+function ensurePdfJs(){
+  return loadScriptOnce(BK_LIB.pdfjs).then(()=>{
+    const lib=window.pdfjsLib||window['pdfjs-dist/build/pdf'];
+    if(!lib) throw new Error('pdf.js missing');
+    lib.GlobalWorkerOptions.workerSrc=BK_LIB.pdfjsWorker;
+    return lib;
+  });
+}
+function bkNativeHttp(){
+  const C=window.Capacitor;
+  return (C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.CapacitorHttp) || null;
+}
+function bkFetchDafPdf(key,daf,amud){
+  const http=bkNativeHttp();
+  if(http){
+    const url='https://www.shas.org/daf-pdf/api/?masechta='+encodeURIComponent(key)+'&daf='+daf+'&amud='+amud;
+    return http.get({url, responseType:'arraybuffer'}).then(r=>{
+      if(r.status!==200) throw new Error('daf http '+r.status);
+      if(typeof r.data==='string'){ const bin=atob(r.data), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+      return new Uint8Array(r.data);
+    });
+  }
+  return fetch('shas-daf/'+encodeURIComponent(key)+'/'+daf+'/'+amud).then(r=>{
+    if(!r.ok || !/pdf/i.test(r.headers.get('content-type')||'')) throw new Error('daf http '+r.status);
+    return r.arrayBuffer();
+  }).then(b=>new Uint8Array(b));
+}
+function bkRenderPdfPage(bytes){
+  return ensurePdfJs().then(lib=>lib.getDocument({data:bytes}).promise).then(pdf=>pdf.getPage(1)).then(pg=>{
+    const vp=pg.getViewport({scale:2});
+    const cv=document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
+    const ctx=cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    return pg.render({canvasContext:ctx, viewport:vp}).promise
+      .then(()=>({src:cv.toDataURL('image/jpeg',0.85), w:cv.width, h:cv.height}));
+  });
+}
+function ensureBkDaf(i){
+  const e=ckDafEntry(i); if(!BK_SHAS_KEY[e.t]) return Promise.resolve();
+  return Promise.all(bkDafSides(i).map(side=>{
+    const k=bkDafKey(e,side);
+    if(BK_DAF[k]) return BK_DAF[k].p;
+    const st={state:'loading'}; BK_DAF[k]=st;
+    st.p=bkFetchDafPdf(BK_SHAS_KEY[e.t],e.daf,side).then(bkRenderPdfPage)
+      .then(r=>{ Object.assign(st,r); st.state='ok'; })
+      .catch(err=>{ st.state='fail'; console.warn('[booklet] daf page unavailable, showing the citation instead:',k,err&&err.message); });
+    return st.p;
+  }));
+}
+
+/* ---------- the day as a list of blocks ----------
+   'day'/'sec'/'sub' headings, 'rule' (the divider - only BETWEEN subjects,
+   never between verses), 'atom' (anything unbreakable: a daf image, a
+   citation line) and 'flow' (a paragraph of inline pieces - verses run on
+   together, each with its number, as in a printed sefer - which the
+   paginator may split between pieces, or inside one between words). */
+function bkP(x){ return `<span class="bk-p">${x}</span>`; }
+function bkVerseNum(v,prev){
+  return (!prev||prev.c!==v.c||prev.book!==v.book) ? heNum(v.c)+':'+heNum(v.v) : heNum(v.v);
+}
+function bkSectionBody(s,slot,B){
+  if(s.kind==='torah'||s.kind==='haftarah'||s.kind==='verse'){
+    const ws=BK_COMM_W.filter(w=>CK_COMM[w].on.indexOf(s.key)>=0);
+    const comm={}; ws.forEach(w=>comm[w]=[]);
+    const pieces=[]; let prev=null;
+    s.items.forEach(v=>{
+      const n=bkVerseNum(v,prev); prev=v;
+      pieces.push(bkP(`<span class="bk-vn">${n}</span>${v.he}${v.targum!=null?` <span class="bk-tg">${v.targum}</span>`:''}`));
+      const id=(v.book&&v.c&&v.v)?`${v.book} ${v.c}:${v.v}`:'';
+      const c=id?ckCommFor(id,slot.key):null;
+      if(c) ws.forEach(w=>(c[w]||[]).forEach((t,i)=>comm[w].push(bkP((i===0?`<span class="bk-cn">${n}</span>`:'')+t))));
+    });
+    B.push({t:'flow', cls:'bk-text', pieces});
+    ws.forEach(w=>{
+      if(!comm[w].length) return;
+      B.push({t:'flow', cls:'bk-comm', pieces:[bkP(`<span class="bk-comm-l">${ckCommLabel(w,'')}</span>`)].concat(comm[w])});
+    });
+    return;
+  }
+  if(s.kind==='tehillim'){
+    let cur=null, pieces=[];
+    const flush=()=>{ if(pieces.length) B.push({t:'flow', cls:'bk-text', pieces}); pieces=[]; };
+    s.items.forEach(x=>{
+      if(x.ch!==cur){ flush(); B.push({t:'sub', html:`<div class="bk-sub">${ckChrome('פֶּרֶק')} ${heNum(x.ch)}</div>`}); cur=x.ch; }
+      pieces.push(bkP(`<span class="bk-vn">${heNum(x.v)}</span>${x.he}`));
+    });
+    flush();
+    return;
+  }
+  if(s.kind==='rambam'){
+    /* same heads and running numbers as the reader's own ramBody() - except
+       that a single-chapter day (the 3-year track) skips its one head, which
+       would only repeat the section's source line word for word */
+    let pieces=[];
+    const flush=()=>{ if(pieces.length) B.push({t:'flow', cls:'bk-text', pieces}); pieces=[]; };
+    const oneChapter=s.items.every(x=>x.i===s.items[0].i);
+    s.items.forEach((x,i)=>{
+      if(!oneChapter && (i===0||s.items[i-1].i!==x.i)){
+        flush();
+        const e=CYC.rambam.order[x.i];
+        B.push({t:'sub', html:`<div class="bk-sub">${ckRambamName(e.book)} · ${ckChrome('פֶּרֶק')} ${heNum(e.ch)}</div>`});
+      }
+      pieces.push(bkP(`<span class="bk-vn">${heNum(i+1)}</span>${x.t}`));
+    });
+    flush();
+    return;
+  }
+  if(s.kind==='daf'){
+    const e=ckDafEntry(s.dIdx);
+    bkDafSides(s.dIdx).forEach(side=>{
+      const cite=ckDafLabel(s.dIdx)+' · '+CK_AMUD[side];
+      const st=BK_SHAS_KEY[e.t]?BK_DAF[bkDafKey(e,side)]:null;
+      if(st&&st.state==='ok') B.push({t:'atom', img:1, html:`<figure class="bk-daf"><img src="${st.src}" width="${st.w}" height="${st.h}" alt=""/><figcaption><div class="bk-daf-cite">${cite}</div><div class="bk-credit" dir="ltr">${BK_SHAS_CREDIT}</div></figcaption></figure>`});
+      else if(st&&st.state==='loading') B.push({t:'atom', html:`<div class="bk-cite bk-loading">${cite} · ${bkUI().loading}</div>`});
+      else B.push({t:'atom', html:`<div class="bk-cite">${cite}</div>`});
+    });
+    return;
+  }
+  /* numbered text (Mishnah, and the bundle fallbacks) runs on with its
+     tags; continuous prose (Zohar, Tanya) keeps one paragraph per piece */
+  if(CK_NO_NUM[s.key]){
+    s.items.forEach(t=>B.push({t:'flow', cls:'bk-text bk-prose', pieces:[bkP(t)]}));
+    return;
+  }
+  B.push({t:'flow', cls:'bk-text', pieces:s.items.map((t,ix)=>{
+    const tag=(s.tags&&s.tags[ix])||heNum(ix+1);
+    return bkP(`<span class="bk-vn">${tag}</span>${t}`);
+  })});
+}
+function bkBlocks(date){
+  const {slot,hd,secs}=bkSections(date);
+  const B=[]; if(!slot) return B;
+  const dayLabel=chokRowLabel(slot.day,slot.dayIdx);
+  B.push({t:'day', label:dayLabel, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
+    <div class="bk-day-s">${bkParashaLine(slot)}</div>
+    <div class="bk-day-d">${localizeHebDateStr(hd.renderGematriya(true))} · ${date.toLocaleDateString(civilDateLocale())}</div></div>`});
+  secs.forEach((s,si)=>{
+    if(si) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
+    const src=chokSourceLine(s,hd);
+    B.push({t:'sec', label:s.he, html:`<div class="bk-sec"><div class="bk-sec-t">${s.he}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
+    bkSectionBody(s,slot,B);
+  });
+  /* the HebrewBooks.org license travels with any booklet that carries one
+     of its pages */
+  if(B.some(b=>b.img)){
+    B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
+    B.push({t:'sub', html:`<div class="bk-sub">${bkUI().license}</div>`});
+    B.push({t:'flow', cls:'bk-license', ltr:1, pieces:[bkP(BK_SHAS_CREDIT)]});
+    B.push({t:'flow', cls:'bk-license', ltr:1, pieces:[bkP(BK_HB_LICENSE)]});
+  }
+  return B;
+}
+function bkBlockHtml(b){
+  if(b.t!=='flow') return b.html;
+  return `<div class="${b.cls}"${b.ltr?' dir="ltr"':''}>${b.pieces.join(' ')}</div>`;
+}
+
+/* ---------- pagination into A4 page boxes (print + PDF) ----------
+   Pours the block list into fixed-size .bk-page boxes, measuring as it
+   goes: headings are kept with at least a couple of lines after them, a
+   divider never opens a page, and a flow that doesn't fit is split between
+   its pieces - or, for one piece longer than the space left, between words
+   (never inside a word, so nikud always stays on its letter). */
+function bkTextNodes(root){ const out=[], w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())) out.push(n); return out; }
+function bkWordCount(node){ return bkTextNodes(node).reduce((a,t)=>a+((t.data.match(/\S+/g)||[]).length),0); }
+/* keep only words [from,to) of a cloned piece, dropping elements left empty */
+function bkKeepWords(root,from,to){
+  let i=0;
+  bkTextNodes(root).forEach(t=>{
+    let out='';
+    t.data.split(/(\s+)/).forEach(p=>{
+      if(!p) return;
+      if(/^\s+$/.test(p)){ if(i>from&&i<to) out+=p; return; }
+      if(i>=from&&i<to) out+=p;
+      i++;
+    });
+    t.data=out;
+  });
+  [...root.querySelectorAll('*')].reverse().forEach(e=>{ if(!e.textContent.trim() && !e.querySelector('img') && e.tagName!=='IMG') e.remove(); });
+  return root;
+}
+function bkPageHtml(meta,no,label){
+  return `<div class="bk-page">
+    <div class="bk-ph"><div class="bk-strip"></div>
+      <div class="bk-ph-row"><span class="bk-ph-side">${meta.parasha}</span><span class="bk-medal"><i>${ORN}</i><b>${bkUI().brand}</b><i>${ORN}</i></span><span class="bk-ph-side bk-ph-lbl">${label}</span></div>
+    </div>
+    <div class="bk-pbody"></div>
+    <div class="bk-pf"><span>${heNum(no)}</span></div>
+  </div>`;
+}
+function bkPaginate(host,blocks,meta){
+  host.innerHTML='';
+  const tmp=document.createElement('div');
+  const el=html=>{ tmp.innerHTML=html.trim(); return tmp.firstElementChild; };
+  /* `pend` = headings placed since the last real content: if that content
+     then has to open a new page, they move over with it instead of being
+     stranded at the foot of the old one. `filled` = real content already
+     on this page (a page holding only moved-over headings is still fresh). */
+  let page=null, body=null, no=0, dayLbl='', secLbl='', filled=false, pend=[];
+  const lbl=()=>[dayLbl,secLbl].filter(Boolean).join(' · ');
+  const newPage=()=>{
+    no++; page=el(bkPageHtml(meta,no,lbl())); host.appendChild(page);
+    body=page.querySelector('.bk-pbody'); filled=false;
+    pend.forEach(h=>body.appendChild(h));
+  };
+  const over=()=>body.scrollHeight>body.clientHeight+1;
+  const relabel=()=>{ const l=page.querySelector('.bk-ph-lbl'); if(l) l.innerHTML=lbl(); };
+  newPage();
+  blocks.forEach(b=>{
+    if(b.t==='day'){ dayLbl=b.label; secLbl=''; }
+    if(b.t==='sec') secLbl=b.label;
+    const heading=(b.t==='day'||b.t==='sec'||b.t==='sub');
+    if(b.t!=='flow'){
+      if(b.t==='rule' && !filled) return;             // a divider never opens a page
+      const n=el(b.html);
+      body.appendChild(n);
+      if(over()){
+        body.removeChild(n);
+        if(b.t==='rule') return;
+        if(filled||pend.length){ newPage(); body.appendChild(n); }
+        else body.appendChild(n);                      // taller than a whole page: let it be
+      }
+      if(heading){ pend.push(n); if(!filled) relabel(); }
+      else { pend=[]; filled=true; }
+      return;
+    }
+    const mkBox=cont=>{ const d=document.createElement('div'); d.className=b.cls+(cont?' bk-cont':''); if(b.ltr) d.dir='ltr'; return d; };
+    let box=mkBox(false); body.appendChild(box);
+    const add=node=>{ if(box.childNodes.length) box.appendChild(document.createTextNode(' ')); box.appendChild(node); };
+    const undo=node=>{ box.removeChild(node); if(box.lastChild&&box.lastChild.nodeType===3) box.removeChild(box.lastChild); };
+    const placed=()=>{ if(box.childNodes.length && !filled){ filled=true; pend=[]; } else if(box.childNodes.length) pend=[]; };
+    b.pieces.forEach(p=>{
+      let node=el(p), guard=0;
+      while(node && guard++<400){
+        add(node);
+        if(!over()){ node=null; placed(); break; }
+        undo(node);
+        // the most words of this piece that still fit here
+        const wc=bkWordCount(node);
+        const fits=k=>{ const a=bkKeepWords(node.cloneNode(true),0,k); add(a); const ok=!over(); undo(a); return ok; };
+        let lo=0, hi=wc-1;
+        while(lo<hi){ const mid=(lo+hi+1)>>1; if(fits(mid)) lo=mid; else hi=mid-1; }
+        const fresh=!filled && !box.childNodes.length && !pend.length;
+        if(lo===0 && fresh){ add(node); node=null; placed(); break; }   // cannot shrink further: let it be
+        if(lo>0){ add(bkKeepWords(node.cloneNode(true),0,lo)); node=bkKeepWords(node.cloneNode(true),lo,Infinity); placed(); }
+        /* if nothing of this block made it onto the page, the box is dropped
+           and its headings (`pend`, non-empty only in that case) move to the
+           next page with it - where it then starts, rather than continues */
+        const started=box.childNodes.length>0;
+        if(!started) body.removeChild(box);
+        newPage(); relabel(); box=mkBox(started); body.appendChild(box);
+      }
+    });
+    if(!box.childNodes.length) body.removeChild(box);
+  });
+  return no;
+}
+function bkBuildPrint(date){
+  const host=document.getElementById('bkPrint'); if(!host) return 0;
+  const {slot}=bkSections(date);
+  return bkPaginate(host, bkBlocks(date), {parasha:bkParashaLine(slot)});
+}
+/* pagination measures real glyphs, so it waits for the reading font */
+function bkFontsReady(){ try{ return (document.fonts&&document.fonts.ready)||Promise.resolve(); }catch(e){ return Promise.resolve(); } }
+
+/* ---------- screens ---------- */
+function bkDayNavHtml(date){
+  const t=bkUI(), isToday=!BK_DATE;
+  return `<div class="ck-daynav-wrap">
+      <button class="sm-aliyah-chip ck-arrow" id="bkPrev" aria-label="${t.prevDay}">${I.prev}</button>
+      <div class="sm-aliyah-tag">${localizeHebDateStr(new HDate(date).renderGematriya(true))}</div>
+      <button class="sm-aliyah-chip ck-arrow" id="bkNext" aria-label="${t.nextDay}">${I.next}</button>
+    </div>
+    ${!isToday?`<div class="sm-aliyah-tag">${t.notToday} · <button class="ck-track-btn" id="bkToday" style="display:inline;padding:2px 10px">${t.today}</button></div>`:''}`;
+}
+function bkWireDayNav(date,rerender){
+  const step=d=>{ BK_DATE=d; rerender(); forceScrollTop(); };
+  const pv=document.getElementById('bkPrev'); if(pv) pv.onclick=()=>step(bkStepDate(date,-1));
+  const nx=document.getElementById('bkNext'); if(nx) nx.onclick=()=>step(bkStepDate(date,1));
+  const td=document.getElementById('bkToday'); if(td) td.onclick=()=>{ BK_DATE=null; rerender(); forceScrollTop(); };
+}
+function renderBookletHome(){
+  stopAutoScroll();
+  const t=bkUI(), date=bkDate();
+  if(!bkReady(date)){
+    app.innerHTML=`${topbar(t.title,'home')}<div class="view">${smSkeleton()}</div>`;
+    ensureBookletDay(date).then(()=>{ if(TAB==='bookletHome'){ renderBookletHome(); tr(app); } })
+      .catch(()=>{ if(TAB==='bookletHome') toast('שְׁגִיאָה בִּטְעִינָה'); });
+    return;
+  }
+  const {slot,hd,secs}=bkSections(date);
+  const rows=secs.map(s=>{
+    const src=chokSourceLine(s,hd);
+    return `<div class="prayer-row round-card" style="cursor:default"><div><div class="prayer-row-title">${s.he}</div>${src?`<div class="qd">${src}</div>`:''}</div></div>`;
+  }).join('');
+  app.innerHTML=`${topbar(t.title,'home')}
+  <div class="view">
+    ${bkDayNavHtml(date)}
+    <div class="sm-week-card" style="cursor:default">
+      <div class="sm-week-text">
+        <div class="sm-week-tag">${slot?chokRowLabel(slot.day,slot.dayIdx):''}</div>
+        <div class="sm-week-name">${slot?parshaName(slot.key):t.empty}</div>
+      </div>
+    </div>
+    ${slot?`<button class="btn btn-gold" id="bkOpenBtn">${t.open} ${I.chev}</button>
+    <div class="bk-actions">
+      <button class="ck-track-btn" id="bkHomePrint">${I.printer}<span>${t.print}</span></button>
+      <button class="ck-track-btn" id="bkHomePdf">${I.pdf}<span>${t.pdf}</span></button>
+    </div>
+    <div class="section-head"><h2>${t.contents}</h2></div>
+    <div class="prayers-list">${rows}</div>`:''}
+    ${ornament()}
+  </div>`;
+  bkWireDayNav(date,renderBookletHome);
+  const ob=document.getElementById('bkOpenBtn'); if(ob) ob.onclick=()=>{ BK_ACTION=null; go('bookletReader'); };
+  const hp=document.getElementById('bkHomePrint'); if(hp) hp.onclick=()=>{ BK_ACTION='print'; go('bookletReader'); };
+  const hf=document.getElementById('bkHomePdf'); if(hf) hf.onclick=()=>{ BK_ACTION='pdf'; go('bookletReader'); };
+}
+function renderBookletReader(){
+  stopAutoScroll();
+  const t=bkUI(), date=bkDate();
+  if(!bkReady(date)){
+    app.innerHTML=`${topbar(t.title,'bookletHome')}<div class="view">${smSkeleton()}</div>`;
+    ensureBookletDay(date).then(()=>{ if(TAB==='bookletReader'){ renderBookletReader(); tr(app); } })
+      .catch(()=>{ if(TAB==='bookletReader') toast('שְׁגִיאָה בִּטְעִינָה'); });
+    return;
+  }
+  const {slot,secs}=bkSections(date);
+  if(!slot){ toast(t.empty); return go('bookletHome'); }
+  const daf=secs.find(s=>s.kind==='daf');
+  if(daf) ensureBkDaf(daf.dIdx);   // starts the fetch (cached), so the blocks below show "loading"
+  app.innerHTML=`
+  <div class="reader view bk-view">
+    <div class="reader-head">
+      <div class="reader-top">
+        <button class="icon-btn" id="bkBack">${I.prev}</button>
+        <div class="reader-title">${t.title}</div>
+      </div>
+      <div class="bic-collapse">
+        ${bkDayNavHtml(date)}
+        <div class="bk-actions">
+          <button class="ck-track-btn" id="bkPrintBtn">${I.printer}<span>${t.print}</span></button>
+          <button class="ck-track-btn" id="bkPdfBtn">${I.pdf}<span>${t.pdf}</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="bk-sheet notranslate" dir="rtl">${bkBlocks(date).map(bkBlockHtml).join('')}</div>
+    <div id="bkPrint" class="bk-print notranslate" dir="rtl" aria-hidden="true"></div>
+    <div style="height:26px"></div>
+  </div>`;
+  document.getElementById('bkBack').onclick=()=>go('bookletHome');
+  bkWireDayNav(date,renderBookletReader);
+  document.getElementById('bkPrintBtn').onclick=()=>bkRun('print');
+  document.getElementById('bkPdfBtn').onclick=()=>bkRun('pdf');
+  const same=()=>TAB==='bookletReader' && +bkDate()===+date;
+  const settle=()=>bkFontsReady().then(()=>{
+    if(!same()) return;
+    bkBuildPrint(date);
+    if(BK_ACTION && !(daf&&bkDafPending(daf.dIdx))){ const a=BK_ACTION; BK_ACTION=null; bkRun(a); }
+  });
+  settle();
+  if(daf && bkDafPending(daf.dIdx)){
+    ensureBkDaf(daf.dIdx).then(()=>{
+      if(!same()) return;
+      const sheet=app.querySelector('.bk-sheet');
+      if(sheet) sheet.innerHTML=bkBlocks(date).map(bkBlockHtml).join('');
+      settle();
+    });
+  }
+}
+/* Print and PDF both wait for the daf page (it changes the pagination),
+   and both use the same #bkPrint pages. */
+function bkRun(action){
+  const date=bkDate(), {secs}=bkSections(date), daf=secs.find(s=>s.kind==='daf');
+  if(daf && bkDafPending(daf.dIdx)){ BK_ACTION=action; toast(bkUI().dafWait); return; }
+  const host=document.getElementById('bkPrint');
+  if(!host) return;
+  if(!host.children.length) bkBuildPrint(date);
+  if(action==='print'){ try{ window.print(); }catch(e){} return; }
+  bkExportPdf(date);
+}
+let BK_PDF_BUSY=false;
+async function bkExportPdf(date){
+  if(BK_PDF_BUSY) return;
+  const t=bkUI();
+  BK_PDF_BUSY=true;
+  toast(t.pdfMaking);
+  try{
+    await Promise.all([loadScriptOnce(BK_LIB.html2canvas), loadScriptOnce(BK_LIB.jspdf)]);
+    await bkFontsReady();
+    const pages=[...document.querySelectorAll('#bkPrint .bk-page')];
+    if(!pages.length) throw new Error('no pages');
+    const doc=new window.jspdf.jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
+    for(let i=0;i<pages.length;i++){
+      toast(`${t.pdfMaking} ${t.pdfPage} ${heNum(i+1)} ${t.pdfOf} ${heNum(pages.length)}`);
+      const cv=await window.html2canvas(pages[i],{scale:2, useCORS:true, backgroundColor:'#fbf7ee', logging:false,
+        /* the page boxes live off-screen and transparent (they're only
+           meant to be seen in print) - make the cloned copy a normal,
+           visible, in-flow element before it is captured */
+        onclone:d=>{ const h=d.getElementById('bkPrint'); if(h) h.classList.add('bk-capture'); }});
+      if(i) doc.addPage();
+      doc.addImage(cv.toDataURL('image/jpeg',0.9),'JPEG',0,0,210,297,undefined,'FAST');
+    }
+    const {slot}=bkSections(date);
+    const name='bet-el-'+(slot?chokSlug(slot.key)+'-'+slot.day:'booklet')+'.pdf';
+    const blob=doc.output('blob');
+    const file=new File([blob],name,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file]}); }catch(e){}
+    } else {
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+      toast(t.pdfSaved);
+    }
+  }catch(e){
+    console.warn('[booklet] PDF export failed:',e&&e.message);
+    toast(t.pdfFail);
+  }finally{ BK_PDF_BUSY=false; }
+}
+
 /* ---------- reader ---------- */
 function renderChokReader(){
   stopAutoScroll();
@@ -5714,6 +6356,8 @@ function render(){
     else if(TAB==='bicHome') renderBicHome();
     else if(TAB==='bicParshiot') renderBicParshiot();
     else if(TAB==='bicReader') renderBicReader();
+    else if(TAB==='bookletHome') renderBookletHome();
+    else if(TAB==='bookletReader') renderBookletReader();
     else if(TAB==='musarList') renderMusarList();
     else if(TAB==='musarYomi') renderMusarYomiReader();
     else if(TAB==='zoharYomi') renderZoharYomiReader();
@@ -5765,7 +6409,7 @@ function render(){
    button on chok/zohar/shnayim's shared .reader-top, or into prayerReader's
    own icon group - rather than floated loose, so it can never land on top
    of a button that is already there. */
-const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1, bicReader:1, musarYomi:1,
+const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1, bicReader:1, musarYomi:1, bookletReader:1,
   libraryTorahReader:1, libraryGemaraReader:1, libraryRambamReader:1, libraryZoharReader:1, libraryMishnahReader:1, libraryNKReader:1};
 function mountToolsFab(){
   if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
@@ -5926,6 +6570,13 @@ function renderHome(){
           <div class="qd">${p?bicParshaName(p):(weekParshaKey?parshaName(weekParshaKey):'')}</div>
         </div>`;
       })()}
+      ${(function(){
+        const slot=CHOK?chokSlotFor(bkDefaultDate()):null;
+        return `<div class="q-tile" data-cat="booklet" id="homeBookletCard">
+          <div class="qt">${heTitle('חוברת לימוד','חוֹבֶרֶת לִמּוּד')}</div>
+          <div class="qd">${slot?parshaName(slot.key)+' · ':''}${ckChrome('לְהַדְפָּסָה')}</div>
+        </div>`;
+      })()}
     </div>
 
     ${(function(){
@@ -5961,6 +6612,7 @@ function renderHome(){
   if(hhb) hhb.onclick=()=>{ LIB.rambamIndex=hh.idx; go('libraryRambamReader'); };
   const hud=document.getElementById('homeUpdateDismiss');
   if(hud) hud.onclick=(e)=>{ e.stopPropagation(); dismissAppUpdate(); };
+  const hbk=document.getElementById('homeBookletCard'); if(hbk) hbk.onclick=()=>openBooklet();
   const hbc=document.getElementById('homeBicCard');
   if(hbc){
     hbc.onclick=()=>openBic();
@@ -10861,6 +11513,8 @@ function navActiveTab(tab){
   tab=tab||'home';
   if(tab==='reader' && RD && !RD.daily) return 'tehillim';
   if(LIBRARY_NESTED_TABS.has(tab)) return 'prayers';
+  // the study booklet opens only from its home-screen card
+  if(tab==='bookletHome'||tab==='bookletReader') return 'home';
   return tab;
 }
 function buildNav(){

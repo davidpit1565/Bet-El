@@ -13,5 +13,8 @@ Thumbs.db
 # Capacitor web asset copy - regenerate with `npm run cap:sync`
 /www
 
+# default output of scripts/booklet-check.mjs
+/booklet-shots/
+
 # Isolated worktrees for background Claude Code agents
 /.claude/worktrees/

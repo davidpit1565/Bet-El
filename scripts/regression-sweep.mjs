@@ -71,6 +71,14 @@ const steps = [
   ['home for musar', () => window.go('home')],
   ['musar list open', () => document.getElementById('homeMusarCard')?.click()],
   ['musar work open', () => document.querySelector('[data-musarday]')?.click()],
+  // study booklet (see scripts/booklet-check.mjs for the full print/PDF check)
+  ['home for booklet', () => window.go('home')],
+  ['booklet home open', () => document.getElementById('homeBookletCard')?.click()],
+  ['booklet home loaded', () => new Promise(r => { const t0 = Date.now(); (function w() { if (document.getElementById('bkOpenBtn') || Date.now() - t0 > 8000) r(); else setTimeout(w, 150); })(); })],
+  ['booklet reader open', () => document.getElementById('bkOpenBtn')?.click()],
+  ['booklet reader loaded', () => new Promise(r => { const t0 = Date.now(); (function w() { if (document.querySelector('.bk-sheet') || Date.now() - t0 > 8000) r(); else setTimeout(w, 150); })(); })],
+  ['booklet next day', () => document.getElementById('bkNext')?.click()],
+  ['booklet back to its home', () => document.getElementById('bkBack')?.click()],
 ];
 
 for (const [label, fn] of steps) {

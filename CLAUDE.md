@@ -139,6 +139,33 @@ in English as usual.
   once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
   for it specifically, enabling the general reminder toggle enables both.
 
+- **Study booklet (חוברת לימוד)** - home card `homeBookletCard` →
+  `openBooklet()` → `renderBookletHome()` (`TAB==='bookletHome'`, day
+  picker + contents + print/PDF) → `renderBookletReader()`
+  (`TAB==='bookletReader'`). Built strictly from the reader's own path:
+  `chokSlotFor(date)` + `chokSectionsFor(key,day,hd)` over a real date
+  (musar filtered out via `BK_SKIP` - it gets its own per-book section in the
+  full booklet); nothing is resolved a second way. `bkBlocks(date)` is one
+  block list rendered twice: a reflowing on-screen `.bk-sheet`, and
+  JS-paginated A4 `.bk-page` boxes in `#bkPrint` (`bkPaginate`) shared by
+  `window.print()` (`@media print` shows only `#bkPrint`) and the PDF
+  export (html2canvas + jsPDF per page, lazy-loaded from cdnjs via
+  `loadScriptOnce`). Real page boxes are what allow the per-page header band
+  (parasha / medallion / day · subject). The Gemara is the real Vilna page
+  image from shas.org's Daf PDF API, rendered to an `<img>` with PDF.js;
+  shas.org has no CORS header, so the web build fetches the same-origin
+  `/shas-daf/<masechta>/<daf>/<amud>` Vercel rewrite (vercel.json) and
+  native uses CapacitorHttp; any failure falls back to the citation line.
+  `BK_SHAS_CREDIT` (beside every page) and `BK_HB_LICENSE` (once, at the
+  end) are license requirements - never drop them. `ckCommFor(id,key)` /
+  `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
+  this kind of not-the-reader's-week rendering. Scope so far: ONE day;
+  still to build: the Sun-Thu/Leil Shishi/Fri week loop, Musar-by-book, Ben
+  Ish Chai year 1 + 2, cover/dedication/TOC/back/blank pages, and the Motzei
+  Shabbat `checkBookletNotification()`. Check with
+  `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
+  emulates the Vercel rewrite, saves screen/print/PDF output).
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
