@@ -9414,10 +9414,11 @@ function siddurBirkotShemaHTML(){
    passage is an Ashkenazi-specific addition; flagged in the build notes
    as a deliberate deviation from the literal brief, backed by the
    sourced text rather than assumed. ---- */
-function siddurArvitShemaHTML(){
+function siddurArvitShemaHTML(info){
   const trA = PT('arvitBlessings'), trS = PT('birkotKriatShema');
   const a = trA ? Object.assign({}, SIDDUR.arvitBlessings, trA) : SIDDUR.arvitBlessings;
   const s = trS ? Object.assign({}, SIDDUR.birkotKriatShema, trS) : SIDDUR.birkotKriatShema;
+  const isShabbatOrYomTov = !!(info && (info.isShabbat || info.isYomTov));
   let html = `<div class="siddur-section-title">${ckChrome('בָּרְכוּ')}</div>`;
   html += siddurParasFromText(a.barchu, true);
   html += `<div class="siddur-section-title">${ckChrome('הַמַּעֲרִיב עֲרָבִים')}</div>`;
@@ -9429,7 +9430,15 @@ function siddurArvitShemaHTML(){
   html += `<div class="siddur-section-title">${ckChrome('בִּרְכַּת גָּאַל יִשְׂרָאֵל')}</div>`;
   html += `<div class="prayer-para">${a.emetVeemunah}</div>`;
   html += `<div class="siddur-section-title">${ckChrome('הַשְׁכִּיבֵנוּ')}</div>`;
-  html += `<div class="prayer-para">${a.hashkiveinu}</div>`;
+  // Hashkiveinu's closing seal differs on Shabbat/Yom Tov - Edot HaMizrach's
+  // own text diverges right after "וְהָגֵן בַּעֲדֵנוּ" (the weekday version
+  // continues with a list of dangers/plagues; Shabbat/Yom Tov's moves
+  // straight to a shorter seal naming Yerushalayim) - previously always
+  // used the weekday wording regardless of day, a genuine gap this
+  // session's siddur-audit workflow found. Veshameru (Exodus 31:16-17) is
+  // said right after, on Shabbat only.
+  html += `<div class="prayer-para">${isShabbatOrYomTov && a.hashkiveinuShabbat ? a.hashkiveinuShabbat : a.hashkiveinu}</div>`;
+  if(info && info.isShabbat) html += `<div class="prayer-para">${a.veshameru}</div>`;
   return html;
 }
 /* ---- Korbanot: Leshem Yichud used to be its own separate section (item 1
@@ -9840,12 +9849,20 @@ function siddurSections(dateObj, info, prayer){
   } else if(prayer==='arvit'){
     const trAB = PT('arvitBlessings');
     const ab = trAB ? Object.assign({}, SIDDUR.arvitBlessings, trAB) : SIDDUR.arvitBlessings;
+    // The opening verses before Barchu, and whether Vehu Rachum is said at
+    // all, both depend on the day - previously always used the weekday
+    // verses and always said Vehu Rachum, even on Shabbat/Yom Tov, a
+    // genuine gap this session's siddur-audit workflow found. Vehu Rachum
+    // itself is weekday-only (omitted Friday night and on Yom Tov); the
+    // Shabbat/Yom Tov opening verses are a different, longer quote
+    // ("Yimloch Hashem" through "Kol HaNeshama").
+    const isShabbatOrYomTovArvit = info.isShabbat || info.isYomTov;
     let opening = siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), ab.leshemYichud);
-    opening += `<div class="prayer-para">${ab.openingVerses}</div>`;
+    opening += `<div class="prayer-para">${isShabbatOrYomTovArvit && ab.openingVersesShabbat ? ab.openingVersesShabbat : ab.openingVerses}</div>`;
     opening += siddurChatziKaddishHTML();
-    opening += `<div class="prayer-para">${ab.vehuRachum}</div>`;
+    if(!isShabbatOrYomTovArvit) opening += `<div class="prayer-para">${ab.vehuRachum}</div>`;
     push('opening','לְשֵׁם יִחוּד', opening);
-    push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML());
+    push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML(info));
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
     push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
     // Arvit has no chazan repetition, so the Kaddish right after the
