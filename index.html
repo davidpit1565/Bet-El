@@ -1440,6 +1440,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-text.bk-prose+.bk-text.bk-prose{margin-top:6px}
 .bk-cols.bk-prose .bk-p{display:block}
 .bk-cols.bk-prose .bk-p+.bk-p{margin-top:6px}
+.bk-ml{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:.9em;color:var(--bk-gold-deep);margin-inline-end:.45em}
 /* verse / halacha markers: a bold gold numeral near body size, sitting on
    the baseline of the line it opens (not a raised superscript) */
 .bk-vn{font-family:"Frank Ruhl Libre",var(--font-sacred);font-size:.82em;font-weight:700;color:var(--bk-gold-deep);vertical-align:baseline;margin-inline-end:.28em}
@@ -5739,6 +5740,7 @@ function bkBlocks(date){
   const {slot,hd,secs}=bkSections(date);
   const B=[]; if(!slot) return B;
   const dayLabel=chokRowLabel(slot.day,slot.dayIdx);
+  let musarDone=false;
   B.push({t:'day', label:dayLabel, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
     <div class="bk-day-s">${bkParashaLine(slot)}</div>
     <div class="bk-day-d">${localizeHebDateStr(hd.renderGematriya(true))} · ${date.toLocaleDateString(civilDateLocale())}</div></div>`});
@@ -5751,8 +5753,9 @@ function bkBlocks(date){
     const src=chokSourceLine(s,hd);
     B.push({t:'sec', label:s.he, dafSec:dafFull, html:`<div class="bk-sec"><div class="bk-sec-t">${s.he}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,slot,B);
+    if(s.key==='halacha'){ bkMusarSection(hd,B); musarDone=true; }
   });
-  bkMusarBlocks(date,hd,slot,B);
+  if(!musarDone) bkMusarSection(hd,B);
   /* the HebrewBooks.org license travels with any booklet that carries one
      of its pages: on screen here, at the end of the day; in print, once on
      the back page (bkBackHtml), with the scans' credit */
@@ -5764,34 +5767,26 @@ function bkBlocks(date){
   }
   return B;
 }
-/* The Musar part opens a new page ('brk'): a part heading, then per work
-   the book name, its source line (ckMusarSourceLabel without the book-name
-   prefix the heading already shows - as the Musar list screen does) and the
-   reader's own note for a work with no vocalized edition, then the text.
-   Musar is continuous prose, like the Zohar, so it prints the same way:
-   one flow per work, paragraphs as blocks, in two columns (.bk-cols). */
+/* Musar is one plain subject of the day (the owner's call - no header per
+   book): all six works' text for the day, read as the reader reads it
+   (ckMusarIndexes + ckMusarSegs), run on in sequence as one two-column flow
+   like the Zohar, each work opened by a small inline label with its name. */
 function bkMusarWorks(hd){
   if(BK_MUSAR_FAIL||!MCYC) return [];
   const t=ckMusarUI();
   return MUSAR_WORKS.filter(w=>MCYC[w.key]&&ckMusarReady(w.key,hd)).map(w=>{
     const idxs=ckMusarIndexes(w.key,hd), items=[];
     idxs.forEach(i=>items.push(...ckMusarSegs(w.key,i)));
-    const name=t[w.key], full=ckMusarSourceLabel(w.key,idxs);
-    const src=full.indexOf(name+' · ')===0?full.slice(name.length+3):full;
-    return {key:w.key, name, src, items, note:MCYC[w.key].vocalized===false?'אֵין מַהֲדוּרָה מְנֻקֶּדֶת':''};
+    return {key:w.key, name:t[w.key], items};
   }).filter(w=>w.items.length);
 }
-function bkMusarBlocks(date,hd,slot,B){
+function bkMusarSection(hd,B){
   const works=bkMusarWorks(hd); if(!works.length) return;
-  const title=bkUI().musar;
-  B.push({t:'day', brk:1, label:title, tocSub:'', html:`<div class="bk-day bk-part"><div class="bk-day-t">${title}</div>
-    <div class="bk-day-s">${bkParashaLine(slot)}</div>
-    <div class="bk-day-d">${localizeHebDateStr(hd.renderGematriya(true))} · ${date.toLocaleDateString(civilDateLocale())}</div></div>`});
-  works.forEach((w,wi)=>{
-    if(wi) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
-    B.push({t:'sec', label:w.name, html:`<div class="bk-sec"><div class="bk-sec-t">${w.name}</div><div class="bk-sec-src">${w.src}</div>${w.note?`<div class="bk-sec-src">${w.note}</div>`:''}</div>`});
-    B.push({t:'flow', cls:'bk-text bk-prose bk-cols', pieces:w.items.map(bkP)});
-  });
+  const title=bkUI().musar, pieces=[];
+  works.forEach(w=>w.items.forEach((t,i)=>pieces.push(bkP((i?'':`<span class="bk-ml">${w.name}</span>`)+t))));
+  B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
+  B.push({t:'sec', label:title, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div></div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose bk-cols', pieces});
 }
 function bkBlockHtml(b){
   if(b.t!=='flow') return b.html;
@@ -5875,7 +5870,6 @@ function bkPaginate(host,blocks,meta){
     if(b.t==='day'){ dayLbl=b.label; secLbl=''; }
     if(b.t==='sec') secLbl=b.label;
     if(b.noPrint) return;
-    if(b.brk && (filled||body.childNodes.length)){ pend=[]; needNew=false; newPage(); }
     if(b.dafSec){ pend=[]; tocDaf=b.label; return; }  // the scans' own pages name the subject
     if(b.t==='atom' && b.daf){ dafPage(b.daf); return; }
     if(needNew){ if(b.t==='rule') return; needNew=false; newPage(); }
@@ -6367,7 +6361,9 @@ function renderBookletHome(){
   const {slot,hd,secs}=bkSections(date);
   const row=(title,src)=>`<div class="prayer-row round-card" style="cursor:default"><div><div class="prayer-row-title">${title}</div>${src?`<div class="qd">${src}</div>`:''}</div></div>`;
   const mw=hd?bkMusarWorks(hd):[];
-  const rows=secs.map(s=>row(s.he,chokSourceLine(s,hd))).join('')+(mw.length?row(t.musar,mw.map(w=>w.name).join(' · ')):'');
+  const mrow=mw.length?row(t.musar,mw.map(w=>w.name).join(' · ')):'';
+  let rows=secs.map(s=>row(s.he,chokSourceLine(s,hd))+(s.key==='halacha'?mrow:'')).join('');
+  if(!secs.some(s=>s.key==='halacha')) rows+=mrow;
   app.innerHTML=`${topbar(t.title,'home')}
   <div class="view">
     ${bkDayNavHtml(date)}
