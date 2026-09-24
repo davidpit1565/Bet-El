@@ -1600,11 +1600,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;margin:0 0 .6mm}
 .bk-toc-day span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13.5px;color:var(--bk-gold-deep)}
 .bk-toc-day small{font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
+.bk-toc-row span{white-space:nowrap}
 .bk-toc-row{display:flex;align-items:baseline;gap:1.5mm;padding-inline-start:2.5mm;font-family:var(--font-sacred);font-size:12px;line-height:1.5}
 .bk-toc-row::after{content:'';order:1;flex:1;min-width:4mm;border-bottom:1px dotted rgba(125,95,42,.55);transform:translateY(-.28em)}
-.bk-toc-row b{order:2;min-width:6mm;text-align:left;font-weight:700;color:var(--bk-gold-deep)}
-.bk-toc-soon span{color:var(--bk-muted)}
-.bk-toc-soon b{font-weight:400;font-size:10.5px;color:var(--bk-muted)}
+/* one fixed page-number column for every row, so every leader ends at the same point */
+.bk-toc-row b{order:2;flex:none;width:7.5mm;text-align:left;font-weight:700;color:var(--bk-gold-deep)}
+.bk-toc-soon b{font-weight:400;color:var(--bk-muted);text-align:center}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
 .bk-back-t span{display:block}
@@ -6340,7 +6341,9 @@ function bkTocHtml(days){
     h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${d.label}</span><small>${d.sub||''}</small></div>${d.items.map(i=>row(i.label,pg(i.pg))).join('')}</div>`;
     lines+=d.items.length+2;
   });
-  h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${t.tocBic}</span></div>${t.tocBicY.map(y=>row(y,t.tocSoon,'bk-toc-soon')).join('')}</div>`;
+  /* "in preparation" is said once, beside the heading - where a day's parasha
+     sits - so its two rows are plain one-line rows like every other */
+  h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${t.tocBic}</span><small>${t.tocSoon}</small></div>${t.tocBicY.map(y=>row(y,'—','bk-toc-soon')).join('')}</div>`;
   lines+=4;
   return bkMatterPage('bk-tocpage','',`<div class="bk-toc">
     <div class="bk-toc-h">${t.tocTitle}</div>${bkRuleHtml()}

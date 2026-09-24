@@ -221,7 +221,10 @@ in English as usual.
   line per subject with its page (`bkTocDays` groups `meta.toc`,
   `bkTocHtml` draws it). A long list sets in 2 columns (>30 lines) or 3 (>60,
   a whole week) - the owner's hard target is ONE page for a full week; a
-  patched-copy mockup of all seven rows fits one page in 3 columns. The
+  patched-copy mockup of all seven rows fits one page in 3 columns.
+  Every row shares one fixed-width page-number column so all leaders end
+  on one line; placeholder rows (Ben Ish Chai) show "—" there, with
+  "בְּהֲכָנָה" once beside their heading (where a day shows its parasha). The
   Mishnah prints without its source line (it read as a Gemara citation);
   instead a "פֶּרֶק ב׳" sub-heading when the chapter changes and each mishnah
   its own paragraph under its own "מִשְׁנָה י׳" heading block (`.bk-mn`, a
