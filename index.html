@@ -1590,14 +1590,18 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-toc-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:26px;color:var(--bk-gold-deep)}
 .bk-toc .bk-rule{width:46mm;margin:2mm auto 2.5mm}
 .bk-toc-list{align-self:stretch}
-.bk-toc-day{display:flex;align-items:baseline;justify-content:space-between;gap:3mm;margin:3.2mm 0 1mm;padding-bottom:.8mm;border-bottom:1px solid var(--bk-line)}
-.bk-toc-day span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:16px;color:var(--bk-gold-deep)}
-.bk-toc-day small{font-family:var(--font-sacred);font-size:11px;color:var(--bk-muted)}
-.bk-toc-row{display:flex;align-items:baseline;gap:2mm;padding:.55mm 3mm .55mm 0;font-family:var(--font-sacred);font-size:13px}
-.bk-toc-dots{flex:1;border-bottom:1px dotted rgba(125,95,42,.55);transform:translateY(-.3em)}
-.bk-toc-p{min-width:9mm;text-align:left;font-weight:700;color:var(--bk-gold-deep)}
-.bk-toc-soon .bk-toc-l{color:var(--bk-muted)}
-.bk-toc-soon em{font-style:normal;font-weight:400;font-size:11px;color:var(--bk-muted)}
+.bk-toc-dblk{margin:0 0 2.6mm}
+.bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;padding-bottom:.6mm;border-bottom:1px solid var(--bk-line);margin-bottom:1mm}
+.bk-toc-day span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:14.5px;color:var(--bk-gold-deep)}
+.bk-toc-day small{flex:1;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
+.bk-toc-items{display:grid;grid-template-columns:repeat(5,1fr);column-gap:3.2mm;row-gap:.2mm;font-family:var(--font-sacred);font-size:11.5px;line-height:1.6}
+.bk-toc-it{display:flex;align-items:baseline;gap:1mm;white-space:nowrap;min-width:0}
+.bk-toc-it::after{content:'';order:1;flex:1;min-width:1.5mm;border-bottom:1px dotted rgba(125,95,42,.5);transform:translateY(-.25em)}
+.bk-toc-it b{order:2}
+.bk-toc-it b{font-weight:700;color:var(--bk-gold-deep);font-size:11px}
+.bk-toc-soon{grid-column:span 2}
+.bk-toc-soon span{color:var(--bk-muted)}
+.bk-toc-soon b{font-weight:400;color:var(--bk-muted)}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
 .bk-back-t span{display:block}
@@ -5757,7 +5761,10 @@ function bkBlocks(date){
        names the subject there) */
     const dafFull=s.kind==='daf' && bkDafFull(s.dIdx);
     if(si) B.push({t:'rule', noPrint:dafFull, html:`<div class="bk-rule"><span>${ORN}</span></div>`});
-    const src=chokSourceLine(s,hd);
+    /* the Mishnah prints without its source line - "מסכת X · פרק:משנה"
+       read as a leftover Gemara citation beside the Gemara's own pages
+       (owner's call); each mishnah keeps its own number tag */
+    const src=s.key==='mishnah'?'':chokSourceLine(s,hd);
     B.push({t:'sec', label:s.he, dafSec:dafFull, html:`<div class="bk-sec"><div class="bk-sec-t">${s.he}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,slot,B);
     if(s.key==='halacha'){ bkMusarSection(hd,B); musarDone=true; }
@@ -6289,17 +6296,30 @@ function bkDedicationHtml(){
 /* the contents page: by day (each day, then its subjects with the page they
    start on), then the Ben Ish Chai tracks - listed for the full booklet's
    shape, still to be built (no page yet) */
-function bkTocHtml(toc,parasha){
-  const t=bkUI();
-  const row=(label,pg,cls)=>`<div class="bk-toc-row${cls?' '+cls:''}"><span class="bk-toc-l">${label}</span><span class="bk-toc-dots"></span><span class="bk-toc-p">${pg}</span></div>`;
-  let h='';
+/* toc entries -> day groups [{label, sub, items:[{label, pg}]}] */
+function bkTocDays(toc,parasha){
+  const pgOf=e=>{ const p=e.el&&e.el.closest&&e.el.closest('.bk-page'); return p&&p.dataset.no?+p.dataset.no:null; };
+  const days=[];
   toc.forEach(e=>{
-    const pg=e.el&&e.el.closest?((e.el.closest('.bk-page')||{}).dataset||{}).no:null;
-    if(e.t==='day') h+=`<div class="bk-toc-day"><span>${e.label}</span><small>${e.sub!=null?e.sub:parasha}</small></div>`;
-    else h+=row(e.label, pg?heNum(+pg):'');
+    if(e.t==='day') days.push({label:e.label, sub:e.sub!=null?e.sub:parasha, pg:pgOf(e), items:[]});
+    else if(days.length) days[days.length-1].items.push({label:e.label, pg:pgOf(e)});
   });
-  h+=`<div class="bk-toc-day"><span>${t.tocBic}</span></div>`;
-  t.tocBicY.forEach(y=>{ h+=row(`${t.tocBic} — ${y}`, `<em>${t.tocSoon}</em>`, 'bk-toc-soon'); });
+  return days;
+}
+/* The contents page, compact enough for a whole week on one page: per day a
+   heading line (name, parasha) and its subjects in an aligned five-across
+   grid of "subject ··· page"; then Ben Ish Chai, listed for the
+   full booklet's shape and still to be built (no page yet). */
+function bkTocHtml(days){
+  const t=bkUI();
+  const pg=n=>n?heNum(n):'';
+  let h='';
+  days.forEach(d=>{
+    h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${d.label}</span><small>${d.sub||''}</small></div>
+      <div class="bk-toc-items">${d.items.map(i=>`<span class="bk-toc-it"><span>${i.label}</span><b>${pg(i.pg)}</b></span>`).join('')}</div></div>`;
+  });
+  h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${t.tocBic}</span><small></small></div>
+    <div class="bk-toc-items">${t.tocBicY.map(y=>`<span class="bk-toc-it bk-toc-soon"><span>${y}</span><b>${t.tocSoon}</b></span>`).join('')}</div></div>`;
   return bkMatterPage('bk-tocpage','',`<div class="bk-toc">
     <div class="bk-toc-h">${t.tocTitle}</div>${bkRuleHtml()}
     <div class="bk-toc-list">${h}</div>
@@ -6332,7 +6352,7 @@ function bkBuildPrint(date){
   const blocks=bkBlocks(date), toc=[];
   const n=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:4, toc});
   const slotEl=host.querySelector('.bk-toc-slot');
-  slotEl.insertAdjacentHTML('afterend',bkTocHtml(toc,bkParashaLine(slot))); slotEl.remove();
+  slotEl.insertAdjacentHTML('afterend',bkTocHtml(bkTocDays(toc,bkParashaLine(slot)))); slotEl.remove();
   /* the Gemara scans' credit + HebrewBooks.org license: once, on the back */
   host.insertAdjacentHTML('beforeend',bkBackHtml(blocks.some(b=>b.img))+bkBlankHtml());
   return n+3;

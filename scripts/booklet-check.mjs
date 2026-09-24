@@ -95,6 +95,8 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
     dedication: !!document.querySelector('#bkPrint .bk-page.bk-dedic'),
     back: !!document.querySelector('#bkPrint .bk-page.bk-backpage'),
     order: [...document.querySelectorAll('#bkPrint .bk-page')].map(pg => ['bk-cover','bk-blank','bk-dedic','bk-tocpage','bk-backpage'].find(c => pg.classList.contains(c)) || 'content'),
+    // every two-column flow (Halacha, Musar, Zohar) must really lay out in 2 columns, at body size
+    cols: [...document.querySelectorAll('#bkPrint .bk-cols')].map(e => { const cs = getComputedStyle(e), pg = e.closest('.bk-page'); return { lbl: (pg.querySelector('.bk-ph-lbl') || {}).textContent, n: cs.columnCount, fs: cs.fontSize }; }),
     musarBooks: [...document.querySelectorAll('#bkPrint .bk-sec-t')].map(e => e.textContent).filter((v, i, a) => a.indexOf(v) === i),
     qrImgs: document.querySelectorAll('#bkPrint .bk-qr img, #bkPrint .bk-cv-qr img').length,
     dafPages: [...document.querySelectorAll('#bkPrint .bk-dafpage')].map(pg => {
@@ -106,6 +108,9 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   if (!info.dafImgs) errs.push('no daf image rendered with the proxy in place');
   if (info.overflow) errs.push(info.overflow + ' page(s) overflow their body');
   if (!info.cover || !info.dedication || !info.back) errs.push('missing cover/dedication/back page');
+  const badCols = info.cols.filter(c => c.n !== '2' || c.fs !== '14px');
+  if (!info.cols.length || badCols.length) errs.push('two-column flows wrong: ' + JSON.stringify(badCols.slice(0, 3)));
+  if (!info.cols.some(c => /מוּסָר/.test(c.lbl))) errs.push('no two-column Musar flow found');
   // printed-booklet order: cover, blank, dedication, contents, ... back page, closing blank
   const o = info.order, want = ['bk-cover', 'bk-blank', 'bk-dedic', 'bk-tocpage'];
   if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(4, -2).some(c => c !== 'content'))

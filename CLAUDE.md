@@ -216,7 +216,13 @@ in English as usual.
   title, and resolves it to its final page's `data-no` - a heading carried
   to the next page moves with its node, so the number is exact) - then the
   Ben Ish Chai year 1/2 entries as placeholders ("בְּהֲכָנָה", no content
-  or page yet). Printed-booklet order (asserted by booklet-check): cover,
+  or page yet). The contents page is compact by design, so a whole week
+  fits one page: per day a heading line (name, parasha) and a five-across
+  grid of "subject ··· page" (`bkTocDays` groups `meta.toc`, `bkTocHtml`
+  draws it; a patched-copy mockup of all seven rows filled exactly one
+  page). The Mishnah prints without its source line (owner's call - it read
+  as a Gemara citation); each mishnah keeps its number tag.
+  Printed-booklet order (asserted by booklet-check): cover,
   a blank (the inside of the cover), dedication, contents, the day's pages
   (Musar inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
   numbered on from the cover (cover 1, blank 2, dedication 3, contents 4,
