@@ -187,8 +187,8 @@ in English as usual.
   run-on verses); Tehillim/Rambam/Mishnah still run on. Halacha (Rambam)
   and Zohar print in two columns (`.bk-cols`, CSS columns inside `.bk-page`
   only; the Zohar is ONE flow with block paragraphs so it runs down the
-  columns continuously; the centre rule is a 1px background gradient
-  because html2canvas doesn't draw `column-rule`).
+  columns continuously; no rule between the columns - the owner wants the
+  gap alone).
   `BK_SHAS_CREDIT` and `BK_HB_LICENSE` are license requirements - never
   drop them. In print they appear once, together, on the back page (owner's
   decision, replacing a per-scan credit line); on screen the reader keeps
