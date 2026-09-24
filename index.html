@@ -3203,11 +3203,21 @@ function chokVerseSegs(key,refs){
     const segs=b[r]; if(!Array.isArray(segs)) return;
     const p=chokParseRef(r);
     if(!p){ segs.forEach(t=>out.push({he:t})); return; }
+    /* where a chapter ends: a ref spanning one chapter boundary ("c1:v1-c2:v2",
+       every such ref in the schedule) carries it itself - its last v2
+       segments are chapter c2, so c1 ends at v1+(segments-v2)-1. The
+       Haftarah data was used before, but it has no Ketuvim books and isn't
+       always loaded, which read as length 0 and renumbered every verse after
+       the first (Proverbs 3:34-4:3 came out 3:34, 4:1..4:4, with each
+       verse's Targum and commentary looked up one verse off). */
+    const c1len = p.c2===p.c1+1 ? p.v1+(segs.length-p.v2)-1 : null;
+    const lenOf = c => (c===p.c1&&c1len!=null) ? c1len
+      : (HAFTARAH&&HAFTARAH[p.book]&&HAFTARAH[p.book][c]?HAFTARAH[p.book][c].length:0);
     let c=p.c1, v=p.v1;
     segs.forEach(t=>{
       out.push({book:p.book, c, v, he:t, targum:ckTargumFor(p.book,c,v,key)});
       v++;
-      if(c<p.c2 && v>(HAFTARAH&&HAFTARAH[p.book]&&HAFTARAH[p.book][c]?HAFTARAH[p.book][c].length:0)){ c++; v=1; }
+      if(c<p.c2 && v>lenOf(c)){ c++; v=1; }
     });
   });
   return out;

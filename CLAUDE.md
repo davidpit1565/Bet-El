@@ -253,7 +253,13 @@ in English as usual.
   Ish Chai year 1 + 2 (listed in the TOC already), and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
-  emulates the Vercel rewrite, saves screen/print/PDF output).
+  emulates the Vercel rewrite, saves screen/print/PDF output), and
+  `node scripts/booklet-audit.mjs [YYYY-MM-DD] [out.json]` (content audit:
+  every segment the reader's own resolvers give for the day - verses,
+  Targum, each commentary, Mishnah, Rambam, Zohar, Tanya, all Musar works -
+  must appear word for word in the printed pages; plus stranded headings,
+  overflow, duplicate source lines, back-page license). Both exit non-zero
+  on any finding.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
@@ -304,6 +310,16 @@ in English as usual.
   (index modulo the order length), both have exposed real bugs before -
   fake the date (`Date` override via `addInitScript`) to reach them rather
   than waiting for the real calendar.
+- **Nevi'im/Ketuvim refs that cross a chapter** ("Proverbs 3:34-4:3", 91 of
+  them in the schedule, every one crossing exactly one boundary) carry
+  their own chapter split: the last `v2` segments are chapter `c2`, so
+  `c1` ends at `v1+(segments-v2)-1` (`chokVerseSegs`). It used to take the
+  length from the Haftarah data, which has no Ketuvim and isn't always
+  loaded, so every verse after the first was renumbered and its Targum and
+  commentary looked up one verse off. The original data prep had the same
+  bug: those first-chapter verses had no commentary at all until
+  `scripts/fill-cross-chapter-comm.py` filled them (136 verses, from the
+  same Sefaria editions, verified text-for-text first).
 - If a Playwright script hangs with clean system resources (`free -h`,
   `uptime`, no leftover `chrome-linux/chrome` processes), don't assume
   it's a real app bug from one flaky run - isolate that exact case alone
