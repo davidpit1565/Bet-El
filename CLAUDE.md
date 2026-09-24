@@ -164,18 +164,29 @@ in English as usual.
   Gemara section's title/divider are print-hidden (`dafSec`/`noPrint`
   blocks); no credit line on the scan pages - see the license note below.
   `bkBuildPrint` wraps the day in front/back matter built from the same
-  frame/strip/medallion: cover (`bkCoverHtml`: the gold medallion, the
-  real icon-512 logo tile in a gold ring and the booklet name, framed by
-  thin blue corner ornaments - `bkCornersHtml()`/`.bk-corner`, which
-  replaced an earlier filled navy panel at the owner's request - then the
-  parasha as the title, Hebrew then civil date, QR), a full sefer-style
-  dedication page
-  (`bkDedicationHtml`: gold double frame, בס״ד, small logo, each block
-  framed by the same blue corners as the cover, memorial + blessing wording from
-  `BK_UI` dedLead/dedMerit/dedTnzbh/dedBless/dedFoot around the names in
-  `BK_DEDICATION` - the owner's confirmed names, verbatim, never "fix" them;
-  empty = a blank line) and
-  back page (`bkBackHtml`, credits/distribution text + QR, plus - whenever
+  frame/strip/medallion, except the cover and dedication, which are
+  full-page ornament compositions modelled on the owner's reference booklet
+  ("האוצר", נהר שלום): one inline SVG per page (`ornCoverSvg` /
+  `ornDedicationSvg`, from a small kit - `ornSpiral`, `ornEmboss` (every
+  motif drawn as highlight + shadow + mid tone for an embossed look),
+  scroll wallpaper / scroll-column `<pattern>`s, rope-twist lobes
+  `ornRopeV`/`ornRopeRing`, `ornCrest`, `ornLaceArc`, `ornPlaque`) under
+  absolutely placed HTML (`.bk-ol`) for all text, the logo and the QR. Every
+  root `<svg>` needs `xmlns` or html2canvas can't draw it; text stays HTML
+  (html2canvas can't use web fonts inside an SVG image), including the
+  medallion's ring text (`ornRingText`, one rotated span per letter, the
+  Bet El verses Bereshit 28:17/19 in `BK_UI.ring`). Cover: rope-and-scroll
+  side columns, a faint scroll-engraved centre panel, the logo tile above a
+  round medallion (rope ring, ring text, lace, "בֵּית אֵל" between crests),
+  "חוֹבֶרֶת לִמּוּד", the parasha in the bevelled plaque, dates, QR.
+  Dedication: a scroll-filled bevelled frame with an arched shield panel
+  (lace arch, ribbon band carrying "לְעִלּוּי נִשְׁמַת", a candle in the
+  pointed foot) holding the memorial + blessing wording from
+  `BK_UI` dedLead/dedMerit/dedTnzbh/dedBless/dedAmen/dedFoot around the
+  names in `BK_DEDICATION` - the owner's confirmed names, verbatim, never
+  "fix" them; empty = a blank line. And a
+  back page (`bkBackHtml`, credits/distribution text + QR, the support
+  contact block (`BK_UI.contactH`/`contact`, info@bet-el.be), plus - whenever
   the booklet carries a daf scan - the small-print legal block with
   `BK_SHAS_CREDIT` and the full `BK_HB_LICENSE`). The QR is the
   App Store link from `appQrSrc()` (shared with `appQrImage()`); QR and logo

@@ -94,7 +94,7 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
     cover: !!document.querySelector('#bkPrint .bk-page.bk-cover'),
     dedication: !!document.querySelector('#bkPrint .bk-page.bk-dedic'),
     back: !!document.querySelector('#bkPrint .bk-page.bk-backpage:last-child'),
-    qrImgs: document.querySelectorAll('#bkPrint .bk-qr img').length,
+    qrImgs: document.querySelectorAll('#bkPrint .bk-qr img, #bkPrint .bk-cv-qr img').length,
     dafPages: [...document.querySelectorAll('#bkPrint .bk-dafpage')].map(pg => {
       const im = pg.querySelector('.bk-dafimg'), b = pg.querySelector('.bk-pbody');
       return { img: im ? [im.clientWidth, im.clientHeight] : null, body: [b.clientWidth, b.clientHeight], extra: b.children.length - 1 };
