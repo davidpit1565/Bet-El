@@ -1577,6 +1577,18 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-qr img{width:40mm;height:40mm;display:block;padding:3mm;border:1px solid var(--bk-gold);border-radius:3mm;background:var(--bk-paper)}
 .bk-qr-cap{font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
 .bk-qr-url{font-family:var(--font-ui);font-size:9px;color:var(--bk-muted);direction:ltr}
+.bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:6mm 4mm 0}
+.bk-toc-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:26px;color:var(--bk-gold-deep)}
+.bk-toc .bk-rule{width:46mm;margin:3mm auto 5mm}
+.bk-toc-list{align-self:stretch}
+.bk-toc-day{display:flex;align-items:baseline;justify-content:space-between;gap:3mm;margin:4.5mm 0 1.5mm;padding-bottom:1mm;border-bottom:1px solid var(--bk-line)}
+.bk-toc-day span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:16px;color:var(--bk-gold-deep)}
+.bk-toc-day small{font-family:var(--font-sacred);font-size:11px;color:var(--bk-muted)}
+.bk-toc-row{display:flex;align-items:baseline;gap:2mm;padding:1.2mm 3mm 1.2mm 0;font-family:var(--font-sacred);font-size:13.5px}
+.bk-toc-dots{flex:1;border-bottom:1px dotted rgba(125,95,42,.55);transform:translateY(-.3em)}
+.bk-toc-p{min-width:9mm;text-align:left;font-weight:700;color:var(--bk-gold-deep)}
+.bk-toc-soon .bk-toc-l{color:var(--bk-muted)}
+.bk-toc-soon em{font-style:normal;font-weight:400;font-size:11px;color:var(--bk-muted)}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
 .bk-back-t span{display:block}
@@ -5422,7 +5434,7 @@ const BK_UI={
       qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִקְלוֹת:', contact:['דָּוִד פִישָׁחָדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִקְלוֹת:', contact:['דָּוִד פִישָׁחָדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['נוצר מתוך אפליקציית בית אל','כל הטקסטים על פי המקורות המובאים באפליקציה','כל הזכויות שמורות © בית אל'],
       backDist:'ניתן להפיץ חוברת זו לזיכוי הרבים, ובלבד שלא ייעשה בה כל שינוי בתוכן או בעריכה.',
       parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
@@ -5433,7 +5445,7 @@ const BK_UI={
       qrCap:'Get the app', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִקְלוֹת:', contact:['דָּוִד פִישָׁחָדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִקְלוֹת:', contact:['דָּוִד פִישָׁחָדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['Created with the Bet El app','All texts follow the sources cited in the app','All rights reserved © Bet El'],
       backDist:'This booklet may be freely distributed for the merit of the public, provided nothing in its content or editing is changed.',
       parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
@@ -5783,10 +5795,14 @@ function bkPaginate(host,blocks,meta){
      then has to open a new page, they move over with it instead of being
      stranded at the foot of the old one. `filled` = real content already
      on this page (a page holding only moved-over headings is still fresh). */
-  let page=null, body=null, no=meta.startNo||0, dayLbl='', secLbl='', filled=false, pend=[], needNew=false;
+  let page=null, body=null, no=meta.startNo||0, dayLbl='', secLbl='', filled=false, pend=[], needNew=false, tocDaf='';
+  /* the table of contents: each day and subject heading's DOM node (it moves
+     with any heading carried over to the next page), resolved to its final
+     page's number once pagination is done */
+  const toc=meta.toc||[];
   const lbl=()=>[dayLbl,secLbl].filter(Boolean).join(' · ');
   const newPage=()=>{
-    no++; page=el(bkPageHtml(meta,no,lbl())); host.appendChild(page);
+    no++; page=el(bkPageHtml(meta,no,lbl())); page.dataset.no=no; host.appendChild(page);
     body=page.querySelector('.bk-pbody'); filled=false;
     pend.forEach(h=>body.appendChild(h));
   };
@@ -5798,6 +5814,7 @@ function bkPaginate(host,blocks,meta){
   const dafPage=d=>{
     if(filled||body.childNodes.length){ pend=[]; newPage(); }
     page.classList.add('bk-dafpage');
+    if(tocDaf){ toc.push({t:'sec', label:tocDaf, el:page}); tocDaf=''; }
     const l=page.querySelector('.bk-ph-lbl'); if(l) l.innerHTML=[dayLbl,secLbl+' '+d.amud].filter(Boolean).join(' · ');
     const img=el(`<img class="bk-dafimg" src="${d.src}" alt=""/>`); body.appendChild(img);
     const a=d.h/d.w;
@@ -5814,7 +5831,7 @@ function bkPaginate(host,blocks,meta){
     if(b.t==='day'){ dayLbl=b.label; secLbl=''; }
     if(b.t==='sec') secLbl=b.label;
     if(b.noPrint) return;
-    if(b.dafSec){ pend=[]; return; }                  // the scans' own pages name the subject
+    if(b.dafSec){ pend=[]; tocDaf=b.label; return; }  // the scans' own pages name the subject
     if(b.t==='atom' && b.daf){ dafPage(b.daf); return; }
     if(needNew){ if(b.t==='rule') return; needNew=false; newPage(); }
     const heading=(b.t==='day'||b.t==='sec'||b.t==='sub');
@@ -5822,6 +5839,7 @@ function bkPaginate(host,blocks,meta){
       if(b.t==='rule' && !filled) return;             // a divider never opens a page
       const n=el(b.html);
       body.appendChild(n);
+      if(b.t==='day'||b.t==='sec') toc.push({t:b.t, label:b.label, el:n});
       if(over()){
         body.removeChild(n);
         if(b.t==='rule') return;
@@ -6222,6 +6240,25 @@ function bkDedicationHtml(){
     </div>
   </div>`;
 }
+/* the contents page: by day (each day, then its subjects with the page they
+   start on), then the Ben Ish Chai tracks - listed for the full booklet's
+   shape, still to be built (no page yet) */
+function bkTocHtml(toc,parasha){
+  const t=bkUI();
+  const row=(label,pg,cls)=>`<div class="bk-toc-row${cls?' '+cls:''}"><span class="bk-toc-l">${label}</span><span class="bk-toc-dots"></span><span class="bk-toc-p">${pg}</span></div>`;
+  let h='';
+  toc.forEach(e=>{
+    const pg=e.el&&e.el.closest?((e.el.closest('.bk-page')||{}).dataset||{}).no:null;
+    if(e.t==='day') h+=`<div class="bk-toc-day"><span>${e.label}</span><small>${parasha}</small></div>`;
+    else h+=row(e.label, pg?heNum(+pg):'');
+  });
+  h+=`<div class="bk-toc-day"><span>${t.tocBic}</span></div>`;
+  t.tocBicY.forEach(y=>{ h+=row(`${t.tocBic} — ${y}`, `<em>${t.tocSoon}</em>`, 'bk-toc-soon'); });
+  return bkMatterPage('bk-tocpage','',`<div class="bk-toc">
+    <div class="bk-toc-h">${t.tocTitle}</div>${bkRuleHtml()}
+    <div class="bk-toc-list">${h}</div>
+  </div>`);
+}
 function bkBackHtml(legal){
   const t=bkUI();
   return bkMatterPage('bk-backpage'+(legal?' bk-back-legal':''),'',`<div class="bk-back">
@@ -6237,14 +6274,16 @@ function bkBackHtml(legal){
     <p dir="ltr">${BK_HB_LICENSE}</p>
   </div>`:''}`);
 }
-/* cover, dedication, the day's pages (numbered on from the cover, as a
-   printed book counts its folios), back page */
+/* cover, dedication, contents, the day's pages (numbered on from the
+   cover, as a printed book counts its folios), back page */
 function bkBuildPrint(date){
   const host=document.getElementById('bkPrint'); if(!host) return 0;
   const {slot}=bkSections(date);
-  host.innerHTML=bkCoverHtml(date,slot)+bkDedicationHtml();
-  const blocks=bkBlocks(date);
-  const n=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:2});
+  host.innerHTML=bkCoverHtml(date,slot)+bkDedicationHtml()+'<div class="bk-toc-slot"></div>';
+  const blocks=bkBlocks(date), toc=[];
+  const n=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:3, toc});
+  const slotEl=host.querySelector('.bk-toc-slot');
+  slotEl.insertAdjacentHTML('afterend',bkTocHtml(toc,bkParashaLine(slot))); slotEl.remove();
   /* the Gemara scans' credit + HebrewBooks.org license: once, on the back */
   host.insertAdjacentHTML('beforeend',bkBackHtml(blocks.some(b=>b.img)));
   return n+1;

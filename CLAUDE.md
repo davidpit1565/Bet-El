@@ -199,8 +199,15 @@ in English as usual.
   App Store link from `appQrSrc()` (shared with `appQrImage()`); QR and logo
   are preloaded as data: URLs (`bkImgData`/`ensureBkMatter`) so print and
   html2canvas never wait on a cross-origin image, and print/PDF wait for
-  them like they wait for the daf (`bkPending`). Day pages are numbered on
-  from the cover (first day page = 3). Torah/Neviim/Ketuvim print one verse
+  them like they wait for the daf (`bkPending`). After the dedication, a
+  contents page (`bkTocHtml`): by day - each day, then its subjects with the
+  page each starts on (`bkPaginate` records each day/subject heading's DOM
+  node in `meta.toc`, or the first scan page for a print-hidden Gemara
+  title, and resolves it to its final page's `data-no` - a heading carried
+  to the next page moves with its node, so the number is exact) - then the
+  Ben Ish Chai year 1/2 entries as placeholders ("בְּהֲכָנָה", no content
+  or page yet). Day pages are numbered on from the cover (cover 1,
+  dedication 2, contents 3, first day page 4). Torah/Neviim/Ketuvim print one verse
   per line (`.bk-vline`, number in a hanging column - the owner's pick over
   run-on verses); Tehillim/Rambam/Mishnah still run on. Halacha (Rambam)
   and Zohar print in two columns (`.bk-cols`, CSS columns inside `.bk-page`
@@ -216,7 +223,8 @@ in English as usual.
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
   this kind of not-the-reader's-week rendering. Scope so far: ONE day;
   still to build: the Sun-Thu/Leil Shishi/Fri week loop, Musar-by-book, Ben
-  Ish Chai year 1 + 2, the TOC and blank printing-convention pages, and the Motzei
+  Ish Chai year 1 + 2 (listed in the TOC already), blank printing-convention
+  pages, and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
   emulates the Vercel rewrite, saves screen/print/PDF output).
