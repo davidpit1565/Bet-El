@@ -139,7 +139,13 @@ in English as usual.
   once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
   for it specifically, enabling the general reminder toggle enables both.
 
-- **Study booklet (חוברת לימוד)** - home card `homeBookletCard` →
+- **Study booklet (חוברת לימוד)** - its own name / brand everywhere it
+  names itself (cover title, running header band, the TOC/back page pill,
+  the rights lines, the PDF file name) is **"הַתָּמִיד"** - the app's
+  confirmed name, as in support/privacy/terms.html (`BK_UI.brand` /
+  `brandStam` "התמיד" / `backMade`); "בית אל" there was a placeholder. The
+  Bet El verses in `BK_UI.ring` are scripture (unused on the cover now),
+  not branding. Home card `homeBookletCard` →
   `openBooklet()` → `renderBookletHome()` (`TAB==='bookletHome'`, day
   picker + contents + print/PDF) → `renderBookletReader()`
   (`TAB==='bookletReader'`). Built strictly from the reader's own path:
@@ -237,8 +243,8 @@ in English as usual.
   Printed-booklet order (asserted by booklet-check): cover, the rights &
   contact page (page 2, the inside of the cover - `bkRightsHtml` /
   `ornRightsSvg`: after the reference booklet's own page 2, an arched gold
-  panel, a ribbon with "כל הזכויות שמורות © בית אל", a small seal with the
-  Stam title, then the distribution note and the contact block - ONLY the
+  panel, a ribbon with "כל הזכויות שמורות © התמיד" (no seal - the owner's
+  call), then the distribution note and the contact block - ONLY the
   booklet's own approved `BK_UI` texts (backMade/backDist/contactH/contact),
   never invented claims), dedication, contents, the day's pages (Musar
   inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
