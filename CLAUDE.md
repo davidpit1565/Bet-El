@@ -216,12 +216,17 @@ in English as usual.
   title, and resolves it to its final page's `data-no` - a heading carried
   to the next page moves with its node, so the number is exact) - then the
   Ben Ish Chai year 1/2 entries as placeholders ("בְּהֲכָנָה", no content
-  or page yet). The contents page is compact by design, so a whole week
-  fits one page: per day a heading line (name, parasha) and a five-across
-  grid of "subject ··· page" (`bkTocDays` groups `meta.toc`, `bkTocHtml`
-  draws it; a patched-copy mockup of all seven rows filled exactly one
-  page). The Mishnah prints without its source line (owner's call - it read
-  as a Gemara citation); each mishnah keeps its number tag.
+  or page yet). The contents page is a book's list, never a table grid
+  (owner's call): per day a heading (name, parasha), then one dotted-leader
+  line per subject with its page (`bkTocDays` groups `meta.toc`,
+  `bkTocHtml` draws it). A long list sets in 2 columns (>30 lines) or 3 (>60,
+  a whole week) - the owner's hard target is ONE page for a full week; a
+  patched-copy mockup of all seven rows fits one page in 3 columns. The
+  Mishnah prints without its source line (it read as a Gemara citation);
+  instead a "פֶּרֶק ב׳" sub-heading when the chapter changes and each mishnah
+  its own paragraph under its own "מִשְׁנָה י׳" heading block (`.bk-mn`, a
+  'sub' block so the paginator never strands it). Tanya, like the Zohar,
+  is one two-column flow.
   Printed-booklet order (asserted by booklet-check): cover,
   a blank (the inside of the cover), dedication, contents, the day's pages
   (Musar inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
