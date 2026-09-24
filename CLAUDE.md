@@ -150,7 +150,9 @@ in English as usual.
   Musar - `bkMusarSection`: each work read exactly as the reader reads it
   (`ckMusarIndexes` + `ckMusarSegs`), run on in sequence as one two-column
   flow, each work opened only by a small inline name label `.bk-ml` - the
-  owner's call, no header per book; a Musar load failure sets
+  owner's call, no header per book - at the same body size as the rest of
+  the day: `.bk-cols` changes layout only, never text size; a Musar load
+  failure sets
   `BK_MUSAR_FAIL` so the day still renders); nothing is resolved a second
   way. `bkBlocks(date)` is one
   block list rendered twice: a reflowing on-screen `.bk-sheet`, and
