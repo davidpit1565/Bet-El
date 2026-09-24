@@ -144,8 +144,14 @@ in English as usual.
   picker + contents + print/PDF) → `renderBookletReader()`
   (`TAB==='bookletReader'`). Built strictly from the reader's own path:
   `chokSlotFor(date)` + `chokSectionsFor(key,day,hd)` over a real date
-  (musar filtered out via `BK_SKIP` - it gets its own per-book section in the
-  full booklet); nothing is resolved a second way. `bkBlocks(date)` is one
+  (musar filtered out of the day via `BK_SKIP` - it is its own part after
+  the day instead: `bkMusarBlocks`, one subject per work of `MUSAR_WORKS`,
+  read exactly as the reader reads it (`ckMusarIndexes` + `ckMusarSegs`,
+  source line from `ckMusarSourceLabel` minus the book-name prefix, the
+  reader's "no vocalized edition" note), opening a new page (`brk`) and
+  printed in two columns like the Zohar - continuous prose suits them; a
+  Musar load failure sets `BK_MUSAR_FAIL` so the day still renders);
+  nothing is resolved a second way. `bkBlocks(date)` is one
   block list rendered twice: a reflowing on-screen `.bk-sheet`, and
   JS-paginated **A5** (148x210mm, the printed booklet's real page - type is
   set for it, not shrunk from A4) `.bk-page` boxes in `#bkPrint` (`bkPaginate`) shared by
@@ -206,8 +212,11 @@ in English as usual.
   title, and resolves it to its final page's `data-no` - a heading carried
   to the next page moves with its node, so the number is exact) - then the
   Ben Ish Chai year 1/2 entries as placeholders ("בְּהֲכָנָה", no content
-  or page yet). Day pages are numbered on from the cover (cover 1,
-  dedication 2, contents 3, first day page 4). Torah/Neviim/Ketuvim print one verse
+  or page yet). Printed-booklet order (asserted by booklet-check): cover,
+  a blank (the inside of the cover), dedication, contents, the day's pages,
+  the Musar part, the back page, a closing blank (`bkBlankHtml`). Pages are
+  numbered on from the cover (cover 1, blank 2, dedication 3, contents 4,
+  first day page 5). Torah/Neviim/Ketuvim print one verse
   per line (`.bk-vline`, number in a hanging column - the owner's pick over
   run-on verses); Tehillim/Rambam/Mishnah still run on. Halacha (Rambam)
   and Zohar print in two columns (`.bk-cols`, CSS columns inside `.bk-page`
@@ -222,9 +231,8 @@ in English as usual.
   text baseline, not raised superscripts. `ckCommFor(id,key)` /
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
   this kind of not-the-reader's-week rendering. Scope so far: ONE day;
-  still to build: the Sun-Thu/Leil Shishi/Fri week loop, Musar-by-book, Ben
-  Ish Chai year 1 + 2 (listed in the TOC already), blank printing-convention
-  pages, and the Motzei
+  still to build: the Sun-Thu/Leil Shishi/Fri week loop (Musar then per week, not per day), Ben
+  Ish Chai year 1 + 2 (listed in the TOC already), and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
   emulates the Vercel rewrite, saves screen/print/PDF output).

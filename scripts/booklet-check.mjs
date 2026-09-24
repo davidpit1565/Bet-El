@@ -93,7 +93,9 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
     labels: [...document.querySelectorAll('#bkPrint .bk-ph-lbl')].map(e => e.textContent),
     cover: !!document.querySelector('#bkPrint .bk-page.bk-cover'),
     dedication: !!document.querySelector('#bkPrint .bk-page.bk-dedic'),
-    back: !!document.querySelector('#bkPrint .bk-page.bk-backpage:last-child'),
+    back: !!document.querySelector('#bkPrint .bk-page.bk-backpage'),
+    order: [...document.querySelectorAll('#bkPrint .bk-page')].map(pg => ['bk-cover','bk-blank','bk-dedic','bk-tocpage','bk-backpage'].find(c => pg.classList.contains(c)) || 'content'),
+    musarBooks: [...document.querySelectorAll('#bkPrint .bk-sec-t')].map(e => e.textContent).filter((v, i, a) => a.indexOf(v) === i),
     qrImgs: document.querySelectorAll('#bkPrint .bk-qr img, #bkPrint .bk-cv-qr img').length,
     dafPages: [...document.querySelectorAll('#bkPrint .bk-dafpage')].map(pg => {
       const im = pg.querySelector('.bk-dafimg'), b = pg.querySelector('.bk-pbody');
@@ -104,6 +106,10 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   if (!info.dafImgs) errs.push('no daf image rendered with the proxy in place');
   if (info.overflow) errs.push(info.overflow + ' page(s) overflow their body');
   if (!info.cover || !info.dedication || !info.back) errs.push('missing cover/dedication/back page');
+  // printed-booklet order: cover, blank, dedication, contents, ... back page, closing blank
+  const o = info.order, want = ['bk-cover', 'bk-blank', 'bk-dedic', 'bk-tocpage'];
+  if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(4, -2).some(c => c !== 'content'))
+    errs.push('page order is ' + o.join(','));
   if (info.qrImgs !== 2) errs.push('expected the QR on the cover and the back page, got ' + info.qrImgs);
   if (info.dafPages.length !== info.dafImgs) errs.push('each scanned amud should get its own page');
   if (info.dafPages.some(d => d.extra)) errs.push('a daf page carries something besides the scan');
