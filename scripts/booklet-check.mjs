@@ -94,7 +94,7 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
     cover: !!document.querySelector('#bkPrint .bk-page.bk-cover'),
     dedication: !!document.querySelector('#bkPrint .bk-page.bk-dedic'),
     back: !!document.querySelector('#bkPrint .bk-page.bk-backpage'),
-    order: [...document.querySelectorAll('#bkPrint .bk-page')].map(pg => ['bk-cover','bk-blank','bk-dedic','bk-tocpage','bk-backpage'].find(c => pg.classList.contains(c)) || 'content'),
+    order: [...document.querySelectorAll('#bkPrint .bk-page')].map(pg => ['bk-cover','bk-rights','bk-blank','bk-dedic','bk-tocpage','bk-backpage'].find(c => pg.classList.contains(c)) || 'content'),
     // every two-column flow (Halacha, Musar, Zohar) must really lay out in 2 columns, at body size
     cols: [...document.querySelectorAll('#bkPrint .bk-cols')].map(e => { const cs = getComputedStyle(e), pg = e.closest('.bk-page'); return { lbl: (pg.querySelector('.bk-ph-lbl') || {}).textContent, n: cs.columnCount, fs: cs.fontSize }; }),
     musarBooks: [...document.querySelectorAll('#bkPrint .bk-sec-t')].map(e => e.textContent).filter((v, i, a) => a.indexOf(v) === i),
@@ -111,8 +111,8 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   const badCols = info.cols.filter(c => c.n !== '2' || c.fs !== '14px');
   if (!info.cols.length || badCols.length) errs.push('two-column flows wrong: ' + JSON.stringify(badCols.slice(0, 3)));
   if (!info.cols.some(c => /מוּסָר/.test(c.lbl))) errs.push('no two-column Musar flow found');
-  // printed-booklet order: cover, blank, dedication, contents, ... back page, closing blank
-  const o = info.order, want = ['bk-cover', 'bk-blank', 'bk-dedic', 'bk-tocpage'];
+  // printed-booklet order: cover, rights & contact page, dedication, contents, ... back page, closing blank
+  const o = info.order, want = ['bk-cover', 'bk-rights', 'bk-dedic', 'bk-tocpage'];
   if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(4, -2).some(c => c !== 'content'))
     errs.push('page order is ' + o.join(','));
   if (info.qrImgs !== 2) errs.push('expected the QR on the cover and the back page, got ' + info.qrImgs);

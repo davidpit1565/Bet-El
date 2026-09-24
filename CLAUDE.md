@@ -234,11 +234,24 @@ in English as usual.
   its own paragraph under its own "מִשְׁנָה י׳" heading block (`.bk-mn`, a
   'sub' block so the paginator never strands it). Tanya, like the Zohar,
   is one two-column flow.
-  Printed-booklet order (asserted by booklet-check): cover,
-  a blank (the inside of the cover), dedication, contents, the day's pages
-  (Musar inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
-  numbered on from the cover (cover 1, blank 2, dedication 3, contents 4,
-  first day page 5). Torah/Neviim/Ketuvim print one verse
+  Printed-booklet order (asserted by booklet-check): cover, the rights &
+  contact page (page 2, the inside of the cover - `bkRightsHtml` /
+  `ornRightsSvg`: after the reference booklet's own page 2, an arched gold
+  panel, a ribbon with "כל הזכויות שמורות © בית אל", a small seal with the
+  Stam title, then the distribution note and the contact block - ONLY the
+  booklet's own approved `BK_UI` texts (backMade/backDist/contactH/contact),
+  never invented claims), dedication, contents, the day's pages (Musar
+  inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
+  numbered on from the cover (cover 1, rights 2, dedication 3, contents 4,
+  first day page 5). Every day page (incl. the Gemara scan pages, where it
+  narrows to the scan's width) opens with the running header band
+  (`bkPageHtml` → `bkBandSvg`, after the reference's own running head): a
+  light band between two small embossed lace ribbons (`ornLaceRibbon`), a
+  filigree crest above and below the gold Stam "בית אל" in its centre
+  (`ornTitleSvg`), the parasha on one side and day · subject
+  (`.bk-ph-lbl`, relabelled by the paginator) on the other. The TOC and
+  back page keep the plain strip + small "✦ בֵּית אֵל ✦" pill header
+  (`bkMatterPage`). Torah/Neviim/Ketuvim print one verse
   per line (`.bk-vline`, number in a hanging column - the owner's pick over
   run-on verses); Tehillim/Rambam/Mishnah still run on. Halacha (Rambam)
   and Zohar print in two columns (`.bk-cols`, CSS columns inside `.bk-page`
