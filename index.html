@@ -1551,21 +1551,16 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-orn-page{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bk-ol{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
 /* cover */
-.bk-cv-ring{top:73.5mm;left:74mm;right:auto;width:0;height:0}
-.bk-cv-ring span{position:absolute;left:0;top:0;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:14.5px;line-height:1;
-  color:#a88f60;text-shadow:-.5px -.5px 0 #fffdf7,.6px .8px 0 rgba(98,74,34,.4)}
-.bk-cv-title{top:52mm}
-.bk-cv-crest{width:34mm;height:7.2mm;display:block}
-.bk-cv-crest.dn{transform:scaleY(-1)}
-.bk-cv-name{width:92mm;height:23mm;display:block;margin:1.4mm 0 .8mm}
-.bk-cv-sub{top:132mm;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:16px;letter-spacing:.36em;color:#8a6d38;padding-inline-start:.36em;
+.bk-cv-title{top:48mm}
+.bk-cv-name{width:104mm;height:26mm;display:block}
+.bk-cv-sub{top:80mm;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:16px;letter-spacing:.36em;color:#8a6d38;padding-inline-start:.36em;
   text-shadow:-.5px -.5px 0 #fffdf7,.6px .8px 0 rgba(98,74,34,.28)}
-.bk-cv-plq{top:145mm;height:13mm;justify-content:center;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:23px;color:#3a2e1a;
+.bk-cv-plq{top:118mm;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:28px;color:#3a2e1a;
   text-shadow:-.6px -.6px 0 #fff,.8px 1px 0 rgba(98,74,34,.22)}
-.bk-cv-dates{top:163mm;font-family:"Taamey Frank CLM",var(--font-sacred)}
+.bk-cv-dates{top:134mm;font-family:"Taamey Frank CLM",var(--font-sacred)}
 .bk-cv-hd{font-weight:700;font-size:15.5px;color:#3a2e1a}
 .bk-cv-gd{font-family:var(--font-ui);font-size:10.5px;color:var(--bk-muted);letter-spacing:.08em;margin-top:.6mm}
-.bk-cv-qr{top:178mm;gap:1mm}
+.bk-cv-qr{top:166mm;gap:1mm}
 .bk-cv-qr img{width:19mm;height:19mm;padding:1.4mm;background:#fffdf8;border:1px solid rgba(162,128,63,.6);border-radius:1.8mm;display:block}
 .bk-cv-qr div{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);letter-spacing:.04em}
 /* dedication */
@@ -6112,57 +6107,42 @@ function ornPlaque(x0,y0,x1,y1,id){
     ${ornEmboss(fil(x0+e*.62)+fil(x1-e*.62),filF(x0+e*.62,-1)+filF(x1-e*.62,1),sz*.16,{d:1.2})}`;
 }
 
-/* an embossed crown (keter), drawn once above the medallion */
-function ornCrown(cx,y,w){
-  const h=w*.62, x0=cx-w/2, x1=cx+w/2, by=y+h, P=(x,yy)=>`${f2(x)} ${f2(yy)}`;
-  // the band, five points rising to small orbs, arches between them
-  const pts=[0,.25,.5,.75,1].map((k,i)=>({x:x0+w*(.08+.84*k), y:y+(i===2?0:i%2?h*.2:h*.1)}));
-  const arches=pts.slice(0,-1).map((p,i)=>{ const q=pts[i+1], mx=(p.x+q.x)/2; return `M${P(p.x,p.y+w*.05)} Q${P(mx,by-h*.34)} ${P(q.x,q.y+w*.05)}`; }).join(' ');
-  const s=`<path d="${arches}"/><path d="M${P(x0+w*.06,by-h*.2)} H${f2(x1-w*.06)} M${P(x0+w*.04,by)} H${f2(x1-w*.04)}"/>
-    ${pts.map(p=>`<path d="M${P(p.x,p.y+w*.05)} V${f2(by-h*.2)}"/>`).join('')}
-    <path d="${ornSpiral(cx-w*.2,by-h*.46,w*.07,1,2,.3)}"/><path d="${ornSpiral(cx+w*.2,by-h*.46,w*.07,-1,2,.3)}"/>`;
-  const f=pts.map(p=>`<circle cx="${f2(p.x)}" cy="${f2(p.y)}" r="${f2(w*.028)}"/>`).join('')
-    +[.18,.34,.5,.66,.82].map(k=>`<circle cx="${f2(x0+w*k)}" cy="${f2(by-h*.1)}" r="${f2(w*.018)}"/>`).join('');
-  return ornEmboss(s,f,w*.018,{d:w*.006});
+/* One corner of the cover frame: a vine running along each edge from a
+   small fleur on the corner, curling into scrolls with a few leaves -
+   restrained, as in the owner's approved frame (no denser than that).
+   Drawn for the top-left corner, corner point at (0,0), extending right and
+   down; the left-edge half is the top-edge half reflected across x=y. */
+function ornFrameCorner(o){
+  const half=`<path d="M26 24 C74 8 126 12 166 30 C192 42 218 40 246 28"/>
+    <path d="M64 17 C50 32 54 58 74 66"/><path d="${ornSpiral(88,60,16,1,3,.26)}"/>
+    <path d="M156 27 C146 40 150 56 162 60"/><path d="${ornSpiral(172,55,10,1,3,.28)}"/>
+    <path d="M246 28 C254 24 258 16 252 12"/>`;
+  /* leaves sprout from the vine itself (no loose ones) */
+  const halfF=ornDrop(116,14,22,6.5,-100)+ornDrop(204,39,16,5,-80)+ornDrop(62,19,15,4.6,-150)+ornDrop(154,29,12,3.8,-130)
+    +`<circle cx="252" cy="11" r="3.4"/>`;
+  /* a small fleur on the corner point, on the diagonal */
+  const fleurS=`<path d="M44 44 C34 32 36 20 48 18"/><path d="M44 44 C32 34 20 36 18 48"/>`;
+  const fleurF=ornDrop(34,34,44,13,135)+ornDrop(27,27,26,7.5,100)+ornDrop(27,27,26,7.5,170)+`<circle cx="38" cy="38" r="7.5"/>`;
+  return `${ornEmboss(half,halfF,4.4,o)}<g transform="matrix(0 1 1 0 0 0)">${ornEmboss(half,halfF,4.4,o)}</g>${ornEmboss(fleurS,fleurF,4,o)}`;
 }
+/* The cover: ivory paper and a double gold frame with restrained corner
+   scrollwork - nothing in the centre (the owner's approved direction: the
+   frame only, no medallion), so the title and its lines stand in open space. */
 function ornCoverSvg(){
-  const W=1480, H=2100, cx=740, my=735, id='cv'+(++ORN_ID);
-  // from the edge in: rope, scroll column, a plain strip, then the panel
-  const ropeX=58, ropeW=46, colX=112, colW=92, pL=250, pR=W-pL;
-  const rope=(x)=>{ let o=''; const step=ropeW*.78; for(let y=20;y<H-20;y+=step) o+=ornLobe(x+ropeW/2,y,ropeW*.62,ropeW*.24,-52,id+'g'); return o; };
-  const R=505, rRope=402;
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="bk-orn-page" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-  <defs>
-    ${ornRopeGrad(id+'g')}
-    ${ornWallPattern(id+'w',2.3,{mid:'#efe4cb',shade:'rgba(120,92,44,.16)',hi:'#fffefa',d:.7,sw:2.2})}
-    ${ornScrollColumn(id+'s',colW,colW/40,{d:.5})}
-    <linearGradient id="${id}v" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e7d9ba"/><stop offset=".08" stop-color="#f3e9d4"/><stop offset=".5" stop-color="#f6eedd"/><stop offset=".92" stop-color="#f3e9d4"/><stop offset="1" stop-color="#e7d9ba"/></linearGradient>
-    <linearGradient id="${id}p" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7f0e0"/><stop offset=".5" stop-color="#fffdf8"/><stop offset="1" stop-color="#f7f0e0"/></linearGradient>
-    <radialGradient id="${id}o" cx=".5" cy=".5" r=".5"><stop offset=".78" stop-color="#fffdf8"/><stop offset=".9" stop-color="#f4ead4"/><stop offset="1" stop-color="#dfcca3"/></radialGradient>
-    <radialGradient id="${id}d" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#ffffff"/><stop offset=".75" stop-color="#fffdf8"/><stop offset="1" stop-color="#f1e7d1"/></radialGradient>
-    <clipPath id="${id}k"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath>
-  </defs>
+  const W=1480, H=2100, id='cv'+(++ORN_ID), o1=42, o2=74, gold='#b8923f';
+  const O={mid:'#c9a24a', shade:'rgba(110,80,22,.55)', hi:'#fff4d2', d:1.6};
+  const c=ornFrameCorner(O), k=o2+10, sc=1.35;
+  return `<svg class="bk-orn-page" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+  <defs><radialGradient id="${id}v" cx=".5" cy=".45" r=".75"><stop offset="0" stop-color="#fdf8ec"/><stop offset=".75" stop-color="#f9f1df"/><stop offset="1" stop-color="#f1e4c6"/></radialGradient></defs>
   <rect width="${W}" height="${H}" fill="url(#${id}v)"/>
-  <g clip-path="url(#${id}k)">
-    <rect x="${pL}" y="0" width="${pR-pL}" height="${H}" fill="url(#${id}p)"/>
-    <rect x="${pL}" y="0" width="${pR-pL}" height="${H}" fill="url(#${id}w)"/>
-    <rect x="${colX}" y="0" width="${colW}" height="${H}" fill="url(#${id}s)"/>
-    <g transform="translate(${W} 0) scale(-1 1)"><rect x="${colX}" y="0" width="${colW}" height="${H}" fill="url(#${id}s)"/></g>
-    ${rope(ropeX)}${rope(W-ropeX-ropeW)}
-    <path d="M${pL} 0 V${H} M${pR} 0 V${H}" stroke="${ORN_C.deep}" stroke-opacity=".32" stroke-width="2"/>
-    <path d="M${pL+7} 0 V${H} M${pR-7} 0 V${H}" stroke="#fffdf7" stroke-width="3"/>
-  </g>
-  <!-- the medallion: a soft pillow ring, a thin rope, the white disc -->
-  <circle cx="${cx}" cy="${my+10}" r="${R+4}" fill="rgba(98,74,34,.14)"/>
-  <circle cx="${cx}" cy="${my}" r="${R}" fill="url(#${id}o)" stroke="${ORN_C.deep}" stroke-opacity=".55" stroke-width="2"/>
-  <circle cx="${cx}" cy="${my}" r="${R-16}" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".38" stroke-width="1.4" stroke-dasharray="10 8"/>
-  <circle cx="${cx}" cy="${my}" r="${rRope+22}" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".38" stroke-width="1.4" stroke-dasharray="10 8"/>
-  ${ornRopeRing(cx,my,rRope,22,id+'g')}
-  <circle cx="${cx}" cy="${my}" r="${rRope-12}" fill="url(#${id}d)" stroke="${ORN_C.deep}" stroke-opacity=".45" stroke-width="1.4"/>
-  <g opacity=".8">${ornLaceArc(cx,my,rRope-52,Math.PI*1.17,Math.PI*1.83,9,46,{mid:'#e9dcbd',shade:'rgba(98,74,34,.25)',d:1})}
-  ${ornLaceArc(cx,my,rRope-52,Math.PI*.17,Math.PI*.83,9,46,{mid:'#e9dcbd',shade:'rgba(98,74,34,.25)',d:1})}</g>
-  <g transform="translate(${cx} ${my-R-150}) scale(7.2)">${ornCrestG({d:.35,mid:'#c9b182'})}</g>
-  ${ornPlaque(430,1450,1050,1580,id+'q')}
+  <rect x="${o1+3}" y="${o1+4}" width="${W-2*o1}" height="${H-2*o1}" fill="none" stroke="rgba(110,80,22,.25)" stroke-width="9"/>
+  <rect x="${o1}" y="${o1}" width="${W-2*o1}" height="${H-2*o1}" fill="none" stroke="${gold}" stroke-width="9"/>
+  <rect x="${o1-3}" y="${o1-3}" width="${W-2*o1+6}" height="${H-2*o1+6}" fill="none" stroke="#f3dfa6" stroke-width="1.6" opacity=".9"/>
+  <rect x="${o2}" y="${o2}" width="${W-2*o2}" height="${H-2*o2}" fill="none" stroke="${gold}" stroke-width="3"/>
+  <g transform="translate(${k} ${k}) scale(${sc})">${c}</g>
+  <g transform="translate(${W-k} ${k}) scale(${-sc} ${sc})">${c}</g>
+  <g transform="translate(${k} ${H-k}) scale(${sc} ${-sc})">${c}</g>
+  <g transform="translate(${W-k} ${H-k}) scale(${-sc})">${c}</g>
   </svg>`;
 }
 /* the title: SVG text in the scribal Stam face with a gold metallic fill and
@@ -6296,8 +6276,7 @@ function bkQrHtml(){
 function bkCoverHtml(date,slot){
   const t=bkUI(), hd=new HDate(date), q=bkImgSrc(BK_QR_KEY);
   return `<div class="bk-page bk-matter bk-ornp bk-cover">${ornCoverSvg()}
-    <div class="bk-ol bk-cv-ring" aria-hidden="true">${ornRingText(t.ring,45.2)}</div>
-    <div class="bk-ol bk-cv-title"><i class="bk-cv-crest">${ornCrest()}</i><i class="bk-cv-name" role="img" aria-label="${t.brand}">${ornTitleSvg(t.brandStam,BK_FONT.url)}</i><i class="bk-cv-crest dn">${ornCrest()}</i></div>
+    <div class="bk-ol bk-cv-title"><i class="bk-cv-name" role="img" aria-label="${t.brand}">${ornTitleSvg(t.brandStam,BK_FONT.url)}</i></div>
     <div class="bk-ol bk-cv-sub">${t.title}</div>
     <div class="bk-ol bk-cv-plq">${bkParashaLine(slot)}</div>
     <div class="bk-ol bk-cv-dates"><div class="bk-cv-hd">${localizeHebDateStr(hd.renderGematriya(true))}</div><div class="bk-cv-gd">${date.toLocaleDateString(civilDateLocale())}</div></div>
