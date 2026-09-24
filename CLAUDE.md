@@ -195,9 +195,14 @@ in English as usual.
   cover). Cover (the owner's approved direction, from a Canva reference:
   THE FRAME ONLY - no logo, no medallion, nothing in the centre):
   `ornCoverSvg` = ivory paper, a double gold border (heavy outer line, thin
-  inner line) and restrained corner scrollwork (`ornFrameCorner`: a fleur
-  on the corner point, a vine curling into two scrolls along each edge,
-  mirrored to all four corners - not denser than that), with the title
+  inner line that stops at each corner in a bead finial - the ornament IS
+  the corner, as in the reference) and an openwork acanthus corner
+  (`ornFrameCorner`, built from `ornLeaf` - lobed leaves generated along a
+  curve - plus thin scrolls: a fleur-de-lis on the corner point, a slim
+  leaf curling out along each arm, an inner C-scroll, a bud pointing into
+  the page; mirrored to all four corners at scale 1.3) - matched
+  side-by-side against the owner's approved Canva reference
+  (scratchpad canva-cover-ornament-v2.png, minus its medallion), with the title
   "בית אל" (`BK_UI.brandStam`, no nikud) standing in the open centre in the
   scribal Culmus Stam Ashkenaz face (fonts/, GPL + font exception, like
   Taamey Frank) with a gold metallic fill - `ornTitleSvg`, the font
