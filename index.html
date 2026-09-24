@@ -1440,7 +1440,13 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-text.bk-prose+.bk-text.bk-prose{margin-top:6px}
 .bk-cols.bk-prose .bk-p{display:block}
 .bk-cols.bk-prose .bk-p+.bk-p{margin-top:6px}
-.bk-ml{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:.9em;color:var(--bk-gold-deep);margin-inline-end:.45em}
+/* Musar's per-book marks: a small sub-heading line at the head of each
+   book's text (name + a hairline to the column edge) - clearly under the
+   "מוּסָר" heading, but reading as a few mini-chapters */
+.bk-ml{display:flex;align-items:center;gap:.5em;margin:.55em 0 .2em;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;
+  font-size:1em;line-height:1.35;letter-spacing:.04em;color:var(--bk-gold-deep);break-after:avoid}
+.bk-ml::after{content:'';flex:1;height:1px;background:linear-gradient(to left,var(--bk-line),rgba(162,128,63,0))}
+.bk-p:first-child>.bk-ml{margin-top:0}
 /* verse / halacha markers: a bold gold numeral near body size, sitting on
    the baseline of the line it opens (not a raised superscript) */
 .bk-vn{font-family:"Frank Ruhl Libre",var(--font-sacred);font-size:.82em;font-weight:700;color:var(--bk-gold-deep);vertical-align:baseline;margin-inline-end:.28em}

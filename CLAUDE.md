@@ -149,7 +149,8 @@ in English as usual.
   "מוּסָר" subject of the day, right after Halacha where the reader puts
   Musar - `bkMusarSection`: each work read exactly as the reader reads it
   (`ckMusarIndexes` + `ckMusarSegs`), run on in sequence as one two-column
-  flow, each work opened only by a small inline name label `.bk-ml` - the
+  flow, each work opened only by a small sub-heading line `.bk-ml` (name +
+  fading hairline, body size, subordinate to the heading) - the
   owner's call, no header per book - at the same body size as the rest of
   the day: `.bk-cols` changes layout only, never text size; a Musar load
   failure sets
