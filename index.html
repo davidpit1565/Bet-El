@@ -1539,26 +1539,23 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-orn-page{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bk-ol{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
 /* cover */
-.bk-cv-logo{top:11mm;left:50%;right:auto;transform:translateX(-50%);padding:1.1mm;border:1.4px solid var(--bk-gold);border-radius:6.4mm;background:var(--bk-paper);
-  box-shadow:0 0 0 2.2mm var(--bk-paper),0 0 0 calc(2.2mm + 1px) rgba(125,95,42,.5)}
-.bk-cv-logo img{width:25mm;height:25mm;display:block;border-radius:5.4mm}
-.bk-cv-ring{top:80mm;left:74mm;right:auto;width:0;height:0}
-.bk-cv-ring span{position:absolute;left:0;top:0;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;line-height:1;
-  color:#a2865a;text-shadow:-.4px -.4px 0 #fffdf7,.5px .6px 0 rgba(98,74,34,.45)}
-.bk-cv-title{top:67mm}
-.bk-cv-crest{width:30mm;height:6.4mm;display:block}
+.bk-cv-ring{top:73.5mm;left:74mm;right:auto;width:0;height:0}
+.bk-cv-ring span{position:absolute;left:0;top:0;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:14.5px;line-height:1;
+  color:#a88f60;text-shadow:-.5px -.5px 0 #fffdf7,.6px .8px 0 rgba(98,74,34,.4)}
+.bk-cv-title{top:52mm}
+.bk-cv-crest{width:34mm;height:7.2mm;display:block}
 .bk-cv-crest.dn{transform:scaleY(-1)}
-.bk-cv-name{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:62px;line-height:1.05;margin:1.2mm 0 1.6mm;
-  color:#6e5426;text-shadow:-1px -1px 0 #fffdf7,1.2px 1.6px 0 rgba(98,74,34,.35),0 3px 7px rgba(98,74,34,.18)}
-.bk-cv-sub{top:130mm;font-family:var(--font-sacred);font-weight:700;font-size:15px;letter-spacing:.3em;color:var(--bk-gold-deep);padding-inline-start:.3em}
-.bk-cv-plq{top:142mm;height:17mm;justify-content:center;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:25px;color:var(--bk-ink);
-  text-shadow:-.6px -.6px 0 #fff,.8px 1px 0 rgba(98,74,34,.25)}
-.bk-cv-dates{top:162.5mm}
-.bk-cv-hd{font-family:var(--font-sacred);font-weight:700;font-size:15px}
-.bk-cv-gd{font-family:var(--font-ui);font-size:11px;color:var(--bk-muted);letter-spacing:.06em;margin-top:.4mm}
-.bk-cv-qr{top:176mm;gap:1.2mm}
-.bk-cv-qr img{width:21mm;height:21mm;padding:1.6mm;background:#fffdf8;border:1px solid var(--bk-gold);border-radius:2mm;display:block}
-.bk-cv-qr div{font-family:var(--font-sacred);font-size:9.5px;color:var(--bk-muted)}
+.bk-cv-name{width:92mm;height:23mm;display:block;margin:1.4mm 0 .8mm}
+.bk-cv-sub{top:132mm;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:16px;letter-spacing:.36em;color:#8a6d38;padding-inline-start:.36em;
+  text-shadow:-.5px -.5px 0 #fffdf7,.6px .8px 0 rgba(98,74,34,.28)}
+.bk-cv-plq{top:145mm;height:13mm;justify-content:center;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:23px;color:#3a2e1a;
+  text-shadow:-.6px -.6px 0 #fff,.8px 1px 0 rgba(98,74,34,.22)}
+.bk-cv-dates{top:163mm;font-family:"Taamey Frank CLM",var(--font-sacred)}
+.bk-cv-hd{font-weight:700;font-size:15.5px;color:#3a2e1a}
+.bk-cv-gd{font-family:var(--font-ui);font-size:10.5px;color:var(--bk-muted);letter-spacing:.08em;margin-top:.6mm}
+.bk-cv-qr{top:178mm;gap:1mm}
+.bk-cv-qr img{width:19mm;height:19mm;padding:1.4mm;background:#fffdf8;border:1px solid rgba(162,128,63,.6);border-radius:1.8mm;display:block}
+.bk-cv-qr div{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);letter-spacing:.04em}
 /* dedication */
 .bk-dd-bsd{top:7mm;right:10mm;left:auto;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
 .bk-dd-lead{top:39mm;font-family:var(--font-sacred);font-size:13px;letter-spacing:.24em;color:var(--bk-muted);padding-inline-start:.24em}
@@ -5421,7 +5418,7 @@ function renderBicReader(){
    the TOC and blank printing-convention pages and the Motzei Shabbat
    notification come next, on top of these same pieces. */
 const BK_UI={
-  he:{title:'חוֹבֶרֶת לִמּוּד', brand:'בֵּית אֵל', open:'פְּתַח אֶת הַחוֹבֶרֶת', print:'הַדְפָּסָה', pdf:'הוֹרָדַת PDF',
+  he:{title:'חוֹבֶרֶת לִמּוּד', brand:'בֵּית אֵל', brandStam:'בית אל', open:'פְּתַח אֶת הַחוֹבֶרֶת', print:'הַדְפָּסָה', pdf:'הוֹרָדַת PDF',
       qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
@@ -5432,7 +5429,7 @@ const BK_UI={
       contents:'תֹּכֶן הַיּוֹם', empty:'אֵין לִמּוּד לַיּוֹם הַזֶּה', dafWait:'מַמְתִּין לְדַף הַגְּמָרָא…', loading:'טוֹעֵן…',
       pdfMaking:'מֵכִין PDF…', pdfPage:'עַמּוּד', pdfOf:'מִתּוֹךְ', pdfFail:'שְׁגִיאָה בִּיצִירַת הַ-PDF', pdfSaved:'הַקֹּבֶץ נִשְׁמַר',
       license:'רִשְׁיוֹן דַּפֵּי הַגְּמָרָא'},
-  en:{title:'Study Booklet', brand:'בֵּית אֵל', open:'Open the booklet', print:'Print', pdf:'Download PDF',
+  en:{title:'Study Booklet', brand:'בֵּית אֵל', brandStam:'בית אל', open:'Open the booklet', print:'Print', pdf:'Download PDF',
       qrCap:'Get the app', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
@@ -5464,6 +5461,7 @@ function openBooklet(){
   // a daf that failed to load last time gets a fresh try
   Object.keys(BK_DAF).forEach(k=>{ if(BK_DAF[k].state==='fail') delete BK_DAF[k]; });
   Object.keys(BK_IMG).forEach(k=>{ if(BK_IMG[k].state==='fail') delete BK_IMG[k]; });
+  if(BK_FONT.state==='fail') BK_FONT.state=null;
   go('bookletHome');
 }
 function bkSlot(date){ return CHOK?chokSlotFor(date):null; }
@@ -5962,7 +5960,15 @@ function ornCrest(opt){
   const fleurS=`<path d="M0.3 10.2 C1.6 6.6 5.2 6.2 6 8.6 C6.5 10.3 4.7 11.4 3.6 10.5"/><path d="M-0.3 10.2 C-1.6 6.6 -5.2 6.2 -6 8.6 C-6.5 10.3 -4.7 11.4 -3.6 10.5"/><path d="M-3.6 12 H3.6"/>`;
   const fleurF=`<path d="M0 0.4 C2.4 4 2.5 7.2 0 10.8 C-2.5 7.2 -2.4 4 0 0.4Z"/>`;
   const o=Object.assign({d:.5},opt||{});
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="orn" viewBox="-64 -1 128 27">${ornEmboss(h.s,h.f,1.5,o)}<g transform="scale(-1 1)">${ornEmboss(h.s,h.f,1.5,o)}</g>${ornEmboss(fleurS,fleurF,1.3,o)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="orn" viewBox="-64 -1 128 27">${ornCrestG(o)}</svg>`;
+}
+/* the crest's drawing alone (for placing inside a page SVG) */
+function ornCrestG(o){
+  const h=ornCrestHalf();
+  const fleurS=`<path d="M0.3 10.2 C1.6 6.6 5.2 6.2 6 8.6 C6.5 10.3 4.7 11.4 3.6 10.5"/><path d="M-0.3 10.2 C-1.6 6.6 -5.2 6.2 -6 8.6 C-6.5 10.3 -4.7 11.4 -3.6 10.5"/><path d="M-3.6 12 H3.6"/>`;
+  const fleurF=`<path d="M0 0.4 C2.4 4 2.5 7.2 0 10.8 C-2.5 7.2 -2.4 4 0 0.4Z"/>`;
+  o=Object.assign({d:.5},o||{});
+  return `${ornEmboss(h.s,h.f,1.5,o)}<g transform="scale(-1 1)">${ornEmboss(h.s,h.f,1.5,o)}</g>${ornEmboss(fleurS,fleurF,1.3,o)}`;
 }
 /* a lace band of small spirals + leaves along an arc (dedication shield) */
 function ornLaceArc(cx,cy,r,a0,a1,n,sz,opt){
@@ -6003,42 +6009,69 @@ function ornPlaque(x0,y0,x1,y1,id){
     ${ornEmboss(fil(x0+e*.62)+fil(x1-e*.62),filF(x0+e*.62,-1)+filF(x1-e*.62,1),sz*.16,{d:1.2})}`;
 }
 
+/* an embossed crown (keter), drawn once above the medallion */
+function ornCrown(cx,y,w){
+  const h=w*.62, x0=cx-w/2, x1=cx+w/2, by=y+h, P=(x,yy)=>`${f2(x)} ${f2(yy)}`;
+  // the band, five points rising to small orbs, arches between them
+  const pts=[0,.25,.5,.75,1].map((k,i)=>({x:x0+w*(.08+.84*k), y:y+(i===2?0:i%2?h*.2:h*.1)}));
+  const arches=pts.slice(0,-1).map((p,i)=>{ const q=pts[i+1], mx=(p.x+q.x)/2; return `M${P(p.x,p.y+w*.05)} Q${P(mx,by-h*.34)} ${P(q.x,q.y+w*.05)}`; }).join(' ');
+  const s=`<path d="${arches}"/><path d="M${P(x0+w*.06,by-h*.2)} H${f2(x1-w*.06)} M${P(x0+w*.04,by)} H${f2(x1-w*.04)}"/>
+    ${pts.map(p=>`<path d="M${P(p.x,p.y+w*.05)} V${f2(by-h*.2)}"/>`).join('')}
+    <path d="${ornSpiral(cx-w*.2,by-h*.46,w*.07,1,2,.3)}"/><path d="${ornSpiral(cx+w*.2,by-h*.46,w*.07,-1,2,.3)}"/>`;
+  const f=pts.map(p=>`<circle cx="${f2(p.x)}" cy="${f2(p.y)}" r="${f2(w*.028)}"/>`).join('')
+    +[.18,.34,.5,.66,.82].map(k=>`<circle cx="${f2(x0+w*k)}" cy="${f2(by-h*.1)}" r="${f2(w*.018)}"/>`).join('');
+  return ornEmboss(s,f,w*.018,{d:w*.006});
+}
 function ornCoverSvg(){
-  const W=1480, H=2100, cx=740, my=800, id='cv'+(++ORN_ID);
-  const colL=62, colW=100, ropeW=60, pL=colL+colW+ropeW, pR=W-pL;
-  const rope=(x)=>{ let o=''; const step=ropeW*.78; for(let y=40;y<H-40;y+=step) o+=ornLobe(x+ropeW/2,y,ropeW*.62,ropeW*.24,-52,id+'g'); return o; };
+  const W=1480, H=2100, cx=740, my=735, id='cv'+(++ORN_ID);
+  // from the edge in: rope, scroll column, a plain strip, then the panel
+  const ropeX=58, ropeW=46, colX=112, colW=92, pL=250, pR=W-pL;
+  const rope=(x)=>{ let o=''; const step=ropeW*.78; for(let y=20;y<H-20;y+=step) o+=ornLobe(x+ropeW/2,y,ropeW*.62,ropeW*.24,-52,id+'g'); return o; };
+  const R=505, rRope=402;
   return `<svg xmlns="http://www.w3.org/2000/svg" class="bk-orn-page" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
   <defs>
     ${ornRopeGrad(id+'g')}
-    ${ornWallPattern(id+'w',1.1,{mid:'#e9dcc0',shade:'rgba(120,92,44,.2)',d:.8})}
-    ${ornScrollColumn(id+'s',colW,colW/40,{d:.55})}
-    <radialGradient id="${id}v" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#fffdf8"/><stop offset=".7" stop-color="#f8f1e2"/><stop offset="1" stop-color="#eadcbd"/></radialGradient>
-    <radialGradient id="${id}d" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#ffffff"/><stop offset=".8" stop-color="#fdfaf3"/><stop offset="1" stop-color="#efe4cc"/></radialGradient>
-    <linearGradient id="${id}o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffcf4"/><stop offset=".5" stop-color="#efe3c7"/><stop offset="1" stop-color="#dcc79c"/></linearGradient>
-    <clipPath id="${id}k"><rect x="0" y="40" width="${W}" height="${H-80}"/></clipPath>
+    ${ornWallPattern(id+'w',2.3,{mid:'#efe4cb',shade:'rgba(120,92,44,.16)',hi:'#fffefa',d:.7,sw:2.2})}
+    ${ornScrollColumn(id+'s',colW,colW/40,{d:.5})}
+    <linearGradient id="${id}v" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e7d9ba"/><stop offset=".08" stop-color="#f3e9d4"/><stop offset=".5" stop-color="#f6eedd"/><stop offset=".92" stop-color="#f3e9d4"/><stop offset="1" stop-color="#e7d9ba"/></linearGradient>
+    <linearGradient id="${id}p" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7f0e0"/><stop offset=".5" stop-color="#fffdf8"/><stop offset="1" stop-color="#f7f0e0"/></linearGradient>
+    <radialGradient id="${id}o" cx=".5" cy=".5" r=".5"><stop offset=".78" stop-color="#fffdf8"/><stop offset=".9" stop-color="#f4ead4"/><stop offset="1" stop-color="#dfcca3"/></radialGradient>
+    <radialGradient id="${id}d" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#ffffff"/><stop offset=".75" stop-color="#fffdf8"/><stop offset="1" stop-color="#f1e7d1"/></radialGradient>
+    <clipPath id="${id}k"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath>
   </defs>
   <rect width="${W}" height="${H}" fill="url(#${id}v)"/>
   <g clip-path="url(#${id}k)">
-    <rect x="${pL}" y="0" width="${pR-pL}" height="${H}" fill="#fcf8ef"/>
+    <rect x="${pL}" y="0" width="${pR-pL}" height="${H}" fill="url(#${id}p)"/>
     <rect x="${pL}" y="0" width="${pR-pL}" height="${H}" fill="url(#${id}w)"/>
-    <rect x="${colL}" y="0" width="${colW}" height="${H}" fill="url(#${id}s)"/>
-    <g transform="translate(${W} 0) scale(-1 1)"><rect x="${colL}" y="0" width="${colW}" height="${H}" fill="url(#${id}s)"/></g>
-    ${rope(colL+colW)}${rope(W-colL-colW-ropeW)}
-    <path d="M${pL} 0 V${H} M${pR} 0 V${H}" stroke="${ORN_C.deep}" stroke-opacity=".45" stroke-width="2.5"/>
-    <path d="M${colL} 0 V${H} M${W-colL} 0 V${H}" stroke="${ORN_C.deep}" stroke-opacity=".3" stroke-width="2"/>
+    <rect x="${colX}" y="0" width="${colW}" height="${H}" fill="url(#${id}s)"/>
+    <g transform="translate(${W} 0) scale(-1 1)"><rect x="${colX}" y="0" width="${colW}" height="${H}" fill="url(#${id}s)"/></g>
+    ${rope(ropeX)}${rope(W-ropeX-ropeW)}
+    <path d="M${pL} 0 V${H} M${pR} 0 V${H}" stroke="${ORN_C.deep}" stroke-opacity=".32" stroke-width="2"/>
+    <path d="M${pL+7} 0 V${H} M${pR-7} 0 V${H}" stroke="#fffdf7" stroke-width="3"/>
   </g>
-  <path d="M40 40 H${W-40} V${H-40} H40 Z" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".45" stroke-width="2"/>
-  <!-- medallion -->
-  <circle cx="${cx}" cy="${my+8}" r="452" fill="rgba(98,74,34,.18)"/>
-  <circle cx="${cx}" cy="${my}" r="450" fill="url(#${id}o)" stroke="${ORN_C.deep}" stroke-width="3"/>
-  <circle cx="${cx}" cy="${my}" r="436" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="14 9"/>
-  <circle cx="${cx}" cy="${my}" r="364" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="14 9"/>
-  ${ornRopeRing(cx,my,346,34,id+'g')}
-  <circle cx="${cx}" cy="${my}" r="327" fill="url(#${id}d)" stroke="${ORN_C.deep}" stroke-opacity=".6" stroke-width="2"/>
-  ${ornLaceArc(cx,my,292,0,2*Math.PI,24,50,{mid:'#e6d9b8',shade:'rgba(98,74,34,.3)',d:1.2})}
-  <circle cx="${cx}" cy="${my}" r="252" fill="none" stroke="${ORN_C.mid}" stroke-width="1.4"/>
-  <!-- the plaque under the title block -->
-  ${ornPlaque(360,1420,1120,1590,id+'p')}
+  <!-- the medallion: a soft pillow ring, a thin rope, the white disc -->
+  <circle cx="${cx}" cy="${my+10}" r="${R+4}" fill="rgba(98,74,34,.14)"/>
+  <circle cx="${cx}" cy="${my}" r="${R}" fill="url(#${id}o)" stroke="${ORN_C.deep}" stroke-opacity=".55" stroke-width="2"/>
+  <circle cx="${cx}" cy="${my}" r="${R-16}" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".38" stroke-width="1.4" stroke-dasharray="10 8"/>
+  <circle cx="${cx}" cy="${my}" r="${rRope+22}" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".38" stroke-width="1.4" stroke-dasharray="10 8"/>
+  ${ornRopeRing(cx,my,rRope,22,id+'g')}
+  <circle cx="${cx}" cy="${my}" r="${rRope-12}" fill="url(#${id}d)" stroke="${ORN_C.deep}" stroke-opacity=".45" stroke-width="1.4"/>
+  <g opacity=".8">${ornLaceArc(cx,my,rRope-52,Math.PI*1.17,Math.PI*1.83,9,46,{mid:'#e9dcbd',shade:'rgba(98,74,34,.25)',d:1})}
+  ${ornLaceArc(cx,my,rRope-52,Math.PI*.17,Math.PI*.83,9,46,{mid:'#e9dcbd',shade:'rgba(98,74,34,.25)',d:1})}</g>
+  <g transform="translate(${cx} ${my-R-150}) scale(7.2)">${ornCrestG({d:.35,mid:'#c9b182'})}</g>
+  ${ornPlaque(430,1450,1050,1580,id+'q')}
+  </svg>`;
+}
+/* the title: SVG text in the scribal Stam face with a gold metallic fill and
+   the ornaments' emboss (the font is embedded as a data: URL, since an SVG
+   rendered as an image - html2canvas - can't reach the page's fonts) */
+function ornTitleSvg(txt,fontUrl){
+  const id='tt'+(++ORN_ID), fam=fontUrl?'BkStamT':"'Taamey Frank CLM'";
+  const t=(fill,tr,extra)=>`<text x="600" y="246" text-anchor="middle" direction="rtl" font-family="${fam},serif" font-size="262" fill="${fill}" transform="translate(${tr})" ${extra||''}>${txt}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="orn" viewBox="0 0 1200 300">
+    <defs>${fontUrl?`<style>@font-face{font-family:BkStamT;src:url(${fontUrl}) format('truetype')}</style>`:''}
+    <linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9c7b3c"/><stop offset=".32" stop-color="#d9bd7a"/><stop offset=".5" stop-color="#f4e4b8"/><stop offset=".68" stop-color="#c6a45e"/><stop offset="1" stop-color="#6e5426"/></linearGradient></defs>
+    ${t('#fffdf7','-3 -3')}${t('rgba(98,74,34,.42)','5 7')}${t(`url(#${id})`,'0 0','stroke="#6e5426" stroke-width="2.2" paint-order="stroke"')}
   </svg>`;
 }
 /* ring text: one span per letter, rotated round the medallion (html2canvas
@@ -6091,11 +6124,12 @@ function ornDedicationSvg(){
 }
 
 /* ---------- front and back matter ----------
-   The same page frame, header strip and medallion as the day pages. The
-   QR (the App Store link, appQrSrc - the same code the share card draws)
-   and the logo are held as data: URLs, so print and html2canvas never wait
-   on, or get blocked by, a cross-origin image. If the QR can't be fetched
-   (offline) the App Store address is printed instead. */
+   The back page uses the day pages' frame, header strip and medallion; the
+   cover and dedication are the ornament compositions above. The QR (the
+   App Store link, appQrSrc - the same code the share card draws) is held
+   as a data: URL, so print and html2canvas never wait on, or get blocked
+   by, a cross-origin image. If it can't be fetched (offline) the App Store
+   address is printed instead. */
 const BK_IMG={};   // key -> {state:'loading'|'ok'|'fail', p, src}
 function bkImgData(key,url,process){
   if(BK_IMG[key]) return BK_IMG[key].p;
@@ -6115,11 +6149,29 @@ function bkImgData(key,url,process){
   });
   return st.p;
 }
-const BK_QR_KEY='qr', BK_LOGO_KEY='logo';
-function ensureBkMatter(){
-  return Promise.all([bkImgData(BK_QR_KEY,appQrSrc(600,'2b2418','fbf7ee')), bkImgData(BK_LOGO_KEY,'icon-512.png')]);
+const BK_QR_KEY='qr';
+/* the cover title's scribal face (Culmus Stam Ashkenaz, fonts/): registered
+   with the document for print, and kept as a data: URL for the title SVG
+   (an SVG drawn as an image - html2canvas - can't reach page fonts). A
+   failure falls back to Taamey Frank and is retried on the next open. */
+const BK_FONT={state:null, url:'', p:null};
+function ensureBkFont(){
+  if(BK_FONT.p) return BK_FONT.p;
+  BK_FONT.state='loading';
+  BK_FONT.p=fetch('fonts/StamAshkenazCLM.ttf').then(r=>{ if(!r.ok) throw new Error('font http '+r.status); return r.arrayBuffer(); })
+    .then(buf=>{
+      const u=new Uint8Array(buf); let bin=''; for(let i=0;i<u.length;i+=8192) bin+=String.fromCharCode.apply(null,u.subarray(i,i+8192));
+      BK_FONT.url='data:font/ttf;base64,'+btoa(bin);
+      const ff=new FontFace('BkStamT',buf); document.fonts.add(ff); return ff.load();
+    })
+    .then(()=>{ BK_FONT.state='ok'; })
+    .catch(e=>{ console.warn('[booklet] title font unavailable:',e&&e.message); BK_FONT.state='fail'; BK_FONT.url=''; BK_FONT.p=null; });
+  return BK_FONT.p;
 }
-function bkMatterPending(){ return [BK_QR_KEY,BK_LOGO_KEY].some(k=>!BK_IMG[k]||BK_IMG[k].state==='loading'); }
+function ensureBkMatter(){
+  return Promise.all([ensureBkFont(), bkImgData(BK_QR_KEY,appQrSrc(600,'2b2418','fbf7ee'))]);
+}
+function bkMatterPending(){ return !BK_FONT.state || BK_FONT.state==='loading' || [BK_QR_KEY].some(k=>!BK_IMG[k]||BK_IMG[k].state==='loading'); }
 function bkImgSrc(key){ const st=BK_IMG[key]; return st&&st.state==='ok'?st.src:''; }
 /* The dedication names - the owner's confirmed wording, verbatim (do not
    "correct" it), set inside the page's own traditional dedication wording
@@ -6139,11 +6191,10 @@ function bkQrHtml(){
   return `<div class="bk-qr">${q?`<img src="${q}" alt=""/><div class="bk-qr-cap">${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>`;
 }
 function bkCoverHtml(date,slot){
-  const t=bkUI(), logo=bkImgSrc(BK_LOGO_KEY)||'icon-512.png', hd=new HDate(date), q=bkImgSrc(BK_QR_KEY);
+  const t=bkUI(), hd=new HDate(date), q=bkImgSrc(BK_QR_KEY);
   return `<div class="bk-page bk-matter bk-ornp bk-cover">${ornCoverSvg()}
-    <div class="bk-ol bk-cv-ring" aria-hidden="true">${ornRingText(t.ring,40.5)}</div>
-    <div class="bk-ol bk-cv-logo"><img src="${logo}" alt=""/></div>
-    <div class="bk-ol bk-cv-title"><i class="bk-cv-crest">${ornCrest()}</i><div class="bk-cv-name">${t.brand}</div><i class="bk-cv-crest dn">${ornCrest()}</i></div>
+    <div class="bk-ol bk-cv-ring" aria-hidden="true">${ornRingText(t.ring,45.2)}</div>
+    <div class="bk-ol bk-cv-title"><i class="bk-cv-crest">${ornCrest()}</i><i class="bk-cv-name" role="img" aria-label="${t.brand}">${ornTitleSvg(t.brandStam,BK_FONT.url)}</i><i class="bk-cv-crest dn">${ornCrest()}</i></div>
     <div class="bk-ol bk-cv-sub">${t.title}</div>
     <div class="bk-ol bk-cv-plq">${bkParashaLine(slot)}</div>
     <div class="bk-ol bk-cv-dates"><div class="bk-cv-hd">${localizeHebDateStr(hd.renderGematriya(true))}</div><div class="bk-cv-gd">${date.toLocaleDateString(civilDateLocale())}</div></div>

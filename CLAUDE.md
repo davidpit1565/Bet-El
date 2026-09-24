@@ -175,10 +175,17 @@ in English as usual.
   root `<svg>` needs `xmlns` or html2canvas can't draw it; text stays HTML
   (html2canvas can't use web fonts inside an SVG image), including the
   medallion's ring text (`ornRingText`, one rotated span per letter, the
-  Bet El verses Bereshit 28:17/19 in `BK_UI.ring`). Cover: rope-and-scroll
-  side columns, a faint scroll-engraved centre panel, the logo tile above a
-  round medallion (rope ring, ring text, lace, "בֵּית אֵל" between crests),
-  "חוֹבֶרֶת לִמּוּד", the parasha in the bevelled plaque, dates, QR.
+  Bet El verses Bereshit 28:17/19 in `BK_UI.ring`). Cover (no app logo -
+  the owner's call): from the edge in, rope then scroll column, a plain
+  strip, a lighter centre panel with large faint engraving; a filigree
+  crest on the top edge of a round medallion (pillow ring, ring text, thin
+  rope, faint lace arcs) holding the title "בית אל" (`BK_UI.brandStam`, no
+  nikud) in the scribal Culmus Stam Ashkenaz face (fonts/, GPL + font
+  exception, like Taamey Frank) with a gold metallic fill - `ornTitleSvg`,
+  the font embedded as a data: URL by `ensureBkFont()` (also a document
+  FontFace for print; print/PDF wait for it via `bkMatterPending`); then
+  "חוֹבֶרֶת לִמּוּד", the parasha in the bevelled plaque, dates, QR -
+  supporting lines in Taamey Frank Bold.
   Dedication: a scroll-filled bevelled frame with an arched shield panel
   (lace arch, ribbon band carrying "לְעִלּוּי נִשְׁמַת", a candle in the
   pointed foot) holding the memorial + blessing wording from
