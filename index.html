@@ -8856,6 +8856,17 @@ function siddurTalitTefilinHTML(){
 function siddurTikunChatzotSkipToday(info){
   return !!(info.isYomTov || (info.isCholHaMoed && info.cholHaMoedChag==='pesach'));
 }
+// Whether Tachanun is said at all on the Hebrew day `info` describes -
+// Shabbat, every Yom Tov, Chol HaMoed, plus everything already in
+// info.skipTachanun (Rosh Chodesh, Nisan, Lag BaOmer, Erev Yom Kippur,
+// Chanukah, Tu BiShvat, Purim, Isru Chag). Shacharit/Mincha's own Tachanun
+// section never needs this broader check since it only ever renders on a
+// weekday that has already structurally excluded Shabbat/Yom Tov/Chol
+// HaMoed; Kriat Shema Al HaMita (below) is shown every single night
+// regardless of day type, so it needs the full check spelled out.
+function siddurNoTachanunDay(info){
+  return !!(info.isShabbat || info.isYomTov || info.isCholHaMoed || info.skipTachanun);
+}
 function siddurTikunChatzotHTML(info){
   const tc = SIDDUR.tikunChatzot;
   // Non-Hebrew rendering swaps in PRAYERS_TRANSLIT per field, same
@@ -9656,8 +9667,38 @@ function siddurLevanaHTML(dateObj){
    be worse than just listing all seven. No i18n yet (no PRAYERS_TRANSLIT
    entry) - stays Hebrew-only in every language for now, like Birkat
    HaLevana's own Tehillim quotes. ---- */
-function siddurKriatShemaAlHamitaHTML(){
+function siddurKriatShemaAlHamitaHTML(info){
   const K = SIDDUR.kriatShemaAlHamita;
+  // The Vidui (Tachanun-like confession) is gated by this section's own
+  // viduiNote rubric: not on a night whose Hebrew day itself has no
+  // Tachanun (Shabbat, Yom Tov, Chol HaMoed, Rosh Chodesh, Chanukah,
+  // etc. - see siddurNoTachanunDay), and also not on the night AFTER such
+  // a day ends (Motzei Shabbat/Yom Tov/Rosh Chodesh, "וכיוצא בזה") until
+  // chatzot halayla (halachic midnight) passes. currentHDate() (which
+  // built `info`) already rolls to the next Hebrew day at tzeit, so
+  // "today" here IS tonight's Hebrew date and "yesterday" is the day
+  // whose evening this now is.
+  let skipVidui = siddurNoTachanunDay(info);
+  if(!skipVidui){
+    try{
+      const hd = currentHDate();
+      const yInfo = siddurDayInfo(new HDate(hd.abs()-1));
+      if(siddurNoTachanunDay(yInfo)){
+        // chatzotNight(D) is the midpoint of the night ENDING on D's
+        // morning (D's sunrise minus half the night that led up to it,
+        // per its own gregEve()/nightHour() math) - i.e. the chatzot of
+        // the night leading INTO D, not the night after D's own evening.
+        // hd (=currentHDate(), already rolled at tzeit) stays the same
+        // Hebrew day from tonight's sunset all the way to tomorrow's
+        // sunset, so hd.greg() is exactly the date whose chatzotNight()
+        // is tonight's - true whether it's currently evening (before the
+        // civil-calendar's own midnight rollover) or already past
+        // midnight but still before the next sunset.
+        const cn = zmanimFor(hd.greg()).chatzotNight();
+        if(!cn || new Date()<cn) skipVidui = true;
+      }
+    }catch(e){}
+  }
   let html = `<div class="siddur-section-title">${ckChrome('קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה')}</div>`;
   html += siddurParasFromText(K.timingNote);
   html += `<div class="siddur-section-title">${ckChrome('לְשֵׁם יִחוּד')}</div>`;
@@ -9676,8 +9717,12 @@ function siddurKriatShemaAlHamitaHTML(){
   html += siddurParasFromText(K.hinehMitato);
   html += siddurParasFromText(K.yevarechecha);
   html += siddurParasFromText(K.psalm91);
-  html += siddurParasFromText(K.viduiNote);
-  html += siddurParasFromText(K.viduiText);
+  if(skipVidui){
+    html += `<div class="siddur-tachanun-strip">${ckChrome('הַלַּיְלָה אֵין אוֹמְרִים וִדּוּי')}</div>`;
+  } else {
+    html += siddurParasFromText(K.viduiNote);
+    html += siddurParasFromText(K.viduiText);
+  }
   html += siddurParasFromText(K.anaBekoachNote);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
   html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
@@ -9901,7 +9946,7 @@ function siddurSections(dateObj, info, prayer){
   } else if(prayer==='levana'){
     push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML(dateObj));
   } else if(prayer==='kriatShemaAlHamita'){
-    push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML());
+    push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML(info));
   } else if(prayer==='tikunChatzot'){
     const chz = siddurTikunChatzotHTML(info);
     if(siddurTikunChatzotSkipToday(info)) push('note','הֲלָכָה לְמַעֲשֶׂה', `<div class="siddur-halacha-note">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תִּקּוּן חֲצוֹת.')}</div>`);
