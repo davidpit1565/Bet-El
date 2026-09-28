@@ -5,5 +5,6 @@ import SwiftUI
 struct BetElWidgetBundle: WidgetBundle {
     var body: some Widget {
         BetElWidget()
+        BetElCandleWidget()
     }
 }

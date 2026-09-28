@@ -19,15 +19,21 @@ public class BetElWidgetBridge: CAPPlugin, CAPBridgedPlugin {
         let streakCount = call.getInt("streakCount") ?? 0
         let streakBest = call.getInt("streakBest") ?? 0
         let theme = call.getString("theme") ?? "dark"
+        let lang = call.getString("lang") ?? "he"
         let latitude = call.getDouble("latitude") ?? BetElSharedData.Snapshot.placeholder.latitude
         let longitude = call.getDouble("longitude") ?? BetElSharedData.Snapshot.placeholder.longitude
+        let candleTimeISO = call.getString("candleTime")
+        let candleLabel = call.getString("candleLabel")
 
         let snapshot = BetElSharedData.Snapshot(
             streakCount: streakCount,
             streakBest: streakBest,
             theme: theme,
+            lang: lang,
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            candleTimeISO: candleTimeISO,
+            candleLabel: candleLabel
         )
         BetElSharedData.write(snapshot)
 

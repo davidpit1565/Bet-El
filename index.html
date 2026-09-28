@@ -2000,7 +2000,7 @@ function animateCountUp(el, from, to, duration){
 }
 window.animateCountUp = animateCountUp;
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
-function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); }
+function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); syncWidgetData(); }
 /* ---------- i18n ---------- */
 const I18N={
 en:{'נסח עדות המזרח':'Edot HaMizrach nusach','התכן מתעדכן אוטומטית לפי':'content updates automatically for','יום היאהרצייט':'Yahrzeit','ראש חדש':'Rosh Chodesh','בראש חדש מתפללים שחרית כבכל יום ומוסיפים "יעלה ויבא", ואחר חזרת הש"ץ אומרים הלל בדלוג ובלא ברכה תחלה וסוף.':'On Rosh Chodesh, Shacharit is prayed as on any other day with the addition of "Yaaleh veYavo"; after the chazzan\'s repetition, Hallel is said in its abbreviated form, with no blessing before or after.','ברכות השחר':'Birkot Hashachar','סדר טלית ותפלין':'Seder Talit uTefilin','סדר עטיפת טלית':'Seder Atifat Talit','סדר הנחת תפלין':'Seder Hanachat Tefilin','פתח אליהו':'Petach Eliyahu','סדר תקון חצות':'Seder Tikun Chatzot','תקון רחל':'Tikun Rachel','תקון לאה':'Tikun Leah','לשם יחוד':'Leshem Yichud','קדיש':'Kaddish','בריך שמה':'Berich Shemei','לשם יחוד למוסף':'Leshem Yichud LeMusaf','חולצין תפלין':'Tefillin are removed here','כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).':'When saying "Ki ereh shameicha maase etzbeotecha" one looks at the moon, but once beginning the blessing itself one no longer looks at it (Ben Ish Chai, Shana Bet, Vayikra 23).','לפני הברכה יאמר:':'Before the blessing, one says:','שחרית':'Shacharit','מנחה':'Mincha','ערבית':'Arvit','סדר ראש חדש':'Seder Rosh Chodesh','ספירת העמר':'Sefirat HaOmer','ברכת הלבנה':'Birkat HaLevana','תקון חצות':'Tikun Chatzot','השפה עדכנה':'Language updated','פרשיות':'parshiot','מתוך':'of','מזמור':'Psalm','פסוקים':'verses','סגור':'Close','כוון תפלה':'Prayer Direction','אפשרו חישן כוון':'Enable the compass sensor','אפשרו גישה למקום':'Enable location access','כוון קדש הקדשים':'Direction to the Holy of Holies','הכוון החי דורש אשור חישן':'Live direction requires sensor permission','ק״מ מירושלים':'km from Jerusalem','הכוון מחשב לפי המקום וחישן הכוון של המכשיר. שמעו לב: יתכן שתהיה סטיה קלה במצפן הטלפון - השמוש באחריותכם בלבד.':'The direction is calculated from your location and the device\'s compass sensor. Note: your phone\'s compass may be slightly off - use at your own responsibility.','אתם מכוונים נכון!':'You\'re facing the right way!','הסתובבו':'Turn','שמאלה':'left','ימינה':'right','צפון':'North','צפוןמזרח':'Northeast','מזרח':'East','דרוםמזרח':'Southeast','דרום':'South','דרוםמערב':'Southwest','מערב':'West','צפוןמערב':'Northwest','משהו השתבש':'Something went wrong','אפשר לנסות לרענן את העמוד':'Try refreshing the page','רענן':'Refresh','גרסה חדשה זמינה':'New version available','עדכנו לגרסה האחרונה ב-App Store':'Update to the latest version on the App Store','עדכן עכשו':'Update now',
@@ -2565,17 +2565,41 @@ function getCombinedStreak(){ const d=getCombinedStreakData(); return {count:d.c
    else (web/Android), and safely skipped if the native plugin isn't
    registered yet (e.g. mid-rollout, or a build without the widget
    extension). */
+function nextCandleLightingInfo(){
+  try{
+    const locale = S.lang==='en' ? 'en' : 'he';
+    let hd=currentHDate(); const now=new Date();
+    for(let i=0;i<8;i++){
+      const st=shabbatTimes(hd, locale);
+      if(st.candle && st.candle>now){
+        const title = st.chanukahNight
+          ? (locale==='en' ? ('Chanukah · Candle '+st.chanukahNight) : ('חנוכה · נר '+heNum(st.chanukahNight)))
+          : st.label ? st.label
+          : (hd.getDay()===5
+              ? (locale==='en' ? 'Erev Shabbat' : 'ערב שבת קדש')
+              : (locale==='en' ? 'Candle lighting' : 'הדלקת נרות'));
+        return {time:st.candle.toISOString(), label:title};
+      }
+      hd=new HDate(hd.abs()+1);
+    }
+  }catch(e){}
+  return null;
+}
 function syncWidgetData(){
   try{
     const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BetElWidgetBridge;
     if(!plugin || !plugin.updateSharedData) return;
     const streak = getCombinedStreak();
+    const candle = nextCandleLightingInfo();
     plugin.updateSharedData({
       streakCount: streak.count,
       streakBest: streak.best,
       theme: S.theme||'dark',
+      lang: S.lang||'he',
       latitude: (LOC&&LOC.lat!=null)?LOC.lat:FALLBACK.lat,
       longitude: (LOC&&LOC.lon!=null)?LOC.lon:FALLBACK.lon,
+      candleTime: candle?candle.time:null,
+      candleLabel: candle?candle.label:null,
     }).catch(()=>{});
   }catch(e){}
 }
@@ -6449,11 +6473,12 @@ function finishReading(){
 }
 
 /* ================= CALENDAR ================= */
-function shabbatTimes(hd){
+function shabbatTimes(hd, locale){
+  locale = locale || 'he';
   try{
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
     const il=calIsIL();
-    const evs=HebrewCalendar.calendar({start:s,end:e,candlelighting:true,location:hebLocation(),il,locale:'he'});
+    const evs=HebrewCalendar.calendar({start:s,end:e,candlelighting:true,location:hebLocation(),il,locale});
     let candle=null,havdala=null,chanukahNight=null,label=null;
     const CHAG_EREV = 1|1048576; // @hebcal/core flags.CHAG | flags.EREV
     evs.forEach(ev=>{
@@ -6462,7 +6487,7 @@ function shabbatTimes(hd){
       if(chMatch){ chanukahNight=+chMatch[1]; if(t) candle=t; return; }
       if(t && /Candle/i.test(d)){ candle=t; return; }
       if(t && /Havdalah/i.test(d)){ havdala=t; return; }
-      if(!t && (f&CHAG_EREV) && !label) label=deNikud(ev.render('he'));
+      if(!t && (f&CHAG_EREV) && !label) label = locale==='he' ? deNikud(ev.render('he')) : ev.render(locale);
     });
     return {candle,havdala,chanukahNight,label};
   }catch(err){ return {candle:null,havdala:null,chanukahNight:null,label:null}; }
@@ -11047,6 +11072,7 @@ applyLang();
 if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_PACE_STEP=-2; CK_PACE_PENDING_TAB='home'; TAB='chokPace'; }
 buildNav();
 render();
+syncWidgetData();
 maybeShowRatePrompt();
 /* Drag along the bottom nav itself to scrub between tabs, like sliding a
    finger across a segmented control: the pill follows the finger live

@@ -45,6 +45,22 @@ private func timeString(_ date: Date?) -> String {
     return f.string(from: date)
 }
 
+/// Text/frame alignment for the given app language - widget layout is
+/// always forced to `.leftToRight` (see BetElWidgetEntryView) so this
+/// is what actually decides which side content hugs: `.trailing`
+/// (right) for Hebrew and any not-yet-translated language (its text is
+/// still Hebrew via WidgetL10n's fallback), `.leading` (left) for
+/// English, matching each script's natural reading direction.
+private func hAlign(_ lang: String) -> HorizontalAlignment {
+    WidgetL10n.isRTL(lang) ? .trailing : .leading
+}
+private func frameAlign(_ lang: String) -> Alignment {
+    WidgetL10n.isRTL(lang) ? .trailing : .leading
+}
+private func textAlign(_ lang: String) -> TextAlignment {
+    WidgetL10n.isRTL(lang) ? .trailing : .leading
+}
+
 // MARK: - Shared pieces
 
 private struct BackgroundView: View {
@@ -85,18 +101,20 @@ private struct SmallWidgetView: View {
     let entry: BetElEntry
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
+        let align = hAlign(entry.lang)
         ZStack {
             BackgroundView(palette: palette)
-            VStack(alignment: .trailing, spacing: 6) {
+            VStack(alignment: align, spacing: 6) {
                 HStack {
+                    if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
                     Spacer()
-                    StreakBadge(count: entry.streakCount, palette: palette)
+                    if align == .trailing { StreakBadge(count: entry.streakCount, palette: palette) }
                 }
                 Spacer()
                 Text(entry.hebrewDateText)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(palette.ink)
-                    .multilineTextAlignment(.trailing)
+                    .multilineTextAlignment(textAlign(entry.lang))
                     .lineLimit(2)
                 if let t = entry.nextZmanTime {
                     HStack(spacing: 4) {
@@ -117,14 +135,16 @@ private struct MediumWidgetView: View {
     let entry: BetElEntry
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
+        let align = hAlign(entry.lang)
+        let fAlign = frameAlign(entry.lang)
         ZStack {
             BackgroundView(palette: palette)
             HStack(alignment: .top, spacing: 0) {
-                VStack(alignment: .trailing, spacing: 6) {
+                VStack(alignment: align, spacing: 6) {
                     Text(entry.hebrewDateText)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(palette.ink)
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(textAlign(entry.lang))
                     if let t = entry.nextZmanTime {
                         HStack(spacing: 4) {
                             Text(timeString(t)).font(.system(size: 13, weight: .bold))
@@ -135,20 +155,20 @@ private struct MediumWidgetView: View {
                     Spacer()
                     StreakBadge(count: entry.streakCount, palette: palette)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: fAlign)
 
                 GoldDivider(palette: palette).frame(width: 1).padding(.vertical, 4)
 
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("תְּהִלִּים הַיּוֹם")
+                VStack(alignment: align, spacing: 4) {
+                    Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                         .font(.system(size: 11))
                         .foregroundColor(palette.inkSoft)
-                    Text("\(entry.tehillimRange.start)–\(entry.tehillimRange.end)")
+                    Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
                         .font(.system(size: 22, weight: .bold))
                         .foregroundColor(palette.goldBright)
                     Spacer()
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: fAlign)
             }
             .padding(14)
         }
@@ -161,50 +181,53 @@ private struct LargeWidgetView: View {
     let entry: BetElEntry
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
+        let align = hAlign(entry.lang)
+        let fAlign = frameAlign(entry.lang)
         ZStack {
             BackgroundView(palette: palette)
-            VStack(alignment: .trailing, spacing: 10) {
+            VStack(alignment: align, spacing: 10) {
                 HStack {
+                    if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
                     Spacer()
-                    StreakBadge(count: entry.streakCount, palette: palette)
+                    if align == .trailing { StreakBadge(count: entry.streakCount, palette: palette) }
                 }
                 Text(entry.hebrewDateText)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(palette.ink)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: fAlign)
 
                 HStack(spacing: 16) {
                     if let t2 = entry.secondZmanTime, let l2 = entry.secondZmanLabel {
-                        VStack(alignment: .trailing, spacing: 2) {
+                        VStack(alignment: align, spacing: 2) {
                             Text(l2).font(.system(size: 11)).foregroundColor(palette.inkSoft)
                             Text(timeString(t2)).font(.system(size: 15, weight: .semibold)).foregroundColor(palette.gold)
                         }
                     }
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: align, spacing: 2) {
                         Text(entry.nextZmanLabel).font(.system(size: 11)).foregroundColor(palette.inkSoft)
                         Text(timeString(entry.nextZmanTime)).font(.system(size: 15, weight: .semibold)).foregroundColor(palette.gold)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: fAlign)
 
                 GoldDivider(palette: palette)
 
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("תְּהִלִּים הַיּוֹם")
+                VStack(alignment: align, spacing: 4) {
+                    Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                         .font(.system(size: 12))
                         .foregroundColor(palette.inkSoft)
-                    Text("פֶּרֶק \(entry.tehillimRange.start)–\(entry.tehillimRange.end)")
+                    Text("\(WidgetL10n.t("chapter", lang: entry.lang)) \(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(palette.goldBright)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: fAlign)
 
                 Spacer()
 
-                Text("\(entry.streakCount) יָמִים בְּרֶצֶף")
+                Text("\(entry.streakCount) \(WidgetL10n.t("dayStreak", lang: entry.lang))")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(palette.gold)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: fAlign)
             }
             .padding(16)
         }
@@ -228,6 +251,11 @@ struct BetElWidgetEntryView: View {
                 SmallWidgetView(entry: entry)
             }
         }
+        // Widget copy always follows the app's own S.lang setting, not
+        // the device's system language - so layout direction is forced
+        // explicitly here rather than left to inherit from the OS
+        // locale (which the widget extension would otherwise pick up).
+        .environment(\.layoutDirection, .leftToRight)
         .widgetURL(entry.deepLinkURL)
     }
 }

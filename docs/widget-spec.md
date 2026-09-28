@@ -183,8 +183,40 @@ it either way; it needs to be committed to git alongside the rest of
   Shnayim Mikra (a new small main-app feature, not just a widget read).
 - **Color scheme**: both dark and light variants, following the app's
   own stored theme setting (not the system-wide iOS appearance).
+- **Language**: the widget's chrome text (zman labels, "Tehillim
+  today", the streak line) and the Hebrew-date formatting both follow
+  the app's own `S.lang` setting (synced through the App Group snapshot
+  as `lang`), same as the color scheme - not the iPhone's system
+  language. Per explicit user decision, only **Hebrew and English**
+  have real translations for now (`ios/App/BetElWidget/Localization.
+  swift`'s `WidgetL10n`); French/Russian/Georgian fall back to Hebrew
+  until someone adds their rows to that table - same fallback pattern
+  the main app itself already uses for partially-translated content.
+  Widget layout direction is forced explicitly per-language (`.leading`/
+  `.trailing` resolved against a fixed `.leftToRight` environment)
+  rather than inherited from the device's own system language, so it
+  stays correct even when those two differ.
+- **A fourth, dedicated small widget for candle lighting** (`BetEl
+  CandleWidget`, its own `Widget`/kind in the same `BetElWidgetBundle`,
+  `.supportedFamilies([.systemSmall])` only per explicit request) -
+  shows just the next candle-lighting time + occasion label (Erev
+  Shabbat, a Yom Tov's own name, or "Chanukah · Candle N"). Computed
+  app-side by `nextCandleLightingInfo()` in `index.html` (scans forward
+  from today via the existing `shabbatTimes()`/hebcal machinery, already
+  locale-aware via the same `lang` value) since the widget extension
+  can't run hebcal itself, and synced through the same App Group
+  snapshot (`candleTimeISO`, `candleLabel`) alongside everything else -
+  refreshed whenever the app opens or any setting changes (`saveS()`
+  now also calls `syncWidgetData()`), not only when the combined streak
+  bumps.
 
 ## Still open
 - Apple Developer **signing team ID** - Xcode fills this in once you
   open the project and select your team under Signing & Capabilities;
   can't be set correctly from here.
+- The candle-lighting widget currently only ever shows *this stored*
+  next occasion; if the app isn't opened again before that time passes,
+  the widget can't compute the following week's time on its own (it has
+  no hebcal in Swift) and will keep showing the stale time until the
+  next app open re-syncs it. Acceptable for a daily-use study app, but
+  worth knowing.
