@@ -2540,6 +2540,45 @@ function updateStreak(){
   saveStreakData({lastDate:today,count,best:Math.max(count,d.best||0)});
 }
 function getStreak(){ const d=getStreakData(); return {count:d.count||0,best:d.best||0}; }
+/* A combined streak spanning every learning track (Tehillim, Chok
+   LeYisrael, Musar, Shnayim Mikra) rather than just Tehillim's own
+   betel_streak above - a day counts once any one of them is marked
+   done that day. Bumped from each feature's own mark-done call site
+   (updateStreak below, chokMarkDone, smMarkDone) plus Musar's
+   openMusarYomi (Musar has no per-day done-tracking of its own yet, so
+   opening that day's reading is the signal used here). Shared to the
+   iOS widget via the App Group, alongside being shown in-app. */
+function getCombinedStreakData(){ try{return JSON.parse(localStorage.getItem('betel_combined_streak')||'{}');}catch(e){return {};} }
+function saveCombinedStreakData(d){ localStorage.setItem('betel_combined_streak',JSON.stringify(d)); }
+function bumpCombinedStreak(){
+  const today=civilToday().toISOString().slice(0,10), d=getCombinedStreakData();
+  if(d.lastDate===today) return;
+  const count=(d.lastDate && isYesterday(d.lastDate))?(d.count||0)+1:1;
+  saveCombinedStreakData({lastDate:today,count,best:Math.max(count,d.best||0)});
+  syncWidgetData();
+}
+function getCombinedStreak(){ const d=getCombinedStreakData(); return {count:d.count||0,best:d.best||0}; }
+/* Pushes the data the iOS home-screen widget needs (combined streak,
+   today's Tehillim position, the app's own theme setting) into the App
+   Group shared container, via a small native plugin (see
+   docs/widget-spec.md's "Data sharing" section) - a no-op everywhere
+   else (web/Android), and safely skipped if the native plugin isn't
+   registered yet (e.g. mid-rollout, or a build without the widget
+   extension). */
+function syncWidgetData(){
+  try{
+    const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BetElWidgetBridge;
+    if(!plugin || !plugin.updateSharedData) return;
+    const streak = getCombinedStreak();
+    plugin.updateSharedData({
+      streakCount: streak.count,
+      streakBest: streak.best,
+      theme: S.theme||'dark',
+      latitude: (LOC&&LOC.lat!=null)?LOC.lat:FALLBACK.lat,
+      longitude: (LOC&&LOC.lon!=null)?LOC.lon:FALLBACK.lon,
+    }).catch(()=>{});
+  }catch(e){}
+}
 
 
 
@@ -2936,7 +2975,7 @@ function chokDoneKey(key,day){ return key+'|'+day; }
 function chokDone(){ try{ return JSON.parse(localStorage.getItem('betel_chok_done')||'[]'); }catch(e){ return []; } }
 function chokMarkDone(key,day){
   const s=chokDone(), k=chokDoneKey(key,day);
-  if(!s.includes(k)){ s.push(k); localStorage.setItem('betel_chok_done',JSON.stringify(s)); }
+  if(!s.includes(k)){ s.push(k); localStorage.setItem('betel_chok_done',JSON.stringify(s)); bumpCombinedStreak(); }
 }
 function chokIsDone(key,day){ return chokDone().includes(chokDoneKey(key,day)); }
 
@@ -3216,7 +3255,7 @@ function renderMusarList(){
   app.querySelectorAll('[data-musarday]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openMusarYomi(b.dataset.musarday); });
 }
 let MUSAR_YOMI_WORK=null, MUSAR_YOMI_START=null;
-function openMusarYomi(work){ MUSAR_YOMI_WORK=work; MUSAR_YOMI_START=null; go('musarYomi'); }
+function openMusarYomi(work){ MUSAR_YOMI_WORK=work; MUSAR_YOMI_START=null; go('musarYomi'); bumpCombinedStreak(); }
 function renderMusarYomiReader(){
   const work=MUSAR_YOMI_WORK||'reshit';
   const t=ckMusarUI();
@@ -8856,6 +8895,17 @@ function siddurTalitTefilinHTML(){
 function siddurTikunChatzotSkipToday(info){
   return !!(info.isYomTov || (info.isCholHaMoed && info.cholHaMoedChag==='pesach'));
 }
+// Whether Tachanun is said at all on the Hebrew day `info` describes -
+// Shabbat, every Yom Tov, Chol HaMoed, plus everything already in
+// info.skipTachanun (Rosh Chodesh, Nisan, Lag BaOmer, Erev Yom Kippur,
+// Chanukah, Tu BiShvat, Purim, Isru Chag). Shacharit/Mincha's own Tachanun
+// section never needs this broader check since it only ever renders on a
+// weekday that has already structurally excluded Shabbat/Yom Tov/Chol
+// HaMoed; Kriat Shema Al HaMita (below) is shown every single night
+// regardless of day type, so it needs the full check spelled out.
+function siddurNoTachanunDay(info){
+  return !!(info.isShabbat || info.isYomTov || info.isCholHaMoed || info.skipTachanun);
+}
 function siddurTikunChatzotHTML(info){
   const tc = SIDDUR.tikunChatzot;
   // Non-Hebrew rendering swaps in PRAYERS_TRANSLIT per field, same
@@ -9656,8 +9706,38 @@ function siddurLevanaHTML(dateObj){
    be worse than just listing all seven. No i18n yet (no PRAYERS_TRANSLIT
    entry) - stays Hebrew-only in every language for now, like Birkat
    HaLevana's own Tehillim quotes. ---- */
-function siddurKriatShemaAlHamitaHTML(){
+function siddurKriatShemaAlHamitaHTML(info){
   const K = SIDDUR.kriatShemaAlHamita;
+  // The Vidui (Tachanun-like confession) is gated by this section's own
+  // viduiNote rubric: not on a night whose Hebrew day itself has no
+  // Tachanun (Shabbat, Yom Tov, Chol HaMoed, Rosh Chodesh, Chanukah,
+  // etc. - see siddurNoTachanunDay), and also not on the night AFTER such
+  // a day ends (Motzei Shabbat/Yom Tov/Rosh Chodesh, "וכיוצא בזה") until
+  // chatzot halayla (halachic midnight) passes. currentHDate() (which
+  // built `info`) already rolls to the next Hebrew day at tzeit, so
+  // "today" here IS tonight's Hebrew date and "yesterday" is the day
+  // whose evening this now is.
+  let skipVidui = siddurNoTachanunDay(info);
+  if(!skipVidui){
+    try{
+      const hd = currentHDate();
+      const yInfo = siddurDayInfo(new HDate(hd.abs()-1));
+      if(siddurNoTachanunDay(yInfo)){
+        // chatzotNight(D) is the midpoint of the night ENDING on D's
+        // morning (D's sunrise minus half the night that led up to it,
+        // per its own gregEve()/nightHour() math) - i.e. the chatzot of
+        // the night leading INTO D, not the night after D's own evening.
+        // hd (=currentHDate(), already rolled at tzeit) stays the same
+        // Hebrew day from tonight's sunset all the way to tomorrow's
+        // sunset, so hd.greg() is exactly the date whose chatzotNight()
+        // is tonight's - true whether it's currently evening (before the
+        // civil-calendar's own midnight rollover) or already past
+        // midnight but still before the next sunset.
+        const cn = zmanimFor(hd.greg()).chatzotNight();
+        if(!cn || new Date()<cn) skipVidui = true;
+      }
+    }catch(e){}
+  }
   let html = `<div class="siddur-section-title">${ckChrome('קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה')}</div>`;
   html += siddurParasFromText(K.timingNote);
   html += `<div class="siddur-section-title">${ckChrome('לְשֵׁם יִחוּד')}</div>`;
@@ -9676,8 +9756,12 @@ function siddurKriatShemaAlHamitaHTML(){
   html += siddurParasFromText(K.hinehMitato);
   html += siddurParasFromText(K.yevarechecha);
   html += siddurParasFromText(K.psalm91);
-  html += siddurParasFromText(K.viduiNote);
-  html += siddurParasFromText(K.viduiText);
+  if(skipVidui){
+    html += `<div class="siddur-tachanun-strip">${ckChrome('הַלַּיְלָה אֵין אוֹמְרִים וִדּוּי')}</div>`;
+  } else {
+    html += siddurParasFromText(K.viduiNote);
+    html += siddurParasFromText(K.viduiText);
+  }
   html += siddurParasFromText(K.anaBekoachNote);
   html += siddurParasFromText(SIDDUR.omerAnaBekoach.split('\n\n').slice(0,-1).join('\n\n'), true);
   html += siddurParasFromText(`<span class="siddur-whisper">${ckChrome('(בלחש)')}</span> ${PT('baruchShemKavod')||'בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד:'}`);
@@ -9901,7 +9985,7 @@ function siddurSections(dateObj, info, prayer){
   } else if(prayer==='levana'){
     push('levana','בִּרְכַּת הַלְּבָנָה', siddurLevanaHTML(dateObj));
   } else if(prayer==='kriatShemaAlHamita'){
-    push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML());
+    push('kriatShemaAlHamita','קְרִיאַת שְׁמַע שֶׁעַל הַמִּטָּה', siddurKriatShemaAlHamitaHTML(info));
   } else if(prayer==='tikunChatzot'){
     const chz = siddurTikunChatzotHTML(info);
     if(siddurTikunChatzotSkipToday(info)) push('note','הֲלָכָה לְמַעֲשֶׂה', `<div class="siddur-halacha-note">${ckChrome('הַיּוֹם אֵין אוֹמְרִים תִּקּוּן חֲצוֹת.')}</div>`);
@@ -10019,6 +10103,7 @@ function smMarkDone(key){
   const d=smStreakData(); const today=civilToday().toISOString().slice(0,10);
   if(d.last!==today){ d.count=(d.last && isYesterday(d.last))?d.count+1:1; d.best=Math.max(d.best,d.count); d.last=today; localStorage.setItem('betel_sm_streak',JSON.stringify(d)); }
   const done=JSON.parse(localStorage.getItem('betel_sm_done')||'[]'); if(!done.includes(key)){ done.push(key); localStorage.setItem('betel_sm_done',JSON.stringify(done)); }
+  bumpCombinedStreak();
 }
 function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
 function smIsDone(key){ try{return JSON.parse(localStorage.getItem('betel_sm_done')||'[]').includes(key);}catch(e){return false;} }

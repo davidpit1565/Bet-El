@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F72859958551B1E3E967AA2 /* BetElWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF731F19971C018FA05D9FE7 /* BetElWidget.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		3E9E713168783F7207FC1BC1 /* SharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9274E9281FDF317A272DE17 /* SharedData.swift */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -15,11 +17,47 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		5CE2A40204577F2C7B07A4AA /* Solar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C224FC89218B90CFC8E4C0 /* Solar.swift */; };
+		6D0958385491BDBEF575FB64 /* SharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9274E9281FDF317A272DE17 /* SharedData.swift */; };
+		7F1FD21D057EC7E01E6CB494 /* BetElWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF701305BE4DBDAA787444A /* BetElWidgetBundle.swift */; };
+		8A074172DFC9F6AAC6FC5E01 /* BetElWidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 682EEB13158E5B65AFF23FB7 /* BetElWidgetBridge.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
+		AB345F94F3B4B35246135031 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6200BCF09C2A315098A0A934 /* Foundation.framework */; };
+		B4AFCFCD69014FF5886C2E5E /* BetElWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 81EB37DC17CE2617B611ABD9 /* BetElWidget.appex */; settings = {ATTRIBUTES = (RemoveHeaderOnCopy, ); }; };
+		C761FFA07C5178E57D87BE8F /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FE6D65B6A501918B061D8C /* Provider.swift */; };
+		FA978A88D2397868B7551144 /* HebrewDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3DE7F09F11BFC86E15552C /* HebrewDay.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5EDB269DBD3B49E987F1DB6E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 10B43BF50CA590CE702DE68A;
+			remoteInfo = BetElWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		55FDED17B90C1B59C368A6E3 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B4AFCFCD69014FF5886C2E5E /* BetElWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		09C224FC89218B90CFC8E4C0 /* Solar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Solar.swift; sourceTree = "<group>"; };
+		16FE6D65B6A501918B061D8C /* Provider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
+		2F3DE7F09F11BFC86E15552C /* HebrewDay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HebrewDay.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		49EC39C473DF8F15EAD181A6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -28,11 +66,27 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		6200BCF09C2A315098A0A934 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		655C956457ECBF25294D3CBF /* BetElWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = BetElWidget.entitlements; sourceTree = "<group>"; };
+		682EEB13158E5B65AFF23FB7 /* BetElWidgetBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidgetBridge.swift; sourceTree = "<group>"; };
+		81EB37DC17CE2617B611ABD9 /* BetElWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BetElWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BF701305BE4DBDAA787444A /* BetElWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidgetBundle.swift; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		DE278307C742BE5E4186087A /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		E9274E9281FDF317A272DE17 /* SharedData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedData.swift; sourceTree = "<group>"; };
+		EF731F19971C018FA05D9FE7 /* BetElWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		18C4299739A786525601D9AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB345F94F3B4B35246135031 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3011FED79650016851F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -50,6 +104,8 @@
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
+				6EA57D0CFD3B0C41C55566BC /* BetElWidget */,
+				97770C83C0F67F3D130FE862 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				81EB37DC17CE2617B611ABD9 /* BetElWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,13 +130,64 @@
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
+				682EEB13158E5B65AFF23FB7 /* BetElWidgetBridge.swift */,
+				DE278307C742BE5E4186087A /* App.entitlements */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		5500976724450EB596BE7415 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				6200BCF09C2A315098A0A934 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		6EA57D0CFD3B0C41C55566BC /* BetElWidget */ = {
+			isa = PBXGroup;
+			children = (
+				8BF701305BE4DBDAA787444A /* BetElWidgetBundle.swift */,
+				EF731F19971C018FA05D9FE7 /* BetElWidget.swift */,
+				16FE6D65B6A501918B061D8C /* Provider.swift */,
+				09C224FC89218B90CFC8E4C0 /* Solar.swift */,
+				2F3DE7F09F11BFC86E15552C /* HebrewDay.swift */,
+				E9274E9281FDF317A272DE17 /* SharedData.swift */,
+				49EC39C473DF8F15EAD181A6 /* Info.plist */,
+				655C956457ECBF25294D3CBF /* BetElWidget.entitlements */,
+			);
+			name = BetElWidget;
+			path = BetElWidget;
+			sourceTree = "<group>";
+		};
+		97770C83C0F67F3D130FE862 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5500976724450EB596BE7415 /* iOS */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		10B43BF50CA590CE702DE68A /* BetElWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 66F901C21A336A21E0AE60AE /* Build configuration list for PBXNativeTarget "BetElWidget" */;
+			buildPhases = (
+				3C13C4DE44D8AC73BF14DDF6 /* Sources */,
+				18C4299739A786525601D9AC /* Frameworks */,
+				359B344F88AC4285E20D179D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BetElWidget;
+			productName = BetElWidget;
+			productReference = 81EB37DC17CE2617B611ABD9 /* BetElWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		504EC3031FED79650016851F /* App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
@@ -87,10 +195,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				55FDED17B90C1B59C368A6E3 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1DE532BDB192994A08A97888 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -133,11 +243,19 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				10B43BF50CA590CE702DE68A /* BetElWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		359B344F88AC4285E20D179D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3021FED79650016851F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,16 +272,40 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3C13C4DE44D8AC73BF14DDF6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F1FD21D057EC7E01E6CB494 /* BetElWidgetBundle.swift in Sources */,
+				2F72859958551B1E3E967AA2 /* BetElWidget.swift in Sources */,
+				C761FFA07C5178E57D87BE8F /* Provider.swift in Sources */,
+				5CE2A40204577F2C7B07A4AA /* Solar.swift in Sources */,
+				FA978A88D2397868B7551144 /* HebrewDay.swift in Sources */,
+				6D0958385491BDBEF575FB64 /* SharedData.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3001FED79650016851F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
+				3E9E713168783F7207FC1BC1 /* SharedData.swift in Sources */,
+				8A074172DFC9F6AAC6FC5E01 /* BetElWidgetBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1DE532BDB192994A08A97888 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BetElWidget;
+			target = 10B43BF50CA590CE702DE68A /* BetElWidget */;
+			targetProxy = 5EDB269DBD3B49E987F1DB6E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
@@ -299,6 +441,7 @@
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = App/Info.plist;
@@ -321,6 +464,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = App/Info.plist;
@@ -335,6 +479,59 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B339EBFA725ECA3F8084E517 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = BetElWidget/BetElWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BetElWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.beitel.tehilim.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B58B6882FA214A014091621D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = BetElWidget/BetElWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BetElWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.beitel.tehilim.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -355,6 +552,15 @@
 			buildConfigurations = (
 				504EC3171FED79650016851F /* Debug */,
 				504EC3181FED79650016851F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66F901C21A336A21E0AE60AE /* Build configuration list for PBXNativeTarget "BetElWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B58B6882FA214A014091621D /* Release */,
+				B339EBFA725ECA3F8084E517 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
