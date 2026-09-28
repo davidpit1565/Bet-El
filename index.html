@@ -2574,6 +2574,8 @@ function syncWidgetData(){
       streakCount: streak.count,
       streakBest: streak.best,
       theme: S.theme||'dark',
+      latitude: (LOC&&LOC.lat!=null)?LOC.lat:FALLBACK.lat,
+      longitude: (LOC&&LOC.lon!=null)?LOC.lon:FALLBACK.lon,
     }).catch(()=>{});
   }catch(e){}
 }
