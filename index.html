@@ -6537,6 +6537,41 @@ function siddurIsTalSeason(hd){
   if(m===HMONTHS.TISHREI) return d<=21;
   return false;
 }
+function siddurGregLeap(y){ return (y%4===0 && (y%100!==0 || y%400===0)); }
+/* Outside Israel, "וְתֵן טַל וּמָטָר" starts 60 days after Tekufat Tishrei,
+   which lands on the civil Dec 4 - except Dec 5 in the civil year right
+   before a civil leap year (2023, 2027, 2031...), since that leap day
+   shifts the count. Valid under this simple Dec-4/Dec-5 rule through
+   the year 2100 (the standard practical approximation cited by every
+   halachic calendar; after 2100 the Julian/Gregorian drift moves it a
+   day later). */
+function siddurChulTalUmatarStart(gregYear){
+  return new Date(gregYear, 11, siddurGregLeap(gregYear+1) ? 5 : 4);
+}
+/* "בָּֽרְכֵֽנוּ" (no rain request) vs. "בָּרֵךְ עָלֵֽינוּ ... וְתֵן טַל וּמָטָר"
+   in the Amidah's 9th blessing (Birkat HaShanim) - a DIFFERENT switch-over
+   than siddurIsTalSeason's own Pesach/Shmini-Atzeret one above, and
+   location-dependent: this app's Edot HaMizrach nusach has no separate
+   third "transitional" wording (per Yalkut Yosef siman 117) - one keeps
+   saying "ברכנו" all the way through the night before the rain-request
+   itself starts, which is 7 Cheshvan in Israel but only ~6 weeks later
+   (the civil Dec 4/5 date above) outside Israel. Both locations switch
+   back to "ברכנו" together at the same moment as siddurIsTalSeason's own
+   Pesach boundary (Nisan 15). */
+function siddurIsGeshemSeason(hd){
+  const abs=hd.abs();
+  let hy=hd.getFullYear();
+  let pesachAbs=new HDate(15, HMONTHS.NISAN, hy).abs();
+  if(pesachAbs<abs){ hy++; pesachAbs=new HDate(15, HMONTHS.NISAN, hy).abs(); }
+  let sheelaAbs;
+  if(calIsIL()){
+    sheelaAbs=new HDate(7, HMONTHS.CHESHVAN, hy).abs();
+  }else{
+    const pesachGregYear=new HDate(pesachAbs).greg().getFullYear();
+    sheelaAbs=new HDate(siddurChulTalUmatarStart(pesachGregYear-1)).abs();
+  }
+  return abs>=sheelaAbs && abs<pesachAbs;
+}
 /* One function describing everything the Siddur's rendering needs to know
    about today, so the reader screens just check plain booleans/fields
    rather than re-deriving calendar logic themselves - mirrors
@@ -6558,6 +6593,7 @@ function siddurDayInfo(hd){
     hallel:null, // null | 'half' | 'full'
     hallelBlessing:false,
     isTalSeason:false,
+    isGeshemSeason:false,
     isShabbat:false,
     isYomTov:false, yaaleVeyavoChag:null, // null|'roshChodesh'|'pesach'|'shavuot'|'sukkot'|'shminiAtzeret'|'roshHashana'
     isPesachLastDays:false,
@@ -6585,6 +6621,7 @@ function siddurDayInfo(hd){
     info.isHashemHuHaElokimDay = info.isAseretYemeiTeshuva || (hd.getMonth()===HMONTHS.TISHREI && hd.getDate()===21);
     info.isIsruChag = isIsruChagToday(hd, il);
     info.isTalSeason = siddurIsTalSeason(hd);
+    info.isGeshemSeason = siddurIsGeshemSeason(hd);
     info.isShabbat = hd.greg().getDay()===6;
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
     const evs=HebrewCalendar.calendar({start:s,end:e,il,location:hebLocation()});
@@ -8745,7 +8782,14 @@ function siddurBlessingParas(b, info, opts){
     }
   };
   if(b.text) out.push({text:b.text});
-  if(b.season) out.push({text: info.isTalSeason ? b.season.summer : b.season.winter});
+  if(b.season){
+    // Blessing 9 (Birkat HaShanim, "בָּֽרְכֵֽנוּ"/"בָּרֵךְ עָלֵֽינוּ") switches on
+    // its own location-dependent date (siddurIsGeshemSeason), not the
+    // Pesach/Shmini-Atzeret one every other seasonal blessing (Gevurot's
+    // Tal/Geshem) uses - see siddurIsGeshemSeason's own comment.
+    const wantWinter = (b.n===9) ? info.isGeshemSeason : !info.isTalSeason;
+    out.push({text: wantWinter ? b.season.winter : b.season.summer});
+  }
   if(b.text2) out.push({text:b.text2});
   // Modim (blessing 18, the only one with a tail2) has a different
   // internal order than every other blessing with a teshuvaInsert: Sefaria
