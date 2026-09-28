@@ -11,11 +11,16 @@ enum HebrewDay {
         return cal
     }
 
-    /// A short Hebrew date string, e.g. "י״ז אדר א' תשפ״ז".
-    static func formatted(_ date: Date) -> String {
+    /// A short Hebrew-calendar date string, e.g. "י״ז אדר א' תשפ״ז" in
+    /// Hebrew or "17 Adar I 5787" in English (Foundation's own Hebrew
+    /// calendar transliteration for the `en` locale).
+    static func formatted(_ date: Date, lang: String = "he") -> String {
+        let locale = Locale(identifier: WidgetL10n.isRTL(lang) ? "he" : "en")
+        var cal = Calendar(identifier: .hebrew)
+        cal.locale = locale
         let formatter = DateFormatter()
-        formatter.calendar = hebrewCalendar
-        formatter.locale = Locale(identifier: "he")
+        formatter.calendar = cal
+        formatter.locale = locale
         formatter.dateFormat = "d MMMM y"
         return formatter.string(from: date)
     }

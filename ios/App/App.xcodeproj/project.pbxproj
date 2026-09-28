@@ -19,11 +19,13 @@
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		5CE2A40204577F2C7B07A4AA /* Solar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C224FC89218B90CFC8E4C0 /* Solar.swift */; };
 		6D0958385491BDBEF575FB64 /* SharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9274E9281FDF317A272DE17 /* SharedData.swift */; };
+		76AFC14D16EBDDD45C98D938 /* BetElCandleWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4818BB0B2787F95B286FD5E /* BetElCandleWidget.swift */; };
 		7F1FD21D057EC7E01E6CB494 /* BetElWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF701305BE4DBDAA787444A /* BetElWidgetBundle.swift */; };
 		8A074172DFC9F6AAC6FC5E01 /* BetElWidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 682EEB13158E5B65AFF23FB7 /* BetElWidgetBridge.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		AB345F94F3B4B35246135031 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6200BCF09C2A315098A0A934 /* Foundation.framework */; };
 		B4AFCFCD69014FF5886C2E5E /* BetElWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 81EB37DC17CE2617B611ABD9 /* BetElWidget.appex */; settings = {ATTRIBUTES = (RemoveHeaderOnCopy, ); }; };
+		B88883E07D4A36E212AA52F5 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9219DE907AE74E0EDD8E75B /* Localization.swift */; };
 		C761FFA07C5178E57D87BE8F /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FE6D65B6A501918B061D8C /* Provider.swift */; };
 		FA978A88D2397868B7551144 /* HebrewDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3DE7F09F11BFC86E15552C /* HebrewDay.swift */; };
 /* End PBXBuildFile section */
@@ -73,6 +75,8 @@
 		8BF701305BE4DBDAA787444A /* BetElWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidgetBundle.swift; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		B9219DE907AE74E0EDD8E75B /* Localization.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		C4818BB0B2787F95B286FD5E /* BetElCandleWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElCandleWidget.swift; sourceTree = "<group>"; };
 		DE278307C742BE5E4186087A /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		E9274E9281FDF317A272DE17 /* SharedData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedData.swift; sourceTree = "<group>"; };
 		EF731F19971C018FA05D9FE7 /* BetElWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidget.swift; sourceTree = "<group>"; };
@@ -155,6 +159,8 @@
 				E9274E9281FDF317A272DE17 /* SharedData.swift */,
 				49EC39C473DF8F15EAD181A6 /* Info.plist */,
 				655C956457ECBF25294D3CBF /* BetElWidget.entitlements */,
+				C4818BB0B2787F95B286FD5E /* BetElCandleWidget.swift */,
+				B9219DE907AE74E0EDD8E75B /* Localization.swift */,
 			);
 			name = BetElWidget;
 			path = BetElWidget;
@@ -282,6 +288,8 @@
 				5CE2A40204577F2C7B07A4AA /* Solar.swift in Sources */,
 				FA978A88D2397868B7551144 /* HebrewDay.swift in Sources */,
 				6D0958385491BDBEF575FB64 /* SharedData.swift in Sources */,
+				76AFC14D16EBDDD45C98D938 /* BetElCandleWidget.swift in Sources */,
+				B88883E07D4A36E212AA52F5 /* Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -11,6 +11,12 @@ struct BetElEntry: TimelineEntry {
     let secondZmanTime: Date?
     let streakCount: Int
     let theme: String
+    /// Mirrors the app's own S.lang ("he"/"en"/"fr"/"ru"/"ka") - see
+    /// WidgetL10n for which languages the widget's own chrome text
+    /// actually has a translation for.
+    let lang: String
+    let candleTime: Date?
+    let candleLabel: String?
 
     /// A stable deep link into the app for whatever this entry is
     /// currently showing - opens straight to today's Tehillim portion.
@@ -58,40 +64,46 @@ struct BetElProvider: TimelineProvider {
     }
 
     private func makeEntry(for date: Date, snapshot: BetElSharedData.Snapshot) -> BetElEntry {
+        let lang = snapshot.lang
         let portion = HebrewDay.tehillimPortion(for: date)
         let times = Solar.times(for: date, latitude: snapshot.latitude, longitude: snapshot.longitude)
 
-        var nextLabel = "זְרִיחָה"
+        let sunriseLabel = WidgetL10n.t("sunrise", lang: lang)
+        let sunsetLabel = WidgetL10n.t("sunset", lang: lang)
+        var nextLabel = sunriseLabel
         var nextTime: Date? = times?.sunrise
-        var secondLabel: String? = "שְׁקִיעָה"
+        var secondLabel: String? = sunsetLabel
         var secondTime: Date? = times?.sunset
 
         if let times = times {
             if date < times.sunrise {
-                nextLabel = "זְרִיחָה"; nextTime = times.sunrise
-                secondLabel = "שְׁקִיעָה"; secondTime = times.sunset
+                nextLabel = sunriseLabel; nextTime = times.sunrise
+                secondLabel = sunsetLabel; secondTime = times.sunset
             } else if date < times.sunset {
-                nextLabel = "שְׁקִיעָה"; nextTime = times.sunset
+                nextLabel = sunsetLabel; nextTime = times.sunset
                 secondLabel = nil; secondTime = nil
             } else {
                 // after sunset - show tomorrow's sunrise as "next"
                 let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date
                 let tTimes = Solar.times(for: tomorrow, latitude: snapshot.latitude, longitude: snapshot.longitude)
-                nextLabel = "זְרִיחָה"; nextTime = tTimes?.sunrise
+                nextLabel = sunriseLabel; nextTime = tTimes?.sunrise
                 secondLabel = nil; secondTime = nil
             }
         }
 
         return BetElEntry(
             date: date,
-            hebrewDateText: HebrewDay.formatted(date),
+            hebrewDateText: HebrewDay.formatted(date, lang: lang),
             tehillimRange: portion,
             nextZmanLabel: nextLabel,
             nextZmanTime: nextTime,
             secondZmanLabel: secondLabel,
             secondZmanTime: secondTime,
             streakCount: snapshot.streakCount,
-            theme: snapshot.theme
+            theme: snapshot.theme,
+            lang: lang,
+            candleTime: snapshot.candleTime,
+            candleLabel: snapshot.candleLabel
         )
     }
 }
