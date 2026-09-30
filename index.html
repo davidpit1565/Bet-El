@@ -1537,6 +1537,40 @@ const { HDate, Zmanim, Location, HebrewCalendar, gematriya, months: HMONTHS } = 
 const T = window.TEHILLIM;      // {1:[verses],...}
 const P = window.PRAYERS;
 
+/* ================= REMOTE DATA (native app size) =================
+   `data/` (chok cycles, siddur, tikkunei hazohar page scans, etc.) is
+   ~325MB of legitimate content, not bloat - but Capacitor has no server
+   config, so it used to get bundled directly into the native iOS/Android
+   binary, meaning every user downloaded all of it at install time even
+   though every loader below already only *reads* it lazily (see the
+   CLAUDE.md note on ensureX() loaders). This repo's own GitHub Pages
+   deployment (.github/workflows/pages.yml, publishing the whole repo
+   root on every push to main) already serves this exact `data/` folder
+   live and free - so on native only, every data fetch below now points
+   there instead of the local bundle, and `npm run cap:sync` (package.json)
+   no longer copies `data/` into the native builds at all. The PWA/plain
+   web build is completely untouched: DATA_BASE stays '' there, so its
+   fetches remain the exact same same-origin relative paths they always
+   were, still served locally and still cached by the existing sw.js
+   service worker exactly as before this change.
+   cachedFetch() adds a Cache Storage layer (a standard web API, usable
+   directly from page script with no service worker involved) so native
+   only pays the network cost once per file, same as a bundled read
+   after that - this is strictly *more* resilient than before, since a
+   bundled local read could never "fail" the way a first network fetch
+   theoretically could. */
+const DATA_BASE = (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()!=='web')
+  ? 'https://davidpit1565.github.io/Bet-El/' : '';
+const NATIVE_DATA_CACHE = 'betel-native-data-v1';
+function dataURL(path){ return DATA_BASE + path.replace(/^\.?\//,''); }
+function cachedFetch(url){
+  if(!DATA_BASE || !window.caches) return fetch(url);
+  return caches.open(NATIVE_DATA_CACHE).then(c=>c.match(url).then(hit=>{
+    if(hit) return hit;
+    return fetch(url).then(res=>{ if(res && res.ok) c.put(url, res.clone()); return res; });
+  })).catch(()=>fetch(url));
+}
+
 /* ---------- icons ---------- */
 const I = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>',
@@ -1969,10 +2003,10 @@ function ensurePrayersTranslit(){
   if(PRAYERS_TRANSLIT.en) return Promise.resolve();
   if(prayersLoadPromise) return prayersLoadPromise;
   prayersLoadPromise = Promise.all([
-    fetch('data/prayers-en.json').then(r=>r.json()).catch(()=>({})),
-    fetch('data/prayers-fr.json').then(r=>r.json()).catch(()=>({})),
-    fetch('data/prayers-ru.json').then(r=>r.json()).catch(()=>({})),
-    fetch('data/prayers-ka.json').then(r=>r.json()).catch(()=>({})),
+    cachedFetch(dataURL('data/prayers-en.json')).then(r=>r.json()).catch(()=>({})),
+    cachedFetch(dataURL('data/prayers-fr.json')).then(r=>r.json()).catch(()=>({})),
+    cachedFetch(dataURL('data/prayers-ru.json')).then(r=>r.json()).catch(()=>({})),
+    cachedFetch(dataURL('data/prayers-ka.json')).then(r=>r.json()).catch(()=>({})),
   ]).then(([en,fr,ru,ka])=>{ PRAYERS_TRANSLIT={en,fr,ru,ka}; });
   return prayersLoadPromise;
 }
@@ -2364,11 +2398,11 @@ function ensureShnayimData(){
   if(TORAH) return Promise.resolve();
   if(smLoadPromise) return smLoadPromise;
   smLoadPromise = Promise.all([
-    fetch('data/torah-data.json').then(r=>r.json()),
-    fetch('data/haftarah-data.json').then(r=>r.json()),
-    fetch('data/leyning-data.json').then(r=>r.json()),
-    fetch('data/torah-fr.json').then(r=>r.json()).catch(()=>({})),
-    fetch('data/torah-en.json').then(r=>r.json()).catch(()=>({})),
+    cachedFetch(dataURL('data/torah-data.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/haftarah-data.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/leyning-data.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/torah-fr.json')).then(r=>r.json()).catch(()=>({})),
+    cachedFetch(dataURL('data/torah-en.json')).then(r=>r.json()).catch(()=>({})),
   ]).then(([t,h,l,fr,en])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr,en}; })
     .catch(e=>{ smLoadPromise=null; throw e; });
   return smLoadPromise;
@@ -2377,7 +2411,7 @@ let ZOHAR=null, zoharLoadPromise=null;
 function ensureZoharData(){
   if(ZOHAR) return Promise.resolve();
   if(zoharLoadPromise) return zoharLoadPromise;
-  zoharLoadPromise = fetch('data/tikkunei-hazohar-data.json').then(r=>r.json()).then(d=>{ ZOHAR=d; })
+  zoharLoadPromise = cachedFetch(dataURL('data/tikkunei-hazohar-data.json')).then(r=>r.json()).then(d=>{ ZOHAR=d; })
     .catch(e=>{ zoharLoadPromise=null; throw e; });
   return zoharLoadPromise;
 }
@@ -2726,7 +2760,7 @@ const CHOK_MISHNAH_EPOCH=5786;
 function ensureChokIndex(){
   if(CHOK) return Promise.resolve();
   if(chokLoadPromise) return chokLoadPromise;
-  chokLoadPromise=fetch('data/chok-leyisrael-index.json').then(r=>r.json()).then(d=>{ CHOK=d; })
+  chokLoadPromise=cachedFetch(dataURL('data/chok-leyisrael-index.json')).then(r=>r.json()).then(d=>{ CHOK=d; })
     .catch(e=>{ chokLoadPromise=null; throw e; });
   return chokLoadPromise;
 }
@@ -2748,7 +2782,7 @@ function ckWeekReady(key){ const ks=ckKeysOf(key); return ks.length>0 && ks.ever
 function ensureChokWeek(key){
   return ensureChokIndex().then(()=>Promise.all(ckKeysOf(key).map(k=>{
     if(CHOK_WEEK[k]) return null;
-    return fetch('data/chok-leyisrael/'+chokSlug(k)+'.json').then(r=>r.json())
+    return cachedFetch(dataURL('data/chok-leyisrael/'+chokSlug(k)+'.json')).then(r=>r.json())
       .then(d=>{ CHOK_WEEK[k]=d; });
   })));
 }
@@ -2767,7 +2801,7 @@ let BIC_INDEX=null, BIC_WEEK={}, BIC_WEEK_I18N={}, bicIndexPromise=null;
 function ensureBicIndex(){
   if(BIC_INDEX) return Promise.resolve();
   if(bicIndexPromise) return bicIndexPromise;
-  bicIndexPromise=fetch('data/chok-benishchai-index.json').then(r=>r.json()).then(d=>{ BIC_INDEX=d; })
+  bicIndexPromise=cachedFetch(dataURL('data/chok-benishchai-index.json')).then(r=>r.json()).then(d=>{ BIC_INDEX=d; })
     .catch(e=>{ bicIndexPromise=null; throw e; });
   return bicIndexPromise;
 }
@@ -2796,10 +2830,10 @@ function ensureBicWeek(track,keys){
   return ensureBicIndex().then(()=>Promise.all(bicUnitsFor(keys,track).map(u=>{
     const k=track+'/'+u;
     const base=BIC_WEEK[k] ? null
-      : fetch('data/chok-benishchai/'+track+'/'+u+'.json').then(r=>r.json()).then(d=>{ BIC_WEEK[k]=d; });
+      : cachedFetch(dataURL('data/chok-benishchai/'+track+'/'+u+'.json')).then(r=>r.json()).then(d=>{ BIC_WEEK[k]=d; });
     const i18nKey=lang+'/'+k;
     const i18n=(lang==='he'||BIC_WEEK_I18N[i18nKey]!==undefined) ? null
-      : fetch('data/chok-benishchai/'+track+'/'+u+'.'+lang+'.json')
+      : cachedFetch(dataURL('data/chok-benishchai/'+track+'/'+u+'.'+lang+'.json'))
           .then(r=>r.ok?r.json():null).then(d=>{ BIC_WEEK_I18N[i18nKey]=d||null; })
           .catch(()=>{ BIC_WEEK_I18N[i18nKey]=null; });
     return Promise.all([base,i18n]);
@@ -3648,14 +3682,14 @@ let CYC=null, CYC_BLOCK={}, cycLoadPromise=null;
 function ensureCycles(){
   if(CYC) return Promise.resolve();
   if(cycLoadPromise) return cycLoadPromise;
-  cycLoadPromise=fetch('data/chok-cycles.json').then(r=>r.json()).then(d=>{ CYC=d; })
+  cycLoadPromise=cachedFetch(dataURL('data/chok-cycles.json')).then(r=>r.json()).then(d=>{ CYC=d; })
     .catch(e=>{ cycLoadPromise=null; throw e; });
   return cycLoadPromise;
 }
 function ensureCycBlock(kind,b){
   const k=kind+'/'+b;
   if(CYC_BLOCK[k]) return Promise.resolve();
-  return fetch('data/chok-'+kind+'/'+b+'.json').then(r=>r.json()).then(d=>{ CYC_BLOCK[k]=d; });
+  return cachedFetch(dataURL('data/chok-'+kind+'/'+b+'.json')).then(r=>r.json()).then(d=>{ CYC_BLOCK[k]=d; });
 }
 /* The daf is what the day needs; Steinsaltz and Rashi sit behind a button, so
    they are only fetched once a button is pressed. */
@@ -3664,7 +3698,7 @@ function ckDafBlock(i){ return Math.floor(i/(CYC.daf.block||20)); }
 function ensureDafComm(i){
   const b=ckDafBlock(i);
   if(DAF_C[b]) return Promise.resolve();
-  if(!dafCPending[b]) dafCPending[b]=fetch('data/chok-daf-c/'+b+'.json').then(r=>r.json())
+  if(!dafCPending[b]) dafCPending[b]=cachedFetch(dataURL('data/chok-daf-c/'+b+'.json')).then(r=>r.json())
     .then(d=>{ DAF_C[b]=d; }).catch(()=>{ DAF_C[b]={}; });
   return dafCPending[b];
 }
@@ -3878,7 +3912,7 @@ const MUSAR_BLOCK=40;
 function ensureMusarCycles(){
   if(MCYC) return Promise.resolve();
   if(musarLoadPromise) return musarLoadPromise;
-  musarLoadPromise=fetch('data/chok-musar-cycles.json').then(r=>r.json()).then(d=>{ MCYC=d; })
+  musarLoadPromise=cachedFetch(dataURL('data/chok-musar-cycles.json')).then(r=>r.json()).then(d=>{ MCYC=d; })
     .catch(e=>{ musarLoadPromise=null; throw e; });
   return musarLoadPromise;
 }
@@ -3886,10 +3920,10 @@ function ckMusarBlockOf(i){ return Math.floor(i/MUSAR_BLOCK); }
 function ensureMusarBlock(work,b){
   const k=work+'/'+b, lang=S.lang;
   const base=MCYC_BLOCK[k] ? null
-    : fetch('data/chok-'+work+'/'+b+'.json').then(r=>r.json()).then(d=>{ MCYC_BLOCK[k]=d; });
+    : cachedFetch(dataURL('data/chok-'+work+'/'+b+'.json')).then(r=>r.json()).then(d=>{ MCYC_BLOCK[k]=d; });
   const i18nKey=lang+'/'+k;
   const i18n=(lang==='he'||MCYC_BLOCK_I18N[i18nKey]!==undefined) ? null
-    : fetch('data/chok-'+work+'/'+b+'.'+lang+'.json')
+    : cachedFetch(dataURL('data/chok-'+work+'/'+b+'.'+lang+'.json'))
         .then(r=>r.ok?r.json():null).then(d=>{ MCYC_BLOCK_I18N[i18nKey]=d||null; })
         .catch(()=>{ MCYC_BLOCK_I18N[i18nKey]=null; });
   return Promise.all([base,i18n]);
@@ -3936,8 +3970,8 @@ function ensureTanyaCycle(){
   if(TANYA_IDX&&TANYA_SCHED) return Promise.resolve();
   if(tanyaLoadPromise) return tanyaLoadPromise;
   tanyaLoadPromise=Promise.all([
-    fetch('data/chok-tanya-index.json').then(r=>r.json()),
-    fetch('data/tanya-schedule.json').then(r=>r.json())
+    cachedFetch(dataURL('data/chok-tanya-index.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/tanya-schedule.json')).then(r=>r.json())
   ]).then(([idx,sched])=>{ TANYA_IDX=idx; TANYA_SCHED=sched; })
     .catch(e=>{ tanyaLoadPromise=null; throw e; });
   return tanyaLoadPromise;
@@ -6526,7 +6560,7 @@ let SIDDUR=null, siddurLoadPromise=null;
 function ensureSiddurData(){
   if(SIDDUR) return Promise.resolve();
   if(siddurLoadPromise) return siddurLoadPromise;
-  siddurLoadPromise = fetch('data/siddur.json').then(r=>r.json()).then(d=>{ SIDDUR=d; })
+  siddurLoadPromise = cachedFetch(dataURL('data/siddur.json')).then(r=>r.json()).then(d=>{ SIDDUR=d; })
     .catch(e=>{ siddurLoadPromise=null; throw e; });
   return siddurLoadPromise;
 }
@@ -8174,7 +8208,7 @@ let MISHNAH_IDX=null, mishnahLoadPromise=null;
 function ensureMishnahIndex(){
   if(MISHNAH_IDX) return Promise.resolve();
   if(mishnahLoadPromise) return mishnahLoadPromise;
-  mishnahLoadPromise=fetch('data/mishnah-index.json').then(r=>r.json()).then(d=>{ MISHNAH_IDX=d; })
+  mishnahLoadPromise=cachedFetch(dataURL('data/mishnah-index.json')).then(r=>r.json()).then(d=>{ MISHNAH_IDX=d; })
     .catch(e=>{ mishnahLoadPromise=null; throw e; });
   return mishnahLoadPromise;
 }
@@ -8340,14 +8374,14 @@ let NEVIIM_DATA=null, KETUVIM_DATA=null, neviimLoadPromise=null, ketuvimLoadProm
 function ensureNeviimData(){
   if(NEVIIM_DATA) return Promise.resolve();
   if(neviimLoadPromise) return neviimLoadPromise;
-  neviimLoadPromise=fetch('data/neviim-data.json').then(r=>r.json()).then(d=>{ NEVIIM_DATA=d; })
+  neviimLoadPromise=cachedFetch(dataURL('data/neviim-data.json')).then(r=>r.json()).then(d=>{ NEVIIM_DATA=d; })
     .catch(e=>{ neviimLoadPromise=null; throw e; });
   return neviimLoadPromise;
 }
 function ensureKetuvimData(){
   if(KETUVIM_DATA) return Promise.resolve();
   if(ketuvimLoadPromise) return ketuvimLoadPromise;
-  ketuvimLoadPromise=fetch('data/ketuvim-data.json').then(r=>r.json()).then(d=>{ KETUVIM_DATA=d; })
+  ketuvimLoadPromise=cachedFetch(dataURL('data/ketuvim-data.json')).then(r=>r.json()).then(d=>{ KETUVIM_DATA=d; })
     .catch(e=>{ ketuvimLoadPromise=null; throw e; });
   return ketuvimLoadPromise;
 }
@@ -10505,12 +10539,12 @@ function renderZoharReader(){
         ${Array.from({length:entry.pageCount},(_,i)=>{
           const zbm=zoharBookmarkGet(); const marked = !!zbm && zbm.day===entry.day && zbm.page===i;
           return `<div class="zh-page-wrap" data-page="${i}">
-            <img src="${entry.pagesDir}/p-${String(i+1).padStart(2,'0')}.jpg" alt="${entry.hebDate} · עַמּוּד ${heNum(i+1)}" loading="${i<2?'eager':'lazy'}">
+            <img src="${dataURL(entry.pagesDir)}/p-${String(i+1).padStart(2,'0')}.jpg" alt="${entry.hebDate} · עַמּוּד ${heNum(i+1)}" loading="${i<2?'eager':'lazy'}">
             <button class="zh-mark-btn ${marked?'on':''}" data-page="${i}">${marked?I.bookmarkOn:I.bookmark}</button>
           </div>`;
         }).join('')}
       </div>
-      ${entry.pdf?`<a class="zh-pdf-link" href="${entry.pdf}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>`:''}
+      ${entry.pdf?`<a class="zh-pdf-link" href="${dataURL(entry.pdf)}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>`:''}
     </div>`:''}
     <div class="reader-nav">
       <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>

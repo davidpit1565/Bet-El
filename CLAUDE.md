@@ -20,6 +20,29 @@ in English as usual.
   variable to `null` in its `.catch()` so a transient fetch failure doesn't
   permanently poison that feature for the rest of the session:
   `.catch(e=>{ xLoadPromise=null; throw e; })`.
+- **`data/` is ~325MB and is NOT bundled into native builds** (as of the
+  app-size reduction work) - `npm run cap:sync` no longer copies it into
+  `www/`, since Capacitor has no server config and used to bundle it
+  straight into the iOS/Android binary otherwise, ballooning install size
+  even though every loader already only reads it lazily. Every `fetch(...)`
+  of a `data/...` path must go through `dataURL()`/`cachedFetch()` (defined
+  right after the `HDate`/`HMONTHS` destructure near the top of the script)
+  instead of calling `fetch()` directly - on native, `dataURL()` redirects
+  to this repo's own GitHub Pages deployment (`.github/workflows/pages.yml`
+  publishes the whole repo root, `data/` included, on every push to main),
+  and `cachedFetch()` adds a persistent Cache Storage layer so that only
+  costs a real network hit once per file. On the web/PWA build, `dataURL()`
+  is a no-op (empty base) - those stay the exact same same-origin relative
+  paths they always were, since the web app IS served from that same
+  GitHub Pages origin and its own `data/` is right there already, still
+  cached by the existing `sw.js` service worker like any other same-origin
+  asset. **Any new `data/` fetch (a new book/section) must be written with
+  `cachedFetch(dataURL('data/...'))` from the start**, and any hardcoded
+  `data/`-relative path used outside a `fetch()` (e.g. an `<img src>` or a
+  PDF link built from a path stored inside a JSON file, like Tikkunei
+  HaZohar's `pagesDir`/`pdf` fields) must be wrapped in `dataURL(...)` at
+  the point of use too - see the Zohar reader's page-image `<img>` tag for
+  the pattern. Never revert to a plain `fetch('data/...')` call.
 - The Musar system (`MUSAR_WORKS`, `MUSAR_UI`, `ckMusarSourceLabel`) is
   designed to make adding a new work mostly declarative: add `{key:'x'}` to
   `MUSAR_WORKS` and an `x` entry to every language block of `MUSAR_UI`
