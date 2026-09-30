@@ -995,7 +995,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
    Aseret Yemei Teshuva swaps, Hallel) get a colored left rule + small tag
    so it's visually clear *why* a line is there today, instead of blending
    into the rest of the Amidah's plain paragraphs. */
-.siddur-insert{border-right:3px solid #7a9a3f;padding-right:12px;margin:10px 0}
+.siddur-insert{border-right:3px solid #7a9a3f;padding-right:12px;margin-top:10px}
 [data-theme="dark"] .siddur-insert,:root:not([data-theme="light"]) .siddur-insert{border-right-color:#96b65b}
 .siddur-insert-tag{display:block;font-family:var(--font-ui);font-size:12px;font-weight:700;color:#7a9a3f;margin-bottom:4px}
 [data-theme="dark"] .siddur-insert-tag,:root:not([data-theme="light"]) .siddur-insert-tag{color:#96b65b}
@@ -8905,9 +8905,9 @@ function siddurBlessingParas(b, info, opts){
     // Pesach/Shmini-Atzeret one every other seasonal blessing (Gevurot's
     // Tal/Geshem) uses - see siddurIsGeshemSeason's own comment.
     const wantWinter = (b.n===9) ? info.isGeshemSeason : !info.isTalSeason;
-    out.push({text: wantWinter ? b.season.winter : b.season.summer});
+    out.push({text: wantWinter ? b.season.winter : b.season.summer, cont:true});
   }
-  if(b.text2) out.push({text:b.text2});
+  if(b.text2) out.push({text:b.text2, cont:true});
   // Modim (blessing 18, the only one with a tail2) has a different
   // internal order than every other blessing with a teshuvaInsert: Sefaria
   // has it read tail -> [Al HaNisim] -> teshuvaInsert -> tail2, not
@@ -8929,18 +8929,19 @@ function siddurBlessingParas(b, info, opts){
   if(seal) out.push({text:seal, insert:(seal!==b.seal), tag:ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')});
   return out;
 }
-/* isLast=false: this piece is one of several making up the SAME blessing
-   (body/season/insert/tail/seal) - no divider under it, since the
-   boundary that matters is between one blessing and the next, not
-   between a blessing's own body and its own seal. */
-function siddurParaHTML(p, isLast){
-  const nodiv = isLast===false ? ' siddur-para-nodivider' : '';
+/* p.cont: this piece is a direct continuation of the SAME sentence as the
+   piece before it (e.g. Gevurot's season insert flowing into text2) - no
+   divider under it. Every other piece (body/tail/insert/seal) is its own
+   distinct clause and keeps the normal gap, even when it isn't the
+   blessing's last piece. */
+function siddurParaHTML(p){
+  const nodiv = p.cont ? ' siddur-para-nodivider' : '';
   if(p.insert) return `<div class="prayer-para siddur-insert${nodiv}"><span class="siddur-insert-tag">${p.tag||ckChrome('תּוֹסֶפֶת שֶׁל הַיּוֹם')}</span>${p.text}</div>`;
   return `<div class="prayer-para${nodiv}">${p.text}</div>`;
 }
 function siddurBlessingHTML(b, info, opts){
   const paras = siddurBlessingParas(b, info, opts);
-  return paras.map((p,i)=>siddurParaHTML(p, i===paras.length-1)).join('');
+  return paras.map(p=>siddurParaHTML(p)).join('');
 }
 
 /* ---- Shir Shel Yom: the Levites' day-of-week Psalm of the Day, recited
