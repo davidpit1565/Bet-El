@@ -91,6 +91,16 @@ body::before{ /* subtle starfield/texture */
 [data-theme="light"] body::before{opacity:.25;
   background:radial-gradient(1px 1px at 20% 30%,rgba(150,116,44,.4),transparent),radial-gradient(1px 1px at 70% 60%,rgba(150,116,44,.3),transparent);}
 #app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 16px calc(var(--nav-h) + 30px + env(safe-area-inset-bottom))}
+/* When a real native UITabBar is present (MainViewController.swift) the
+   HTML .bottom-nav/.nav-fade are redundant - the native bar handles all
+   of navigation/active-state/scroll-hide instead (see syncNativeTabBar()
+   in the main script). --native-nav-h is set by native code itself once
+   the tab bar has actually laid out, so #app's own reserved space always
+   matches its real height (including the safe-area inset UITabBar
+   already extends into on its own) rather than a guessed constant. */
+html.has-native-tabbar .bottom-nav,html.has-native-tabbar .nav-fade{display:none}
+html.has-native-tabbar #app{padding-bottom:calc(var(--native-nav-h, 90px) + 20px)}
+html.has-native-tabbar .toast{bottom:calc(var(--native-nav-h, 90px) + 20px)}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 ::selection{background:rgba(212,175,95,.3)}
 
@@ -2652,8 +2662,9 @@ function go(tab){
      but .bottom-nav is a body-level sibling outside #app's own stacking
      context, so no z-index inside #app can ever paint over it - remove it
      outright instead, same as onboard/chokPace already do. */
-  if(tab==='kotelCompass'){ const nav=document.querySelector('.bottom-nav'); if(nav) nav.remove(); }
+  if(tab==='kotelCompass'){ const nav=document.querySelector('.bottom-nav'); if(nav) nav.remove(); if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setVisible({visible:false}).catch(()=>{}); }
   else if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
+  else if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setActive({tab:navActiveTab(tab)}).catch(()=>{});
   render();
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===navActiveTab(tab)));
   requestAnimationFrame(placeNavPill);
@@ -11098,7 +11109,7 @@ function navActiveTab(tab){
 }
 function buildNav(){
   const old=document.querySelector('.bottom-nav'); if(old) old.remove();
-  if(TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); return; }
+  if(TAB==='chokPace'||TAB==='kotelCompass'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); syncNativeTabBar(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
   const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
@@ -11107,6 +11118,7 @@ function buildNav(){
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
   tr(nav);
   requestAnimationFrame(placeNavPill);
+  syncNativeTabBar();
 }
 window.addEventListener('resize', placeNavPill);
 /* Native iOS Capacitor shell (capacitor.config.json: ios.contentInset =
@@ -11118,6 +11130,30 @@ window.addEventListener('resize', placeNavPill);
    under env() without adding unwanted top padding on the web/PWA. */
 if(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()==='ios'){
   document.documentElement.classList.add('ios-native-safe-top');
+}
+/* A real native UITabBar (MainViewController.swift) gets iOS 26's actual
+   Liquid Glass material for free from the OS - CSS backdrop-filter can
+   only ever approximate that look. When the bridge is present, the HTML
+   .bottom-nav/.nav-fade hide entirely (see .has-native-tabbar in the
+   stylesheet) and the native bar takes over navigation/active-state/
+   scroll-hide via syncNativeTabBar() below - on any other platform
+   (web/PWA/Android) this plugin simply doesn't exist and everything
+   behaves exactly as before. */
+const NATIVE_TABBAR = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeTabBar);
+if(NATIVE_TABBAR) document.documentElement.classList.add('has-native-tabbar');
+function nativeTabBarLabel(he){
+  if(S.lang==='he') return he;
+  const dict=I18N[S.lang]; return (dict && dict[he]!=null) ? dict[he] : he;
+}
+function syncNativeTabBar(){
+  if(!NATIVE_TABBAR) return;
+  try{
+    const plugin=window.Capacitor.Plugins.NativeTabBar;
+    if(TAB==='chokPace'||TAB==='kotelCompass'){ plugin.setVisible({visible:false}).catch(()=>{}); return; }
+    const items=[['home','דף הבית'],['tehillim','תהילים'],['prayers','ספרייה'],['calendar','לוח שנה'],['settings','הגדרות']]
+      .map(([id,he])=>({id,label:nativeTabBarLabel(he)}));
+    plugin.configure({items, activeTab:navActiveTab(TAB)}).catch(()=>{});
+  }catch(e){}
 }
 applySettings();
 applyWakeLock();
@@ -11194,6 +11230,7 @@ maybeShowRatePrompt();
      header open/closed - direction has to actually change or continue for
      a real, deliberate scroll before anything toggles. */
   function set(hide){
+    if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setHidden({hidden:hide}).catch(()=>{});
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
     const bicHead=document.querySelector('.bic-collapse');
