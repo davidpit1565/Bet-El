@@ -499,7 +499,16 @@ a.set-item{text-decoration:none;color:inherit}
 /* ================= BOTTOM NAV ================= */
 .bottom-nav{position:fixed;bottom:calc(6px + env(safe-area-inset-bottom));left:0;right:0;z-index:40;height:var(--nav-h);
   display:flex;max-width:600px;margin:0 auto;width:calc(100% - 24px);
-  background:var(--panel-solid);border:1px solid var(--line-strong);border-radius:26px;
+  /* Real Liquid Glass needs a translucent background for its own
+     backdrop-filter to actually show anything through - `--panel-solid`
+     (opaque hex) made the strong blur(24px) saturate(1.4) below
+     completely invisible in practice, rendering as a plain flat panel
+     despite the filter being applied. `--panel` is the same translucent
+     rgba() every other glass surface (cards, tiles, icon buttons) in
+     this file already uses. No new blurred element and no higher blur
+     radius - see the "iOS 26 LIQUID GLASS" comment further down for why
+     that distinction matters (Chrome renderer-crash risk from stacking). */
+  background:var(--panel);border:1px solid var(--line-strong);border-radius:26px;
   backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
   box-shadow:0 12px 34px -10px rgba(0,0,0,.35),0 2px 8px -2px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.06);
   padding:0 4px;will-change:opacity,transform,filter;
