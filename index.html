@@ -8752,6 +8752,14 @@ function siddurTehillimChapterHTML(ch, opts){
   // (needed when the chapter is read in full elsewhere), so it must be
   // sliced off here rather than removed from the shared data.
   if(opts && opts.skipSuperscription) verses = verses.slice(1);
+  // count: only the chapter's first N verses (e.g. Birkat HaLevana's own
+  // Tehillim 148 quote stops after verse 6). pick: specific 1-indexed
+  // verses only, in order (e.g. Birkat HaLevana's Tehillim 8 quote is just
+  // verses 4 and 10) - both let a hand-picked excerpt still go through
+  // window.TEHILLIM/langText's existing per-language data instead of being
+  // hardcoded as an untranslatable Hebrew-only string.
+  if(opts && opts.count) verses = verses.slice(0, opts.count);
+  if(opts && opts.pick) verses = opts.pick.map(n=>verses[n-1]).filter(Boolean);
   return verses.length ? `<div class="prayer-para">${verses.join(' ')}</div>` : '';
 }
 function siddurTorahBody(verses){
@@ -9856,22 +9864,25 @@ function siddurLevanaHTML(dateObj){
   }
   // Non-Hebrew rendering swaps in PRAYERS_TRANSLIT per field, same
   // (t&&t.field)||SIDDUR.field fallback pattern as siddurBirkotHashacharHTML.
-  // L.opening (Tehillim 19:2-15) is deliberately NOT translated here - no
-  // Tehillim per-chapter i18n mechanism exists anywhere else in the app
-  // (window.TEHILLIM is Hebrew-only), so it stays Hebrew in every language,
-  // consistent with how Tehillim renders everywhere else in this Siddur
-  // (see siddurTehillimChapterHTML's own callers, none of which translate).
   const lang=(S.lang&&PRAYERS_TRANSLIT[S.lang])?S.lang:null;
   const t=(lang&&PRAYERS_TRANSLIT[lang].levana)?PRAYERS_TRANSLIT[lang].levana:null;
   const lf = (k)=> (t&&t[k])||L[k];
   let html = noteHtml + `<div class="siddur-section-title">${ckChrome('בִּרְכַּת הַלְּבָנָה')}</div>`;
-  // The two [[NOTE]] rubric asides embedded inside L.opening (when to look
-  // at the moon; the cue before the blessing) are instructional text, not
-  // part of the Tehillim quotes around them - translate just those two via
-  // ckChrome, leaving the actual Psalm verses Hebrew like everywhere else.
-  html += siddurParasFromText(L.opening
-    .replace('כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).', ckChrome('כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).'))
-    .replace('לפני הברכה יאמר:', ckChrome('לפני הברכה יאמר:')));
+  // L.opening used to be one hand-copied Hebrew-only blob (Tehillim
+  // 19/148:1-6/8:4+10 quotes interleaved with two halachic notes and a short
+  // non-Biblical declaration) - built here instead from the same
+  // siddurTehillimChapterHTML/langText data every other Tehillim quote in
+  // this Siddur already uses, so it's no longer Hebrew-only in every
+  // language. The two [[NOTE]] rubric asides (when to look at the moon; the
+  // cue before the blessing) are instructional text, translated via ckChrome
+  // as before.
+  html += siddurTehillimChapterHTML(19);
+  const v75 = langText(75)||window.TEHILLIM['75'];
+  html += `<div class="prayer-para">${lf('tzuriDeclaration')} ${v75[10]}</div>`;
+  html += siddurTehillimChapterHTML(148, {count:6});
+  html += `<div class="siddur-halacha-note">${ckChrome('כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).')}</div>`;
+  html += siddurTehillimChapterHTML(8, {pick:[4,10]});
+  html += `<div class="siddur-halacha-note">${ckChrome('לפני הברכה יאמר:')}</div>`;
   html += siddurCollapseHTML(ckChrome('לְשֵׁם יִחוּד'), siddurParasFromText(lf('leshemYichud')));
   html += `<div class="prayer-para">${lf('blessing')}</div>`;
   html += siddurParasFromText(lf('ceremony'));
