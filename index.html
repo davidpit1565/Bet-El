@@ -8905,9 +8905,9 @@ function siddurBlessingParas(b, info, opts){
     // Pesach/Shmini-Atzeret one every other seasonal blessing (Gevurot's
     // Tal/Geshem) uses - see siddurIsGeshemSeason's own comment.
     const wantWinter = (b.n===9) ? info.isGeshemSeason : !info.isTalSeason;
-    out.push({text: wantWinter ? b.season.winter : b.season.summer, cont:true});
+    out.push({text: wantWinter ? b.season.winter : b.season.summer});
   }
-  if(b.text2) out.push({text:b.text2, cont:true});
+  if(b.text2) out.push({text:b.text2});
   // Modim (blessing 18, the only one with a tail2) has a different
   // internal order than every other blessing with a teshuvaInsert: Sefaria
   // has it read tail -> [Al HaNisim] -> teshuvaInsert -> tail2, not
@@ -8922,18 +8922,26 @@ function siddurBlessingParas(b, info, opts){
     const occ = info.isRoshChodesh ? y.roshChodesh : (info.cholHaMoedChag==='pesach' ? y.pesach : y.sukkot);
     out.push({text:[y.head,occ,y.tail].join(' '), insert:true, tag:ckChrome('יַעֲלֶה וְיָבֹא')});
   }
-  if(b.tail2){ pushAlHanissim(); if(b.tail) out.push({text:b.tail}); pushTeshuvaInsert(); out.push({text:b.tail2}); }
+  // Modim's own body ("מודים אנחנו לך") and its "ve'al kulam yitbarach..."
+  // tail are the one pair inside a single blessing that reads as two
+  // distinct sections (the tail is effectively the congregation's own
+  // response) rather than one continuous body - so it alone keeps the gap
+  // that every other internal piece below gives up.
+  if(b.tail2){ pushAlHanissim(); if(b.tail) out.push({text:b.tail, gapBefore:b.n===18}); pushTeshuvaInsert(); out.push({text:b.tail2}); }
   else { if(b.tail) out.push({text:b.tail}); pushAlHanissim(); }
   let seal = b.seal;
   if(b.sealTeshuva && info.isAseretYemeiTeshuva) seal = b.sealTeshuva;
   if(seal) out.push({text:seal, insert:(seal!==b.seal), tag:ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')});
+  // A blessing renders as one visual section: every internal piece is a
+  // continuation of the one before it (no gap, just a new line - the seal
+  // always lands on its own line this way) except the very last piece,
+  // which keeps its normal gap so the next blessing still starts with a
+  // real break, and any piece explicitly marked gapBefore (Modim's tail).
+  for(let i=0;i<out.length-1;i++){
+    if(!out[i+1].gapBefore) out[i].cont = true;
+  }
   return out;
 }
-/* p.cont: this piece is a direct continuation of the SAME sentence as the
-   piece before it (e.g. Gevurot's season insert flowing into text2) - no
-   divider under it. Every other piece (body/tail/insert/seal) is its own
-   distinct clause and keeps the normal gap, even when it isn't the
-   blessing's last piece. */
 function siddurParaHTML(p){
   const nodiv = p.cont ? ' siddur-para-nodivider' : '';
   if(p.insert) return `<div class="prayer-para siddur-insert${nodiv}"><span class="siddur-insert-tag">${p.tag||ckChrome('תּוֹסֶפֶת שֶׁל הַיּוֹם')}</span>${p.text}</div>`;
