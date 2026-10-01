@@ -1178,21 +1178,6 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ck-secnav-wrap .ck-arrow{flex:none}
 .sm-aliyah-chip.ck-secchip{font-family:var(--font-ui);font-size:13px;font-weight:700}
 
-/* Siddur reader: a small, always-visible-but-unobtrusive column of dots
-   pinned to the screen edge (left, so it sits on the far side from where
-   RTL Hebrew text starts) letting you jump to any section of the single
-   continuous scroll below, instead of the wide chip strip used elsewhere
-   (renderChokReader etc still page-switch and keep that pattern - this is
-   specific to the Siddur's own continuous-scroll reader). Deliberately
-   tiny: a few millimeters of dots, not a bar - "not permanently prominent"
-   per spec. */
-.sid-dotnav{position:fixed;left:6px;top:50%;transform:translateY(-50%);z-index:35;
-  display:flex;flex-direction:column;align-items:center;gap:9px;padding:8px 6px;
-  border-radius:999px;background:var(--panel);border:1px solid var(--line);
-  box-shadow:var(--card-shadow)}
-.sid-dot{flex:none;width:7px;height:7px;border-radius:50%;padding:0;border:none;cursor:pointer;
-  background:var(--line-strong);transition:.25s var(--ease)}
-.sid-dot.on{background:var(--gold-grad);width:9px;height:9px}
 /* shared "slide in from the side you came from" touch, reused by the
    carousel, the day/parsha titles and anything else driven by a
    prev/next control */
@@ -1269,20 +1254,19 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .ps-cell:active,.cal-cell:active{ transform:scale(.88); transition-duration:.1s; }
 .nav-item:active{ transform:scale(.9); transition-duration:.1s; }
 /* These small controls (per-chapter/per-day mark buttons, the dedication
-   list's delete button, chok's track/lang/year/commentary pills, the
-   siddur side dot-nav) sit right next to buttons above that already get a
-   press animation, but were missing one of their own - a real "why does
-   this one button feel dead" inconsistency on otherwise identical rows. */
+   list's delete button, chok's track/lang/year/commentary pills) sit right
+   next to buttons above that already get a press animation, but were
+   missing one of their own - a real "why does this one button feel dead"
+   inconsistency on otherwise identical rows. */
 .zh-mark-btn,.sm-mark-btn,.ded-del,.ck-track-btn,.ck-resume-btn,.ck-yr-btn,
-.ck-today,.sid-dot{ transition:transform .2s var(--ease); }
+.ck-today{ transition:transform .2s var(--ease); }
 .zh-mark-btn:active,.sm-mark-btn:active,.ded-del:active{ transform:scale(.88); transition-duration:.1s; }
 .ck-track-btn:active,.ck-resume-btn:active,.ck-comm-btn:active,.ck-today:active{ transform:scale(.96); transition-duration:.1s; }
 .ck-yr-btn:active{ transform:scale(.88); transition-duration:.1s; }
-.sid-dot:active{ transform:scale(.75); transition-duration:.1s; }
 @media (prefers-reduced-motion: reduce){
   .card,.q-tile,.set-item,.pace-opt,.ob-row,.btn,.icon-btn,.cal-nav,.ps-cell,.cal-cell,
   .rnav-btn,.dd-portion,.search-box,.reader-tools .rt-fab,.nav-item,.sm-week-card,.nav-pill,
-  .zh-mark-btn,.sm-mark-btn,.ded-del,.ck-track-btn,.ck-resume-btn,.ck-yr-btn,.ck-today,.sid-dot{
+  .zh-mark-btn,.sm-mark-btn,.ded-del,.ck-track-btn,.ck-resume-btn,.ck-yr-btn,.ck-today{
     transition:none!important;
   }
 }
@@ -8932,6 +8916,14 @@ function siddurBlessingParas(b, info, opts){
   let seal = b.seal;
   if(b.sealTeshuva && info.isAseretYemeiTeshuva) seal = b.sealTeshuva;
   if(seal) out.push({text:seal, insert:(seal!==b.seal), tag:ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')});
+  // A blessing with nothing between its body and its seal (Kedushat
+  // HaShem/אתה קדוש, Refuah/רפאנו, Birkat HaMinim/למינים ולמלשינים, and any
+  // other blessing that happens to have no tail/insert on a given day) reads
+  // as one short line of prose, so the seal joins the body directly on the
+  // same line instead of starting a new one.
+  if(out.length===2 && !out[0].insert && !out[1].insert){
+    out.splice(0, 2, {text: out[0].text+' '+out[1].text});
+  }
   // A blessing renders as one visual section: every internal piece is a
   // continuation of the one before it (no gap, just a new line - the seal
   // always lands on its own line this way) except the very last piece,
@@ -10209,19 +10201,13 @@ function renderSiddurReader(){
 /* Continuous-scroll reader: every section from siddurSections() is
    concatenated in order into one scrollable page (no more page-switching
    one section at a time), each wrapped in an anchored <section id="sid-
-   sec-<key>">. Navigation between them is the small fixed dot-column
-   (.sid-dotnav, one dot per section) rather than the old always-visible
-   ck-secnav-wrap chip strip: tapping a dot scrolls to that section, and
-   scroll-spying via IntersectionObserver keeps the dot for whichever
-   section is currently on screen lit. */
-let SID_OBS = null;
+   sec-<key>">. */
 function drawSiddurReader(){
   const p = SID.prayer;
   const dateObj = new Date();
   const info = siddurDayInfo(currentHDate());
   const secs = siddurSections(dateObj, info, p);
   if(!secs.length){ toast('אֵין תֹּכֶן לְהַיּוֹם'); return go('siddurHome'); }
-  if(SID_OBS){ SID_OBS.disconnect(); SID_OBS=null; }
   app.innerHTML = `
   <div class="topbar">
   <button class="icon-btn tb-back" onclick="go('siddurHome')">${I.prev}</button>
@@ -10241,13 +10227,10 @@ function drawSiddurReader(){
     </div>`:''}
     <div class="prayer-reader-divider"></div>
     <div class="prayer-reader-text notranslate">
-      ${secs.map(sec=>`<section id="sid-sec-${sec.key}" data-sidanchor="${sec.key}">${sec.html}</section>`).join('')}
+      ${secs.map(sec=>`<section id="sid-sec-${sec.key}">${sec.html}</section>`).join('')}
     </div>
     <div style="height:80px"></div>
-  </div>
-  ${secs.length>1?`<div class="sid-dotnav" role="tablist" aria-label="קְטָעִים">
-    ${secs.map((sec,ix)=>`<button class="sid-dot${ix===0?' on':''}" data-siddot="${sec.key}" aria-label="${sec.he}"></button>`).join('')}
-  </div>`:''}`;
+  </div>`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
   app.querySelectorAll('[data-nv-ch]').forEach(b=>b.onclick=()=>openReader([+b.dataset.nvCh],{daily:false,verse:+b.dataset.nvVi}));
   const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openSiddurPrayer('selichot');
@@ -10255,28 +10238,6 @@ function drawSiddurReader(){
   const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
   const rn=document.getElementById('sidResumeNew'); if(rn) rn.onclick=sidRestart;
   document.addEventListener('scroll', sidTrackScroll, {passive:true, capture:true});
-  const dots = app.querySelectorAll('.sid-dot[data-siddot]');
-  dots.forEach(d=>d.onclick=()=>{
-    const target = document.getElementById('sid-sec-'+d.dataset.siddot);
-    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
-    toast(d.getAttribute('aria-label'));
-  });
-  if(secs.length>1){
-    const anchors = app.querySelectorAll('[data-sidanchor]');
-    SID_OBS = new IntersectionObserver((entries)=>{
-      if(TAB!=='siddurReader'){ SID_OBS.disconnect(); SID_OBS=null; return; }
-      // pick the entry closest to the top of the viewport among those
-      // currently intersecting, so the highlighted dot tracks whichever
-      // section heading is topmost on screen rather than flapping between
-      // several partially-visible sections at once.
-      let best=null;
-      entries.forEach(e=>{ if(e.isIntersecting && (!best || e.boundingClientRect.top<best.boundingClientRect.top)) best=e; });
-      if(!best) return;
-      const key = best.target.dataset.sidanchor;
-      dots.forEach(d=>d.classList.toggle('on', d.dataset.siddot===key));
-    }, {rootMargin:'-15% 0px -70% 0px', threshold:0});
-    anchors.forEach(a=>SID_OBS.observe(a));
-  }
   wireToolsFab();
   tr(app);
 }
