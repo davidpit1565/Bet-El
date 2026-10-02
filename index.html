@@ -8376,9 +8376,16 @@ function renderLibraryMishnahReader(){
    data/torah-data.json (verified by an identical Genesis 1:1 byte-for-byte
    before use here - see scripts/fetch-neviim-ketuvim.mjs). Psalms is NOT
    duplicated in ketuvim-data.json - it reuses the app's own existing
-   window.TEHILLIM. Hebrew only, deliberately no en/fr/ru/ka transliteration
-   for this content (deferred by the user to a future phase) - the reader
-   below only ever shows the Hebrew verse text, regardless of S.lang. */
+   window.TEHILLIM. Originally Hebrew only (en/fr/ru/ka transliteration was
+   deferred to a future phase); that phase is now underway, book by book -
+   data/neviim-<lang>.json/data/ketuvim-<lang>.json hold one key per
+   translated book, generated with scripts/transliterate-neviim-ketuvim.py
+   (a rule-based Hebrew->Latin transliterator reverse-engineered from the
+   Torah's own already-correct data/torah-en.json, since Sefaria has no
+   transliteration edition to fetch - see nkEnsureTranslit()/nkVersesOf()
+   below). A book absent from the current language's file still falls back
+   to the Hebrew verse text via nkVersesOf(), so partial per-book coverage
+   degrades gracefully while more books are translated over time. */
 const NK_BOOKS={
   neviim:[
     {k:'Joshua', he:'יְהוֹשֻׁעַ', en:'Joshua', fr:'Josué', ru:'Иисус Навин', ka:'იესო ნავეს ძე'},
@@ -8440,9 +8447,31 @@ function ensureKetuvimData(){
     .catch(e=>{ ketuvimLoadPromise=null; throw e; });
   return ketuvimLoadPromise;
 }
+/* Nevi'im/Ketuvim transliteration, added gradually book by book (starting
+   with Joshua) - same data/<cat>-<lang>.json-per-language shape as
+   torah-en.json/torah-fr.json, fetched lazily and only for the language
+   actually in use. A book not yet translated is simply absent from the
+   fetched object, so nkVersesOf's own fallback to NEVIIM_DATA/KETUVIM_DATA's
+   Hebrew below keeps working for it exactly as before - no per-book 404
+   handling needed since this is one shared file per category, not a sibling
+   file per book. Psalms is excluded here too (reuses window.TEHILLIM, which
+   already has its own per-language transliteration via langText()). */
+let NK_TRANSLIT={neviim:{}, ketuvim:{}}, nkTranslitLoadPromise={neviim:null, ketuvim:null};
+function nkEnsureTranslit(cat){
+  const lang=S.lang;
+  if(!lang || lang==='he') return Promise.resolve();
+  if(NK_TRANSLIT[cat][lang]) return Promise.resolve();
+  if(nkTranslitLoadPromise[cat] && nkTranslitLoadPromise[cat].lang===lang) return nkTranslitLoadPromise[cat].p;
+  const p=cachedFetch(dataURL(`data/${cat}-${lang}.json`)).then(r=>r.ok?r.json():{}).then(d=>{ NK_TRANSLIT[cat][lang]=d||{}; })
+    .catch(()=>{ NK_TRANSLIT[cat][lang]={}; });
+  nkTranslitLoadPromise[cat]={lang, p};
+  return p;
+}
 function nkEnsureData(cat){
-  if(cat==='neviim') return ensureNeviimData();
-  return ensureKetuvimData(); // Ketuvim minus Psalms; Psalms itself comes from window.TEHILLIM (always already loaded)
+  return Promise.all([
+    cat==='neviim' ? ensureNeviimData() : ensureKetuvimData(), // Ketuvim minus Psalms; Psalms itself comes from window.TEHILLIM (always already loaded)
+    nkEnsureTranslit(cat),
+  ]);
 }
 function nkChaptersOf(cat,book){
   if(book==='Psalms') return Object.keys(window.TEHILLIM||{}).length;
@@ -8450,7 +8479,10 @@ function nkChaptersOf(cat,book){
   return (store && store[book]) ? store[book].length : 0;
 }
 function nkVersesOf(cat,book,ch){
-  if(book==='Psalms') return (window.TEHILLIM&&window.TEHILLIM[String(ch)])||[];
+  if(book==='Psalms') return (langText(ch))||(window.TEHILLIM&&window.TEHILLIM[String(ch)])||[];
+  const lang=S.lang;
+  const trBook = lang && NK_TRANSLIT[cat][lang] && NK_TRANSLIT[cat][lang][book];
+  if(trBook && trBook[ch-1]) return trBook[ch-1];
   const store=cat==='neviim'?NEVIIM_DATA:KETUVIM_DATA;
   return (store && store[book] && store[book][ch-1]) || [];
 }
