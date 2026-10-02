@@ -3753,7 +3753,7 @@ function ensureCycBlock(kind,b){
    only for the language actually in use. A chapter not yet translated is
    simply absent from the file, so ckCycleSegs()'s fallback to the Hebrew
    block data below keeps working for it unchanged. */
-let CK_TRANSLIT={rambam:{}, tanya:{}}, ckTranslitLoadPromise={rambam:null, tanya:null};
+let CK_TRANSLIT={rambam:{}, tanya:{}, daf:{}}, ckTranslitLoadPromise={rambam:null, tanya:null, daf:null};
 function ckEnsureTranslit(kind){
   const lang=S.lang;
   if(!lang || lang==='he') return Promise.resolve();
@@ -4427,7 +4427,12 @@ function renderChokPace(){
    from the Yerushalmi, Kinnim and Middot are Mishnah - and those carry their
    own source line and their own name for the commentary beside them. */
 function ckDafEntry(i){ return CYC.daf.order[i]; }
-function ckDafRec(i){ return (CYC_BLOCK['daf/'+ckDafBlock(i)]||{})[String(i)]||null; }
+function ckDafRec(i){
+  const lang=S.lang;
+  const tr=lang && CK_TRANSLIT.daf[lang] && CK_TRANSLIT.daf[lang][String(i)];
+  if(tr) return {g:tr};
+  return (CYC_BLOCK['daf/'+ckDafBlock(i)]||{})[String(i)]||null;
+}
 function ckDafName(t){
   const he=(CYC.daf.heNames||{})[t]||t;
   if(!S.lang || S.lang==='he') return he;
@@ -4533,7 +4538,7 @@ function ensureCycDay(hd){
     return Promise.all([...need].map(k=>{
       const [kind,b]=k.split('/');
       return ensureCycBlock(kind,+b);
-    }).concat([ckEnsureTranslit('rambam')]));
+    }).concat([ckEnsureTranslit('rambam'), ckEnsureTranslit('daf')]));
   });
 }
 
@@ -4788,7 +4793,7 @@ function renderChokUnit(){
     let segs=[], when='';
     if(e.kind==='mishnah'){ segs=chokBundleSegs(e.key,[e.ref]); when='שָׁנָה '+heNum(e.year)+' בְּמַחֲזוֹר הַמִּשְׁנָה'; }
     else if(e.kind==='musar'){ segs=chokBundleSegs(e.key,[e.ref]); when='אֵין מַהֲדוּרָה מְנֻקֶּדֶת'; }
-    else if(e.kind==='daf'){ return ensureCycBlock('daf',ckDafBlock(e.i))
+    else if(e.kind==='daf'){ return Promise.all([ensureCycBlock('daf',ckDafBlock(e.i)),ckEnsureTranslit('daf')])
       .then(()=>drawUnit(ckDafItems(e.i).filter(x=>x.t!==undefined).map(x=>x.t), ckWhenLine('daf',e.i))); }
     else if(e.kind==='rambam'){ return Promise.all([ensureCycBlock('rambam',ckBlockOf(e.i)),ckEnsureTranslit('rambam')]).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
     else if(e.kind==='zohar'){ return ensureCycBlock('zohar',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
@@ -7931,7 +7936,7 @@ function renderLibraryGemaraReader(){
   const b=ckDafBlock(i);
   if(!CYC_BLOCK['daf/'+b]){
     app.innerHTML=`${topbar(ckDafName(e.t),'libraryGemaraMasechtot')}<div class="view">${smSkeleton()}</div>`;
-    ensureCycBlock('daf',b).then(()=>{ if(TAB==='libraryGemaraReader'){ renderLibraryGemaraReader(); tr(app); } });
+    Promise.all([ensureCycBlock('daf',b),ckEnsureTranslit('daf')]).then(()=>{ if(TAB==='libraryGemaraReader'){ renderLibraryGemaraReader(); tr(app); } });
     return;
   }
   const list=libAmudList(e.t);
