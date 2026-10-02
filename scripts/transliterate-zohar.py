@@ -46,6 +46,7 @@ def parts_list(cyc):
 
 
 def generate(part, lang):
+    nk.DIALECT = lang
     cyc = load_cycles()
     order = cyc['zohar']['order']
     block_size = cyc['block']

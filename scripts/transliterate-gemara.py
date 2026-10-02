@@ -45,6 +45,7 @@ def masechtot_list(cyc):
 
 
 def generate(masechet, lang):
+    nk.DIALECT = lang
     cyc = load_cycles()
     order = cyc['daf']['order']
     block_size = cyc['daf']['block']

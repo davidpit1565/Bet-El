@@ -26,17 +26,44 @@ HOLAM='ֹ'; HOLAM_HASER='ֺ'; QUBUTS='ֻ'; DAGESH='ּ'
 METEG='ֽ'; MAQAF='־'; RAFE='ֿ'; SHIN_DOT='ׁ'; SIN_DOT='ׂ'
 QAMATZ_QATAN='ׇ'
 
-VOWELS={HIRIQ:'i',TZERE:'e',SEGOL:'e',PATAH:'a',QAMATZ:'a',QAMATZ_QATAN:'o',
-        HOLAM:'o',HOLAM_HASER:'o',QUBUTS:'u',HATAF_SEGOL:'e',HATAF_PATAH:'a',HATAF_QAMATZ:'o'}
-
 ALEF='א'; BET='ב'; GIMEL='ג'; DALET='ד'; HE='ה'; VAV='ו'
 ZAYIN='ז'; CHET='ח'; TET='ט'; YOD='י'; KAF='כ'; KAF_F='ך'
 LAMED='ל'; MEM='מ'; MEM_F='ם'; NUN='נ'; NUN_F='ן'; SAMEKH='ס'
 AYIN='ע'; PE='פ'; PE_F='ף'; TZADI='צ'; TZADI_F='ץ'; QOF='ק'
 RESH='ר'; SHIN='ש'; TAV='ת'
 
-CONS={GIMEL:'g',DALET:'d',ZAYIN:'z',CHET:'ch',TET:'t',LAMED:'l',MEM:'m',MEM_F:'m',
-      NUN:'n',NUN_F:'n',SAMEKH:'s',TZADI:'tz',TZADI_F:'tz',QOF:'k',RESH:'r',TAV:'t'}
+# Two dialects share every rule/heuristic below (gemination, sheva
+# vocalization, mater lectionis handling, Tetragrammaton detection, etc.) -
+# only the actual Latin spelling per Hebrew sound differs, reverse-engineered
+# the same way from data/torah-fr.json as the English convention was from
+# data/torah-en.json: shin->'ch' (not 'sh'), chet/kaf-rafe->'kh' (not 'ch'),
+# tzadi->'ts' (not 'tz'), tzere/segol/vocal-sheva->'é' (not 'e'),
+# shuruk/qubuts->'ou' (not 'u'), Tetragrammaton->"Adonaï" (not "Adonai").
+# qof='k' and everything else matches in both, confirmed against the data.
+DIALECT = 'en'
+
+VOWELS_BY_DIALECT = {
+    'en': {HIRIQ:'i',TZERE:'e',SEGOL:'e',PATAH:'a',QAMATZ:'a',QAMATZ_QATAN:'o',
+           HOLAM:'o',HOLAM_HASER:'o',QUBUTS:'u',HATAF_SEGOL:'e',HATAF_PATAH:'a',HATAF_QAMATZ:'o'},
+    'fr': {HIRIQ:'i',TZERE:'é',SEGOL:'é',PATAH:'a',QAMATZ:'a',QAMATZ_QATAN:'o',
+           HOLAM:'o',HOLAM_HASER:'o',QUBUTS:'ou',HATAF_SEGOL:'é',HATAF_PATAH:'a',HATAF_QAMATZ:'o'},
+}
+CONS_BY_DIALECT = {
+    'en': {GIMEL:'g',DALET:'d',ZAYIN:'z',CHET:'ch',TET:'t',LAMED:'l',MEM:'m',MEM_F:'m',
+           NUN:'n',NUN_F:'n',SAMEKH:'s',TZADI:'tz',TZADI_F:'tz',QOF:'k',RESH:'r',TAV:'t'},
+    'fr': {GIMEL:'g',DALET:'d',ZAYIN:'z',CHET:'kh',TET:'t',LAMED:'l',MEM:'m',MEM_F:'m',
+           NUN:'n',NUN_F:'n',SAMEKH:'s',TZADI:'ts',TZADI_F:'ts',QOF:'k',RESH:'r',TAV:'t'},
+}
+# word-final bare-yod-after-a/o/u ("y") and furtive-patach "a" are the same
+# in both dialects (confirmed against torah-fr.json); only these differ:
+SHIN_SOUND_BY_DIALECT = {'en':'sh', 'fr':'ch'}
+KAF_RAFE_SOUND_BY_DIALECT = {'en':'ch', 'fr':'kh'}
+SHEVA_SOUND_BY_DIALECT = {'en':'e', 'fr':'é'}
+SHURUK_SOUND_BY_DIALECT = {'en':'u', 'fr':'ou'}
+ADONAI_BY_DIALECT = {'en':'Adonai', 'fr':'Adonaï'}
+
+def VOWELS(): return VOWELS_BY_DIALECT[DIALECT]
+def CONS(): return CONS_BY_DIALECT[DIALECT]
 
 def is_hebrew_letter(c):
     return 'א'<=c<='ת'
@@ -55,11 +82,11 @@ def parse_units(word):
             while i<n and not is_hebrew_letter(chars[i]):
                 d=chars[i]
                 if d==DAGESH: dagesh=True
-                elif d==SHIN_DOT: shindot='sh'
+                elif d==SHIN_DOT: shindot=SHIN_SOUND_BY_DIALECT[DIALECT]
                 elif d==SIN_DOT: shindot='s'
                 elif d in (RAFE,METEG,MAQAF): pass
                 elif d==SHEVA: has_sheva=True
-                elif d in VOWELS: vmarks.append(d)
+                elif d in VOWELS(): vmarks.append(d)
                 i+=1
             units.append({'base':base,'dagesh':dagesh,'shindot':shindot,'vmarks':vmarks,'sheva':has_sheva})
         else:
@@ -75,14 +102,14 @@ def transliterate_word(word):
         is_last=(idx==nunits-1); is_first=(idx==0)
         prev_sheva = idx>0 and units[idx-1]['sheva'] and not units[idx-1]['vmarks']
         has_holam = any(v in (HOLAM,HOLAM_HASER) for v in vmarks)
-        vowel = VOWELS.get(vmarks[0]) if vmarks else None
+        vowel = VOWELS().get(vmarks[0]) if vmarks else None
 
-        # vav special handling: cholam male -> 'o' pure vowel; shuruk (dagesh, no holam) -> 'u' pure vowel
+        # vav special handling: cholam male -> 'o' pure vowel; shuruk (dagesh, no holam) -> shuruk-sound pure vowel
         if base==VAV and not (dagesh and sheva):
             if has_holam:
                 out.append('o'); continue
             if dagesh and vowel is None:
-                out.append('u'); continue
+                out.append(SHURUK_SOUND_BY_DIALECT[DIALECT]); continue
             if vowel is None and not sheva:
                 if is_first or is_last:
                     out.append('v')
@@ -90,7 +117,7 @@ def transliterate_word(word):
                     out.append('')
                 continue
             if sheva:
-                out.append('ve'); continue
+                out.append('v'+SHEVA_SOUND_BY_DIALECT[DIALECT]); continue
             out.append('v'+(vowel or '')); continue
         # vav with BOTH dagesh and sheva is a geminated root consonant with a
         # pronominal-suffix sheva (e.g. tzivvecha), never shuruk (which never
@@ -107,21 +134,21 @@ def transliterate_word(word):
         # Torah's own data.
         if base==YOD and vowel is None and not sheva and not dagesh:
             prev_out = out[-1] if out else ''
-            if not is_first and prev_out and (prev_out[-1] in 'ie' or not is_last):
+            if not is_first and prev_out and (prev_out[-1] in 'ieé' or not is_last):
                 out.append(''); continue
             if is_first:
                 out.append('y'); continue
             out.append('y'); continue
         if base==YOD and sheva and vowel is None:
-            out.append('ye'); continue
+            out.append('y'+SHEVA_SOUND_BY_DIALECT[DIALECT]); continue
 
         # consonant sound
         if base==SHIN:
-            csound = u['shindot'] if u['shindot'] else 'sh'
+            csound = u['shindot'] if u['shindot'] else SHIN_SOUND_BY_DIALECT[DIALECT]
         elif base==BET:
             csound = 'b' if dagesh else 'v'
         elif base in (KAF,KAF_F):
-            csound = 'k' if dagesh else 'ch'
+            csound = 'k' if dagesh else KAF_RAFE_SOUND_BY_DIALECT[DIALECT]
         elif base in (PE,PE_F):
             csound = 'p' if dagesh else 'f'
         elif base==YOD:
@@ -133,7 +160,7 @@ def transliterate_word(word):
         elif base==HE:
             csound='h'
         else:
-            csound=CONS.get(base,'')
+            csound=CONS().get(base,'')
 
         # dagesh chazak (gemination) only happens when the dagesh'd letter
         # is preceded by an actual vowel sound (not a silent/elided sheva or
@@ -141,12 +168,31 @@ def transliterate_word(word):
         # qal (sound change only, e.g. b/v k/ch p/f already applied above,
         # no doubling). Gemination doubles the WHOLE resulting sound, not
         # just its first letter, e.g. sh->shsh.
-        prev_ends_vowel = bool(out) and bool(out[-1]) and out[-1][-1] in 'aeiou'
+        prev_ends_vowel = bool(out) and bool(out[-1]) and out[-1][-1] in 'aeioué'
         double = dagesh and (not is_first) and base!=HE and csound!='' and prev_ends_vowel
+        # French spelling needs a single intervocalic samekh/sin (the "s"
+        # sound) doubled to "ss" even with NO Hebrew dagesh at all - plain
+        # single "s" between vowels would otherwise be read as "z" in French
+        # orthography (e.g. וְאָסַפְתָּ -> "véassafta", not "véasafta").
+        # Confirmed against torah-fr.json; doesn't apply to English ('s' is
+        # always unvoiced there) or when a real dagesh already doubles it.
+        if DIALECT=='fr' and not double and not is_first and prev_ends_vowel and csound=='s':
+            will_vocalize = bool(vowel) or (sheva and (is_first or prev_sheva))
+            if will_vocalize:
+                double = True
         if double:
             csound = csound+csound
 
-        vsound = vowel if vowel else ('e' if (sheva and (is_first or double or prev_sheva) and csound!='') else '')
+        vsound = vowel if vowel else (SHEVA_SOUND_BY_DIALECT[DIALECT] if (sheva and (is_first or double or prev_sheva) and csound!='') else '')
+
+        # French marks a hirik "i" with a trema (ï) when it directly follows
+        # another vowel sound with no consonant between them (a hiatus, e.g.
+        # לְהָאִיר -> "léhaïr" not "léhair") - without it the vowel pair would
+        # misleadingly look like a single French diphthong. Confirmed against
+        # torah-fr.json; "Adonaï" is the same phenomenon applied to the
+        # Tetragrammaton's own trailing patach+yod, already hardcoded above.
+        if DIALECT=='fr' and vsound=='i' and csound=='' and prev_ends_vowel:
+            vsound='ï'
 
         # final He silent mater (no vowel, no dagesh/mappiq)
         if base==HE and is_last and vowel is None and not dagesh and not sheva:
@@ -260,12 +306,13 @@ def transliterate_verse(verse):
             # same kind of substitute - but a bare "ה" with neither mark is
             # a real single letter (e.g. the numeral 5), so one of the two
             # is required here.
+            adonai = ADONAI_BY_DIALECT[DIALECT]
             if consonants=='יי' or is_he_geresh:
-                rendered.append('Adonai'); continue
+                rendered.append(adonai); continue
             if consonants.endswith('יהוה') and len(consonants)>=4:
                 prefix_letters = len(consonants)-4
                 if prefix_letters==0:
-                    rendered.append('Adonai')
+                    rendered.append(adonai)
                 else:
                     # split the nikud-bearing core right before the start of the
                     # (prefix_letters+1)-th Hebrew letter, so the prefix keeps its
@@ -277,7 +324,7 @@ def transliterate_verse(verse):
                             if seen==prefix_letters+1:
                                 cut=ci; break
                     prefix_part = core[:cut]
-                    rendered.append(transliterate_word(prefix_part)+'-Adonai')
+                    rendered.append(transliterate_word(prefix_part)+'-'+adonai)
             else:
                 rendered.append(transliterate_word(core))
         out.append(''.join(rendered))
@@ -299,6 +346,8 @@ def transliterate_book(cat, book):
     return [[cap_first(transliterate_verse(v)) for v in ch] for ch in chapters]
 
 def generate(cat, book, lang):
+    global DIALECT
+    DIALECT = lang if lang in VOWELS_BY_DIALECT else 'en'
     out_path = os.path.join(ROOT, 'data', f'{cat}-{lang}.json')
     existing = {}
     if os.path.exists(out_path):
@@ -311,8 +360,13 @@ def generate(cat, book, lang):
     nverses = sum(len(ch) for ch in existing[book])
     print(f'Wrote {book} ({len(existing[book])} chapters, {nverses} verses) into {out_path}')
 
-def validate():
-    with open('/tmp/claude-0/-home-user-Bet-El/7368b576-15ac-5c60-878f-cf494ca7bc20/scratchpad/verse_pairs.json', encoding='utf-8') as f:
+SCRATCHPAD = '/tmp/claude-0/-home-user-Bet-El/7368b576-15ac-5c60-878f-cf494ca7bc20/scratchpad'
+
+def validate(lang='en'):
+    global DIALECT
+    DIALECT = lang if lang in VOWELS_BY_DIALECT else 'en'
+    pairs_file = 'verse_pairs.json' if lang=='en' else f'{lang}_pairs.json'
+    with open(os.path.join(SCRATCHPAD, pairs_file), encoding='utf-8') as f:
         pairs = json.load(f)
     exact=0; close=0; total=len(pairs)
     bad=[]
@@ -344,7 +398,7 @@ if __name__=='__main__':
     ap.add_argument('--validate', action='store_true')
     args = ap.parse_args()
     if args.validate:
-        validate()
+        validate(args.lang)
     elif args.cat and args.book:
         generate(args.cat, args.book, args.lang)
     else:

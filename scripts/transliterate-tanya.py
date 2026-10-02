@@ -29,6 +29,7 @@ spec.loader.exec_module(nk)
 
 
 def generate(lang):
+    nk.DIALECT = lang
     with open(os.path.join(ROOT, 'data', 'chok-tanya-index.json'), encoding='utf-8') as f:
         idx = json.load(f)
     block_size = idx['block']

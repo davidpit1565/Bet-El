@@ -40,6 +40,7 @@ def sedarim_list(idx):
 
 
 def generate(seder_key, lang):
+    nk.DIALECT = lang
     idx = load_index()
     seder = next((s for s in idx['sedarim'] if s['seder'] == seder_key), None)
     if seder is None:

@@ -64,6 +64,7 @@ def refs_for_sefer(cyc, sefer_he):
 
 
 def generate(sefer_he, lang):
+    nk.DIALECT = lang
     cyc = load_cycles()
     target, refs, blocks = refs_for_sefer(cyc, sefer_he)
     refs_needed = set(refs)
