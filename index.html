@@ -3746,6 +3746,24 @@ function ensureCycBlock(kind,b){
   if(CYC_BLOCK[k]) return Promise.resolve();
   return cachedFetch(dataURL('data/chok-'+kind+'/'+b+'.json')).then(r=>r.json()).then(d=>{ CYC_BLOCK[k]=d; });
 }
+/* Translation for the daily-cycle content (Rambam so far, book by book -
+   see scripts/transliterate-rambam.py), added the same gradual way as
+   Nevi'im/Ketuvim's own translation (nkEnsureTranslit): a flat
+   {ref: [english paragraphs]} file per kind+language, fetched lazily and
+   only for the language actually in use. A chapter not yet translated is
+   simply absent from the file, so ckCycleSegs()'s fallback to the Hebrew
+   block data below keeps working for it unchanged. */
+let CK_TRANSLIT={rambam:{}}, ckTranslitLoadPromise={rambam:null};
+function ckEnsureTranslit(kind){
+  const lang=S.lang;
+  if(!lang || lang==='he') return Promise.resolve();
+  if(CK_TRANSLIT[kind][lang]) return Promise.resolve();
+  if(ckTranslitLoadPromise[kind] && ckTranslitLoadPromise[kind].lang===lang) return ckTranslitLoadPromise[kind].p;
+  const p=cachedFetch(dataURL(`data/${kind}-${lang}.json`)).then(r=>r.ok?r.json():{}).then(d=>{ CK_TRANSLIT[kind][lang]=d||{}; })
+    .catch(()=>{ CK_TRANSLIT[kind][lang]={}; });
+  ckTranslitLoadPromise[kind]={lang, p};
+  return p;
+}
 /* The daf is what the day needs; Steinsaltz and Rashi sit behind a button, so
    they are only fetched once a button is pressed. */
 let DAF_C={}, dafCPending={};
@@ -4487,6 +4505,9 @@ function ckCycleSegs(kind,i){
   const b=CYC_BLOCK[kind+'/'+ckBlockOf(i)]||{};
   if(kind==='zohar') return b[String(i)]||[];
   const ref=CYC.rambam.order[i].ref;
+  const lang=S.lang;
+  const tr=lang && CK_TRANSLIT[kind] && CK_TRANSLIT[kind][lang] && CK_TRANSLIT[kind][lang][ref];
+  if(tr) return tr;
   return b[ref]||[];
 }
 /* whether the blocks this day needs are already here - moving to another day
@@ -4509,7 +4530,7 @@ function ensureCycDay(hd){
     return Promise.all([...need].map(k=>{
       const [kind,b]=k.split('/');
       return ensureCycBlock(kind,+b);
-    }));
+    }).concat([ckEnsureTranslit('rambam')]));
   });
 }
 
@@ -4766,7 +4787,7 @@ function renderChokUnit(){
     else if(e.kind==='musar'){ segs=chokBundleSegs(e.key,[e.ref]); when='אֵין מַהֲדוּרָה מְנֻקֶּדֶת'; }
     else if(e.kind==='daf'){ return ensureCycBlock('daf',ckDafBlock(e.i))
       .then(()=>drawUnit(ckDafItems(e.i).filter(x=>x.t!==undefined).map(x=>x.t), ckWhenLine('daf',e.i))); }
-    else if(e.kind==='rambam'){ return ensureCycBlock('rambam',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
+    else if(e.kind==='rambam'){ return Promise.all([ensureCycBlock('rambam',ckBlockOf(e.i)),ckEnsureTranslit('rambam')]).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
     else if(e.kind==='zohar'){ return ensureCycBlock('zohar',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
     drawUnit(segs,when);
   });
@@ -8025,7 +8046,7 @@ function renderLibraryRambamReader(){
   const b=ckBlockOf(i);
   if(!CYC_BLOCK['rambam/'+b]){
     app.innerHTML=`${topbar(ckRambamName(e.book),'libraryRambamBooks')}<div class="view">${smSkeleton()}</div>`;
-    ensureCycBlock('rambam',b).then(()=>{ if(TAB==='libraryRambamReader'){ renderLibraryRambamReader(); tr(app); } });
+    Promise.all([ensureCycBlock('rambam',b),ckEnsureTranslit('rambam')]).then(()=>{ if(TAB==='libraryRambamReader'){ renderLibraryRambamReader(); tr(app); } });
     return;
   }
   const rg=libRambamRangeFor(e.book);
