@@ -3753,7 +3753,7 @@ function ensureCycBlock(kind,b){
    only for the language actually in use. A chapter not yet translated is
    simply absent from the file, so ckCycleSegs()'s fallback to the Hebrew
    block data below keeps working for it unchanged. */
-let CK_TRANSLIT={rambam:{}, tanya:{}, daf:{}}, ckTranslitLoadPromise={rambam:null, tanya:null, daf:null};
+let CK_TRANSLIT={rambam:{}, tanya:{}, daf:{}, zohar:{}}, ckTranslitLoadPromise={rambam:null, tanya:null, daf:null, zohar:null};
 function ckEnsureTranslit(kind){
   const lang=S.lang;
   if(!lang || lang==='he') return Promise.resolve();
@@ -4511,9 +4511,13 @@ function ckZoharLabel(i){
 }
 function ckCycleSegs(kind,i){
   const b=CYC_BLOCK[kind+'/'+ckBlockOf(i)]||{};
-  if(kind==='zohar') return b[String(i)]||[];
-  const ref=CYC.rambam.order[i].ref;
   const lang=S.lang;
+  if(kind==='zohar'){
+    const ztr=lang && CK_TRANSLIT.zohar[lang] && CK_TRANSLIT.zohar[lang][String(i)];
+    if(ztr) return ztr;
+    return b[String(i)]||[];
+  }
+  const ref=CYC.rambam.order[i].ref;
   const tr=lang && CK_TRANSLIT[kind] && CK_TRANSLIT[kind][lang] && CK_TRANSLIT[kind][lang][ref];
   if(tr) return tr;
   return b[ref]||[];
@@ -4538,7 +4542,7 @@ function ensureCycDay(hd){
     return Promise.all([...need].map(k=>{
       const [kind,b]=k.split('/');
       return ensureCycBlock(kind,+b);
-    }).concat([ckEnsureTranslit('rambam'), ckEnsureTranslit('daf')]));
+    }).concat([ckEnsureTranslit('rambam'), ckEnsureTranslit('daf'), ckEnsureTranslit('zohar')]));
   });
 }
 
@@ -4796,7 +4800,7 @@ function renderChokUnit(){
     else if(e.kind==='daf'){ return Promise.all([ensureCycBlock('daf',ckDafBlock(e.i)),ckEnsureTranslit('daf')])
       .then(()=>drawUnit(ckDafItems(e.i).filter(x=>x.t!==undefined).map(x=>x.t), ckWhenLine('daf',e.i))); }
     else if(e.kind==='rambam'){ return Promise.all([ensureCycBlock('rambam',ckBlockOf(e.i)),ckEnsureTranslit('rambam')]).then(()=>drawUnit(ckCycleSegs('rambam',e.i), ckWhenLine('rambam',e.i))); }
-    else if(e.kind==='zohar'){ return ensureCycBlock('zohar',ckBlockOf(e.i)).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
+    else if(e.kind==='zohar'){ return Promise.all([ensureCycBlock('zohar',ckBlockOf(e.i)),ckEnsureTranslit('zohar')]).then(()=>drawUnit(ckCycleSegs('zohar',e.i), ckWhenLine('zohar',e.i))); }
     drawUnit(segs,when);
   });
   function drawUnit(segs,when){
@@ -8142,7 +8146,7 @@ function renderLibraryZoharReader(){
   const b=ckBlockOf(i);
   if(!CYC_BLOCK['zohar/'+b]){
     app.innerHTML=`${topbar(ckZoharPartName(e.part),'libraryZoharParts')}<div class="view">${smSkeleton()}</div>`;
-    ensureCycBlock('zohar',b).then(()=>{ if(TAB==='libraryZoharReader'){ renderLibraryZoharReader(); tr(app); } });
+    Promise.all([ensureCycBlock('zohar',b),ckEnsureTranslit('zohar')]).then(()=>{ if(TAB==='libraryZoharReader'){ renderLibraryZoharReader(); tr(app); } });
     return;
   }
   const rg=libZoharRangeFor(e.part);
