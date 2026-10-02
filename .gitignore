@@ -15,3 +15,4 @@ Thumbs.db
 
 # Isolated worktrees for background Claude Code agents
 /.claude/worktrees/
+__pycache__/

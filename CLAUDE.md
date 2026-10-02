@@ -5,6 +5,39 @@ The user writes in Hebrew. Answer and summarize in Hebrew (עברית) in chat �
 not English. Code, comments, commit messages, and PR titles/descriptions stay
 in English as usual.
 
+## Translation work: always check for an existing source first
+Before translating ANY content to a new language - whether asked explicitly
+or continuing an ongoing translation effort (Tanach, Rambam, Mishnah,
+Gemara, Musar, Tanya, Zohar, etc.) - first check whether a translation
+already exists to copy instead of writing it yourself:
+1. Check the repo/data directory itself (a sibling `-en.json`/`-fr.json`
+   etc. file, or data already wired into `index.html`) - this is how the
+   Torah's English/French translation was discovered already done.
+2. Check reputable sources (Sefaria's API versions, etc.) for a ready
+   transliteration/translation edition before building one mechanically.
+3. Only when nothing exists, generate it (the established pattern:
+   `scripts/transliterate-neviim-ketuvim.py`'s rule-based Hebrew→Latin
+   transliterator, reused via `scripts/transliterate-rambam.py` and
+   `scripts/transliterate-mishnah.py` for Rambam/Mishnah).
+**Sources must always be Jewish/kosher** - never copy from the New
+Testament, Christian sites, or other non-Jewish religious sources, even
+indirectly. The mechanical transliterator itself is always safe regardless
+(it takes no outside text, just converts the app's own existing Hebrew
+letters+nikud to Latin phonetics), but any ready-made translation/source
+considered for copying must be checked for this first.
+**Concrete near-miss that makes this non-optional:** all 6 Musar works
+(`data/chok-{reshit,teshuva,kedusha,mesilat,orchot,peleyoetz}/<block>.en.
+json`, plus fr/ru/ka siblings) already had complete, careful, real
+meaning-translations from an earlier large effort (hundreds of commits,
+one chapter/section at a time) - a mechanical transliteration pass nearly
+overwrote all of it with far lower-quality phonetic output before the
+mistake was caught and reverted. **Before writing to ANY `data/` file,
+run `git log --oneline -- <path>` first** - a non-empty result means the
+file already exists (possibly only on `origin/main`, not yet merged into
+your branch) and must be read and compared before it is touched, never
+assumed empty/Hebrew-only just because a code comment or your own
+starting checks said so earlier in the project's history.
+
 ## Architecture essentials
 - Everything lives in one file, `index.html` (~5400+ lines): a giant classic
   `<script>` wrapped in a single top-level IIFE `(function(){ ... })();`.
