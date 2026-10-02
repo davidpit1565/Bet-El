@@ -3753,7 +3753,7 @@ function ensureCycBlock(kind,b){
    only for the language actually in use. A chapter not yet translated is
    simply absent from the file, so ckCycleSegs()'s fallback to the Hebrew
    block data below keeps working for it unchanged. */
-let CK_TRANSLIT={rambam:{}}, ckTranslitLoadPromise={rambam:null};
+let CK_TRANSLIT={rambam:{}, tanya:{}}, ckTranslitLoadPromise={rambam:null, tanya:null};
 function ckEnsureTranslit(kind){
   const lang=S.lang;
   if(!lang || lang==='he') return Promise.resolve();
@@ -4073,6 +4073,9 @@ function ckTanyaBlockOf(i){ return Math.floor(i/(TANYA_IDX.block||40)); }
 function ckTanyaSegs(i){
   const b=CYC_BLOCK['tanya/'+ckTanyaBlockOf(i)]||{};
   const ref=TANYA_IDX.order[i].ref;
+  const lang=S.lang;
+  const tr=lang && CK_TRANSLIT.tanya[lang] && CK_TRANSLIT.tanya[lang][ref];
+  if(tr) return tr;
   return b[ref]||[];
 }
 function ckTanyaReady(hd){
@@ -4083,7 +4086,7 @@ function ckTanyaReady(hd){
 function ensureTanyaDay(hd){
   return ensureTanyaCycle().then(()=>{
     const e=ckTanyaDayEntry(hd);
-    return ensureCycBlock('tanya', ckTanyaBlockOf(e.orderIndex));
+    return Promise.all([ensureCycBlock('tanya', ckTanyaBlockOf(e.orderIndex)), ckEnsureTranslit('tanya')]);
   });
 }
 /* Hebrew citation word per unitLabel - Likkutei Amarim/Shaar HaYichud/
@@ -8232,7 +8235,7 @@ function renderLibraryTanyaReader(){
   const b=ckTanyaBlockOf(i);
   if(!CYC_BLOCK['tanya/'+b]){
     app.innerHTML=`${topbar(partTitle,'libraryTanyaParts')}<div class="view">${smSkeleton()}</div>`;
-    ensureCycBlock('tanya',b).then(()=>{ if(TAB==='libraryTanyaReader'){ renderLibraryTanyaReader(); tr(app); } });
+    Promise.all([ensureCycBlock('tanya',b),ckEnsureTranslit('tanya')]).then(()=>{ if(TAB==='libraryTanyaReader'){ renderLibraryTanyaReader(); tr(app); } });
     return;
   }
   const rg=tanyaPartRange(e.part);

@@ -162,26 +162,68 @@ def transliterate_word(word):
 def strip_diacritics_only_consonants(word):
     return ''.join(c for c in word if is_hebrew_letter(c))
 
+def _has_nikud(s):
+    return any('ְ' <= c <= 'ׇ' for c in s)
+
+def _small_sub(m):
+    # <small>...</small> is used for two very different things across
+    # content: Rambam wraps unvocalized scholarly citations in it, e.g.
+    # "<small>(דברים ח י)</small>" - garbles badly if transliterated as if
+    # vocalized, so this is dropped entirely (tag AND content). But Rambam
+    # also uses it for ordinary vocalized text (colophons, section
+    # summaries), and Tanya uses it for fully vocalized editorial glosses
+    # (hagahot) that ARE meant to be read - those must only have the tags
+    # stripped, keeping the content. The deciding signal is vocalization
+    # itself: real text always carries nikud in this fully-vocalized
+    # source data, a bare citation/note never does.
+    content = m.group(1)
+    return '' if not _has_nikud(content) else content
+
+def _ketiv_qere_sub(m):
+    # Nevi'im/Ketuvim ketiv/qere pairs ("written" unvocalized form followed
+    # by the vocalized "read" form in brackets) look identical in shape to
+    # Rambam's own bracketed vocalized textual variants, e.g.
+    # "עֲבוֹדָה [הַיּוֹם]" (an alternate/added reading, not a ketiv at all) -
+    # naively dropping the word before every "word [...]" would wrongly
+    # delete real preceding words like "עֲבוֹדָה" there. The distinguishing
+    # signal is the same as above: a true ketiv is always bare, unvocalized
+    # consonants; Rambam's preceding word is always fully vocalized.
+    # The ketiv itself is sometimes maqaf-joined to a vocalized prefix
+    # (e.g. "וְאֶת־אחותי [אַחְיוֹתַ֔י]") - checking nikud on the whole token
+    # would wrongly see the prefix's own vowels and miss a real ketiv. The
+    # ketiv can also itself be multiple unvocalized maqaf-joined segments
+    # (e.g. "מבן־ימין [מִבִּנְיָמִ֗ין]", a single word split into two bare
+    # segments) - so scan maqaf-joined segments from the end, collecting
+    # the trailing run that is entirely unvocalized (the real ketiv); any
+    # segments before that run are a vocalized prefix kept as-is.
+    token, qere = m.group(1), m.group(2)
+    segments = token.split('־')
+    cut = len(segments)
+    for i in range(len(segments) - 1, -1, -1):
+        if _has_nikud(segments[i]):
+            break
+        cut = i
+    if cut == len(segments):
+        return m.group(0)  # no unvocalized trailing run - not a real ketiv/qere
+    prefix = '־'.join(segments[:cut])
+    if prefix:
+        prefix += '־'
+    return prefix + qere
+
 def transliterate_verse(verse):
-    # some content (e.g. Rambam's halacha text) embeds literal HTML: <img>
-    # (a diagram, no text to transliterate), <small>(...)</small> (an
-    # unvocalized scholarly citation like "(דברים ח י)" - garbles badly if
-    # transliterated as if vocalized, so it's dropped entirely, tag and
-    # content both), <br> (a line break, becomes a space), and <b>/</b>
-    # (emphasis around ordinary vocalized Hebrew - strip the tags, keep the
-    # text so it transliterates normally).
-    verse = re.sub(r'<img[^>]*>', '', verse)
-    verse = re.sub(r'<small>.*?</small>', '', verse)
+    # Some content (Rambam, Tanya) embeds literal HTML: <img> (a diagram,
+    # no text to transliterate), <br> (a line break, becomes a space), and
+    # <b>/<big>/<strong>/<i> (various emphasis around ordinary vocalized
+    # Hebrew - strip the tags, keep the text so it transliterates
+    # normally). <small> needs its own vocalization-aware handling, see
+    # _small_sub above.
     verse = re.sub(r'<br\s*/?>', ' ', verse)
-    verse = re.sub(r'</?b>', '', verse)
+    verse = re.sub(r'<small>(.*?)</small>', _small_sub, verse)
+    verse = re.sub(r'</?[a-zA-Z][^>]*>', '', verse)
     # strip literal Masoretic paragraph markers some Nevi'im/Ketuvim verses
     # carry inline (petucha "(פ)" / setuma "(ס)") - not part of the verse text
     verse = re.sub(r'\s*\([פס]\)\s*$', '', verse)
-    # ketiv/qere pairs ("written" unvocalized form followed by the vocalized
-    # "read" form in brackets) - only the bracketed qere form is actually
-    # read aloud, so drop the bare ketiv word and keep just the brackets'
-    # content (then strip the brackets themselves).
-    verse = re.sub(r'\S+ \[([^\]]+)\]', r'\1', verse)
+    verse = re.sub(r'(\S+) \[([^\]]+)\]', _ketiv_qere_sub, verse)
     verse = strip_trope(verse)
     tokens = re.split(r'(\s+)', verse)
     out=[]
@@ -196,6 +238,17 @@ def transliterate_verse(verse):
             core = re.sub(r'[ -⁯ﬞ׃׀׀.:]', '', st)
             if not core: continue
             consonants = strip_diacritics_only_consonants(core)
+            # A word with zero nikud at all (sheva included) is never
+            # genuine running text in this fully-vocalized source data - it
+            # is always either editorial apparatus (an unvocalized aside
+            # like Tanya's "נראה דצריך להיות" or a bare citation/siman
+            # number like "ל״ה") that would garble badly if transliterated
+            # letter-by-letter as if vocalized. Dropped entirely, the same
+            # disclosed simplification already applied to citations.
+            # Excludes the Tetragrammaton/"יי" checks just below, which are
+            # recognized and rendered as "Adonai" regardless of vocalization.
+            if consonants not in ('יי',) and not consonants.endswith('יהוה') and not _has_nikud(core):
+                continue
             # "יי" (sometimes written with a following geresh, יְיָ׳) is the
             # standard Rabbinic-era scribal substitute for the Tetragrammaton,
             # used throughout later halachic/liturgical works (Rambam, Gemara,
