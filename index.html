@@ -8365,7 +8365,7 @@ function renderLibraryMishnahReader(){
 }
 
 
-/* ---------- Nevi'im & Ketuvim (new full-text data, Hebrew only) ----------
+/* ---------- Nevi'im & Ketuvim (new full-text data) ----------
    The app previously had no full Nevi'im/Ketuvim text anywhere, only short
    daily-cycle excerpts from 19 books. data/neviim-data.json and
    data/ketuvim-data.json are new source content (user-approved exception to
@@ -8377,15 +8377,17 @@ function renderLibraryMishnahReader(){
    before use here - see scripts/fetch-neviim-ketuvim.mjs). Psalms is NOT
    duplicated in ketuvim-data.json - it reuses the app's own existing
    window.TEHILLIM. Originally Hebrew only (en/fr/ru/ka transliteration was
-   deferred to a future phase); that phase is now underway, book by book -
-   data/neviim-<lang>.json/data/ketuvim-<lang>.json hold one key per
-   translated book, generated with scripts/transliterate-neviim-ketuvim.py
-   (a rule-based Hebrew->Latin transliterator reverse-engineered from the
-   Torah's own already-correct data/torah-en.json, since Sefaria has no
-   transliteration edition to fetch - see nkEnsureTranslit()/nkVersesOf()
-   below). A book absent from the current language's file still falls back
-   to the Hebrew verse text via nkVersesOf(), so partial per-book coverage
-   degrades gracefully while more books are translated over time. */
+   deferred to a future phase); English is now done for every book of both
+   Nevi'im and Ketuvim (besides Psalms, which already has its own
+   window.TEHILLIM_EN). data/neviim-<lang>.json/data/ketuvim-<lang>.json
+   hold one key per translated book, generated with
+   scripts/transliterate-neviim-ketuvim.py (a rule-based Hebrew->Latin
+   transliterator reverse-engineered from the Torah's own already-correct
+   data/torah-en.json, since Sefaria has no transliteration edition to
+   fetch - see nkEnsureTranslit()/nkVersesOf() below). fr/ru/ka are not
+   done yet for this content (same as Torah's own fr/ru/ka gap) - a book
+   absent from the current language's file falls back to the Hebrew verse
+   text via nkVersesOf(), so that degrades gracefully. */
 const NK_BOOKS={
   neviim:[
     {k:'Joshua', he:'יְהוֹשֻׁעַ', en:'Joshua', fr:'Josué', ru:'Иисус Навин', ka:'იესო ნავეს ძე'},
