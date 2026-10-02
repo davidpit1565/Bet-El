@@ -25,6 +25,18 @@ indirectly. The mechanical transliterator itself is always safe regardless
 (it takes no outside text, just converts the app's own existing Hebrew
 letters+nikud to Latin phonetics), but any ready-made translation/source
 considered for copying must be checked for this first.
+**Concrete near-miss that makes this non-optional:** all 6 Musar works
+(`data/chok-{reshit,teshuva,kedusha,mesilat,orchot,peleyoetz}/<block>.en.
+json`, plus fr/ru/ka siblings) already had complete, careful, real
+meaning-translations from an earlier large effort (hundreds of commits,
+one chapter/section at a time) - a mechanical transliteration pass nearly
+overwrote all of it with far lower-quality phonetic output before the
+mistake was caught and reverted. **Before writing to ANY `data/` file,
+run `git log --oneline -- <path>` first** - a non-empty result means the
+file already exists (possibly only on `origin/main`, not yet merged into
+your branch) and must be read and compared before it is touched, never
+assumed empty/Hebrew-only just because a code comment or your own
+starting checks said so earlier in the project's history.
 
 ## Architecture essentials
 - Everything lives in one file, `index.html` (~5400+ lines): a giant classic

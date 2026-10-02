@@ -247,14 +247,20 @@ def transliterate_verse(verse):
             # disclosed simplification already applied to citations.
             # Excludes the Tetragrammaton/"יי" checks just below, which are
             # recognized and rendered as "Adonai" regardless of vocalization.
-            if consonants not in ('יי',) and not consonants.endswith('יהוה') and not _has_nikud(core):
+            is_he_geresh = consonants=='ה' and ('׳' in core or "'" in core)
+            if consonants not in ('יי',) and not is_he_geresh and not consonants.endswith('יהוה') and not _has_nikud(core):
                 continue
             # "יי" (sometimes written with a following geresh, יְיָ׳) is the
             # standard Rabbinic-era scribal substitute for the Tetragrammaton,
             # used throughout later halachic/liturgical works (Rambam, Gemara,
             # Shulchan Aruch) specifically to avoid writing God's actual name -
-            # always read aloud as "Adonai", same as יהוה itself.
-            if consonants=='יי':
+            # always read aloud as "Adonai", same as יהוה itself. "ה׳" (heh
+            # followed by a geresh - or, in some Musar source files, a plain
+            # ASCII apostrophe instead - used in Musar/Tanya works) is the
+            # same kind of substitute - but a bare "ה" with neither mark is
+            # a real single letter (e.g. the numeral 5), so one of the two
+            # is required here.
+            if consonants=='יי' or is_he_geresh:
                 rendered.append('Adonai'); continue
             if consonants.endswith('יהוה') and len(consonants)>=4:
                 prefix_letters = len(consonants)-4
