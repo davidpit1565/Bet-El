@@ -163,6 +163,17 @@ def strip_diacritics_only_consonants(word):
     return ''.join(c for c in word if is_hebrew_letter(c))
 
 def transliterate_verse(verse):
+    # some content (e.g. Rambam's halacha text) embeds literal HTML: <img>
+    # (a diagram, no text to transliterate), <small>(...)</small> (an
+    # unvocalized scholarly citation like "(דברים ח י)" - garbles badly if
+    # transliterated as if vocalized, so it's dropped entirely, tag and
+    # content both), <br> (a line break, becomes a space), and <b>/</b>
+    # (emphasis around ordinary vocalized Hebrew - strip the tags, keep the
+    # text so it transliterates normally).
+    verse = re.sub(r'<img[^>]*>', '', verse)
+    verse = re.sub(r'<small>.*?</small>', '', verse)
+    verse = re.sub(r'<br\s*/?>', ' ', verse)
+    verse = re.sub(r'</?b>', '', verse)
     # strip literal Masoretic paragraph markers some Nevi'im/Ketuvim verses
     # carry inline (petucha "(פ)" / setuma "(ס)") - not part of the verse text
     verse = re.sub(r'\s*\([פס]\)\s*$', '', verse)
@@ -185,6 +196,13 @@ def transliterate_verse(verse):
             core = re.sub(r'[ -⁯ﬞ׃׀׀.:]', '', st)
             if not core: continue
             consonants = strip_diacritics_only_consonants(core)
+            # "יי" (sometimes written with a following geresh, יְיָ׳) is the
+            # standard Rabbinic-era scribal substitute for the Tetragrammaton,
+            # used throughout later halachic/liturgical works (Rambam, Gemara,
+            # Shulchan Aruch) specifically to avoid writing God's actual name -
+            # always read aloud as "Adonai", same as יהוה itself.
+            if consonants=='יי':
+                rendered.append('Adonai'); continue
             if consonants.endswith('יהוה') and len(consonants)>=4:
                 prefix_letters = len(consonants)-4
                 if prefix_letters==0:
