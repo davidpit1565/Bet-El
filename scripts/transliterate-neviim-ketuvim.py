@@ -97,10 +97,17 @@ def transliterate_word(word):
         # also carries sheva) - falls through to the normal consonant path
         # below so it gets doubled/vocalized exactly like any other letter.
 
-        # yod special handling: silent mater after i/e-type vowel when yod itself carries nothing
+        # yod special handling: silent mater after i/e-type vowel when yod itself
+        # carries nothing (e.g. pene->"pene", peri->"peri"), and likewise when a
+        # bare yod after a/o/u is itself followed by another letter (e.g. the
+        # "-av"/"his" suffix אֲדֹנָיו=adonav, where the trailing vav - not this
+        # yod - is what's actually pronounced). But a bare yod after a/o/u that
+        # IS the end of the word stays a real consonant ("y"): standalone
+        # אֲדֹנָי=adonay, לְפָנַי=lefanay, אֵלַי=elay - confirmed against the
+        # Torah's own data.
         if base==YOD and vowel is None and not sheva and not dagesh:
             prev_out = out[-1] if out else ''
-            if not is_first and prev_out and prev_out[-1] in 'iea':
+            if not is_first and prev_out and (prev_out[-1] in 'ie' or not is_last):
                 out.append(''); continue
             if is_first:
                 out.append('y'); continue
