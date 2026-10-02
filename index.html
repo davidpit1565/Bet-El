@@ -4104,16 +4104,24 @@ function ensureTanyaDay(hd){
    number - confirmed acceptable, free/Sefaria sources don't carry Kehot's
    printed page numbers. Modeled directly on ckZoharLabel. */
 const TANYA_UNIT_WORD={chapter:'פֶּרֶק', letter:'אִגֶּרֶת', unit:'פֶּרֶק'};
-/* only English names exist in the data (partEn/subsection) - fr/ru/ka fall
-   back to the Hebrew name, same as any other content the translation
-   effort hasn't reached yet (see CLAUDE.md on the Ben Ish Chai rollout). */
+/* English and French names exist in the data (partEn/partFr + subsection/
+   subsectionFr) - ru/ka fall back to the Hebrew name, same as any other
+   content the translation effort hasn't reached yet (see CLAUDE.md on the
+   Ben Ish Chai rollout). */
 const TANYA_UNIT_WORD_EN={chapter:'chapter', letter:'letter', unit:'chapter'};
+const TANYA_UNIT_WORD_FR={chapter:'chapitre', letter:'lettre', unit:'chapitre'};
 function ckTanyaLabel(orderIndex){
   const e=TANYA_IDX.order[orderIndex];
   if(S.lang==='en' && e.partEn){
     let s='Tanya · '+e.partEn;
     if(e.subsection) s+=' · '+e.subsection;
     else s+=' · '+(TANYA_UNIT_WORD_EN[e.unitLabel]||'chapter')+' '+heNum(e.chapter);
+    return s;
+  }
+  if(S.lang==='fr' && e.partFr){
+    let s='Tanya · '+e.partFr;
+    if(e.subsectionFr) s+=' · '+e.subsectionFr;
+    else s+=' · '+(TANYA_UNIT_WORD_FR[e.unitLabel]||'chapitre')+' '+heNum(e.chapter);
     return s;
   }
   let s='תַּנְיָא · '+e.partHe;
@@ -8217,7 +8225,7 @@ function tanyaPartRange(part){
   TANYA_IDX.order.forEach((e,i)=>{ if(e.part===part){ if(first<0) first=i; last=i; } });
   return {first,last};
 }
-function tanyaPartTitle(p){ return (S.lang==='en' && p.en) ? p.en : p.he; }
+function tanyaPartTitle(p){ if(S.lang==='en' && p.en) return p.en; if(S.lang==='fr' && p.fr) return p.fr; return p.he; }
 function renderLibraryTanyaParts(){
   const tanyaTitle=(S.lang==='en')?'Tanya':'תניא';
   if(!TANYA_IDX){
@@ -8248,7 +8256,7 @@ function renderLibraryTanyaReader(){
   }
   const i=LIB.tanyaIndex;
   const e=TANYA_IDX.order[i];
-  const partTitle=(S.lang==='en' && e.partEn) ? e.partEn : e.partHe;
+  const partTitle=(S.lang==='en' && e.partEn) ? e.partEn : (S.lang==='fr' && e.partFr) ? e.partFr : e.partHe;
   const b=ckTanyaBlockOf(i);
   if(!CYC_BLOCK['tanya/'+b]){
     app.innerHTML=`${topbar(partTitle,'libraryTanyaParts')}<div class="view">${smSkeleton()}</div>`;
