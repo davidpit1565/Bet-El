@@ -8281,10 +8281,34 @@ function renderLibraryTanyaReader(){
    54 files it reads and how refs are parsed/grouped). Re-run the script
    whenever chok-leyisrael data changes; this file is not hand-edited. */
 let MISHNAH_IDX=null, mishnahLoadPromise=null;
+/* English (so far) transliteration, one Seder at a time - see
+   scripts/transliterate-mishnah.py. Flat {"<Masechet> <ch>:<n>": "english"}
+   map, fetched lazily like the Rambam/Nevi'im-Ketuvim translations
+   (ckEnsureTranslit/nkEnsureTranslit) - a mishnah absent from it just falls
+   back to the Hebrew text below. */
+let MISHNAH_TRANSLIT={}, mishnahTranslitLoadPromise=null;
+function ensureMishnahTranslit(){
+  const lang=S.lang;
+  if(!lang || lang==='he') return Promise.resolve();
+  if(MISHNAH_TRANSLIT[lang]) return Promise.resolve();
+  if(mishnahTranslitLoadPromise && mishnahTranslitLoadPromise.lang===lang) return mishnahTranslitLoadPromise.p;
+  const p=cachedFetch(dataURL(`data/mishnah-${lang}.json`)).then(r=>r.ok?r.json():{}).then(d=>{ MISHNAH_TRANSLIT[lang]=d||{}; })
+    .catch(()=>{ MISHNAH_TRANSLIT[lang]={}; });
+  mishnahTranslitLoadPromise={lang, p};
+  return p;
+}
+function mishText(masechet,ch,m){
+  const lang=S.lang;
+  const tr=lang && MISHNAH_TRANSLIT[lang] && MISHNAH_TRANSLIT[lang][`${masechet} ${ch}:${m.n}`];
+  return tr || m.text;
+}
 function ensureMishnahIndex(){
   if(MISHNAH_IDX) return Promise.resolve();
   if(mishnahLoadPromise) return mishnahLoadPromise;
-  mishnahLoadPromise=cachedFetch(dataURL('data/mishnah-index.json')).then(r=>r.json()).then(d=>{ MISHNAH_IDX=d; })
+  mishnahLoadPromise=Promise.all([
+    cachedFetch(dataURL('data/mishnah-index.json')).then(r=>r.json()).then(d=>{ MISHNAH_IDX=d; }),
+    ensureMishnahTranslit(),
+  ])
     .catch(e=>{ mishnahLoadPromise=null; throw e; });
   return mishnahLoadPromise;
 }
@@ -8371,7 +8395,7 @@ function renderLibraryMishnahReader(){
       </div>
     </div>
     <div class="sm-verses notranslate">
-      ${c.mishnayot.map(m=>`<div class="sm-verse-row"><span class="sm-vnum">${ckChrome('מִשְׁנָה')} ${heNum(m.n)}</span><div class="sm-he">${m.text}</div></div>`).join('')}
+      ${c.mishnayot.map(m=>`<div class="sm-verse-row"><span class="sm-vnum">${ckChrome('מִשְׁנָה')} ${heNum(m.n)}</span><div class="sm-he">${mishText(LIB.mishnahTractate,c.ch,m)}</div></div>`).join('')}
     </div>
     <div style="height:26px"></div>
   </div>`;
