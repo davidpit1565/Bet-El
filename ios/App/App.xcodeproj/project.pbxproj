@@ -30,6 +30,8 @@
 		C761FFA07C5178E57D87BE8F /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FE6D65B6A501918B061D8C /* Provider.swift */; };
 		ECCF7B063C32BD92317F5535 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA98F6EE9BABA518238B1D5 /* MainViewController.swift */; };
 		FA978A88D2397868B7551144 /* HebrewDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3DE7F09F11BFC86E15552C /* HebrewDay.swift */; };
+		1A2B3C4D5E6F7081920A3B4C /* NativeToolsFabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3B4C5D6E7F8091A2B3C4D5 /* NativeToolsFabView.swift */; };
+		3B4C5D6E7F8091A2B3C4D5E6 /* NativeToolsFabBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5D6E7F8091A2B3C4D5E6F7 /* NativeToolsFabBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +86,8 @@
 		DE278307C742BE5E4186087A /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		E9274E9281FDF317A272DE17 /* SharedData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedData.swift; sourceTree = "<group>"; };
 		EF731F19971C018FA05D9FE7 /* BetElWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidget.swift; sourceTree = "<group>"; };
+		2A3B4C5D6E7F8091A2B3C4D5 /* NativeToolsFabView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeToolsFabView.swift; sourceTree = "<group>"; };
+		4C5D6E7F8091A2B3C4D5E6F7 /* NativeToolsFabBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeToolsFabBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +146,8 @@
 				DE278307C742BE5E4186087A /* App.entitlements */,
 				8AA98F6EE9BABA518238B1D5 /* MainViewController.swift */,
 				46751A00A0A858BF4DE9FC7D /* NativeTabBarBridge.swift */,
+				2A3B4C5D6E7F8091A2B3C4D5 /* NativeToolsFabView.swift */,
+				4C5D6E7F8091A2B3C4D5E6F7 /* NativeToolsFabBridge.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -309,6 +315,8 @@
 				8A074172DFC9F6AAC6FC5E01 /* BetElWidgetBridge.swift in Sources */,
 				ECCF7B063C32BD92317F5535 /* MainViewController.swift in Sources */,
 				6C4E5E5AA93D9D96B0217FB4 /* NativeTabBarBridge.swift in Sources */,
+				1A2B3C4D5E6F7081920A3B4C /* NativeToolsFabView.swift in Sources */,
+				3B4C5D6E7F8091A2B3C4D5E6 /* NativeToolsFabBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

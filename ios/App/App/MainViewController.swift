@@ -22,6 +22,7 @@ import Capacitor
 /// `syncNativeTabBar()` in index.html - so the two never show at once.
 class MainViewController: CAPBridgeViewController {
     private let tabBar = UITabBar()
+    private let toolsFab = NativeToolsFabView()
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -39,7 +40,9 @@ class MainViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabBar()
+        setupToolsFab()
         NativeTabBarBridge.activeController = self
+        NativeToolsFabBridge.activeController = self
     }
 
     override func viewDidLayoutSubviews() {
@@ -62,6 +65,50 @@ class MainViewController: CAPBridgeViewController {
             tabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+    }
+
+    /// Pinned to the bottom-right corner, above the tab bar (whether or not
+    /// the tab bar is currently visible - see the floating offset below) -
+    /// see NativeToolsFabView's own header comment for why this is a fixed
+    /// corner position rather than an exact mirror of the HTML version's
+    /// inline header placement.
+    private func setupToolsFab() {
+        toolsFab.translatesAutoresizingMaskIntoConstraints = false
+        toolsFab.isHidden = true
+        toolsFab.onAction = { [weak self] action in
+            guard let self = self else { return }
+            let js: String
+            switch action {
+            case .minus: js = "window.NativeToolsFabHost && window.NativeToolsFabHost.minus()"
+            case .plus: js = "window.NativeToolsFabHost && window.NativeToolsFabHost.plus()"
+            case .theme: js = "window.NativeToolsFabHost && window.NativeToolsFabHost.theme()"
+            case .autoscroll: js = "window.NativeToolsFabHost && window.NativeToolsFabHost.autoscroll()"
+            case .home: js = "window.go && window.go('home')"
+            }
+            self.webView?.evaluateJavaScript(js, completionHandler: nil)
+        }
+        view.addSubview(toolsFab)
+        NSLayoutConstraint.activate([
+            toolsFab.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            toolsFab.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -14),
+            toolsFab.widthAnchor.constraint(equalToConstant: 46),
+            toolsFab.heightAnchor.constraint(equalToConstant: 46),
+        ])
+    }
+
+    // MARK: - Called by NativeToolsFabBridge (JS-driven)
+
+    func configureToolsFab(showAutoscroll: Bool) {
+        toolsFab.configure(showAutoscroll: showAutoscroll)
+    }
+
+    func setToolsFabState(fontScalePercent: Int, isDarkTheme: Bool, isAutoscrollActive: Bool) {
+        toolsFab.setState(fontScalePercent: fontScalePercent, isDarkTheme: isDarkTheme, isAutoscrollActive: isAutoscrollActive)
+    }
+
+    func setToolsFabVisible(_ visible: Bool) {
+        if !visible { toolsFab.collapseIfExpanded() }
+        toolsFab.isHidden = !visible
     }
 
     private func reportHeightToWebView() {

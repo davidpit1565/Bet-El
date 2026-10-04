@@ -101,6 +101,11 @@ body::before{ /* subtle starfield/texture */
 html.has-native-tabbar .bottom-nav,html.has-native-tabbar .nav-fade{display:none}
 html.has-native-tabbar #app{padding-bottom:calc(var(--native-nav-h, 90px) + 20px)}
 html.has-native-tabbar .toast{bottom:calc(var(--native-nav-h, 90px) + 20px)}
+/* NativeToolsFab (see NativeToolsFabBridge.swift) replaces the HTML
+   .reader-tools floating button with a real native UIGlassEffect FAB -
+   hide the HTML one wherever it would otherwise render, same pattern as
+   .has-native-tabbar above. */
+html.has-native-tools-fab .reader-tools{display:none}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 ::selection{background:rgba(212,175,95,.3)}
 
@@ -3718,6 +3723,7 @@ function wireToolsFab(){
   const th=document.getElementById('gTheme'); if(th) th.onclick=()=>{ toggleTheme(); th.innerHTML=S.theme==='dark'?I.sun:I.moon; };
   const as=document.getElementById('gAutoScroll'); if(as) as.onclick=e=>toggleAutoScroll(e.currentTarget);
   const hm=document.getElementById('gHome'); if(hm) hm.onclick=()=>go('home');
+  syncNativeToolsFab();
 }
 /* Close the quick-tools panel on a single tap anywhere else on the screen,
    not just by re-tapping the dots button. Registered once, globally - it
@@ -5939,8 +5945,16 @@ function render(){
    of a button that is already there. */
 const CK_TEXT_TABS={chokReader:1, chokUnit:1, prayerReader:1, smReader:1, zoharReader:1, zoharYomi:1, bicReader:1, musarYomi:1,
   libraryTorahReader:1, libraryGemaraReader:1, libraryRambamReader:1, libraryZoharReader:1, libraryMishnahReader:1, libraryNKReader:1};
+/* 'reader' (renderContinuous/renderReader) and 'siddurReader'
+   (drawSiddurReader) embed and wire their own tools-fab HTML directly
+   rather than going through this function - each already calls
+   syncNativeToolsFab() itself once wired, so this function must leave
+   the native FAB alone for them rather than hiding it. */
+const CK_TOOLSFAB_SELF_OWNED={reader:1, siddurReader:1};
 function mountToolsFab(){
-  if(TAB==='reader'||!CK_TEXT_TABS[TAB]||document.getElementById('gTools')) return;
+  if(CK_TOOLSFAB_SELF_OWNED[TAB]) return;
+  if(!CK_TEXT_TABS[TAB]){ hideNativeToolsFab(); return; }
+  if(document.getElementById('gTools')) return;
   if(!app.firstChild) return;
   const html = toolsFab({scroll:true});
   const readerTop = app.querySelector('.reader-top');
@@ -6565,6 +6579,7 @@ function wireReader(){
   document.getElementById('tPlus').onclick=()=>changeFont(0.1);
   document.getElementById('tTheme').onclick=()=>{ toggleTheme(); document.getElementById('tTheme').innerHTML=S.theme==='dark'?I.sun:I.moon; };
   document.getElementById('tAutoScroll').onclick=e=>toggleAutoScroll(e.currentTarget);
+  syncNativeToolsFab();
   tr(app);
   if(RD && RD.verse!=null){ const vs=app.querySelectorAll('.chapter .verse'); const el=vs[RD.verse]; if(el){ el.classList.add('vhi'); setTimeout(()=>{ try{el.scrollIntoView({block:'center'});}catch(e){} },60); setTimeout(()=>el.classList.remove('vhi'),2600); } RD.verse=null; }
 }
@@ -11254,6 +11269,59 @@ function syncNativeTabBar(){
       .map(([id,he])=>({id,label:nativeTabBarLabel(he)}));
     plugin.configure({items, activeTab:navActiveTab(TAB)}).catch(()=>{});
   }catch(e){}
+}
+/* NativeToolsFab - replaces the HTML .reader-tools floating button (font
+   size/theme/autoscroll/home) with a genuine native iOS 26 Liquid Glass
+   FAB (see NativeToolsFabBridge.swift/NativeToolsFabView.swift) on any
+   platform where that plugin exists; a no-op everywhere else (web/PWA/
+   Android/older native builds), same pattern as NATIVE_TABBAR above.
+   JS stays the single source of truth for font scale/theme/autoscroll
+   state - the native side only renders whatever syncNativeToolsFab()
+   last pushed, and relays taps back into window.NativeToolsFabHost. */
+const NATIVE_TOOLS_FAB = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeToolsFab);
+if(NATIVE_TOOLS_FAB) document.documentElement.classList.add('has-native-tools-fab');
+window.NativeToolsFabHost = {
+  minus(){ changeFont(-0.1); syncNativeToolsFab(); },
+  plus(){ changeFont(0.1); syncNativeToolsFab(); },
+  theme(){
+    toggleTheme();
+    const th=document.getElementById('gTheme')||document.getElementById('tTheme');
+    if(th) th.innerHTML=S.theme==='dark'?I.sun:I.moon;
+    syncNativeToolsFab();
+  },
+  autoscroll(){
+    if(autoScrollTimer){ stopAutoScroll(); }
+    else{
+      const target=document.body;
+      const interval=document.querySelector('.zh-pdf-canvas')?110:50;
+      autoScrollTimer=setInterval(()=>{
+        if((target.scrollTop+target.clientHeight)>=(target.scrollHeight-4)){ stopAutoScroll(); syncNativeToolsFab(); return; }
+        target.scrollTop+=1;
+      },interval);
+    }
+    syncNativeToolsFab();
+  },
+};
+/* Every screen that shows the widget (see toolsFab()/wireToolsFab() and
+   renderReader()/wireReader()'s own separate inline copy) always passes
+   {scroll:true} - there is currently no call site without autoscroll - so
+   showAutoscroll is unconditionally true here. */
+function syncNativeToolsFab(){
+  if(!NATIVE_TOOLS_FAB) return;
+  try{
+    const plugin=window.Capacitor.Plugins.NativeToolsFab;
+    plugin.configure({showAutoscroll:true}).catch(()=>{});
+    plugin.setState({
+      fontScalePercent: Math.round(S.fontScale*100),
+      isDarkTheme: S.theme==='dark',
+      isAutoscrollActive: !!autoScrollTimer,
+    }).catch(()=>{});
+    plugin.show().catch(()=>{});
+  }catch(e){}
+}
+function hideNativeToolsFab(){
+  if(!NATIVE_TOOLS_FAB) return;
+  try{ window.Capacitor.Plugins.NativeToolsFab.hide().catch(()=>{}); }catch(e){}
 }
 applySettings();
 applyWakeLock();
