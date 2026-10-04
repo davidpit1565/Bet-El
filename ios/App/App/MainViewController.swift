@@ -24,6 +24,7 @@ class MainViewController: CAPBridgeViewController {
     private let tabBar = UITabBar()
     private let toolsFab = NativeToolsFabView()
     private let topBar = NativeTopBarView()
+    private let modal = NativeModalView()
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -43,9 +44,11 @@ class MainViewController: CAPBridgeViewController {
         setupTabBar()
         setupToolsFab()
         setupTopBar()
+        setupModal()
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
+        NativeModalBridge.activeController = self
     }
 
     override func viewDidLayoutSubviews() {
@@ -145,6 +148,38 @@ class MainViewController: CAPBridgeViewController {
     func setTopBarVisible(_ visible: Bool) {
         topBar.isHidden = !visible
         reportHeightToWebView()
+    }
+
+    /// Spans the whole view (its own backdrop dims everything beneath it,
+    /// webview included) - see NativeModalBridge's header comment for the
+    /// current scope (Rate Us only).
+    private func setupModal() {
+        modal.translatesAutoresizingMaskIntoConstraints = false
+        modal.isHidden = true
+        view.addSubview(modal)
+        NSLayoutConstraint.activate([
+            modal.topAnchor.constraint(equalTo: view.topAnchor),
+            modal.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            modal.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            modal.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+    }
+
+    // MARK: - Called by NativeModalBridge (JS-driven)
+
+    func presentRateModal(title: String, body: String, buttonText: String, reviewUrl: String, isRTL: Bool) {
+        modal.onPrimary = { [weak self] in
+            if let url = URL(string: reviewUrl) {
+                UIApplication.shared.open(url)
+            }
+            self?.modal.dismiss()
+        }
+        modal.onDismiss = nil
+        modal.present(title: title, body: body, buttonText: buttonText, iconSymbol: "star.fill", isRTL: isRTL)
+    }
+
+    func dismissModal() {
+        modal.dismiss()
     }
 
     private func reportHeightToWebView() {

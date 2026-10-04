@@ -34,6 +34,8 @@
 		3B4C5D6E7F8091A2B3C4D5E6 /* NativeToolsFabBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5D6E7F8091A2B3C4D5E6F7 /* NativeToolsFabBridge.swift */; };
 		30877432D1026706D7E805DA /* NativeTopBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */; };
 		73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */; };
+		7EEB8A1EC9332A30A983694D /* NativeModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */; };
+		5310F88053FC3FCDCEAB11B9 /* NativeModalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +94,8 @@
 		4C5D6E7F8091A2B3C4D5E6F7 /* NativeToolsFabBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeToolsFabBridge.swift; sourceTree = "<group>"; };
 		846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeTopBarView.swift; sourceTree = "<group>"; };
 		C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeTopBarBridge.swift; sourceTree = "<group>"; };
+		1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeModalView.swift; sourceTree = "<group>"; };
+		D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeModalBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +158,8 @@
 				4C5D6E7F8091A2B3C4D5E6F7 /* NativeToolsFabBridge.swift */,
 				846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */,
 				C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */,
+				1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */,
+				D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -325,6 +331,8 @@
 				3B4C5D6E7F8091A2B3C4D5E6 /* NativeToolsFabBridge.swift in Sources */,
 				30877432D1026706D7E805DA /* NativeTopBarView.swift in Sources */,
 				73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */,
+				7EEB8A1EC9332A30A983694D /* NativeModalView.swift in Sources */,
+				5310F88053FC3FCDCEAB11B9 /* NativeModalBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

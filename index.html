@@ -11012,16 +11012,36 @@ function openFeedbackForm(){
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
 }
+/* NativeModal (see NativeModalBridge.swift/NativeModalView.swift) covers
+   only this one dialog so far - a real native Liquid Glass card instead
+   of the HTML .overlay/.modal - since it's the one `.overlay` screen with
+   no text input and no competing full-screen animation behind it (unlike
+   the feedback form and the confetti-backed celebration modal; see
+   NativeModalBridge's header comment for why those stay HTML for now). */
+const NATIVE_MODAL = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeModal);
 function openRateModal(){
   localStorage.setItem('betel_rate_prompt_shown','1');
+  const title=ckChrome('אָהַבְתָּ אֶת תמיד?');
+  const body=ckChrome('דֵּרוּג וּבִיקוֹרֶת עוֹזְרִים לָנוּ לְהַמְשִׁיךְ לְשַׁפֵּר אֶת הָאַפְּלִיקַצְיָה.');
+  const buttonText=ckChrome('דַּרְגוּ עַכְשָׁו');
+  if(NATIVE_MODAL){
+    try{
+      window.Capacitor.Plugins.NativeModal.presentRateModal({
+        title, body, buttonText,
+        reviewUrl: APP_REVIEW_URL,
+        isRTL: document.documentElement.dir!=='ltr',
+      }).catch(()=>{});
+      return;
+    }catch(e){}
+  }
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal">
     <button class="close-x" data-close>${I.x}</button>
     <div class="m-crown">${I.star}</div>
-    <h3 class="gold-text">${ckChrome('אָהַבְתָּ אֶת תמיד?')}</h3>
-    <p>${ckChrome('דֵּרוּג וּבִיקוֹרֶת עוֹזְרִים לָנוּ לְהַמְשִׁיךְ לְשַׁפֵּר אֶת הָאַפְּלִיקַצְיָה.')}</p>
+    <h3 class="gold-text">${title}</h3>
+    <p>${body}</p>
     <div class="rate-stars">${I.star}${I.star}${I.star}${I.star}${I.star}</div>
-    <button class="btn btn-gold" id="rateGoBtn"><span>${ckChrome('דַּרְגוּ עַכְשָׁו')}</span></button>
+    <button class="btn btn-gold" id="rateGoBtn"><span>${buttonText}</span></button>
   </div>`;
   document.body.appendChild(ov);
   ov.querySelector('#rateGoBtn').onclick=()=>{ window.open(APP_REVIEW_URL,'_blank'); ov.remove(); };
