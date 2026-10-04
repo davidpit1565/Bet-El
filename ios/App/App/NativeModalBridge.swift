@@ -5,18 +5,13 @@ import Capacitor
 /// can drive a real native Liquid Glass modal card (NativeModalView) in
 /// place of the HTML `.overlay`/`.modal` dialogs.
 ///
-/// Only `presentRateModal` is wired up (see openRateModal() in
-/// index.html) - the app's other two `.overlay` dialogs are intentionally
-/// left as HTML rather than ported blind in this pass:
-///   - openFeedbackForm() has three real text inputs (name/email/message)
-///     that would need native UITextField/UITextView, keyboard avoidance,
-///     and RTL text entry all re-implemented and validated without a way
-///     to build/test them in this environment.
-///   - celebrate() always shows behind a full-screen HTML confetti burst
-///     (see confetti() in index.html); a native modal's own opaque
-///     backdrop would sit on top of the webview and hide that animation,
-///     which is the point of the celebration.
-/// Both are reasonable next steps on their own once this simpler case is
+/// `presentRateModal` (openRateModal()) and `presentCelebration`
+/// (celebrate()) are wired up. openFeedbackForm()'s dialog is
+/// intentionally left as HTML rather than ported blind in this pass: it
+/// has three real text inputs (name/email/message) that would need native
+/// UITextField/UITextView, keyboard avoidance, and RTL text entry all
+/// re-implemented and validated without a way to build/test them in this
+/// environment - a reasonable next step on its own once these two are
 /// confirmed working on a real device.
 @objc(NativeModalBridge)
 public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
@@ -24,6 +19,7 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "NativeModal"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "presentRateModal", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "presentCelebration", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "dismiss", returnType: CAPPluginReturnPromise),
     ]
 
@@ -38,6 +34,20 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
         DispatchQueue.main.async {
             NativeModalBridge.activeController?.presentRateModal(
                 title: title, body: body, buttonText: buttonText, reviewUrl: reviewUrl, isRTL: isRTL
+            )
+        }
+        call.resolve()
+    }
+
+    @objc func presentCelebration(_ call: CAPPluginCall) {
+        let title = call.getString("title") ?? ""
+        let body = call.getString("body") ?? ""
+        let buttonText = call.getString("buttonText") ?? ""
+        let iconSymbol = call.getString("iconSymbol") ?? "star.fill"
+        let isRTL = call.getBool("isRTL") ?? true
+        DispatchQueue.main.async {
+            NativeModalBridge.activeController?.presentCelebrationModal(
+                title: title, body: body, buttonText: buttonText, iconSymbol: iconSymbol, isRTL: isRTL
             )
         }
         call.resolve()

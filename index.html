@@ -11135,6 +11135,20 @@ function celebrate(kind, subject){
   const prP = pr ? ckChrome(pr.p).replace('{subj}', ckChrome(subject||'הַתְּהִלִּים')) : '';
   const grandTitle = ckChrome('חֲזַק חֲזַק וְנִתְחַזֵּק');
   const grandBody = ckChrome('סִיַּמְתָּ אֶת כָּל סֵפֶר הַתְּהִלִּים לְחֹדֶשׁ זֶה!<br>תְּהִי מִשְׁנָתְךָ לְעִלּוּי וּלְבְרָכָה.');
+  if(NATIVE_MODAL){
+    try{
+      const nativeTitle = special ? `✦✦ ${prT} ✦✦` : (grand?grandTitle:prT);
+      const nativeBody = (grand?grandBody:prP).replace(/<br\s*\/?>/g,'\n');
+      window.Capacitor.Plugins.NativeModal.presentCelebration({
+        title: nativeTitle,
+        body: nativeBody,
+        buttonText: '♥ '+ckChrome('אָמֵן'),
+        iconSymbol: special ? 'flame.fill' : 'star.fill',
+        isRTL: document.documentElement.dir!=='ltr',
+      }).catch(()=>{});
+      return;
+    }catch(e){}
+  }
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal${special?' modal-special':''}">
     <button class="close-x" data-close>${I.x}</button>

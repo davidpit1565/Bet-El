@@ -178,6 +178,17 @@ class MainViewController: CAPBridgeViewController {
         modal.present(title: title, body: body, buttonText: buttonText, iconSymbol: "star.fill", isRTL: isRTL)
     }
 
+    /// Mirrors celebrate()'s own behavior: the close X, the backdrop tap,
+    /// and the primary ("Amen") button all dismiss AND navigate home -
+    /// there's no plain-close path for this one, unlike the Rate modal.
+    func presentCelebrationModal(title: String, body: String, buttonText: String, iconSymbol: String, isRTL: Bool) {
+        modal.onPrimary = { [weak self] in self?.modal.dismiss() }
+        modal.onDismiss = { [weak self] in
+            self?.webView?.evaluateJavaScript("window.go && window.go('home')", completionHandler: nil)
+        }
+        modal.present(title: title, body: body, buttonText: buttonText, iconSymbol: iconSymbol, isRTL: isRTL)
+    }
+
     func dismissModal() {
         modal.dismiss()
     }

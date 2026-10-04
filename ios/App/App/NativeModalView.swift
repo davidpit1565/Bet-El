@@ -6,11 +6,18 @@ import UIKit
 /// dialogs (icon, title, body, a primary gold button, a close X, and
 /// tap-outside-to-dismiss).
 ///
-/// Only the "Rate Us" modal (openRateModal() in index.html) is wired to
-/// this so far - see NativeModalBridge's header comment for why the other
-/// two `.overlay` dialogs (the feedback form's text inputs, and the
-/// celebration modal's confetti layering) are intentionally left as HTML
-/// for now rather than ported blind.
+/// Covers the "Rate Us" modal and the celebration modal (openRateModal()
+/// and celebrate() in index.html) - see NativeModalBridge's header
+/// comment for why the feedback form's text inputs are left as HTML for
+/// now rather than ported blind.
+///
+/// The backdrop is a real native blur (UIBlurEffect/UIGlassEffect), not a
+/// solid dim, matching the HTML `.overlay`'s own `backdrop-filter:
+/// blur(6px)` - this matters for the celebration modal specifically,
+/// which always shows over a full-screen HTML confetti burst (see
+/// confetti() in index.html): a blurred backdrop lets it stay visible
+/// (dimmed and blurred) behind the card, the same as the CSS version,
+/// rather than a native celebration modal having to hide it.
 ///
 /// REQUIRES BUILDING WITH THE iOS 26 SDK (Xcode 26+) - see
 /// NativeToolsFabView's header comment for why; the same applies here.
@@ -19,7 +26,7 @@ final class NativeModalView: UIView {
     var onDismiss: (() -> Void)?
 
     private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
-    private let backdrop = UIView()
+    private let backdrop = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
     private var card: UIView?
 
     override init(frame: CGRect) {
@@ -31,7 +38,6 @@ final class NativeModalView: UIView {
 
     private func setupBackdrop() {
         backdrop.translatesAutoresizingMaskIntoConstraints = false
-        backdrop.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         backdrop.alpha = 0
         addSubview(backdrop)
         NSLayoutConstraint.activate([
