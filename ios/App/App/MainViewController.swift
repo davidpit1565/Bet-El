@@ -23,6 +23,7 @@ import Capacitor
 class MainViewController: CAPBridgeViewController {
     private let tabBar = UITabBar()
     private let toolsFab = NativeToolsFabView()
+    private let topBar = NativeTopBarView()
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -41,8 +42,10 @@ class MainViewController: CAPBridgeViewController {
         super.viewDidLoad()
         setupTabBar()
         setupToolsFab()
+        setupTopBar()
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
+        NativeTopBarBridge.activeController = self
     }
 
     override func viewDidLayoutSubviews() {
@@ -111,9 +114,46 @@ class MainViewController: CAPBridgeViewController {
         toolsFab.isHidden = !visible
     }
 
+    /// Spans the full width and extends up through the status bar (like the
+    /// HTML .topbar's own backdrop does), with its interactive content kept
+    /// inside the safe area by NativeTopBarView's own constraints.
+    private func setupTopBar() {
+        topBar.translatesAutoresizingMaskIntoConstraints = false
+        topBar.isHidden = true
+        // onBack is replaced on every configureTopBar() call below with a
+        // closure bound to that call's own backTo target.
+        view.addSubview(topBar)
+        NSLayoutConstraint.activate([
+            topBar.topAnchor.constraint(equalTo: view.topAnchor),
+            topBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            topBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            topBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topBar.contentHeight),
+        ])
+    }
+
+    // MARK: - Called by NativeTopBarBridge (JS-driven)
+
+    func configureTopBar(title: String, backTo: String, isRTL: Bool) {
+        topBar.configure(title: title, hasBack: !backTo.isEmpty, isRTL: isRTL)
+        topBar.onBack = { [weak self] in
+            self?.webView?.evaluateJavaScript("window.go && window.go('\(backTo)')", completionHandler: nil)
+        }
+        topBar.isHidden = false
+        reportHeightToWebView()
+    }
+
+    func setTopBarVisible(_ visible: Bool) {
+        topBar.isHidden = !visible
+        reportHeightToWebView()
+    }
+
     private func reportHeightToWebView() {
-        let height = tabBar.isHidden ? 0 : tabBar.frame.height
-        let js = "document.documentElement.style.setProperty('--native-nav-h','\(height)px')"
+        let navHeight = tabBar.isHidden ? 0 : tabBar.frame.height
+        let headerHeight = topBar.isHidden ? 0 : (topBar.frame.height)
+        let js = """
+        document.documentElement.style.setProperty('--native-nav-h','\(navHeight)px');
+        document.documentElement.style.setProperty('--native-header-h','\(headerHeight)px');
+        """
         webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 

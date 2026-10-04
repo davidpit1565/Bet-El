@@ -106,6 +106,18 @@ html.has-native-tabbar .toast{bottom:calc(var(--native-nav-h, 90px) + 20px)}
    hide the HTML one wherever it would otherwise render, same pattern as
    .has-native-tabbar above. */
 html.has-native-tools-fab .reader-tools{display:none}
+/* NativeTopBar (see NativeTopBarBridge.swift) replaces the shared topbar()
+   HTML header with a real native UIGlassEffect bar - hide it wherever it
+   would otherwise render, EXCEPT the handful of screens with custom
+   right-side actions (tb-native-exempt, set by topbar() itself and the
+   few ad-hoc inline .topbar screens) which keep their own HTML header
+   since those extra actions aren't modeled natively. #app gets top
+   padding equal to the real native bar height (reported the same way
+   --native-nav-h is, see MainViewController's reportHeightToWebView) so
+   content isn't flush against the status bar once the HTML header's own
+   flow space is gone. */
+html.has-native-topbar .topbar:not(.tb-native-exempt){display:none}
+html.has-native-topbar #app{padding-top:var(--native-header-h, 0px)}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 ::selection{background:rgba(212,175,95,.3)}
 
@@ -5273,8 +5285,9 @@ function renderBicParshiot(){
       <span class="sm-week-chev">${I.chev}</span>
     </div>`;
   }).join('');
+  hideNativeTopBar();
   app.innerHTML=`
-  <div class="topbar">
+  <div class="topbar tb-native-exempt">
     <button class="icon-btn tb-back" id="bicBookBack">${I.prev}</button>
     <div class="tb-title gold-text">${bicBookLabel(BIC_PARSHIOT_BOOK)}</div>
     <div style="width:34px"></div>
@@ -8553,8 +8566,9 @@ function renderPrayerReader(){
     return `<div class="prayer-para${tight?' prayer-para-tight':''}">${line}</div>`;
   }).join('');
   
+  hideNativeTopBar();
   app.innerHTML=`
-  <div class="topbar" style="justify-content:space-between">
+  <div class="topbar tb-native-exempt" style="justify-content:space-between">
     <button class="icon-btn" onclick="go('${PR.group?'prayersGroup':'prayers'}')">${I.prev}<span style="display:none">חזור</span></button>
     <div class="tb-title gold-text">${p.title}</div>
     <div style="display:flex;gap:6px">
@@ -10256,8 +10270,9 @@ function drawSiddurReader(){
   const info = siddurDayInfo(currentHDate());
   const secs = siddurSections(dateObj, info, p);
   if(!secs.length){ toast('אֵין תֹּכֶן לְהַיּוֹם'); return go('siddurHome'); }
+  hideNativeTopBar();
   app.innerHTML = `
-  <div class="topbar">
+  <div class="topbar tb-native-exempt">
   <button class="icon-btn tb-back" onclick="go('siddurHome')">${I.prev}</button>
   <div class="tb-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
   ${toolsFab({scroll:true})}</div>
@@ -10393,8 +10408,9 @@ function drawShnayimList(){
 function drawShnayimBookList(){
   const book=SML.book;
   const keys=individualParshaKeys().filter(k=>LEYNING[k].book===book);
+  hideNativeTopBar();
   app.innerHTML=`
-  <div class="topbar" style="justify-content:space-between">
+  <div class="topbar tb-native-exempt" style="justify-content:space-between">
     <button class="icon-btn" id="smBackToBooks">${I.prev}</button>
     <div class="tb-title gold-text">${bookName(book)}</div>
     <div style="width:34px"></div>
@@ -11183,10 +11199,18 @@ function ckMilestoneCheck(count){
 const ORN='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 4.2L18 4.8l-1.4 4.4L21 11l-4.4 1.8L18 17l-4.4-1.4L12 20l-1.6-4.4L6 17l1.4-4.2L3 11l4.4-1.8L6 4.8l4.4 1.4z" opacity=".85"/></svg>';
 function ornament(){ return `<div class="ornament">${ORN}</div>`; }
 function topbar(title, backTo, rightHtml){
+  if(rightHtml){
+    // Custom right-side actions aren't modeled natively (see NATIVE_TOPBAR
+    // above) - keep the HTML bar for these and make sure the native one
+    // isn't left showing stale content from a previous screen.
+    hideNativeTopBar();
+  }else{
+    syncNativeTopBar(title, backTo);
+  }
   const left = backTo
     ? `<button class="icon-btn tb-back" onclick="go('${backTo}')">${I.prev}</button>`
     : `<img class="tb-mark" src="${LOGO}" alt=""/>`;
-  return `<div class="topbar">
+  return `<div class="topbar${rightHtml?' tb-native-exempt':''}">
   ${left}
   <div class="tb-title gold-text">${title}</div>
   ${rightHtml||'<div style="width:34px"></div>'}</div>`;
@@ -11322,6 +11346,37 @@ function syncNativeToolsFab(){
 function hideNativeToolsFab(){
   if(!NATIVE_TOOLS_FAB) return;
   try{ window.Capacitor.Plugins.NativeToolsFab.hide().catch(()=>{}); }catch(e){}
+}
+/* NativeTopBar - replaces the HTML .topbar sticky header (see the shared
+   topbar() template just above) with a genuine native iOS 26 Liquid Glass
+   bar (NativeTopBarBridge.swift/NativeTopBarView.swift), same opt-in
+   pattern as NATIVE_TABBAR/NATIVE_TOOLS_FAB above: a no-op everywhere the
+   plugin doesn't exist (web/PWA/Android/older native builds).
+   Only the shared topbar() helper (~67 call sites, every screen with a
+   plain back-or-logo + title header) is covered - the handful of ad-hoc
+   screens with custom right-side actions (share/QR, the reader's own
+   toolsFab, book pickers) keep rendering their own HTML .topbar via the
+   tb-native-exempt class and explicitly hide the native bar instead, the
+   same "self-owned" carve-out CK_TOOLSFAB_SELF_OWNED already uses. The
+   native back button has no JS-side callback to invoke - every topbar()
+   call site's back action is already just `go(backTo)` with no other
+   side effect, so the plugin is simply told which tab to go to and calls
+   window.go(...) directly. */
+const NATIVE_TOPBAR = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeTopBar);
+if(NATIVE_TOPBAR) document.documentElement.classList.add('has-native-topbar');
+function syncNativeTopBar(title, backTo){
+  if(!NATIVE_TOPBAR) return;
+  try{
+    window.Capacitor.Plugins.NativeTopBar.configure({
+      title: String(title||'').replace(/<[^>]*>/g,''),
+      backTo: backTo||'',
+      isRTL: document.documentElement.dir!=='ltr',
+    }).catch(()=>{});
+  }catch(e){}
+}
+function hideNativeTopBar(){
+  if(!NATIVE_TOPBAR) return;
+  try{ window.Capacitor.Plugins.NativeTopBar.hide().catch(()=>{}); }catch(e){}
 }
 applySettings();
 applyWakeLock();
