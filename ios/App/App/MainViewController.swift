@@ -1,6 +1,5 @@
 import UIKit
 import Capacitor
-import MessageUI
 
 /// Replaces the plain `CAPBridgeViewController` as the app's root view
 /// controller so the bottom navigation can be a REAL native `UITabBar`
@@ -215,7 +214,7 @@ class MainViewController: CAPBridgeViewController {
                               messagePlaceholder: String, sendButtonText: String,
                               subject: String, supportEmail: String, isRTL: Bool) {
         feedbackForm.onSend = { [weak self] name, email, message in
-            self?.sendFeedbackMail(subject: subject, supportEmail: supportEmail, name: name, email: email, message: message)
+            self?.relayFeedbackToJS(name: name, email: email, message: message)
             self?.feedbackForm.dismiss()
         }
         feedbackForm.onDismiss = nil
@@ -229,32 +228,21 @@ class MainViewController: CAPBridgeViewController {
         feedbackForm.dismiss()
     }
 
-    /// Matches the HTML version's own mailto: body exactly ("שם: .../
-    /// אימייל: .../\n\n...", hardcoded Hebrew labels regardless of UI
-    /// language - the HTML form does the same). Prefers
-    /// MFMailComposeViewController's in-app compose sheet when Mail is
-    /// configured on the device, falling back to the plain mailto: URL
-    /// (the same mechanism the web/HTML path always uses) otherwise.
-    private func sendFeedbackMail(subject: String, supportEmail: String, name: String, email: String, message: String) {
-        let body = "שם: \(name)\nאימייל: \(email)\n\n\(message)"
-        if MFMailComposeViewController.canSendMail() {
-            let mail = MFMailComposeViewController()
-            mail.mailComposeDelegate = self
-            mail.setToRecipients([supportEmail])
-            mail.setSubject(subject)
-            mail.setMessageBody(body, isHTML: false)
-            present(mail, animated: true)
-        } else if let url = mailtoURL(to: supportEmail, subject: subject, body: body) {
-            UIApplication.shared.open(url)
-        }
-    }
-
-    private func mailtoURL(to: String, subject: String, body: String) -> URL? {
-        var comps = URLComponents()
-        comps.scheme = "mailto"
-        comps.path = to
-        comps.queryItems = [URLQueryItem(name: "subject", value: subject), URLQueryItem(name: "body", value: body)]
-        return comps.url
+    /// Hands the typed fields to window.NativeFeedbackHost.send(...) in JS
+    /// rather than composing/sending the email in Swift - JS already owns
+    /// a single sendFeedbackForm() implementation (silent Cloud Function
+    /// relay, falling back to mailto:) shared with the HTML form, and this
+    /// way the native path gets that same fallback chain for free instead
+    /// of duplicating network code here that can't be tested in this
+    /// environment. The fields are JSON-encoded (not interpolated as raw
+    /// JS string literals) so a name/email/message containing a quote,
+    /// backslash, or newline can't break out of the JS call.
+    private func relayFeedbackToJS(name: String, email: String, message: String) {
+        let payload = ["name": name, "email": email, "message": message]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+        let js = "window.NativeFeedbackHost && window.NativeFeedbackHost.send(\(jsonString))"
+        webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
     private func reportHeightToWebView() {
@@ -310,11 +298,5 @@ extension MainViewController: UITabBarDelegate {
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let tabId = item.accessibilityIdentifier else { return }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
-    }
-}
-
-extension MainViewController: MFMailComposeViewControllerDelegate {
-    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-        controller.dismiss(animated: true)
     }
 }

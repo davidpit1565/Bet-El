@@ -10,11 +10,13 @@ import Capacitor
 /// wired up. The feedback form uses its own native view
 /// (NativeFeedbackFormView) rather than NativeModalView, since it needs
 /// real UITextField/UITextView input, keyboard avoidance, and RTL text
-/// entry instead of a fixed title/body/button - its Send button builds
-/// the same "שם: ...\nאימייל: ...\n\n..." body the HTML version sends via
-/// mailto:, but hands it to MFMailComposeViewController when Mail is
-/// configured (a smoother in-app compose sheet), falling back to the same
-/// mailto: URL otherwise.
+/// entry instead of a fixed title/body/button. Its Send button doesn't
+/// send anything itself - MainViewController.relayFeedbackToJS() hands
+/// the typed fields to window.NativeFeedbackHost.send(...) in JS, which
+/// owns the one sendFeedbackForm() implementation (shared with the HTML
+/// form): a silent Cloud Function relay first, falling back to mailto:
+/// only if that call fails. See functions/index.js and
+/// sendFeedbackForm() in index.html.
 @objc(NativeModalBridge)
 public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "NativeModalBridge"
