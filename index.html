@@ -10981,19 +10981,36 @@ const SUPPORT_EMAIL = 'info@bet-el.be';
    mailto: link (pre-filled subject+body) - same destination as the
    support.html mailto link, just reachable from inside the app too. */
 function openFeedbackForm(){
+  const title=ckChrome('דִּוּוּחַ וְהַצָּעוֹת לְשִׁפּוּר');
+  const body=ckChrome('אָנוּ מַעֲרִיכִים אֶת הַזְּמַן שֶׁלָּךְ. נִשְׂמַח לִשְׁמֹעַ הַצָּעוֹת לְשִׁפּוּר אוֹ לְקַבֵּל דִּוּוּחַ עַל תַּקָּלוֹת');
+  const namePlaceholder=ckChrome('הַכְנֵס אֶת שִׁמְךָ');
+  const emailPlaceholder=ckChrome('הַכְנֵס אֶת הָאִימֵייל שֶׁלָּךְ');
+  const messagePlaceholder=ckChrome('הַכְנֵס אֶת הוֹדָעָתְךָ');
+  const sendButtonText=ckChrome('שְׁלַח');
+  if(NATIVE_MODAL){
+    try{
+      window.Capacitor.Plugins.NativeModal.presentFeedbackForm({
+        title, body, namePlaceholder, emailPlaceholder, messagePlaceholder, sendButtonText,
+        subject: 'משוב מהאפליקציה — תמיד',
+        supportEmail: SUPPORT_EMAIL,
+        isRTL: document.documentElement.dir!=='ltr',
+      }).catch(()=>{});
+      return;
+    }catch(e){}
+  }
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal">
     <button class="close-x" data-close>${I.x}</button>
     <div class="m-crown">${I.wrench}</div>
-    <h3 class="gold-text">${ckChrome('דִּוּוּחַ וְהַצָּעוֹת לְשִׁפּוּר')}</h3>
-    <p>${ckChrome('אָנוּ מַעֲרִיכִים אֶת הַזְּמַן שֶׁלָּךְ. נִשְׂמַח לִשְׁמֹעַ הַצָּעוֹת לְשִׁפּוּר אוֹ לְקַבֵּל דִּוּוּחַ עַל תַּקָּלוֹת')}</p>
+    <h3 class="gold-text">${title}</h3>
+    <p>${body}</p>
     <div class="fld-col">
-      <input class="fld-input" id="fbName" placeholder="${ckChrome('הַכְנֵס אֶת שִׁמְךָ')}"/>
-      <input class="fld-input" id="fbEmail" type="email" placeholder="${ckChrome('הַכְנֵס אֶת הָאִימֵייל שֶׁלָּךְ')}"/>
-      <textarea class="fld-input" id="fbMsg" rows="4" maxlength="500" placeholder="${ckChrome('הַכְנֵס אֶת הוֹדָעָתְךָ')}"></textarea>
+      <input class="fld-input" id="fbName" placeholder="${namePlaceholder}"/>
+      <input class="fld-input" id="fbEmail" type="email" placeholder="${emailPlaceholder}"/>
+      <textarea class="fld-input" id="fbMsg" rows="4" maxlength="500" placeholder="${messagePlaceholder}"></textarea>
       <div class="fb-count" id="fbCount">0/500</div>
     </div>
-    <button class="btn btn-gold" id="fbSend" disabled><span>${ckChrome('שְׁלַח')}</span></button>
+    <button class="btn btn-gold" id="fbSend" disabled><span>${sendButtonText}</span></button>
   </div>`;
   document.body.appendChild(ov);
   const nameEl=ov.querySelector('#fbName'), emailEl=ov.querySelector('#fbEmail'), msgEl=ov.querySelector('#fbMsg');
@@ -11005,19 +11022,19 @@ function openFeedbackForm(){
   [nameEl,emailEl,msgEl].forEach(el=>el.addEventListener('input',refresh));
   sendBtn.onclick=()=>{
     const subject=encodeURIComponent('משוב מהאפליקציה — תמיד');
-    const body=encodeURIComponent('שם: '+nameEl.value.trim()+'\nאימייל: '+emailEl.value.trim()+'\n\n'+msgEl.value.trim());
-    location.href='mailto:'+SUPPORT_EMAIL+'?subject='+subject+'&body='+body;
+    const mailBody=encodeURIComponent('שם: '+nameEl.value.trim()+'\nאימייל: '+emailEl.value.trim()+'\n\n'+msgEl.value.trim());
+    location.href='mailto:'+SUPPORT_EMAIL+'?subject='+subject+'&body='+mailBody;
     ov.remove();
   };
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
 }
-/* NativeModal (see NativeModalBridge.swift/NativeModalView.swift) covers
-   only this one dialog so far - a real native Liquid Glass card instead
-   of the HTML .overlay/.modal - since it's the one `.overlay` screen with
-   no text input and no competing full-screen animation behind it (unlike
-   the feedback form and the confetti-backed celebration modal; see
-   NativeModalBridge's header comment for why those stay HTML for now). */
+/* NativeModal (see NativeModalBridge.swift/NativeModalView.swift/
+   NativeFeedbackFormView.swift) replaces all three HTML .overlay/.modal
+   dialogs (Rate Us, the celebration modal, and the feedback form) with
+   real native Liquid Glass cards - a no-op everywhere the plugin doesn't
+   exist (web/PWA/Android/older native builds), same pattern as the other
+   NATIVE_* flags in this file. */
 const NATIVE_MODAL = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeModal);
 function openRateModal(){
   localStorage.setItem('betel_rate_prompt_shown','1');

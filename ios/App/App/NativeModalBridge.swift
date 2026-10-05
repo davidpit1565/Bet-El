@@ -5,14 +5,16 @@ import Capacitor
 /// can drive a real native Liquid Glass modal card (NativeModalView) in
 /// place of the HTML `.overlay`/`.modal` dialogs.
 ///
-/// `presentRateModal` (openRateModal()) and `presentCelebration`
-/// (celebrate()) are wired up. openFeedbackForm()'s dialog is
-/// intentionally left as HTML rather than ported blind in this pass: it
-/// has three real text inputs (name/email/message) that would need native
-/// UITextField/UITextView, keyboard avoidance, and RTL text entry all
-/// re-implemented and validated without a way to build/test them in this
-/// environment - a reasonable next step on its own once these two are
-/// confirmed working on a real device.
+/// `presentRateModal` (openRateModal()), `presentCelebration`
+/// (celebrate()), and `presentFeedbackForm` (openFeedbackForm()) are all
+/// wired up. The feedback form uses its own native view
+/// (NativeFeedbackFormView) rather than NativeModalView, since it needs
+/// real UITextField/UITextView input, keyboard avoidance, and RTL text
+/// entry instead of a fixed title/body/button - its Send button builds
+/// the same "שם: ...\nאימייל: ...\n\n..." body the HTML version sends via
+/// mailto:, but hands it to MFMailComposeViewController when Mail is
+/// configured (a smoother in-app compose sheet), falling back to the same
+/// mailto: URL otherwise.
 @objc(NativeModalBridge)
 public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "NativeModalBridge"
@@ -20,7 +22,9 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "presentRateModal", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "presentCelebration", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "presentFeedbackForm", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "dismiss", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "dismissFeedbackForm", returnType: CAPPluginReturnPromise),
     ]
 
     static weak var activeController: MainViewController?
@@ -53,9 +57,36 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
 
+    @objc func presentFeedbackForm(_ call: CAPPluginCall) {
+        let title = call.getString("title") ?? ""
+        let body = call.getString("body") ?? ""
+        let namePlaceholder = call.getString("namePlaceholder") ?? ""
+        let emailPlaceholder = call.getString("emailPlaceholder") ?? ""
+        let messagePlaceholder = call.getString("messagePlaceholder") ?? ""
+        let sendButtonText = call.getString("sendButtonText") ?? ""
+        let subject = call.getString("subject") ?? ""
+        let supportEmail = call.getString("supportEmail") ?? ""
+        let isRTL = call.getBool("isRTL") ?? true
+        DispatchQueue.main.async {
+            NativeModalBridge.activeController?.presentFeedbackForm(
+                title: title, body: body, namePlaceholder: namePlaceholder, emailPlaceholder: emailPlaceholder,
+                messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText,
+                subject: subject, supportEmail: supportEmail, isRTL: isRTL
+            )
+        }
+        call.resolve()
+    }
+
     @objc func dismiss(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             NativeModalBridge.activeController?.dismissModal()
+        }
+        call.resolve()
+    }
+
+    @objc func dismissFeedbackForm(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            NativeModalBridge.activeController?.dismissFeedbackForm()
         }
         call.resolve()
     }

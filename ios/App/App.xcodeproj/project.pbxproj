@@ -36,6 +36,7 @@
 		73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */; };
 		7EEB8A1EC9332A30A983694D /* NativeModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */; };
 		5310F88053FC3FCDCEAB11B9 /* NativeModalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */; };
+		9E1D4BC5FFC163B08E7D88C6 /* NativeFeedbackFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD982A6820578D37E334E0A8 /* NativeFeedbackFormView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +97,7 @@
 		C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeTopBarBridge.swift; sourceTree = "<group>"; };
 		1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeModalView.swift; sourceTree = "<group>"; };
 		D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeModalBridge.swift; sourceTree = "<group>"; };
+		AD982A6820578D37E334E0A8 /* NativeFeedbackFormView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeFeedbackFormView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +162,7 @@
 				C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */,
 				1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */,
 				D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */,
+				AD982A6820578D37E334E0A8 /* NativeFeedbackFormView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -333,6 +336,7 @@
 				73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */,
 				7EEB8A1EC9332A30A983694D /* NativeModalView.swift in Sources */,
 				5310F88053FC3FCDCEAB11B9 /* NativeModalBridge.swift in Sources */,
+				9E1D4BC5FFC163B08E7D88C6 /* NativeFeedbackFormView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import MessageUI
 
 /// Replaces the plain `CAPBridgeViewController` as the app's root view
 /// controller so the bottom navigation can be a REAL native `UITabBar`
@@ -25,6 +26,7 @@ class MainViewController: CAPBridgeViewController {
     private let toolsFab = NativeToolsFabView()
     private let topBar = NativeTopBarView()
     private let modal = NativeModalView()
+    private let feedbackForm = NativeFeedbackFormView()
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -45,6 +47,7 @@ class MainViewController: CAPBridgeViewController {
         setupToolsFab()
         setupTopBar()
         setupModal()
+        setupFeedbackForm()
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
@@ -152,7 +155,7 @@ class MainViewController: CAPBridgeViewController {
 
     /// Spans the whole view (its own backdrop dims everything beneath it,
     /// webview included) - see NativeModalBridge's header comment for the
-    /// current scope (Rate Us only).
+    /// current scope (Rate Us and the celebration modal).
     private func setupModal() {
         modal.translatesAutoresizingMaskIntoConstraints = false
         modal.isHidden = true
@@ -191,6 +194,67 @@ class MainViewController: CAPBridgeViewController {
 
     func dismissModal() {
         modal.dismiss()
+    }
+
+    /// Separate full-screen overlay from `modal` (NativeModalView), since
+    /// this one hosts real text input/keyboard handling - see
+    /// NativeFeedbackFormView's own header comment.
+    private func setupFeedbackForm() {
+        feedbackForm.translatesAutoresizingMaskIntoConstraints = false
+        feedbackForm.isHidden = true
+        view.addSubview(feedbackForm)
+        NSLayoutConstraint.activate([
+            feedbackForm.topAnchor.constraint(equalTo: view.topAnchor),
+            feedbackForm.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            feedbackForm.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            feedbackForm.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+    }
+
+    func presentFeedbackForm(title: String, body: String, namePlaceholder: String, emailPlaceholder: String,
+                              messagePlaceholder: String, sendButtonText: String,
+                              subject: String, supportEmail: String, isRTL: Bool) {
+        feedbackForm.onSend = { [weak self] name, email, message in
+            self?.sendFeedbackMail(subject: subject, supportEmail: supportEmail, name: name, email: email, message: message)
+            self?.feedbackForm.dismiss()
+        }
+        feedbackForm.onDismiss = nil
+        feedbackForm.present(
+            title: title, body: body, namePlaceholder: namePlaceholder, emailPlaceholder: emailPlaceholder,
+            messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText, isRTL: isRTL
+        )
+    }
+
+    func dismissFeedbackForm() {
+        feedbackForm.dismiss()
+    }
+
+    /// Matches the HTML version's own mailto: body exactly ("שם: .../
+    /// אימייל: .../\n\n...", hardcoded Hebrew labels regardless of UI
+    /// language - the HTML form does the same). Prefers
+    /// MFMailComposeViewController's in-app compose sheet when Mail is
+    /// configured on the device, falling back to the plain mailto: URL
+    /// (the same mechanism the web/HTML path always uses) otherwise.
+    private func sendFeedbackMail(subject: String, supportEmail: String, name: String, email: String, message: String) {
+        let body = "שם: \(name)\nאימייל: \(email)\n\n\(message)"
+        if MFMailComposeViewController.canSendMail() {
+            let mail = MFMailComposeViewController()
+            mail.mailComposeDelegate = self
+            mail.setToRecipients([supportEmail])
+            mail.setSubject(subject)
+            mail.setMessageBody(body, isHTML: false)
+            present(mail, animated: true)
+        } else if let url = mailtoURL(to: supportEmail, subject: subject, body: body) {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    private func mailtoURL(to: String, subject: String, body: String) -> URL? {
+        var comps = URLComponents()
+        comps.scheme = "mailto"
+        comps.path = to
+        comps.queryItems = [URLQueryItem(name: "subject", value: subject), URLQueryItem(name: "body", value: body)]
+        return comps.url
     }
 
     private func reportHeightToWebView() {
@@ -246,5 +310,11 @@ extension MainViewController: UITabBarDelegate {
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let tabId = item.accessibilityIdentifier else { return }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
+    }
+}
+
+extension MainViewController: MFMailComposeViewControllerDelegate {
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true)
     }
 }
