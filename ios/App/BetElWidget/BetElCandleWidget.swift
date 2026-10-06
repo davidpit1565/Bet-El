@@ -72,24 +72,43 @@ private struct BetElCandleWidgetView: View {
 
     private var homeScreenBody: some View {
         let palette = BetElTheme.palette(for: entry.theme)
-        let align: HorizontalAlignment = WidgetL10n.isRTL(entry.lang) ? .trailing : .leading
-        let fAlign: Alignment = WidgetL10n.isRTL(entry.lang) ? .trailing : .leading
-        return VStack(alignment: align, spacing: 6) {
+        let rtl = WidgetL10n.isRTL(entry.lang)
+        let align: HorizontalAlignment = rtl ? .trailing : .leading
+        let fAlign: Alignment = rtl ? .trailing : .leading
+        let medium = family == .systemMedium
+        let upcoming = (entry.candleTime.map { $0 > entry.date } ?? false)
+        return VStack(alignment: align, spacing: 4) {
             Image(systemName: "flame.fill")
-                .font(.system(size: 16))
+                .font(.system(size: medium ? 24 : 22))
                 .foregroundColor(palette.gold)
                 .frame(maxWidth: .infinity, alignment: fAlign)
-            Spacer()
+            Spacer(minLength: 0)
             Text(entry.candleLabel ?? WidgetL10n.t("candleLighting", lang: entry.lang))
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: medium ? 15 : 13, weight: .semibold))
                 .foregroundColor(palette.inkSoft)
                 .lineLimit(2)
-                .multilineTextAlignment(WidgetL10n.isRTL(entry.lang) ? .trailing : .leading)
+                .minimumScaleFactor(0.7)
+                .multilineTextAlignment(rtl ? .trailing : .leading)
             Text(timeStr(entry.candleTime))
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: medium ? 52 : 38, weight: .heavy, design: .rounded))
+                .monospacedDigit()
                 .foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            // live countdown to the lighting itself
+            if upcoming, let c = entry.candleTime {
+                HStack(spacing: 4) {
+                    if rtl {
+                        Text(c, style: .timer).font(.system(size: medium ? 20 : 16, weight: .bold, design: .rounded)).monospacedDigit().foregroundColor(palette.gold)
+                        Text(WidgetL10n.t("candleIn", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
+                    } else {
+                        Text(WidgetL10n.t("candleIn", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
+                        Text(c, style: .timer).font(.system(size: medium ? 20 : 16, weight: .bold, design: .rounded)).monospacedDigit().foregroundColor(palette.gold)
+                    }
+                }
+                .lineLimit(1).minimumScaleFactor(0.6)
+            }
         }
-        .padding(14)
+        .padding(medium ? 16 : 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -114,7 +133,7 @@ struct BetElCandleWidget: Widget {
     }
 
     private static var families: [WidgetFamily] {
-        var families: [WidgetFamily] = [.systemSmall]
+        var families: [WidgetFamily] = [.systemSmall, .systemMedium]
         if #available(iOS 16.0, *) { families.append(.accessoryRectangular) }
         return families
     }

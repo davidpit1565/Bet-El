@@ -95,32 +95,133 @@ private struct StreakBadge: View {
     }
 }
 
+// MARK: - Building blocks
+
+/// A live, system-ticking countdown ("5:26:00") to `target` - driven by
+/// `Text(_, style: .timer)`, so it keeps counting down on the Home/Lock
+/// Screen on its own with no extra timeline entries.
+private struct Countdown: View {
+    let target: Date?
+    let from: Date
+    let size: CGFloat
+    let color: Color
+    var body: some View {
+        if let t = target, t > from {
+            Text(t, style: .timer)
+                .font(.system(size: size, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+        } else {
+            Text("--:--")
+                .font(.system(size: size, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+        }
+    }
+}
+
+/// [leading content][Spacer][trailing content], flipped for Hebrew so the
+/// label hugs the right edge - the whole widget is laid out left-to-right
+/// (see BetElWidgetEntryView), so "which side" is decided here.
+private struct SideRow<L: View, R: View>: View {
+    let lang: String
+    let label: L
+    let value: R
+    init(lang: String, @ViewBuilder label: () -> L, @ViewBuilder value: () -> R) {
+        self.lang = lang; self.label = label(); self.value = value()
+    }
+    var body: some View {
+        HStack(spacing: 8) {
+            if WidgetL10n.isRTL(lang) { value; Spacer(minLength: 4); label }
+            else { label; Spacer(minLength: 4); value }
+        }
+    }
+}
+
+private func firstUpcoming(_ rows: [ZmanRow], after date: Date) -> String? {
+    rows.first(where: { $0.time > date })?.key
+}
+
+/// The big date: weekday, then the day numeral large, then month + year.
+private struct DateBlock: View {
+    let entry: BetElEntry
+    let palette: BetElTheme.Palette
+    let daySize: CGFloat
+    let showWeekday: Bool
+    var body: some View {
+        let align = hAlign(entry.lang)
+        VStack(alignment: align, spacing: 0) {
+            if showWeekday {
+                Text(entry.weekdayText)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(palette.inkSoft)
+            }
+            Text(entry.dayText)
+                .font(.system(size: daySize, weight: .heavy))
+                .foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
+            Text("\(entry.monthText) \(entry.yearText)")
+                .font(.system(size: max(15, daySize * 0.4), weight: .semibold))
+                .foregroundColor(palette.ink)
+                .lineLimit(1).minimumScaleFactor(0.6)
+        }
+        .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+    }
+}
+
+/// Next zman: caption, its name, a live countdown and the clock time.
+private struct NextZmanBlock: View {
+    let entry: BetElEntry
+    let palette: BetElTheme.Palette
+    let countdownSize: CGFloat
+    var body: some View {
+        let align = hAlign(entry.lang)
+        VStack(alignment: align, spacing: 1) {
+            Text(entry.nextZmanLabel)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(palette.ink)
+                .lineLimit(1).minimumScaleFactor(0.7)
+            Countdown(target: entry.nextZmanTime, from: entry.date, size: countdownSize, color: palette.gold)
+            if let t = entry.nextZmanTime {
+                Text(timeString(t))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(palette.inkSoft)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+    }
+}
+
+private struct TehillimLine: View {
+    let entry: BetElEntry
+    let palette: BetElTheme.Palette
+    let size: CGFloat
+    var body: some View {
+        SideRow(lang: entry.lang, label: {
+            Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
+                .font(.system(size: size - 3, weight: .medium)).foregroundColor(palette.inkSoft)
+        }, value: {
+            Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+                .font(.system(size: size + 4, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
+        })
+    }
+}
+
 // MARK: - Small
 
 private struct SmallWidgetView: View {
     let entry: BetElEntry
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
-        let align = hAlign(entry.lang)
-        VStack(alignment: align, spacing: 6) {
-            HStack {
-                if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
-                Spacer()
-                if align == .trailing { StreakBadge(count: entry.streakCount, palette: palette) }
-            }
-            Spacer()
-            Text(entry.hebrewDateText)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(palette.ink)
-                .multilineTextAlignment(textAlign(entry.lang))
-                .lineLimit(2)
-            if let t = entry.nextZmanTime {
-                HStack(spacing: 4) {
-                    Text(timeString(t)).font(.system(size: 12, weight: .bold))
-                    Text(entry.nextZmanLabel).font(.system(size: 11))
-                }
-                .foregroundColor(palette.gold)
-            }
+        VStack(alignment: hAlign(entry.lang), spacing: 4) {
+            SideRow(lang: entry.lang, label: {
+                Text(entry.weekdayText).font(.system(size: 12, weight: .semibold)).foregroundColor(palette.inkSoft)
+            }, value: { StreakBadge(count: entry.streakCount, palette: palette) })
+            DateBlock(entry: entry, palette: palette, daySize: 42, showWeekday: false)
+            Spacer(minLength: 2)
+            GoldDivider(palette: palette)
+            NextZmanBlock(entry: entry, palette: palette, countdownSize: 22)
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -133,41 +234,32 @@ private struct MediumWidgetView: View {
     let entry: BetElEntry
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
-        let align = hAlign(entry.lang)
-        let fAlign = frameAlign(entry.lang)
-        HStack(alignment: .top, spacing: 0) {
-                VStack(alignment: align, spacing: 6) {
-                    Text(entry.hebrewDateText)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(palette.ink)
-                        .multilineTextAlignment(textAlign(entry.lang))
-                    if let t = entry.nextZmanTime {
-                        HStack(spacing: 4) {
-                            Text(timeString(t)).font(.system(size: 13, weight: .bold))
-                            Text(entry.nextZmanLabel).font(.system(size: 12))
-                        }
-                        .foregroundColor(palette.gold)
-                    }
-                    Spacer()
-                    StreakBadge(count: entry.streakCount, palette: palette)
-                }
-                .frame(maxWidth: .infinity, alignment: fAlign)
-
-                GoldDivider(palette: palette).frame(width: 1).padding(.vertical, 4)
-
-                VStack(alignment: align, spacing: 4) {
-                    Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
-                        .font(.system(size: 11))
-                        .foregroundColor(palette.inkSoft)
-                    Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(palette.goldBright)
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, alignment: fAlign)
+        HStack(alignment: .center, spacing: 12) {
+            if WidgetL10n.isRTL(entry.lang) { right(palette); GoldDivider(palette: palette).frame(width: 1).padding(.vertical, 6); left(palette) }
+            else { left(palette); GoldDivider(palette: palette).frame(width: 1).padding(.vertical, 6); right(palette) }
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // "left"/"right" are just the two columns: the date, and the live info
+    private func left(_ palette: BetElTheme.Palette) -> some View {
+        VStack(alignment: hAlign(entry.lang), spacing: 4) {
+            DateBlock(entry: entry, palette: palette, daySize: 54, showWeekday: true)
+            Spacer(minLength: 0)
+            StreakBadge(count: entry.streakCount, palette: palette)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: frameAlign(entry.lang))
+    }
+
+    private func right(_ palette: BetElTheme.Palette) -> some View {
+        VStack(alignment: hAlign(entry.lang), spacing: 6) {
+            NextZmanBlock(entry: entry, palette: palette, countdownSize: 30)
+            Spacer(minLength: 0)
+            GoldDivider(palette: palette)
+            TehillimLine(entry: entry, palette: palette, size: 14)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: frameAlign(entry.lang))
     }
 }
 
@@ -177,54 +269,251 @@ private struct LargeWidgetView: View {
     let entry: BetElEntry
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
-        let align = hAlign(entry.lang)
-        let fAlign = frameAlign(entry.lang)
-        VStack(alignment: align, spacing: 10) {
-                HStack {
-                    if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
-                    Spacer()
-                    if align == .trailing { StreakBadge(count: entry.streakCount, palette: palette) }
+        let upcoming = firstUpcoming(entry.zmanimToday, after: entry.date)
+        VStack(alignment: hAlign(entry.lang), spacing: 8) {
+            SideRow(lang: entry.lang, label: {
+                Text(entry.weekdayText).font(.system(size: 14, weight: .semibold)).foregroundColor(palette.inkSoft)
+            }, value: { StreakBadge(count: entry.streakCount, palette: palette) })
+
+            DateBlock(entry: entry, palette: palette, daySize: 60, showWeekday: false)
+
+            // next zman, as a card
+            NextZmanBlock(entry: entry, palette: palette, countdownSize: 38)
+                .padding(.horizontal, 12).padding(.vertical, 8)
+                .background(palette.gold.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+            VStack(spacing: 4) {
+                ForEach(entry.zmanimToday) { row in
+                    let isNext = row.key == upcoming
+                    SideRow(lang: entry.lang, label: {
+                        Text(row.label)
+                            .font(.system(size: 14, weight: isNext ? .bold : .medium))
+                            .foregroundColor(isNext ? palette.goldBright : palette.ink)
+                    }, value: {
+                        Text(timeString(row.time))
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(isNext ? palette.goldBright : palette.gold)
+                    })
                 }
-                Text(entry.hebrewDateText)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(palette.ink)
-                    .frame(maxWidth: .infinity, alignment: fAlign)
+            }
 
-                HStack(spacing: 16) {
-                    if let t2 = entry.secondZmanTime, let l2 = entry.secondZmanLabel {
-                        VStack(alignment: align, spacing: 2) {
-                            Text(l2).font(.system(size: 11)).foregroundColor(palette.inkSoft)
-                            Text(timeString(t2)).font(.system(size: 15, weight: .semibold)).foregroundColor(palette.gold)
-                        }
-                    }
-                    VStack(alignment: align, spacing: 2) {
-                        Text(entry.nextZmanLabel).font(.system(size: 11)).foregroundColor(palette.inkSoft)
-                        Text(timeString(entry.nextZmanTime)).font(.system(size: 15, weight: .semibold)).foregroundColor(palette.gold)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: fAlign)
-
-                GoldDivider(palette: palette)
-
-                VStack(alignment: align, spacing: 4) {
-                    Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
-                        .font(.system(size: 12))
-                        .foregroundColor(palette.inkSoft)
-                    Text("\(WidgetL10n.t("chapter", lang: entry.lang)) \(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(palette.goldBright)
-                }
-                .frame(maxWidth: .infinity, alignment: fAlign)
-
-                Spacer()
-
-                Text("\(entry.streakCount) \(WidgetL10n.t("dayStreak", lang: entry.lang))")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(palette.gold)
-                    .frame(maxWidth: .infinity, alignment: fAlign)
+            Spacer(minLength: 0)
+            GoldDivider(palette: palette)
+            HStack(spacing: 10) {
+                if WidgetL10n.isRTL(entry.lang) { candleCell(palette); tehillimCell(palette) }
+                else { tehillimCell(palette); candleCell(palette) }
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func tehillimCell(_ palette: BetElTheme.Palette) -> some View {
+        VStack(alignment: hAlign(entry.lang), spacing: 1) {
+            Text(WidgetL10n.t("tehillimToday", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
+            Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+                .font(.system(size: 22, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
+        }
+        .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+    }
+
+    @ViewBuilder
+    private func candleCell(_ palette: BetElTheme.Palette) -> some View {
+        VStack(alignment: hAlign(entry.lang), spacing: 1) {
+            Text(entry.candleLabel ?? WidgetL10n.t("candleLighting", lang: entry.lang))
+                .font(.system(size: 11)).foregroundColor(palette.inkSoft).lineLimit(1).minimumScaleFactor(0.7)
+            if let c = entry.candleTime, c > entry.date {
+                Countdown(target: c, from: entry.date, size: 20, color: palette.goldBright)
+            } else {
+                Text(WidgetL10n.t("noCandle", lang: entry.lang))
+                    .font(.system(size: 12, weight: .medium)).foregroundColor(palette.inkSoft).lineLimit(2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+    }
+}
+
+// MARK: - Zmanim widget (today's four times, next one live)
+
+private struct ZmanimWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: BetElEntry
+    var body: some View {
+        let palette = BetElTheme.palette(for: entry.theme)
+        let upcoming = firstUpcoming(entry.zmanimToday, after: entry.date)
+        Group {
+            if #available(iOS 16.0, *), family == .accessoryRectangular {
+                BetElZmanAccessoryView(entry: entry)
+            } else if family == .systemSmall {
+                VStack(alignment: hAlign(entry.lang), spacing: 5) {
+                    ForEach(entry.zmanimToday) { row in
+                        let isNext = row.key == upcoming
+                        SideRow(lang: entry.lang, label: {
+                            Text(row.label).font(.system(size: 13, weight: isNext ? .bold : .medium))
+                                .foregroundColor(isNext ? palette.goldBright : palette.ink)
+                                .lineLimit(1).minimumScaleFactor(0.6)
+                        }, value: {
+                            Text(timeString(row.time)).font(.system(size: 15, weight: .bold, design: .rounded)).monospacedDigit()
+                                .foregroundColor(isNext ? palette.goldBright : palette.gold)
+                        })
+                    }
+                    Spacer(minLength: 0)
+                    GoldDivider(palette: palette)
+                    Countdown(target: entry.nextZmanTime, from: entry.date, size: 22, color: palette.goldBright)
+                        .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+                }
+                .padding(12)
+            } else {
+                // medium & large: next-zman countdown on top, the four times as tiles
+                VStack(alignment: hAlign(entry.lang), spacing: 10) {
+                    NextZmanBlock(entry: entry, palette: palette, countdownSize: family == .systemLarge ? 46 : 34)
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                        ForEach(entry.zmanimToday) { row in
+                            let isNext = row.key == upcoming
+                            VStack(spacing: 2) {
+                                Text(row.label).font(.system(size: 12, weight: .medium)).foregroundColor(palette.inkSoft)
+                                    .lineLimit(1).minimumScaleFactor(0.6)
+                                Text(timeString(row.time))
+                                    .font(.system(size: family == .systemLarge ? 26 : 20, weight: .bold, design: .rounded)).monospacedDigit()
+                                    .foregroundColor(isNext ? palette.goldBright : palette.gold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, family == .systemLarge ? 14 : 6)
+                            .background(palette.gold.opacity(isNext ? 0.22 : 0.10))
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        }
+                    }
+                    if family == .systemLarge { Spacer(minLength: 0) }
+                }
+                .padding(14)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .environment(\.layoutDirection, .leftToRight)
+        .widgetURL(entry.deepLinkURL)
+        .widgetBackground(palette: palette)
+    }
+}
+
+@available(iOS 16.0, *)
+private struct BetElZmanAccessoryView: View {
+    let entry: BetElEntry
+    var body: some View {
+        let isRTL = WidgetL10n.isRTL(entry.lang)
+        VStack(alignment: isRTL ? .trailing : .leading, spacing: 1) {
+            Text(entry.nextZmanLabel).font(.system(size: 12)).lineLimit(1)
+            if let t = entry.nextZmanTime, t > entry.date {
+                Text(t, style: .timer).font(.system(size: 17, weight: .bold)).monospacedDigit()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
+        .widgetAccentable()
+    }
+}
+
+struct BetElZmanimWidget: Widget {
+    let kind: String = "BetElZmanimWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            ZmanimWidgetView(entry: entry)
+        }
+        .configurationDisplayName("זְמַנֵּי הַיּוֹם")
+        .description("עֲלוֹת הַשַּׁחַר, זְרִיחָה, חֲצוֹת וּשְׁקִיעָה, עִם סְפִירָה לַאֲחוֹרָה")
+        .supportedFamilies(Self.families)
+    }
+    private static var families: [WidgetFamily] {
+        var f: [WidgetFamily] = [.systemSmall, .systemMedium, .systemLarge]
+        if #available(iOS 16.0, *) { f.append(.accessoryRectangular) }
+        return f
+    }
+}
+
+// MARK: - Tehillim widget (today's portion, big)
+
+private struct TehillimWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: BetElEntry
+    var body: some View {
+        let palette = BetElTheme.palette(for: entry.theme)
+        VStack(alignment: hAlign(entry.lang), spacing: 4) {
+            Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
+                .font(.system(size: family == .systemSmall ? 14 : 17, weight: .semibold))
+                .foregroundColor(palette.inkSoft)
+            Spacer(minLength: 0)
+            Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+                .font(.system(size: family == .systemSmall ? 40 : 64, weight: .heavy, design: .rounded))
+                .foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
+            Text(WidgetL10n.t("chapter", lang: entry.lang))
+                .font(.system(size: family == .systemSmall ? 14 : 18, weight: .medium))
+                .foregroundColor(palette.ink)
+            Spacer(minLength: 0)
+            SideRow(lang: entry.lang, label: {
+                Text("\(entry.dayText) \(entry.monthText)").font(.system(size: 13, weight: .medium)).foregroundColor(palette.inkSoft)
+            }, value: { StreakBadge(count: entry.streakCount, palette: palette) })
+        }
+        .padding(family == .systemSmall ? 12 : 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: frameAlign(entry.lang))
+        .environment(\.layoutDirection, .leftToRight)
+        .widgetURL(entry.deepLinkURL)
+        .widgetBackground(palette: palette)
+    }
+}
+
+struct BetElTehillimWidget: Widget {
+    let kind: String = "BetElTehillimWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            TehillimWidgetView(entry: entry)
+        }
+        .configurationDisplayName("תְּהִלִּים הַיּוֹם")
+        .description("הַפְּרָקִים שֶׁל הַיּוֹם בְּגוֹדֶל גָּדוֹל, לִלְחִיצָה וּפְתִיחָה")
+        .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}
+
+// MARK: - Streak widget
+
+private struct StreakWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: BetElEntry
+    var body: some View {
+        let palette = BetElTheme.palette(for: entry.theme)
+        let big: CGFloat = family == .systemSmall ? 64 : 80
+        VStack(spacing: 2) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: family == .systemSmall ? 30 : 36))
+                .foregroundColor(palette.gold)
+            Text("\(entry.streakCount)")
+                .font(.system(size: big, weight: .heavy, design: .rounded))
+                .foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
+            Text(WidgetL10n.t("dayStreak", lang: entry.lang))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(palette.ink)
+            Text("\(WidgetL10n.t("best", lang: entry.lang)): \(entry.streakBest)")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(palette.inkSoft)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .environment(\.layoutDirection, .leftToRight)
+        .widgetURL(entry.deepLinkURL)
+        .widgetBackground(palette: palette)
+    }
+}
+
+struct BetElStreakWidget: Widget {
+    let kind: String = "BetElStreakWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            StreakWidgetView(entry: entry)
+        }
+        .configurationDisplayName("רֶצֶף לִמּוּד")
+        .description("כַּמָּה יָמִים בְּרֶצֶף לָמַדְתָּ")
+        .supportedFamilies([.systemSmall])
     }
 }
 

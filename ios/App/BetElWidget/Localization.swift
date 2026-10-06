@@ -9,6 +9,12 @@ import Foundation
 enum WidgetL10n {
     private static let strings: [String: [String: String]] = [
         "dawn": ["he": "עֲלוֹת הַשַּׁחַר", "en": "Dawn"],
+        "chatzot": ["he": "חֲצוֹת", "en": "Midday"],
+        "zmanimToday": ["he": "זְמַנֵּי הַיּוֹם", "en": "Today's times"],
+        "candleIn": ["he": "עַד הַדְלָקָה", "en": "Until candle lighting"],
+        "noCandle": ["he": "אֵין הַדְלָקָה בְּקָרוֹב", "en": "No candle lighting soon"],
+        "streakTitle": ["he": "רֶצֶף לִמּוּד", "en": "Study streak"],
+        "best": ["he": "שִׂיא", "en": "Best"],
         "sunrise": ["he": "זְרִיחָה", "en": "Sunrise"],
         "sunset": ["he": "שְׁקִיעָה", "en": "Sunset"],
         "tehillimToday": ["he": "תְּהִלִּים הַיּוֹם", "en": "Tehillim today"],

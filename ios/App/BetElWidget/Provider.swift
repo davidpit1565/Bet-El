@@ -1,6 +1,13 @@
 import WidgetKit
 import Foundation
 
+struct ZmanRow: Identifiable {
+    let key: String
+    let label: String
+    let time: Date
+    var id: String { key }
+}
+
 struct BetElEntry: TimelineEntry {
     let date: Date
     let hebrewDateText: String
@@ -17,6 +24,17 @@ struct BetElEntry: TimelineEntry {
     let lang: String
     let candleTime: Date?
     let candleLabel: String?
+    let streakBest: Int
+    /// The Hebrew date split into parts so each widget size can lay it out
+    /// big: weekday ("יום רביעי"), day ("כ״ו"), month ("תשרי"), year ("תשפ״ז")
+    /// - in English the same parts as numerals/English names.
+    let weekdayText: String
+    let dayText: String
+    let monthText: String
+    let yearText: String
+    /// Today's dawn / sunrise / midday / sunset, in order, for the widgets
+    /// that list them.
+    let zmanimToday: [ZmanRow]
 
     /// A stable deep link into the app for whatever this entry is
     /// currently showing - opens straight to today's Tehillim portion.
@@ -61,6 +79,16 @@ struct BetElProvider: TimelineProvider {
 
         let reloadAfter = refreshDates.last ?? cal.date(byAdding: .hour, value: 6, to: now)!
         completion(Timeline(entries: entries, policy: .after(reloadAfter)))
+    }
+
+    private static func zmanimRows(_ times: Solar.DayTimes?, lang: String) -> [ZmanRow] {
+        guard let t = times else { return [] }
+        return [
+            ZmanRow(key: "dawn", label: WidgetL10n.t("dawn", lang: lang), time: t.dawn),
+            ZmanRow(key: "sunrise", label: WidgetL10n.t("sunrise", lang: lang), time: t.sunrise),
+            ZmanRow(key: "chatzot", label: WidgetL10n.t("chatzot", lang: lang), time: t.solarNoon),
+            ZmanRow(key: "sunset", label: WidgetL10n.t("sunset", lang: lang), time: t.sunset),
+        ]
     }
 
     private func makeEntry(for date: Date, snapshot: BetElSharedData.Snapshot) -> BetElEntry {
@@ -108,7 +136,13 @@ struct BetElProvider: TimelineProvider {
             theme: snapshot.theme,
             lang: lang,
             candleTime: snapshot.candleTime,
-            candleLabel: snapshot.candleLabel
+            candleLabel: snapshot.candleLabel,
+            streakBest: snapshot.streakBest,
+            weekdayText: HebrewDay.weekdayText(date, lang: lang),
+            dayText: HebrewDay.dayText(date, lang: lang),
+            monthText: HebrewDay.monthText(date, lang: lang),
+            yearText: HebrewDay.yearText(date, lang: lang),
+            zmanimToday: Self.zmanimRows(times, lang: lang)
         )
     }
 }
