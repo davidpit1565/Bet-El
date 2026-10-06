@@ -38,7 +38,7 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
 
     @objc func refresh(_ call: CAPPluginCall) {
         #if canImport(ActivityKit)
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.2, *) {
             NativeLiveActivityBridge.refreshActivity()
         }
         #endif
@@ -47,7 +47,7 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
 
     @objc func end(_ call: CAPPluginCall) {
         #if canImport(ActivityKit)
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.2, *) {
             Task { for activity in Activity<BetElActivityAttributes>.activities { await activity.end(nil, dismissalPolicy: .immediate) } }
         }
         #endif
@@ -55,15 +55,15 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
     }
 
     #if canImport(ActivityKit)
-    @available(iOS 16.1, *)
+    @available(iOS 16.2, *)
     private static func refreshActivity() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let snapshot = BetElSharedData.read()
         let now = Date()
-        guard let (zmanKey, endDate) = nextZman(latitude: snapshot.latitude, longitude: snapshot.longitude, after: now) else { return }
+        guard let next = nextZman(latitude: snapshot.latitude, longitude: snapshot.longitude, after: now) else { return }
 
-        let state = BetElActivityAttributes.ContentState(zmanLabel: WidgetL10n.t(zmanKey, lang: snapshot.lang), endDate: endDate)
-        let content = ActivityContent(state: state, staleDate: endDate.addingTimeInterval(60 * 30))
+        let state = BetElActivityAttributes.ContentState(zmanLabel: WidgetL10n.t(next.label, lang: snapshot.lang), endDate: next.date)
+        let content = ActivityContent(state: state, staleDate: next.date.addingTimeInterval(60 * 30))
 
         if let existing = Activity<BetElActivityAttributes>.activities.first {
             Task { await existing.update(content) }
@@ -86,7 +86,7 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
     /// passed) - kept here rather than shared, since the widget's version
     /// also needs the *second* upcoming zman for its large layout, which
     /// this simpler countdown-only use doesn't.
-    @available(iOS 16.1, *)
+    @available(iOS 16.2, *)
     private static func nextZman(latitude: Double, longitude: Double, after now: Date) -> (label: String, date: Date)? {
         guard let today = Solar.times(for: now, latitude: latitude, longitude: longitude) else { return nil }
         if now < today.sunrise { return ("sunrise", today.sunrise) }

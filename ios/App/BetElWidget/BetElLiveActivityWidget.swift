@@ -10,7 +10,7 @@ import ActivityKit
 /// style: .timer)` with a manually-recomputed string - once given a date
 /// range it ticks on its own, live, driven by the system, with no app or
 /// extension process needing to stay alive to update it.
-@available(iOS 16.1, *)
+@available(iOS 16.2, *)
 struct BetElLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: BetElActivityAttributes.self) { context in
@@ -50,7 +50,7 @@ struct BetElLiveActivityWidget: Widget {
     }
 }
 
-@available(iOS 16.1, *)
+@available(iOS 16.2, *)
 private struct LockScreenView: View {
     let context: ActivityViewContext<BetElActivityAttributes>
     var body: some View {

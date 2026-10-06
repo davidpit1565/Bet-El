@@ -6,7 +6,7 @@ struct BetElWidgetBundle: WidgetBundle {
     var body: some Widget {
         BetElWidget()
         BetElCandleWidget()
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.2, *) {
             BetElLiveActivityWidget()
         }
     }

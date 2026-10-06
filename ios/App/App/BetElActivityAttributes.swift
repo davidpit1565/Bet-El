@@ -10,13 +10,13 @@ import ActivityKit
 /// `BetElSharedData` is already shared between them for the Home Screen
 /// widget's App Group data.
 ///
-/// `ActivityAttributes` (and everywhere it's used) is iOS 16.1+ API - this
+/// `ActivityAttributes` (and everywhere it's used) is iOS 16.2+ API - this
 /// file guards itself with `canImport(ActivityKit)` so it still compiles
 /// on anything building against an older SDK, and every actual *use* of
 /// `Activity<BetElActivityAttributes>` elsewhere is further guarded with
-/// `if #available(iOS 16.1, *)` since the app's own deployment target
+/// `if #available(iOS 16.2, *)` since the app's own deployment target
 /// stays at 15.0.
-@available(iOS 16.1, *)
+@available(iOS 16.2, *)
 struct BetElActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         /// The zman's own name, already in the app's current UI language
