@@ -144,10 +144,18 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTopBarBridge (JS-driven)
 
-    func configureTopBar(title: String, backTo: String, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String) {
-        topBar.configure(title: title, hasBack: !backTo.isEmpty, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel)
+    func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String)]) {
+        topBar.configure(title: title, hasBack: hasBack, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel, actions: actions)
+        // Both relay to one fixed JS entry point each rather than this
+        // method trying to encode what "back" or a given action id means -
+        // JS (TOPBAR_BACK_ACTION/TOPBAR_ACTION_HANDLERS in index.html)
+        // owns that, since it can be more than a plain `go(tab)` call and
+        // the same action id means different things on different screens.
         topBar.onBack = { [weak self] in
-            self?.webView?.evaluateJavaScript("window.go && window.go('\(backTo)')", completionHandler: nil)
+            self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onBack()", completionHandler: nil)
+        }
+        topBar.onTrailingAction = { [weak self] id in
+            self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onAction(\(self?.jsStringLiteral(id) ?? "null"))", completionHandler: nil)
         }
         topBar.onQuickAction = { [weak self] action in
             guard let self = self else { return }
