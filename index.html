@@ -1483,6 +1483,73 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   #app{max-width:980px}
   .bottom-nav{max-width:760px}
 }
+
+/* ================= NATIVE iOS: STRONGER LIQUID GLASS SKIN =================
+   Only on the native iOS app (html.has-native-tabbar - set when the native
+   UITabBar bridge exists), where the real UIGlassEffect tab bar/top bar/FAB
+   sit right next to these HTML surfaces and the softer web-wide sheen above
+   read as flat beside them. Approximates the real material with a clear,
+   low-opacity fill, a bright specular rim on the light-facing (top/start)
+   edge, a faint inner glow and a soft floating shadow - flat gradients,
+   borders and shadows ONLY, no backdrop-filter added (see the Liquid Glass
+   note above: stacking blurred layers crashed the renderer before). Applies
+   to home cards, buttons, search boxes, segmented controls and select
+   pickers; .done/.on state rules are restated after the base skin since
+   this block's higher specificity would otherwise flatten them. */
+html.has-native-tabbar{
+  --lg2-fill:linear-gradient(150deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.04) 38%,rgba(255,255,255,.02) 62%,rgba(255,255,255,.08) 100%);
+  --lg2-base:rgba(22,33,63,.38);
+  --lg2-border:1px solid rgba(255,255,255,.16);
+  --lg2-rim:inset 1.5px 1.5px 0 -0.5px rgba(255,255,255,.34),inset -1px -1px 0 -0.5px rgba(255,255,255,.10),inset 0 0 22px rgba(255,255,255,.04);
+  --lg2-shadow:0 12px 32px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.25);
+}
+html.has-native-tabbar[data-theme="light"]{
+  --lg2-fill:linear-gradient(150deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.34) 38%,rgba(255,255,255,.22) 62%,rgba(255,255,255,.52) 100%);
+  --lg2-base:rgba(255,252,244,.42);
+  --lg2-border:1px solid rgba(255,255,255,.85);
+  --lg2-rim:inset 1.5px 1.5px 0 -0.5px rgba(255,255,255,.95),inset -1px -1px 0 -0.5px rgba(150,116,44,.10),inset 0 0 22px rgba(255,255,255,.35);
+  --lg2-shadow:0 14px 30px -16px rgba(110,80,25,.38),0 2px 6px -2px rgba(110,80,25,.14);
+}
+html.has-native-tabbar :is(.q-tile,.prayer-row,.search-box,.btn-ghost,.icon-btn,.rnav-btn,.today-btn,
+  .bic-arrow-btn,.ck-track-btn,.ck-resume-btn,.fld-select,.seg,.stepper){
+  background-color:var(--lg2-base);
+  background-image:var(--lg2-fill);
+  border:var(--lg2-border);
+  box-shadow:var(--lg2-rim),var(--lg2-shadow);
+}
+/* .fld-select draws its chevron with background-image - keep it on top of the glass fill */
+html.has-native-tabbar .fld-select{
+  background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%),var(--lg2-fill);
+  background-size:5px 5px,5px 5px,100% 100%;
+  border-radius:999px;
+}
+html.has-native-tabbar :is(.search-box,.ck-track-btn,.ck-resume-btn,.today-btn,.rnav-btn,.seg,.stepper){border-radius:999px}
+html.has-native-tabbar .search-box{padding:12px 18px}
+html.has-native-tabbar .q-tile{border-radius:24px}
+html.has-native-tabbar .q-tile.primary{box-shadow:var(--lg2-rim),0 18px 36px -18px rgba(0,0,0,.5),var(--lg2-shadow)}
+html.has-native-tabbar :is(.q-tile,.prayer-row).done,
+html.has-native-tabbar .prayer-row.week-row{
+  border-color:var(--gold);
+  box-shadow:var(--lg2-rim),0 0 0 1px rgba(212,175,95,.35) inset,0 8px 22px -10px rgba(212,175,95,.5);
+}
+/* Active/selected states: tinted gold glass rather than a flat gold fill */
+html.has-native-tabbar :is(.ck-track-btn,.ck-resume-btn.primary).on,
+html.has-native-tabbar .ck-resume-btn.primary,
+html.has-native-tabbar .seg button.on{
+  background:linear-gradient(180deg,rgba(212,175,95,.62),rgba(212,175,95,.34));
+  color:var(--ink);border-color:rgba(255,255,255,.35);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 6px 16px -8px rgba(184,134,11,.6);
+}
+html.has-native-tabbar .seg button{border-radius:999px}
+html.has-native-tabbar .btn-gold{
+  background-image:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0) 55%),var(--gold-grad);
+  border:1px solid rgba(255,255,255,.4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 6px rgba(120,80,0,.25),0 12px 26px -12px rgba(184,134,11,.75);
+}
+/* Elastic press - the "squish" real Liquid Glass controls do on touch */
+html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-btn,.bic-arrow-btn,.ck-track-btn,.ck-resume-btn,.seg button):active{
+  transform:scale(.965);
+}
 </style>
 </head>
 <body>
@@ -11911,6 +11978,20 @@ function syncNativeTabBar(){
     plugin.configure({items, activeTab:navActiveTab(TAB), isRTL:S.lang==='he'}).catch(()=>{});
   }catch(e){}
 }
+/* Called by MainViewController's native glass search button (beside the
+   native tab bar): opens the Library screen, whose search box already
+   searches across every book/section, and focuses it. */
+window.NativeSearchHost = {
+  open(){
+    if(TAB!=='prayers') go('prayers');
+    setTimeout(()=>{
+      const q=document.getElementById('libSearchQ');
+      if(!q) return;
+      q.scrollIntoView({block:'center', behavior:'smooth'});
+      q.focus();
+    }, 80);
+  }
+};
 /* NativeToolsFab - replaces the HTML .reader-tools floating button (font
    size/theme/autoscroll/home) with a genuine native iOS 26 Liquid Glass
    FAB (see NativeToolsFabBridge.swift/NativeToolsFabView.swift) on any

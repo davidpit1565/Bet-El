@@ -28,6 +28,11 @@ class MainViewController: CAPBridgeViewController {
     private let feedbackForm = NativeFeedbackFormView()
     private let toastView = NativeToastView()
     private let settingsView = NativeSettingsView()
+    /// iOS 26-style standalone search button: its own Liquid Glass circle
+    /// beside the tab bar (the way system apps split Search off from their
+    /// other tabs), opening the Library search via window.NativeSearchHost.
+    private let searchButton = UIButton(type: .system)
+    private var tabBarSideConstraints: [NSLayoutConstraint] = []
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -96,10 +101,68 @@ class MainViewController: CAPBridgeViewController {
         // with a manually-drawn one instead of the genuine thing.
         view.addSubview(tabBar)
         NSLayoutConstraint.activate([
-            tabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        setupSearchButton()
+        layoutTabBarSides(isRTL: false)
+    }
+
+    private func setupSearchButton() {
+        searchButton.translatesAutoresizingMaskIntoConstraints = false
+        searchButton.isHidden = true
+        searchButton.accessibilityIdentifier = "search"
+        let symbol = UIImage(systemName: "magnifyingglass", withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold))
+        if #available(iOS 26.0, *) {
+            var config = UIButton.Configuration.glass()
+            config.image = symbol
+            config.cornerStyle = .capsule
+            searchButton.configuration = config
+        } else {
+            var config = UIButton.Configuration.filled()
+            config.image = symbol
+            config.cornerStyle = .capsule
+            config.background.visualEffect = UIBlurEffect(style: .systemMaterial)
+            config.baseBackgroundColor = .clear
+            config.baseForegroundColor = .label
+            searchButton.configuration = config
+        }
+        searchButton.addTarget(self, action: #selector(searchTapped), for: .touchUpInside)
+        view.addSubview(searchButton)
+        NSLayoutConstraint.activate([
+            searchButton.widthAnchor.constraint(equalToConstant: 56),
+            searchButton.heightAnchor.constraint(equalToConstant: 56),
+            // The tab bar's own safe-area guide excludes the home-indicator
+            // strip, so its center is the center of the visible item row.
+            searchButton.centerYAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.centerYAnchor),
+        ])
+    }
+
+    /// Search sits on the trailing end of the reading direction - right for
+    /// LTR languages, left for Hebrew - with the tab bar taking the rest.
+    /// Explicit left/right anchors (not leading/trailing) so the result
+    /// follows the app's own language, not the device's.
+    private func layoutTabBarSides(isRTL: Bool) {
+        NSLayoutConstraint.deactivate(tabBarSideConstraints)
+        let guide = view.safeAreaLayoutGuide
+        if isRTL {
+            tabBarSideConstraints = [
+                searchButton.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 16),
+                tabBar.leftAnchor.constraint(equalTo: searchButton.rightAnchor),
+                tabBar.rightAnchor.constraint(equalTo: view.rightAnchor),
+            ]
+        } else {
+            tabBarSideConstraints = [
+                tabBar.leftAnchor.constraint(equalTo: view.leftAnchor),
+                tabBar.rightAnchor.constraint(equalTo: searchButton.leftAnchor),
+                searchButton.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -16),
+            ]
+        }
+        NSLayoutConstraint.activate(tabBarSideConstraints)
+    }
+
+    @objc private func searchTapped() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
     }
 
     /// Pinned to the bottom-right corner, above the tab bar (whether or not
@@ -391,6 +454,7 @@ class MainViewController: CAPBridgeViewController {
         }
         tabBar.semanticContentAttribute = .forceLeftToRight
         tabBar.items = isRTL ? ordered.reversed() : ordered
+        layoutTabBarSides(isRTL: isRTL)
         setActive(tab: activeTab)
         setVisible(true)
     }
@@ -401,6 +465,7 @@ class MainViewController: CAPBridgeViewController {
 
     func setVisible(_ visible: Bool) {
         tabBar.isHidden = !visible
+        searchButton.isHidden = !visible
         reportHeightToWebView()
     }
 
@@ -409,10 +474,13 @@ class MainViewController: CAPBridgeViewController {
         // simple fade+slide, not full removal (setVisible above is for
         // "this screen has no nav at all", a different state).
         UIView.animate(withDuration: ReduceMotion.duration(hidden ? 0.26 : 0.38)) {
-            self.tabBar.alpha = hidden ? 0 : 1
-            self.tabBar.transform = hidden
+            let slide = hidden
                 ? CGAffineTransform(translationX: 0, y: self.tabBar.frame.height)
                 : .identity
+            self.tabBar.alpha = hidden ? 0 : 1
+            self.tabBar.transform = slide
+            self.searchButton.alpha = hidden ? 0 : 1
+            self.searchButton.transform = slide
         }
     }
 }
