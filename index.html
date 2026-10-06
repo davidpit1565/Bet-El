@@ -1007,6 +1007,9 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .social-link{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--gold);opacity:.8}
 .social-link:active{transform:scale(.9);opacity:1}
 .social-link svg{width:24px;height:24px}
+.social-links.big{gap:30px;margin:16px 0 10px}
+.social-links.big .social-link{width:52px;height:52px;opacity:1}
+.social-links.big .social-link svg{width:40px;height:40px}
 .stats-row{display:flex;gap:10px;margin:14px 4px 0}
 .stat-card{flex:1;position:relative;overflow:hidden;background:linear-gradient(155deg,var(--panel) 55%,rgba(212,175,95,.14) 100%);
   border:1px solid var(--line-strong);border-radius:22px;
@@ -2176,8 +2179,8 @@ const SOCIAL_LINKS=[
   {key:'youtube', url:'https://www.youtube.com/@rabi.itschak.pitchkhadze', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.5 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/></svg>'},
   {key:'tiktok', url:'https://www.tiktok.com/@rabi.itschak.pitchkhadze', icon:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14.5 3h2.6c.2 1.6 1.3 3 3 3.4v2.6c-1.1 0-2.2-.3-3.1-.9v6.3a5.1 5.1 0 1 1-5.1-5.1c.3 0 .6 0 .9.1v2.7a2.4 2.4 0 1 0 1.7 2.3V3z"/></svg>'},
 ];
-function socialLinksHTML(){
-  return `<div class="social-links">${SOCIAL_LINKS.map(s=>
+function socialLinksHTML(size){
+  return `<div class="social-links${size==='m'?' big':''}">${SOCIAL_LINKS.map(s=>
     `<a class="social-link" href="${s.url}" target="_blank" rel="noopener" aria-label="${s.key}">${s.icon}</a>`
   ).join('')}</div>`;
 }
@@ -6476,7 +6479,7 @@ const HOME_CATALOG={
   stats:{kind:'block',label:'מונה משתמשים'},
   hatzlacha:{kind:'block',label:'להצלחת'},
   memorial:{kind:'block',keep:true,label:'לעלוי נשמת'}, // can be moved, never removed
-  social:{kind:'block',label:'רשתות חברתיות'},
+  social:{kind:'block',keep:true,sizes:['s','m'],label:'רשתות חברתיות'}, // can be moved/enlarged (2 sizes), never removed
   streak:{kind:'tile',label:'רצף למוד'},
   library:{kind:'tile',label:'ספרייה'},
   torah:{kind:'tile',label:'תורה'},
@@ -6496,7 +6499,7 @@ const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
   {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},
-  {id:'tikkunei',size:'l'},{id:'stats',size:'l'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'l'},
+  {id:'tikkunei',size:'l'},{id:'stats',size:'l'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
@@ -6508,10 +6511,10 @@ function getHomeLayout(){
     if(!it || !HOME_CATALOG[it.id] || seen.has(it.id)) return;
     seen.add(it.id);
     const def=HOME_CATALOG[it.id];
-    out.push({id:it.id, size: def.kind==='tile' ? (['s','m','l'].includes(it.size)?it.size:'s') : 'l'});
+    out.push({id:it.id, size: def.sizes ? (def.sizes.includes(it.size)?it.size:def.sizes[0]) : def.kind==='tile' ? (['s','m','l'].includes(it.size)?it.size:'s') : 'l'});
   });
   // items that must always exist (can be moved, never removed) come back if a saved layout lacks them
-  Object.keys(HOME_CATALOG).forEach(id=>{ if(HOME_CATALOG[id].keep && !seen.has(id)) out.push({id,size:'l'}); });
+  Object.keys(HOME_CATALOG).forEach(id=>{ if(HOME_CATALOG[id].keep && !seen.has(id)) out.push({id,size:HOME_CATALOG[id].sizes?HOME_CATALOG[id].sizes[0]:'l'}); });
   return homeNormalize(out);
 }
 /* The notices strip (yahrzeit, update available...) is not optional and
@@ -6544,7 +6547,7 @@ function homeNativeEdit(){ try{ return !!(window.Capacitor && Capacitor.Plugins 
 function homeEditControls(id,def,size){
   if(homeNativeEdit()) return '';
   const minus = def.keep ? '' : `<button class="hi-minus" data-act="del" aria-label="${ckChrome('הסר')}"><svg viewBox="0 0 12 12"><path d="M2.5 6h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`;
-  const resize = def.kind==='tile' ? `<span class="hi-resize" data-act="resize" aria-label="resize"><svg viewBox="0 0 22 22"><path d="M17 5 C17 12.5 12.5 17 5 17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>` : '';
+  const resize = (def.kind==='tile'||def.sizes) ? `<span class="hi-resize" data-act="resize" aria-label="resize"><svg viewBox="0 0 22 22"><path d="M17 5 C17 12.5 12.5 17 5 17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>` : '';
   return minus+resize;
 }
 function homeEmptyHTML(){
@@ -6720,7 +6723,7 @@ function homeBindDrag(grid){
 const HOME_NRES={};
 function homeResizeApply(item,size){
   item.dataset.size=size;
-  item.classList.toggle('hi-wide', size==='l');
+  if(item.querySelector('.q-tile')) item.classList.toggle('hi-wide', size==='l');
   const t=item.querySelector('.q-tile');
   if(t){ t.classList.remove('primary','hi-l'); if(size!=='s') t.classList.add('primary'); if(size==='l') t.classList.add('hi-l'); }
 }
@@ -6735,7 +6738,7 @@ function homeSyncNative(){
     if(!HOME_EDIT||TAB!=='home'||HOME_SYNC_HIDE){ if(!HOME_EDIT||TAB!=='home') NH.hide().catch(()=>{}); else NH.setControls({items:[],rtl:true,isDark:false}).catch(()=>{}); return; }
     const items=[...document.querySelectorAll('#homeGrid .home-item:not(.hi-fixed)')].map(el=>{
       const id=el.dataset.homeItem, def=HOME_CATALOG[id]||{}, r=el.getBoundingClientRect();
-      return {id,minus:!def.keep,resize:def.kind==='tile',x:r.left,y:r.top,w:r.width,h:r.height};
+      return {id,minus:!def.keep,resize:(def.kind==='tile'||!!def.sizes),x:r.left,y:r.top,w:r.width,h:r.height};
     }).filter(i=>i.y+i.h>0&&i.y<innerHeight);
     NH.setControls({items,rtl:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark')}).catch(()=>{});
   });
@@ -6759,10 +6762,10 @@ window.NativeHomeEditHost={
   },
   resizeMove(id,tx,ty){
     const st=HOME_NRES[id]; if(!st) return;
-    const rtl=document.documentElement.dir!=='ltr', order=['s','m','l'];
+    const rtl=document.documentElement.dir!=='ltr', order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','m','l'];
     const g=(ty-st.y0)+(rtl ? (st.x0-tx) : (tx-st.x0));
     const k=order.indexOf(st.size);
-    if(g>46 && k<2) st.size=order[k+1];
+    if(g>46 && k<order.length-1) st.size=order[k+1];
     else if(g<-46 && k>0) st.size=order[k-1];
     else return;
     st.changed=true; st.x0=tx; st.y0=ty;
@@ -6782,7 +6785,7 @@ function homeBindResize(grid){
   const order=['s','m','l'];
   const apply=(item,size)=>{
     item.dataset.size=size;
-    item.classList.toggle('hi-wide', size==='l');
+    if(item.querySelector('.q-tile')) item.classList.toggle('hi-wide', size==='l');
     const t=item.querySelector('.q-tile');
     if(t){ t.classList.remove('primary','hi-l'); if(size!=='s') t.classList.add('primary'); if(size==='l') t.classList.add('hi-l'); }
   };
@@ -6795,9 +6798,9 @@ function homeBindResize(grid){
       item.classList.add('resizing');
       const move=e=>{
         const g=(e.clientY-y0)+(rtl ? (x0-e.clientX) : (e.clientX-x0));   // down and outward = bigger
-        const k=order.indexOf(size);
-        if(g>46 && k<2){ size=order[k+1]; changed=true; }
-        else if(g<-46 && k>0){ size=order[k-1]; changed=true; }
+        const ord=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||order, k=ord.indexOf(size);
+        if(g>46 && k<ord.length-1){ size=ord[k+1]; changed=true; }
+        else if(g<-46 && k>0){ size=ord[k-1]; changed=true; }
         else return;
         x0=e.clientX; y0=e.clientY;
         apply(item,size);
@@ -7028,7 +7031,7 @@ function renderHome(){
     </div>`,
     hatzlacha:()=>hatzlachaHTML(),
     memorial:()=>memorialHTML(),
-    social:()=>socialLinksHTML(),
+    social:(sz)=>socialLinksHTML(sz),
   };
   // plain shortcut tiles (any screen of the app) - see HOME_SHORTCUTS
   HOME_SHORTCUTS().forEach(sc=>{
