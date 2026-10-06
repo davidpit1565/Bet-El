@@ -37,3 +37,16 @@ extension UILabel {
         adjustsFontForContentSizeCategory = true
     }
 }
+
+extension UIColor {
+    /// The app's gold, tuned per appearance for contrast on Liquid Glass:
+    /// the old fixed #D4AF5F washed out on light glass, so light mode uses
+    /// a deep antique gold and dark mode a brighter one. Resolves against
+    /// each view's own trait collection, so views follow the app theme via
+    /// their overrideUserInterfaceStyle.
+    static let betelGold = UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.902, green: 0.784, blue: 0.455, alpha: 1)
+            : UIColor(red: 0.478, green: 0.353, blue: 0.078, alpha: 1)
+    }
+}

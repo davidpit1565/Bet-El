@@ -1509,6 +1509,8 @@ html.has-native-tabbar{
   --lg2-shadow:0 12px 32px -14px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.25);
 }
 html.has-native-tabbar[data-theme="light"]{
+  /* deeper gold for legible text/icons on the lighter glass surfaces */
+  --gold:#7a5a14;
   --lg2-fill:linear-gradient(150deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.34) 38%,rgba(255,255,255,.22) 62%,rgba(255,255,255,.52) 100%);
   --lg2-base:rgba(255,252,244,.42);
   --lg2-border:1px solid rgba(255,255,255,.85);
@@ -11999,7 +12001,7 @@ function syncNativeTabBar(){
     if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ plugin.setVisible({visible:false}).catch(()=>{}); return; }
     const items=[['home','דף הבית'],['tehillim','תהילים'],['prayers','ספרייה'],['calendar','לוח שנה'],['settings','הגדרות'],['search','חיפוש']]
       .map(([id,he])=>({id,label:nativeTabBarLabel(he)}));
-    plugin.configure({items, activeTab:navActiveTab(TAB), isRTL:S.lang==='he'}).catch(()=>{});
+    plugin.configure({items, activeTab:navActiveTab(TAB), isRTL:S.lang==='he', isDark:S.theme==='dark'}).catch(()=>{});
   }catch(e){}
 }
 /* Called by the native tab bar's "search" item (MainViewController): opens the Library screen, whose search box already

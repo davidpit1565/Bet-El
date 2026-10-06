@@ -32,7 +32,9 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         }
         let activeTab = call.getString("activeTab") ?? "home"
         let isRTL = call.getBool("isRTL") ?? false
+        let isDark = call.getBool("isDark") ?? false
         DispatchQueue.main.async {
+            NativeTabBarBridge.activeController?.setTabBarTheme(isDark: isDark)
             NativeTabBarBridge.activeController?.configure(items: items, activeTab: activeTab, isRTL: isRTL)
         }
         call.resolve()

@@ -31,6 +31,13 @@ class MainViewController: CAPBridgeViewController {
     /// The app's own language direction (S.lang), from the last tab bar
     /// configure() - also used to place the tools FAB on the matching side.
     private var isRTL = true
+    /// Apple Music-style minimized tab bar: while scrolling down the full
+    /// bar shrinks away into this small glass circle showing the current
+    /// tab's icon (instead of disappearing entirely); tapping it expands
+    /// the full bar again.
+    private let miniTabButton = UIButton(type: .system)
+    private var miniSideConstraint: NSLayoutConstraint?
+    private var isTabBarMinimized = false
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -109,6 +116,60 @@ class MainViewController: CAPBridgeViewController {
             tabBar.leftAnchor.constraint(equalTo: view.leftAnchor),
             tabBar.rightAnchor.constraint(equalTo: view.rightAnchor),
         ])
+        tabBar.tintColor = .betelGold
+        setupMiniTabButton()
+    }
+
+    private func setupMiniTabButton() {
+        miniTabButton.translatesAutoresizingMaskIntoConstraints = false
+        miniTabButton.alpha = 0
+        miniTabButton.isHidden = true
+        miniTabButton.accessibilityLabel = "Show tab bar"
+        miniTabButton.addTarget(self, action: #selector(miniTabTapped), for: .touchUpInside)
+        view.addSubview(miniTabButton)
+        NSLayoutConstraint.activate([
+            miniTabButton.widthAnchor.constraint(equalToConstant: 56),
+            miniTabButton.heightAnchor.constraint(equalToConstant: 56),
+            miniTabButton.centerYAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.centerYAnchor),
+        ])
+        layoutMiniTabButton()
+    }
+
+    /// Reading-direction start edge, like Apple Music's minimized bar
+    /// (left in LTR languages, right in Hebrew).
+    private func layoutMiniTabButton() {
+        miniSideConstraint?.isActive = false
+        let guide = view.safeAreaLayoutGuide
+        miniSideConstraint = isRTL
+            ? miniTabButton.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -20)
+            : miniTabButton.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 20)
+        miniSideConstraint?.isActive = true
+    }
+
+    private func refreshMiniTabIcon() {
+        let id = tabBar.selectedItem?.accessibilityIdentifier ?? "home"
+        let icon = MainViewController.tabOrder.first { $0.id == id }?.icon ?? "house.fill"
+        let image = UIImage(systemName: icon, withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold))
+        if #available(iOS 26.0, *) {
+            var config = UIButton.Configuration.glass()
+            config.image = image
+            config.cornerStyle = .capsule
+            config.baseForegroundColor = .betelGold
+            miniTabButton.configuration = config
+        } else {
+            var config = UIButton.Configuration.filled()
+            config.image = image
+            config.cornerStyle = .capsule
+            config.background.visualEffect = UIBlurEffect(style: .systemMaterial)
+            config.baseBackgroundColor = .clear
+            config.baseForegroundColor = .betelGold
+            miniTabButton.configuration = config
+        }
+    }
+
+    @objc private func miniTabTapped() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        setHidden(false)
     }
 
     /// Pinned to the bottom-right corner, above the tab bar (whether or not
@@ -430,30 +491,62 @@ class MainViewController: CAPBridgeViewController {
         tabBar.items = isRTL ? ordered.reversed() : ordered
         self.isRTL = isRTL
         layoutToolsFab()
+        layoutMiniTabButton()
         setActive(tab: activeTab)
         setVisible(true)
     }
 
     func setActive(tab: String) {
         tabBar.selectedItem = tabBar.items?.first { $0.accessibilityIdentifier == tab }
+        refreshMiniTabIcon()
+    }
+
+    /// From JS (S.theme) so the tab bar, its minimized circle and the gold
+    /// tint resolve against the app's own theme, not the device's.
+    func setTabBarTheme(isDark: Bool) {
+        let style: UIUserInterfaceStyle = isDark ? .dark : .light
+        tabBar.overrideUserInterfaceStyle = style
+        miniTabButton.overrideUserInterfaceStyle = style
     }
 
     func setVisible(_ visible: Bool) {
         tabBar.isHidden = !visible
+        if !visible {
+            miniTabButton.isHidden = true
+            miniTabButton.alpha = 0
+            isTabBarMinimized = false
+            tabBar.alpha = 1
+            tabBar.transform = .identity
+        }
         reportHeightToWebView()
     }
 
+    /// Scroll-down "hide" from JS minimizes rather than removes: the full
+    /// bar shrinks toward the mini circle's corner and fades, and the mini
+    /// circle (current tab's icon) springs in - Apple Music's behavior.
+    /// Scrolling back up, or tapping the circle, expands it again.
     func setHidden(_ hidden: Bool) {
-        // The scroll-away/reveal behavior the HTML nav already had - a
-        // simple fade+slide, not full removal (setVisible above is for
-        // "this screen has no nav at all", a different state).
-        UIView.animate(withDuration: ReduceMotion.duration(hidden ? 0.26 : 0.38)) {
-            let slide = hidden
-                ? CGAffineTransform(translationX: 0, y: self.tabBar.frame.height)
-                : .identity
-            self.tabBar.alpha = hidden ? 0 : 1
-            self.tabBar.transform = slide
+        guard !tabBar.isHidden, hidden != isTabBarMinimized else { return }
+        isTabBarMinimized = hidden
+        if hidden {
+            refreshMiniTabIcon()
+            miniTabButton.isHidden = false
         }
+        let w = tabBar.bounds.width
+        let towardCorner = CGAffineTransform(translationX: (isRTL ? 1 : -1) * w * 0.38, y: 0).scaledBy(x: 0.25, y: 0.6)
+        UIView.animate(
+            withDuration: ReduceMotion.duration(hidden ? 0.34 : 0.42), delay: 0,
+            usingSpringWithDamping: 0.82, initialSpringVelocity: 0.3, options: [.allowUserInteraction, .beginFromCurrentState],
+            animations: {
+                self.tabBar.alpha = hidden ? 0 : 1
+                self.tabBar.transform = hidden ? towardCorner : .identity
+                self.miniTabButton.alpha = hidden ? 1 : 0
+                self.miniTabButton.transform = hidden ? .identity : CGAffineTransform(scaleX: 0.6, y: 0.6)
+            },
+            completion: { _ in
+                if !self.isTabBarMinimized { self.miniTabButton.isHidden = true }
+            }
+        )
     }
 }
 

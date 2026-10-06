@@ -25,7 +25,7 @@ final class NativeModalView: UIView {
     var onPrimary: (() -> Void)?
     var onDismiss: (() -> Void)?
 
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private let backdrop = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
     private var card: UIView?
 

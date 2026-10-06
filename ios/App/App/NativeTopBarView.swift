@@ -35,7 +35,7 @@ final class NativeTopBarView: UIView {
     /// it can't give those tiles one.
     var onQuickAction: ((String) -> Void)?
 
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private let barHeight: CGFloat = 44
 
     private let titleLabel = UILabel()

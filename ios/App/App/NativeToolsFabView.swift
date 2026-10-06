@@ -24,7 +24,7 @@ final class NativeToolsFabView: UIView {
     var onAction: ((Action) -> Void)?
 
     private let fabSize: CGFloat = 46
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
 
     private var panelContainer: UIView?
     private(set) var isExpanded = false

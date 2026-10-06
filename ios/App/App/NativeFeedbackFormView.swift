@@ -19,7 +19,7 @@ final class NativeFeedbackFormView: UIView {
     var onDismiss: (() -> Void)?
 
     private let maxMessageLength = 500
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private let fieldBackground = UIColor(white: 1, alpha: 0.08)
 
     private let backdrop = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))

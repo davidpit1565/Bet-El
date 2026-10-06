@@ -10,7 +10,7 @@ import UIKit
 /// REQUIRES BUILDING WITH THE iOS 26 SDK (Xcode 26+) - see
 /// NativeToolsFabView's header comment for why.
 final class NativeToastView: UIView {
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private var pill: UIView?
     private var hideWorkItem: DispatchWorkItem?
 

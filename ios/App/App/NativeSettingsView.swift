@@ -58,7 +58,7 @@ final class NativeSettingsView: UIView {
     /// side just clicks the matching real HTML control either way).
     var onAction: ((String, String?) -> Void)?
 
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var sections: [NativeSettingsSection] = []
     /// From the app's own S.lang (Hebrew = RTL), not the device language -
