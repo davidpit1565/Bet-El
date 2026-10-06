@@ -27,6 +27,7 @@ class MainViewController: CAPBridgeViewController {
     private let modal = NativeModalView()
     private let feedbackForm = NativeFeedbackFormView()
     private let toastView = NativeToastView()
+    private let settingsView = NativeSettingsView()
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -49,11 +50,13 @@ class MainViewController: CAPBridgeViewController {
         setupModal()
         setupFeedbackForm()
         setupToast()
+        setupSettingsView()
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
         NativeToastBridge.activeController = self
+        NativeSettingsBridge.activeController = self
     }
 
     override func viewDidLayoutSubviews() {
@@ -261,6 +264,56 @@ class MainViewController: CAPBridgeViewController {
 
     func showToast(message: String) {
         toastView.show(message: message)
+    }
+
+    /// Fills the same content area the WKWebView itself occupies (below the
+    /// native top bar, above the native tab bar) - this REPLACES the
+    /// Settings tab's content visually while shown, not a floating card
+    /// like the modal/toast, since it stands in for the whole screen's
+    /// content rather than a transient dialog. The HTML Settings screen
+    /// keeps rendering underneath the whole time (see syncNativeSettings()
+    /// in index.html) - hiding this view just reveals it again.
+    private func setupSettingsView() {
+        settingsView.translatesAutoresizingMaskIntoConstraints = false
+        settingsView.isHidden = true
+        view.addSubview(settingsView)
+        NSLayoutConstraint.activate([
+            settingsView.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+            settingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            settingsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            settingsView.bottomAnchor.constraint(equalTo: tabBar.topAnchor),
+        ])
+        settingsView.onAction = { [weak self] id, value in
+            self?.relaySettingsAction(id: id, value: value)
+        }
+    }
+
+    // MARK: - Called by NativeSettingsBridge (JS-driven)
+
+    func configureSettings(title: String, sections: [NativeSettingsSection], isDark: Bool) {
+        settingsView.configure(sections: sections, isDark: isDark)
+    }
+
+    func setSettingsVisible(_ visible: Bool) {
+        settingsView.isHidden = !visible
+    }
+
+    /// Encodes `id` (and `value`, if present) as JSON string literals - via
+    /// the `[x]`-then-strip-brackets trick, since `JSONSerialization` only
+    /// accepts a top-level Array/Dictionary, not a bare String - so a
+    /// row id or option value containing a quote or backslash can't break
+    /// out of the generated JS call, same reasoning as
+    /// `relayFeedbackToJS` above.
+    private func jsStringLiteral(_ value: String) -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: [value]),
+              let encoded = String(data: data, encoding: .utf8) else { return "null" }
+        return String(encoded.dropFirst().dropLast())
+    }
+
+    private func relaySettingsAction(id: String, value: String?) {
+        let valueJS = value.map(jsStringLiteral) ?? "null"
+        let js = "window.NativeSettingsHost && window.NativeSettingsHost.onAction(\(jsStringLiteral(id)), \(valueJS))"
+        webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
     /// Hands the typed fields to window.NativeFeedbackHost.send(...) in JS

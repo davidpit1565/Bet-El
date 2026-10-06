@@ -2829,6 +2829,7 @@ function go(tab){
   else if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   else if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setActive({tab:navActiveTab(tab)}).catch(()=>{});
   render();
+  if(NATIVE_SETTINGS){ if(tab==='settings') showNativeSettings(); else hideNativeSettings(); }
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===navActiveTab(tab)));
   requestAnimationFrame(placeNavPill);
   forceScrollTop();
@@ -11059,6 +11060,7 @@ function renderSettings(){
     } else { S.notifEnabled=false; saveS(); renderSettings(); notifCancelDaily(); toast('הודעות כבו'); }
   };
   tr(app);
+  syncNativeSettings();
 }
 function toggleTheme(){ S.theme=S.theme==='dark'?'light':'dark'; saveS(); applySettings(); }
 
@@ -11418,6 +11420,124 @@ let toastT;
    some non-iOS-native callers may still read it), just never shown. */
 const NATIVE_TOAST = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeToast);
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t);} if(S.lang!=='he'&&I18N[S.lang]){const d=I18N[S.lang];if(d[msg])msg=d[msg];else for(const k in d){if(k.length>2&&msg.includes(k))msg=msg.split(k).join(d[k]);}} if(NATIVE_TOAST){ try{ window.Capacitor.Plugins.NativeToast.show({message:msg}); }catch(e){} return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
+
+/* NativeSettings (NativeSettingsBridge.swift/NativeSettingsViewController.
+   swift) shows a real native insetGrouped UITableView as a full-screen
+   overlay above the Settings tab, built from a declarative
+   {title, sections:[{header, rows:[...]}]} spec this function sends over
+   on every renderSettings() - JS stays the single source of truth for
+   every row's translated label/current value (computed exactly the same
+   way renderSettings() itself already computes them), Swift only renders
+   whatever spec it's given and relays taps back via NativeSettingsHost.
+   The real HTML settings screen keeps rendering underneath exactly as
+   before (never skipped) - some rows simply relay to a click()/value+
+   change-event dispatch on the matching already-rendered HTML control
+   rather than duplicating its logic in Swift, so there's only ever one
+   real implementation of each setting's behavior.
+   Three editable-list sections (Pasuk Lefi HaShem names, dedications,
+   yahrzeit) and anything that would otherwise call a browser-privileged,
+   gesture-gated web API (camera/orientation-sensor permission prompts,
+   the Web Share API, a file-picker/download) are deliberately left as
+   plain "disclosure" rows that just dismiss the native table back to
+   that real HTML screen instead of being relayed through a synthetic,
+   non-user-gesture JS click - iOS can silently refuse exactly those APIs
+   when they're not triggered by a real, trusted tap. "link" rows are the
+   one type Swift never relays to JS at all: it opens the URL itself via
+   `UIApplication.shared.open`, which sidesteps that whole question since
+   the tap IS a real native gesture there. */
+const NATIVE_SETTINGS = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeSettings);
+function nsRow(id,type,title,subtitle,extra){ return Object.assign({id,type,title,subtitle:subtitle||''}, extra||{}); }
+function nativeSettingsSpec(){
+  const notifPerm=notifPermGranted()?'granted':'denied';
+  const sections=[];
+  sections.push({header:ckChrome('תצוגה'), rows:[
+    nsRow('theme','toggle',ckChrome('מצב לילה / יום'), S.theme==='dark'?ckChrome('כהה (נייבי-זהב)'):ckChrome('בהיר (קלף)'), {value:S.theme==='dark'}),
+    nsRow('fontScale','stepper',ckChrome('גדל הגופן'),ckChrome('הגדלה / הקטנה של הטקסט'),{value:Math.round(S.fontScale*100)+'%'}),
+    nsRow('wake','toggle',ckChrome('מסך פעיל'),ckChrome('שומר על המסך דלוק בזמן התפלה'),{value:!!S.keepAwake}),
+  ]});
+  sections.push({header:ckChrome('תזכורת יומית'), rows:[
+    nsRow('notif','toggle',ckChrome('הודעת תזכורת לקריאה'), (S.notifEnabled&&notifPerm==='granted')?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!(S.notifEnabled&&notifPerm==='granted')}),
+    ...((window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window)?[nsRow('push','toggle',ckChrome('הודעות על תכן חדש'), S.pushEnabled?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!S.pushEnabled})]:[]),
+  ]});
+  sections.push({header:ckChrome('קריאה יומית'), rows:[
+    nsRow('lang','select',ckChrome('שפה'),ckChrome('שפת הממשק'),{value:S.lang||'he', options:[{value:'he',label:'עברית'},{value:'en',label:'English'},{value:'fr',label:'Français'},{value:'ru',label:'Русский'},{value:'ka',label:'ქართული'}]}),
+    nsRow('tracker','disclosure',ckChrome('מעקב קריאה'), ckExplainerTitle('tehillim')+' · '+ckChrome('תיקוני הזהר')+' · '+ckChrome('שנים מקרא')),
+    nsRow('chokExplainer','disclosure',ckChrome('מה לומדים כל יום'),ckChrome('הסבר קצר על סדר הלמוד בחוק לישראל')),
+  ]});
+  sections.push({header: ckPaceUI().settingsTitle, rows:[
+    nsRow('halacha','select',ckChrome('הלכה'), halachaChoiceLabel(), {value:halachaChoice(), options:[
+      {value:'rambam3', label:ckChrome('רמב״ם')+' · '+ckChrome('שלש שנים · פרק ליום')},
+      {value:'rambam1', label:ckChrome('רמב״ם')+' · '+ckChrome('שנה · שלשה פרקים')},
+    ]}),
+    ...(MCYC?[nsRow('musarWork','select',ckChrome('מוסר'),ckChrome('3 יחידות ליום'),{value:S.musarWork||'reshit', options:MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>({value:w.key,label:ckMusarUI()[w.key]}))})]:[]),
+    nsRow('division','segmented',ckChrome('שיטת חלוקה'), ckDivisionLabel(), {value:(S.division!=='monthly'&&S.division!=='weekly')?'monthlyStd':S.division, options:[{value:'monthlyStd',label:ckChrome('חדשי')},{value:'monthly',label:ckChrome('חדשי (5 ליום)')},{value:'weekly',label:ckChrome('שבועי')}]}),
+  ]});
+  sections.push({header:ckChrome('מקום וזמנים'), rows:[
+    nsRow('gps','button',ckChrome('השתמש במקום שלי'),ckChrome('אתור אוטומטי לפי GPS')),
+    nsRow('compass','disclosure',ckChrome('מצפן'),ckChrome('כוון לקדש הקדשים בירושלים')),
+    nsRow('tefillinMirror','disclosure',ckChrome('מראה לתפלין'),ckChrome('בדקו שהתפלין מונחים ישר')),
+    nsRow('region','segmented',ckChrome('ישראל / חוץ לארץ'),ckChrome('קובע יום טוב שני, חול המועד וכדומה בלוח השנה'),{value:S.calRegion||'auto', options:[{value:'auto',label:ckChrome('אוטומטי')},{value:'il',label:ckChrome('ישראל')},{value:'chul',label:ckChrome('חוץ לארץ')}]}),
+  ]});
+  sections.push({header:ckChrome('פָּסוּק לְפִי הַשֵּׁם'), rows:[
+    nsRow('hebrewNames','disclosure', (S.hebrewNames&&S.hebrewNames.length)?S.hebrewNames.join(' · '):ckChrome('אין שמות עדין')),
+  ]});
+  sections.push({header:ckChrome('הקדשת הקריאה'), rows:[
+    nsRow('dedications','disclosure', dedicationLine()||ckChrome('אין הקדשות עדין')),
+  ]});
+  sections.push({header:ckChrome('יאהרצייט · זכרון'), rows:[
+    nsRow('yahrzeit','disclosure', getYahrzeits().length ? getYahrzeits().map(y=>y.name).join(' · ') : ckChrome('אין זכרונות עדין')),
+  ]});
+  sections.push({header:ckChrome('שתוף'), rows:[
+    nsRow('shareApp','disclosure',ckChrome('שתף את האפליקציה'),ckChrome('שלח לחברים בקהלה')),
+    nsRow('shareAppQR','disclosure',ckChrome('שתף קוד QR'),ckChrome('תמונה מעצבת לסריקה')),
+    nsRow('bkExport','disclosure',ckChrome('גבוי לקבץ'),ckChrome('שמירת התקדמות, מועדפים והגדרות')),
+    nsRow('bkImport','disclosure',ckChrome('שחזור מגבוי'),ckChrome('טעינת קבץ גבוי קים')),
+    nsRow('resetProg','button',ckChrome('אפוס מעקב היום'),ckChrome('נקה סימון פרקים שנקראו')),
+  ]});
+  sections.push({header:ckChrome('משוב ותמיכה'), rows:[
+    nsRow('feedback','button',ckChrome('דווח והצעות לשפור'),ckChrome('דווח על תקלות והצעות לשפור')),
+    nsRow('rate','link',ckChrome('דרגו אותנו ב-App Store'),ckChrome('דרוג עוזר לנו להגיע לעוד אנשים'),{url:APP_REVIEW_URL}),
+  ]});
+  sections.push({header:ckChrome('משפטי'), rows:[
+    nsRow('privacy','link',ckChrome('מדיניות פרטיות'),ckChrome('מה נשמר ואיפה'),{url:'https://davidpit1565.github.io/Bet-El/privacy.html'}),
+    nsRow('terms','link',ckChrome('תנאי שמוש'),ckChrome('תנאים לשמוש באפליקציה'),{url:'https://davidpit1565.github.io/Bet-El/terms.html'}),
+  ]});
+  return {title:ckChrome('הגדרות'), isDark:S.theme==='dark', sections};
+}
+function syncNativeSettings(){
+  if(!NATIVE_SETTINGS || TAB!=='settings') return;
+  try{ window.Capacitor.Plugins.NativeSettings.configure(nativeSettingsSpec()).catch(()=>{}); }catch(e){}
+}
+function showNativeSettings(){ if(!NATIVE_SETTINGS) return; try{ window.Capacitor.Plugins.NativeSettings.show().catch(()=>{}); }catch(e){} }
+function hideNativeSettings(){ if(!NATIVE_SETTINGS) return; try{ window.Capacitor.Plugins.NativeSettings.hide().catch(()=>{}); }catch(e){} }
+window.NativeSettingsHost = {
+  onAction(id, value){
+    const click=sel=>{ const el=document.querySelector(sel); if(el) el.click(); };
+    switch(id){
+      case 'theme': click('#tgTheme'); break;
+      case 'wake': click('#tgWake'); break;
+      case 'fontScaleMinus': click('#fsMinus'); break;
+      case 'fontScalePlus': click('#fsPlus'); break;
+      case 'notif': click('#tgNotif'); break;
+      case 'push': click('#tgPush'); break;
+      case 'lang': { const el=document.getElementById('selLang'); if(el){ el.value=value; el.dispatchEvent(new Event('change')); } break; }
+      case 'halacha': { const el=document.getElementById('selHalacha'); if(el){ el.value=value; el.dispatchEvent(new Event('change')); } break; }
+      case 'musarWork': { const el=document.getElementById('selMusarWork'); if(el){ el.value=value; el.dispatchEvent(new Event('change')); } break; }
+      case 'division': click(`[data-div="${value}"]`); break;
+      case 'region': click(`[data-region="${value}"]`); break;
+      case 'gps': click('#useGPS'); break;
+      case 'resetProg': click('#resetProg'); break;
+      case 'feedback': click('#openFeedback'); break;
+      case 'compass': click('#openCompass'); break;
+      case 'tefillinMirror': click('#openTefillinMirror'); break;
+      case 'tracker': click('#settingsTracker'); break;
+      case 'chokExplainer': click('#settingsChokExplainer'); break;
+      case 'hebrewNames': case 'dedications': case 'yahrzeit':
+      case 'shareApp': case 'shareAppQR': case 'bkExport': case 'bkImport':
+        hideNativeSettings(); break;
+    }
+  }
+};
 
 /* ================= BOOT ================= */
 /* Every screen nested under the Library nav icon (renderLibrary() itself,
