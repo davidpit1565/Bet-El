@@ -5,7 +5,9 @@ var capacitorNativeBridge = (function (core) {
     // Liquid Glass UI: NativeTopBarBridge.swift, NativeToolsFabBridge.swift,
     // NativeModalBridge.swift, NativeSettingsBridge.swift,
     // NativeToastBridge.swift, NativeHapticsBridge.swift,
-    // NativeTabBarBridge.swift) - unlike @capacitor/app or
+    // NativeTabBarBridge.swift, plus the unrelated-to-Liquid-Glass
+    // BetElWidgetBridge.swift used by updateSharedData() to push today's
+    // data to the home-screen widget) - unlike @capacitor/app or
     // @capacitor/local-notifications, they ship no npm package of their
     // own, so there is no vendored UMD bundle that calls
     // `core.registerPlugin(...)` for them. Without that JS-side call,
@@ -28,6 +30,7 @@ var capacitorNativeBridge = (function (core) {
         core.registerPlugin('NativeToast');
         core.registerPlugin('NativeHaptics');
         core.registerPlugin('NativeTabBar');
+        core.registerPlugin('BetElWidgetBridge');
     }
 
     return core;
