@@ -147,15 +147,29 @@ class MainViewController: CAPBridgeViewController {
         miniSideConstraint?.isActive = true
     }
 
+    /// The app's own emblem (the bundled web icon, public/icon-192.png),
+    /// clipped to a circle - shown in the minimized tab bar instead of the
+    /// last-tapped tab's icon, by user request. Falls back to a fixed
+    /// symbol if the file isn't there for some reason.
+    private static let appLogo: UIImage? = {
+        guard let path = Bundle.main.path(forResource: "icon-192", ofType: "png", inDirectory: "public"),
+              let src = UIImage(contentsOfFile: path) else { return nil }
+        let size = CGSize(width: 40, height: 40)
+        return UIGraphicsImageRenderer(size: size).image { _ in
+            UIBezierPath(ovalIn: CGRect(origin: .zero, size: size)).addClip()
+            src.draw(in: CGRect(origin: .zero, size: size))
+        }.withRenderingMode(.alwaysOriginal)
+    }()
+
     private func refreshMiniTabIcon() {
-        let id = tabBar.selectedItem?.accessibilityIdentifier ?? "home"
-        let icon = MainViewController.tabOrder.first { $0.id == id }?.icon ?? "house.fill"
-        let image = UIImage(systemName: icon, withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold))
+        let image = MainViewController.appLogo
+            ?? UIImage(systemName: "house.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold))
         if #available(iOS 26.0, *) {
             var config = UIButton.Configuration.glass()
             config.image = image
             config.cornerStyle = .capsule
             config.baseForegroundColor = MainViewController.tabTint
+            config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
             miniTabButton.configuration = config
         } else {
             var config = UIButton.Configuration.filled()
@@ -163,7 +177,8 @@ class MainViewController: CAPBridgeViewController {
             config.cornerStyle = .capsule
             config.background.visualEffect = UIBlurEffect(style: .systemMaterial)
             config.baseBackgroundColor = .clear
-            config.baseForegroundColor = .betelGold
+            config.baseForegroundColor = MainViewController.tabTint
+            config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
             miniTabButton.configuration = config
         }
     }

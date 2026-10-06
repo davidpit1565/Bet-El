@@ -184,9 +184,13 @@ in English as usual.
   Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
   first use (needs internet once; nothing at boot). The bayit's bottom edge
   belongs on the hairline (where an infant's skull is soft), centered
-  between the eyes - NOT on the forehead. Hairline = first non-skin color
-  scanning up the center line vs. cheek/brow skin references; remembered
-  per session once seen without a bayit covering it.
+  between the eyes - NOT on the forehead. Hairline comes from MediaPipe's
+  Hair Segmenter mask (first hair pixel scanning up from the brows), with a
+  skin-color fallback; remembered per session once seen without a bayit
+  covering it. The overlay must never draw crossing lines (a center line
+  over a hairline line read as a cross) - corner brackets + a dotted
+  hairline curve only. The color-only hairline proved ~4cm too low on a
+  real photo, which is why segmentation is used.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
