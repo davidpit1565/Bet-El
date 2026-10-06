@@ -10,6 +10,8 @@
 	<string>המיקום משמש לחישוב זמני תפילה וכיוון המצפן לבית המקדש</string>
 	<key>NSMotionUsageDescription</key>
 	<string>חיישן הכיוון משמש להצגת מצפן המורה על כיוון התפילה לירושלים</string>
+	<key>NSCameraUsageDescription</key>
+	<string>המצלמה משמשת להצגת מראה להנחת התפילין</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
