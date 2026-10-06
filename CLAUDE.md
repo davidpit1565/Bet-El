@@ -180,6 +180,16 @@ in English as usual.
   Search is an item inside the native tab bar (`NativeSearchHost.open()`),
   the tab bar minimizes Apple Music-style on scroll, and the reader tools
   "…" button lives in the native header row (`layoutToolsFab()`).
+- **Dev builds don't count as Firebase users.** Every Xcode install (delete +
+  reinstall = fresh localStorage) used to bump the public visit counter,
+  live presence and Analytics. `MainViewController.webViewConfiguration`
+  injects `window.__BETEL_DEV_BUILD` (true when there's no App Store/
+  TestFlight receipt - Xcode/simulator installs), and index.html's Firebase
+  module (`IS_DEV_BUILD`, also true on localhost) skips the visit
+  increment, presence write and `getAnalytics()` for those. Reads/listeners
+  stay on. The existing inflated `stats/visits` count was never touched -
+  it can be lowered by hand in the Firebase Console if wanted.
+
 - **Tefillin Mirror placement guide** (`MirrorGuide` in index.html): MediaPipe
   Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
   first use (needs internet once; nothing at boot). The bayit's bottom edge

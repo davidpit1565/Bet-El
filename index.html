@@ -7640,19 +7640,30 @@ function renderDayDetail(hd, events){
   el.querySelectorAll('[data-open]').forEach(d=>d.onclick=()=>{ const [a,b]=d.dataset.open.split(',').map(Number); openReader(chaptersOf([a,b]),{daily:false}); });
   const shareBtn=document.getElementById('ddShare'); if(shareBtn) shareBtn.onclick=()=>shareDayDetail(hd,events,weekKey);
 }
-/* Composes the same info already on screen (Hebrew+civil date, events,
-   parasha, candle-lighting/havdala when relevant) as plain text, reusing
-   the exact same navigator.share/clipboard fallback pattern sharePrayer()
-   already uses elsewhere rather than inventing a second one. */
+/* Composes everything the day card shows as plain text - Hebrew+civil date,
+   events, parasha, the two Tehillim portions, the location and EVERY zman
+   listed on the card (same ZMANIM_LIVE/ZMANIM_READY filter the card uses, so
+   the two never drift apart), plus candle-lighting/havdala when relevant -
+   in the app's current language, reusing the exact same
+   navigator.share/clipboard fallback pattern sharePrayer() already uses. */
 function shareDayDetail(hd,events,weekKey){
   const g=hd.greg();
+  const T=ckChrome;
+  const mRange=monthlyPortion(hd), wRange=weeklyPortion(hd);
+  const zlist=zmanimList(g).filter(z=>ZMANIM_LIVE||ZMANIM_READY.includes(z.key));
   const lines=[`${dowName(hd)} · ${heNum(hd.getDate())} ${monthName(hd)}`, g.toLocaleDateString(civilDateLocale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'})];
-  if(events.length) lines.push(events.join(' · '));
-  if(weekKey) lines.push('פרשת השבוע: '+parshaName(weekKey));
+  if(events.length) lines.push(events.map(e=>T(e)).join(' · '));
+  if(weekKey) lines.push(T('פָּרָשַׁת הַשָּׁבוּעַ')+': '+parshaName(weekKey));
+  lines.push('');
+  lines.push(T('קְרִיאָה חָדְשִׁית')+': '+heNum(mRange[0])+'–'+heNum(mRange[1]));
+  lines.push(T('קְרִיאָה שְׁבוּעִית')+': '+heNum(wRange[0])+'–'+heNum(wRange[1]));
+  lines.push('');
+  lines.push('📍 '+T(LOC.name));
+  zlist.forEach(z=>lines.push(T(z.label)+': '+fmtTime(z.date)));
   const st=shabbatTimes(hd);
-  if(st.candle) lines.push('הדלקת נרות: '+fmtTime(st.candle));
-  if(st.havdala) lines.push('צאת השבת/חג: '+fmtTime(st.havdala));
-  const text=lines.join('\n')+'\n\n— בית א״ל';
+  if(st.candle) lines.push(T('הַדְלָקַת נֵרוֹת')+': '+fmtTime(st.candle));
+  if(st.havdala) lines.push(T('צֵאת הַשַּׁבָּת / חַג')+': '+fmtTime(st.havdala));
+  const text=lines.join('\n')+'\n\n— '+T('בית א״ל');
   if(navigator.share){ navigator.share({text}).catch(()=>{}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>toast('הַטֶּקְסְט הֹעֻתַּק')).catch(()=>{}); }
 }
@@ -12824,7 +12835,16 @@ window.shareQR = shareQR;
     databaseURL: "https://bet-el-e6812-default-rtdb.europe-west1.firebasedatabase.app"
   };
   const firebaseApp = initializeApp(firebaseConfig);
-  getAnalytics(firebaseApp);
+  /* Development builds must not inflate the real numbers: every Xcode run
+     on a device (delete + reinstall = fresh localStorage) used to count as a
+     brand-new user in the visit counter, in the live-presence list and in
+     Analytics. A build counts as "dev" when the iOS shell injected
+     window.__BETEL_DEV_BUILD (MainViewController: no App Store/TestFlight
+     receipt, i.e. installed straight from Xcode or the simulator) or when
+     it's served from localhost (local servers, Playwright sweeps). */
+  const IS_DEV_BUILD = window.__BETEL_DEV_BUILD === true
+    || ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname);
+  if(!IS_DEV_BUILD) getAnalytics(firebaseApp);
 
   // Public visit counter (Firestore stats/visits), shown on the home page
   const db = getFirestore(firebaseApp);
@@ -12844,6 +12864,7 @@ window.shareQR = shareQR;
     }
   }, () => {});
   (async () => {
+    if(IS_DEV_BUILD) return;
     if(localStorage.getItem('betel_visit_counted')) return;
     localStorage.setItem('betel_visit_counted', '1');
     try {
@@ -12878,7 +12899,7 @@ window.shareQR = shareQR;
       window.__paintLiveCount();
     }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
     onValue(ref(rtdb, '.info/connected'), (snap) => {
-      if(snap.val() === true){
+      if(snap.val() === true && !IS_DEV_BUILD){
         const myRef = push(presenceListRef);
         onDisconnect(myRef).remove();
         set(myRef, true).catch((err) => { console.error('[betel presence] write blocked, check Realtime Database rules:', err); });

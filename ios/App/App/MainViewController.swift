@@ -1,4 +1,5 @@
 import UIKit
+import WebKit
 import Capacitor
 
 /// Replaces the plain `CAPBridgeViewController` as the app's root view
@@ -64,6 +65,23 @@ class MainViewController: CAPBridgeViewController {
     /// proxies (so index.html hides its HTML nav/FAB/etc. in favor of the
     /// native ones), but every call into them rejects as unimplemented and
     /// no native UI ever appears.
+    /// Tells the web app whether this is a development install, before any
+    /// page script runs: there is no App Store/TestFlight receipt on a build
+    /// installed straight from Xcode (Debug or Release) or on the simulator.
+    /// index.html uses `window.__BETEL_DEV_BUILD` to keep such installs out
+    /// of the Firebase visit counter, live presence and Analytics, so
+    /// repeated test installs don't inflate the real user numbers.
+    override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
+        let configuration = super.webViewConfiguration(for: instanceConfiguration)
+        let hasReceipt = Bundle.main.appStoreReceiptURL
+            .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        let script = WKUserScript(
+            source: "window.__BETEL_DEV_BUILD = \(hasReceipt ? "false" : "true");",
+            injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        configuration.userContentController.addUserScript(script)
+        return configuration
+    }
+
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeTabBarBridge())
         bridge?.registerPluginInstance(NativeToolsFabBridge())
