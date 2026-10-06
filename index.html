@@ -1765,6 +1765,11 @@ const I = {
      recognizable in both light and dark theme, not tint with the
      surrounding text/icon color. */
   tefillin:'<svg viewBox="0 0 48 48" fill="none"><rect x="6" y="9" width="17" height="14" rx="2.5" fill="#8a6245" stroke="#f3e3af" stroke-width="1.5"/><rect x="6" y="9" width="17" height="5.5" rx="2.5" fill="#a9815f" stroke="#f3e3af" stroke-width="1.5"/><path d="M10 14.5q1-4.3 2.1 0M14.3 14.5q1-4.3 2.1 0M18.6 14.5q1-4.3 2.1 0" stroke="#3b2a20" stroke-width="1.3" stroke-linecap="round"/><path d="M8 23q-1 10 1.5 17M21 23q1 10-1.5 17" stroke="#c9a06e" stroke-width="2.6" fill="none" stroke-linecap="round"/><rect x="25" y="21" width="15" height="12" rx="2.5" fill="#8a6245" stroke="#f3e3af" stroke-width="1.5"/><rect x="25" y="21" width="15" height="4.5" rx="2.5" fill="#a9815f" stroke="#f3e3af" stroke-width="1.5"/><path d="M27 33q6 6 10 15" stroke="#c9a06e" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>',
+  /* A plain currentColor line-icon twin of the above, for spots (the
+     Shacharit reader's own header button) that sit among other plain
+     icon-btns - the colorful fixed-color version reads as a clashing
+     outlier next to monochrome siblings there. */
+  tefillinMono:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="8" height="7" rx="1.4"/><path d="M7 12v8M4 8.5h8"/><rect x="13" y="11" width="7" height="6" rx="1.3"/><path d="M15 17v4M13 14h7"/></svg>',
   shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
   doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></svg>',
@@ -8737,6 +8742,16 @@ function renderPrayerReader(){
 
 /* ================= SIDDUR (screens) ================= */
 let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 'mincha' | 'arvit' | 'roshChodesh'
+/* Opening the Tefillin Mirror from inside the reader (Shacharit's own
+   header shortcut) returns here via a plain go('siddurReader') - not
+   openSiddurPrayer(), which is the only thing that looks up a saved
+   sidBmGet() bookmark - so without this, drawSiddurReader()'s innerHTML
+   rebuild would silently reset the scroll to the top, losing exactly the
+   "don't lose where I stopped praying" place the mirror button exists to
+   avoid. A plain raw scroll-position save/restore, independent of the
+   bookmark/resume-banner system entirely, since this is a same-visit
+   round trip, not a "come back later" resume. */
+let SID_RETURN_SCROLL = null;
 const SIDDUR_PRAYER_NAMES = {birkot:'ברכות השחר', talitTefilin:'סדר טלית ותפלין', shacharit:'שחרית', mincha:'מנחה', arvit:'ערבית', roshChodesh:'סדר ראש חדש', omer:'ספירת העמר', levana:'ברכת הלבנה', kriatShemaAlHamita:'קריאת שמע שעל המיטה', tikunChatzot:'תקון חצות', selichot:'סליחות'};
 /* home screen's own "current prayer" tile only - shown big/bold like a
    title rather than read as a sentence, so (per the nikud-on-request
@@ -10427,12 +10442,33 @@ function drawSiddurReader(){
   const info = siddurDayInfo(currentHDate());
   const secs = siddurSections(dateObj, info, p);
   if(!secs.length){ toast('אֵין תֹּכֶן לְהַיּוֹם'); return go('siddurHome'); }
-  syncNativeTopBar(SIDDUR_PRAYER_NAMES[p],'siddurHome');
+  /* Shacharit alone gets a permanent Tefillin Mirror shortcut right in its
+     own header - per explicit user request, always reachable without
+     losing the reading scroll position (a header icon, not something in
+     the page's own scrollable flow). Native gets it as a real top-bar
+     trailing action (reusing the actions mechanism every other
+     favorite/share/QR button already uses); the HTML fallback button
+     below covers web/PWA/Android, where this .topbar is never hidden. */
+  const openMirrorFromReader=()=>{
+    // Whichever of these is actually the live scrolling element varies by
+    // platform/webview (forceScrollTop() below resets all three for the
+    // same reason) - take the largest rather than guessing which one.
+    SID_RETURN_SCROLL=Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0);
+    openTefillinMirror('siddurReader');
+  };
+  const mirrorAction = p==='shacharit' ? {actions:[{id:'tefillinMirror',icon:'camera.viewfinder'}], handlers:{tefillinMirror:openMirrorFromReader}} : null;
+  // Matches the HTML back button's own wiring below (sidTrackPosition()
+  // saves the resume/scroll position before leaving) - a plain 'siddurHome'
+  // string here would have skipped that on the native back button.
+  syncNativeTopBar(SIDDUR_PRAYER_NAMES[p], ()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); }, mirrorAction);
   app.innerHTML = `
   <div class="topbar">
   <button class="icon-btn tb-back" onclick="go('siddurHome')">${I.prev}</button>
   <div class="tb-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
-  ${toolsFab({scroll:true})}</div>
+  <div style="display:flex;align-items:center;gap:4px">
+  ${p==='shacharit'?`<button class="icon-btn" id="sidTefillinMirror" aria-label="מראה לתפלין">${I.tefillinMono}</button>`:''}
+  ${toolsFab({scroll:true})}
+  </div></div>
   <div class="view prayer-reader-page">
     <div class="prayer-reader-header">
       <div class="prayer-reader-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
@@ -10454,9 +10490,19 @@ function drawSiddurReader(){
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
   const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openSiddurPrayer('selichot');
   document.querySelector('.tb-back').onclick=()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); };
+  const tm=document.getElementById('sidTefillinMirror'); if(tm) tm.onclick=openMirrorFromReader;
   const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
   const rn=document.getElementById('sidResumeNew'); if(rn) rn.onclick=sidRestart;
   document.addEventListener('scroll', sidTrackScroll, {passive:true, capture:true});
+  if(SID_RETURN_SCROLL!=null){
+    // go()'s own forceScrollTop() fights any scroll restore attempted
+    // within the first ~8 animation frames (it forces back to 0 on each
+    // one, meant for the common "new screen should start at the top"
+    // case) - this one screen needs the opposite, so the restore has to
+    // wait until well after that loop gives up rather than racing it.
+    const y=SID_RETURN_SCROLL; SID_RETURN_SCROLL=null;
+    setTimeout(()=>{ document.documentElement.scrollTop=y; document.body.scrollTop=y; window.scrollTo(0,y); }, 260);
+  }
   wireToolsFab();
   tr(app);
 }
