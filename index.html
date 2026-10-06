@@ -1585,10 +1585,22 @@ window.PRAYERS = {
      below, and the App plugin used by checkAppUpdate() to read the
      installed version, when running inside the iOS/Android app shells -
      both are harmless no-op web fallbacks in a plain browser (PWA/GitHub
-     Pages/Vercel). Re-copy them if any of these packages is upgraded. -->
+     Pages/Vercel). Re-copy them if any of these packages is upgraded.
+
+     capacitor-native-bridge.js (hand-written, lives in the repo root, not
+     vendored from any package) registers this app's own custom native-only
+     Swift plugins (NativeTopBar, NativeToolsFab, NativeModal,
+     NativeSettings, NativeToast, NativeHaptics, NativeTabBar - see
+     ios/App/App/Native*Bridge.swift) - without this file calling
+     `registerPlugin()` for each one, `window.Capacitor.Plugins.<Name>`
+     never exists no matter how correct the Swift side is, since Capacitor
+     only creates that JS proxy when registerPlugin() runs client-side. Add
+     a new `core.registerPlugin('X')` line there (and a matching bridge
+     .swift) for any future native-only plugin. -->
 <script src="capacitor-core.js"></script>
 <script src="capacitor-local-notifications.js"></script>
 <script src="capacitor-app.js"></script>
+<script src="capacitor-native-bridge.js"></script>
 <script>/* ================= BET EL · TEHILLIM · APP ================= */
 (function(){
 'use strict';
