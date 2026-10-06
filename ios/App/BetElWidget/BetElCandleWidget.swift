@@ -61,25 +61,24 @@ private struct BetElCandleWidgetView: View {
         let palette = BetElTheme.palette(for: entry.theme)
         let align: HorizontalAlignment = WidgetL10n.isRTL(entry.lang) ? .trailing : .leading
         let fAlign: Alignment = WidgetL10n.isRTL(entry.lang) ? .trailing : .leading
-        ZStack {
-            LinearGradient(colors: [palette.bgTop, palette.bgBottom], startPoint: .top, endPoint: .bottom)
-            VStack(alignment: align, spacing: 6) {
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(palette.gold)
-                    .frame(maxWidth: .infinity, alignment: fAlign)
-                Spacer()
-                Text(entry.candleLabel ?? WidgetL10n.t("candleLighting", lang: entry.lang))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(palette.inkSoft)
-                    .lineLimit(2)
-                    .multilineTextAlignment(WidgetL10n.isRTL(entry.lang) ? .trailing : .leading)
-                Text(timeStr(entry.candleTime))
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(palette.goldBright)
-            }
-            .padding(14)
+        VStack(alignment: align, spacing: 6) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: 16))
+                .foregroundColor(palette.gold)
+                .frame(maxWidth: .infinity, alignment: fAlign)
+            Spacer()
+            Text(entry.candleLabel ?? WidgetL10n.t("candleLighting", lang: entry.lang))
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(palette.inkSoft)
+                .lineLimit(2)
+                .multilineTextAlignment(WidgetL10n.isRTL(entry.lang) ? .trailing : .leading)
+            Text(timeStr(entry.candleTime))
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(palette.goldBright)
         }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .widgetBackground(palette: palette)
     }
 
     private func timeStr(_ date: Date?) -> String {

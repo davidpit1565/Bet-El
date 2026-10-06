@@ -102,30 +102,28 @@ private struct SmallWidgetView: View {
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
         let align = hAlign(entry.lang)
-        ZStack {
-            BackgroundView(palette: palette)
-            VStack(alignment: align, spacing: 6) {
-                HStack {
-                    if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
-                    Spacer()
-                    if align == .trailing { StreakBadge(count: entry.streakCount, palette: palette) }
-                }
+        VStack(alignment: align, spacing: 6) {
+            HStack {
+                if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
                 Spacer()
-                Text(entry.hebrewDateText)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(palette.ink)
-                    .multilineTextAlignment(textAlign(entry.lang))
-                    .lineLimit(2)
-                if let t = entry.nextZmanTime {
-                    HStack(spacing: 4) {
-                        Text(timeString(t)).font(.system(size: 12, weight: .bold))
-                        Text(entry.nextZmanLabel).font(.system(size: 11))
-                    }
-                    .foregroundColor(palette.gold)
-                }
+                if align == .trailing { StreakBadge(count: entry.streakCount, palette: palette) }
             }
-            .padding(12)
+            Spacer()
+            Text(entry.hebrewDateText)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(palette.ink)
+                .multilineTextAlignment(textAlign(entry.lang))
+                .lineLimit(2)
+            if let t = entry.nextZmanTime {
+                HStack(spacing: 4) {
+                    Text(timeString(t)).font(.system(size: 12, weight: .bold))
+                    Text(entry.nextZmanLabel).font(.system(size: 11))
+                }
+                .foregroundColor(palette.gold)
+            }
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -137,9 +135,7 @@ private struct MediumWidgetView: View {
         let palette = BetElTheme.palette(for: entry.theme)
         let align = hAlign(entry.lang)
         let fAlign = frameAlign(entry.lang)
-        ZStack {
-            BackgroundView(palette: palette)
-            HStack(alignment: .top, spacing: 0) {
+        HStack(alignment: .top, spacing: 0) {
                 VStack(alignment: align, spacing: 6) {
                     Text(entry.hebrewDateText)
                         .font(.system(size: 14, weight: .semibold))
@@ -169,9 +165,9 @@ private struct MediumWidgetView: View {
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, alignment: fAlign)
-            }
-            .padding(14)
         }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -183,9 +179,7 @@ private struct LargeWidgetView: View {
         let palette = BetElTheme.palette(for: entry.theme)
         let align = hAlign(entry.lang)
         let fAlign = frameAlign(entry.lang)
-        ZStack {
-            BackgroundView(palette: palette)
-            VStack(alignment: align, spacing: 10) {
+        VStack(alignment: align, spacing: 10) {
                 HStack {
                     if align == .leading { StreakBadge(count: entry.streakCount, palette: palette) }
                     Spacer()
@@ -228,9 +222,9 @@ private struct LargeWidgetView: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(palette.gold)
                     .frame(maxWidth: .infinity, alignment: fAlign)
-            }
-            .padding(16)
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -257,6 +251,29 @@ struct BetElWidgetEntryView: View {
         // locale (which the widget extension would otherwise pick up).
         .environment(\.layoutDirection, .leftToRight)
         .widgetURL(entry.deepLinkURL)
+        .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+    }
+}
+
+extension View {
+    /// `.containerBackground(for: .widget)` (iOS 17+) is what lets the
+    /// system render this widget's background as part of the real
+    /// tinted/"Liquid Glass" Home Screen appearance modes the user can
+    /// pick in the widget editor - a plain `.background()` behind the
+    /// content (the old approach every view here used) opts out of that
+    /// entirely and always shows this flat gradient regardless of what
+    /// appearance the user chose. Falls back to the old plain background
+    /// below iOS 17 (this extension's own deployment target), where
+    /// `containerBackground` doesn't exist at all.
+    @ViewBuilder
+    func widgetBackground(palette: BetElTheme.Palette) -> some View {
+        if #available(iOS 17.0, *) {
+            self.containerBackground(for: .widget) {
+                BackgroundView(palette: palette)
+            }
+        } else {
+            self.background(BackgroundView(palette: palette))
+        }
     }
 }
 
