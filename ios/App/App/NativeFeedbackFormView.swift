@@ -284,6 +284,7 @@ final class NativeFeedbackFormView: UIView {
     }
 
     @objc private func tapSend() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
         onSend?(nameField.text ?? "", emailField.text ?? "", messageView.text ?? "")
     }
 

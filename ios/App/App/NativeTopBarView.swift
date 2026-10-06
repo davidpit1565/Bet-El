@@ -15,6 +15,17 @@ import UIKit
 final class NativeTopBarView: UIView {
     var onBack: (() -> Void)?
 
+    /// Long-pressing the title reveals a real `UIContextMenuInteraction`
+    /// quick-jump menu ("home"/"settings"/"share") - the one piece of the
+    /// screen that's genuine native UIKit content (everything below the
+    /// bar is the WKWebView), so it's also the only spot a true system
+    /// context menu can attach to; the web app's own cards/tiles are plain
+    /// HTML, and WKWebView's own context-menu customization hook
+    /// (`webView(_:contextMenuConfigurationForElement:completionHandler:)`)
+    /// only fires for links/images, not arbitrary custom DOM elements, so
+    /// it can't give those tiles one.
+    var onQuickAction: ((String) -> Void)?
+
     private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
     private let barHeight: CGFloat = 44
 
@@ -64,6 +75,8 @@ final class NativeTopBarView: UIView {
         titleLabel.textColor = goldColor
         titleLabel.numberOfLines = 1
         titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.isUserInteractionEnabled = true
+        titleLabel.addInteraction(UIContextMenuInteraction(delegate: self))
         contentView.addSubview(titleLabel)
 
         let widthConstraint = backButton.widthAnchor.constraint(equalToConstant: 34)
@@ -88,11 +101,16 @@ final class NativeTopBarView: UIView {
     /// app's own I.prev getter, which flips by document direction) rather
     /// than relying on automatic UIKit mirroring, since the app's RTL
     /// state is driven by its own language setting, not the device's.
-    func configure(title: String, hasBack: Bool, isRTL: Bool) {
+    private var quickActionLabels: (home: String, settings: String, share: String) = ("Home", "Settings", "Share")
+
+    func configure(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String) {
         titleLabel.text = title
         backButton.isHidden = !hasBack
         let symbol = isRTL ? "chevron.right" : "chevron.left"
         backButton.setImage(UIImage(systemName: symbol), for: .normal)
+        if !homeLabel.isEmpty { quickActionLabels.home = homeLabel }
+        if !settingsLabel.isEmpty { quickActionLabels.settings = settingsLabel }
+        if !shareLabel.isEmpty { quickActionLabels.share = shareLabel }
         // Always keep a valid horizontal constraint active, even when
         // hidden, so Auto Layout never has an ambiguous/unconstrained
         // backButton frame.
@@ -113,6 +131,27 @@ final class NativeTopBarView: UIView {
             let c = backButton.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 8)
             c.isActive = true
             leadingConstraint = c
+        }
+    }
+}
+
+extension NativeTopBarView: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(
+        _ interaction: UIContextMenuInteraction,
+        configurationForMenuAtLocation location: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self = self else { return nil }
+            let home = UIAction(title: self.quickActionLabels.home, image: UIImage(systemName: "house.fill")) { _ in
+                self.onQuickAction?("home")
+            }
+            let settings = UIAction(title: self.quickActionLabels.settings, image: UIImage(systemName: "gearshape.fill")) { _ in
+                self.onQuickAction?("settings")
+            }
+            let share = UIAction(title: self.quickActionLabels.share, image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                self.onQuickAction?("share")
+            }
+            return UIMenu(title: "", children: [home, settings, share])
         }
     }
 }

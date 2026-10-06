@@ -10,8 +10,8 @@ in English as usual.
   `<script>` wrapped in a single top-level IIFE `(function(){ ... })();`.
   Nothing inside is reachable from outside except the handful explicitly
   exported near the end via `window.x = x;` (currently: `go`,
-  `celebrateMilestone`, `ckMilestoneCheck`, `openPrayer`, `sharePrayer`,
-  `shareQR`). This means Playwright's `page.evaluate()` **cannot call any
+  `celebrateMilestone`, `ckMilestoneCheck`, `openPrayer`, `shareApp`,
+  `sharePrayer`, `shareQR`). This means Playwright's `page.evaluate()` **cannot call any
   other internal function or read any other internal variable** — testing
   must click real DOM elements (`document.getElementById(...).click()`,
   `document.querySelector(...)`) or use the exposed `window.go(tab)`.

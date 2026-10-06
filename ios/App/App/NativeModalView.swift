@@ -164,7 +164,10 @@ final class NativeModalView: UIView {
         }
     }
 
-    @objc private func tapPrimary() { onPrimary?() }
+    @objc private func tapPrimary() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        onPrimary?()
+    }
 
     func dismiss() {
         guard let cardView = card else { isHidden = true; return }

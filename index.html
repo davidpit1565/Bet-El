@@ -2116,7 +2116,17 @@ function openPrayer(prayerKey, fromGroup){
 }
 
 const DEF = { theme:'light', fontScale:1, division:'monthlyStd', sunsetRoll:true, lang:'he', dedType:'none', dedName:'', hebrewName:'', hebrewNames:[], remindOn:false, remindTime:'20:00', notifEnabled:true, keepAwake:true, pushEnabled:true, calRegion:'auto' };
-function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){} }
+/* navigator.vibrate() is unsupported in iOS's WKWebView (and Safari in
+   general) - every one of this function's many existing call sites below
+   was already silently a no-op on the native iOS build. NATIVE_HAPTICS
+   (defined further down, alongside NATIVE_TABBAR/NATIVE_TOOLS_FAB) gives
+   them a real UIFeedbackGenerator tap there instead, without having to
+   touch each call site - heavier durations (used for the two "grand"
+   celebration calls) map to a stronger impact style. */
+function haptic(ms){
+  try{ if(navigator.vibrate) navigator.vibrate(ms||15); }catch(e){}
+  nativeHaptic('impact', (ms||15)>=25 ? 'medium' : 'light');
+}
 /* Animates a number counting up (or down) to its new value instead of just
    snapping to it - used for the live Firebase-backed stat counters
    (visits/currently-online), which otherwise just replace their text the
@@ -2783,7 +2793,7 @@ function todaysYahrzeits(){
   try{const hd=currentHDate(),m=hd.getMonth(),d=hd.getDate(); return getYahrzeits().filter(y=>+y.hm===m&&+y.hd===d);}catch(e){return [];}
 }
 function yahrzeitHebLabel(y){ return heNum(+y.hd)+' ב'+(HEB_MONTHS_HE[(+y.hm)-1]||''); }
-function toggleFav(ch){ if(FAV.has(ch))FAV.delete(ch); else FAV.add(ch); saveFav(); }
+function toggleFav(ch){ if(FAV.has(ch))FAV.delete(ch); else FAV.add(ch); saveFav(); nativeHaptic('selection'); }
 function isFav(ch){ return FAV.has(ch); }
 /* dedication line */
 function dedList(){ 
@@ -6640,7 +6650,7 @@ function wireReader(){
   });
   const prev=document.getElementById('rPrev'); if(prev) prev.onclick=()=>{ if(RD.idx>0){ CK_NAV_DIR=-1; RD.idx--; renderReader(); forceScrollTop(); } };
   const next=document.getElementById('rNext'); if(next) next.onclick=()=>{
-    markRead(RD.chapters[RD.idx]); CK_NAV_DIR=1; RD.idx++; renderReader(); forceScrollTop();
+    haptic(); markRead(RD.chapters[RD.idx]); CK_NAV_DIR=1; RD.idx++; renderReader(); forceScrollTop();
   };
   const done=document.getElementById('rDone'); if(done) done.onclick=()=>{
     haptic(); markRead(RD.chapters[RD.idx]); finishReading();
@@ -11400,7 +11410,14 @@ function topbar(title, backTo, rightHtml){
   ${rightHtml||'<div style="width:34px"></div>'}</div>`;
 }
 let toastT;
-function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t);} if(S.lang!=='he'&&I18N[S.lang]){const d=I18N[S.lang];if(d[msg])msg=d[msg];else for(const k in d){if(k.length>2&&msg.includes(k))msg=msg.split(k).join(d[k]);}} t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
+/* NativeToast (NativeToastBridge.swift/NativeToastView.swift) shows a real
+   iOS 26 Liquid Glass pill instead of the HTML .toast CSS approximation
+   below - same "native plugin present → use it, else fall back to the
+   existing HTML implementation" pattern as NATIVE_TABBAR/NATIVE_MODAL. The
+   HTML toast element is still built/kept in the DOM either way (cheap, and
+   some non-iOS-native callers may still read it), just never shown. */
+const NATIVE_TOAST = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeToast);
+function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t);} if(S.lang!=='he'&&I18N[S.lang]){const d=I18N[S.lang];if(d[msg])msg=d[msg];else for(const k in d){if(k.length>2&&msg.includes(k))msg=msg.split(k).join(d[k]);}} if(NATIVE_TOAST){ try{ window.Capacitor.Plugins.NativeToast.show({message:msg}); }catch(e){} return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
 
 /* ================= BOOT ================= */
 /* Every screen nested under the Library nav icon (renderLibrary() itself,
@@ -11462,6 +11479,23 @@ if(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatf
    scroll-hide via syncNativeTabBar() below - on any other platform
    (web/PWA/Android) this plugin simply doesn't exist and everything
    behaves exactly as before. */
+/* NativeHaptics - real UIFeedbackGenerator taps (NativeHapticsBridge.swift)
+   at the handful of interactions that already feel tactile on native iOS:
+   marking a Tehillim chapter/Chok LeYisrael day/Zohar day/Musar unit read,
+   toggling a favorite, and hitting a reading-streak milestone. A no-op
+   everywhere else (web/PWA/Android/older native builds), same guarded
+   `window.Capacitor.Plugins.X && ...` pattern as every other native-only
+   bridge here - see NATIVE_TABBAR/NATIVE_TOOLS_FAB below. */
+const NATIVE_HAPTICS = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeHaptics);
+function nativeHaptic(kind, opt){
+  if(!NATIVE_HAPTICS) return;
+  try{
+    const plugin=window.Capacitor.Plugins.NativeHaptics;
+    if(kind==='selection') plugin.selection().catch(()=>{});
+    else if(kind==='notification') plugin.notification({type:opt||'success'}).catch(()=>{});
+    else plugin.impact({style:opt||'light'}).catch(()=>{});
+  }catch(e){}
+}
 const NATIVE_TABBAR = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeTabBar);
 if(NATIVE_TABBAR) document.documentElement.classList.add('has-native-tabbar');
 function nativeTabBarLabel(he){
@@ -11555,6 +11589,9 @@ function syncNativeTopBar(title, backTo){
       title: String(title||'').replace(/<[^>]*>/g,''),
       backTo: backTo||'',
       isRTL: document.documentElement.dir!=='ltr',
+      homeLabel: nativeTabBarLabel('דף הבית'),
+      settingsLabel: nativeTabBarLabel('הגדרות'),
+      shareLabel: nativeTabBarLabel('שתף'),
     }).catch(()=>{});
   }catch(e){}
 }
@@ -11799,6 +11836,7 @@ window.go = go;
 window.celebrateMilestone = celebrateMilestone;
 window.ckMilestoneCheck = ckMilestoneCheck;
 window.openPrayer = openPrayer;
+window.shareApp = shareApp;
 function sharePrayer(key){
   const p = PRAYERS_EXTRA[key]; if(!p) return;
   const plain = (p.text||'').split('\n\n')

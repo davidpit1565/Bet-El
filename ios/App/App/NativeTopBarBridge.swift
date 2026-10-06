@@ -27,8 +27,14 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
         let title = call.getString("title") ?? ""
         let backTo = call.getString("backTo") ?? ""
         let isRTL = call.getBool("isRTL") ?? true
+        let homeLabel = call.getString("homeLabel") ?? ""
+        let settingsLabel = call.getString("settingsLabel") ?? ""
+        let shareLabel = call.getString("shareLabel") ?? ""
         DispatchQueue.main.async {
-            NativeTopBarBridge.activeController?.configureTopBar(title: title, backTo: backTo, isRTL: isRTL)
+            NativeTopBarBridge.activeController?.configureTopBar(
+                title: title, backTo: backTo, isRTL: isRTL,
+                homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel
+            )
         }
         call.resolve()
     }

@@ -91,6 +91,7 @@ final class NativeToolsFabView: UIView {
     }
 
     @objc private func toggleExpanded() {
+        UISelectionFeedbackGenerator().selectionChanged()
         if isExpanded { collapsePanel() } else { expandPanel() }
     }
 
@@ -204,11 +205,11 @@ final class NativeToolsFabView: UIView {
         )
     }
 
-    @objc private func tapMinus() { onAction?(.minus) }
-    @objc private func tapPlus() { onAction?(.plus) }
-    @objc private func tapTheme() { onAction?(.theme) }
-    @objc private func tapAutoscroll() { onAction?(.autoscroll) }
-    @objc private func tapHome() { onAction?(.home); collapsePanel() }
+    @objc private func tapMinus() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.minus) }
+    @objc private func tapPlus() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.plus) }
+    @objc private func tapTheme() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.theme) }
+    @objc private func tapAutoscroll() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.autoscroll) }
+    @objc private func tapHome() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.home); collapsePanel() }
 
     // MARK: - State from JS
 

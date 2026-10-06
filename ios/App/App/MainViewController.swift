@@ -26,6 +26,7 @@ class MainViewController: CAPBridgeViewController {
     private let topBar = NativeTopBarView()
     private let modal = NativeModalView()
     private let feedbackForm = NativeFeedbackFormView()
+    private let toastView = NativeToastView()
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -47,10 +48,12 @@ class MainViewController: CAPBridgeViewController {
         setupTopBar()
         setupModal()
         setupFeedbackForm()
+        setupToast()
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
+        NativeToastBridge.activeController = self
     }
 
     override func viewDidLayoutSubviews() {
@@ -138,10 +141,21 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTopBarBridge (JS-driven)
 
-    func configureTopBar(title: String, backTo: String, isRTL: Bool) {
-        topBar.configure(title: title, hasBack: !backTo.isEmpty, isRTL: isRTL)
+    func configureTopBar(title: String, backTo: String, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String) {
+        topBar.configure(title: title, hasBack: !backTo.isEmpty, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel)
         topBar.onBack = { [weak self] in
             self?.webView?.evaluateJavaScript("window.go && window.go('\(backTo)')", completionHandler: nil)
+        }
+        topBar.onQuickAction = { [weak self] action in
+            guard let self = self else { return }
+            let js: String
+            switch action {
+            case "home": js = "window.go && window.go('home')"
+            case "settings": js = "window.go && window.go('settings')"
+            case "share": js = "window.shareApp && window.shareApp()"
+            default: return
+            }
+            self.webView?.evaluateJavaScript(js, completionHandler: nil)
         }
         topBar.isHidden = false
         reportHeightToWebView()
@@ -228,6 +242,27 @@ class MainViewController: CAPBridgeViewController {
         feedbackForm.dismiss()
     }
 
+    /// Pinned just above the tab bar, matching the HTML `.toast`'s own
+    /// `bottom: calc(var(--native-nav-h) + 20px)` position when a native
+    /// tab bar is present (see the `.has-native-tabbar .toast` CSS rule).
+    private func setupToast() {
+        toastView.translatesAutoresizingMaskIntoConstraints = false
+        toastView.isHidden = true
+        view.addSubview(toastView)
+        NSLayoutConstraint.activate([
+            toastView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            toastView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            toastView.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -20),
+            toastView.heightAnchor.constraint(equalToConstant: 76),
+        ])
+    }
+
+    // MARK: - Called by NativeToastBridge (JS-driven)
+
+    func showToast(message: String) {
+        toastView.show(message: message)
+    }
+
     /// Hands the typed fields to window.NativeFeedbackHost.send(...) in JS
     /// rather than composing/sending the email in Swift - JS already owns
     /// a single sendFeedbackForm() implementation (silent Cloud Function
@@ -297,6 +332,7 @@ class MainViewController: CAPBridgeViewController {
 extension MainViewController: UITabBarDelegate {
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let tabId = item.accessibilityIdentifier else { return }
+        UISelectionFeedbackGenerator().selectionChanged()
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
     }
 }
