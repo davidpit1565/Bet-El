@@ -263,6 +263,13 @@ in English as usual.
   Playwright tests passed because they stub `window.Capacitor.Plugins.X`
   directly, bypassing the real registration path entirely - but silently
   did nothing at all on a real device) before being traced to this file.
+  **It ALSO needs a `bridge?.registerPluginInstance(XBridge())` line in
+  `MainViewController.capacitorDidLoad()`** - Capacitor 8 only
+  auto-registers the npm plugins `npx cap sync` lists in `packageClassList`,
+  never classes compiled into the app target itself. Missing only this
+  half is worse than missing both: the JS proxy exists, so index.html hides
+  its HTML nav/FAB in favor of the native one, but every native call
+  rejects as unimplemented - the app ends up with no nav bar at all.
   **Also not compile-verified in Xcode as of this writing** (no macOS/
   Xcode available in that session): Dynamic Type scaling across every
   native UIKit label, two `.symbolEffect(.bounce)` spots (tools FAB theme

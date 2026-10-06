@@ -42,6 +42,27 @@ class MainViewController: CAPBridgeViewController {
         ("settings", "gearshape.fill"),
     ]
 
+    /// Capacitor 8 only auto-registers plugins listed in the generated
+    /// capacitor.config.json's `packageClassList`, which `npx cap sync`
+    /// fills from npm packages alone - plugins compiled into the app target
+    /// itself are never discovered, so every one of them must be registered
+    /// here explicitly. Without this, the JS-side `registerPlugin()` calls in
+    /// capacitor-native-bridge.js still create `window.Capacitor.Plugins.X`
+    /// proxies (so index.html hides its HTML nav/FAB/etc. in favor of the
+    /// native ones), but every call into them rejects as unimplemented and
+    /// no native UI ever appears.
+    override func capacitorDidLoad() {
+        bridge?.registerPluginInstance(NativeTabBarBridge())
+        bridge?.registerPluginInstance(NativeToolsFabBridge())
+        bridge?.registerPluginInstance(NativeTopBarBridge())
+        bridge?.registerPluginInstance(NativeModalBridge())
+        bridge?.registerPluginInstance(NativeSettingsBridge())
+        bridge?.registerPluginInstance(NativeToastBridge())
+        bridge?.registerPluginInstance(NativeHapticsBridge())
+        bridge?.registerPluginInstance(BetElWidgetBridge())
+        bridge?.registerPluginInstance(NativeLiveActivityBridge())
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabBar()
