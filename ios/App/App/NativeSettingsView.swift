@@ -43,285 +43,404 @@ struct NativeSettingsSection {
     let rows: [NativeSettingsRow]
 }
 
-/// A real native `UITableView` (`.insetGrouped`, the genuine system
-/// Settings-app look, not a CSS approximation of one) mirroring the web
-/// app's own Settings screen - see NativeSettingsBridge's header comment
-/// in index.html (`nativeSettingsSpec()`) for why most rows relay to the
-/// already-rendered HTML control underneath rather than duplicating its
-/// logic here, and why a few rows are deliberately left as plain
-/// "disclosure" taps back to that HTML screen instead.
+/// The native Settings screen, drawn as iOS 26 Liquid Glass cards (one
+/// `UIGlassEffect` card per section) over the app's own parchment/navy
+/// background, rather than a system grouped table - the system table's grey
+/// cells and bottom action sheet for pickers looked foreign next to the rest
+/// of the app. Mirrors the web app's own Settings screen (see index.html's
+/// `nativeSettingsSpec()`): most rows relay to the already-rendered HTML
+/// control underneath rather than duplicating its logic here.
+///
+/// Pickers (`select` rows) are a real pull-down `UIMenu` anchored to the
+/// value button itself, so they open right where you tap. Colors resolve
+/// against the app theme via `overrideUserInterfaceStyle` (`.label` ink,
+/// `UIColor.betelGold` accents) so text and gold stay legible on the glass
+/// in both themes.
 final class NativeSettingsView: UIView {
-    /// (rowId, value-as-string-or-nil) - value is set for stepper
-    /// ("Minus"/"Plus" suffix folded into the id itself, see
-    /// `relayAction`), select and segmented rows; nil for a plain
-    /// toggle/button/disclosure tap (those relay by id alone, and the web
-    /// side just clicks the matching real HTML control either way).
+    /// (rowId, value-as-string-or-nil) - value is set for select and
+    /// segmented rows; stepper rows fold "Minus"/"Plus" into the id itself;
+    /// nil for a plain toggle/button/disclosure tap (the web side just
+    /// clicks the matching real HTML control either way).
     var onAction: ((String, String?) -> Void)?
 
     private let goldColor = UIColor.betelGold
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+    private let scrollView = UIScrollView()
+    private let contentStack = UIStackView()
     private var sections: [NativeSettingsSection] = []
-    /// From the app's own S.lang (Hebrew = RTL), not the device language -
-    /// semanticContentAttribute isn't inherited by table cells, so it's
-    /// applied to the table and to every cell as it's built.
-    private var layoutDirection: UISemanticContentAttribute = .forceLeftToRight
-    private var appBackground: UIColor = .systemGroupedBackground
-    private var cellBackground: UIColor = .secondarySystemGroupedBackground
+    private var isRTL = true
+    private var isDark = false
+    private var firstRowId: String?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupTable()
+        setupLayout()
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    private func setupTable() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.tintColor = goldColor
-        addSubview(tableView)
+    private func setupLayout() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.alwaysBounceVertical = true
+        scrollView.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 130, right: 0)
+        addSubview(scrollView)
+
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.axis = .vertical
+        contentStack.spacing = 10
+        scrollView.addSubview(contentStack)
+
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 8),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentStack.leftAnchor.constraint(equalTo: scrollView.frameLayoutGuide.leftAnchor, constant: 16),
+            contentStack.rightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.rightAnchor, constant: -16),
         ])
     }
 
-    /// Reloads in place - called on every `configure()` while already
-    /// visible too (e.g. right after a toggle flips), so the native table
-    /// always mirrors whatever the web side just computed, the same way
-    /// NativeTabBar/NativeToolsFab re-push their whole state on any change
-    /// rather than patching a single field.
+    /// Rebuilt in place on every `configure()` (including right after a
+    /// toggle flips) so the native screen always mirrors whatever the web
+    /// side just computed. Scroll position is kept unless the screen itself
+    /// changed (category list <-> a category).
     func configure(sections: [NativeSettingsSection], isDark: Bool, isRTL: Bool) {
         self.sections = sections
+        self.isDark = isDark
+        self.isRTL = isRTL
         overrideUserInterfaceStyle = isDark ? .dark : .light
-        layoutDirection = isRTL ? .forceRightToLeft : .forceLeftToRight
-        // The app's own parchment/navy palette (index.html's --bg and
-        // --panel-solid) instead of the system's grey grouped-table colors,
-        // so this screen matches every other screen of the app.
-        appBackground = isDark
+        backgroundColor = isDark
             ? UIColor(red: 0.031, green: 0.051, blue: 0.098, alpha: 1)
             : UIColor(red: 0.937, green: 0.902, blue: 0.824, alpha: 1)
-        cellBackground = isDark
-            ? UIColor(red: 0.071, green: 0.110, blue: 0.220, alpha: 1)
-            : UIColor(red: 0.984, green: 0.965, blue: 0.918, alpha: 1)
-        tableView.backgroundColor = appBackground
-        backgroundColor = appBackground
-        tableView.separatorColor = goldColor.withAlphaComponent(0.22)
-        semanticContentAttribute = layoutDirection
-        tableView.semanticContentAttribute = layoutDirection
-        tableView.reloadData()
-    }
-
-    private func relayAction(_ id: String, value: String? = nil) {
-        onAction?(id, value)
-    }
-
-    @objc private func toggleChanged(_ sender: UISwitch) {
-        relayAction(rowId(forTag: sender.tag))
-    }
-
-    @objc private func stepperMinusTapped(_ sender: UIButton) {
-        relayAction(rowId(forTag: sender.tag) + "Minus")
-    }
-
-    @objc private func stepperPlusTapped(_ sender: UIButton) {
-        relayAction(rowId(forTag: sender.tag) + "Plus")
-    }
-
-    @objc private func segmentChanged(_ sender: UISegmentedControl) {
-        let row = row(forTag: sender.tag)
-        guard sender.selectedSegmentIndex >= 0, sender.selectedSegmentIndex < row.options.count else { return }
-        relayAction(row.id, value: row.options[sender.selectedSegmentIndex].value)
-    }
-
-    // MARK: - Row lookup by a flat tag (section*1000 + row), since
-    // UIKit controls only carry a single Int `tag`, not an IndexPath.
-
-    private func row(forTag tag: Int) -> NativeSettingsRow {
-        sections[tag / 1000].rows[tag % 1000]
-    }
-
-    private func rowId(forTag tag: Int) -> String { row(forTag: tag).id }
-
-    private func tag(for indexPath: IndexPath) -> Int { indexPath.section * 1000 + indexPath.row }
-}
-
-extension NativeSettingsView: UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int { sections.count }
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { sections[section].rows.count }
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        let header = sections[section].header
-        return header.isEmpty ? nil : header
-    }
-
-    /// Builds the small rounded-square colored icon badge iOS's own
-    /// Settings app uses for its top-level category rows (General,
-    /// Notifications, ...), as a single composited image so it can go
-    /// straight into `cell.imageView?.image` - `UITableViewCell.imageView`
-    /// is a plain `UIImageView`, there's no API to swap in a custom
-    /// container view the way `accessoryView` allows.
-    private func iconBadge(systemName: String, hexColor: String) -> UIImage? {
-        let size = CGSize(width: 29, height: 29)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { ctx in
-            let rect = CGRect(origin: .zero, size: size)
-            let path = UIBezierPath(roundedRect: rect, cornerRadius: 7)
-            (UIColor(hex: hexColor) ?? .systemGray).setFill()
-            path.fill()
-            let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-            guard let symbol = UIImage(systemName: systemName, withConfiguration: config)?
-                .withTintColor(.white, renderingMode: .alwaysOriginal) else { return }
-            let symbolSize = symbol.size
-            let origin = CGPoint(x: (size.width - symbolSize.width) / 2, y: (size.height - symbolSize.height) / 2)
-            symbol.draw(at: origin)
+        let newFirst = sections.first?.rows.first?.id
+        let screenChanged = newFirst != firstRowId
+        firstRowId = newFirst
+        rebuild()
+        if screenChanged {
+            layoutIfNeeded()
+            scrollView.setContentOffset(CGPoint(x: 0, y: -scrollView.adjustedContentInset.top), animated: false)
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = sections[indexPath.section].rows[indexPath.row]
-        let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
-        cell.semanticContentAttribute = layoutDirection
-        cell.contentView.semanticContentAttribute = layoutDirection
-        cell.backgroundColor = cellBackground
-        cell.textLabel?.text = row.title
-        cell.textLabel?.numberOfLines = 0
-        cell.detailTextLabel?.text = row.subtitle
-        cell.detailTextLabel?.numberOfLines = 0
-        cell.detailTextLabel?.textColor = .secondaryLabel
-        cell.selectionStyle = .none
-        cell.accessoryType = .none
-        cell.accessoryView = nil
+    // MARK: - Building
+
+    private func rebuild() {
+        contentStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for (sIndex, section) in sections.enumerated() {
+            if !section.header.isEmpty {
+                let header = UILabel()
+                header.text = section.header
+                header.setScaledFont(14, weight: .bold, maximumSize: 19)
+                header.textColor = goldColor
+                header.textAlignment = isRTL ? .right : .left
+                let wrap = UIView()
+                header.translatesAutoresizingMaskIntoConstraints = false
+                wrap.addSubview(header)
+                NSLayoutConstraint.activate([
+                    header.topAnchor.constraint(equalTo: wrap.topAnchor, constant: sIndex == 0 ? 0 : 14),
+                    header.bottomAnchor.constraint(equalTo: wrap.bottomAnchor),
+                    header.leftAnchor.constraint(equalTo: wrap.leftAnchor, constant: 14),
+                    header.rightAnchor.constraint(equalTo: wrap.rightAnchor, constant: -14),
+                ])
+                contentStack.addArrangedSubview(wrap)
+            } else if sIndex > 0 {
+                let gap = UIView()
+                gap.heightAnchor.constraint(equalToConstant: 8).isActive = true
+                contentStack.addArrangedSubview(gap)
+            }
+            contentStack.addArrangedSubview(makeCard(section: section, sectionIndex: sIndex))
+        }
+    }
+
+    private func makeCard(section: NativeSettingsSection, sectionIndex: Int) -> UIView {
+        let card: UIView
+        let content: UIView
+        if #available(iOS 26.0, *) {
+            let effect = UIGlassEffect()
+            // A light tint keeps the glass clear but gives text a steady
+            // backdrop - untinted glass over the flat parchment read washed out.
+            effect.tintColor = isDark
+                ? UIColor(red: 0.10, green: 0.15, blue: 0.30, alpha: 0.45)
+                : UIColor(white: 1, alpha: 0.55)
+            let v = UIVisualEffectView(effect: effect)
+            card = v
+            content = v.contentView
+        } else {
+            let v = UIVisualEffectView(effect: UIBlurEffect(style: isDark ? .systemThinMaterialDark : .systemThinMaterialLight))
+            card = v
+            content = v.contentView
+        }
+        card.layer.cornerRadius = 26
+        card.layer.cornerCurve = .continuous
+        card.clipsToBounds = true
+        card.layer.borderWidth = 1
+        card.layer.borderColor = (isDark ? UIColor(white: 1, alpha: 0.14) : UIColor(white: 1, alpha: 0.9)).cgColor
+
+        let rows = UIStackView()
+        rows.axis = .vertical
+        rows.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(rows)
+        NSLayoutConstraint.activate([
+            rows.topAnchor.constraint(equalTo: content.topAnchor),
+            rows.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            rows.leftAnchor.constraint(equalTo: content.leftAnchor),
+            rows.rightAnchor.constraint(equalTo: content.rightAnchor),
+        ])
+        for (rIndex, row) in section.rows.enumerated() {
+            if rIndex > 0 {
+                let sep = UIView()
+                sep.backgroundColor = goldColor.withAlphaComponent(0.2)
+                sep.translatesAutoresizingMaskIntoConstraints = false
+                let sepWrap = UIView()
+                sepWrap.addSubview(sep)
+                NSLayoutConstraint.activate([
+                    sep.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale),
+                    sep.topAnchor.constraint(equalTo: sepWrap.topAnchor),
+                    sep.bottomAnchor.constraint(equalTo: sepWrap.bottomAnchor),
+                    sep.leftAnchor.constraint(equalTo: sepWrap.leftAnchor, constant: 18),
+                    sep.rightAnchor.constraint(equalTo: sepWrap.rightAnchor, constant: -18),
+                ])
+                rows.addArrangedSubview(sepWrap)
+            }
+            rows.addArrangedSubview(makeRow(row))
+        }
+        return card
+    }
+
+    private func makeRow(_ row: NativeSettingsRow) -> UIView {
+        let rowView = NativeSettingsRowView()
+        rowView.rowId = row.id
+        rowView.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
+
+        let h = UIStackView()
+        h.axis = .horizontal
+        h.alignment = .center
+        h.spacing = 12
+        h.semanticContentAttribute = rowView.semanticContentAttribute
+        h.translatesAutoresizingMaskIntoConstraints = false
+        h.isUserInteractionEnabled = true
+        rowView.addSubview(h)
+        NSLayoutConstraint.activate([
+            h.topAnchor.constraint(equalTo: rowView.topAnchor, constant: 12),
+            h.bottomAnchor.constraint(equalTo: rowView.bottomAnchor, constant: -12),
+            h.leftAnchor.constraint(equalTo: rowView.leftAnchor, constant: 18),
+            h.rightAnchor.constraint(equalTo: rowView.rightAnchor, constant: -18),
+            rowView.heightAnchor.constraint(greaterThanOrEqualToConstant: 56),
+        ])
+
         if let icon = row.icon {
-            cell.imageView?.image = iconBadge(systemName: icon, hexColor: row.iconColor ?? "#8E8E93")
+            let badge = UIImageView(image: iconBadge(systemName: icon, hexColor: row.iconColor ?? "#8E8E93"))
+            badge.setContentHuggingPriority(.required, for: .horizontal)
+            h.addArrangedSubview(badge)
         }
 
-        let tagValue = tag(for: indexPath)
+        let texts = UIStackView()
+        texts.axis = .vertical
+        texts.spacing = 3
+        texts.alignment = isRTL ? .trailing : .leading
+        let title = UILabel()
+        title.text = row.title
+        title.numberOfLines = 0
+        title.setScaledFont(16, weight: .semibold, maximumSize: 22)
+        title.textColor = .label
+        title.textAlignment = isRTL ? .right : .left
+        texts.addArrangedSubview(title)
+        if !row.subtitle.isEmpty && row.type != "select" {
+            let sub = UILabel()
+            sub.text = row.subtitle
+            sub.numberOfLines = 0
+            sub.setScaledFont(13, weight: .regular, maximumSize: 18)
+            sub.textColor = .secondaryLabel
+            sub.textAlignment = isRTL ? .right : .left
+            texts.addArrangedSubview(sub)
+        }
+        texts.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        texts.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        h.addArrangedSubview(texts)
 
+        if let control = makeControl(for: row, rowView: rowView) {
+            control.setContentHuggingPriority(.required, for: .horizontal)
+            control.setContentCompressionResistancePriority(.required, for: .horizontal)
+            h.addArrangedSubview(control)
+        }
+        return rowView
+    }
+
+    private func makeControl(for row: NativeSettingsRow, rowView: NativeSettingsRowView) -> UIView? {
         switch row.type {
         case "toggle":
             let sw = UISwitch()
             sw.isOn = row.boolValue
-            sw.tag = tagValue
-            sw.addTarget(self, action: #selector(toggleChanged(_:)), for: .valueChanged)
-            cell.accessoryView = sw
+            sw.onTintColor = goldColor
+            sw.addAction(UIAction { [weak self] _ in self?.onAction?(row.id, nil) }, for: .valueChanged)
+            return sw
 
         case "stepper":
-            let stack = UIStackView()
-            stack.axis = .horizontal
-            stack.spacing = 10
-            stack.alignment = .center
-
-            let minus = UIButton(type: .system)
-            minus.setTitle("−", for: .normal)
-            minus.tag = tagValue
-            minus.accessibilityLabel = "Decrease"
-            minus.addTarget(self, action: #selector(stepperMinusTapped(_:)), for: .touchUpInside)
-
-            let valueLabel = UILabel()
-            valueLabel.text = row.stringValue
-            valueLabel.setScaledFont(15, weight: .semibold, maximumSize: 19)
-            valueLabel.adjustsFontSizeToFitWidth = true
-            valueLabel.minimumScaleFactor = 0.7
-            valueLabel.textAlignment = .center
-            valueLabel.widthAnchor.constraint(equalToConstant: 46).isActive = true
-            valueLabel.isAccessibilityElement = false // the row's own accessory controls already speak for it
-
-            let plus = UIButton(type: .system)
-            plus.setTitle("+", for: .normal)
-            plus.tag = tagValue
-            plus.accessibilityLabel = "Increase"
-            plus.addTarget(self, action: #selector(stepperPlusTapped(_:)), for: .touchUpInside)
-
-            stack.addArrangedSubview(minus)
-            stack.addArrangedSubview(valueLabel)
-            stack.addArrangedSubview(plus)
-            stack.sizeToFit()
-            cell.accessoryView = stack
-            cell.detailTextLabel?.text = row.subtitle
+            return makeStepper(row)
 
         case "segmented":
             let seg = UISegmentedControl(items: row.options.map { $0.label })
             if let idx = row.options.firstIndex(where: { $0.value == row.stringValue }) {
                 seg.selectedSegmentIndex = idx
             }
-            seg.tag = tagValue
-            seg.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
-            // A fixed width (rather than intrinsic sizing) keeps multi-option
-            // segmented controls from being squeezed unreadably narrow next
-            // to a long title/subtitle on smaller screens.
-            seg.widthAnchor.constraint(equalToConstant: 180).isActive = true
-            cell.accessoryView = seg
-            cell.detailTextLabel?.text = row.subtitle
+            seg.selectedSegmentTintColor = goldColor
+            seg.setTitleTextAttributes([.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 13, weight: .bold)], for: .selected)
+            seg.setTitleTextAttributes([.foregroundColor: UIColor.label, .font: UIFont.systemFont(ofSize: 13, weight: .semibold)], for: .normal)
+            seg.addAction(UIAction { [weak self, weak seg] _ in
+                guard let seg = seg, seg.selectedSegmentIndex >= 0, seg.selectedSegmentIndex < row.options.count else { return }
+                self?.onAction?(row.id, row.options[seg.selectedSegmentIndex].value)
+            }, for: .valueChanged)
+            return seg
 
         case "select":
-            cell.accessoryType = .disclosureIndicator
-            cell.selectionStyle = .default
-            if let label = row.options.first(where: { $0.value == row.stringValue })?.label {
-                cell.detailTextLabel?.text = label
-            }
+            return makeSelectButton(row)
 
         case "link", "disclosure", "button":
-            cell.accessoryType = row.type == "button" ? .none : .disclosureIndicator
-            cell.selectionStyle = .default
+            rowView.onTap = { [weak self] in
+                if row.type == "link" {
+                    if let s = row.url, let url = URL(string: s) { UIApplication.shared.open(url) }
+                } else {
+                    self?.onAction?(row.id, nil)
+                }
+            }
+            if row.type == "button" { return nil }
+            let chevron = UIImageView(image: UIImage(
+                systemName: row.type == "link" ? "arrow.up.forward" : (isRTL ? "chevron.left" : "chevron.right"),
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)))
+            chevron.tintColor = .tertiaryLabel
+            return chevron
 
         default:
-            break
+            return nil
         }
+    }
 
-        return cell
+    /// A glass capsule: − value + (the old table version's stack had no
+    /// size and never showed up at all).
+    private func makeStepper(_ row: NativeSettingsRow) -> UIView {
+        let capsule = UIView()
+        capsule.backgroundColor = isDark ? UIColor(white: 1, alpha: 0.08) : UIColor(white: 1, alpha: 0.7)
+        capsule.layer.cornerRadius = 19
+        capsule.layer.cornerCurve = .continuous
+        capsule.layer.borderWidth = 1
+        capsule.layer.borderColor = goldColor.withAlphaComponent(0.35).resolvedColor(with: traitCollection).cgColor
+
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.spacing = 2
+        stack.semanticContentAttribute = .forceLeftToRight
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        capsule.addSubview(stack)
+
+        func stepButton(_ symbol: String, suffix: String, label: String) -> UIButton {
+            let b = UIButton(type: .system)
+            b.setImage(UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)), for: .normal)
+            b.tintColor = goldColor
+            b.accessibilityLabel = label
+            b.widthAnchor.constraint(equalToConstant: 38).isActive = true
+            b.heightAnchor.constraint(equalToConstant: 38).isActive = true
+            b.addAction(UIAction { [weak self] _ in
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                self?.onAction?(row.id + suffix, nil)
+            }, for: .touchUpInside)
+            return b
+        }
+        let value = UILabel()
+        value.text = row.stringValue
+        value.setScaledFont(15, weight: .bold, maximumSize: 19)
+        value.textColor = .label
+        value.textAlignment = .center
+        value.adjustsFontSizeToFitWidth = true
+        value.minimumScaleFactor = 0.7
+        value.widthAnchor.constraint(equalToConstant: 44).isActive = true
+
+        stack.addArrangedSubview(stepButton("minus", suffix: "Minus", label: "Decrease"))
+        stack.addArrangedSubview(value)
+        stack.addArrangedSubview(stepButton("plus", suffix: "Plus", label: "Increase"))
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: capsule.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: capsule.bottomAnchor),
+            stack.leftAnchor.constraint(equalTo: capsule.leftAnchor, constant: 2),
+            stack.rightAnchor.constraint(equalTo: capsule.rightAnchor, constant: -2),
+        ])
+        return capsule
+    }
+
+    /// Current value + an up/down chevron; tapping opens a native pull-down
+    /// menu right at the button with a checkmark on the current option.
+    private func makeSelectButton(_ row: NativeSettingsRow) -> UIView {
+        let current = row.options.first(where: { $0.value == row.stringValue })?.label ?? row.subtitle
+        var config = UIButton.Configuration.plain()
+        config.title = current
+        config.image = UIImage(systemName: "chevron.up.chevron.down", withConfiguration: UIImage.SymbolConfiguration(pointSize: 11, weight: .bold))
+        config.imagePlacement = isRTL ? .leading : .trailing
+        config.imagePadding = 6
+        config.baseForegroundColor = goldColor
+        config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0)
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attrs in
+            var a = attrs
+            a.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+            return a
+        }
+        let button = UIButton(configuration: config)
+        button.semanticContentAttribute = .forceLeftToRight
+        let actions = row.options.map { option in
+            UIAction(title: option.label, state: option.value == row.stringValue ? .on : .off) { [weak self] _ in
+                self?.onAction?(row.id, option.value)
+            }
+        }
+        button.menu = UIMenu(title: row.title, children: actions)
+        button.showsMenuAsPrimaryAction = true
+        return button
+    }
+
+    private func iconBadge(systemName: String, hexColor: String) -> UIImage? {
+        let size = CGSize(width: 32, height: 32)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in
+            let rect = CGRect(origin: .zero, size: size)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: 9)
+            (UIColor(hex: hexColor) ?? .systemGray).setFill()
+            path.fill()
+            // Specular top sheen so the badge reads as glass, not a flat tile
+            let sheen = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: size.width, height: size.height / 2), cornerRadius: 9)
+            UIColor(white: 1, alpha: 0.18).setFill()
+            sheen.fill()
+            let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+            guard let symbol = UIImage(systemName: systemName, withConfiguration: config)?
+                .withTintColor(.white, renderingMode: .alwaysOriginal) else { return }
+            let origin = CGPoint(x: (size.width - symbol.size.width) / 2, y: (size.height - symbol.size.height) / 2)
+            symbol.draw(at: origin)
+        }
     }
 }
 
-extension NativeSettingsView: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        guard let header = view as? UITableViewHeaderFooterView else { return }
-        header.textLabel?.textColor = goldColor
-        header.semanticContentAttribute = layoutDirection
-        header.contentView.semanticContentAttribute = layoutDirection
+/// A row that highlights while pressed and fires `onTap` (disclosure,
+/// link and button rows) - controls inside it handle their own touches.
+final class NativeSettingsRowView: UIView {
+    var rowId = ""
+    var onTap: (() -> Void)?
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        guard onTap != nil else { return }
+        UIView.animate(withDuration: 0.12) { self.backgroundColor = UIColor.label.withAlphaComponent(0.06) }
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let row = sections[indexPath.section].rows[indexPath.row]
-        switch row.type {
-        case "select":
-            presentOptionSheet(for: row)
-        case "link":
-            if let urlString = row.url, let url = URL(string: urlString) {
-                UIApplication.shared.open(url)
-            }
-        case "button", "disclosure":
-            relayAction(row.id)
-        default:
-            break
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        guard let onTap = onTap else { return }
+        UIView.animate(withDuration: 0.25) { self.backgroundColor = .clear }
+        if let t = touches.first, bounds.contains(t.location(in: self)) {
+            UISelectionFeedbackGenerator().selectionChanged()
+            onTap()
         }
     }
 
-    private func presentOptionSheet(for row: NativeSettingsRow) {
-        guard let viewController = parentViewController() else { return }
-        let sheet = UIAlertController(title: row.title, message: nil, preferredStyle: .actionSheet)
-        for option in row.options {
-            sheet.addAction(UIAlertAction(title: option.label, style: .default) { [weak self] _ in
-                self?.relayAction(row.id, value: option.value)
-            })
-        }
-        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        if let popover = sheet.popoverPresentationController {
-            popover.sourceView = tableView
-            popover.sourceRect = tableView.bounds
-        }
-        viewController.present(sheet, animated: true)
-    }
-
-    private func parentViewController() -> UIViewController? {
-        var responder: UIResponder? = self
-        while let next = responder?.next {
-            if let vc = next as? UIViewController { return vc }
-            responder = next
-        }
-        return nil
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        UIView.animate(withDuration: 0.25) { self.backgroundColor = .clear }
     }
 }

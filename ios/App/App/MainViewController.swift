@@ -403,12 +403,13 @@ class MainViewController: CAPBridgeViewController {
     private func setupSettingsView() {
         settingsView.translatesAutoresizingMaskIntoConstraints = false
         settingsView.isHidden = true
-        view.addSubview(settingsView)
+        // Below the floating tab bar (the list scrolls under it, inset clears it).
+        view.insertSubview(settingsView, belowSubview: tabBar)
         NSLayoutConstraint.activate([
             settingsView.topAnchor.constraint(equalTo: topBar.bottomAnchor),
             settingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             settingsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            settingsView.bottomAnchor.constraint(equalTo: tabBar.topAnchor),
+            settingsView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         settingsView.onAction = { [weak self] id, value in
             self?.relaySettingsAction(id: id, value: value)
