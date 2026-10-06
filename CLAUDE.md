@@ -194,7 +194,11 @@ in English as usual.
   rendered from `HOME_CATALOG` (id -> kind tile|block + label) and the
   `mods` renderers inside `renderHome()`; the user's layout lives in
   `localStorage['betel_home_layout_v1']`. Long-press enters iOS-style edit
-  mode (wiggle, grip to drag, red minus, S/M/L tile sizes, "+" sheet, Done).
+  mode modelled on the iPhone's own: gentle wiggle, a small gray minus
+  (confirm dialog), drag the tile itself after a ~0.17s hold (touch events,
+  so a quick swipe still scrolls), a corner arc handle to resize (small ->
+  medium -> large), a quiet + and check at the top. `memorial` (לעילוי נשמת)
+  has `keep:true`: it can be moved but never removed.
   The app scrolls on `<body>`, not the window - use `homeScroller()`.
   To offer a new button: add it to `HOME_CATALOG` and give it a renderer
   (`mods.<id>`) or a `HOME_SHORTCUTS()` entry; ask the user which new
