@@ -19,6 +19,10 @@ import Capacitor
 ///   - "button"     {id, title, subtitle}
 ///   - "disclosure" {id, title, subtitle}
 ///   - "link"       {id, title, subtitle, url: String}          (opened directly, never relayed)
+/// Any row may also carry {icon: String (SF Symbol name), iconColor: String
+/// ("#RRGGBB")} for a small colored icon badge leading the row, matching
+/// the real Settings app's own category rows - used by the top-level
+/// category list (nativeSettingsSpec()'s SETTINGS_VIEW==='list' branch).
 /// A tap/change on any row but "link" relays `{id, value}` back to
 /// `window.NativeSettingsHost.onAction(id, value)` in JS, which either
 /// clicks/dispatches a change event on the matching already-rendered HTML
@@ -59,7 +63,9 @@ public class NativeSettingsBridge: CAPPlugin, CAPBridgedPlugin {
                     boolValue: rowDict["value"] as? Bool ?? false,
                     stringValue: rowDict["value"] as? String ?? "",
                     options: options,
-                    url: rowDict["url"] as? String
+                    url: rowDict["url"] as? String,
+                    icon: rowDict["icon"] as? String,
+                    iconColor: rowDict["iconColor"] as? String
                 )
             }
             sections.append(NativeSettingsSection(header: header, rows: rows))

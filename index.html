@@ -2866,6 +2866,13 @@ function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div
 const app = document.getElementById('app');
 let TAB='home';
 function go(tab){
+  // Entering the Settings tab fresh from elsewhere always starts at the
+  // category list (not wherever you last drilled into) - matches how
+  // iOS's own Settings app resets to its root list when you leave the app
+  // tab-switcher-style and come back via a different route. An internal
+  // re-render while already on 'settings' (a toggle flip, etc.) must NOT
+  // hit this, or every setting change would bounce you back to the list.
+  if(tab==='settings' && TAB!=='settings') SETTINGS_VIEW='list';
   if(CK_PACE_FAMILY_TABS[tab] && !localStorage.getItem('betel_chok_pace_v1')){
     CK_PACE_PENDING_TAB=tab; CK_PACE_STEP=-2; CK_PACE_AFTER_LANG='intro'; tab='chokPace';
   }
@@ -10984,12 +10991,58 @@ function renderTefillinMirror(){
     if(TAB==='tefillinMirror') note.textContent=ckChrome('לא ניתנה הרשאה למצלמה');
   });
 }
+/* Settings used to be one single flat scrolling list of 12 header groups /
+   25+ rows - unwieldy on a phone screen. It's now two levels, the same
+   shape as iOS's own Settings app: a short top-level list of category rows
+   (icon + title + 1-line preview), each opening its own dedicated
+   sub-screen with a back button. SETTINGS_VIEW holds which level/category
+   is currently showing ('list', or a category id); renderSettings() is
+   just a dispatcher so every other call site that already calls it
+   (toggle handlers, go('settings'), etc.) keeps working unchanged. */
+let SETTINGS_VIEW='list';
+function settingsCategoriesMeta(){
+  return [
+    {id:'general', icon:I.moon, sf:'paintbrush.fill', color:'#8E8E93', label:ckChrome('כללי'), sub:ckChrome('תצוגה, גדל גופן, שפה')},
+    {id:'notifications', icon:I.bell, sf:'bell.fill', color:'#FF3B30', label:ckChrome('התראות'), sub:ckChrome('תזכורת יומית')},
+    {id:'study', icon:I.book, sf:'book.fill', color:'#34C759', label:ckChrome('תכנית הלמוד'), sub:ckPaceUI().settingsTitle},
+    {id:'location', icon:I.compass, sf:'location.fill', color:'#007AFF', label:ckChrome('מקום וזמנים'), sub:ckChrome('GPS, מצפן, מראה לתפלין')},
+    {id:'personal', icon:I.heart, sf:'person.text.rectangle.fill', color:'#AF52DE', label:ckChrome('אישי'), sub:ckChrome('שמות, הקדשות, יאהרצייט')},
+    {id:'share', icon:I.share, sf:'square.and.arrow.up.fill', color:'#FF9500', label:ckChrome('שתוף וגבוי'), sub:ckChrome('שתוף, גבוי ושחזור')},
+    {id:'support', icon:I.wrench, sf:'questionmark.circle.fill', color:'#5AC8FA', label:ckChrome('תמיכה ומידע'), sub:ckChrome('משוב, דרוג, מדיניות')},
+  ];
+}
 function renderSettings(){
   if(!MCYC) ensureMusarCycles().then(()=>{ if(TAB==='settings'){ renderSettings(); tr(app); } });
-  const notifPerm=notifPermGranted()?'granted':'denied';
+  if(SETTINGS_VIEW==='list') return renderSettingsList();
+  return renderSettingsCategory(SETTINGS_VIEW);
+}
+function renderSettingsList(){
+  const cats=settingsCategoriesMeta();
   app.innerHTML=`
-  ${topbar('הגדרות')}
+  ${topbar(ckChrome('הגדרות'))}
   <div class="view">
+    <div class="set-group">
+      ${cats.map(c=>`<div class="set-item" data-cat="${c.id}" style="cursor:pointer"><div class="si-l"><span class="si-ico">${c.icon}</span><div><div class="si-t">${c.label}</div><div class="si-d">${c.sub}</div></div></div>${I.chev}</div>`).join('')}
+    </div>
+
+    ${STRIPE_DONATE_URL?`<div class="set-group">
+      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תמכו בבית אל</div><div class="si-d">כל תרומה מסיעת להמשך הלמוד היומי</div></div></div>${I.chev}</a>
+    </div>`:''}
+
+    <div class="ornament">${ORN}</div>
+    <div class="credit"><span class="cg">מרכז ק״ק הספרדים · בית א-ל</span></div>
+  </div>`;
+  app.querySelectorAll('[data-cat]').forEach(el=>el.onclick=()=>{ SETTINGS_VIEW=el.dataset.cat; renderSettings(); tr(app); });
+  tr(app);
+  syncNativeSettings();
+}
+/* Each category's body is the EXACT same markup/row-ids/wiring the old
+   single flat list used for that group - only the grouping/navigation
+   changed, not any row's own behavior, so every existing click handler,
+   data attribute and localStorage key keeps working untouched. */
+function settingsCategoryBody(catId, notifPerm){
+  switch(catId){
+    case 'general': return `
     <div class="set-group">
       <h3>תצוגה</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.moon}</span><div><div class="si-t">מצב לילה / יום</div><div class="si-d">${S.theme==='dark'?'כהה (נייבי-זהב)':'בהיר (קלף)'}</div></div></div>
@@ -10999,28 +11052,25 @@ function renderSettings(){
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.screenOn}</span><div><div class="si-t">מסך פעיל</div><div class="si-d">שומר על המסך דלוק בזמן התפלה</div></div></div>
         <div class="toggle ${S.keepAwake?'on':''}" id="tgWake"></div></div>
     </div>
-
-    ${STRIPE_DONATE_URL?`<div class="set-group">
-      <h3>תרומה</h3>
-      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תמכו בבית אל</div><div class="si-d">כל תרומה מסיעת להמשך הלמוד היומי</div></div></div>${I.chev}</a>
-    </div>`:''}
-
     <div class="set-group">
-      <h3>תזכורת יומית</h3>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעת תזכורת לקריאה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
-      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעות על תכן חדש</div><div class="si-d">${S.pushEnabled?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
-    </div>
-
-    <div class="set-group">
-      <h3>קריאה יומית</h3>
+      <h3>שפה</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">שפה</div><div class="si-d">שפת הממשק</div></div></div>
         <select id="selLang" class="fld-select" style="width:auto;min-width:120px">
           <option value="he">עברית</option><option value="en">English</option><option value="fr">Français</option><option value="ru">Русский</option><option value="ka">ქართული</option>
         </select></div>
+    </div>`;
+    case 'notifications': return `
+    <div class="set-group">
+      <h3>תזכורת יומית</h3>
+      <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעת תזכורת לקריאה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
+      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעות על תכן חדש</div><div class="si-d">${S.pushEnabled?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
+    </div>`;
+    case 'study': return `
+    <div class="set-group">
+      <h3>קריאה יומית</h3>
       <div class="set-item" id="settingsTracker" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.tracker}</span><div><div class="si-t">מעקב קריאה</div><div class="si-d"><span class="notranslate">${ckExplainerTitle('tehillim')}</span> · תיקוני הזהר · שנים מקרא</div></div></div>${I.chev}</div>
       <div class="set-item" id="settingsChokExplainer" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.info}</span><div><div class="si-t">מה לומדים כל יום</div><div class="si-d">הסבר קצר על סדר הלמוד בחוק לישראל</div></div></div>${I.chev}</div>
     </div>
-
     <div class="set-group">
       <h3>${ckPaceUI().settingsTitle}</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.book}</span><div><div class="si-t">הלכה</div><div class="si-d">${halachaChoiceLabel()}</div></div></div>
@@ -11034,8 +11084,8 @@ function renderSettings(){
         </select></div>`:''}
       <div class="set-item set-item-stack"><div class="si-l"><span class="si-ico">${I.split}</span><div><div class="si-t">שיטת חלוקה</div><div class="si-d">${ckDivisionLabel()}</div></div></div>
         <div class="seg"><button data-div="monthlyStd" class="${S.division!=='monthly'&&S.division!=='weekly'?'on':''}">חדשי</button><button data-div="monthly" class="${S.division==='monthly'?'on':''}">חדשי (5 ליום)</button><button data-div="weekly" class="${S.division==='weekly'?'on':''}">שבועי</button></div></div>
-    </div>
-
+    </div>`;
+    case 'location': return `
     <div class="set-group">
       <h3>מקום וזמנים</h3>
       <div class="set-item" id="useGPS" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.loc}</span><div><div class="si-t">השתמש במקום שלי</div><div class="si-d">אתור אוטומטי לפי GPS</div></div></div>${I.refresh}</div>
@@ -11043,8 +11093,8 @@ function renderSettings(){
       <div class="set-item" id="openTefillinMirror" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.tefillin}</span><div><div class="si-t">מראה לתפלין</div><div class="si-d">בדקו שהתפלין מונחים ישר</div></div></div>${I.chev}</div>
       <div class="set-item set-item-stack"><div class="si-l"><span class="si-ico">${I.cal}</span><div><div class="si-t">ישראל / חוץ לארץ</div><div class="si-d">קובע יום טוב שני, חול המועד וכדומה בלוח השנה</div></div></div>
         <div class="seg"><button data-region="auto" class="${(S.calRegion||'auto')==='auto'?'on':''}">אוטומטי</button><button data-region="il" class="${S.calRegion==='il'?'on':''}">ישראל</button><button data-region="chul" class="${S.calRegion==='chul'?'on':''}">חוץ לארץ</button></div></div>
-    </div>
-
+    </div>`;
+    case 'personal': return `
     <div class="set-group">
       <h3>פָּסוּק לְפִי הַשֵּׁם</h3>
       <div class="set-item col">
@@ -11058,7 +11108,6 @@ function renderSettings(){
         </div>
       </div>
     </div>
-
     <div class="set-group">
       <h3>הקדשת הקריאה</h3>
       <div class="set-item col">
@@ -11082,7 +11131,6 @@ function renderSettings(){
         </div>
       </div>
     </div>
-
     <div class="set-group">
       <h3>יאהרצייט · זכרון</h3>
       <div class="yahr-list" id="yahrList">
@@ -11096,8 +11144,8 @@ function renderSettings(){
         </div>
         <button class="btn btn-gold" id="yahrAdd">${I.plus}<span>הוסף יאהרצייט</span></button>
       </div>
-    </div>
-
+    </div>`;
+    case 'share': return `
     <div class="set-group">
       <h3>שתוף</h3>
       <div class="set-item" id="shareApp" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">שתף את האפליקציה</div><div class="si-d">שלח לחברים בקהלה</div></div></div>${I.chev}</div>
@@ -11105,104 +11153,138 @@ function renderSettings(){
       <div class="set-item" id="bkExport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.share}</span><div><div class="si-t">גבוי לקבץ</div><div class="si-d">שמירת התקדמות, מועדפים והגדרות</div></div></div>${I.chev}</div>
       <div class="set-item" id="bkImport" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">שחזור מגבוי</div><div class="si-d">טעינת קבץ גבוי קים</div></div></div>${I.chev}</div>
       <div class="set-item" id="resetProg" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">אפוס מעקב היום</div><div class="si-d">נקה סימון פרקים שנקראו</div></div></div></div>
-    </div>
-
+    </div>`;
+    case 'support': return `
     <div class="set-group">
       <h3>משוב ותמיכה</h3>
       <div class="set-item" id="openFeedback" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.wrench}</span><div><div class="si-t">דווח והצעות לשפור</div><div class="si-d">דווח על תקלות והצעות לשפור</div></div></div>${I.chev}</div>
       <div class="set-item" id="openRate" style="cursor:pointer"><div class="si-l"><span class="si-ico">${I.star}</span><div><div class="si-t">דרגו אותנו ב-App Store</div><div class="si-d">דרוג עוזר לנו להגיע לעוד אנשים</div></div></div>${I.chev}</div>
     </div>
-
     <div class="set-group">
       <h3>משפטי</h3>
       <a class="set-item" href="https://davidpit1565.github.io/Bet-El/privacy.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.shield}</span><div><div class="si-t">מדיניות פרטיות</div><div class="si-d">מה נשמר ואיפה</div></div></div>${I.chev}</a>
       <a class="set-item" href="https://davidpit1565.github.io/Bet-El/terms.html" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.doc}</span><div><div class="si-t">תנאי שמוש</div><div class="si-d">תנאים לשמוש באפליקציה</div></div></div>${I.chev}</a>
-    </div>
-
+    </div>`;
+    default: return '';
+  }
+}
+function wireSettingsCategory(catId){
+  switch(catId){
+    case 'general':
+      document.getElementById('tgTheme').onclick=()=>{ toggleTheme(); renderSettings(); };
+      document.getElementById('tgWake').onclick=()=>{ S.keepAwake=!S.keepAwake; saveS(); applyWakeLock(); renderSettings(); };
+      document.getElementById('fsMinus').onclick=()=>{ changeFont(-0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
+      document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
+      { const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); }; } }
+      break;
+    case 'notifications': {
+      const tgp=document.getElementById('tgPush');
+      if(tgp) tgp.onclick=async()=>{
+        if(S.pushEnabled){ S.pushEnabled=false; saveS(); renderSettings(); try{ await window.disablePush(); }catch(e){} return; }
+        tgp.classList.add('on'); // optimistic - permission prompt can take a moment
+        const ok = await (window.enablePush?window.enablePush():Promise.resolve(false));
+        S.pushEnabled=ok; saveS();
+        if(!ok) toast('לא הפעל - נדרשת הרשאת הודעות');
+        renderSettings();
+      };
+      const tgn=document.getElementById('tgNotif');
+      if(tgn) tgn.onclick=async()=>{
+        const currentlyOn = S.notifEnabled && notifPermGranted();
+        if(!currentlyOn){
+          if(!notifLocalPlugin() && typeof Notification==='undefined'){ toast('הדפדפן אינו תומך בהתראות'); return; }
+          const granted=await notifRequestPermission();
+          S.notifEnabled=granted; saveS(); renderSettings();
+          if(granted) notifScheduleDaily();
+          toast(granted?'הודעות הפעלו':'לא נתנה הרשאה');
+        } else { S.notifEnabled=false; saveS(); renderSettings(); notifCancelDaily(); toast('הודעות כבו'); }
+      };
+      break;
+    }
+    case 'study':
+      document.getElementById('settingsTracker').onclick=()=>go('tracker');
+      document.getElementById('settingsChokExplainer').onclick=()=>{ CK_EXPLAINER_BACK='settings'; go('chokExplainer'); };
+      app.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{ S.division=b.dataset.div; saveS(); renderSettings(); });
+      { const sh=document.getElementById('selHalacha'); if(sh) sh.onchange=()=>{ setHalachaChoice(sh.value); saveS(); renderSettings(); }; }
+      { const smw=document.getElementById('selMusarWork'); if(smw) smw.onchange=()=>{ S.musarWork=smw.value; saveS(); renderSettings(); }; }
+      break;
+    case 'location':
+      document.getElementById('useGPS').onclick=()=>{ toast('מאתר מקום…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'המקום עדכן לפי GPS':'לא התקבלה הרשאת מקום'); renderSettings(); }); };
+      document.getElementById('openCompass').onclick=()=>go('kotelCompass');
+      document.getElementById('openTefillinMirror').onclick=()=>openTefillinMirror('settings');
+      app.querySelectorAll('[data-region]').forEach(b=>b.onclick=()=>{ S.calRegion=b.dataset.region; saveS(); renderSettings(); });
+      break;
+    case 'personal': {
+      const hnAdd=document.getElementById('hebrewNameAdd');
+      if(hnAdd) hnAdd.onclick=()=>{
+        const hn=document.getElementById('hebrewNameIn'); const n=hn.value.trim();
+        if(!n){ toast('הזן שם'); return; }
+        if(!Array.isArray(S.hebrewNames)) S.hebrewNames=[];
+        S.hebrewNames.push(n); saveS(); renderSettings(); toast('השם נוסף');
+      };
+      document.querySelectorAll('#hebrewNamesList .ded-del').forEach(b=>b.onclick=()=>{ S.hebrewNames.splice(+b.dataset.i,1); saveS(); renderSettings(); });
+      const da=document.getElementById('dedAdd'); if(da) da.onclick=()=>{
+        const t=document.getElementById('dedType').value, n=document.getElementById('dedName').value.trim();
+        if(!n){ toast('הזן שם'); return; }
+        const L=dedList(); L.push({t,n}); saveDedList(L); S.dedName=''; S.dedType='none'; saveS(); renderSettings(); toast('ההקדשה נוספה');
+      };
+      document.querySelectorAll('#dedItems .ded-del').forEach(b=>b.onclick=()=>{ const L=dedList(); L.splice(+b.dataset.i,1); saveDedList(L); renderSettings(); });
+      document.querySelectorAll('.yahr-del').forEach(b=>b.onclick=()=>{ const L=getYahrzeits(); L.splice(+b.dataset.i,1); saveYahrzeits(L); renderSettings(); });
+      const yahrAdd=document.getElementById('yahrAdd');
+      if(yahrAdd) yahrAdd.onclick=()=>{
+        const name=document.getElementById('yahrName').value.trim();
+        const hm=+document.getElementById('yahrMonth').value;
+        const hd2=+document.getElementById('yahrDay').value;
+        if(!name){ toast('הזן שם'); return; }
+        const L=getYahrzeits(); L.push({name,hm,hd:hd2}); saveYahrzeits(L); renderSettings(); toast('נוסף');
+      };
+      break;
+    }
+    case 'share':
+      document.getElementById('shareApp').onclick=shareApp;
+      document.getElementById('shareAppQR').onclick=shareQR;
+      document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('המעקב אפס'); };
+      document.getElementById('bkExport').onclick=()=>{
+        const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
+        const data={}; keys.forEach(k=>{const v=localStorage.getItem(k); if(v!=null)data[k]=v;});
+        const blob=new Blob([JSON.stringify({app:'betel-tehillim',v:1,data})],{type:'application/json'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+        a.download='tehillim-betel-backup.json'; document.body.appendChild(a); a.click(); a.remove();
+        toast('הגבוי נשמר');
+      };
+      document.getElementById('bkImport').onclick=()=>{
+        const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+        inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; const rd=new FileReader();
+          rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='betel-tehillim'||!j.data) throw 0;
+            Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
+          }catch(e){ toast('קבץ גבוי לא תקין'); } };
+          rd.readAsText(f); };
+        inp.click();
+      };
+      break;
+    case 'support':
+      document.getElementById('openFeedback').onclick=openFeedbackForm;
+      document.getElementById('openRate').onclick=()=>window.open(APP_REVIEW_URL,'_blank');
+      break;
+  }
+}
+function renderSettingsCategory(catId){
+  const meta=settingsCategoriesMeta().find(c=>c.id===catId);
+  const notifPerm=notifPermGranted()?'granted':'denied';
+  const backFn=()=>{ SETTINGS_VIEW='list'; renderSettings(); tr(app); };
+  syncNativeTopBar(meta?meta.label:ckChrome('הגדרות'), backFn);
+  app.innerHTML=`
+  <div class="topbar">
+    <button class="icon-btn tb-back" id="setsCatBack">${I.prev}</button>
+    <div class="tb-title gold-text">${meta?meta.label:''}</div>
+    <div style="width:34px"></div>
+  </div>
+  <div class="view">
+    ${settingsCategoryBody(catId, notifPerm)}
     <div class="ornament">${ORN}</div>
     <div class="credit"><span class="cg">מרכז ק״ק הספרדים · בית א-ל</span></div>
   </div>`;
-  document.getElementById('tgTheme').onclick=()=>{ toggleTheme(); renderSettings(); };
-  document.getElementById('tgWake').onclick=()=>{ S.keepAwake=!S.keepAwake; saveS(); applyWakeLock(); renderSettings(); };
-  const tgp=document.getElementById('tgPush');
-  if(tgp) tgp.onclick=async()=>{
-    if(S.pushEnabled){ S.pushEnabled=false; saveS(); renderSettings(); try{ await window.disablePush(); }catch(e){} return; }
-    tgp.classList.add('on'); // optimistic - permission prompt can take a moment
-    const ok = await (window.enablePush?window.enablePush():Promise.resolve(false));
-    S.pushEnabled=ok; saveS();
-    if(!ok) toast('לא הפעל - נדרשת הרשאת הודעות');
-    renderSettings();
-  };
-  document.getElementById('fsMinus').onclick=()=>{ changeFont(-0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
-  document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
-  app.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{ S.division=b.dataset.div; saveS(); renderSettings(); });
-  app.querySelectorAll('[data-region]').forEach(b=>b.onclick=()=>{ S.calRegion=b.dataset.region; saveS(); renderSettings(); });
-  document.getElementById('useGPS').onclick=()=>{ toast('מאתר מקום…'); localStorage.setItem('betel_gps_tried','1'); requestGPS(ok=>{ toast(ok?'המקום עדכן לפי GPS':'לא התקבלה הרשאת מקום'); renderSettings(); }); };
-  document.getElementById('openCompass').onclick=()=>go('kotelCompass');
-  document.getElementById('openTefillinMirror').onclick=()=>openTefillinMirror('settings');
-  document.getElementById('shareApp').onclick=shareApp;
-  document.getElementById('shareAppQR').onclick=shareQR;
-  document.getElementById('openFeedback').onclick=openFeedbackForm;
-  document.getElementById('openRate').onclick=()=>window.open(APP_REVIEW_URL,'_blank');
-  document.getElementById('settingsTracker').onclick=()=>go('tracker');
-  document.getElementById('settingsChokExplainer').onclick=()=>{ CK_EXPLAINER_BACK='settings'; go('chokExplainer'); };
-  document.getElementById('resetProg').onclick=()=>{ const k=progKey(); delete PROG[k]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); toast('המעקב אפס'); };
-  document.getElementById('bkExport').onclick=()=>{
-    const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
-    const data={}; keys.forEach(k=>{const v=localStorage.getItem(k); if(v!=null)data[k]=v;});
-    const blob=new Blob([JSON.stringify({app:'betel-tehillim',v:1,data})],{type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download='tehillim-betel-backup.json'; document.body.appendChild(a); a.click(); a.remove();
-    toast('הגבוי נשמר');
-  };
-  document.getElementById('bkImport').onclick=()=>{
-    const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
-    inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; const rd=new FileReader();
-      rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='betel-tehillim'||!j.data) throw 0;
-        Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
-      }catch(e){ toast('קבץ גבוי לא תקין'); } };
-      rd.readAsText(f); };
-    inp.click();
-  };
-  const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); }; }
-  const sh=document.getElementById('selHalacha'); if(sh) sh.onchange=()=>{ setHalachaChoice(sh.value); saveS(); renderSettings(); };
-  const smw=document.getElementById('selMusarWork'); if(smw) smw.onchange=()=>{ S.musarWork=smw.value; saveS(); renderSettings(); };
-  const hnAdd=document.getElementById('hebrewNameAdd');
-  if(hnAdd) hnAdd.onclick=()=>{
-    const hn=document.getElementById('hebrewNameIn'); const n=hn.value.trim();
-    if(!n){ toast('הזן שם'); return; }
-    if(!Array.isArray(S.hebrewNames)) S.hebrewNames=[];
-    S.hebrewNames.push(n); saveS(); renderSettings(); toast('השם נוסף');
-  };
-  document.querySelectorAll('#hebrewNamesList .ded-del').forEach(b=>b.onclick=()=>{ S.hebrewNames.splice(+b.dataset.i,1); saveS(); renderSettings(); });
-  const da=document.getElementById('dedAdd'); if(da) da.onclick=()=>{
-    const t=document.getElementById('dedType').value, n=document.getElementById('dedName').value.trim();
-    if(!n){ toast('הזן שם'); return; }
-    const L=dedList(); L.push({t,n}); saveDedList(L); S.dedName=''; S.dedType='none'; saveS(); renderSettings(); toast('ההקדשה נוספה');
-  };
-  document.querySelectorAll('#dedItems .ded-del').forEach(b=>b.onclick=()=>{ const L=dedList(); L.splice(+b.dataset.i,1); saveDedList(L); renderSettings(); });
-  // yahrzeit
-  document.querySelectorAll('.yahr-del').forEach(b=>b.onclick=()=>{ const L=getYahrzeits(); L.splice(+b.dataset.i,1); saveYahrzeits(L); renderSettings(); });
-  const yahrAdd=document.getElementById('yahrAdd');
-  if(yahrAdd) yahrAdd.onclick=()=>{
-    const name=document.getElementById('yahrName').value.trim();
-    const hm=+document.getElementById('yahrMonth').value;
-    const hd2=+document.getElementById('yahrDay').value;
-    if(!name){ toast('הזן שם'); return; }
-    const L=getYahrzeits(); L.push({name,hm,hd:hd2}); saveYahrzeits(L); renderSettings(); toast('נוסף');
-  };
-  // notification
-  const tgn=document.getElementById('tgNotif');
-  if(tgn) tgn.onclick=async()=>{
-    const currentlyOn = S.notifEnabled && notifPermGranted();
-    if(!currentlyOn){
-      if(!notifLocalPlugin() && typeof Notification==='undefined'){ toast('הדפדפן אינו תומך בהתראות'); return; }
-      const granted=await notifRequestPermission();
-      S.notifEnabled=granted; saveS(); renderSettings();
-      if(granted) notifScheduleDaily();
-      toast(granted?'הודעות הפעלו':'לא נתנה הרשאה');
-    } else { S.notifEnabled=false; saveS(); renderSettings(); notifCancelDaily(); toast('הודעות כבו'); }
-  };
+  document.getElementById('setsCatBack').onclick=backFn;
+  wireSettingsCategory(catId);
   tr(app);
   syncNativeSettings();
 }
@@ -11596,61 +11678,94 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 const NATIVE_SETTINGS = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeSettings);
 function nsRow(id,type,title,subtitle,extra){ return Object.assign({id,type,title,subtitle:subtitle||''}, extra||{}); }
 function nativeSettingsSpec(){
+  if(SETTINGS_VIEW==='list'){
+    const cats=settingsCategoriesMeta();
+    const rows=cats.map(c=>nsRow('cat:'+c.id,'disclosure',c.label,c.sub,{icon:c.sf,iconColor:c.color}));
+    if(STRIPE_DONATE_URL) rows.push(nsRow('donate','link',ckChrome('תמכו בבית אל'),ckChrome('כל תרומה מסיעת להמשך הלמוד היומי'),{url:STRIPE_DONATE_URL, icon:'heart.fill', iconColor:'#FF2D55'}));
+    return {title:ckChrome('הגדרות'), isDark:S.theme==='dark', sections:[{header:'', rows}]};
+  }
+  return nativeSettingsCategorySpec(SETTINGS_VIEW);
+}
+function nativeSettingsCategorySpec(catId){
   const notifPerm=notifPermGranted()?'granted':'denied';
-  const sections=[];
-  sections.push({header:ckChrome('תצוגה'), rows:[
-    nsRow('theme','toggle',ckChrome('מצב לילה / יום'), S.theme==='dark'?ckChrome('כהה (נייבי-זהב)'):ckChrome('בהיר (קלף)'), {value:S.theme==='dark'}),
-    nsRow('fontScale','stepper',ckChrome('גדל הגופן'),ckChrome('הגדלה / הקטנה של הטקסט'),{value:Math.round(S.fontScale*100)+'%'}),
-    nsRow('wake','toggle',ckChrome('מסך פעיל'),ckChrome('שומר על המסך דלוק בזמן התפלה'),{value:!!S.keepAwake}),
-  ]});
-  sections.push({header:ckChrome('תזכורת יומית'), rows:[
-    nsRow('notif','toggle',ckChrome('הודעת תזכורת לקריאה'), (S.notifEnabled&&notifPerm==='granted')?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!(S.notifEnabled&&notifPerm==='granted')}),
-    ...((window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window)?[nsRow('push','toggle',ckChrome('הודעות על תכן חדש'), S.pushEnabled?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!S.pushEnabled})]:[]),
-  ]});
-  sections.push({header:ckChrome('קריאה יומית'), rows:[
-    nsRow('lang','select',ckChrome('שפה'),ckChrome('שפת הממשק'),{value:S.lang||'he', options:[{value:'he',label:'עברית'},{value:'en',label:'English'},{value:'fr',label:'Français'},{value:'ru',label:'Русский'},{value:'ka',label:'ქართული'}]}),
-    nsRow('tracker','disclosure',ckChrome('מעקב קריאה'), ckExplainerTitle('tehillim')+' · '+ckChrome('תיקוני הזהר')+' · '+ckChrome('שנים מקרא')),
-    nsRow('chokExplainer','disclosure',ckChrome('מה לומדים כל יום'),ckChrome('הסבר קצר על סדר הלמוד בחוק לישראל')),
-  ]});
-  sections.push({header: ckPaceUI().settingsTitle, rows:[
-    nsRow('halacha','select',ckChrome('הלכה'), halachaChoiceLabel(), {value:halachaChoice(), options:[
-      {value:'rambam3', label:ckChrome('רמב״ם')+' · '+ckChrome('שלש שנים · פרק ליום')},
-      {value:'rambam1', label:ckChrome('רמב״ם')+' · '+ckChrome('שנה · שלשה פרקים')},
-    ]}),
-    ...(MCYC?[nsRow('musarWork','select',ckChrome('מוסר'),ckChrome('3 יחידות ליום'),{value:S.musarWork||'reshit', options:MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>({value:w.key,label:ckMusarUI()[w.key]}))})]:[]),
-    nsRow('division','segmented',ckChrome('שיטת חלוקה'), ckDivisionLabel(), {value:(S.division!=='monthly'&&S.division!=='weekly')?'monthlyStd':S.division, options:[{value:'monthlyStd',label:ckChrome('חדשי')},{value:'monthly',label:ckChrome('חדשי (5 ליום)')},{value:'weekly',label:ckChrome('שבועי')}]}),
-  ]});
-  sections.push({header:ckChrome('מקום וזמנים'), rows:[
-    nsRow('gps','button',ckChrome('השתמש במקום שלי'),ckChrome('אתור אוטומטי לפי GPS')),
-    nsRow('compass','disclosure',ckChrome('מצפן'),ckChrome('כוון לקדש הקדשים בירושלים')),
-    nsRow('tefillinMirror','disclosure',ckChrome('מראה לתפלין'),ckChrome('בדקו שהתפלין מונחים ישר')),
-    nsRow('region','segmented',ckChrome('ישראל / חוץ לארץ'),ckChrome('קובע יום טוב שני, חול המועד וכדומה בלוח השנה'),{value:S.calRegion||'auto', options:[{value:'auto',label:ckChrome('אוטומטי')},{value:'il',label:ckChrome('ישראל')},{value:'chul',label:ckChrome('חוץ לארץ')}]}),
-  ]});
-  sections.push({header:ckChrome('פָּסוּק לְפִי הַשֵּׁם'), rows:[
-    nsRow('hebrewNames','disclosure', (S.hebrewNames&&S.hebrewNames.length)?S.hebrewNames.join(' · '):ckChrome('אין שמות עדין')),
-  ]});
-  sections.push({header:ckChrome('הקדשת הקריאה'), rows:[
-    nsRow('dedications','disclosure', dedicationLine()||ckChrome('אין הקדשות עדין')),
-  ]});
-  sections.push({header:ckChrome('יאהרצייט · זכרון'), rows:[
-    nsRow('yahrzeit','disclosure', getYahrzeits().length ? getYahrzeits().map(y=>y.name).join(' · ') : ckChrome('אין זכרונות עדין')),
-  ]});
-  sections.push({header:ckChrome('שתוף'), rows:[
-    nsRow('shareApp','disclosure',ckChrome('שתף את האפליקציה'),ckChrome('שלח לחברים בקהלה')),
-    nsRow('shareAppQR','disclosure',ckChrome('שתף קוד QR'),ckChrome('תמונה מעצבת לסריקה')),
-    nsRow('bkExport','disclosure',ckChrome('גבוי לקבץ'),ckChrome('שמירת התקדמות, מועדפים והגדרות')),
-    nsRow('bkImport','disclosure',ckChrome('שחזור מגבוי'),ckChrome('טעינת קבץ גבוי קים')),
-    nsRow('resetProg','button',ckChrome('אפוס מעקב היום'),ckChrome('נקה סימון פרקים שנקראו')),
-  ]});
-  sections.push({header:ckChrome('משוב ותמיכה'), rows:[
-    nsRow('feedback','button',ckChrome('דווח והצעות לשפור'),ckChrome('דווח על תקלות והצעות לשפור')),
-    nsRow('rate','link',ckChrome('דרגו אותנו ב-App Store'),ckChrome('דרוג עוזר לנו להגיע לעוד אנשים'),{url:APP_REVIEW_URL}),
-  ]});
-  sections.push({header:ckChrome('משפטי'), rows:[
-    nsRow('privacy','link',ckChrome('מדיניות פרטיות'),ckChrome('מה נשמר ואיפה'),{url:'https://davidpit1565.github.io/Bet-El/privacy.html'}),
-    nsRow('terms','link',ckChrome('תנאי שמוש'),ckChrome('תנאים לשמוש באפליקציה'),{url:'https://davidpit1565.github.io/Bet-El/terms.html'}),
-  ]});
-  return {title:ckChrome('הגדרות'), isDark:S.theme==='dark', sections};
+  const meta=settingsCategoriesMeta().find(c=>c.id===catId);
+  let sections=[];
+  switch(catId){
+    case 'general':
+      sections=[
+        {header:ckChrome('תצוגה'), rows:[
+          nsRow('theme','toggle',ckChrome('מצב לילה / יום'), S.theme==='dark'?ckChrome('כהה (נייבי-זהב)'):ckChrome('בהיר (קלף)'), {value:S.theme==='dark'}),
+          nsRow('fontScale','stepper',ckChrome('גדל הגופן'),ckChrome('הגדלה / הקטנה של הטקסט'),{value:Math.round(S.fontScale*100)+'%'}),
+          nsRow('wake','toggle',ckChrome('מסך פעיל'),ckChrome('שומר על המסך דלוק בזמן התפלה'),{value:!!S.keepAwake}),
+        ]},
+        {header:ckChrome('שפה'), rows:[
+          nsRow('lang','select',ckChrome('שפה'),ckChrome('שפת הממשק'),{value:S.lang||'he', options:[{value:'he',label:'עברית'},{value:'en',label:'English'},{value:'fr',label:'Français'},{value:'ru',label:'Русский'},{value:'ka',label:'ქართული'}]}),
+        ]},
+      ];
+      break;
+    case 'notifications':
+      sections=[{header:ckChrome('תזכורת יומית'), rows:[
+        nsRow('notif','toggle',ckChrome('הודעת תזכורת לקריאה'), (S.notifEnabled&&notifPerm==='granted')?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!(S.notifEnabled&&notifPerm==='granted')}),
+        ...((window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window)?[nsRow('push','toggle',ckChrome('הודעות על תכן חדש'), S.pushEnabled?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!S.pushEnabled})]:[]),
+      ]}];
+      break;
+    case 'study':
+      sections=[
+        {header:ckChrome('קריאה יומית'), rows:[
+          nsRow('tracker','disclosure',ckChrome('מעקב קריאה'), ckExplainerTitle('tehillim')+' · '+ckChrome('תיקוני הזהר')+' · '+ckChrome('שנים מקרא')),
+          nsRow('chokExplainer','disclosure',ckChrome('מה לומדים כל יום'),ckChrome('הסבר קצר על סדר הלמוד בחוק לישראל')),
+        ]},
+        {header: ckPaceUI().settingsTitle, rows:[
+          nsRow('halacha','select',ckChrome('הלכה'), halachaChoiceLabel(), {value:halachaChoice(), options:[
+            {value:'rambam3', label:ckChrome('רמב״ם')+' · '+ckChrome('שלש שנים · פרק ליום')},
+            {value:'rambam1', label:ckChrome('רמב״ם')+' · '+ckChrome('שנה · שלשה פרקים')},
+          ]}),
+          ...(MCYC?[nsRow('musarWork','select',ckChrome('מוסר'),ckChrome('3 יחידות ליום'),{value:S.musarWork||'reshit', options:MUSAR_WORKS.filter(w=>MCYC[w.key]).map(w=>({value:w.key,label:ckMusarUI()[w.key]}))})]:[]),
+          nsRow('division','segmented',ckChrome('שיטת חלוקה'), ckDivisionLabel(), {value:(S.division!=='monthly'&&S.division!=='weekly')?'monthlyStd':S.division, options:[{value:'monthlyStd',label:ckChrome('חדשי')},{value:'monthly',label:ckChrome('חדשי (5 ליום)')},{value:'weekly',label:ckChrome('שבועי')}]}),
+        ]},
+      ];
+      break;
+    case 'location':
+      sections=[{header:ckChrome('מקום וזמנים'), rows:[
+        nsRow('gps','button',ckChrome('השתמש במקום שלי'),ckChrome('אתור אוטומטי לפי GPS')),
+        nsRow('compass','disclosure',ckChrome('מצפן'),ckChrome('כוון לקדש הקדשים בירושלים')),
+        nsRow('tefillinMirror','disclosure',ckChrome('מראה לתפלין'),ckChrome('בדקו שהתפלין מונחים ישר')),
+        nsRow('region','segmented',ckChrome('ישראל / חוץ לארץ'),ckChrome('קובע יום טוב שני, חול המועד וכדומה בלוח השנה'),{value:S.calRegion||'auto', options:[{value:'auto',label:ckChrome('אוטומטי')},{value:'il',label:ckChrome('ישראל')},{value:'chul',label:ckChrome('חוץ לארץ')}]}),
+      ]}];
+      break;
+    case 'personal':
+      sections=[
+        {header:ckChrome('פָּסוּק לְפִי הַשֵּׁם'), rows:[
+          nsRow('hebrewNames','disclosure', (S.hebrewNames&&S.hebrewNames.length)?S.hebrewNames.join(' · '):ckChrome('אין שמות עדין')),
+        ]},
+        {header:ckChrome('הקדשת הקריאה'), rows:[
+          nsRow('dedications','disclosure', dedicationLine()||ckChrome('אין הקדשות עדין')),
+        ]},
+        {header:ckChrome('יאהרצייט · זכרון'), rows:[
+          nsRow('yahrzeit','disclosure', getYahrzeits().length ? getYahrzeits().map(y=>y.name).join(' · ') : ckChrome('אין זכרונות עדין')),
+        ]},
+      ];
+      break;
+    case 'share':
+      sections=[{header:ckChrome('שתוף'), rows:[
+        nsRow('shareApp','disclosure',ckChrome('שתף את האפליקציה'),ckChrome('שלח לחברים בקהלה')),
+        nsRow('shareAppQR','disclosure',ckChrome('שתף קוד QR'),ckChrome('תמונה מעצבת לסריקה')),
+        nsRow('bkExport','disclosure',ckChrome('גבוי לקבץ'),ckChrome('שמירת התקדמות, מועדפים והגדרות')),
+        nsRow('bkImport','disclosure',ckChrome('שחזור מגבוי'),ckChrome('טעינת קבץ גבוי קים')),
+        nsRow('resetProg','button',ckChrome('אפוס מעקב היום'),ckChrome('נקה סימון פרקים שנקראו')),
+      ]}];
+      break;
+    case 'support':
+      sections=[{header:ckChrome('משוב ותמיכה'), rows:[
+        nsRow('feedback','button',ckChrome('דווח והצעות לשפור'),ckChrome('דווח על תקלות והצעות לשפור')),
+        nsRow('rate','link',ckChrome('דרגו אותנו ב-App Store'),ckChrome('דרוג עוזר לנו להגיע לעוד אנשים'),{url:APP_REVIEW_URL}),
+      ]},{header:ckChrome('משפטי'), rows:[
+        nsRow('privacy','link',ckChrome('מדיניות פרטיות'),ckChrome('מה נשמר ואיפה'),{url:'https://davidpit1565.github.io/Bet-El/privacy.html'}),
+        nsRow('terms','link',ckChrome('תנאי שמוש'),ckChrome('תנאים לשמוש באפליקציה'),{url:'https://davidpit1565.github.io/Bet-El/terms.html'}),
+      ]}];
+      break;
+  }
+  return {title: meta?meta.label:ckChrome('הגדרות'), isDark:S.theme==='dark', sections};
 }
 function syncNativeSettings(){
   if(!NATIVE_SETTINGS || TAB!=='settings') return;
@@ -11660,6 +11775,7 @@ function showNativeSettings(){ if(!NATIVE_SETTINGS) return; try{ window.Capacito
 function hideNativeSettings(){ if(!NATIVE_SETTINGS) return; try{ window.Capacitor.Plugins.NativeSettings.hide().catch(()=>{}); }catch(e){} }
 window.NativeSettingsHost = {
   onAction(id, value){
+    if(id && id.indexOf('cat:')===0){ SETTINGS_VIEW=id.slice(4); renderSettings(); tr(app); return; }
     const click=sel=>{ const el=document.querySelector(sel); if(el) el.click(); };
     switch(id){
       case 'theme': click('#tgTheme'); break;

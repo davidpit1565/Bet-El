@@ -1,5 +1,23 @@
 import UIKit
 
+extension UIColor {
+    /// Parses a "#RRGGBB" string (the only format `nativeSettingsSpec()`
+    /// sends) into a UIColor - returns nil for anything else rather than
+    /// guessing, so a malformed value falls back to the caller's own
+    /// default color instead of rendering black/transparent silently.
+    convenience init?(hex: String) {
+        var s = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        if s.hasPrefix("#") { s.removeFirst() }
+        guard s.count == 6, let rgb = UInt32(s, radix: 16) else { return nil }
+        self.init(
+            red: CGFloat((rgb >> 16) & 0xFF) / 255,
+            green: CGFloat((rgb >> 8) & 0xFF) / 255,
+            blue: CGFloat(rgb & 0xFF) / 255,
+            alpha: 1
+        )
+    }
+}
+
 /// One row in the native Settings table - see NativeSettingsBridge's
 /// header comment for the full spec this is parsed from.
 struct NativeSettingsRow {
@@ -11,6 +29,13 @@ struct NativeSettingsRow {
     let stringValue: String
     let options: [(value: String, label: String)]
     let url: String?
+    /// SF Symbol name + hex background color for the small rounded-square
+    /// icon badge shown leading the row, matching the real iOS Settings
+    /// app's own category rows (General, Notifications, ...) - nil for
+    /// every row that doesn't pass one (most individual setting rows),
+    /// which keeps the plain `.value1` look for those.
+    let icon: String?
+    let iconColor: String?
 }
 
 struct NativeSettingsSection {
@@ -111,6 +136,29 @@ extension NativeSettingsView: UITableViewDataSource {
         return header.isEmpty ? nil : header
     }
 
+    /// Builds the small rounded-square colored icon badge iOS's own
+    /// Settings app uses for its top-level category rows (General,
+    /// Notifications, ...), as a single composited image so it can go
+    /// straight into `cell.imageView?.image` - `UITableViewCell.imageView`
+    /// is a plain `UIImageView`, there's no API to swap in a custom
+    /// container view the way `accessoryView` allows.
+    private func iconBadge(systemName: String, hexColor: String) -> UIImage? {
+        let size = CGSize(width: 29, height: 29)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            let rect = CGRect(origin: .zero, size: size)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: 7)
+            (UIColor(hex: hexColor) ?? .systemGray).setFill()
+            path.fill()
+            let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+            guard let symbol = UIImage(systemName: systemName, withConfiguration: config)?
+                .withTintColor(.white, renderingMode: .alwaysOriginal) else { return }
+            let symbolSize = symbol.size
+            let origin = CGPoint(x: (size.width - symbolSize.width) / 2, y: (size.height - symbolSize.height) / 2)
+            symbol.draw(at: origin)
+        }
+    }
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let row = sections[indexPath.section].rows[indexPath.row]
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
@@ -122,6 +170,9 @@ extension NativeSettingsView: UITableViewDataSource {
         cell.selectionStyle = .none
         cell.accessoryType = .none
         cell.accessoryView = nil
+        if let icon = row.icon {
+            cell.imageView?.image = iconBadge(systemName: icon, hexColor: row.iconColor ?? "#8E8E93")
+        }
 
         let tagValue = tag(for: indexPath)
 
