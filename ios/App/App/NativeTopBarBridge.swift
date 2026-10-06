@@ -30,6 +30,7 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
         let title = call.getString("title") ?? ""
         let backTo = call.getString("backTo") ?? ""
         let isRTL = call.getBool("isRTL") ?? true
+        let isDark = call.getBool("isDark") ?? false
         let homeLabel = call.getString("homeLabel") ?? ""
         let settingsLabel = call.getString("settingsLabel") ?? ""
         let shareLabel = call.getString("shareLabel") ?? ""
@@ -41,7 +42,7 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
         }
         DispatchQueue.main.async {
             NativeTopBarBridge.activeController?.configureTopBar(
-                title: title, hasBack: !backTo.isEmpty, isRTL: isRTL,
+                title: title, hasBack: !backTo.isEmpty, isRTL: isRTL, isDark: isDark,
                 homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel,
                 actions: actions
             )

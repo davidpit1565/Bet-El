@@ -28,11 +28,9 @@ class MainViewController: CAPBridgeViewController {
     private let feedbackForm = NativeFeedbackFormView()
     private let toastView = NativeToastView()
     private let settingsView = NativeSettingsView()
-    /// iOS 26-style standalone search button: its own Liquid Glass circle
-    /// beside the tab bar (the way system apps split Search off from their
-    /// other tabs), opening the Library search via window.NativeSearchHost.
-    private let searchButton = UIButton(type: .system)
-    private var tabBarSideConstraints: [NSLayoutConstraint] = []
+    /// The app's own language direction (S.lang), from the last tab bar
+    /// configure() - also used to place the tools FAB on the matching side.
+    private var isRTL = true
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -45,6 +43,9 @@ class MainViewController: CAPBridgeViewController {
         ("prayers", "books.vertical.fill"),
         ("calendar", "calendar"),
         ("settings", "gearshape.fill"),
+        // Not a screen of its own - selecting it opens the Library search
+        // (window.NativeSearchHost) and the bar re-selects the real tab.
+        ("search", "magnifyingglass"),
     ]
 
     /// Capacitor 8 only auto-registers plugins listed in the generated
@@ -77,6 +78,7 @@ class MainViewController: CAPBridgeViewController {
         setupFeedbackForm()
         setupToast()
         setupSettingsView()
+        layoutToolsFab()
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
@@ -103,66 +105,10 @@ class MainViewController: CAPBridgeViewController {
         NSLayoutConstraint.activate([
             tabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        setupSearchButton()
-        layoutTabBarSides(isRTL: false)
-    }
-
-    private func setupSearchButton() {
-        searchButton.translatesAutoresizingMaskIntoConstraints = false
-        searchButton.isHidden = true
-        searchButton.accessibilityIdentifier = "search"
-        let symbol = UIImage(systemName: "magnifyingglass", withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold))
-        if #available(iOS 26.0, *) {
-            var config = UIButton.Configuration.glass()
-            config.image = symbol
-            config.cornerStyle = .capsule
-            searchButton.configuration = config
-        } else {
-            var config = UIButton.Configuration.filled()
-            config.image = symbol
-            config.cornerStyle = .capsule
-            config.background.visualEffect = UIBlurEffect(style: .systemMaterial)
-            config.baseBackgroundColor = .clear
-            config.baseForegroundColor = .label
-            searchButton.configuration = config
-        }
-        searchButton.addTarget(self, action: #selector(searchTapped), for: .touchUpInside)
-        view.addSubview(searchButton)
         NSLayoutConstraint.activate([
-            searchButton.widthAnchor.constraint(equalToConstant: 56),
-            searchButton.heightAnchor.constraint(equalToConstant: 56),
-            // The tab bar's own safe-area guide excludes the home-indicator
-            // strip, so its center is the center of the visible item row.
-            searchButton.centerYAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.centerYAnchor),
+            tabBar.leftAnchor.constraint(equalTo: view.leftAnchor),
+            tabBar.rightAnchor.constraint(equalTo: view.rightAnchor),
         ])
-    }
-
-    /// Search sits on the trailing end of the reading direction - right for
-    /// LTR languages, left for Hebrew - with the tab bar taking the rest.
-    /// Explicit left/right anchors (not leading/trailing) so the result
-    /// follows the app's own language, not the device's.
-    private func layoutTabBarSides(isRTL: Bool) {
-        NSLayoutConstraint.deactivate(tabBarSideConstraints)
-        let guide = view.safeAreaLayoutGuide
-        if isRTL {
-            tabBarSideConstraints = [
-                searchButton.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 16),
-                tabBar.leftAnchor.constraint(equalTo: searchButton.rightAnchor),
-                tabBar.rightAnchor.constraint(equalTo: view.rightAnchor),
-            ]
-        } else {
-            tabBarSideConstraints = [
-                tabBar.leftAnchor.constraint(equalTo: view.leftAnchor),
-                tabBar.rightAnchor.constraint(equalTo: searchButton.leftAnchor),
-                searchButton.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -16),
-            ]
-        }
-        NSLayoutConstraint.activate(tabBarSideConstraints)
-    }
-
-    @objc private func searchTapped() {
-        UISelectionFeedbackGenerator().selectionChanged()
-        webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
     }
 
     /// Pinned to the bottom-right corner, above the tab bar (whether or not
@@ -187,11 +133,38 @@ class MainViewController: CAPBridgeViewController {
         }
         view.addSubview(toolsFab)
         NSLayoutConstraint.activate([
-            toolsFab.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            toolsFab.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -14),
             toolsFab.widthAnchor.constraint(equalToConstant: 46),
             toolsFab.heightAnchor.constraint(equalToConstant: 46),
         ])
+        // Tapping anywhere outside the FAB/its open panel closes the panel.
+        // cancelsTouchesInView=false so the tap still reaches the web view.
+        let outsideTap = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+        outsideTap.cancelsTouchesInView = false
+        outsideTap.delegate = self
+        view.addGestureRecognizer(outsideTap)
+    }
+
+    private var toolsFabSideConstraints: [NSLayoutConstraint] = []
+
+    /// Top of the screen, just under the header, on the side the header's
+    /// own actions use (left in Hebrew, right otherwise) - the panel opens
+    /// downward from there (see NativeToolsFabView.expandPanel).
+    private func layoutToolsFab() {
+        guard toolsFab.superview != nil, topBar.superview != nil else { return }
+        NSLayoutConstraint.deactivate(toolsFabSideConstraints)
+        let guide = view.safeAreaLayoutGuide
+        toolsFabSideConstraints = [
+            toolsFab.topAnchor.constraint(equalTo: guide.topAnchor, constant: topBar.contentHeight + 8),
+            isRTL
+                ? toolsFab.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 14)
+                : toolsFab.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -14),
+        ]
+        NSLayoutConstraint.activate(toolsFabSideConstraints)
+        toolsFab.isRTL = isRTL
+    }
+
+    @objc private func handleOutsideTap(_ gesture: UITapGestureRecognizer) {
+        toolsFab.collapseIfExpanded()
     }
 
     // MARK: - Called by NativeToolsFabBridge (JS-driven)
@@ -228,7 +201,8 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTopBarBridge (JS-driven)
 
-    func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
+    func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, isDark: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
+        topBar.setTheme(isDark: isDark)
         topBar.configure(title: title, hasBack: hasBack, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel, actions: actions)
         // Both relay to one fixed JS entry point each rather than this
         // method trying to encode what "back" or a given action id means -
@@ -454,7 +428,8 @@ class MainViewController: CAPBridgeViewController {
         }
         tabBar.semanticContentAttribute = .forceLeftToRight
         tabBar.items = isRTL ? ordered.reversed() : ordered
-        layoutTabBarSides(isRTL: isRTL)
+        self.isRTL = isRTL
+        layoutToolsFab()
         setActive(tab: activeTab)
         setVisible(true)
     }
@@ -465,7 +440,6 @@ class MainViewController: CAPBridgeViewController {
 
     func setVisible(_ visible: Bool) {
         tabBar.isHidden = !visible
-        searchButton.isHidden = !visible
         reportHeightToWebView()
     }
 
@@ -479,9 +453,20 @@ class MainViewController: CAPBridgeViewController {
                 : .identity
             self.tabBar.alpha = hidden ? 0 : 1
             self.tabBar.transform = slide
-            self.searchButton.alpha = hidden ? 0 : 1
-            self.searchButton.transform = slide
         }
+    }
+}
+
+extension MainViewController: UIGestureRecognizerDelegate {
+    /// Only taps that land outside the FAB and its expanded panel count as
+    /// "outside" - taps on the panel's own buttons must not close it.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard toolsFab.isExpanded else { return false }
+        return !toolsFab.containsTouch(touch)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+        true
     }
 }
 
@@ -489,6 +474,10 @@ extension MainViewController: UITabBarDelegate {
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let tabId = item.accessibilityIdentifier else { return }
         UISelectionFeedbackGenerator().selectionChanged()
+        if tabId == "search" {
+            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
+            return
+        }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
     }
 }

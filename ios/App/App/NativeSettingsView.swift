@@ -65,6 +65,8 @@ final class NativeSettingsView: UIView {
     /// semanticContentAttribute isn't inherited by table cells, so it's
     /// applied to the table and to every cell as it's built.
     private var layoutDirection: UISemanticContentAttribute = .forceLeftToRight
+    private var appBackground: UIColor = .systemGroupedBackground
+    private var cellBackground: UIColor = .secondarySystemGroupedBackground
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -96,6 +98,18 @@ final class NativeSettingsView: UIView {
         self.sections = sections
         overrideUserInterfaceStyle = isDark ? .dark : .light
         layoutDirection = isRTL ? .forceRightToLeft : .forceLeftToRight
+        // The app's own parchment/navy palette (index.html's --bg and
+        // --panel-solid) instead of the system's grey grouped-table colors,
+        // so this screen matches every other screen of the app.
+        appBackground = isDark
+            ? UIColor(red: 0.031, green: 0.051, blue: 0.098, alpha: 1)
+            : UIColor(red: 0.937, green: 0.902, blue: 0.824, alpha: 1)
+        cellBackground = isDark
+            ? UIColor(red: 0.071, green: 0.110, blue: 0.220, alpha: 1)
+            : UIColor(red: 0.984, green: 0.965, blue: 0.918, alpha: 1)
+        tableView.backgroundColor = appBackground
+        backgroundColor = appBackground
+        tableView.separatorColor = goldColor.withAlphaComponent(0.22)
         semanticContentAttribute = layoutDirection
         tableView.semanticContentAttribute = layoutDirection
         tableView.reloadData()
@@ -171,6 +185,7 @@ extension NativeSettingsView: UITableViewDataSource {
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
         cell.semanticContentAttribute = layoutDirection
         cell.contentView.semanticContentAttribute = layoutDirection
+        cell.backgroundColor = cellBackground
         cell.textLabel?.text = row.title
         cell.textLabel?.numberOfLines = 0
         cell.detailTextLabel?.text = row.subtitle
@@ -261,6 +276,13 @@ extension NativeSettingsView: UITableViewDataSource {
 }
 
 extension NativeSettingsView: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let header = view as? UITableViewHeaderFooterView else { return }
+        header.textLabel?.textColor = goldColor
+        header.semanticContentAttribute = layoutDirection
+        header.contentView.semanticContentAttribute = layoutDirection
+    }
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let row = sections[indexPath.section].rows[indexPath.row]

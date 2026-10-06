@@ -27,7 +27,14 @@ final class NativeToolsFabView: UIView {
     private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
 
     private var panelContainer: UIView?
-    private var isExpanded = false
+    private(set) var isExpanded = false
+    /// Set by MainViewController - which screen edge the FAB sits on, so the
+    /// panel lines up with it as it drops down.
+    var isRTL = true
+    /// Icons inside the panel use the system label color (near-black on
+    /// light, white on dark, via overrideUserInterfaceStyle in setState)
+    /// rather than gold-on-glass, which read as too faint.
+    private var iconColor: UIColor { .label }
 
     private var showAutoscroll = false
     private var fontScalePercent = 100
@@ -99,8 +106,8 @@ final class NativeToolsFabView: UIView {
     private func iconButton(systemName: String, action: Selector, label: String) -> UIButton {
         let b = UIButton(type: .system)
         b.translatesAutoresizingMaskIntoConstraints = false
-        b.setImage(UIImage(systemName: systemName), for: .normal)
-        b.tintColor = goldColor
+        b.setImage(UIImage(systemName: systemName, withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)), for: .normal)
+        b.tintColor = iconColor
         b.accessibilityLabel = label
         b.widthAnchor.constraint(equalToConstant: 36).isActive = true
         b.heightAnchor.constraint(equalToConstant: 36).isActive = true
@@ -122,9 +129,10 @@ final class NativeToolsFabView: UIView {
         panel.translatesAutoresizingMaskIntoConstraints = false
         superview.insertSubview(panel, belowSubview: self)
         panelContainer = panel
+        panel.overrideUserInterfaceStyle = overrideUserInterfaceStyle
         NSLayoutConstraint.activate([
-            panel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            panel.bottomAnchor.constraint(equalTo: topAnchor, constant: -10),
+            isRTL ? panel.leftAnchor.constraint(equalTo: leftAnchor) : panel.rightAnchor.constraint(equalTo: rightAnchor),
+            panel.topAnchor.constraint(equalTo: bottomAnchor, constant: 10),
             panel.widthAnchor.constraint(equalToConstant: panelWidth),
             panel.heightAnchor.constraint(equalToConstant: panelHeight),
         ])
@@ -143,7 +151,7 @@ final class NativeToolsFabView: UIView {
         fsLabel.setScaledFont(13, weight: .bold, maximumSize: 16)
         fsLabel.adjustsFontSizeToFitWidth = true
         fsLabel.minimumScaleFactor = 0.7
-        fsLabel.textColor = UIColor(white: 0.5, alpha: 1)
+        fsLabel.textColor = .label
         fsLabel.textAlignment = .center
         fsLabel.widthAnchor.constraint(equalToConstant: 30).isActive = true
         fontLabel = fsLabel
@@ -217,9 +225,20 @@ final class NativeToolsFabView: UIView {
 
     // MARK: - State from JS
 
+    /// JS re-sends this on every state sync (including right after one of
+    /// the panel's own buttons is tapped), so the panel only closes when
+    /// its contents actually change - not on every call, which used to
+    /// close it after each tap.
     func configure(showAutoscroll: Bool) {
+        let changed = self.showAutoscroll != showAutoscroll
         self.showAutoscroll = showAutoscroll
-        if isExpanded { collapsePanel() }
+        if changed && isExpanded { collapsePanel() }
+    }
+
+    func containsTouch(_ touch: UITouch) -> Bool {
+        if bounds.contains(touch.location(in: self)) { return true }
+        if let panel = panelContainer, panel.bounds.contains(touch.location(in: panel)) { return true }
+        return false
     }
 
     func setState(fontScalePercent: Int, isDarkTheme: Bool, isAutoscrollActive: Bool) {
@@ -233,6 +252,8 @@ final class NativeToolsFabView: UIView {
         self.fontScalePercent = fontScalePercent
         self.isDarkTheme = isDarkTheme
         self.isAutoscrollActive = isAutoscrollActive
+        overrideUserInterfaceStyle = isDarkTheme ? .dark : .light
+        panelContainer?.overrideUserInterfaceStyle = overrideUserInterfaceStyle
         fontLabel?.text = "\(fontScalePercent)"
         themeButton?.setImage(UIImage(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill"), for: .normal)
         autoscrollButton?.setImage(UIImage(systemName: isAutoscrollActive ? "pause.fill" : "play.fill"), for: .normal)
