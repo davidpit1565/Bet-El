@@ -241,8 +241,21 @@ struct BetElWidgetEntryView: View {
                 MediumWidgetView(entry: entry)
             case .systemLarge:
                 LargeWidgetView(entry: entry)
-            default:
+            case .systemSmall:
                 SmallWidgetView(entry: entry)
+            default:
+                // Only reachable for .accessoryCircular/.accessoryRectangular
+                // (iOS 16+) - see BetElWidget.supportedFamilies below, which
+                // only ever offers those families on iOS 16+ in the first
+                // place, so this branch is never hit pre-16 despite the
+                // `if #available` looking redundant here.
+                if #available(iOS 16.0, *), family == .accessoryCircular {
+                    BetElAccessoryCircularView(entry: entry)
+                } else if #available(iOS 16.0, *), family == .accessoryRectangular {
+                    BetElAccessoryRectangularView(entry: entry)
+                } else {
+                    SmallWidgetView(entry: entry)
+                }
             }
         }
         // Widget copy always follows the app's own S.lang setting, not
@@ -286,6 +299,18 @@ struct BetElWidget: Widget {
         }
         .configurationDisplayName("תָּמִיד")
         .description("תַּאֲרִיךְ עִבְרִי, תְּהִלִּים הַיּוֹם וְהִתְקַדְּמוּתְךָ")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies(Self.families)
+    }
+
+    /// `.accessoryCircular`/`.accessoryRectangular` (Lock Screen) only
+    /// exist from iOS 16 - appended conditionally rather than raising this
+    /// extension's own deployment target, so the Home Screen families keep
+    /// working unchanged all the way back to iOS 15.
+    private static var families: [WidgetFamily] {
+        var families: [WidgetFamily] = [.systemSmall, .systemMedium, .systemLarge]
+        if #available(iOS 16.0, *) {
+            families.append(contentsOf: [.accessoryCircular, .accessoryRectangular])
+        }
+        return families
     }
 }

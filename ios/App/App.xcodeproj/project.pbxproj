@@ -21,6 +21,7 @@
 		6C4E5E5AA93D9D96B0217FB4 /* NativeTabBarBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46751A00A0A858BF4DE9FC7D /* NativeTabBarBridge.swift */; };
 		6D0958385491BDBEF575FB64 /* SharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9274E9281FDF317A272DE17 /* SharedData.swift */; };
 		76AFC14D16EBDDD45C98D938 /* BetElCandleWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4818BB0B2787F95B286FD5E /* BetElCandleWidget.swift */; };
+		E5480615C180044168F06C36 /* BetElWidgetAccessoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38A1008B46394CC3110076D /* BetElWidgetAccessoryViews.swift */; };
 		7F1FD21D057EC7E01E6CB494 /* BetElWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF701305BE4DBDAA787444A /* BetElWidgetBundle.swift */; };
 		8A074172DFC9F6AAC6FC5E01 /* BetElWidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 682EEB13158E5B65AFF23FB7 /* BetElWidgetBridge.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
@@ -94,6 +95,7 @@
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		B9219DE907AE74E0EDD8E75B /* Localization.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		C4818BB0B2787F95B286FD5E /* BetElCandleWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElCandleWidget.swift; sourceTree = "<group>"; };
+		C38A1008B46394CC3110076D /* BetElWidgetAccessoryViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidgetAccessoryViews.swift; sourceTree = "<group>"; };
 		DE278307C742BE5E4186087A /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		E9274E9281FDF317A272DE17 /* SharedData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedData.swift; sourceTree = "<group>"; };
 		EF731F19971C018FA05D9FE7 /* BetElWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BetElWidget.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				49EC39C473DF8F15EAD181A6 /* Info.plist */,
 				655C956457ECBF25294D3CBF /* BetElWidget.entitlements */,
 				C4818BB0B2787F95B286FD5E /* BetElCandleWidget.swift */,
+				C38A1008B46394CC3110076D /* BetElWidgetAccessoryViews.swift */,
 				B9219DE907AE74E0EDD8E75B /* Localization.swift */,
 			);
 			name = BetElWidget;
@@ -334,6 +337,7 @@
 				FA978A88D2397868B7551144 /* HebrewDay.swift in Sources */,
 				6D0958385491BDBEF575FB64 /* SharedData.swift in Sources */,
 				76AFC14D16EBDDD45C98D938 /* BetElCandleWidget.swift in Sources */,
+				E5480615C180044168F06C36 /* BetElWidgetAccessoryViews.swift in Sources */,
 				B88883E07D4A36E212AA52F5 /* Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

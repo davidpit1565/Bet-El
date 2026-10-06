@@ -56,12 +56,25 @@ struct BetElCandleProvider: TimelineProvider {
 // MARK: - View
 
 private struct BetElCandleWidgetView: View {
+    @Environment(\.widgetFamily) var family
     let entry: BetElCandleEntry
     var body: some View {
+        Group {
+            if #available(iOS 16.0, *), family == .accessoryRectangular {
+                BetElCandleAccessoryRectangularView(entry: entry)
+            } else {
+                homeScreenBody
+            }
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+    }
+
+    private var homeScreenBody: some View {
         let palette = BetElTheme.palette(for: entry.theme)
         let align: HorizontalAlignment = WidgetL10n.isRTL(entry.lang) ? .trailing : .leading
         let fAlign: Alignment = WidgetL10n.isRTL(entry.lang) ? .trailing : .leading
-        VStack(alignment: align, spacing: 6) {
+        return VStack(alignment: align, spacing: 6) {
             Image(systemName: "flame.fill")
                 .font(.system(size: 16))
                 .foregroundColor(palette.gold)
@@ -78,7 +91,6 @@ private struct BetElCandleWidgetView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .widgetBackground(palette: palette)
     }
 
     private func timeStr(_ date: Date?) -> String {
@@ -95,10 +107,15 @@ struct BetElCandleWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElCandleProvider()) { entry in
             BetElCandleWidgetView(entry: entry)
-                .environment(\.layoutDirection, .leftToRight)
         }
         .configurationDisplayName("הַדְלָקַת נֵרוֹת")
         .description("זְמַן הַדְלָקַת הַנֵּרוֹת הַקָּרוֹב")
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies(Self.families)
+    }
+
+    private static var families: [WidgetFamily] {
+        var families: [WidgetFamily] = [.systemSmall]
+        if #available(iOS 16.0, *) { families.append(.accessoryRectangular) }
+        return families
     }
 }
