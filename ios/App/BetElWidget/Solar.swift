@@ -13,6 +13,14 @@ enum Solar {
         let sunrise: Date
         let solarNoon: Date
         let sunset: Date
+
+        /// Alot HaShachar by the community's rule (same as index.html's
+        /// ZCUSTOM.alotHaShachar): the sunrise-to-sunset span divided by 8
+        /// (an 800-minute day -> 100 minutes) is how long before sunrise
+        /// dawn is.
+        var dawn: Date {
+            sunrise.addingTimeInterval(-sunset.timeIntervalSince(sunrise) / 8)
+        }
     }
 
     /// `date` should be local midnight (any time on the target day works;

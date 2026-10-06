@@ -8,6 +8,7 @@ import Foundation
 /// strings (see index.html's `tt()`/PRAYERS_TRANSLIT fallbacks).
 enum WidgetL10n {
     private static let strings: [String: [String: String]] = [
+        "dawn": ["he": "עֲלוֹת הַשַּׁחַר", "en": "Dawn"],
         "sunrise": ["he": "זְרִיחָה", "en": "Sunrise"],
         "sunset": ["he": "שְׁקִיעָה", "en": "Sunset"],
         "tehillimToday": ["he": "תְּהִלִּים הַיּוֹם", "en": "Tehillim today"],

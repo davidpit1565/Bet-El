@@ -6,7 +6,7 @@ import ActivityKit
 
 /// Exposes `window.Capacitor.Plugins.NativeLiveActivity.*` to the web app -
 /// a Live Activity (Lock Screen banner + Dynamic Island) showing a live
-/// countdown to the next zman (sunrise/sunset only - the same simple solar
+/// countdown to the next zman (dawn/sunrise/sunset only - the same simple solar
 /// calculation `BetElWidget`'s own Provider.swift already uses, not the
 /// app's full halachic zmanim, see Solar.swift's own header comment for
 /// why that's out of scope here too).
@@ -82,18 +82,19 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
     }
 
     /// Mirrors Provider.swift's own "what's the next zman" logic (today's
-    /// sunrise/sunset, or tomorrow's sunrise once today's sunset has
+    /// dawn/sunrise/sunset, or tomorrow's dawn once today's sunset has
     /// passed) - kept here rather than shared, since the widget's version
     /// also needs the *second* upcoming zman for its large layout, which
     /// this simpler countdown-only use doesn't.
     @available(iOS 16.2, *)
     private static func nextZman(latitude: Double, longitude: Double, after now: Date) -> (label: String, date: Date)? {
         guard let today = Solar.times(for: now, latitude: latitude, longitude: longitude) else { return nil }
+        if now < today.dawn { return ("dawn", today.dawn) }
         if now < today.sunrise { return ("sunrise", today.sunrise) }
         if now < today.sunset { return ("sunset", today.sunset) }
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now) ?? now
         guard let next = Solar.times(for: tomorrow, latitude: latitude, longitude: longitude) else { return nil }
-        return ("sunrise", next.sunrise)
+        return ("dawn", next.dawn)
     }
     #endif
 }

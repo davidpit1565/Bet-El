@@ -44,7 +44,7 @@ struct BetElProvider: TimelineProvider {
         // day) plus one for right now, deduplicated and sorted.
         var refreshDates: [Date] = [now]
         if let times = Solar.times(for: now, latitude: snapshot.latitude, longitude: snapshot.longitude) {
-            refreshDates.append(contentsOf: [times.sunrise, times.solarNoon, times.sunset])
+            refreshDates.append(contentsOf: [times.dawn, times.sunrise, times.solarNoon, times.sunset])
         }
         // Also refresh right after local midnight, for the next day's
         // Hebrew date + Tehillim portion + a fresh zmanim set.
@@ -68,26 +68,31 @@ struct BetElProvider: TimelineProvider {
         let portion = HebrewDay.tehillimPortion(for: date)
         let times = Solar.times(for: date, latitude: snapshot.latitude, longitude: snapshot.longitude)
 
+        let dawnLabel = WidgetL10n.t("dawn", lang: lang)
         let sunriseLabel = WidgetL10n.t("sunrise", lang: lang)
         let sunsetLabel = WidgetL10n.t("sunset", lang: lang)
-        var nextLabel = sunriseLabel
-        var nextTime: Date? = times?.sunrise
-        var secondLabel: String? = sunsetLabel
-        var secondTime: Date? = times?.sunset
+        var nextLabel = dawnLabel
+        var nextTime: Date? = times?.dawn
+        var secondLabel: String? = sunriseLabel
+        var secondTime: Date? = times?.sunrise
 
         if let times = times {
-            if date < times.sunrise {
+            if date < times.dawn {
+                nextLabel = dawnLabel; nextTime = times.dawn
+                secondLabel = sunriseLabel; secondTime = times.sunrise
+            } else if date < times.sunrise {
                 nextLabel = sunriseLabel; nextTime = times.sunrise
                 secondLabel = sunsetLabel; secondTime = times.sunset
             } else if date < times.sunset {
                 nextLabel = sunsetLabel; nextTime = times.sunset
                 secondLabel = nil; secondTime = nil
             } else {
-                // after sunset - show tomorrow's sunrise as "next"
+                // after sunset - show tomorrow's dawn as "next"
                 let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date
                 let tTimes = Solar.times(for: tomorrow, latitude: snapshot.latitude, longitude: snapshot.longitude)
-                nextLabel = sunriseLabel; nextTime = tTimes?.sunrise
-                secondLabel = nil; secondTime = nil
+                nextLabel = dawnLabel; nextTime = tTimes?.dawn
+                secondLabel = tTimes != nil ? sunriseLabel : nil
+                secondTime = tTimes?.sunrise
             }
         }
 
