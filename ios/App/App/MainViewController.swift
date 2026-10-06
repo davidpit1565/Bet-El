@@ -117,7 +117,7 @@ class MainViewController: CAPBridgeViewController {
             tabBar.leftAnchor.constraint(equalTo: view.leftAnchor),
             tabBar.rightAnchor.constraint(equalTo: view.rightAnchor),
         ])
-        tabBar.tintColor = .betelGold
+        tabBar.tintColor = MainViewController.tabTint
         setupMiniTabButton()
     }
 
@@ -155,7 +155,7 @@ class MainViewController: CAPBridgeViewController {
             var config = UIButton.Configuration.glass()
             config.image = image
             config.cornerStyle = .capsule
-            config.baseForegroundColor = .betelGold
+            config.baseForegroundColor = MainViewController.tabTint
             miniTabButton.configuration = config
         } else {
             var config = UIButton.Configuration.filled()
@@ -508,9 +508,26 @@ class MainViewController: CAPBridgeViewController {
         refreshMiniTabIcon()
     }
 
-    /// From JS (S.theme) so the tab bar, its minimized circle and the gold
-    /// tint resolve against the app's own theme, not the device's.
+    /// Selected-tab color: deep gold on light glass, a bright cream-gold on
+    /// dark glass. On iOS 26 the Liquid Glass bar switches between light and
+    /// dark by itself depending on what's scrolling under it, and this
+    /// dynamic color follows that switch live (so it stays readable over a
+    /// dark page even in the light theme, and vice versa).
+    static let tabTint = UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.973, green: 0.906, blue: 0.706, alpha: 1)
+            : UIColor(red: 0.478, green: 0.353, blue: 0.078, alpha: 1)
+    }
+
+    /// From JS (S.theme). On iOS 26 the bar is left to adapt to the content
+    /// beneath it (see `tabTint`); older systems' blur bar doesn't adapt by
+    /// itself, so there it follows the app theme.
     func setTabBarTheme(isDark: Bool) {
+        if #available(iOS 26.0, *) {
+            tabBar.overrideUserInterfaceStyle = .unspecified
+            miniTabButton.overrideUserInterfaceStyle = .unspecified
+            return
+        }
         let style: UIUserInterfaceStyle = isDark ? .dark : .light
         tabBar.overrideUserInterfaceStyle = style
         miniTabButton.overrideUserInterfaceStyle = style
