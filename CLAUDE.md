@@ -250,3 +250,28 @@ in English as usual.
   App Store (id6807186847) as of 2026-09-09. `appQrImage()` (index.html)
   now encodes `APP_STORE_URL` (`https://apps.apple.com/app/...`) instead
   of the PWA's own `location.href`.
+- **Any new custom native-only Swift plugin (a `CAPPlugin`/`CAPBridgedPlugin`
+  with no npm package of its own) must ALSO get a `core.registerPlugin('X')`
+  line in `capacitor-native-bridge.js`.** The Swift side alone is not
+  enough - `window.Capacitor.Plugins.X` only exists once something calls
+  `registerPlugin()` client-side, and this app's custom plugins
+  (NativeTopBar, NativeToolsFab, NativeModal, NativeSettings, NativeToast,
+  NativeHaptics, NativeTabBar, BetElWidgetBridge, NativeLiveActivity) ship
+  no vendored UMD bundle of their own the way `@capacitor/app` does. This
+  exact gap went undetected for most of a session (every native Liquid
+  Glass feature "worked" by every code-level signal - it built, it ran,
+  Playwright tests passed because they stub `window.Capacitor.Plugins.X`
+  directly, bypassing the real registration path entirely - but silently
+  did nothing at all on a real device) before being traced to this file.
+  **Also not compile-verified in Xcode as of this writing** (no macOS/
+  Xcode available in that session): Dynamic Type scaling across every
+  native UIKit label, two `.symbolEffect(.bounce)` spots (tools FAB theme
+  icon, modal icon), Lock Screen widget families
+  (`.accessoryCircular`/`.accessoryRectangular` on both widgets), and a
+  new Live Activity (`NativeLiveActivityBridge.swift` +
+  `BetElLiveActivityWidget.swift` + `BetElActivityAttributes.swift`,
+  shared between the App and BetElWidget targets like `SharedData.swift`)
+  showing a countdown to the next sunrise/sunset. Build in Xcode and
+  actually exercise all of these - especially starting the Live Activity
+  and checking the Lock Screen banner and Dynamic Island - before
+  assuming any of them work.
