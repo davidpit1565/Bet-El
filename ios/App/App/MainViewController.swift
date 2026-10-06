@@ -28,6 +28,7 @@ class MainViewController: CAPBridgeViewController {
     private let modal = NativeModalView()
     private let feedbackForm = NativeFeedbackFormView()
     private let toastView = NativeToastView()
+    let homeEditOverlay = HomeEditOverlay()
     private let settingsView = NativeSettingsView()
     /// The app's own language direction (S.lang), from the last tab bar
     /// configure() - also used to place the tools FAB on the matching side.
@@ -89,6 +90,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeModalBridge())
         bridge?.registerPluginInstance(NativeSettingsBridge())
         bridge?.registerPluginInstance(NativeToastBridge())
+        bridge?.registerPluginInstance(NativeHomeEditBridge())
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
@@ -102,6 +104,7 @@ class MainViewController: CAPBridgeViewController {
         setupModal()
         setupFeedbackForm()
         setupToast()
+        setupHomeEdit()
         setupSettingsView()
         layoutToolsFab()
         topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
@@ -110,6 +113,7 @@ class MainViewController: CAPBridgeViewController {
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
         NativeToastBridge.activeController = self
+        NativeHomeEditBridge.activeController = self
         NativeSettingsBridge.activeController = self
     }
 
@@ -414,6 +418,13 @@ class MainViewController: CAPBridgeViewController {
     /// Pinned just above the tab bar, matching the HTML `.toast`'s own
     /// `bottom: calc(var(--native-nav-h) + 20px)` position when a native
     /// tab bar is present (see the `.has-native-tabbar .toast` CSS rule).
+    private func setupHomeEdit() {
+        homeEditOverlay.frame = view.bounds
+        homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+        homeEditOverlay.topInset = { [weak self] in self?.view.safeAreaInsets.top ?? 0 }
+        view.insertSubview(homeEditOverlay, belowSubview: tabBar)
+    }
+
     private func setupToast() {
         toastView.translatesAutoresizingMaskIntoConstraints = false
         toastView.isHidden = true

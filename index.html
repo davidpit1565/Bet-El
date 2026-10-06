@@ -3155,7 +3155,7 @@ function go(tab){
   }
   if(TAB==='kotelCompass' && tab!=='kotelCompass') stopCompass();
   if(TAB==='tefillinMirror' && tab!=='tefillinMirror') stopTefillinMirror();
-  if(HOME_EDIT){ HOME_EDIT=false; const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
+  if(HOME_EDIT){ HOME_EDIT=false; try{ if(homeNativeEdit()) Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
   TAB=tab;
   /* the full-screen AR compass overlay must cover the bottom nav completely,
      but .bottom-nav is a body-level sibling outside #app's own stacking
@@ -6527,6 +6527,7 @@ function homeSetEdit(on){
   HOME_EDIT=!!on;
   const bar=document.getElementById('homeEditBar'); if(bar) bar.remove();
   const sheet=document.getElementById('homeSheet'); if(sheet) sheet.remove();
+  if(!on && homeNativeEdit()){ try{ Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} }
   if(TAB==='home') renderHome();
 }
 function homeEnterEdit(){
@@ -6535,7 +6536,13 @@ function homeEnterEdit(){
   homeSetEdit(true);
 }
 
+/* Real Liquid Glass edit controls (NativeHomeEdit.swift): on the native app the
+   minus badges, resize handles, +/check pills, the remove confirmation and the
+   add sheet are genuine UIKit/UIGlassEffect views drawn over the web view; on
+   the web/PWA the HTML versions below stay. */
+function homeNativeEdit(){ try{ return !!(window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.NativeHomeEdit); }catch(e){ return false; } }
 function homeEditControls(id,def,size){
+  if(homeNativeEdit()) return '';
   const minus = def.keep ? '' : `<button class="hi-minus" data-act="del" aria-label="${ckChrome('הסר')}"><svg viewBox="0 0 12 12"><path d="M2.5 6h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`;
   const resize = def.kind==='tile' ? `<span class="hi-resize" data-act="resize" aria-label="resize"><svg viewBox="0 0 22 22"><path d="M17 5 C17 12.5 12.5 17 5 17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>` : '';
   return minus+resize;
@@ -6565,6 +6572,22 @@ function homeGridHTML(mods){
 function homeAddSheet(){
   const have=new Set(getHomeLayout().map(x=>x.id));
   const rows=Object.keys(HOME_CATALOG).filter(id=>!HOME_CATALOG[id].fixed && !HOME_CATALOG[id].keep && !have.has(id));
+  const addId=id=>{
+    const layout=getHomeLayout();
+    layout.push({id,size:HOME_CATALOG[id].kind==='tile'?'s':'l'});
+    saveHomeLayout(layout); homeKeepScroll(renderHome);
+    setTimeout(()=>{ const el=document.querySelector(`[data-home-item="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); },60);
+  };
+  if(homeNativeEdit()){
+    Capacitor.Plugins.NativeHomeEdit.showAddSheet({title:ckChrome('הוספת כפתור'),resetLabel:ckChrome('איפוס לברירת מחדל'),emptyLabel:ckChrome('כל הכפתורים כבר על המסך'),
+      rows:rows.map(id=>({id,label:ckChrome(HOME_CATALOG[id].label)})),rtl:document.documentElement.dir!=='ltr',
+      isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark')})
+      .then(r=>{
+        if(r&&r.id) addId(r.id);
+        else if(r&&r.reset){ try{ localStorage.removeItem(HOME_LAYOUT_KEY); }catch(e){} homeKeepScroll(renderHome); }
+      }).catch(()=>{});
+    return;
+  }
   const ov=document.createElement('div'); ov.id='homeSheet'; ov.className='home-sheet-ov';
   ov.innerHTML=`<div class="home-sheet">
     <div class="hs-head"><b>${ckChrome('הוספת כפתור')}</b><button class="hs-close" data-x>✕</button></div>
@@ -6594,6 +6617,7 @@ function homeKeepScroll(fn){ const sc=homeScroller(), y=sc.scrollTop; fn(); home
 function homeMountEditBar(){
   const old=document.getElementById('homeEditBar'); if(old) old.remove();
   if(!HOME_EDIT) return;
+  if(homeNativeEdit()){ homeSyncNative(); return; }   // the +/check pills are native glass buttons
   const bar=document.createElement('div'); bar.id='homeEditBar'; bar.className='home-edit-bar';
   bar.innerHTML=`<button class="heb-add" data-act="add" aria-label="${ckChrome('הוספת כפתור')}"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button><button class="heb-done" data-act="done" aria-label="${ckChrome('סיום')}"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
   document.body.appendChild(bar);
@@ -6649,7 +6673,7 @@ function homeBindDrag(grid){
     st.timer=null; st.active=true;
     const it=st.item, r=it.getBoundingClientRect();
     st.gx=st.sx-r.left; st.gy=st.sy-r.top; st.px=st.sx; st.py=st.sy;
-    it.classList.add('dragging');
+    it.classList.add('dragging'); homeSyncHide(true);
     try{ nativeHaptic('impact','medium'); }catch(_){}
     place(); st.raf=requestAnimationFrame(loop);
   };
@@ -6664,7 +6688,7 @@ function homeBindDrag(grid){
     if(!st.active){ st.item=null; return; }
     st.active=false; cancelAnimationFrame(st.raf);
     const it=st.item; st.item=null;
-    it.classList.remove('dragging'); it.style.transform='';
+    it.classList.remove('dragging'); it.style.transform=''; homeSyncHide(false);
     const order=movable().map(x=>x.dataset.homeItem);
     const cur=getHomeLayout(), byId=Object.fromEntries(cur.map(x=>[x.id,x]));
     saveHomeLayout(homeNormalize(order.map(id=>byId[id]).filter(Boolean)));
@@ -6691,6 +6715,68 @@ function homeBindDrag(grid){
 
 /* The corner handle (like the iPhone's widget handle): drag outward/down to make
    a tile bigger, back to make it smaller; it snaps through small -> medium -> large. */
+/* Native resize handle (a UIPanGestureRecognizer in NativeHomeEdit.swift) reports
+   the finger's cumulative translation; same down-and-outward stepping as above. */
+const HOME_NRES={};
+function homeResizeApply(item,size){
+  item.dataset.size=size;
+  item.classList.toggle('hi-wide', size==='l');
+  const t=item.querySelector('.q-tile');
+  if(t){ t.classList.remove('primary','hi-l'); if(size!=='s') t.classList.add('primary'); if(size==='l') t.classList.add('hi-l'); }
+}
+/* positions of every tile, handed to the native glass overlay */
+let HOME_SYNC_RAF=0, HOME_SYNC_HIDE=false, HOME_SCROLL_T=null;
+function homeSyncNative(){
+  if(!homeNativeEdit()) return;
+  if(HOME_SYNC_RAF) cancelAnimationFrame(HOME_SYNC_RAF);
+  HOME_SYNC_RAF=requestAnimationFrame(()=>{
+    HOME_SYNC_RAF=0;
+    const NH=Capacitor.Plugins.NativeHomeEdit;
+    if(!HOME_EDIT||TAB!=='home'||HOME_SYNC_HIDE){ if(!HOME_EDIT||TAB!=='home') NH.hide().catch(()=>{}); else NH.setControls({items:[],rtl:true,isDark:false}).catch(()=>{}); return; }
+    const items=[...document.querySelectorAll('#homeGrid .home-item:not(.hi-fixed)')].map(el=>{
+      const id=el.dataset.homeItem, def=HOME_CATALOG[id]||{}, r=el.getBoundingClientRect();
+      return {id,minus:!def.keep,resize:def.kind==='tile',x:r.left,y:r.top,w:r.width,h:r.height};
+    }).filter(i=>i.y+i.h>0&&i.y<innerHeight);
+    NH.setControls({items,rtl:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark')}).catch(()=>{});
+  });
+}
+function homeSyncHide(on){ HOME_SYNC_HIDE=!!on; homeSyncNative(); }
+window.NativeHomeEditHost={
+  minus(id){
+    const def=HOME_CATALOG[id]; if(!def) return;
+    homeConfirmRemove(ckChrome(def.label),()=>{
+      saveHomeLayout(getHomeLayout().filter(x=>x.id!==id));
+      try{ nativeHaptic('impact','light'); }catch(_){}
+      homeKeepScroll(renderHome);
+    });
+  },
+  add(){ homeAddSheet(); },
+  done(){ homeSetEdit(false); },
+  resizeStart(id){
+    const item=document.querySelector(`#homeGrid [data-home-item="${id}"]`); if(!item) return;
+    HOME_NRES[id]={item,x0:0,y0:0,size:item.dataset.size||'s',changed:false};
+    item.classList.add('resizing');
+  },
+  resizeMove(id,tx,ty){
+    const st=HOME_NRES[id]; if(!st) return;
+    const rtl=document.documentElement.dir!=='ltr', order=['s','m','l'];
+    const g=(ty-st.y0)+(rtl ? (st.x0-tx) : (tx-st.x0));
+    const k=order.indexOf(st.size);
+    if(g>46 && k<2) st.size=order[k+1];
+    else if(g<-46 && k>0) st.size=order[k-1];
+    else return;
+    st.changed=true; st.x0=tx; st.y0=ty;
+    homeResizeApply(st.item,st.size);
+    saveHomeLayout(getHomeLayout().map(x=>x.id===id?{...x,size:st.size}:x));
+    try{ nativeHaptic('selection'); }catch(_){}
+  },
+  resizeEnd(id){
+    const st=HOME_NRES[id]; if(!st) return;
+    delete HOME_NRES[id];
+    st.item.classList.remove('resizing');
+    if(st.changed) homeKeepScroll(renderHome); else homeSyncNative();
+  }
+};
 function homeBindResize(grid){
   const rtl=document.documentElement.dir!=='ltr';
   const order=['s','m','l'];
@@ -6730,6 +6816,12 @@ function homeBindResize(grid){
 
 /* iOS-style confirmation before a button is removed */
 function homeConfirmRemove(label,onYes){
+  if(homeNativeEdit()){
+    Capacitor.Plugins.NativeHomeEdit.confirmRemove({title:ckChrome('להסיר')+' "'+label+'"?',message:ckChrome('הכפתור יוסר ממסך הבית. אפשר להוסיף אותו שוב עם +'),
+      cancel:ckChrome('ביטול'),remove:ckChrome('הסר'),isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark')})
+      .then(r=>{ if(r&&r.confirmed) onYes(); }).catch(()=>{});
+    return;
+  }
   const ov=document.createElement('div'); ov.className='home-confirm-ov'; ov.id='homeConfirm';
   ov.innerHTML=`<div class="home-confirm">
     <div class="hc-title">${ckChrome('להסיר')} "${label}"?</div>
@@ -6784,6 +6876,13 @@ function homeWireCustomize(){
   });
   homeBindResize(grid);
   homeBindDrag(grid);
+  if(homeNativeEdit() && !window.__homeNatScroll){
+    // the native glass controls hide while the page scrolls and snap back in place afterwards
+    window.__homeNatScroll=true;
+    const onScroll=()=>{ if(!HOME_EDIT||TAB!=='home') return; if(!HOME_SCROLL_T) homeSyncHide(true); clearTimeout(HOME_SCROLL_T); HOME_SCROLL_T=setTimeout(()=>{ HOME_SCROLL_T=null; homeSyncHide(false); },140); };
+    window.addEventListener('scroll',onScroll,{passive:true});
+    document.body.addEventListener('scroll',onScroll,{passive:true});
+  }
 }
 
 /* Plain "go there" tiles that aren't on the default home but can be added

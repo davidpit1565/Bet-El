@@ -203,6 +203,14 @@ in English as usual.
   To offer a new button: add it to `HOME_CATALOG` and give it a renderer
   (`mods.<id>`) or a `HOME_SHORTCUTS()` entry; ask the user which new
   buttons they want. Removing everything shows only the big logo.
+- **Home edit-mode controls are real native Liquid Glass** (`NativeHomeEdit.swift`:
+  `NativeHomeEditBridge` + `HomeEditOverlay`): minus badges, corner resize
+  handles (pan gesture), the +/check pills (`UIButton.Configuration.glass()`),
+  the remove confirmation (system `UIAlertController`) and the add sheet
+  (system sheet) are UIKit views over the web view; tiles themselves stay web
+  content. JS (`homeNativeEdit()`, `homeSyncNative()`, `window.NativeHomeEditHost`)
+  sends tile rects and receives taps/drags; the HTML controls remain as the
+  web/PWA fallback. Not compile-verified in Xcode.
 - **Launch screen**: the native image (`Splash.imageset`, one 2732px file:
   the feathered 1024 app icon at 1380px on the per-row navy gradient) and
   the HTML `#boot` overlay at the top of index.html are designed to be
