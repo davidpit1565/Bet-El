@@ -12465,7 +12465,10 @@ function syncNativeTopBar(title, backTo, opts){
   TOPBAR_ACTION_HANDLERS = opts.handlers || {};
   try{
     window.Capacitor.Plugins.NativeTopBar.configure({
-      title: String(opts.title!=null ? opts.title : (title||'')).replace(/<[^>]*>/g,''),
+      // Top-level tab screens (no back action) show no title: the tab bar
+      // already names them, and the extra word read as clutter (by user
+      // request). Inner screens keep their title beside the back button.
+      title: String(opts.title!=null ? opts.title : (backTo ? (title||'') : '')).replace(/<[^>]*>/g,''),
       backTo: (typeof backTo==='function') ? '​' : (backTo||''), // zero-width space: "has a back action" without a real tab name Swift would otherwise try to display/log
       isRTL: document.documentElement.dir!=='ltr',
       isDark: S.theme==='dark',
