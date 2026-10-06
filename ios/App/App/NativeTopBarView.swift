@@ -127,13 +127,14 @@ final class NativeTopBarView: UIView {
     /// Rebuilt from scratch on every `configure()` call (cheap - at most 3
     /// buttons) rather than diffed, same as NativeSettingsView's table
     /// reload - there's no per-button state to preserve between screens.
-    private func setActions(_ actions: [(id: String, icon: String)], isRTL: Bool) {
+    private func setActions(_ actions: [(id: String, icon: String, label: String)], isRTL: Bool) {
         actionsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         for action in actions {
             let button = UIButton(type: .system)
             button.setImage(UIImage(systemName: action.icon), for: .normal)
             button.tintColor = goldColor
             button.accessibilityIdentifier = action.id
+            if !action.label.isEmpty { button.accessibilityLabel = action.label }
             button.widthAnchor.constraint(equalToConstant: 34).isActive = true
             button.heightAnchor.constraint(equalToConstant: 34).isActive = true
             button.addTarget(self, action: #selector(tapTrailingAction(_:)), for: .touchUpInside)
@@ -176,11 +177,12 @@ final class NativeTopBarView: UIView {
     /// state is driven by its own language setting, not the device's.
     private var quickActionLabels: (home: String, settings: String, share: String) = ("Home", "Settings", "Share")
 
-    func configure(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String)]) {
+    func configure(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
         titleLabel.text = title
         backButton.isHidden = !hasBack
         let symbol = isRTL ? "chevron.right" : "chevron.left"
         backButton.setImage(UIImage(systemName: symbol), for: .normal)
+        backButton.accessibilityLabel = isRTL ? "חזור" : "Back"
         if !homeLabel.isEmpty { quickActionLabels.home = homeLabel }
         if !settingsLabel.isEmpty { quickActionLabels.settings = settingsLabel }
         if !shareLabel.isEmpty { quickActionLabels.share = shareLabel }

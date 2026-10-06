@@ -78,6 +78,7 @@ final class NativeToolsFabView: UIView {
         fabButton.translatesAutoresizingMaskIntoConstraints = false
         fabButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
         fabButton.tintColor = goldColor
+        fabButton.accessibilityLabel = "Reading tools"
         fabButton.addTarget(self, action: #selector(toggleExpanded), for: .touchUpInside)
 
         let contentView: UIView = (glass as? UIVisualEffectView)?.contentView ?? glass
@@ -95,11 +96,12 @@ final class NativeToolsFabView: UIView {
         if isExpanded { collapsePanel() } else { expandPanel() }
     }
 
-    private func iconButton(systemName: String, action: Selector) -> UIButton {
+    private func iconButton(systemName: String, action: Selector, label: String) -> UIButton {
         let b = UIButton(type: .system)
         b.translatesAutoresizingMaskIntoConstraints = false
         b.setImage(UIImage(systemName: systemName), for: .normal)
         b.tintColor = goldColor
+        b.accessibilityLabel = label
         b.widthAnchor.constraint(equalToConstant: 36).isActive = true
         b.heightAnchor.constraint(equalToConstant: 36).isActive = true
         b.addTarget(self, action: action, for: .touchUpInside)
@@ -133,7 +135,7 @@ final class NativeToolsFabView: UIView {
         stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let minusBtn = iconButton(systemName: "minus", action: #selector(tapMinus))
+        let minusBtn = iconButton(systemName: "minus", action: #selector(tapMinus), label: "Decrease text size")
 
         let fsLabel = UILabel()
         fsLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -144,7 +146,7 @@ final class NativeToolsFabView: UIView {
         fsLabel.widthAnchor.constraint(equalToConstant: 30).isActive = true
         fontLabel = fsLabel
 
-        let plusBtn = iconButton(systemName: "plus", action: #selector(tapPlus))
+        let plusBtn = iconButton(systemName: "plus", action: #selector(tapPlus), label: "Increase text size")
 
         let sep = UIView()
         sep.translatesAutoresizingMaskIntoConstraints = false
@@ -152,7 +154,7 @@ final class NativeToolsFabView: UIView {
         sep.widthAnchor.constraint(equalToConstant: 1).isActive = true
         sep.heightAnchor.constraint(equalToConstant: 24).isActive = true
 
-        let themeBtn = iconButton(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill", action: #selector(tapTheme))
+        let themeBtn = iconButton(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill", action: #selector(tapTheme), label: "Toggle dark mode")
         themeButton = themeBtn
 
         stack.addArrangedSubview(minusBtn)
@@ -162,12 +164,12 @@ final class NativeToolsFabView: UIView {
         stack.addArrangedSubview(themeBtn)
 
         if showAutoscroll {
-            let asBtn = iconButton(systemName: isAutoscrollActive ? "pause.fill" : "play.fill", action: #selector(tapAutoscroll))
+            let asBtn = iconButton(systemName: isAutoscrollActive ? "pause.fill" : "play.fill", action: #selector(tapAutoscroll), label: isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll")
             autoscrollButton = asBtn
             stack.addArrangedSubview(asBtn)
         }
 
-        let homeBtn = iconButton(systemName: "house.fill", action: #selector(tapHome))
+        let homeBtn = iconButton(systemName: "house.fill", action: #selector(tapHome), label: "Home")
         stack.addArrangedSubview(homeBtn)
 
         let contentView: UIView = (panel as? UIVisualEffectView)?.contentView ?? panel
@@ -180,7 +182,7 @@ final class NativeToolsFabView: UIView {
         panel.alpha = 0
         panel.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
         UIView.animate(
-            withDuration: 0.28, delay: 0, usingSpringWithDamping: 0.78, initialSpringVelocity: 0.4,
+            withDuration: ReduceMotion.duration(0.28), delay: 0, usingSpringWithDamping: 0.78, initialSpringVelocity: 0.4,
             options: [], animations: {
                 panel.alpha = 1
                 panel.transform = .identity
@@ -196,7 +198,7 @@ final class NativeToolsFabView: UIView {
         themeButton = nil
         autoscrollButton = nil
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 panel.alpha = 0
                 panel.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
@@ -225,6 +227,7 @@ final class NativeToolsFabView: UIView {
         fontLabel?.text = "\(fontScalePercent)"
         themeButton?.setImage(UIImage(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill"), for: .normal)
         autoscrollButton?.setImage(UIImage(systemName: isAutoscrollActive ? "pause.fill" : "play.fill"), for: .normal)
+        autoscrollButton?.accessibilityLabel = isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll"
     }
 
     /// Collapses the expanded panel (e.g. when the screen navigates away or

@@ -144,7 +144,7 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTopBarBridge (JS-driven)
 
-    func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String)]) {
+    func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
         topBar.configure(title: title, hasBack: hasBack, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel, actions: actions)
         // Both relay to one fixed JS entry point each rather than this
         // method trying to encode what "back" or a given action id means -
@@ -381,7 +381,7 @@ class MainViewController: CAPBridgeViewController {
         // The scroll-away/reveal behavior the HTML nav already had - a
         // simple fade+slide, not full removal (setVisible above is for
         // "this screen has no nav at all", a different state).
-        UIView.animate(withDuration: hidden ? 0.26 : 0.38) {
+        UIView.animate(withDuration: ReduceMotion.duration(hidden ? 0.26 : 0.38)) {
             self.tabBar.alpha = hidden ? 0 : 1
             self.tabBar.transform = hidden
                 ? CGAffineTransform(translationX: 0, y: self.tabBar.frame.height)

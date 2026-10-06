@@ -70,7 +70,7 @@ final class NativeToastView: UIView {
         ])
 
         isHidden = false
-        UIView.animate(withDuration: 0.22) {
+        UIView.animate(withDuration: ReduceMotion.duration(0.22)) {
             pillView.alpha = 1
             pillView.transform = .identity
         }
@@ -83,7 +83,7 @@ final class NativeToastView: UIView {
     private func hide() {
         guard let pillView = pill else { isHidden = true; return }
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 pillView.alpha = 0
                 pillView.transform = CGAffineTransform(translationX: 0, y: 14)

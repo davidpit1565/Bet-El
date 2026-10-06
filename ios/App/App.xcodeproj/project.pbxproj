@@ -35,6 +35,7 @@
 		30877432D1026706D7E805DA /* NativeTopBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */; };
 		73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */; };
 		358B0438C8F4F446F64D9FE9 /* NativeHapticsBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CB513BB9D040126A1E4171 /* NativeHapticsBridge.swift */; };
+		E65EEC85465EDFF002888C93 /* ReduceMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0819265AB1B472A13A2BA0 /* ReduceMotion.swift */; };
 		3FD4E3BBFF6906BCB14C7B69 /* NativeToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C31AABF568510A2DCDD82E /* NativeToastView.swift */; };
 		7BE1EC9F2197E2A403D8C9D9 /* NativeToastBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EE0FBFC77A3BB2EDF48C60 /* NativeToastBridge.swift */; };
 		D7FDDA1C5DE4E8BEC38E0C7E /* NativeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0560A6B6A92127FD742CD38 /* NativeSettingsView.swift */; };
@@ -101,6 +102,7 @@
 		846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeTopBarView.swift; sourceTree = "<group>"; };
 		C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeTopBarBridge.swift; sourceTree = "<group>"; };
 		E2CB513BB9D040126A1E4171 /* NativeHapticsBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeHapticsBridge.swift; sourceTree = "<group>"; };
+		8C0819265AB1B472A13A2BA0 /* ReduceMotion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReduceMotion.swift; sourceTree = "<group>"; };
 		C2C31AABF568510A2DCDD82E /* NativeToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeToastView.swift; sourceTree = "<group>"; };
 		D0EE0FBFC77A3BB2EDF48C60 /* NativeToastBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeToastBridge.swift; sourceTree = "<group>"; };
 		C0560A6B6A92127FD742CD38 /* NativeSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeSettingsView.swift; sourceTree = "<group>"; };
@@ -171,6 +173,7 @@
 				846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */,
 				C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */,
 				E2CB513BB9D040126A1E4171 /* NativeHapticsBridge.swift */,
+				8C0819265AB1B472A13A2BA0 /* ReduceMotion.swift */,
 				C2C31AABF568510A2DCDD82E /* NativeToastView.swift */,
 				D0EE0FBFC77A3BB2EDF48C60 /* NativeToastBridge.swift */,
 				C0560A6B6A92127FD742CD38 /* NativeSettingsView.swift */,
@@ -350,6 +353,7 @@
 				30877432D1026706D7E805DA /* NativeTopBarView.swift in Sources */,
 				73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */,
 				358B0438C8F4F446F64D9FE9 /* NativeHapticsBridge.swift in Sources */,
+				E65EEC85465EDFF002888C93 /* ReduceMotion.swift in Sources */,
 				3FD4E3BBFF6906BCB14C7B69 /* NativeToastView.swift in Sources */,
 				7BE1EC9F2197E2A403D8C9D9 /* NativeToastBridge.swift in Sources */,
 				D7FDDA1C5DE4E8BEC38E0C7E /* NativeSettingsView.swift in Sources */,

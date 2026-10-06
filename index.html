@@ -5188,7 +5188,7 @@ function drawChokList(){
   const _anim=ckAnimClass();
   app.innerHTML=`
   ${topbar('חוק לישראל','chokParshiot', `<button class="icon-btn" id="ckExplainerBtn" aria-label="מה לומדים כל יום">${I.info}</button>`,
-    {actions:[{id:'explainer', icon:'info.circle'}], handlers:{explainer:()=>{ CK_EXPLAINER_BACK='chokList'; go('chokExplainer'); }}})}
+    {actions:[{id:'explainer', icon:'info.circle', label:ckChrome('מה לומדים כל יום')}], handlers:{explainer:()=>{ CK_EXPLAINER_BACK='chokList'; go('chokExplainer'); }}})}
   <div class="view">
     ${miss.length?`<div class="sm-week-card" id="ckMakeupCard">
       <div class="sm-week-icon">${I.bookmarkOn}</div>
@@ -6639,9 +6639,9 @@ function syncReaderTopBar(){
   const title = RD.daily ? ('קְרִיאַת הַיּוֹם · '+(RD.idx+1)+'/'+RD.chapters.length) : 'תְּהִלִּים';
   syncNativeTopBar(title, ()=> RD.daily?go('home'):go('tehillim'), {
     actions:[
-      {id:'favorite', icon: isFav(ch) ? 'bookmark.fill' : 'bookmark'},
-      {id:'share', icon:'square.and.arrow.up'},
-      {id:'shareQR', icon:'qrcode'},
+      {id:'favorite', icon: isFav(ch) ? 'bookmark.fill' : 'bookmark', label: isFav(ch) ? ckChrome('הָסֵר מֵהַמּוּעֲדָפִים') : ckChrome('הוֹסֵף לַמּוּעֲדָפִים')},
+      {id:'share', icon:'square.and.arrow.up', label:ckChrome('שתף')},
+      {id:'shareQR', icon:'qrcode', label:ckChrome('קוד QR')},
     ],
     handlers:{
       favorite:()=>{ document.getElementById('rFav')?.click(); syncReaderTopBar(); },
@@ -8713,7 +8713,7 @@ function renderPrayerReader(){
   }).join('');
   
   syncNativeTopBar(p.title, PR.group?'prayersGroup':'prayers', {
-    actions:[{id:'share',icon:'square.and.arrow.up'},{id:'shareQR',icon:'qrcode'}],
+    actions:[{id:'share',icon:'square.and.arrow.up',label:ckChrome('שתף')},{id:'shareQR',icon:'qrcode',label:ckChrome('קוד QR')}],
     handlers:{ share:()=>sharePrayer(PR.prayer), shareQR:()=>shareQR() },
   });
   app.innerHTML=`
@@ -10456,7 +10456,7 @@ function drawSiddurReader(){
     SID_RETURN_SCROLL=Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0);
     openTefillinMirror('siddurReader');
   };
-  const mirrorAction = p==='shacharit' ? {actions:[{id:'tefillinMirror',icon:'camera.viewfinder'}], handlers:{tefillinMirror:openMirrorFromReader}} : null;
+  const mirrorAction = p==='shacharit' ? {actions:[{id:'tefillinMirror',icon:'camera.viewfinder',label:ckChrome('מראה לתפלין')}], handlers:{tefillinMirror:openMirrorFromReader}} : null;
   // Matches the HTML back button's own wiring below (sidTrackPosition()
   // saves the resume/scroll position before leaving) - a plain 'siddurHome'
   // string here would have skipped that on the native back button.
@@ -11847,7 +11847,9 @@ if(NATIVE_TOPBAR) document.documentElement.classList.add('has-native-topbar');
    keep passing a string like before. */
 let TOPBAR_BACK_ACTION = null;
 /* Trailing icon actions (favorite/share/QR/info, NativeTopBarBridge's
-   `actions:[{id,icon}]`) relay a tap back to this id→handler map instead
+   `actions:[{id,icon,label}]` - `label` becomes the native button's real
+   VoiceOver accessibilityLabel, since an SF Symbol alone has none) relay
+   a tap back to this id→handler map instead
    of a fixed set of JS globals, since different screens need different
    handlers under the same id (e.g. 'share' means something different on
    the Tehillim reader vs. the openPrayer screen) - each syncNativeTopBar()

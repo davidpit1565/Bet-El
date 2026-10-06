@@ -142,6 +142,7 @@ extension NativeSettingsView: UITableViewDataSource {
             let minus = UIButton(type: .system)
             minus.setTitle("−", for: .normal)
             minus.tag = tagValue
+            minus.accessibilityLabel = "Decrease"
             minus.addTarget(self, action: #selector(stepperMinusTapped(_:)), for: .touchUpInside)
 
             let valueLabel = UILabel()
@@ -149,10 +150,12 @@ extension NativeSettingsView: UITableViewDataSource {
             valueLabel.font = .systemFont(ofSize: 15, weight: .semibold)
             valueLabel.textAlignment = .center
             valueLabel.widthAnchor.constraint(equalToConstant: 46).isActive = true
+            valueLabel.isAccessibilityElement = false // the row's own accessory controls already speak for it
 
             let plus = UIButton(type: .system)
             plus.setTitle("+", for: .normal)
             plus.tag = tagValue
+            plus.accessibilityLabel = "Increase"
             plus.addTarget(self, action: #selector(stepperPlusTapped(_:)), for: .touchUpInside)
 
             stack.addArrangedSubview(minus)

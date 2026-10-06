@@ -134,6 +134,7 @@ final class NativeFeedbackFormView: UIView {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = UIColor(white: 0.6, alpha: 1)
+        closeButton.accessibilityLabel = isRTL ? "סגור" : "Close"
         closeButton.addTarget(self, action: #selector(tapBackdrop), for: .touchUpInside)
         contentView.addSubview(closeButton)
         NSLayoutConstraint.activate([
@@ -268,7 +269,7 @@ final class NativeFeedbackFormView: UIView {
         stack.addArrangedSubview(sendButton)
 
         isHidden = false
-        UIView.animate(withDuration: 0.25) {
+        UIView.animate(withDuration: ReduceMotion.duration(0.25)) {
             self.backdrop.alpha = 1
             cardView.alpha = 1
             cardView.transform = .identity
@@ -306,7 +307,7 @@ final class NativeFeedbackFormView: UIView {
         [nameField, emailField, messageView].forEach { $0.resignFirstResponder() }
         guard let cardView = card else { isHidden = true; return }
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 self.backdrop.alpha = 0
                 cardView.alpha = 0

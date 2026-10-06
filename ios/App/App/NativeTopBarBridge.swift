@@ -34,10 +34,10 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
         let settingsLabel = call.getString("settingsLabel") ?? ""
         let shareLabel = call.getString("shareLabel") ?? ""
         let actionsRaw = call.getArray("actions") ?? []
-        let actions: [(id: String, icon: String)] = actionsRaw.compactMap {
+        let actions: [(id: String, icon: String, label: String)] = actionsRaw.compactMap {
             guard let dict = $0 as? [String: Any],
                   let id = dict["id"] as? String, let icon = dict["icon"] as? String else { return nil }
-            return (id, icon)
+            return (id, icon, dict["label"] as? String ?? "")
         }
         DispatchQueue.main.async {
             NativeTopBarBridge.activeController?.configureTopBar(

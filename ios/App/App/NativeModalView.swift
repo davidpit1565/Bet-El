@@ -92,6 +92,7 @@ final class NativeModalView: UIView {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = UIColor(white: 0.6, alpha: 1)
+        closeButton.accessibilityLabel = isRTL ? "סגור" : "Close"
         closeButton.addTarget(self, action: #selector(tapBackdrop), for: .touchUpInside)
         contentView.addSubview(closeButton)
 
@@ -99,6 +100,7 @@ final class NativeModalView: UIView {
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.tintColor = goldColor
         iconView.contentMode = .scaleAspectFit
+        iconView.isAccessibilityElement = false // purely decorative - the title/body text already say everything it conveys
         contentView.addSubview(iconView)
 
         let titleLabel = UILabel()
@@ -157,7 +159,7 @@ final class NativeModalView: UIView {
         ])
 
         isHidden = false
-        UIView.animate(withDuration: 0.25) {
+        UIView.animate(withDuration: ReduceMotion.duration(0.25)) {
             self.backdrop.alpha = 1
             cardView.alpha = 1
             cardView.transform = .identity
@@ -172,7 +174,7 @@ final class NativeModalView: UIView {
     func dismiss() {
         guard let cardView = card else { isHidden = true; return }
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 self.backdrop.alpha = 0
                 cardView.alpha = 0
