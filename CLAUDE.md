@@ -190,6 +190,33 @@ in English as usual.
   stay on. The existing inflated `stats/visits` count was never touched -
   it can be lowered by hand in the Firebase Console if wanted.
 
+- **Customizable home screen** (index.html, "HOME CUSTOMIZATION"): home is
+  rendered from `HOME_CATALOG` (id -> kind tile|block + label) and the
+  `mods` renderers inside `renderHome()`; the user's layout lives in
+  `localStorage['betel_home_layout_v1']`. Long-press enters iOS-style edit
+  mode (wiggle, grip to drag, red minus, S/M/L tile sizes, "+" sheet, Done).
+  The app scrolls on `<body>`, not the window - use `homeScroller()`.
+  To offer a new button: add it to `HOME_CATALOG` and give it a renderer
+  (`mods.<id>`) or a `HOME_SHORTCUTS()` entry; ask the user which new
+  buttons they want. Removing everything shows only the big logo.
+- **Launch screen**: the native image (`Splash.imageset`, one 2732px file:
+  the feathered 1024 app icon at 1380px on the per-row navy gradient) and
+  the HTML `#boot` overlay at the top of index.html are designed to be
+  pixel-identical on frame one (icon = 50.51vh square, centered, same
+  gradient stops) so the hand-off is invisible; then #boot animates (shine,
+  glow, spinner) until the first render hides it (`__bootHide`, min 0.5s).
+  It also calls `SplashScreen.hide()`; Capacitor's own auto-hide
+  (`launchShowDuration` 3000) is only the safety net. If the logo art
+  changes, regenerate BOTH together or the hand-off will visibly jump.
+- **Widgets** (BetElWidget target): `BetElWidget` (small/medium/large +
+  Lock Screen), `BetElZmanimWidget`, `BetElTehillimWidget`,
+  `BetElStreakWidget`, `BetElCandleWidget`, plus the Live Activity. Dates
+  use `HebrewDay` (Hebrew-letter day/month/year in Hebrew, numerals +
+  English names in English); dawn = sunrise - (sunset - sunrise)/8 in both
+  the app (`ZCUSTOM.alotHaShachar`) and `Solar.DayTimes.dawn`. Candle
+  lighting offset is Hebcal's default (18 min before sunset; 40 in
+  Jerusalem etc.) - NOT a fixed 20 minutes.
+
 - **Tefillin Mirror placement guide** (`MirrorGuide` in index.html): MediaPipe
   Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
   first use (needs internet once; nothing at boot). The bayit's bottom edge

@@ -8,12 +8,14 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 700,
+      "launchShowDuration": 3000,
       "backgroundColor": "#080d19",
       "androidSplashResourceName": "splash",
       "showSpinner": false,
       "splashFullScreen": true,
-      "splashImmersive": true
+      "splashImmersive": true,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 180
     },
     "StatusBar": {
       "style": "DARK",
