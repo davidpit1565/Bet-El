@@ -23,7 +23,7 @@ final class NativeToolsFabView: UIView {
 
     var onAction: ((Action) -> Void)?
 
-    private let fabSize: CGFloat = 46
+    private let fabSize: CGFloat = 38
     private let goldColor = UIColor.betelGold
 
     private var panelContainer: UIView?

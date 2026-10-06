@@ -86,6 +86,7 @@ class MainViewController: CAPBridgeViewController {
         setupToast()
         setupSettingsView()
         layoutToolsFab()
+        topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
@@ -194,8 +195,8 @@ class MainViewController: CAPBridgeViewController {
         }
         view.addSubview(toolsFab)
         NSLayoutConstraint.activate([
-            toolsFab.widthAnchor.constraint(equalToConstant: 46),
-            toolsFab.heightAnchor.constraint(equalToConstant: 46),
+            toolsFab.widthAnchor.constraint(equalToConstant: 38),
+            toolsFab.heightAnchor.constraint(equalToConstant: 38),
         ])
         // Tapping anywhere outside the FAB/its open panel closes the panel.
         // cancelsTouchesInView=false so the tap still reaches the web view.
@@ -207,21 +208,26 @@ class MainViewController: CAPBridgeViewController {
 
     private var toolsFabSideConstraints: [NSLayoutConstraint] = []
 
-    /// Top of the screen, just under the header, on the side the header's
-    /// own actions use (left in Hebrew, right otherwise) - the panel opens
-    /// downward from there (see NativeToolsFabView.expandPanel).
+    /// Inside the header row itself, as one more glass circle on the side
+    /// the header's own actions use (left in Hebrew, right otherwise), just
+    /// past any actions already there - never floating over the reading
+    /// text. The panel opens downward from it (NativeToolsFabView.expandPanel).
     private func layoutToolsFab() {
         guard toolsFab.superview != nil, topBar.superview != nil else { return }
         NSLayoutConstraint.deactivate(toolsFabSideConstraints)
         let guide = view.safeAreaLayoutGuide
+        let inset = 14 + CGFloat(topBar.actionCount) * 46
         toolsFabSideConstraints = [
-            toolsFab.topAnchor.constraint(equalTo: guide.topAnchor, constant: topBar.contentHeight + 8),
+            toolsFab.centerYAnchor.constraint(equalTo: guide.topAnchor, constant: topBar.contentHeight / 2),
             isRTL
-                ? toolsFab.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 14)
-                : toolsFab.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -14),
+                ? toolsFab.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: inset)
+                : toolsFab.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -inset),
         ]
         NSLayoutConstraint.activate(toolsFabSideConstraints)
         toolsFab.isRTL = isRTL
+        // The header view spans the full width and is added later, so it
+        // would otherwise swallow taps meant for the button sitting in it.
+        view.bringSubviewToFront(toolsFab)
     }
 
     @objc private func handleOutsideTap(_ gesture: UITapGestureRecognizer) {

@@ -157,7 +157,14 @@ final class NativeTopBarView: UIView {
     /// Rebuilt from scratch on every `configure()` call (cheap - at most 3
     /// buttons) rather than diffed, same as NativeSettingsView's table
     /// reload - there's no per-button state to preserve between screens.
+    /// How many trailing action buttons are showing - the tools "…" button
+    /// (MainViewController.layoutToolsFab) sits just past them in this row.
+    private(set) var actionCount = 0
+    var onActionsChanged: (() -> Void)?
+
     private func setActions(_ actions: [(id: String, icon: String, label: String)], isRTL: Bool) {
+        actionCount = actions.count
+        defer { onActionsChanged?() }
         actionsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         for action in actions {
             let button = UIButton(type: .system)
@@ -173,7 +180,8 @@ final class NativeTopBarView: UIView {
         // The title's own side margins need to clear whichever side the
         // actions stack ends up on, or a 2-3 icon row would overlap a
         // long title instead of the title just truncating around it.
-        let actionSideMargin: CGFloat = actions.isEmpty ? 56 : CGFloat(20 + actions.count * 46)
+        // + room for the tools "…" button that can sit past the actions
+        let actionSideMargin: CGFloat = CGFloat(66 + actions.count * 46)
         titleLeadingConstraint.constant = isRTL ? 56 : actionSideMargin
         titleTrailingConstraint.constant = isRTL ? -actionSideMargin : -56
     }

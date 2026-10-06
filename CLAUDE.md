@@ -173,6 +173,21 @@ in English as usual.
   once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
   for it specifically, enabling the general reminder toggle enables both.
 
+- **Native iOS shell decisions (by user request)**: Settings always uses the
+  app's own HTML design (`NATIVE_SETTINGS = false` in index.html - the
+  native glass-card `NativeSettingsView` is kept but unused), with
+  `settingsRowsTappable()` making whole rows the touch target like iOS.
+  Search is an item inside the native tab bar (`NativeSearchHost.open()`),
+  the tab bar minimizes Apple Music-style on scroll, and the reader tools
+  "…" button lives in the native header row (`layoutToolsFab()`).
+- **Tefillin Mirror placement guide** (`MirrorGuide` in index.html): MediaPipe
+  Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
+  first use (needs internet once; nothing at boot). The bayit's bottom edge
+  belongs on the hairline (where an infant's skull is soft), centered
+  between the eyes - NOT on the forehead. Hairline = first non-skin color
+  scanning up the center line vs. cheek/brow skin references; remembered
+  per session once seen without a bayit covering it.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
