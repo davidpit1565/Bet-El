@@ -118,6 +118,16 @@ html.has-native-tools-fab .reader-tools{display:none}
    flow space is gone. */
 html.has-native-topbar .topbar:not(.tb-native-exempt){display:none}
 html.has-native-topbar #app{padding-top:var(--native-header-h, 0px)}
+/* The Kotel Compass and Tefillin Mirror full-screen overlays
+   (.compass-full) never used the shared topbar() header at all - their
+   own .compass-fhead is a self-contained header, not something hidden
+   behind #app's own padding-top trick, since .compass-full is a
+   `position:fixed;inset:0` layer outside #app's normal flow. Hiding it
+   and padding .compass-full itself the same way #app is above gets these
+   two screens the exact same real native bar (title + back chevron) as
+   every other screen instead of their own CSS-only header. */
+html.has-native-topbar .compass-fhead{display:none}
+html.has-native-topbar .compass-full{padding-top:var(--native-header-h, 0px)}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 ::selection{background:rgba(212,175,95,.3)}
 
@@ -496,9 +506,22 @@ a.set-item{text-decoration:none;color:inherit}
 /* tefillin mirror - reuses .compass-full/.compass-fhead/.compass-close/
    .compass-ftitle/.compass-fbody for the same full-screen chrome as the
    compass screen, since both are full-screen "live sensor" overlays with
-   an identical header/close-button shape. */
-.mirror-icon{width:72px;height:72px;margin-bottom:10px}
-.mirror-icon svg{width:100%;height:100%}
+   an identical header/close-button shape. The mirror's own header gets a
+   `.mirror-fhead` modifier instead: the shared `.compass-fhead`'s
+   `justify-content:space-between` (close button vs. title at opposite
+   ends - fine for the compass screen's shorter title) left this screen's
+   longer "מראה לתפלין" title visibly off-center, not actually centered in
+   the header the way it reads. Centering `justify-content` and taking the
+   close button out of flow (absolutely positioned at its original edge,
+   `.compass-fhead` is already `position:relative`) lets the title center
+   in the full header width instead, and it's sized up to match - without
+   touching `.compass-ftitle`/`.compass-fhead` themselves, so the compass
+   screen's own header is untouched. The mirror icon that used to sit
+   above the video was dropped per explicit user request (looked bad) -
+   the video speaks for itself with no icon needed above it. */
+.mirror-fhead{justify-content:center}
+.mirror-fhead .compass-close{position:absolute;inset-inline-start:16px;top:calc(16px + env(safe-area-inset-top))}
+.mirror-fhead .compass-ftitle{font-size:22px}
 .mirror-video{width:100%;max-width:420px;aspect-ratio:3/4;border-radius:28px;object-fit:cover;
   transform:scaleX(-1);background:#0a0e1a;box-shadow:0 10px 40px rgba(0,0,0,.4)}
 .mirror-note{font-size:12px;color:#a9b3c9;text-align:center;line-height:1.6;max-width:340px;margin-top:16px}
@@ -8741,7 +8764,15 @@ function renderSiddurHome(){
 }
 function drawSiddurHome(){
   const info = siddurDayInfo(currentHDate());
-  const tiles = ['birkot','talitTefilin','shacharit','mincha','arvit'];
+  // The Tefillin Mirror tile sits right before Shacharit (not time-gated
+  // like the home screen's own banner for it, isZmanTefilinNow() - that
+  // one only shows up during the actual halachic window, while this is a
+  // permanent entry point here per explicit user request, so it's always
+  // reachable from the one screen that already groups Talit/Tefillin
+  // together). openTefillinMirror() below routes it through the regular
+  // tool screen rather than one of the real siddur-content tiles, so it
+  // gets its own non-data-sidp branch in the tile markup/click-wiring.
+  const tiles = ['birkot','talitTefilin','tefillinMirror','shacharit','mincha','arvit'];
   // Birkat HaLevana has no date-gating yet (a follow-up item - see the
   // build notes) so it's always offered. Sefirat HaOmer only appears as
   // its own tile during the actual 49-day count, and per explicit user
@@ -8769,7 +8800,9 @@ function drawSiddurHome(){
   ${topbar('סדור','prayers')}
   <div class="view">
     <div class="quick-grid">
-      ${tiles.map(p=>`<div class="q-tile round-card" data-cat="siddur" data-sidp="${p}">
+      ${tiles.map(p=> p==='tefillinMirror'
+        ? `<div class="q-tile round-card" data-tool="tefillinMirror"><div class="qt">${ckChrome('מראה לתפלין')}</div></div>`
+        : `<div class="q-tile round-card" data-cat="siddur" data-sidp="${p}">
         <div class="qt">${heTitle(SIDDUR_PRAYER_NAMES[p], SIDDUR_PRAYER_NAMES_NIKUD[p]||SIDDUR_PRAYER_NAMES[p])}</div>
       </div>`).join('')}
     </div>
@@ -8779,6 +8812,7 @@ function drawSiddurHome(){
     ${ornament()}
   </div>`;
   app.querySelectorAll('[data-sidp]').forEach(t=>t.onclick=()=>openSiddurPrayer(t.dataset.sidp));
+  const tmTile=document.querySelector('[data-tool="tefillinMirror"]'); if(tmTile) tmTile.onclick=()=>openTefillinMirror('siddurHome');
   tr(app);
 }
 
@@ -10752,7 +10786,7 @@ function renderZoharReader(){
 /* ================= SETTINGS ================= */
 const COMPASS_RING=[[0,'N'],[45,'NE'],[90,'E'],[135,'SE'],[180,'S'],[225,'SW'],[270,'W'],[315,'NW']];
 function renderKotelCompass(){
-  hideNativeTopBar();
+  syncNativeTopBar(ckChrome('כוון תפלה'), 'settings');
   const hasLoc=LOC && LOC.lat!=null;
   if(hasLoc) startCompass();
   const knowsHeading=hasLoc && CompassState.heading!=null;
@@ -10812,15 +10846,14 @@ function renderKotelCompass(){
 let TEFILLIN_MIRROR_FROM='settings';
 function openTefillinMirror(from){ TEFILLIN_MIRROR_FROM=from||'settings'; go('tefillinMirror'); }
 function renderTefillinMirror(){
-  hideNativeTopBar();
+  syncNativeTopBar(ckChrome('מראה לתפלין'), TEFILLIN_MIRROR_FROM);
   app.innerHTML=`
   <div class="compass-full">
-    <div class="compass-fhead">
+    <div class="compass-fhead mirror-fhead">
       <button class="compass-close" id="mirrorClose">${ckChrome('סגור')}</button>
       <div class="compass-ftitle">${ckChrome('מראה לתפלין')}</div>
     </div>
     <div class="compass-fbody mirror-fbody">
-      <div class="mirror-icon">${I.tefillin}</div>
       <video class="mirror-video" id="mirrorVideo" autoplay playsinline muted></video>
       <div class="mirror-note" id="mirrorNote">${ckChrome('המראה משמשת לבדיקה אישית בלבד ואינה מצלמת או שומרת דבר')}</div>
     </div>
