@@ -106,7 +106,7 @@ final class NativeModalView: UIView {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 19, weight: .bold)
+        titleLabel.setScaledFont(19, weight: .bold)
         titleLabel.textColor = goldColor
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
@@ -115,7 +115,7 @@ final class NativeModalView: UIView {
         let bodyLabel = UILabel()
         bodyLabel.translatesAutoresizingMaskIntoConstraints = false
         bodyLabel.text = body
-        bodyLabel.font = .systemFont(ofSize: 15)
+        bodyLabel.setScaledFont(15)
         bodyLabel.textColor = UIColor(white: 0.85, alpha: 1)
         bodyLabel.textAlignment = .center
         bodyLabel.numberOfLines = 0
@@ -124,7 +124,7 @@ final class NativeModalView: UIView {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle(buttonText, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        button.titleLabel?.setScaledFont(16, weight: .bold, maximumSize: 22)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = goldColor
         button.layer.cornerRadius = 22
@@ -159,11 +159,19 @@ final class NativeModalView: UIView {
         ])
 
         isHidden = false
-        UIView.animate(withDuration: ReduceMotion.duration(0.25)) {
+        UIView.animate(withDuration: ReduceMotion.duration(0.25), animations: {
             self.backdrop.alpha = 1
             cardView.alpha = 1
             cardView.transform = .identity
-        }
+        }, completion: { _ in
+            // A small entrance flourish once the card has actually
+            // finished scaling in, not simultaneously with that motion -
+            // skipped when Reduce Motion is on, same as everything else
+            // ReduceMotion.duration() already gates.
+            if #available(iOS 17.0, *), !ReduceMotion.isEnabled {
+                iconView.addSymbolEffect(.bounce, options: .nonRepeating)
+            }
+        })
     }
 
     @objc private func tapPrimary() {

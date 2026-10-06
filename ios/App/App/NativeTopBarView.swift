@@ -83,7 +83,7 @@ final class NativeTopBarView: UIView {
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textAlignment = .center
-        titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
+        titleLabel.setScaledFont(17, weight: .bold, maximumSize: 24)
         titleLabel.textColor = goldColor
         titleLabel.numberOfLines = 1
         titleLabel.lineBreakMode = .byTruncatingTail

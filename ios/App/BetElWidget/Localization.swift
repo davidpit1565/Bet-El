@@ -14,6 +14,7 @@ enum WidgetL10n {
         "chapter": ["he": "פֶּרֶק", "en": "Chapter"],
         "dayStreak": ["he": "יָמִים בְּרֶצֶף", "en": "day streak"],
         "candleLighting": ["he": "הַדְלָקַת נֵרוֹת", "en": "Candle lighting"],
+        "nextZman": ["he": "הַזְּמַן הַבָּא", "en": "Next zman"],
     ]
 
     static func t(_ key: String, lang: String) -> String {

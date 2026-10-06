@@ -180,7 +180,7 @@ final class NativeFeedbackFormView: UIView {
 
         let titleLabel = UILabel()
         titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        titleLabel.setScaledFont(18, weight: .bold)
         titleLabel.textColor = goldColor
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
@@ -188,7 +188,7 @@ final class NativeFeedbackFormView: UIView {
 
         let bodyLabel = UILabel()
         bodyLabel.text = body
-        bodyLabel.font = .systemFont(ofSize: 14)
+        bodyLabel.setScaledFont(14)
         bodyLabel.textColor = UIColor(white: 0.85, alpha: 1)
         bodyLabel.textAlignment = .center
         bodyLabel.numberOfLines = 0
@@ -217,7 +217,8 @@ final class NativeFeedbackFormView: UIView {
         messageView.translatesAutoresizingMaskIntoConstraints = false
         messageView.backgroundColor = .clear
         messageView.textColor = UIColor(white: 0.95, alpha: 1)
-        messageView.font = .systemFont(ofSize: 15)
+        messageView.font = .scaled(15, maximumSize: 24)
+        messageView.adjustsFontForContentSizeCategory = true
         messageView.textAlignment = isRTL ? .right : .left
         messageView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
         messageView.delegate = self
@@ -228,7 +229,7 @@ final class NativeFeedbackFormView: UIView {
         messagePlaceholderLabel.translatesAutoresizingMaskIntoConstraints = false
         messagePlaceholderLabel.text = messagePlaceholder
         messagePlaceholderLabel.textColor = UIColor(white: 1, alpha: 0.4)
-        messagePlaceholderLabel.font = .systemFont(ofSize: 15)
+        messagePlaceholderLabel.setScaledFont(15, maximumSize: 24)
         messagePlaceholderLabel.textAlignment = isRTL ? .right : .left
         // textViewDidChange() only fires for user edits, not the
         // programmatic `messageView.text = ""` reset above, so the
@@ -249,14 +250,14 @@ final class NativeFeedbackFormView: UIView {
         stack.addArrangedSubview(messageContainer)
 
         countLabel.text = "0/\(maxMessageLength)"
-        countLabel.font = .systemFont(ofSize: 11)
+        countLabel.setScaledFont(11, maximumSize: 15)
         countLabel.textColor = UIColor(white: 1, alpha: 0.4)
         countLabel.textAlignment = isRTL ? .left : .right
         stack.addArrangedSubview(countLabel)
 
         sendButton.removeFromSuperview()
         sendButton.setTitle(sendButtonText, for: .normal)
-        sendButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        sendButton.titleLabel?.setScaledFont(16, weight: .bold, maximumSize: 22)
         sendButton.setTitleColor(.black, for: .normal)
         sendButton.setTitleColor(UIColor(white: 0.3, alpha: 1), for: .disabled)
         sendButton.backgroundColor = goldColor

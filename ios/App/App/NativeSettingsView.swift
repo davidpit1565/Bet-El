@@ -198,7 +198,9 @@ extension NativeSettingsView: UITableViewDataSource {
 
             let valueLabel = UILabel()
             valueLabel.text = row.stringValue
-            valueLabel.font = .systemFont(ofSize: 15, weight: .semibold)
+            valueLabel.setScaledFont(15, weight: .semibold, maximumSize: 19)
+            valueLabel.adjustsFontSizeToFitWidth = true
+            valueLabel.minimumScaleFactor = 0.7
             valueLabel.textAlignment = .center
             valueLabel.widthAnchor.constraint(equalToConstant: 46).isActive = true
             valueLabel.isAccessibilityElement = false // the row's own accessory controls already speak for it

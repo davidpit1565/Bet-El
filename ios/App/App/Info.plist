@@ -12,6 +12,8 @@
 	<string>חיישן הכיוון משמש להצגת מצפן המורה על כיוון התפילה לירושלים</string>
 	<key>NSCameraUsageDescription</key>
 	<string>המצלמה משמשת להצגת מראה להנחת התפילין</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

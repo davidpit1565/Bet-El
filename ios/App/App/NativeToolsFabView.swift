@@ -140,7 +140,9 @@ final class NativeToolsFabView: UIView {
         let fsLabel = UILabel()
         fsLabel.translatesAutoresizingMaskIntoConstraints = false
         fsLabel.text = "\(fontScalePercent)"
-        fsLabel.font = .systemFont(ofSize: 13, weight: .bold)
+        fsLabel.setScaledFont(13, weight: .bold, maximumSize: 16)
+        fsLabel.adjustsFontSizeToFitWidth = true
+        fsLabel.minimumScaleFactor = 0.7
         fsLabel.textColor = UIColor(white: 0.5, alpha: 1)
         fsLabel.textAlignment = .center
         fsLabel.widthAnchor.constraint(equalToConstant: 30).isActive = true
@@ -221,6 +223,13 @@ final class NativeToolsFabView: UIView {
     }
 
     func setState(fontScalePercent: Int, isDarkTheme: Bool, isAutoscrollActive: Bool) {
+        // Only the two icon-swapping booleans get a bounce, and only when
+        // they actually flip - this is called on every JS state sync, not
+        // just when the user taps, so comparing against the *previous*
+        // value (captured before it's overwritten below) keeps the bounce
+        // a reaction to a real change instead of firing on every refresh.
+        let themeChanged = self.isDarkTheme != isDarkTheme
+        let autoscrollChanged = self.isAutoscrollActive != isAutoscrollActive
         self.fontScalePercent = fontScalePercent
         self.isDarkTheme = isDarkTheme
         self.isAutoscrollActive = isAutoscrollActive
@@ -228,6 +237,10 @@ final class NativeToolsFabView: UIView {
         themeButton?.setImage(UIImage(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill"), for: .normal)
         autoscrollButton?.setImage(UIImage(systemName: isAutoscrollActive ? "pause.fill" : "play.fill"), for: .normal)
         autoscrollButton?.accessibilityLabel = isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll"
+        if #available(iOS 17.0, *) {
+            if themeChanged { themeButton?.imageView?.addSymbolEffect(.bounce, options: .nonRepeating) }
+            if autoscrollChanged { autoscrollButton?.imageView?.addSymbolEffect(.bounce, options: .nonRepeating) }
+        }
     }
 
     /// Collapses the expanded panel (e.g. when the screen navigates away or

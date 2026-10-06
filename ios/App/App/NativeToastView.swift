@@ -55,7 +55,7 @@ final class NativeToastView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = message
-        label.font = .systemFont(ofSize: 14.5, weight: .semibold)
+        label.setScaledFont(14.5, weight: .semibold, maximumSize: 20)
         label.textColor = goldColor
         label.textAlignment = .center
         label.numberOfLines = 2

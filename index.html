@@ -2832,7 +2832,22 @@ function syncWidgetData(){
       longitude: (LOC&&LOC.lon!=null)?LOC.lon:FALLBACK.lon,
       candleTime: candle?candle.time:null,
       candleLabel: candle?candle.label:null,
-    }).catch(()=>{});
+    }).then(syncLiveActivity).catch(()=>{});
+  }catch(e){}
+}
+/* Live Activity (Lock Screen banner + Dynamic Island) showing a live
+   countdown to the next sunrise/sunset - see NativeLiveActivityBridge.swift.
+   Called right after syncWidgetData() above (not on its own schedule)
+   since it reads the exact same App Group snapshot (latitude/longitude)
+   that call just wrote, and a stale snapshot would just countdown to the
+   wrong zman rather than erroring - chained onto that promise rather than
+   fired in parallel so it never reads the snapshot from before this
+   sync. iOS 16.1+ only; a no-op everywhere else (older native, web/PWA). */
+function syncLiveActivity(){
+  try{
+    const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeLiveActivity;
+    if(!plugin || !plugin.refresh) return;
+    plugin.refresh().catch(()=>{});
   }catch(e){}
 }
 
