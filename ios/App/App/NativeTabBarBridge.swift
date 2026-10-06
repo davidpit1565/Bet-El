@@ -31,8 +31,9 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
             return ["id": id, "label": label]
         }
         let activeTab = call.getString("activeTab") ?? "home"
+        let isRTL = call.getBool("isRTL") ?? false
         DispatchQueue.main.async {
-            NativeTabBarBridge.activeController?.configure(items: items, activeTab: activeTab)
+            NativeTabBarBridge.activeController?.configure(items: items, activeTab: activeTab, isRTL: isRTL)
         }
         call.resolve()
     }

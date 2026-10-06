@@ -319,8 +319,8 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeSettingsBridge (JS-driven)
 
-    func configureSettings(title: String, sections: [NativeSettingsSection], isDark: Bool) {
-        settingsView.configure(sections: sections, isDark: isDark)
+    func configureSettings(title: String, sections: [NativeSettingsSection], isDark: Bool, isRTL: Bool) {
+        settingsView.configure(sections: sections, isDark: isDark, isRTL: isRTL)
     }
 
     func setSettingsVisible(_ visible: Bool) {
@@ -374,17 +374,23 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTabBarBridge (JS-driven)
 
-    func configure(items: [[String: String]], activeTab: String) {
+    /// `isRTL` (the app's own S.lang, not the device language) decides the
+    /// item order: the bar is pinned to LTR layout and the items reversed
+    /// for Hebrew, so Home sits on the right in Hebrew and on the left in
+    /// every other language no matter what language the device itself is set to.
+    func configure(items: [[String: String]], activeTab: String, isRTL: Bool) {
         let byId = Dictionary(uniqueKeysWithValues: items.compactMap { item -> (String, String)? in
             guard let id = item["id"], let label = item["label"] else { return nil }
             return (id, label)
         })
-        tabBar.items = MainViewController.tabOrder.compactMap { entry in
+        let ordered: [UITabBarItem] = MainViewController.tabOrder.compactMap { entry in
             guard let label = byId[entry.id] else { return nil }
             let item = UITabBarItem(title: label, image: UIImage(systemName: entry.icon), tag: 0)
             item.accessibilityIdentifier = entry.id
             return item
         }
+        tabBar.semanticContentAttribute = .forceLeftToRight
+        tabBar.items = isRTL ? ordered.reversed() : ordered
         setActive(tab: activeTab)
         setVisible(true)
     }

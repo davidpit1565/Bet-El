@@ -61,6 +61,10 @@ final class NativeSettingsView: UIView {
     private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var sections: [NativeSettingsSection] = []
+    /// From the app's own S.lang (Hebrew = RTL), not the device language -
+    /// semanticContentAttribute isn't inherited by table cells, so it's
+    /// applied to the table and to every cell as it's built.
+    private var layoutDirection: UISemanticContentAttribute = .forceLeftToRight
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -88,9 +92,12 @@ final class NativeSettingsView: UIView {
     /// always mirrors whatever the web side just computed, the same way
     /// NativeTabBar/NativeToolsFab re-push their whole state on any change
     /// rather than patching a single field.
-    func configure(sections: [NativeSettingsSection], isDark: Bool) {
+    func configure(sections: [NativeSettingsSection], isDark: Bool, isRTL: Bool) {
         self.sections = sections
         overrideUserInterfaceStyle = isDark ? .dark : .light
+        layoutDirection = isRTL ? .forceRightToLeft : .forceLeftToRight
+        semanticContentAttribute = layoutDirection
+        tableView.semanticContentAttribute = layoutDirection
         tableView.reloadData()
     }
 
@@ -162,6 +169,8 @@ extension NativeSettingsView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let row = sections[indexPath.section].rows[indexPath.row]
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
+        cell.semanticContentAttribute = layoutDirection
+        cell.contentView.semanticContentAttribute = layoutDirection
         cell.textLabel?.text = row.title
         cell.textLabel?.numberOfLines = 0
         cell.detailTextLabel?.text = row.subtitle

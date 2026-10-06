@@ -45,6 +45,7 @@ public class NativeSettingsBridge: CAPPlugin, CAPBridgedPlugin {
     @objc func configure(_ call: CAPPluginCall) {
         let title = call.getString("title") ?? ""
         let isDark = call.getBool("isDark") ?? false
+        let isRTL = call.getBool("isRTL") ?? false
         let sectionsRaw = call.getArray("sections") ?? []
         var sections: [NativeSettingsSection] = []
         for case let sectionDict as [String: Any] in sectionsRaw {
@@ -71,7 +72,7 @@ public class NativeSettingsBridge: CAPPlugin, CAPBridgedPlugin {
             sections.append(NativeSettingsSection(header: header, rows: rows))
         }
         DispatchQueue.main.async {
-            NativeSettingsBridge.activeController?.configureSettings(title: title, sections: sections, isDark: isDark)
+            NativeSettingsBridge.activeController?.configureSettings(title: title, sections: sections, isDark: isDark, isRTL: isRTL)
         }
         call.resolve()
     }

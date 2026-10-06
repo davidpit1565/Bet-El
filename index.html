@@ -11784,7 +11784,7 @@ function nativeSettingsCategorySpec(catId){
 }
 function syncNativeSettings(){
   if(!NATIVE_SETTINGS || TAB!=='settings') return;
-  try{ window.Capacitor.Plugins.NativeSettings.configure(nativeSettingsSpec()).catch(()=>{}); }catch(e){}
+  try{ window.Capacitor.Plugins.NativeSettings.configure({...nativeSettingsSpec(), isRTL:S.lang==='he'}).catch(()=>{}); }catch(e){}
 }
 function showNativeSettings(){ if(!NATIVE_SETTINGS) return; try{ window.Capacitor.Plugins.NativeSettings.show().catch(()=>{}); }catch(e){} }
 function hideNativeSettings(){ if(!NATIVE_SETTINGS) return; try{ window.Capacitor.Plugins.NativeSettings.hide().catch(()=>{}); }catch(e){} }
@@ -11908,7 +11908,7 @@ function syncNativeTabBar(){
     if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ plugin.setVisible({visible:false}).catch(()=>{}); return; }
     const items=[['home','דף הבית'],['tehillim','תהילים'],['prayers','ספרייה'],['calendar','לוח שנה'],['settings','הגדרות']]
       .map(([id,he])=>({id,label:nativeTabBarLabel(he)}));
-    plugin.configure({items, activeTab:navActiveTab(TAB)}).catch(()=>{});
+    plugin.configure({items, activeTab:navActiveTab(TAB), isRTL:S.lang==='he'}).catch(()=>{});
   }catch(e){}
 }
 /* NativeToolsFab - replaces the HTML .reader-tools floating button (font
