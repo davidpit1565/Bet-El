@@ -25,6 +25,13 @@ struct BetElEntry: TimelineEntry {
     let candleTime: Date?
     let candleLabel: String?
     let streakBest: Int
+    /// Sun arc for the "day until sunset" widget: the span the sun ring tracks
+    /// (sunrise -> sunset by day, sunset -> next sunrise at night) and today's two times.
+    let sunStart: Date?
+    let sunEnd: Date?
+    let sunIsDay: Bool
+    let sunriseToday: Date?
+    let sunsetToday: Date?
     /// "פרשת בראשית" / the holiday's name for this day (empty if the app hasn't synced it).
     let parashaText: String
     /// The Hebrew date split into parts so each widget size can lay it out
@@ -82,6 +89,8 @@ struct BetElProvider: TimelineProvider {
             refreshDates.append(midnight)
         }
 
+        // the sun ring/arc moves, so also tick every 30 minutes for the next 24 hours
+        for k in 1...48 { if let d = cal.date(byAdding: .minute, value: 30 * k, to: now) { refreshDates.append(d) } }
         refreshDates = refreshDates.filter { $0 > now }.sorted()
         entries.append(makeEntry(for: now, snapshot: snapshot))
         for d in refreshDates {
@@ -135,6 +144,23 @@ struct BetElProvider: TimelineProvider {
             }
         }
 
+        // the sun span the ring follows
+        var sunSpan: (start: Date?, end: Date?, isDay: Bool) = (nil, nil, true)
+        if let t = times {
+            let cal = Calendar.current
+            if date >= t.sunrise && date < t.sunset {
+                sunSpan = (t.sunrise, t.sunset, true)
+            } else if date < t.sunrise {
+                let y = cal.date(byAdding: .day, value: -1, to: date) ?? date
+                let yT = Solar.times(for: y, latitude: snapshot.latitude, longitude: snapshot.longitude)
+                sunSpan = (yT?.sunset, t.sunrise, false)
+            } else {
+                let tm = cal.date(byAdding: .day, value: 1, to: date) ?? date
+                let tT = Solar.times(for: tm, latitude: snapshot.latitude, longitude: snapshot.longitude)
+                sunSpan = (t.sunset, tT?.sunrise, false)
+            }
+        }
+
         return BetElEntry(
             date: date,
             hebrewDateText: HebrewDay.formatted(date, lang: lang),
@@ -149,6 +175,8 @@ struct BetElProvider: TimelineProvider {
             candleTime: snapshot.candleTime,
             candleLabel: snapshot.candleLabel,
             streakBest: snapshot.streakBest,
+            sunStart: sunSpan.start, sunEnd: sunSpan.end, sunIsDay: sunSpan.isDay,
+            sunriseToday: times?.sunrise, sunsetToday: times?.sunset,
             parashaText: snapshot.dayLabel(for: date),
             weekdayText: HebrewDay.weekdayText(date, lang: lang),
             dayText: HebrewDay.dayText(date, lang: lang),

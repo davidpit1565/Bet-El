@@ -48,10 +48,12 @@ struct BetElAccessoryRectangularView: View {
             Text(entry.hebrewDateText)
                 .font(.system(size: 17, weight: .bold))
                 .lineLimit(1).minimumScaleFactor(0.6)
+                .multilineTextAlignment(isRTL ? .trailing : .leading)
             if !entry.parashaText.isEmpty {
                 Text(entry.parashaText)
                     .font(.system(size: 14, weight: .medium))
                     .lineLimit(1).minimumScaleFactor(0.6)
+                    .multilineTextAlignment(isRTL ? .trailing : .leading)
             }
         }
         .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
@@ -94,13 +96,12 @@ struct BetElTehillimAccessoryCircularView: View {
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            VStack(spacing: 1) {
-                Image(systemName: "book.fill").font(.system(size: 11))
-                Text(entry.tehillimRangeText)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .lineLimit(1).minimumScaleFactor(0.4)
-                    .padding(.horizontal, 3)
-            }
+            // just the chapters, centred
+            Text(entry.tehillimRangeText)
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.4)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 5)
         }
         .widgetAccentable()
     }
@@ -143,5 +144,111 @@ struct BetElCandleAccessoryRectangularView: View {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
         return f.string(from: date)
+    }
+}
+
+
+// MARK: - Sun ring ("day until sunset", like Apple Weather's sunrise/sunset widget)
+
+private func sunTimeString(_ d: Date?) -> String {
+    guard let d = d else { return "--:--" }
+    let f = DateFormatter(); f.dateFormat = "HH:mm"; return f.string(from: d)
+}
+
+/// Lock Screen circle: a ring that fills from sunrise to sunset (and from sunset to the next
+/// sunrise at night); the centre shows the next sun time (sunset by day, sunrise at night).
+@available(iOS 16.0, *)
+struct BetElSunCircularView: View {
+    let entry: BetElEntry
+    var body: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            if let a = entry.sunStart, let b = entry.sunEnd, b > a {
+                ProgressView(timerInterval: a...b, countsDown: false) {
+                    EmptyView()
+                } currentValueLabel: {
+                    VStack(spacing: 0) {
+                        Image(systemName: entry.sunIsDay ? "sunset.fill" : "sunrise.fill").font(.system(size: 11))
+                        Text(sunTimeString(b)).font(.system(size: 13, weight: .bold, design: .rounded)).minimumScaleFactor(0.6)
+                    }
+                }
+                .progressViewStyle(.circular)
+            } else {
+                Image(systemName: "sun.max.fill")
+            }
+        }
+        .widgetAccentable()
+    }
+}
+
+/// Lock Screen rectangle: sunrise time, an arc with the sun on it, sunset time.
+@available(iOS 16.0, *)
+struct BetElSunRectangularView: View {
+    let entry: BetElEntry
+    var body: some View {
+        let frac: Double = {
+            guard entry.sunIsDay, let a = entry.sunStart, let b = entry.sunEnd, b > a else { return entry.sunIsDay ? 0 : 1 }
+            return min(1, max(0, entry.date.timeIntervalSince(a) / b.timeIntervalSince(a)))
+        }()
+        VStack(spacing: 2) {
+            GeometryReader { geo in
+                let w = geo.size.width, h = geo.size.height
+                ZStack {
+                    SunArc().stroke(style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [3, 3])).opacity(0.5)
+                    Circle().frame(width: 9, height: 9)
+                        .position(x: w * CGFloat(frac), y: h - CGFloat(sin(Double.pi * frac)) * (h - 2) - 1)
+                        .opacity(entry.sunIsDay ? 1 : 0.4)
+                }
+            }
+            .frame(height: 26)
+            HStack {
+                Label(sunTimeString(entry.sunriseToday), systemImage: "sunrise.fill")
+                Spacer()
+                Label(sunTimeString(entry.sunsetToday), systemImage: "sunset.fill")
+            }
+            .font(.system(size: 12, weight: .semibold))
+            .labelStyle(.titleAndIcon)
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .widgetAccentable()
+    }
+}
+
+private struct SunArc: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let steps = 40
+        for i in 0...steps {
+            let t = Double(i) / Double(steps)
+            let pt = CGPoint(x: rect.width * CGFloat(t), y: rect.height - CGFloat(sin(Double.pi * t)) * (rect.height - 2) - 1)
+            if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+        }
+        return p
+    }
+}
+
+@available(iOS 16.0, *)
+struct BetElSunLockWidget: Widget {
+    let kind: String = "BetElSunLockWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            BetElSunLockView(entry: entry)
+        }
+        .configurationDisplayName("עַד הַשְּׁקִיעָה")
+        .description("כַּמָּה מֵהַיּוֹם עָבַר: זְרִיחָה וּשְׁקִיעָה")
+        .supportedFamilies([.accessoryCircular, .accessoryRectangular])
+    }
+}
+
+@available(iOS 16.0, *)
+private struct BetElSunLockView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: BetElEntry
+    var body: some View {
+        Group {
+            if family == .accessoryCircular { BetElSunCircularView(entry: entry) }
+            else { BetElSunRectangularView(entry: entry) }
+        }
+        .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
 }

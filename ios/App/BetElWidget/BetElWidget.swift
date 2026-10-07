@@ -474,6 +474,7 @@ private struct TehillimWidgetView: View {
     var body: some View {
         if #available(iOS 16.0, *), family == .accessoryRectangular {
             BetElTehillimAccessoryRectangularView(entry: entry)
+                .environment(\.layoutDirection, .leftToRight)
                 .widgetURL(entry.deepLinkURL).widgetBackground(palette: BetElTheme.palette(for: entry.theme))
         } else if #available(iOS 16.0, *), family == .accessoryCircular {
             BetElTehillimAccessoryCircularView(entry: entry)
@@ -695,6 +696,7 @@ private struct BetElDateLockView: View {
             default: BetElAccessoryRectangularView(entry: entry)
             }
         }
+        .environment(\.layoutDirection, .leftToRight)   // so "trailing" is always the physical right
         .widgetURL(entry.deepLinkURL)
         .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
