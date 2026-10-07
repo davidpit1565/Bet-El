@@ -144,6 +144,7 @@ final class HomeEditOverlay: UIView {
                     addSubview(handle)
                     resizeHandles[spec.id] = handle
                 }
+                handle.rtl = rtl
                 // bottom corner on the reading-direction end side
                 let cx = rtl ? spec.frame.minX + handleSize / 2 + 2 : spec.frame.maxX - handleSize / 2 - 2
                 handle.frame = CGRect(x: cx - handleSize / 2, y: spec.frame.maxY - handleSize - 2, width: handleSize, height: handleSize)
@@ -172,31 +173,45 @@ final class ResizeHandle: UIView {
     init(id: String) {
         self.id = id
         super.init(frame: .zero)
-        let glass = HomeEditOverlay.glassButton(symbol: "arrow.up.left.and.arrow.down.right", pointSize: 13, size: CGSize(width: 34, height: 34))
-        glass.isUserInteractionEnabled = false   // the pan below owns all touches
-        glass.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(glass)
-        NSLayoutConstraint.activate([
-            glass.centerXAnchor.constraint(equalTo: centerXAnchor),
-            glass.centerYAnchor.constraint(equalTo: centerYAnchor),
-            glass.widthAnchor.constraint(equalToConstant: 34),
-            glass.heightAnchor.constraint(equalToConstant: 34),
-        ])
+        // a small curved corner grip drawn like the one on an iPhone widget (no arrows, no circle)
+        isOpaque = false
+        backgroundColor = .clear
+        let grip = CAShapeLayer()
+        let r: CGFloat = 20
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: r, y: 0))
+        path.addQuadCurve(to: CGPoint(x: 0, y: r), controlPoint: CGPoint(x: r, y: r))
+        grip.path = path.cgPath
+        grip.fillColor = UIColor.clear.cgColor
+        grip.strokeColor = UIColor.white.cgColor
+        grip.lineWidth = 4
+        grip.lineCap = .round
+        grip.shadowColor = UIColor.black.cgColor
+        grip.shadowOpacity = 0.45
+        grip.shadowRadius = 2
+        grip.shadowOffset = .zero
+        grip.frame = CGRect(x: 0, y: 0, width: r, height: r)
+        gripLayer = grip
+        layer.addSublayer(grip)
         accessibilityLabel = "Resize"
         isAccessibilityElement = true
         let panGR = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
         addGestureRecognizer(panGR)
-        // a plain tap also steps the size (small -> medium -> large), so resizing never depends on a perfect drag
-        let tapGR = UITapGestureRecognizer(target: self, action: #selector(tapped))
-        tapGR.require(toFail: panGR)
-        addGestureRecognizer(tapGR)
+    }
+
+    private var gripLayer: CAShapeLayer?
+    var rtl = false { didSet { setNeedsLayout() } }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // bottom-trailing corner of the handle; mirrored in RTL
+        guard let grip = gripLayer else { return }
+        let r: CGFloat = 20
+        grip.frame = CGRect(x: rtl ? 8 : bounds.width - r - 8, y: bounds.height - r - 8, width: r, height: r)
+        grip.setAffineTransform(rtl ? CGAffineTransform(scaleX: -1, y: 1) : .identity)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    @objc private func tapped() {
-        runJS?("window.NativeHomeEditHost && window.NativeHomeEditHost.resizeCycle('\(id)')")
-    }
 
     @objc private func pan(_ gesture: UIPanGestureRecognizer) {
         let t = gesture.translation(in: superview)

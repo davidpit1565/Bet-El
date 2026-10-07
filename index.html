@@ -1049,6 +1049,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .stat-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--gold-grad);opacity:.85}
 .stat-card .sc-info{display:flex;flex-direction:column;min-width:0}
 .home-item>.stat-card{height:100%;margin:0}
+.home-item[data-home-item="visitors"],.home-item[data-home-item="live"]{align-self:start}
+.home-item>.stat-card:not(.long){padding:12px 14px;min-height:0}
 .stat-card.long{padding:22px 26px;border-radius:26px;min-height:112px}
 .stat-card.long .sc-num{font-size:46px;line-height:1.05;letter-spacing:.5px}
 .stat-card.long .sc-label{font-size:16px;margin-top:6px}
@@ -7122,8 +7124,20 @@ function homeBindDrag(grid){
     st.active=false; cancelAnimationFrame(st.raf);
     const it=st.item; st.item=null;
     it.classList.remove('dragging'); it.style.transform=''; homeSyncHide(false);
-    const order=movable().map(x=>x.dataset.homeItem);
+    let order=movable().map(x=>x.dataset.homeItem);
+    /* A half-width item dropped in the opposite column from where the flow would put it keeps that column:
+       an empty-space cell is inserted before it instead of the grid pulling everything up (iPhone-style). */
+    try{
+      const gr=grid.getBoundingClientRect(), mid=gr.left+gr.width/2, id0=it.dataset.homeItem;
+      if(!it.classList.contains('hi-wide') && !/^spacer\d$/.test(id0)){
+        const r=it.getBoundingClientRect(), flowRight=(r.left+r.width/2)>mid, wantRight=st.px>mid;
+        const usedSp=new Set(order.filter(x=>/^spacer\d$/.test(x)));
+        const freeSp=['spacer1','spacer2','spacer3','spacer4','spacer5','spacer6'].find(x=>!usedSp.has(x));
+        if(flowRight!==wantRight && freeSp){ const i=order.indexOf(id0); order.splice(i,0,freeSp); }
+      }
+    }catch(_){}
     const cur=getHomeLayout(), byId=Object.fromEntries(cur.map(x=>[x.id,x]));
+    order.forEach(id=>{ if(!byId[id]) byId[id]={id,size:'s'}; });
     saveHomeLayout(homeNormalize(order.map(id=>byId[id]).filter(Boolean)));
     homeKeepScroll(renderHome);   // re-render: puts the notices strip back under the header
   };
@@ -7206,8 +7220,8 @@ window.NativeHomeEditHost={
     const rtl=document.documentElement.dir!=='ltr', order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','l'];
     const g=(ty-st.y0)+(rtl ? (st.x0-tx) : (tx-st.x0));
     const k=order.indexOf(st.size);
-    if(g>30 && k<order.length-1) st.size=order[k+1];
-    else if(g<-30 && k>0) st.size=order[k-1];
+    if(g>22 && k<order.length-1) st.size=order[k+1];
+    else if(g<-22 && k>0) st.size=order[k-1];
     else return;
     st.changed=true; st.x0=tx; st.y0=ty;
     homeResizeApply(st.item,st.size);
