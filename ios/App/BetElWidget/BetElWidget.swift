@@ -344,7 +344,11 @@ private struct LargeWidgetView: View {
             Text(entry.candleLabel ?? WidgetL10n.t("candleLighting", lang: entry.lang))
                 .font(.system(size: 11)).foregroundColor(palette.inkSoft).lineLimit(1).minimumScaleFactor(0.7)
             if let c = entry.candleTime, c > entry.date {
-                Countdown(target: c, from: entry.date, size: 20, color: palette.goldBright)
+                // "יום שישי 18:20" - the day and hour, not a countdown
+                Text("\(HebrewDay.weekdayText(c, lang: entry.lang)) \(timeString(c))")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(palette.goldBright)
+                    .lineLimit(1).minimumScaleFactor(0.6)
             } else {
                 Text(WidgetL10n.t("noCandle", lang: entry.lang))
                     .font(.system(size: 12, weight: .medium)).foregroundColor(palette.inkSoft).lineLimit(2)

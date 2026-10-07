@@ -94,18 +94,12 @@ private struct BetElCandleWidgetView: View {
                 .monospacedDigit()
                 .foregroundColor(palette.goldBright)
                 .lineLimit(1).minimumScaleFactor(0.6)
-            // live countdown to the lighting itself
+            // the day, not a countdown: "יום שישי" / "Friday"
             if upcoming, let c = entry.candleTime {
-                HStack(spacing: 4) {
-                    if rtl {
-                        Text(c, style: .timer).font(.system(size: medium ? 20 : 16, weight: .bold, design: .rounded)).monospacedDigit().foregroundColor(palette.gold)
-                        Text(WidgetL10n.t("candleIn", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
-                    } else {
-                        Text(WidgetL10n.t("candleIn", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
-                        Text(c, style: .timer).font(.system(size: medium ? 20 : 16, weight: .bold, design: .rounded)).monospacedDigit().foregroundColor(palette.gold)
-                    }
-                }
-                .lineLimit(1).minimumScaleFactor(0.6)
+                Text(HebrewDay.weekdayText(c, lang: entry.lang))
+                    .font(.system(size: medium ? 20 : 16, weight: .bold, design: .rounded))
+                    .foregroundColor(palette.gold)
+                    .lineLimit(1).minimumScaleFactor(0.6)
             }
         }
         .padding(medium ? 16 : 14)

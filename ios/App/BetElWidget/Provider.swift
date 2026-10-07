@@ -39,7 +39,9 @@ struct BetElEntry: TimelineEntry {
     /// "א׳–ו׳" in Hebrew (letters, never digits), "1\u{2013}6" in every other language.
     var tehillimRangeText: String {
         let (a, b) = (tehillimRange.start, tehillimRange.end)
-        if lang == "he" { return "\(HebrewDay.gematria(a))\u{2013}\(HebrewDay.gematria(b))" }
+        // letters only, with air around a single dash: "מב – עב" (start on the right).
+        // U+2067/U+2069 isolate it as right-to-left inside the forced-LTR widget layout.
+        if lang == "he" { return "\u{2067}\(HebrewDay.gematriaPlain(a)) \u{2013} \(HebrewDay.gematriaPlain(b))\u{2069}" }
         return "\(a)\u{2013}\(b)"
     }
 

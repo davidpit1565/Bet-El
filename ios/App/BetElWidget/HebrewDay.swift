@@ -37,6 +37,11 @@ enum HebrewDay {
         return punctuate(letters)
     }
 
+    /// Hebrew numeral letters only - no geresh/gershayim marks ("מב", "ע", "קמ").
+    static func gematriaPlain(_ number: Int) -> String {
+        gematria(number).replacingOccurrences(of: "\u{05F3}", with: "").replacingOccurrences(of: "\u{05F4}", with: "")
+    }
+
     private static func lettersFor(_ value: Int, _ table: [(Int, String)]) -> [String] {
         var remaining = value
         var out: [String] = []
