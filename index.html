@@ -7585,16 +7585,23 @@ function nameEdgeLetters(name){
    stripNik-based measure - matches the name's. Cheap enough (~2500
    verses) to just run fresh each time rather than caching. */
 function tehillimVersesByName(name){
-  const edges=nameEdgeLetters(name); if(!edges) return [];
   const T=window.TEHILLIM; if(!T) return [];
-  const out=[];
-  for(let ch=1; ch<=150; ch++){
-    const vs=T[ch]||T[String(ch)]||[];
-    vs.forEach((v,vi)=>{
-      const s=stripNik(v).replace(/\s+/g,'');
-      if(s && s[0]===edges.first && s[s.length-1]===edges.last) out.push({ch,vi,text:v});
-    });
-  }
+  /* A full name written in one go ("דוד מאיר ישראל") counts as separate names: each word gets its own
+     verses, in order, exactly as if each had been added on its own. */
+  const words=stripNik(name).split(/\s+/).filter(Boolean);
+  const out=[], seen=new Set();
+  words.forEach(w=>{
+    const edges=nameEdgeLetters(w); if(!edges) return;
+    for(let ch=1; ch<=150; ch++){
+      const vs=T[ch]||T[String(ch)]||[];
+      vs.forEach((v,vi)=>{
+        const s=stripNik(v).replace(/\s+/g,'');
+        if(s && s[0]===edges.first && s[s.length-1]===edges.last){
+          const k=ch+':'+vi; if(!seen.has(k)){ seen.add(k); out.push({ch,vi,text:v}); }
+        }
+      });
+    }
+  });
   return out;
 }
 function renderTehillim(){
