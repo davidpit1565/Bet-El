@@ -24,6 +24,7 @@ public class BetElWidgetBridge: CAPPlugin, CAPBridgedPlugin {
         let longitude = call.getDouble("longitude") ?? BetElSharedData.Snapshot.placeholder.longitude
         let candleTimeISO = call.getString("candleTime")
         let candleLabel = call.getString("candleLabel")
+        let dayLabelsJSON = call.getString("dayLabels")
 
         let snapshot = BetElSharedData.Snapshot(
             streakCount: streakCount,
@@ -33,7 +34,8 @@ public class BetElWidgetBridge: CAPPlugin, CAPBridgedPlugin {
             latitude: latitude,
             longitude: longitude,
             candleTimeISO: candleTimeISO,
-            candleLabel: candleLabel
+            candleLabel: candleLabel,
+            dayLabelsJSON: dayLabelsJSON
         )
         BetElSharedData.write(snapshot)
 

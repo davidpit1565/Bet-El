@@ -25,6 +25,8 @@ struct BetElEntry: TimelineEntry {
     let candleTime: Date?
     let candleLabel: String?
     let streakBest: Int
+    /// "פרשת בראשית" / the holiday's name for this day (empty if the app hasn't synced it).
+    let parashaText: String
     /// The Hebrew date split into parts so each widget size can lay it out
     /// big: weekday ("יום רביעי"), day ("כ״ו"), month ("תשרי"), year ("תשפ״ז")
     /// - in English the same parts as numerals/English names.
@@ -147,6 +149,7 @@ struct BetElProvider: TimelineProvider {
             candleTime: snapshot.candleTime,
             candleLabel: snapshot.candleLabel,
             streakBest: snapshot.streakBest,
+            parashaText: snapshot.dayLabel(for: date),
             weekdayText: HebrewDay.weekdayText(date, lang: lang),
             dayText: HebrewDay.dayText(date, lang: lang),
             monthText: HebrewDay.monthText(date, lang: lang),

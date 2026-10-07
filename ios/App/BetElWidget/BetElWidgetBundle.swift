@@ -9,6 +9,9 @@ struct BetElWidgetBundle: WidgetBundle {
         BetElZmanimWidget()
         BetElTehillimWidget()
         BetElStreakWidget()
+        if #available(iOS 16.0, *) {
+            BetElDateLockWidget()
+        }
         if #available(iOS 16.2, *) {
             BetElLiveActivityWidget()
         }

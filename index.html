@@ -3109,6 +3109,45 @@ function nextCandleLightingInfo(){
   }catch(e){}
   return null;
 }
+/* For the Lock Screen "Hebrew date" widget: per day for the next ~2 weeks, the holiday
+   on that day or else the coming Shabbat's parasha ("פרשת בראשית"). The widget can't
+   run hebcal, so the app hands it this tiny table (see SharedData.dayLabelsJSON). */
+let WIDGET_LABELS_CACHE={key:'',json:null};
+function widgetDayLabels(){
+  try{
+    const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const base=new Date(); base.setHours(12,0,0,0);
+    const il=calIsIL(), lang=S.lang||'he';
+    const ck=ymd(base)+'|'+lang+'|'+il;
+    if(WIDGET_LABELS_CACHE.key===ck) return WIDGET_LABELS_CACHE.json;
+    const s0=new Date(base); s0.setHours(0,0,0,0); const e0=addDays(s0,15);
+    const evs=HebrewCalendar.calendar({start:s0,end:e0,il,location:hebLocation(),locale:lang==='he'?'he':'en'});
+    const HOL=1|2097152|524288|16384|256|128; // CHAG | CHOL_HAMOED | MINOR_HOLIDAY | fasts | ROSH_CHODESH
+    const holidays={};
+    evs.forEach(ev=>{
+      const f=ev.getFlags?ev.getFlags():0;
+      if(!(f&HOL) || (f&1048576) /* EREV */ || (f&1024) /* parsha */) return;
+      const k=ymd(ev.getDate().greg());
+      if(holidays[k]) return;
+      holidays[k]= lang==='he'
+        ? deNikud(ev.render('he')).replace(/\s*\d{4}\s*$/,'').replace(/סכות/g,'סוכות').replace(/כפור/g,'כיפור').replace(/שמיני עצרת/g,'שמיני עצרת')
+        : holidayName(ev.render('en')).replace(/\s*\d{4}\s*$/,'');
+    });
+    const out=[];
+    for(let i=0;i<15;i++){
+      const day=addDays(s0,i); const k=ymd(day);
+      let t=holidays[k];
+      if(!t){
+        const pk=currentWeekParshaKey(day);
+        if(pk) t = lang==='he' ? 'פרשת '+deNikud(parshaName(pk)) : (lang==='en' ? 'Parashat '+pk : parshaName(pk));
+      }
+      out.push({d:k,t:t||''});
+    }
+    const json=JSON.stringify(out);
+    WIDGET_LABELS_CACHE={key:ck,json};
+    return json;
+  }catch(e){ return null; }
+}
 function syncWidgetData(){
   try{
     const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BetElWidgetBridge;
@@ -3124,6 +3163,7 @@ function syncWidgetData(){
       longitude: (LOC&&LOC.lon!=null)?LOC.lon:FALLBACK.lon,
       candleTime: candle?candle.time:null,
       candleLabel: candle?candle.label:null,
+      dayLabels: widgetDayLabels(),
     }).then(syncLiveActivity).catch(()=>{});
   }catch(e){}
 }

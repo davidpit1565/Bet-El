@@ -472,8 +472,20 @@ private struct TehillimWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: BetElEntry
     var body: some View {
+        if #available(iOS 16.0, *), family == .accessoryRectangular {
+            BetElTehillimAccessoryRectangularView(entry: entry)
+                .widgetURL(entry.deepLinkURL).widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+        } else if #available(iOS 16.0, *), family == .accessoryCircular {
+            BetElTehillimAccessoryCircularView(entry: entry)
+                .widgetURL(entry.deepLinkURL).widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+        } else {
+            homeBody
+        }
+    }
+
+    private var homeBody: some View {
         let palette = BetElTheme.palette(for: entry.theme)
-        VStack(alignment: hAlign(entry.lang), spacing: 4) {
+        return VStack(alignment: hAlign(entry.lang), spacing: 4) {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                 .font(.system(size: family == .systemSmall ? 14 : 17, weight: .semibold))
                 .foregroundColor(palette.inkSoft)
@@ -506,7 +518,12 @@ struct BetElTehillimWidget: Widget {
         }
         .configurationDisplayName("תְּהִלִּים הַיּוֹם")
         .description("הַפְּרָקִים שֶׁל הַיּוֹם בְּגוֹדֶל גָּדוֹל, לִלְחִיצָה וּפְתִיחָה")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies(Self.families)
+    }
+    private static var families: [WidgetFamily] {
+        var f: [WidgetFamily] = [.systemSmall, .systemMedium]
+        if #available(iOS 16.0, *) { f.append(contentsOf: [.accessoryRectangular, .accessoryCircular]) }
+        return f
     }
 }
 
@@ -516,9 +533,18 @@ private struct StreakWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: BetElEntry
     var body: some View {
+        if #available(iOS 16.0, *), family == .accessoryCircular {
+            BetElStreakAccessoryCircularView(entry: entry)
+                .widgetURL(entry.deepLinkURL).widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+        } else {
+            homeBody
+        }
+    }
+
+    private var homeBody: some View {
         let palette = BetElTheme.palette(for: entry.theme)
         let big: CGFloat = family == .systemSmall ? 64 : 80
-        VStack(spacing: 2) {
+        return VStack(spacing: 2) {
             Image(systemName: "flame.fill")
                 .font(.system(size: family == .systemSmall ? 30 : 36))
                 .foregroundColor(palette.gold)
@@ -549,7 +575,12 @@ struct BetElStreakWidget: Widget {
         }
         .configurationDisplayName("רֶצֶף לִמּוּד")
         .description("כַּמָּה יָמִים בְּרֶצֶף לָמַדְתָּ")
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies(Self.families)
+    }
+    private static var families: [WidgetFamily] {
+        var f: [WidgetFamily] = [.systemSmall]
+        if #available(iOS 16.0, *) { f.append(.accessoryCircular) }
+        return f
     }
 }
 
@@ -632,10 +663,39 @@ struct BetElWidget: Widget {
     /// extension's own deployment target, so the Home Screen families keep
     /// working unchanged all the way back to iOS 15.
     private static var families: [WidgetFamily] {
-        var families: [WidgetFamily] = [.systemSmall, .systemMedium, .systemLarge]
-        if #available(iOS 16.0, *) {
-            families.append(contentsOf: [.accessoryCircular, .accessoryRectangular])
+        // Lock Screen families now live in the dedicated widgets below
+        // (BetElDateLockWidget, Tehillim, Streak) so each has its own gallery entry.
+        [.systemSmall, .systemMedium, .systemLarge]
+    }
+}
+
+/// Lock Screen date: rectangle (date + parasha/holiday), circle (day + month), inline.
+@available(iOS 16.0, *)
+struct BetElDateLockWidget: Widget {
+    let kind: String = "BetElDateLockWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            BetElDateLockView(entry: entry)
         }
-        return families
+        .configurationDisplayName("תַּאֲרִיךְ עִבְרִי")
+        .description("הַתַּאֲרִיךְ הָעִבְרִי, הַפָּרָשָׁה אוֹ הֶחָג")
+        .supportedFamilies([.accessoryRectangular, .accessoryCircular, .accessoryInline])
+    }
+}
+
+@available(iOS 16.0, *)
+private struct BetElDateLockView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: BetElEntry
+    var body: some View {
+        Group {
+            switch family {
+            case .accessoryCircular: BetElAccessoryCircularView(entry: entry)
+            case .accessoryInline: BetElAccessoryInlineView(entry: entry)
+            default: BetElAccessoryRectangularView(entry: entry)
+            }
+        }
+        .widgetURL(entry.deepLinkURL)
+        .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
 }
