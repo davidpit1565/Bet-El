@@ -260,7 +260,7 @@ final class NHCell: UICollectionViewCell {
         dashLayer.isHidden = !(isSpacer && editing)
         tintLayer.colors = [it.color.withAlphaComponent(0.34).cgColor, it.color.withAlphaComponent(0.04).cgColor]
         accentLayer.backgroundColor = it.color.withAlphaComponent(0.9).cgColor
-        accentLayer.isHidden = !(it.kind == "tile" || it.kind == "stat")
+        accentLayer.isHidden = !(it.kind == "tile" || it.kind == "stat" || it.kind == "row")
         minusButton.isHidden = !(editing && it.removable)
         grip.isHidden = !(editing && it.resizable)
 
@@ -270,6 +270,25 @@ final class NHCell: UICollectionViewCell {
             if !it.subtitle.isEmpty {
                 stack.addArrangedSubview(label(it.subtitle, .subheadline, .regular, .secondaryLabel, lines: it.wide ? 3 : 2))
             }
+        case "row":
+            stack.axis = .horizontal
+            stack.alignment = .center
+            stack.spacing = 10
+            if !it.badge.isEmpty {
+                let lead = UIImageView(image: UIImage(systemName: it.badge))
+                lead.tintColor = .secondaryLabel
+                lead.setContentHuggingPriority(.required, for: .horizontal)
+                stack.addArrangedSubview(lead)
+            }
+            let v = UIStackView(arrangedSubviews: [label((it.done ? "✓ " : "") + it.title, .headline, .semibold, lines: 2)])
+            v.axis = .vertical
+            v.spacing = 2
+            if !it.subtitle.isEmpty { v.addArrangedSubview(label(it.subtitle, .subheadline, .regular, .secondaryLabel, lines: 2)) }
+            stack.addArrangedSubview(v)
+            let rowChev = UIImageView(image: UIImage(systemName: "chevron.forward"))
+            rowChev.tintColor = .tertiaryLabel
+            rowChev.setContentHuggingPriority(.required, for: .horizontal)
+            stack.addArrangedSubview(rowChev)
         case "stat":
             stack.axis = .horizontal
             stack.alignment = .center
@@ -552,12 +571,13 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
                                                      options: .usesLineFragmentOrigin, attributes: [.font: f], context: nil).height)
         }
         switch it.kind {
-        case "tile": return it.wide ? 132 : 92
+        case "tile": return it.wide ? 132 : (it.size == "m" ? 112 : 92)
         case "stat": return it.wide ? 96 : 68
         case "spacer": return 92
         case "hero": return 118 + 24 + 34 + 22 + 22 + 36
         case "banner": return CGFloat(max(1, it.lines.count)) * 40 + 24
         case "tikkunei": return 78
+        case "row": return it.subtitle.isEmpty ? 64 : 80
         case "zmanim": return 56 + CGFloat(it.rows.count) * 26
         case "text": return CGFloat(max(1, it.lines.count)) * 28 + 28
         case "social": return it.size == "m" ? 96 : 68

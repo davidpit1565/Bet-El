@@ -440,3 +440,13 @@ in English as usual.
   toggle regular <-> wide, add sheet = `NativeHomeEdit.showAddSheet` (native). Empty cells are real `spacer1..12` items kept
   complete per row by `normalizeSpacers()`. Tile sizes are only `s`/`l` (stat cards and social: `s`/`m`). To change what a home
   item shows natively, extend `homeNativeSpec()` (JS) + `NHCell.configure` (Swift). Web/PWA keep the HTML home. Not compile-verified.
+
+- **Home customization is OFF (user decision):** `HOME_CUSTOMIZE=false` in index.html - `getHomeLayout()` always returns the fixed default
+  layout (chok/tehillim `m`, visitors+live side by side) and `homeEnterEdit()` is a no-op, so no edit mode / minus / plus / drag. All of the
+  edit code (HTML and `NativeHomeEdit.swift`) is still there; flip the flag to bring it back. The native home (`NativeHome.swift`) now shows
+  that default layout read-only, with glass cells.
+- **Generic native lists**: `nativeScreenSpec()` (index.html) reuses the NativeHome collection for plain list/grid screens - any screen whose
+  `#app > .view` is only `.q-tile` / `.prayer-row` / `.sm-week-card` / `.set-item` / `.search-box` rows (no inputs, toggles, chips, readers, or
+  live `#libResults`) is read out of the rendered HTML and shown natively (kinds `tile`, `row`, `tikkunei`); taps come back as
+  `NativeHomeHost.open('n<i>')` which clicks the hidden element. A MutationObserver on `#app` + `libDrawSearch` call `nativeAutoPush()`.
+  Anything not eligible stays web. Readers (long text) stay web by design - they cannot be glass.

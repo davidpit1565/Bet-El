@@ -6866,6 +6866,9 @@ function heTitle(plain,nikud){ return (S.lang && S.lang!=='he') ? plain : nikud;
    l = full width, tall (with an extra detail line). Blocks are always
    full width. HOME_CATALOG is declarative - to offer a new button, add it
    here and give it a renderer in renderHome()'s `mods`. */
+/* Customizing the home (edit mode, add/remove/move/resize) was dropped by the user for now: the home is the fixed default
+   layout below. Flip to true to bring the whole edit mode back (all of its code is still here). */
+const HOME_CUSTOMIZE=false;
 const HOME_LAYOUT_KEY='betel_home_layout_v1';
 const HOME_SPACER_IDS=Array.from({length:12},(_,i)=>'spacer'+(i+1));
 let HOME_EDIT=false, HOME_LP_AT=0;
@@ -6911,12 +6914,13 @@ const HOME_CATALOG={
 };
 const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
-  {id:'chok',size:'s'},{id:'tehillim',size:'s'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
+  {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},
   {id:'tikkunei',size:'l'},{id:'visitors',size:'s'},{id:'live',size:'s'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
+  if(!HOME_CUSTOMIZE) return homeNormalize(homeDefaultLayout());   // fixed default home: any saved layout is ignored
   let raw=null;
   try{ raw=JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)||'null'); }catch(e){}
   if(!Array.isArray(raw)) raw=homeDefaultLayout();   // the default goes through the same size clean-up below
@@ -6950,7 +6954,7 @@ function homeSetEdit(on){
   if(TAB==='home') renderHome();
 }
 function homeEnterEdit(){
-  if(HOME_EDIT) return;
+  if(HOME_EDIT || !HOME_CUSTOMIZE) return;
   try{ nativeHaptic('impact','medium'); }catch(e){}
   homeSetEdit(true);
 }
@@ -7310,8 +7314,53 @@ function homeNativePush(){
   },1200);
 }
 function homeNativeHide(){ if(!HOME_NG_ON) return; HOME_NG_ON=false; document.documentElement.classList.remove('native-home'); try{ homeNativePlugin().hide().catch(()=>{}); }catch(e){} }
+
+/* Plain list / grid screens (prayers, library lists, settings list...) reuse the same native glass collection:
+   nativeScreenSpec() reads the screen's rows out of the rendered HTML (only when the screen is nothing but rows -
+   anything with inputs, toggles, chips or text to read stays web) and sends them to NativeHome.show. */
+const NSCR_ROWS='.search-box,.q-tile,.prayer-row,.sm-week-card,.set-item';
+const NSCR_BLOCK='input,select,textarea,button,.reader-top,.reader-head,.ck-track-btn,.ck-yr-btn,.sm-aliyah-chip,.empty-note,.card,.home-grid,canvas,video,iframe,.reader';
+function nativeScreenSpec(){
+  const view=document.querySelector('#app > .view'); if(!view) return null;
+  const rows=[...view.querySelectorAll(NSCR_ROWS)]; if(!rows.length) return null;
+  if([...view.querySelectorAll(NSCR_BLOCK)].some(n=>!n.closest('.search-box'))) return null;
+  const res=view.querySelector('#libResults'); if(res && res.innerHTML.trim()) return null;   // live search results are drawn in HTML
+  const top=rows.filter(r=>!rows.some(o=>o!==r&&o.contains(r)));
+  const T=(root,sel)=>{ const n=root.querySelector(sel); return n?n.textContent.replace(/\s+/g,' ').trim():''; };
+  const base={size:'s',sizes:[],removable:false,movable:false,resizable:false,color:'#d4af5f',done:false,title:'',subtitle:'',lines:[],rows:[],number:'',badge:'',wide:true};
+  return top.map((el,i)=>{
+    el.dataset.nid=i; const id='n'+i, done=el.classList.contains('done')||!!el.querySelector('.tr-done');
+    if(el.matches('.search-box')){ const inp=el.querySelector('input'); return {...base,id,kind:'row',title:(inp&&inp.placeholder)||'',badge:'magnifyingglass'}; }
+    if(el.matches('.q-tile')){
+      const qd=[...el.querySelectorAll('.qd')].map(n=>n.textContent.replace(/\s+/g,' ').trim()).filter(Boolean);
+      return {...base,id,kind:'tile',wide:false,title:T(el,'.qt'),subtitle:qd.join('\n'),done,color:HOME_TILE_COLORS[el.dataset.cat]||LIB_CAT_COLORS[el.dataset.cat]||'#d4af5f'};
+    }
+    if(el.matches('.sm-week-card')) return {...base,id,kind:'tikkunei',title:T(el,'.sm-week-tag'),subtitle:T(el,'.sm-week-name'),done};
+    if(el.matches('.set-item')) return {...base,id,kind:'row',title:T(el,'.si-t'),subtitle:T(el,'.si-d')};
+    return {...base,id,kind:'row',title:T(el,'.prayer-row-title')||el.textContent.replace(/\s+/g,' ').trim(),subtitle:T(el,'.ck-today-name')||T(el,'.prayer-row-sub'),done};
+  });
+}
+function nativeScreenPush(){
+  const NH=homeNativePlugin(); if(!NH||TAB==='home') return;
+  const items=nativeScreenSpec();
+  if(!items||!items.length){ homeNativeHide(); return; }
+  HOME_NG_ON=true; document.documentElement.classList.add('native-home');
+  NH.show({items,editing:false,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),spacerPool:[]}).catch(()=>{});
+}
+function nativeAutoPush(){ try{ if(TAB==='home') homeNativePush(); else nativeScreenPush(); }catch(e){ console.error(e); } }
+try{
+  let nsTimer=null;
+  new MutationObserver(()=>{ clearTimeout(nsTimer); nsTimer=setTimeout(nativeAutoPush,30); }).observe(document.getElementById('app'),{childList:true});
+}catch(e){}
 window.NativeHomeHost={
-  open(id){ const el=document.querySelector(`#homeGrid [data-home-item="${id}"]`); if(el && !HOME_EDIT) el.click(); },
+  open(id){
+    if(/^n\d+$/.test(id)){
+      const e=document.querySelector(`#app [data-nid="${id.slice(1)}"]`); if(!e) return;
+      if(e.matches('.search-box')){ if(window.NativeSearchHost) window.NativeSearchHost.open(); else { const i=e.querySelector('input'); if(i) i.focus(); } return; }
+      e.click(); return;
+    }   // a plain list screen's row
+    const el=document.querySelector(`#homeGrid [data-home-item="${id}"]`); if(el && !HOME_EDIT) el.click();
+  },
   sub(id,i){
     const el=document.querySelector(`#homeGrid [data-home-item="${id}"]`); if(!el||HOME_EDIT) return;
     const subs=el.querySelectorAll('.yahrzeit-strip,.social-link'); if(subs[i]) subs[i].click();
@@ -9327,7 +9376,8 @@ function libSearchHits(q){
   }
   return hits.slice(0,60);
 }
-function libDrawSearch(){
+function libDrawSearch(){ libDrawSearch0(); setTimeout(nativeAutoPush,0); }   // live results are HTML: the native list steps aside while they show
+function libDrawSearch0(){
   const box=document.getElementById('libResults'); if(!box) return;
   const inp=document.getElementById('libSearchQ'); const q=inp?inp.value:'';
   const browse=document.getElementById('libBrowse');
