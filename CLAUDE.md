@@ -285,12 +285,13 @@ in English as usual.
   (`MainViewController.edgePanned`), tapping the active tab again scrolls to top
   (`betelTabReselect`). New Hebrew UI strings still need nikud-free keys in all four I18N blocks.
 
-- **Always target the newest iOS look and APIs (user request).** New native UI uses the latest
-  iOS (currently iOS 26 Liquid Glass: `UIGlassEffect`, `UIButton.Configuration.glass()`, system
-  alerts/sheets, current WidgetKit/ActivityKit APIs) behind `if #available(iOS 26, *)`, with a plain
-  fallback. Deployment target is iOS 16.0 (user's choice: full iOS 26 Liquid Glass on new phones, still
-  working on most older ones). Raising it further cuts users off - only if the user asks. Menus/sheets
-  use real system UIKit (e.g. `NativeModal.presentActionSheet`) so they look native on every iOS.
+- **Always build for the NEWEST iOS (iOS 26 / Liquid Glass) - but keep the app installable on
+  old phones (user's rule).** Design and Apple APIs target the latest iOS: use real system UIKit/
+  SwiftUI/WidgetKit (`UIGlassEffect`, `UIButton.Configuration.glass()`, `UIAlertController`
+  sheets...) behind `if #available(iOS 26, *)`, with a plain fallback so older iOS (down to the
+  15.0 deployment target) still works. Never raise `IPHONEOS_DEPLOYMENT_TARGET` to get newer
+  looks - gate with `#available` instead. Menus/sheets use real system UIKit (e.g.
+  `NativeModal.presentActionSheet`) so they look native on every iOS.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
