@@ -288,8 +288,9 @@ in English as usual.
 - **Always target the newest iOS look and APIs (user request).** New native UI uses the latest
   iOS (currently iOS 26 Liquid Glass: `UIGlassEffect`, `UIButton.Configuration.glass()`, system
   alerts/sheets, current WidgetKit/ActivityKit APIs) behind `if #available(iOS 26, *)`, with a plain
-  fallback. The deployment target stays at 15.0 so older phones keep working - raising it cuts users
-  off, so only do that if the user explicitly asks.
+  fallback. Deployment target is iOS 16.0 (user's choice: full iOS 26 Liquid Glass on new phones, still
+  working on most older ones). Raising it further cuts users off - only if the user asks. Menus/sheets
+  use real system UIKit (e.g. `NativeModal.presentActionSheet`) so they look native on every iOS.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real

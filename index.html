@@ -3281,6 +3281,19 @@ window.betelTabReselect=function(){
   function close(){ const o=document.getElementById('ctxSheet'); if(o) o.remove(); }
   function show(it){
     close(); nativeHaptic('impact','medium');
+    /* In the iOS app: the real system action sheet (Liquid Glass on iOS 26). HTML sheet = web/PWA. */
+    try{
+      const NM=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeModal;
+      if(NM && NM.presentActionSheet){
+        const acts=[]; if(it.open) acts.push({id:'open',title:ckChrome('פְּתִיחָה')});
+        acts.push({id:'share',title:ckChrome('שִׁתּוּף')},{id:'copy',title:ckChrome('הַעְתָּקָה')});
+        NM.presentActionSheet({title:it.title,actions:acts,cancelTitle:ckChrome('בִּטּוּל')}).then(r=>{
+          const act=r&&r.id;
+          if(act==='share') shareDirect(it.title,it.text()); else if(act==='copy') copyText(it.text()); else if(act==='open') it.open();
+        }).catch(()=>{});
+        return;
+      }
+    }catch(e){}
     const o=document.createElement('div'); o.id='ctxSheet'; o.className='ctx-ov';
     o.innerHTML=`<div class="ctx-sheet"><div class="ctx-title"></div>`+
       (it.open?`<button data-a="open">${ckChrome('פְּתִיחָה')}</button>`:'')+
