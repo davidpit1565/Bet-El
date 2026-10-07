@@ -285,6 +285,12 @@ in English as usual.
   (`MainViewController.edgePanned`), tapping the active tab again scrolls to top
   (`betelTabReselect`). New Hebrew UI strings still need nikud-free keys in all four I18N blocks.
 
+- **Always target the newest iOS look and APIs (user request).** New native UI uses the latest
+  iOS (currently iOS 26 Liquid Glass: `UIGlassEffect`, `UIButton.Configuration.glass()`, system
+  alerts/sheets, current WidgetKit/ActivityKit APIs) behind `if #available(iOS 26, *)`, with a plain
+  fallback. The deployment target stays at 15.0 so older phones keep working - raising it cuts users
+  off, so only do that if the user explicitly asks.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
