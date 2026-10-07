@@ -1713,16 +1713,12 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
 .home-zmanim .hz-title{font-family:var(--font-sacred);font-weight:700;font-size:16px;color:var(--gold);margin-bottom:8px}
 /* edit mode (modelled on the iPhone's home-screen edit mode: a gentle wiggle, a small gray minus,
    a corner handle to resize, drag the tile itself, a quiet + and check at the top) */
-.home-edit .home-item:not(.hi-fixed){animation:hiWiggle .55s ease-in-out infinite;transform-origin:50% 50%}
-.home-edit .home-item:nth-child(even):not(.hi-fixed){animation-delay:-.27s}
+.home-edit .home-item{animation:none!important}   /* perfectly still in edit mode - no wiggle, no re-entry animation */
 .home-spacer{min-height:104px;border-radius:var(--radius-sm)}
 .home-edit .home-spacer{border:2px dashed var(--line-strong);opacity:.65}
 /* in the iOS app the controls are native overlays - keep the tiles still (no wiggle, it read as jitter) */
-html.has-native-tabbar .home-edit .home-item:not(.hi-fixed){animation:none;scale:.98}
 .home-edit .home-item.dragging{animation:none;z-index:60;filter:drop-shadow(0 16px 22px rgba(0,0,0,.4));transition:none!important}
 .home-edit .home-item.resizing{animation:none}
-@keyframes hiWiggle{0%{rotate:-.35deg}50%{rotate:.35deg}100%{rotate:-.35deg}}
-@media (prefers-reduced-motion:reduce){.home-edit .home-item:not(.hi-fixed){animation:none}}
 .home-edit .home-item>:not(.hi-minus):not(.hi-resize){pointer-events:none}
 .home-edit .home-item:not(.hi-fixed){cursor:grab}
 .hi-minus{position:absolute;top:-7px;inset-inline-start:-7px;z-index:4;width:25px;height:25px;border-radius:50%;padding:0;
@@ -1757,6 +1753,8 @@ html.has-native-tabbar .home-edit .home-item:not(.hi-fixed){animation:none;scale
 .hs-row{width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 12px;border:none;border-bottom:1px solid var(--line);
   background:none;color:var(--ink);font:600 16px var(--font-ui);text-align:start}
 .hs-plus{width:30px;height:30px;border-radius:50%;background:var(--gold-grad);color:#2a1e05;display:grid;place-items:center;font-weight:800;font-size:20px;line-height:1}
+.hs-sub{margin:12px 4px 2px;font:700 12px var(--font-ui);letter-spacing:.04em;color:var(--muted)}
+.hs-minus{width:30px;height:30px;border-radius:50%;background:rgba(120,120,128,.28);color:var(--ink);display:grid;place-items:center;font-weight:800;font-size:20px;line-height:1}
 .hs-none{padding:18px;color:var(--muted);text-align:center}
 .hs-reset{margin-top:14px;width:100%;padding:12px;border-radius:14px;border:1px dashed var(--line-strong);background:none;color:var(--muted);font:600 14px var(--font-ui)}
 /* empty home: just the big logo */
@@ -2677,6 +2675,10 @@ Object.assign(I18N.en,{"מקום ריק": "Empty space"});
 Object.assign(I18N.fr,{"מקום ריק": "Espace vide"});
 Object.assign(I18N.ru,{"מקום ריק": "Пустое место"});
 Object.assign(I18N.ka,{"מקום ריק": "ცარიელი ადგილი"});
+Object.assign(I18N.en,{"להוספה": "Add","על המסך עכשיו": "On screen now"});
+Object.assign(I18N.fr,{"להוספה": "Ajouter","על המסך עכשיו": "À l'écran"});
+Object.assign(I18N.ru,{"להוספה": "Добавить","על המסך עכשיו": "На экране"});
+Object.assign(I18N.ka,{"להוספה": "დამატება","על המסך עכשיו": "ეკრანზე"});
 Object.assign(I18N.en,{"קטגוריה": "Category"});
 Object.assign(I18N.fr,{"קטגוריה": "Catégorie"});
 Object.assign(I18N.ru,{"קטגוריה": "Категория"});
@@ -6898,6 +6900,9 @@ const HOME_CATALOG={
   spacer1:{kind:'tile',label:'מקום ריק'},   // invisible placeholders: leave a gap anywhere (e.g. one tile on the left only)
   spacer2:{kind:'tile',label:'מקום ריק'},
   spacer3:{kind:'tile',label:'מקום ריק'},
+  spacer4:{kind:'tile',label:'מקום ריק'},
+  spacer5:{kind:'tile',label:'מקום ריק'},
+  spacer6:{kind:'tile',label:'מקום ריק'},
 };
 const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
@@ -6917,7 +6922,7 @@ function getHomeLayout(){
     if(!it || !HOME_CATALOG[it.id] || seen.has(it.id)) return;
     seen.add(it.id);
     const def=HOME_CATALOG[it.id];
-    out.push({id:it.id, size: def.sizes ? (def.sizes.includes(it.size)?it.size:def.sizes[0]) : def.kind==='tile' ? (['s','m','l'].includes(it.size)?it.size:'s') : 'l'});
+    out.push({id:it.id, size: def.sizes ? (def.sizes.includes(it.size)?it.size:def.sizes[0]) : def.kind==='tile' ? (it.size==='l'?'l':'s') : 'l'});
   });
   // items that must always exist (can be moved, never removed) come back if a saved layout lacks them
   Object.keys(HOME_CATALOG).forEach(id=>{ if(HOME_CATALOG[id].keep && !seen.has(id)) out.push({id,size:HOME_CATALOG[id].sizes?HOME_CATALOG[id].sizes[0]:'l'}); });
@@ -6979,20 +6984,33 @@ function homeGridHTML(mods){
 }
 
 function homeAddSheet(){
-  const have=new Set(getHomeLayout().map(x=>x.id));
-  const rows=Object.keys(HOME_CATALOG).filter(id=>!HOME_CATALOG[id].fixed && !HOME_CATALOG[id].keep && !have.has(id));
+  const layout0=getHomeLayout(), have=new Set(layout0.map(x=>x.id));
+  const isSp=id=>/^spacer\d$/.test(id);
+  const SPACER_LABEL=ckChrome('מקום ריק');
+  // available: everything not on the home yet; the empty-space slot is offered while a slot is free
+  const rows=Object.keys(HOME_CATALOG).filter(id=>!HOME_CATALOG[id].fixed && !HOME_CATALOG[id].keep && !have.has(id) && !isSp(id))
+    .map(id=>({id,label:ckChrome(HOME_CATALOG[id].label)}));
+  const freeSp=Object.keys(HOME_CATALOG).find(id=>isSp(id)&&!have.has(id));
+  if(freeSp) rows.push({id:freeSp,label:SPACER_LABEL});
+  // installed: what is on the home now (removable ones), each with a minus
+  let spN=0;
+  const installed=layout0.filter(x=>HOME_CATALOG[x.id] && !HOME_CATALOG[x.id].fixed && !HOME_CATALOG[x.id].keep)
+    .map(x=>({id:x.id,label:isSp(x.id)?SPACER_LABEL+' '+(++spN):ckChrome(HOME_CATALOG[x.id].label)}));
   const addId=id=>{
     const layout=getHomeLayout();
     layout.push({id,size:HOME_CATALOG[id].sizes?HOME_CATALOG[id].sizes[0]:(HOME_CATALOG[id].kind==='tile'?'s':'l')});
     saveHomeLayout(layout); homeKeepScroll(renderHome);
     setTimeout(()=>{ const el=document.querySelector(`[data-home-item="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); },60);
   };
+  const removeId=id=>{ saveHomeLayout(getHomeLayout().filter(x=>x.id!==id)); homeKeepScroll(renderHome); };
+  const dark=document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark');
   if(homeNativeEdit()){
     Capacitor.Plugins.NativeHomeEdit.showAddSheet({title:ckChrome('הוספת כפתור'),resetLabel:ckChrome('איפוס לברירת מחדל'),emptyLabel:ckChrome('כל הכפתורים כבר על המסך'),
-      rows:rows.map(id=>({id,label:ckChrome(HOME_CATALOG[id].label)})),rtl:document.documentElement.dir!=='ltr',
-      isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark')})
+      addHeader:ckChrome('להוספה'),installedHeader:ckChrome('על המסך עכשיו'),
+      rows,installed,rtl:document.documentElement.dir!=='ltr',isDark:dark})
       .then(r=>{
         if(r&&r.id) addId(r.id);
+        else if(r&&r.remove){ removeId(r.remove); setTimeout(homeAddSheet,350); }
         else if(r&&r.reset){ try{ localStorage.removeItem(HOME_LAYOUT_KEY); }catch(e){} homeKeepScroll(renderHome); }
       }).catch(()=>{});
     return;
@@ -7000,20 +7018,18 @@ function homeAddSheet(){
   const ov=document.createElement('div'); ov.id='homeSheet'; ov.className='home-sheet-ov';
   ov.innerHTML=`<div class="home-sheet">
     <div class="hs-head"><b>${ckChrome('הוספת כפתור')}</b><button class="hs-close" data-x>✕</button></div>
-    ${rows.length?rows.map(id=>`<button class="hs-row" data-add="${id}"><span>${ckChrome(HOME_CATALOG[id].label)}</span><span class="hs-plus">+</span></button>`).join('')
+    <div class="hs-sub">${ckChrome('להוספה')}</div>
+    ${rows.length?rows.map(r=>`<button class="hs-row" data-add="${r.id}"><span>${r.label}</span><span class="hs-plus">+</span></button>`).join('')
       :`<div class="hs-none">${ckChrome('כל הכפתורים כבר על המסך')}</div>`}
+    ${installed.length?`<div class="hs-sub">${ckChrome('על המסך עכשיו')}</div>`+installed.map(r=>`<button class="hs-row" data-rm="${r.id}"><span>${r.label}</span><span class="hs-minus">&minus;</span></button>`).join(''):''}
     <button class="hs-reset" data-reset>${ckChrome('איפוס לברירת מחדל')}</button>
   </div>`;
   document.body.appendChild(ov);
   const close=()=>ov.remove();
   ov.onclick=e=>{ if(e.target===ov) close(); };
   ov.querySelector('[data-x]').onclick=close;
-  ov.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
-    const id=b.dataset.add, layout=getHomeLayout();
-    layout.push({id,size:HOME_CATALOG[id].kind==='tile'?'s':'l'});
-    saveHomeLayout(layout); close(); homeKeepScroll(renderHome);
-    setTimeout(()=>{ const el=document.querySelector(`[data-home-item="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); },60);
-  });
+  ov.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ close(); addId(b.dataset.add); });
+  ov.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ close(); removeId(b.dataset.rm); homeAddSheet(); });
   ov.querySelector('[data-reset]').onclick=()=>{ try{ localStorage.removeItem(HOME_LAYOUT_KEY); }catch(e){} close(); homeKeepScroll(renderHome); };
 }
 /* This app scrolls on <body> (not the window) on some platforms - use whichever
@@ -7187,7 +7203,7 @@ window.NativeHomeEditHost={
   },
   resizeMove(id,tx,ty){
     const st=HOME_NRES[id]; if(!st) return;
-    const rtl=document.documentElement.dir!=='ltr', order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','m','l'];
+    const rtl=document.documentElement.dir!=='ltr', order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','l'];
     const g=(ty-st.y0)+(rtl ? (st.x0-tx) : (tx-st.x0));
     const k=order.indexOf(st.size);
     if(g>30 && k<order.length-1) st.size=order[k+1];
@@ -7198,9 +7214,9 @@ window.NativeHomeEditHost={
     saveHomeLayout(getHomeLayout().map(x=>x.id===id?{...x,size:st.size}:x));
     try{ nativeHaptic('selection'); }catch(_){}
   },
-  resizeCycle(id){   // a plain tap on the handle steps small -> medium -> large -> small
+  resizeCycle(id){   // a plain tap on the handle toggles regular <-> wide
     const cur=(getHomeLayout().find(x=>x.id===id)||{}).size||'s';
-    const order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','m','l'];
+    const order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','l'];
     const next=order[(Math.max(0,order.indexOf(cur))+1)%order.length];
     saveHomeLayout(getHomeLayout().map(x=>x.id===id?{...x,size:next}:x));
     try{ nativeHaptic('selection'); }catch(_){}
@@ -7215,7 +7231,7 @@ window.NativeHomeEditHost={
 };
 function homeBindResize(grid){
   const rtl=document.documentElement.dir!=='ltr';
-  const order=['s','m','l'];
+  const order=['s','l'];
   const apply=homeResizeApply;
   grid.querySelectorAll('.hi-resize').forEach(h=>{
     h.addEventListener('pointerdown',ev=>{
@@ -7466,7 +7482,7 @@ function renderHome(){
         ${sz!=='s'?`<div class="qd">${sc.desc()}</div>`:''}
       </div>`;
   });
-  ['spacer1','spacer2','spacer3'].forEach(id=>{ mods[id]=()=>`<div class="home-spacer" aria-hidden="true"></div>`; });
+  ['spacer1','spacer2','spacer3','spacer4','spacer5','spacer6'].forEach(id=>{ mods[id]=()=>`<div class="home-spacer" aria-hidden="true"></div>`; });
   app.innerHTML = `
   ${topbar('תמיד', null, null, {title:''})}
   <div class="view">
