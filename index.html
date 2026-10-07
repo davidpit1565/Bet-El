@@ -85,9 +85,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   --lg-sheen: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.15) 12%, transparent 45%);
   --bg:#efe6d2; --bg-grad:radial-gradient(120% 90% at 50% -10%,#fbf5e6 0%,#f0e6d0 55%,#e7dcc2 100%);
   --panel:rgba(255,252,244,.78); --panel-solid:#fbf6ea; --panel-2:rgba(247,239,223,.8); --panel-hover:rgba(247,239,223,.8);
-  --ink:#22314e; --ink-soft:#3c4a66; --muted:#8a7f66; --text:var(--ink);
+  /* contrast audit: muted text was 3.4:1 on the cream background, gold text 3.6:1 - both now >= 4.5:1 */
+  --ink:#22314e; --ink-soft:#3c4a66; --muted:#6a5f48; --text:var(--ink);
   --line:rgba(150,116,44,.28); --line-strong:rgba(150,116,44,.5);
-  --gold:#9a7526; --gold-bright:#c69a3c;
+  --gold:#7f5f17; --gold-bright:#c69a3c;
   --gold-grad:linear-gradient(135deg,#8a651c 0%,#c49a3d 45%,#e6c874 55%,#9a7526 100%);
   --card-shadow:0 16px 40px -22px rgba(80,60,20,.5),0 1px 0 rgba(255,255,255,.6) inset;
   --glass-border:1px solid rgba(150,116,44,.32); --glass-bg:rgba(255,252,244,.55);
@@ -1001,6 +1002,9 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .ded-panel-names{color:var(--muted);font-size:12.5px;line-height:1.85;opacity:.9;text-wrap:balance}
 .ded-name-nowrap{white-space:nowrap}
 .ded-panel-foot{margin-top:6px;font-size:10.5px;letter-spacing:.5px;color:var(--muted);opacity:.7}
+[data-theme="light"] :is(.ded-panel-foot,.ded-panel-names,.ck-viewdate,.ded-panel-label){opacity:1}
+[data-theme="light"] .sm-vnum{color:#fff}
+[data-theme="light"] .ded-panel-label{color:#5e4510}
 .dedication-memorial .ded-panel-label{color:var(--muted);opacity:.85}
 [data-theme="dark"] .ded-panel-names{color:#8d97ad}
 .social-links{display:flex;justify-content:center;gap:18px;margin:10px 0 4px}
@@ -3188,6 +3192,47 @@ function widgetZmanimTable(){
     const json=JSON.stringify(out); WIDGET_ZMANIM_CACHE={key:ck,json}; return json;
   }catch(e){ return null; }
 }
+/* Scroll the current page back to the top (smoothly) - called by native when the iOS status bar or
+   the header title is tapped (the page scrolls on <body>, not on the window). */
+window.betelScrollTop=function(){
+  try{
+    const els=new Set([document.scrollingElement,document.documentElement,document.body,document.getElementById('app')]);
+    document.querySelectorAll('#app *').forEach(el=>{ if(el.scrollTop>0) els.add(el); });
+    els.forEach(el=>{ if(el && el.scrollTop>0 && el.scrollTo) el.scrollTo({top:0,behavior:'smooth'}); });
+    window.scrollTo({top:0,behavior:'smooth'});
+    nativeHaptic('selection');
+  }catch(e){}
+};
+/* Go "back" like the Android/Samsung back gesture: swipe in from either screen edge. Closes an open
+   dialog/sheet first, else runs the screen's own back action (the same as its back arrow). */
+function appBack(){
+  try{
+    if(HOME_EDIT) return false;
+    const dlg=document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov');
+    if(dlg){ const x=dlg.querySelector('[data-close],[data-x],.close-x'); if(x) x.click(); else dlg.remove(); return true; }
+    if(typeof TOPBAR_BACK_ACTION==='function'){ TOPBAR_BACK_ACTION(); return true; }
+    const btn=[...document.querySelectorAll('.tb-back')].find(b=>b.offsetParent!==null);
+    if(btn){ btn.click(); return true; }
+  }catch(e){}
+  return false;
+}
+(function initEdgeSwipeBack(){
+  let sx=0,sy=0,st=0,edge='';
+  document.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1){ edge=''; return; }
+    const t=e.touches[0], w=innerWidth;
+    edge = t.clientX<=22 ? 'l' : (t.clientX>=w-22 ? 'r' : '');
+    sx=t.clientX; sy=t.clientY; st=Date.now();
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!edge) return;
+    const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+    const inward = edge==='l' ? dx : -dx;
+    const e0=edge; edge='';
+    if(inward>70 && Math.abs(dy)<inward*0.6 && Date.now()-st<700){ if(appBack()) { try{ nativeHaptic('impact','light'); }catch(_){} } }
+  },{passive:true});
+  document.addEventListener('touchcancel',()=>{ edge=''; },{passive:true});
+})();
 /* Widget taps: the widgets link to betel://tehillim | calendar | tracker. Needs the "betel" URL
    scheme in Info.plist; arrives through Capacitor's App plugin (appUrlOpen, plus getLaunchUrl for
    a cold start from a widget tap). */

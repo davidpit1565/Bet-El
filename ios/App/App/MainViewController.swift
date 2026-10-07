@@ -29,6 +29,7 @@ class MainViewController: CAPBridgeViewController {
     private let feedbackForm = NativeFeedbackFormView()
     private let toastView = NativeToastView()
     let homeEditOverlay = HomeEditOverlay()
+    private let scrollTopCatcher = ScrollTopCatcher()
     private let settingsView = NativeSettingsView()
     /// The app's own language direction (S.lang), from the last tab bar
     /// configure() - also used to place the tools FAB on the matching side.
@@ -105,6 +106,7 @@ class MainViewController: CAPBridgeViewController {
         setupFeedbackForm()
         setupToast()
         setupHomeEdit()
+        setupScrollToTop()
         setupSettingsView()
         layoutToolsFab()
         topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
@@ -416,6 +418,21 @@ class MainViewController: CAPBridgeViewController {
         feedbackForm.dismiss()
     }
 
+    /// The app scrolls inside the web page (on <body>), so iOS's own "tap the status bar to scroll to
+    /// top" has nothing to scroll. A tiny invisible UIScrollView that is the ONLY one with
+    /// `scrollsToTop` catches that system gesture; its delegate runs the page's own smooth scroll
+    /// (window.betelScrollTop) instead. Tapping the header title does the same.
+    private func setupScrollToTop() {
+        webView?.scrollView.scrollsToTop = false
+        let scrollToTop: () -> Void = { [weak self] in
+            self?.webView?.evaluateJavaScript("window.betelScrollTop && window.betelScrollTop()", completionHandler: nil)
+        }
+        scrollTopCatcher.frame = CGRect(x: 0, y: 0, width: 2, height: 2)
+        scrollTopCatcher.onScrollToTop = scrollToTop
+        view.insertSubview(scrollTopCatcher, at: 0)
+        topBar.onTitleTap = scrollToTop
+    }
+
     private func setupHomeEdit() {
         homeEditOverlay.frame = view.bounds
         homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
@@ -641,5 +658,32 @@ extension MainViewController: UITabBarDelegate {
             return
         }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
+    }
+}
+
+
+/// See `MainViewController.setupScrollToTop()`.
+final class ScrollTopCatcher: UIScrollView, UIScrollViewDelegate {
+    var onScrollToTop: (() -> Void)?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        delegate = self
+        scrollsToTop = true
+        isScrollEnabled = true
+        alpha = 0.02                       // must be "visible" for the system to pick it
+        backgroundColor = .clear
+        showsVerticalScrollIndicator = false
+        showsHorizontalScrollIndicator = false
+        contentSize = CGSize(width: 2, height: 4000)
+        contentOffset = CGPoint(x: 0, y: 2000)   // not at the top, so a scroll-to-top is requested
+        isAccessibilityElement = false
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        onScrollToTop?()
+        return false   // never actually scroll this dummy view
     }
 }

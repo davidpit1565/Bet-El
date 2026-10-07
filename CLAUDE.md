@@ -269,6 +269,13 @@ in English as usual.
   hairline curve only. The color-only hairline proved ~4cm too low on a
   real photo, which is why segmentation is used.
 
+- **Back / scroll-to-top gestures**: swiping in from either screen edge (<=22px, >70px inward,
+  mostly horizontal) calls `appBack()` (index.html; closes overlays/sheets first, else the
+  topbar back action). Tapping the iPhone status bar or the native header title calls
+  `window.betelScrollTop()` via `ScrollTopCatcher` (MainViewController.swift - a hidden
+  UIScrollView is the only `scrollsToTop` view; the web view's own is off). Swift not
+  compile-verified. The same pair was ported to the friend's halacha-yomit-ios repo (PR #3).
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
