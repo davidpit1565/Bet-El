@@ -28,6 +28,7 @@ exports.sendFeedback = onRequest(
     }
 
     const { name, email, message } = req.body || {};
+    const subjectRaw = typeof (req.body || {}).subject === "string" ? req.body.subject.trim() : "";
     if (
       typeof name !== "string" || !name.trim() ||
       typeof email !== "string" || !email.trim() ||
@@ -60,9 +61,9 @@ exports.sendFeedback = onRequest(
           from: "Bet-El App <onboarding@resend.dev>",
           to: [SUPPORT_EMAIL],
           reply_to: email,
-          subject: "משוב מהאפליקציה — תמיד",
-          text: `שם: ${name}\nאימייל: ${email}\n\n${message}`,
-          html: `<p><b>שם:</b> ${escapeHtml(name)}</p><p><b>אימייל:</b> ${escapeHtml(email)}</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
+          subject: (subjectRaw ? subjectRaw.slice(0, 150) : "משוב מהאפליקציה — תמיד"),
+          text: `שם: ${name}\nאימייל: ${email}\nנושא: ${subjectRaw}\n\n${message}`,
+          html: `<p><b>שם:</b> ${escapeHtml(name)}</p><p><b>אימייל:</b> ${escapeHtml(email)}</p><p><b>נושא:</b> ${escapeHtml(subjectRaw)}</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
         }),
       });
 

@@ -8,12 +8,20 @@ import Foundation
 /// strings (see index.html's `tt()`/PRAYERS_TRANSLIT fallbacks).
 enum WidgetL10n {
     private static let strings: [String: [String: String]] = [
+        "dawn": ["he": "עֲלוֹת הַשַּׁחַר", "en": "Dawn"],
+        "chatzot": ["he": "חֲצוֹת", "en": "Midday"],
+        "zmanimToday": ["he": "זְמַנֵּי הַיּוֹם", "en": "Today's times"],
+        "candleIn": ["he": "עַד הַדְלָקָה", "en": "Until candle lighting"],
+        "noCandle": ["he": "אֵין הַדְלָקָה בְּקָרוֹב", "en": "No candle lighting soon"],
+        "streakTitle": ["he": "רֶצֶף לִמּוּד", "en": "Study streak"],
+        "best": ["he": "שִׂיא", "en": "Best"],
         "sunrise": ["he": "זְרִיחָה", "en": "Sunrise"],
         "sunset": ["he": "שְׁקִיעָה", "en": "Sunset"],
-        "tehillimToday": ["he": "תְּהִלִּים הַיּוֹם", "en": "Tehillim today"],
+        "tehillimToday": ["he": "פִּרְקֵי תְּהִלִּים לְהַיּוֹם", "en": "Today's Tehillim chapters"],
         "chapter": ["he": "פֶּרֶק", "en": "Chapter"],
         "dayStreak": ["he": "יָמִים בְּרֶצֶף", "en": "day streak"],
         "candleLighting": ["he": "הַדְלָקַת נֵרוֹת", "en": "Candle lighting"],
+        "nextZman": ["he": "הַזְּמַן הַבָּא", "en": "Next zman"],
     ]
 
     static func t(_ key: String, lang: String) -> String {

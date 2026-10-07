@@ -23,11 +23,18 @@ final class NativeToolsFabView: UIView {
 
     var onAction: ((Action) -> Void)?
 
-    private let fabSize: CGFloat = 46
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let fabSize: CGFloat = 38
+    private let goldColor = UIColor.betelGold
 
     private var panelContainer: UIView?
-    private var isExpanded = false
+    private(set) var isExpanded = false
+    /// Set by MainViewController - which screen edge the FAB sits on, so the
+    /// panel lines up with it as it drops down.
+    var isRTL = true
+    /// Icons inside the panel use the system label color (near-black on
+    /// light, white on dark, via overrideUserInterfaceStyle in setState)
+    /// rather than gold-on-glass, which read as too faint.
+    private var iconColor: UIColor { .label }
 
     private var showAutoscroll = false
     private var fontScalePercent = 100
@@ -78,6 +85,7 @@ final class NativeToolsFabView: UIView {
         fabButton.translatesAutoresizingMaskIntoConstraints = false
         fabButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
         fabButton.tintColor = goldColor
+        fabButton.accessibilityLabel = "Reading tools"
         fabButton.addTarget(self, action: #selector(toggleExpanded), for: .touchUpInside)
 
         let contentView: UIView = (glass as? UIVisualEffectView)?.contentView ?? glass
@@ -91,14 +99,16 @@ final class NativeToolsFabView: UIView {
     }
 
     @objc private func toggleExpanded() {
+        UISelectionFeedbackGenerator().selectionChanged()
         if isExpanded { collapsePanel() } else { expandPanel() }
     }
 
-    private func iconButton(systemName: String, action: Selector) -> UIButton {
+    private func iconButton(systemName: String, action: Selector, label: String) -> UIButton {
         let b = UIButton(type: .system)
         b.translatesAutoresizingMaskIntoConstraints = false
-        b.setImage(UIImage(systemName: systemName), for: .normal)
-        b.tintColor = goldColor
+        b.setImage(UIImage(systemName: systemName, withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)), for: .normal)
+        b.tintColor = iconColor
+        b.accessibilityLabel = label
         b.widthAnchor.constraint(equalToConstant: 36).isActive = true
         b.heightAnchor.constraint(equalToConstant: 36).isActive = true
         b.addTarget(self, action: action, for: .touchUpInside)
@@ -119,9 +129,10 @@ final class NativeToolsFabView: UIView {
         panel.translatesAutoresizingMaskIntoConstraints = false
         superview.insertSubview(panel, belowSubview: self)
         panelContainer = panel
+        panel.overrideUserInterfaceStyle = overrideUserInterfaceStyle
         NSLayoutConstraint.activate([
-            panel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            panel.bottomAnchor.constraint(equalTo: topAnchor, constant: -10),
+            isRTL ? panel.leftAnchor.constraint(equalTo: leftAnchor) : panel.rightAnchor.constraint(equalTo: rightAnchor),
+            panel.topAnchor.constraint(equalTo: bottomAnchor, constant: 10),
             panel.widthAnchor.constraint(equalToConstant: panelWidth),
             panel.heightAnchor.constraint(equalToConstant: panelHeight),
         ])
@@ -132,18 +143,20 @@ final class NativeToolsFabView: UIView {
         stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let minusBtn = iconButton(systemName: "minus", action: #selector(tapMinus))
+        let minusBtn = iconButton(systemName: "minus", action: #selector(tapMinus), label: "Decrease text size")
 
         let fsLabel = UILabel()
         fsLabel.translatesAutoresizingMaskIntoConstraints = false
         fsLabel.text = "\(fontScalePercent)"
-        fsLabel.font = .systemFont(ofSize: 13, weight: .bold)
-        fsLabel.textColor = UIColor(white: 0.5, alpha: 1)
+        fsLabel.setScaledFont(13, weight: .bold, maximumSize: 16)
+        fsLabel.adjustsFontSizeToFitWidth = true
+        fsLabel.minimumScaleFactor = 0.7
+        fsLabel.textColor = .label
         fsLabel.textAlignment = .center
         fsLabel.widthAnchor.constraint(equalToConstant: 30).isActive = true
         fontLabel = fsLabel
 
-        let plusBtn = iconButton(systemName: "plus", action: #selector(tapPlus))
+        let plusBtn = iconButton(systemName: "plus", action: #selector(tapPlus), label: "Increase text size")
 
         let sep = UIView()
         sep.translatesAutoresizingMaskIntoConstraints = false
@@ -151,7 +164,7 @@ final class NativeToolsFabView: UIView {
         sep.widthAnchor.constraint(equalToConstant: 1).isActive = true
         sep.heightAnchor.constraint(equalToConstant: 24).isActive = true
 
-        let themeBtn = iconButton(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill", action: #selector(tapTheme))
+        let themeBtn = iconButton(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill", action: #selector(tapTheme), label: "Toggle dark mode")
         themeButton = themeBtn
 
         stack.addArrangedSubview(minusBtn)
@@ -161,12 +174,12 @@ final class NativeToolsFabView: UIView {
         stack.addArrangedSubview(themeBtn)
 
         if showAutoscroll {
-            let asBtn = iconButton(systemName: isAutoscrollActive ? "pause.fill" : "play.fill", action: #selector(tapAutoscroll))
+            let asBtn = iconButton(systemName: isAutoscrollActive ? "pause.fill" : "play.fill", action: #selector(tapAutoscroll), label: isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll")
             autoscrollButton = asBtn
             stack.addArrangedSubview(asBtn)
         }
 
-        let homeBtn = iconButton(systemName: "house.fill", action: #selector(tapHome))
+        let homeBtn = iconButton(systemName: "house.fill", action: #selector(tapHome), label: "Home")
         stack.addArrangedSubview(homeBtn)
 
         let contentView: UIView = (panel as? UIVisualEffectView)?.contentView ?? panel
@@ -179,7 +192,7 @@ final class NativeToolsFabView: UIView {
         panel.alpha = 0
         panel.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
         UIView.animate(
-            withDuration: 0.28, delay: 0, usingSpringWithDamping: 0.78, initialSpringVelocity: 0.4,
+            withDuration: ReduceMotion.duration(0.28), delay: 0, usingSpringWithDamping: 0.78, initialSpringVelocity: 0.4,
             options: [], animations: {
                 panel.alpha = 1
                 panel.transform = .identity
@@ -195,7 +208,7 @@ final class NativeToolsFabView: UIView {
         themeButton = nil
         autoscrollButton = nil
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 panel.alpha = 0
                 panel.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
@@ -204,26 +217,51 @@ final class NativeToolsFabView: UIView {
         )
     }
 
-    @objc private func tapMinus() { onAction?(.minus) }
-    @objc private func tapPlus() { onAction?(.plus) }
-    @objc private func tapTheme() { onAction?(.theme) }
-    @objc private func tapAutoscroll() { onAction?(.autoscroll) }
-    @objc private func tapHome() { onAction?(.home); collapsePanel() }
+    @objc private func tapMinus() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.minus) }
+    @objc private func tapPlus() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.plus) }
+    @objc private func tapTheme() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.theme) }
+    @objc private func tapAutoscroll() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.autoscroll) }
+    @objc private func tapHome() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); onAction?(.home); collapsePanel() }
 
     // MARK: - State from JS
 
+    /// JS re-sends this on every state sync (including right after one of
+    /// the panel's own buttons is tapped), so the panel only closes when
+    /// its contents actually change - not on every call, which used to
+    /// close it after each tap.
     func configure(showAutoscroll: Bool) {
+        let changed = self.showAutoscroll != showAutoscroll
         self.showAutoscroll = showAutoscroll
-        if isExpanded { collapsePanel() }
+        if changed && isExpanded { collapsePanel() }
+    }
+
+    func containsTouch(_ touch: UITouch) -> Bool {
+        if bounds.contains(touch.location(in: self)) { return true }
+        if let panel = panelContainer, panel.bounds.contains(touch.location(in: panel)) { return true }
+        return false
     }
 
     func setState(fontScalePercent: Int, isDarkTheme: Bool, isAutoscrollActive: Bool) {
+        // Only the two icon-swapping booleans get a bounce, and only when
+        // they actually flip - this is called on every JS state sync, not
+        // just when the user taps, so comparing against the *previous*
+        // value (captured before it's overwritten below) keeps the bounce
+        // a reaction to a real change instead of firing on every refresh.
+        let themeChanged = self.isDarkTheme != isDarkTheme
+        let autoscrollChanged = self.isAutoscrollActive != isAutoscrollActive
         self.fontScalePercent = fontScalePercent
         self.isDarkTheme = isDarkTheme
         self.isAutoscrollActive = isAutoscrollActive
+        overrideUserInterfaceStyle = isDarkTheme ? .dark : .light
+        panelContainer?.overrideUserInterfaceStyle = overrideUserInterfaceStyle
         fontLabel?.text = "\(fontScalePercent)"
         themeButton?.setImage(UIImage(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill"), for: .normal)
         autoscrollButton?.setImage(UIImage(systemName: isAutoscrollActive ? "pause.fill" : "play.fill"), for: .normal)
+        autoscrollButton?.accessibilityLabel = isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll"
+        if #available(iOS 17.0, *) {
+            if themeChanged { themeButton?.imageView?.addSymbolEffect(.bounce, options: .nonRepeating) }
+            if autoscrollChanged { autoscrollButton?.imageView?.addSymbolEffect(.bounce, options: .nonRepeating) }
+        }
     }
 
     /// Collapses the expanded panel (e.g. when the screen navigates away or

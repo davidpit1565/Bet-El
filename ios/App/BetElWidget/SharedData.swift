@@ -35,12 +35,29 @@ enum BetElSharedData {
         /// current UI language's script where applicable (it's Hebrew
         /// text either way, same as the home-screen banner it mirrors).
         var candleLabel: String?
+        /// JSON `[{"d":"2026-10-07","t":"פרשת בראשית"},...]` for the next ~2 weeks,
+        /// built by the app (hebcal): the holiday on that day, else the coming
+        /// Shabbat's parasha. The widget can't compute either, so it just looks up today.
+        var dayLabelsJSON: String?
 
         static let placeholder = Snapshot(
             streakCount: 0, streakBest: 0, theme: "dark", lang: "he",
             latitude: 51.2194, longitude: 4.4025,
-            candleTimeISO: nil, candleLabel: nil
+            candleTimeISO: nil, candleLabel: nil, dayLabelsJSON: nil
         )
+
+        /// Parasha / holiday text for `date` ("" until the app has synced, or past the synced range).
+        func dayLabel(for date: Date) -> String {
+            guard let json = dayLabelsJSON, let data = json.data(using: .utf8),
+                  let rows = try? JSONDecoder().decode([DayLabel].self, from: data) else { return "" }
+            let f = DateFormatter()
+            f.dateFormat = "yyyy-MM-dd"
+            f.locale = Locale(identifier: "en_US_POSIX")
+            let key = f.string(from: date)
+            return rows.first(where: { $0.d == key })?.t ?? ""
+        }
+
+        private struct DayLabel: Codable { let d: String; let t: String }
 
         var candleTime: Date? {
             guard let iso = candleTimeISO else { return nil }

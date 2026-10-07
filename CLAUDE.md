@@ -10,8 +10,8 @@ in English as usual.
   `<script>` wrapped in a single top-level IIFE `(function(){ ... })();`.
   Nothing inside is reachable from outside except the handful explicitly
   exported near the end via `window.x = x;` (currently: `go`,
-  `celebrateMilestone`, `ckMilestoneCheck`, `openPrayer`, `sharePrayer`,
-  `shareQR`). This means Playwright's `page.evaluate()` **cannot call any
+  `celebrateMilestone`, `ckMilestoneCheck`, `openPrayer`, `shareApp`,
+  `sharePrayer`, `shareQR`). This means Playwright's `page.evaluate()` **cannot call any
   other internal function or read any other internal variable** — testing
   must click real DOM elements (`document.getElementById(...).click()`,
   `document.querySelector(...)`) or use the exposed `window.go(tab)`.
@@ -173,6 +173,90 @@ in English as usual.
   once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
   for it specifically, enabling the general reminder toggle enables both.
 
+- **Native iOS shell decisions (by user request)**: Settings always uses the
+  app's own HTML design (`NATIVE_SETTINGS = false` in index.html - the
+  native glass-card `NativeSettingsView` is kept but unused), with
+  `settingsRowsTappable()` making whole rows the touch target like iOS.
+  Search is an item inside the native tab bar (`NativeSearchHost.open()`),
+  the tab bar minimizes Apple Music-style on scroll, and the reader tools
+  "…" button lives in the native header row (`layoutToolsFab()`).
+- **Dev builds don't count as Firebase users.** Every Xcode install (delete +
+  reinstall = fresh localStorage) used to bump the public visit counter,
+  live presence and Analytics. `MainViewController.webViewConfiguration`
+  injects `window.__BETEL_DEV_BUILD` (true when there's no App Store/
+  TestFlight receipt - Xcode/simulator installs), and index.html's Firebase
+  module (`IS_DEV_BUILD`, also true on localhost) skips the visit
+  increment, presence write and `getAnalytics()` for those. Reads/listeners
+  stay on. The existing inflated `stats/visits` count was never touched -
+  it can be lowered by hand in the Firebase Console if wanted.
+
+- **Customizable home screen** (index.html, "HOME CUSTOMIZATION"): home is
+  rendered from `HOME_CATALOG` (id -> kind tile|block + label) and the
+  `mods` renderers inside `renderHome()`; the user's layout lives in
+  `localStorage['betel_home_layout_v1']`. Long-press enters iOS-style edit
+  mode modelled on the iPhone's own: gentle wiggle, a small gray minus
+  (confirm dialog), drag the tile itself after a ~0.17s hold (touch events,
+  so a quick swipe still scrolls), a corner arc handle to resize (small ->
+  medium -> large), a quiet + and check at the top. `memorial` (לעילוי נשמת)
+  has `keep:true`: it can be moved but never removed. `social` (Instagram/YouTube/TikTok links) is also
+  `keep:true` and has `sizes:['s','m']` - two sizes only (small icons / bigger icons).
+  The app scrolls on `<body>`, not the window - use `homeScroller()`.
+  To offer a new button: add it to `HOME_CATALOG` and give it a renderer
+  (`mods.<id>`) or a `HOME_SHORTCUTS()` entry; ask the user which new
+  buttons they want. Removing everything shows only the big logo.
+- **Home stats are two separate blocks** (`visitors` = total users, `live` =
+  online now; the old single `stats` block migrates into both in
+  `getHomeLayout()`). Both are removable and have `half:true, sizes:['s','m']`:
+  small = half width (two sit side by side), `m` = full-width `.stat-card.long`
+  with a bigger number/label/badge. Their DOM ids (`visitCount`/`liveCount`)
+  are what the Firebase module paints.
+- **Feedback form** (`openFeedbackForm`/`submitFeedback`): the Cloud Function
+  `sendFeedback` is not deployed (404), so sending tries it with a 10s timeout,
+  then a Firestore `feedback` document, and on total failure keeps the text in
+  the HTML form with copy/share/mail buttons instead of silently closing.
+  Firestore rules must allow creating in `feedback` for tier 2 to work.
+- **Every Hebrew string shown through `ckChrome()` needs a nikud-free key in all
+  four `I18N` blocks** (en/fr/ru/ka); a missing key shows up as Hebrew mixed
+  with translated fragments (substring fallback). Audit by loading Settings in
+  each language and scanning for Hebrew letters.
+- **Home edit-mode controls are real native Liquid Glass** (`NativeHomeEdit.swift`:
+  `NativeHomeEditBridge` + `HomeEditOverlay`): minus badges, corner resize
+  handles (pan gesture), the +/check pills (`UIButton.Configuration.glass()`),
+  the remove confirmation (system `UIAlertController`) and the add sheet
+  (system sheet) are UIKit views over the web view; tiles themselves stay web
+  content. JS (`homeNativeEdit()`, `homeSyncNative()`, `window.NativeHomeEditHost`)
+  sends tile rects and receives taps/drags; the HTML controls remain as the
+  web/PWA fallback. Not compile-verified in Xcode.
+- **Launch screen**: the native image (`Splash.imageset`, one 2732px file:
+  the feathered 1024 app icon at 1380px on the per-row navy gradient) and
+  the HTML `#boot` overlay at the top of index.html are designed to be
+  pixel-identical on frame one (icon = 50.51vh square, centered, same
+  gradient stops) so the hand-off is invisible; then #boot animates (shine,
+  glow, spinner) until the first render hides it (`__bootHide`, min 0.5s).
+  It also calls `SplashScreen.hide()`; Capacitor's own auto-hide
+  (`launchShowDuration` 3000) is only the safety net. If the logo art
+  changes, regenerate BOTH together or the hand-off will visibly jump.
+- **Widgets** (BetElWidget target): `BetElWidget` (small/medium/large +
+  Lock Screen), `BetElZmanimWidget`, `BetElTehillimWidget`,
+  `BetElStreakWidget`, `BetElCandleWidget`, plus the Live Activity. Dates
+  use `HebrewDay` (Hebrew-letter day/month/year in Hebrew, numerals +
+  English names in English); dawn = sunrise - (sunset - sunrise)/8 in both
+  the app (`ZCUSTOM.alotHaShachar`) and `Solar.DayTimes.dawn`. Candle
+  lighting offset is Hebcal's default (18 min before sunset; 40 in
+  Jerusalem etc.) - NOT a fixed 20 minutes.
+
+- **Tefillin Mirror placement guide** (`MirrorGuide` in index.html): MediaPipe
+  Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
+  first use (needs internet once; nothing at boot). The bayit's bottom edge
+  belongs on the hairline (where an infant's skull is soft), centered
+  between the eyes - NOT on the forehead. Hairline comes from MediaPipe's
+  Hair Segmenter mask (first hair pixel scanning up from the brows), with a
+  skin-color fallback; remembered per session once seen without a bayit
+  covering it. The overlay must never draw crossing lines (a center line
+  over a hairline line read as a cross) - corner brackets + a dotted
+  hairline curve only. The color-only hairline proved ~4cm too low on a
+  real photo, which is why segmentation is used.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
@@ -250,3 +334,35 @@ in English as usual.
   App Store (id6807186847) as of 2026-09-09. `appQrImage()` (index.html)
   now encodes `APP_STORE_URL` (`https://apps.apple.com/app/...`) instead
   of the PWA's own `location.href`.
+- **Any new custom native-only Swift plugin (a `CAPPlugin`/`CAPBridgedPlugin`
+  with no npm package of its own) must ALSO get a `core.registerPlugin('X')`
+  line in `capacitor-native-bridge.js`.** The Swift side alone is not
+  enough - `window.Capacitor.Plugins.X` only exists once something calls
+  `registerPlugin()` client-side, and this app's custom plugins
+  (NativeTopBar, NativeToolsFab, NativeModal, NativeSettings, NativeToast,
+  NativeHaptics, NativeTabBar, BetElWidgetBridge, NativeLiveActivity) ship
+  no vendored UMD bundle of their own the way `@capacitor/app` does. This
+  exact gap went undetected for most of a session (every native Liquid
+  Glass feature "worked" by every code-level signal - it built, it ran,
+  Playwright tests passed because they stub `window.Capacitor.Plugins.X`
+  directly, bypassing the real registration path entirely - but silently
+  did nothing at all on a real device) before being traced to this file.
+  **It ALSO needs a `bridge?.registerPluginInstance(XBridge())` line in
+  `MainViewController.capacitorDidLoad()`** - Capacitor 8 only
+  auto-registers the npm plugins `npx cap sync` lists in `packageClassList`,
+  never classes compiled into the app target itself. Missing only this
+  half is worse than missing both: the JS proxy exists, so index.html hides
+  its HTML nav/FAB in favor of the native one, but every native call
+  rejects as unimplemented - the app ends up with no nav bar at all.
+  **Also not compile-verified in Xcode as of this writing** (no macOS/
+  Xcode available in that session): Dynamic Type scaling across every
+  native UIKit label, two `.symbolEffect(.bounce)` spots (tools FAB theme
+  icon, modal icon), Lock Screen widget families
+  (`.accessoryCircular`/`.accessoryRectangular` on both widgets), and a
+  new Live Activity (`NativeLiveActivityBridge.swift` +
+  `BetElLiveActivityWidget.swift` + `BetElActivityAttributes.swift`,
+  shared between the App and BetElWidget targets like `SharedData.swift`)
+  showing a countdown to the next sunrise/sunset. Build in Xcode and
+  actually exercise all of these - especially starting the Live Activity
+  and checking the Lock Screen banner and Dynamic Island - before
+  assuming any of them work.

@@ -65,6 +65,7 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
         let namePlaceholder = call.getString("namePlaceholder") ?? ""
         let emailPlaceholder = call.getString("emailPlaceholder") ?? ""
         let messagePlaceholder = call.getString("messagePlaceholder") ?? ""
+        let subjectPlaceholder = call.getString("subjectPlaceholder") ?? ""
         let sendButtonText = call.getString("sendButtonText") ?? ""
         let subject = call.getString("subject") ?? ""
         let supportEmail = call.getString("supportEmail") ?? ""
@@ -73,7 +74,8 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
             NativeModalBridge.activeController?.presentFeedbackForm(
                 title: title, body: body, namePlaceholder: namePlaceholder, emailPlaceholder: emailPlaceholder,
                 messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText,
-                subject: subject, supportEmail: supportEmail, isRTL: isRTL
+                subject: subject, supportEmail: supportEmail, isRTL: isRTL,
+                subjectPlaceholder: subjectPlaceholder
             )
         }
         call.resolve()

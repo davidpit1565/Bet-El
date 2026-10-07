@@ -25,7 +25,7 @@ final class NativeModalView: UIView {
     var onPrimary: (() -> Void)?
     var onDismiss: (() -> Void)?
 
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private let backdrop = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
     private var card: UIView?
 
@@ -92,6 +92,7 @@ final class NativeModalView: UIView {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = UIColor(white: 0.6, alpha: 1)
+        closeButton.accessibilityLabel = isRTL ? "סגור" : "Close"
         closeButton.addTarget(self, action: #selector(tapBackdrop), for: .touchUpInside)
         contentView.addSubview(closeButton)
 
@@ -99,12 +100,13 @@ final class NativeModalView: UIView {
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.tintColor = goldColor
         iconView.contentMode = .scaleAspectFit
+        iconView.isAccessibilityElement = false // purely decorative - the title/body text already say everything it conveys
         contentView.addSubview(iconView)
 
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 19, weight: .bold)
+        titleLabel.setScaledFont(19, weight: .bold)
         titleLabel.textColor = goldColor
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
@@ -113,7 +115,7 @@ final class NativeModalView: UIView {
         let bodyLabel = UILabel()
         bodyLabel.translatesAutoresizingMaskIntoConstraints = false
         bodyLabel.text = body
-        bodyLabel.font = .systemFont(ofSize: 15)
+        bodyLabel.setScaledFont(15)
         bodyLabel.textColor = UIColor(white: 0.85, alpha: 1)
         bodyLabel.textAlignment = .center
         bodyLabel.numberOfLines = 0
@@ -122,7 +124,7 @@ final class NativeModalView: UIView {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle(buttonText, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        button.titleLabel?.setScaledFont(16, weight: .bold, maximumSize: 22)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = goldColor
         button.layer.cornerRadius = 22
@@ -157,19 +159,30 @@ final class NativeModalView: UIView {
         ])
 
         isHidden = false
-        UIView.animate(withDuration: 0.25) {
+        UIView.animate(withDuration: ReduceMotion.duration(0.25), animations: {
             self.backdrop.alpha = 1
             cardView.alpha = 1
             cardView.transform = .identity
-        }
+        }, completion: { _ in
+            // A small entrance flourish once the card has actually
+            // finished scaling in, not simultaneously with that motion -
+            // skipped when Reduce Motion is on, same as everything else
+            // ReduceMotion.duration() already gates.
+            if #available(iOS 17.0, *), !ReduceMotion.isEnabled {
+                iconView.addSymbolEffect(.bounce, options: .nonRepeating)
+            }
+        })
     }
 
-    @objc private func tapPrimary() { onPrimary?() }
+    @objc private func tapPrimary() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        onPrimary?()
+    }
 
     func dismiss() {
         guard let cardView = card else { isHidden = true; return }
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 self.backdrop.alpha = 0
                 cardView.alpha = 0

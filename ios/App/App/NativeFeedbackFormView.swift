@@ -15,11 +15,11 @@ import UIKit
 /// REQUIRES BUILDING WITH THE iOS 26 SDK (Xcode 26+) - see
 /// NativeToolsFabView's header comment for why; the same applies here.
 final class NativeFeedbackFormView: UIView {
-    var onSend: ((_ name: String, _ email: String, _ message: String) -> Void)?
+    var onSend: ((_ name: String, _ email: String, _ subject: String, _ message: String) -> Void)?
     var onDismiss: (() -> Void)?
 
     private let maxMessageLength = 500
-    private let goldColor = UIColor(red: 0.831, green: 0.686, blue: 0.373, alpha: 1)
+    private let goldColor = UIColor.betelGold
     private let fieldBackground = UIColor(white: 1, alpha: 0.08)
 
     private let backdrop = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
@@ -27,6 +27,7 @@ final class NativeFeedbackFormView: UIView {
     private var scrollView: UIScrollView?
 
     private let nameField = UITextField()
+    private let subjectField = UITextField()
     private let emailField = UITextField()
     private let messageView = UITextView()
     private let messagePlaceholderLabel = UILabel()
@@ -76,6 +77,7 @@ final class NativeFeedbackFormView: UIView {
 
     private var nameFieldHeightSet = false
     private var emailFieldHeightSet = false
+    private var subjectFieldHeightSet = false
 
     /// Configures a persistent field (`nameField`/`emailField`) in place
     /// for the current presentation, rather than building a throwaway
@@ -108,7 +110,8 @@ final class NativeFeedbackFormView: UIView {
     /// `isRTL` drives field text alignment and the close button's corner,
     /// matching the HTML form's own direction-aware layout.
     func present(title: String, body: String, namePlaceholder: String, emailPlaceholder: String,
-                 messagePlaceholder: String, sendButtonText: String, isRTL: Bool) {
+                 messagePlaceholder: String, sendButtonText: String, isRTL: Bool,
+                 subjectPlaceholder: String = "") {
         card?.removeFromSuperview()
 
         let cardView = glassView(cornerRadius: 28)
@@ -134,6 +137,7 @@ final class NativeFeedbackFormView: UIView {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = UIColor(white: 0.6, alpha: 1)
+        closeButton.accessibilityLabel = isRTL ? "סגור" : "Close"
         closeButton.addTarget(self, action: #selector(tapBackdrop), for: .touchUpInside)
         contentView.addSubview(closeButton)
         NSLayoutConstraint.activate([
@@ -179,7 +183,7 @@ final class NativeFeedbackFormView: UIView {
 
         let titleLabel = UILabel()
         titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        titleLabel.setScaledFont(18, weight: .bold)
         titleLabel.textColor = goldColor
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
@@ -187,7 +191,7 @@ final class NativeFeedbackFormView: UIView {
 
         let bodyLabel = UILabel()
         bodyLabel.text = body
-        bodyLabel.font = .systemFont(ofSize: 14)
+        bodyLabel.setScaledFont(14)
         bodyLabel.textColor = UIColor(white: 0.85, alpha: 1)
         bodyLabel.textAlignment = .center
         bodyLabel.numberOfLines = 0
@@ -195,16 +199,20 @@ final class NativeFeedbackFormView: UIView {
 
         nameField.removeFromSuperview()
         emailField.removeFromSuperview()
+        subjectField.removeFromSuperview()
         styleTextField(nameField, placeholder: namePlaceholder, isRTL: isRTL, heightSet: &nameFieldHeightSet)
         styleTextField(emailField, placeholder: emailPlaceholder, isRTL: isRTL, heightSet: &emailFieldHeightSet)
+        styleTextField(subjectField, placeholder: subjectPlaceholder, isRTL: isRTL, heightSet: &subjectFieldHeightSet)
         emailField.keyboardType = .emailAddress
         emailField.autocapitalizationType = .none
-        [nameField, emailField].forEach {
+        [nameField, emailField, subjectField].forEach {
             $0.removeTarget(self, action: #selector(updateSendEnabled), for: .editingChanged)
             $0.addTarget(self, action: #selector(updateSendEnabled), for: .editingChanged)
         }
-        stack.addArrangedSubview(nameField)
+        // order: sender email, name, subject, then the message
         stack.addArrangedSubview(emailField)
+        stack.addArrangedSubview(nameField)
+        stack.addArrangedSubview(subjectField)
 
         let messageContainer = UIView()
         messageContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -216,7 +224,8 @@ final class NativeFeedbackFormView: UIView {
         messageView.translatesAutoresizingMaskIntoConstraints = false
         messageView.backgroundColor = .clear
         messageView.textColor = UIColor(white: 0.95, alpha: 1)
-        messageView.font = .systemFont(ofSize: 15)
+        messageView.font = .scaled(15, maximumSize: 24)
+        messageView.adjustsFontForContentSizeCategory = true
         messageView.textAlignment = isRTL ? .right : .left
         messageView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
         messageView.delegate = self
@@ -227,7 +236,7 @@ final class NativeFeedbackFormView: UIView {
         messagePlaceholderLabel.translatesAutoresizingMaskIntoConstraints = false
         messagePlaceholderLabel.text = messagePlaceholder
         messagePlaceholderLabel.textColor = UIColor(white: 1, alpha: 0.4)
-        messagePlaceholderLabel.font = .systemFont(ofSize: 15)
+        messagePlaceholderLabel.setScaledFont(15, maximumSize: 24)
         messagePlaceholderLabel.textAlignment = isRTL ? .right : .left
         // textViewDidChange() only fires for user edits, not the
         // programmatic `messageView.text = ""` reset above, so the
@@ -248,14 +257,14 @@ final class NativeFeedbackFormView: UIView {
         stack.addArrangedSubview(messageContainer)
 
         countLabel.text = "0/\(maxMessageLength)"
-        countLabel.font = .systemFont(ofSize: 11)
+        countLabel.setScaledFont(11, maximumSize: 15)
         countLabel.textColor = UIColor(white: 1, alpha: 0.4)
         countLabel.textAlignment = isRTL ? .left : .right
         stack.addArrangedSubview(countLabel)
 
         sendButton.removeFromSuperview()
         sendButton.setTitle(sendButtonText, for: .normal)
-        sendButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        sendButton.titleLabel?.setScaledFont(16, weight: .bold, maximumSize: 22)
         sendButton.setTitleColor(.black, for: .normal)
         sendButton.setTitleColor(UIColor(white: 0.3, alpha: 1), for: .disabled)
         sendButton.backgroundColor = goldColor
@@ -268,7 +277,7 @@ final class NativeFeedbackFormView: UIView {
         stack.addArrangedSubview(sendButton)
 
         isHidden = false
-        UIView.animate(withDuration: 0.25) {
+        UIView.animate(withDuration: ReduceMotion.duration(0.25)) {
             self.backdrop.alpha = 1
             cardView.alpha = 1
             cardView.transform = .identity
@@ -278,13 +287,15 @@ final class NativeFeedbackFormView: UIView {
     @objc private func updateSendEnabled() {
         let filled = !(nameField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !(emailField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !(subjectField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !messageView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         sendButton.isEnabled = filled
         sendButton.alpha = filled ? 1 : 0.5
     }
 
     @objc private func tapSend() {
-        onSend?(nameField.text ?? "", emailField.text ?? "", messageView.text ?? "")
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        onSend?(nameField.text ?? "", emailField.text ?? "", subjectField.text ?? "", messageView.text ?? "")
     }
 
     @objc private func keyboardWillChange(_ note: Notification) {
@@ -305,7 +316,7 @@ final class NativeFeedbackFormView: UIView {
         [nameField, emailField, messageView].forEach { $0.resignFirstResponder() }
         guard let cardView = card else { isHidden = true; return }
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: ReduceMotion.duration(0.2),
             animations: {
                 self.backdrop.alpha = 0
                 cardView.alpha = 0

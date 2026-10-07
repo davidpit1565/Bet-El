@@ -1,4 +1,5 @@
 import UIKit
+import WebKit
 import Capacitor
 
 /// Replaces the plain `CAPBridgeViewController` as the app's root view
@@ -26,6 +27,19 @@ class MainViewController: CAPBridgeViewController {
     private let topBar = NativeTopBarView()
     private let modal = NativeModalView()
     private let feedbackForm = NativeFeedbackFormView()
+    private let toastView = NativeToastView()
+    let homeEditOverlay = HomeEditOverlay()
+    private let settingsView = NativeSettingsView()
+    /// The app's own language direction (S.lang), from the last tab bar
+    /// configure() - also used to place the tools FAB on the matching side.
+    private var isRTL = true
+    /// Apple Music-style minimized tab bar: while scrolling down the full
+    /// bar shrinks away into this small glass circle showing the current
+    /// tab's icon (instead of disappearing entirely); tapping it expands
+    /// the full bar again.
+    private let miniTabButton = UIButton(type: .system)
+    private var miniSideConstraint: NSLayoutConstraint?
+    private var isTabBarMinimized = false
 
     /// (id, SF Symbol name) - the label text itself comes from JS via
     /// `configure(items:)` below, since the web app is the single source
@@ -38,7 +52,49 @@ class MainViewController: CAPBridgeViewController {
         ("prayers", "books.vertical.fill"),
         ("calendar", "calendar"),
         ("settings", "gearshape.fill"),
+        // Not a screen of its own - selecting it opens the Library search
+        // (window.NativeSearchHost) and the bar re-selects the real tab.
+        ("search", "magnifyingglass"),
     ]
+
+    /// Capacitor 8 only auto-registers plugins listed in the generated
+    /// capacitor.config.json's `packageClassList`, which `npx cap sync`
+    /// fills from npm packages alone - plugins compiled into the app target
+    /// itself are never discovered, so every one of them must be registered
+    /// here explicitly. Without this, the JS-side `registerPlugin()` calls in
+    /// capacitor-native-bridge.js still create `window.Capacitor.Plugins.X`
+    /// proxies (so index.html hides its HTML nav/FAB/etc. in favor of the
+    /// native ones), but every call into them rejects as unimplemented and
+    /// no native UI ever appears.
+    /// Tells the web app whether this is a development install, before any
+    /// page script runs: there is no App Store/TestFlight receipt on a build
+    /// installed straight from Xcode (Debug or Release) or on the simulator.
+    /// index.html uses `window.__BETEL_DEV_BUILD` to keep such installs out
+    /// of the Firebase visit counter, live presence and Analytics, so
+    /// repeated test installs don't inflate the real user numbers.
+    override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
+        let configuration = super.webViewConfiguration(for: instanceConfiguration)
+        let hasReceipt = Bundle.main.appStoreReceiptURL
+            .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        let script = WKUserScript(
+            source: "window.__BETEL_DEV_BUILD = \(hasReceipt ? "false" : "true");",
+            injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        configuration.userContentController.addUserScript(script)
+        return configuration
+    }
+
+    override func capacitorDidLoad() {
+        bridge?.registerPluginInstance(NativeTabBarBridge())
+        bridge?.registerPluginInstance(NativeToolsFabBridge())
+        bridge?.registerPluginInstance(NativeTopBarBridge())
+        bridge?.registerPluginInstance(NativeModalBridge())
+        bridge?.registerPluginInstance(NativeSettingsBridge())
+        bridge?.registerPluginInstance(NativeToastBridge())
+        bridge?.registerPluginInstance(NativeHomeEditBridge())
+        bridge?.registerPluginInstance(NativeHapticsBridge())
+        bridge?.registerPluginInstance(BetElWidgetBridge())
+        bridge?.registerPluginInstance(NativeLiveActivityBridge())
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,10 +103,18 @@ class MainViewController: CAPBridgeViewController {
         setupTopBar()
         setupModal()
         setupFeedbackForm()
+        setupToast()
+        setupHomeEdit()
+        setupSettingsView()
+        layoutToolsFab()
+        topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
         NativeTabBarBridge.activeController = self
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
+        NativeToastBridge.activeController = self
+        NativeHomeEditBridge.activeController = self
+        NativeSettingsBridge.activeController = self
     }
 
     override func viewDidLayoutSubviews() {
@@ -69,10 +133,81 @@ class MainViewController: CAPBridgeViewController {
         // with a manually-drawn one instead of the genuine thing.
         view.addSubview(tabBar)
         NSLayoutConstraint.activate([
-            tabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        NSLayoutConstraint.activate([
+            tabBar.leftAnchor.constraint(equalTo: view.leftAnchor),
+            tabBar.rightAnchor.constraint(equalTo: view.rightAnchor),
+        ])
+        tabBar.tintColor = MainViewController.tabTint
+        setupMiniTabButton()
+    }
+
+    private func setupMiniTabButton() {
+        miniTabButton.translatesAutoresizingMaskIntoConstraints = false
+        miniTabButton.alpha = 0
+        miniTabButton.isHidden = true
+        miniTabButton.accessibilityLabel = "Show tab bar"
+        miniTabButton.addTarget(self, action: #selector(miniTabTapped), for: .touchUpInside)
+        view.addSubview(miniTabButton)
+        NSLayoutConstraint.activate([
+            miniTabButton.widthAnchor.constraint(equalToConstant: 56),
+            miniTabButton.heightAnchor.constraint(equalToConstant: 56),
+            miniTabButton.centerYAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.centerYAnchor),
+        ])
+        layoutMiniTabButton()
+    }
+
+    /// Reading-direction start edge, like Apple Music's minimized bar
+    /// (left in LTR languages, right in Hebrew).
+    private func layoutMiniTabButton() {
+        miniSideConstraint?.isActive = false
+        let guide = view.safeAreaLayoutGuide
+        miniSideConstraint = isRTL
+            ? miniTabButton.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -20)
+            : miniTabButton.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 20)
+        miniSideConstraint?.isActive = true
+    }
+
+    /// The app's own emblem (the bundled web icon, public/icon-192.png),
+    /// clipped to a circle - shown in the minimized tab bar instead of the
+    /// last-tapped tab's icon, by user request. Falls back to a fixed
+    /// symbol if the file isn't there for some reason.
+    private static let appLogo: UIImage? = {
+        guard let path = Bundle.main.path(forResource: "icon-192", ofType: "png", inDirectory: "public"),
+              let src = UIImage(contentsOfFile: path) else { return nil }
+        let size = CGSize(width: 40, height: 40)
+        return UIGraphicsImageRenderer(size: size).image { _ in
+            UIBezierPath(ovalIn: CGRect(origin: .zero, size: size)).addClip()
+            src.draw(in: CGRect(origin: .zero, size: size))
+        }.withRenderingMode(.alwaysOriginal)
+    }()
+
+    private func refreshMiniTabIcon() {
+        let image = MainViewController.appLogo
+            ?? UIImage(systemName: "house.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold))
+        if #available(iOS 26.0, *) {
+            var config = UIButton.Configuration.glass()
+            config.image = image
+            config.cornerStyle = .capsule
+            config.baseForegroundColor = MainViewController.tabTint
+            config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+            miniTabButton.configuration = config
+        } else {
+            var config = UIButton.Configuration.filled()
+            config.image = image
+            config.cornerStyle = .capsule
+            config.background.visualEffect = UIBlurEffect(style: .systemMaterial)
+            config.baseBackgroundColor = .clear
+            config.baseForegroundColor = MainViewController.tabTint
+            config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+            miniTabButton.configuration = config
+        }
+    }
+
+    @objc private func miniTabTapped() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        setHidden(false)
     }
 
     /// Pinned to the bottom-right corner, above the tab bar (whether or not
@@ -97,11 +232,43 @@ class MainViewController: CAPBridgeViewController {
         }
         view.addSubview(toolsFab)
         NSLayoutConstraint.activate([
-            toolsFab.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            toolsFab.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -14),
-            toolsFab.widthAnchor.constraint(equalToConstant: 46),
-            toolsFab.heightAnchor.constraint(equalToConstant: 46),
+            toolsFab.widthAnchor.constraint(equalToConstant: 38),
+            toolsFab.heightAnchor.constraint(equalToConstant: 38),
         ])
+        // Tapping anywhere outside the FAB/its open panel closes the panel.
+        // cancelsTouchesInView=false so the tap still reaches the web view.
+        let outsideTap = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+        outsideTap.cancelsTouchesInView = false
+        outsideTap.delegate = self
+        view.addGestureRecognizer(outsideTap)
+    }
+
+    private var toolsFabSideConstraints: [NSLayoutConstraint] = []
+
+    /// Inside the header row itself, as one more glass circle on the side
+    /// the header's own actions use (left in Hebrew, right otherwise), just
+    /// past any actions already there - never floating over the reading
+    /// text. The panel opens downward from it (NativeToolsFabView.expandPanel).
+    private func layoutToolsFab() {
+        guard toolsFab.superview != nil, topBar.superview != nil else { return }
+        NSLayoutConstraint.deactivate(toolsFabSideConstraints)
+        let guide = view.safeAreaLayoutGuide
+        let inset = 14 + CGFloat(topBar.actionCount) * 46
+        toolsFabSideConstraints = [
+            toolsFab.centerYAnchor.constraint(equalTo: guide.topAnchor, constant: topBar.contentHeight / 2),
+            isRTL
+                ? toolsFab.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: inset)
+                : toolsFab.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -inset),
+        ]
+        NSLayoutConstraint.activate(toolsFabSideConstraints)
+        toolsFab.isRTL = isRTL
+        // The header view spans the full width and is added later, so it
+        // would otherwise swallow taps meant for the button sitting in it.
+        view.bringSubviewToFront(toolsFab)
+    }
+
+    @objc private func handleOutsideTap(_ gesture: UITapGestureRecognizer) {
+        toolsFab.collapseIfExpanded()
     }
 
     // MARK: - Called by NativeToolsFabBridge (JS-driven)
@@ -138,10 +305,30 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTopBarBridge (JS-driven)
 
-    func configureTopBar(title: String, backTo: String, isRTL: Bool) {
-        topBar.configure(title: title, hasBack: !backTo.isEmpty, isRTL: isRTL)
+    func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, isDark: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
+        topBar.setTheme(isDark: isDark)
+        topBar.configure(title: title, hasBack: hasBack, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel, actions: actions)
+        // Both relay to one fixed JS entry point each rather than this
+        // method trying to encode what "back" or a given action id means -
+        // JS (TOPBAR_BACK_ACTION/TOPBAR_ACTION_HANDLERS in index.html)
+        // owns that, since it can be more than a plain `go(tab)` call and
+        // the same action id means different things on different screens.
         topBar.onBack = { [weak self] in
-            self?.webView?.evaluateJavaScript("window.go && window.go('\(backTo)')", completionHandler: nil)
+            self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onBack()", completionHandler: nil)
+        }
+        topBar.onTrailingAction = { [weak self] id in
+            self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onAction(\(self?.jsStringLiteral(id) ?? "null"))", completionHandler: nil)
+        }
+        topBar.onQuickAction = { [weak self] action in
+            guard let self = self else { return }
+            let js: String
+            switch action {
+            case "home": js = "window.go && window.go('home')"
+            case "settings": js = "window.go && window.go('settings')"
+            case "share": js = "window.shareApp && window.shareApp()"
+            default: return
+            }
+            self.webView?.evaluateJavaScript(js, completionHandler: nil)
         }
         topBar.isHidden = false
         reportHeightToWebView()
@@ -212,20 +399,100 @@ class MainViewController: CAPBridgeViewController {
 
     func presentFeedbackForm(title: String, body: String, namePlaceholder: String, emailPlaceholder: String,
                               messagePlaceholder: String, sendButtonText: String,
-                              subject: String, supportEmail: String, isRTL: Bool) {
-        feedbackForm.onSend = { [weak self] name, email, message in
-            self?.relayFeedbackToJS(name: name, email: email, message: message)
+                              subject: String, supportEmail: String, isRTL: Bool, subjectPlaceholder: String = "") {
+        feedbackForm.onSend = { [weak self] name, email, subject, message in
+            self?.relayFeedbackToJS(name: name, email: email, subject: subject, message: message)
             self?.feedbackForm.dismiss()
         }
         feedbackForm.onDismiss = nil
         feedbackForm.present(
             title: title, body: body, namePlaceholder: namePlaceholder, emailPlaceholder: emailPlaceholder,
-            messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText, isRTL: isRTL
+            messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText, isRTL: isRTL,
+            subjectPlaceholder: subjectPlaceholder
         )
     }
 
     func dismissFeedbackForm() {
         feedbackForm.dismiss()
+    }
+
+    private func setupHomeEdit() {
+        homeEditOverlay.frame = view.bounds
+        homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+        homeEditOverlay.topInset = { [weak self] in self?.view.safeAreaInsets.top ?? 0 }
+        view.insertSubview(homeEditOverlay, belowSubview: tabBar)
+    }
+
+    /// Pinned just above the tab bar, matching the HTML `.toast`'s own
+    /// `bottom: calc(var(--native-nav-h) + 20px)` position when a native
+    /// tab bar is present (see the `.has-native-tabbar .toast` CSS rule).
+    private func setupToast() {
+        toastView.translatesAutoresizingMaskIntoConstraints = false
+        toastView.isHidden = true
+        view.addSubview(toastView)
+        NSLayoutConstraint.activate([
+            toastView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            toastView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            toastView.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -20),
+            toastView.heightAnchor.constraint(equalToConstant: 76),
+        ])
+    }
+
+    // MARK: - Called by NativeToastBridge (JS-driven)
+
+    func showToast(message: String) {
+        toastView.show(message: message)
+    }
+
+    /// Fills the same content area the WKWebView itself occupies (below the
+    /// native top bar, above the native tab bar) - this REPLACES the
+    /// Settings tab's content visually while shown, not a floating card
+    /// like the modal/toast, since it stands in for the whole screen's
+    /// content rather than a transient dialog. The HTML Settings screen
+    /// keeps rendering underneath the whole time (see syncNativeSettings()
+    /// in index.html) - hiding this view just reveals it again.
+    private func setupSettingsView() {
+        settingsView.translatesAutoresizingMaskIntoConstraints = false
+        settingsView.isHidden = true
+        // Below the floating tab bar (the list scrolls under it, inset clears it).
+        view.insertSubview(settingsView, belowSubview: tabBar)
+        NSLayoutConstraint.activate([
+            settingsView.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+            settingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            settingsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            settingsView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        settingsView.onAction = { [weak self] id, value in
+            self?.relaySettingsAction(id: id, value: value)
+        }
+    }
+
+    // MARK: - Called by NativeSettingsBridge (JS-driven)
+
+    func configureSettings(title: String, sections: [NativeSettingsSection], isDark: Bool, isRTL: Bool) {
+        settingsView.configure(sections: sections, isDark: isDark, isRTL: isRTL)
+    }
+
+    func setSettingsVisible(_ visible: Bool) {
+        settingsView.isHidden = !visible
+    }
+
+    /// Encodes `id` (and `value`, if present) as JSON string literals - via
+    /// the `[x]`-then-strip-brackets trick, since `JSONSerialization` only
+    /// accepts a top-level Array/Dictionary, not a bare String - so a
+    /// row id or option value containing a quote or backslash can't break
+    /// out of the generated JS call, same reasoning as
+    /// `relayFeedbackToJS` above.
+    private func jsStringLiteral(_ value: String) -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: [value]),
+              let encoded = String(data: data, encoding: .utf8) else { return "null" }
+        return String(encoded.dropFirst().dropLast())
+    }
+
+    private func relaySettingsAction(id: String, value: String?) {
+        let valueJS = value.map(jsStringLiteral) ?? "null"
+        let js = "window.NativeSettingsHost && window.NativeSettingsHost.onAction(\(jsStringLiteral(id)), \(valueJS))"
+        webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
     /// Hands the typed fields to window.NativeFeedbackHost.send(...) in JS
@@ -237,8 +504,8 @@ class MainViewController: CAPBridgeViewController {
     /// environment. The fields are JSON-encoded (not interpolated as raw
     /// JS string literals) so a name/email/message containing a quote,
     /// backslash, or newline can't break out of the JS call.
-    private func relayFeedbackToJS(name: String, email: String, message: String) {
-        let payload = ["name": name, "email": email, "message": message]
+    private func relayFeedbackToJS(name: String, email: String, subject: String, message: String) {
+        let payload = ["name": name, "email": email, "subject": subject, "message": message]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
               let jsonString = String(data: jsonData, encoding: .utf8) else { return }
         let js = "window.NativeFeedbackHost && window.NativeFeedbackHost.send(\(jsonString))"
@@ -257,46 +524,122 @@ class MainViewController: CAPBridgeViewController {
 
     // MARK: - Called by NativeTabBarBridge (JS-driven)
 
-    func configure(items: [[String: String]], activeTab: String) {
+    /// `isRTL` (the app's own S.lang, not the device language) decides the
+    /// item order: the bar is pinned to LTR layout and the items reversed
+    /// for Hebrew, so Home sits on the right in Hebrew and on the left in
+    /// every other language no matter what language the device itself is set to.
+    func configure(items: [[String: String]], activeTab: String, isRTL: Bool) {
         let byId = Dictionary(uniqueKeysWithValues: items.compactMap { item -> (String, String)? in
             guard let id = item["id"], let label = item["label"] else { return nil }
             return (id, label)
         })
-        tabBar.items = MainViewController.tabOrder.compactMap { entry in
+        let ordered: [UITabBarItem] = MainViewController.tabOrder.compactMap { entry in
             guard let label = byId[entry.id] else { return nil }
             let item = UITabBarItem(title: label, image: UIImage(systemName: entry.icon), tag: 0)
             item.accessibilityIdentifier = entry.id
             return item
         }
+        tabBar.semanticContentAttribute = .forceLeftToRight
+        tabBar.items = isRTL ? ordered.reversed() : ordered
+        self.isRTL = isRTL
+        layoutToolsFab()
+        layoutMiniTabButton()
         setActive(tab: activeTab)
         setVisible(true)
     }
 
     func setActive(tab: String) {
         tabBar.selectedItem = tabBar.items?.first { $0.accessibilityIdentifier == tab }
+        refreshMiniTabIcon()
+    }
+
+    /// Selected-tab color: deep gold on light glass, a bright cream-gold on
+    /// dark glass. On iOS 26 the Liquid Glass bar switches between light and
+    /// dark by itself depending on what's scrolling under it, and this
+    /// dynamic color follows that switch live (so it stays readable over a
+    /// dark page even in the light theme, and vice versa).
+    static let tabTint = UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.973, green: 0.906, blue: 0.706, alpha: 1)
+            : UIColor(red: 0.478, green: 0.353, blue: 0.078, alpha: 1)
+    }
+
+    /// From JS (S.theme). On iOS 26 the bar is left to adapt to the content
+    /// beneath it (see `tabTint`); older systems' blur bar doesn't adapt by
+    /// itself, so there it follows the app theme.
+    func setTabBarTheme(isDark: Bool) {
+        if #available(iOS 26.0, *) {
+            tabBar.overrideUserInterfaceStyle = .unspecified
+            miniTabButton.overrideUserInterfaceStyle = .unspecified
+            return
+        }
+        let style: UIUserInterfaceStyle = isDark ? .dark : .light
+        tabBar.overrideUserInterfaceStyle = style
+        miniTabButton.overrideUserInterfaceStyle = style
     }
 
     func setVisible(_ visible: Bool) {
         tabBar.isHidden = !visible
+        if !visible {
+            miniTabButton.isHidden = true
+            miniTabButton.alpha = 0
+            isTabBarMinimized = false
+            tabBar.alpha = 1
+            tabBar.transform = .identity
+        }
         reportHeightToWebView()
     }
 
+    /// Scroll-down "hide" from JS minimizes rather than removes: the full
+    /// bar shrinks toward the mini circle's corner and fades, and the mini
+    /// circle (current tab's icon) springs in - Apple Music's behavior.
+    /// Scrolling back up, or tapping the circle, expands it again.
     func setHidden(_ hidden: Bool) {
-        // The scroll-away/reveal behavior the HTML nav already had - a
-        // simple fade+slide, not full removal (setVisible above is for
-        // "this screen has no nav at all", a different state).
-        UIView.animate(withDuration: hidden ? 0.26 : 0.38) {
-            self.tabBar.alpha = hidden ? 0 : 1
-            self.tabBar.transform = hidden
-                ? CGAffineTransform(translationX: 0, y: self.tabBar.frame.height)
-                : .identity
+        guard !tabBar.isHidden, hidden != isTabBarMinimized else { return }
+        isTabBarMinimized = hidden
+        if hidden {
+            refreshMiniTabIcon()
+            miniTabButton.isHidden = false
         }
+        let w = tabBar.bounds.width
+        let towardCorner = CGAffineTransform(translationX: (isRTL ? 1 : -1) * w * 0.38, y: 0).scaledBy(x: 0.25, y: 0.6)
+        UIView.animate(
+            withDuration: ReduceMotion.duration(hidden ? 0.34 : 0.42), delay: 0,
+            usingSpringWithDamping: 0.82, initialSpringVelocity: 0.3, options: [.allowUserInteraction, .beginFromCurrentState],
+            animations: {
+                self.tabBar.alpha = hidden ? 0 : 1
+                self.tabBar.transform = hidden ? towardCorner : .identity
+                self.miniTabButton.alpha = hidden ? 1 : 0
+                self.miniTabButton.transform = hidden ? .identity : CGAffineTransform(scaleX: 0.6, y: 0.6)
+            },
+            completion: { _ in
+                if !self.isTabBarMinimized { self.miniTabButton.isHidden = true }
+            }
+        )
+    }
+}
+
+extension MainViewController: UIGestureRecognizerDelegate {
+    /// Only taps that land outside the FAB and its expanded panel count as
+    /// "outside" - taps on the panel's own buttons must not close it.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard toolsFab.isExpanded else { return false }
+        return !toolsFab.containsTouch(touch)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+        true
     }
 }
 
 extension MainViewController: UITabBarDelegate {
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         guard let tabId = item.accessibilityIdentifier else { return }
+        UISelectionFeedbackGenerator().selectionChanged()
+        if tabId == "search" {
+            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
+            return
+        }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
     }
 }
