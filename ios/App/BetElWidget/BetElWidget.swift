@@ -223,7 +223,7 @@ private struct TehillimLine: View {
                 .lineLimit(1).minimumScaleFactor(0.6)
         }, value: {
             Text("\(entry.tehillimRangeText)")
-                .font(.system(size: size + 4, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
+                .font(.system(size: size + 2, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
                 .lineLimit(1).minimumScaleFactor(0.5)
         })
     }
@@ -335,7 +335,7 @@ private struct LargeWidgetView: View {
         VStack(alignment: hAlign(entry.lang), spacing: 1) {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft).lineLimit(1).minimumScaleFactor(0.6)
             Text("\(entry.tehillimRangeText)")
-                .font(.system(size: 22, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
+                .font(.system(size: 18, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
                 .lineLimit(1).minimumScaleFactor(0.5)
         }
         .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
@@ -481,7 +481,7 @@ private struct TehillimWidgetView: View {
                 .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
             Spacer(minLength: 0)
             Text("\(entry.tehillimRangeText)")
-                .font(.system(size: family == .systemSmall ? 38 : 60, weight: .heavy, design: .rounded))
+                .font(.system(size: family == .systemSmall ? 30 : 46, weight: .heavy, design: .rounded))
                 .foregroundColor(palette.goldBright)
                 .lineLimit(1).minimumScaleFactor(0.3)
                 .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))

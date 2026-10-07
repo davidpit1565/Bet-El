@@ -3094,12 +3094,14 @@ function nextCandleLightingInfo(){
     for(let i=0;i<8;i++){
       const st=shabbatTimes(hd, locale);
       if(st.candle && st.candle>now){
+        // Shabbat is abbreviated (נש״ק); a Yom Tov lighting - the eve itself or the
+        // second night - says so. Whichever comes next wins, so this is never only Shabbat.
+        const isShabbat = hd.getDay()===5 && !st.label;
         const title = st.chanukahNight
           ? (locale==='en' ? ('Chanukah · Candle '+st.chanukahNight) : ('חנוכה · נר '+heNum(st.chanukahNight)))
-          : st.label ? st.label
-          : (hd.getDay()===5
-              ? (locale==='en' ? 'Erev Shabbat' : 'ערב שבת קדש')
-              : (locale==='en' ? 'Candle lighting' : 'הדלקת נרות'));
+          : isShabbat
+            ? (locale==='en' ? 'Shabbat candles' : 'הדלקת נש״ק')
+            : (locale==='en' ? 'Yom Tov candles' : 'הדלקת נרות יום טוב');
         return {time:st.candle.toISOString(), label:title};
       }
       hd=new HDate(hd.abs()+1);
