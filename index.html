@@ -3098,9 +3098,9 @@ function nextCandleLightingInfo(){
         // part of this (a plain Chanukah weekday is skipped; its Friday is just Shabbat).
         const isShabbat = hd.getDay()===5 && !st.label;
         if(st.chanukahNight && !isShabbat && !st.label){ hd=new HDate(hd.abs()+1); continue; }
-        const title = isShabbat
-          ? (locale==='en' ? 'Shabbat candles' : 'הדלקת נרות שבת')
-          : (locale==='en' ? 'Yom Tov candles' : 'הדלקת נרות יום טוב');
+        const CL={he:['הדלקת נרות שבת','הדלקת נרות יום טוב'],en:['Shabbat candles','Yom Tov candles'],
+          fr:['Bougies de Chabbat','Bougies de Yom Tov'],ru:['Свечи Шаббата','Свечи Йом-Това'],ka:['შაბათის სანთლები','იომ ტოვის სანთლები']}[S.lang||'he']||['Shabbat candles','Yom Tov candles'];
+        const title = isShabbat ? CL[0] : CL[1];
         return {time:st.candle.toISOString(), label:title};
       }
       hd=new HDate(hd.abs()+1);
@@ -3111,6 +3111,12 @@ function nextCandleLightingInfo(){
 /* For the Lock Screen "Hebrew date" widget: per day for the next ~2 weeks, the holiday
    on that day or else the coming Shabbat's parasha ("פרשת בראשית"). The widget can't
    run hebcal, so the app hands it this tiny table (see SharedData.dayLabelsJSON). */
+/* how many days ahead the widgets get pre-computed tables for, so they keep working
+   (correct parasha/holiday, exact zmanim, omer) even if the app isn't opened for ~2 months */
+const WIDGET_DAYS=60;
+/* The widget's Hebrew day can roll over at nightfall (tzeit) like the app's own date does.
+   OFF until nightfall is added to the app's UI: flip to true and the widgets switch automatically. */
+const WIDGET_TZEIT_ROLLOVER=false;
 let WIDGET_LABELS_CACHE={key:'',json:null};
 function widgetDayLabels(){
   try{
@@ -3119,7 +3125,7 @@ function widgetDayLabels(){
     const il=calIsIL(), lang=S.lang||'he';
     const ck=ymd(base)+'|'+lang+'|'+il;
     if(WIDGET_LABELS_CACHE.key===ck) return WIDGET_LABELS_CACHE.json;
-    const s0=new Date(base); s0.setHours(0,0,0,0); const e0=addDays(s0,15);
+    const s0=new Date(base); s0.setHours(0,0,0,0); const e0=addDays(s0,WIDGET_DAYS);
     const evs=HebrewCalendar.calendar({start:s0,end:e0,il,location:hebLocation(),locale:lang==='he'?'he':'en'});
     const HOL=1|2097152|524288|16384|256|128; // CHAG | CHOL_HAMOED | MINOR_HOLIDAY | fasts | ROSH_CHODESH
     const holidays={};
@@ -3133,18 +3139,108 @@ function widgetDayLabels(){
         : holidayName(ev.render('en')).replace(/\s*\d{4}\s*$/,'');
     });
     const out=[];
-    for(let i=0;i<15;i++){
+    for(let i=0;i<WIDGET_DAYS;i++){
       const day=addDays(s0,i); const k=ymd(day);
       let t=holidays[k];
       if(!t){
         const pk=currentWeekParshaKey(day);
-        if(pk) t = lang==='he' ? 'פרשת '+deNikud(parshaName(pk)) : (lang==='en' ? 'Parashat '+pk : parshaName(pk));
+        if(pk) t = lang==='he' ? 'פרשת '+deNikud(parshaName(pk)) : (lang==='en' ? 'Parashat '+pk : (lang==='fr' ? 'Paracha '+parshaName(pk) : parshaName(pk)));
       }
       out.push({d:k,t:t||''});
     }
     const json=JSON.stringify(out);
     WIDGET_LABELS_CACHE={key:ck,json};
     return json;
+  }catch(e){ return null; }
+}
+/* Exact times (the app's own, incl. its custom dawn) for yesterday..WIDGET_DAYS ahead, so the
+   widgets show the same times as the app instead of their own approximation. Compact keys:
+   d=date, a=dawn, r=sunrise, c=chatzot, s=sunset, t=tzeit (only when WIDGET_TZEIT_ROLLOVER). */
+let WIDGET_ZMANIM_CACHE={key:'',json:null};
+function widgetZmanimTable(){
+  try{
+    const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const base=new Date(); base.setHours(12,0,0,0);
+    const ck=ymd(base)+'|'+(LOC&&LOC.lat)+'|'+(LOC&&LOC.lon)+'|'+WIDGET_TZEIT_ROLLOVER;
+    if(WIDGET_ZMANIM_CACHE.key===ck) return WIDGET_ZMANIM_CACHE.json;
+    const iso=x=>(x&&!isNaN(x))?x.toISOString():null;
+    const out=[];
+    for(let i=-1;i<=WIDGET_DAYS;i++){
+      const day=addDays(base,i); const z=zmanimFor(day);
+      const row={d:ymd(day)};
+      try{ row.a=iso(ZCUSTOM.alotHaShachar(z)); }catch(e){}
+      try{ row.r=iso(z.sunrise()); }catch(e){}
+      try{ row.c=iso(z.chatzot()); }catch(e){}
+      try{ row.s=iso(z.sunset()); }catch(e){}
+      if(WIDGET_TZEIT_ROLLOVER){ try{ row.t=iso(z.tzeit()); }catch(e){} }
+      out.push(row);
+    }
+    const json=JSON.stringify(out); WIDGET_ZMANIM_CACHE={key:ck,json}; return json;
+  }catch(e){ return null; }
+}
+/* Widget taps: the widgets link to betel://tehillim | calendar | tracker. Needs the "betel" URL
+   scheme in Info.plist; arrives through Capacitor's App plugin (appUrlOpen, plus getLaunchUrl for
+   a cold start from a widget tap). */
+function openWidgetLink(url){
+  try{
+    const m=/^betel:\/\/([a-z]+)/i.exec(url||''); if(!m) return;
+    const kind=m[1].toLowerCase();
+    if(kind==='tehillim'){
+      try{ const hd=currentHDate(); const chs=chaptersOf(portionFor(hd)); renderContinuous(chs,hd); }catch(e){ go('tehillim'); }
+    } else if(kind==='calendar') go('calendar');
+    else if(kind==='tracker') go('tracker');
+    else go('home');
+  }catch(e){}
+}
+window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
+(function initWidgetLinks(){
+  try{
+    const AppP=window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if(!AppP || !(window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
+    AppP.addListener('appUrlOpen', ev=>openWidgetLink(ev&&ev.url));
+    setTimeout(()=>{ AppP.getLaunchUrl().then(r=>{ if(r&&r.url) openWidgetLink(r.url); }).catch(()=>{}); },1200);
+  }catch(e){}
+})();
+/* Every Shabbat / Yom Tov candle lighting for the coming days (so the candle widget moves on to the
+   next one by itself): [{t: ISO time, l: label}] */
+let WIDGET_CANDLES_CACHE={key:'',json:null};
+function widgetCandleTable(){
+  try{
+    const locale = S.lang==='en' ? 'en' : 'he';
+    const base=civilToday();
+    const ck=base.toDateString()+'|'+(S.lang||'he')+'|'+calIsIL()+'|'+(LOC&&LOC.lat);
+    if(WIDGET_CANDLES_CACHE.key===ck) return WIDGET_CANDLES_CACHE.json;
+    const CL={he:['הדלקת נרות שבת','הדלקת נרות יום טוב'],en:['Shabbat candles','Yom Tov candles'],
+      fr:['Bougies de Chabbat','Bougies de Yom Tov'],ru:['Свечи Шаббата','Свечи Йом-Това'],ka:['შაბათის სანთლები','იომ ტოვის სანთლები']}[S.lang||'he']||['Shabbat candles','Yom Tov candles'];
+    const out=[];
+    let hd=new HDate(base);
+    for(let i=0;i<WIDGET_DAYS;i++){
+      const st=shabbatTimes(hd, locale);
+      if(st.candle){
+        const isShabbat = hd.getDay()===5 && !st.label;
+        if(!(st.chanukahNight && !isShabbat && !st.label)) out.push({t:st.candle.toISOString(), l:isShabbat?CL[0]:CL[1]});
+      }
+      hd=new HDate(hd.abs()+1);
+    }
+    const json=JSON.stringify(out); WIDGET_CANDLES_CACHE={key:ck,json}; return json;
+  }catch(e){ return null; }
+}
+/* Sefirat HaOmer: [{d:'yyyy-mm-dd', n:1..49}] for the coming days (empty outside the omer). */
+let WIDGET_OMER_CACHE={key:'',json:null};
+function widgetOmerTable(){
+  try{
+    const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const s0=new Date(); s0.setHours(0,0,0,0); const e0=addDays(s0,WIDGET_DAYS);
+    const ck=ymd(s0)+'|'+calIsIL();
+    if(WIDGET_OMER_CACHE.key===ck) return WIDGET_OMER_CACHE.json;
+    const evs=HebrewCalendar.calendar({start:s0,end:e0,il:calIsIL(),omer:true,noHolidays:true,locale:'en'});
+    const out=[];
+    evs.forEach(ev=>{
+      const f=ev.getFlags?ev.getFlags():0; if(!(f&4096)) return;
+      const n=ev.omer||+((/^(\d+)/.exec((ev.getDesc&&ev.getDesc())||'')||[])[1]);
+      if(n) out.push({d:ymd(ev.getDate().greg()),n});
+    });
+    const json=JSON.stringify(out); WIDGET_OMER_CACHE={key:ck,json}; return json;
   }catch(e){ return null; }
 }
 function syncWidgetData(){
@@ -3163,6 +3259,9 @@ function syncWidgetData(){
       candleTime: candle?candle.time:null,
       candleLabel: candle?candle.label:null,
       dayLabels: widgetDayLabels(),
+      zmanim: widgetZmanimTable(),
+      omer: widgetOmerTable(),
+      candles: widgetCandleTable(),
     }).then(syncLiveActivity).catch(()=>{});
   }catch(e){}
 }

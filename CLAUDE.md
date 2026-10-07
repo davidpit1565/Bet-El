@@ -245,6 +245,18 @@ in English as usual.
   lighting offset is Hebcal's default (18 min before sunset; 40 in
   Jerusalem etc.) - NOT a fixed 20 minutes.
 
+- **Widget data sync** (`syncWidgetData()` in index.html -> `BetElWidgetBridge` -> App Group
+  `SharedData.Snapshot`): besides streak/theme/lang/location, the app pushes pre-computed 60-day tables
+  (`WIDGET_DAYS`): exact zmanim (`zmanim`, same values as the app incl. its custom dawn; the widget's
+  `Solar.swift` is only a fallback), parasha/holiday per day (`dayLabels`), the Omer count (`omer`) and
+  every Shabbat/Yom Tov candle lighting (`candles`, Chanukah deliberately excluded). The widgets keep
+  working for ~2 months without opening the app. `WIDGET_TZEIT_ROLLOVER` (index.html) is **false** until
+  nightfall is added to the app UI; flipping it syncs `tzeit` and the widgets then roll their Hebrew
+  date/parasha/Tehillim at nightfall automatically. Widgets follow the iPhone's light/dark appearance
+  (`SystemTheme`), only "he" lays out RTL (fr/ru/ka are LTR with their own strings in `Localization.swift`),
+  taps deep-link via the `betel://` URL scheme (Info.plist) handled by `openWidgetLink()` (tehillim |
+  calendar | tracker), and Smart Stack relevance is set on zmanim/candle entries. Lock Screen widgets
+  (all accessory families) live in `BetElWidgetAccessoryViews.swift`. None of the Swift is compile-verified.
 - **Tefillin Mirror placement guide** (`MirrorGuide` in index.html): MediaPipe
   Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
   first use (needs internet once; nothing at boot). The bayit's bottom edge

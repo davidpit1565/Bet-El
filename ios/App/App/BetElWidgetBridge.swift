@@ -25,6 +25,9 @@ public class BetElWidgetBridge: CAPPlugin, CAPBridgedPlugin {
         let candleTimeISO = call.getString("candleTime")
         let candleLabel = call.getString("candleLabel")
         let dayLabelsJSON = call.getString("dayLabels")
+        let zmanimJSON = call.getString("zmanim")
+        let omerJSON = call.getString("omer")
+        let candlesJSON = call.getString("candles")
 
         let snapshot = BetElSharedData.Snapshot(
             streakCount: streakCount,
@@ -35,7 +38,10 @@ public class BetElWidgetBridge: CAPPlugin, CAPBridgedPlugin {
             longitude: longitude,
             candleTimeISO: candleTimeISO,
             candleLabel: candleLabel,
-            dayLabelsJSON: dayLabelsJSON
+            dayLabelsJSON: dayLabelsJSON,
+            zmanimJSON: zmanimJSON,
+            omerJSON: omerJSON,
+            candlesJSON: candlesJSON
         )
         BetElSharedData.write(snapshot)
 

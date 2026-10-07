@@ -12,6 +12,7 @@ struct BetElWidgetBundle: WidgetBundle {
         if #available(iOS 16.0, *) {
             BetElDateLockWidget()
             BetElSunLockWidget()
+            BetElOmerLockWidget()
         }
         if #available(iOS 16.2, *) {
             BetElLiveActivityWidget()

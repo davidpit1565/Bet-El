@@ -12,44 +12,70 @@ import SwiftUI
 /// App Group snapshot as everything else - see SharedData.swift.
 struct BetElCandleEntry: TimelineEntry {
     let date: Date
-    let theme: String
+    var theme: String
     let lang: String
     let candleTime: Date?
     let candleLabel: String?
+    /// Smart Stack: the candle widget jumps to the top of the stack in the hours before lighting.
+    var relevance: TimelineEntryRelevance? = nil
 }
 
 struct BetElCandleProvider: TimelineProvider {
+    private struct CandleRow: Decodable { let t: String; let l: String }
+
     func placeholder(in context: Context) -> BetElCandleEntry {
-        makeEntry(snapshot: .placeholder)
+        makeEntry(snapshot: .placeholder, at: Date())
     }
 
     func getSnapshot(in context: Context, completion: @escaping (BetElCandleEntry) -> Void) {
-        completion(makeEntry(snapshot: BetElSharedData.read()))
+        completion(makeEntry(snapshot: BetElSharedData.read(), at: Date()))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<BetElCandleEntry>) -> Void) {
         let snapshot = BetElSharedData.read()
-        let entry = makeEntry(snapshot: snapshot)
-        // Nothing more to compute locally once this week's candle time
-        // has passed - the widget just keeps showing it until the app
-        // itself reopens and syncs the next one. Reload right at that
-        // moment anyway (harmless no-op) and again after a day as a
-        // fallback in case the app is opened but the OS is slow to
-        // deliver the reload signal.
         let now = Date()
+        let times = Self.candles(snapshot).map { $0.time }.filter { $0 > now }
+        // one entry now, one a few hours before each coming lighting (so Smart Stack can raise
+        // it) and one right after it (so the widget moves on to the next lighting by itself)
+        var dates: [Date] = [now]
+        for t in times.prefix(8) {
+            dates.append(t.addingTimeInterval(-4 * 3600))
+            dates.append(t.addingTimeInterval(60))
+        }
+        dates = Array(Set(dates.filter { $0 >= now })).sorted()
+        let entries = dates.map { makeEntry(snapshot: snapshot, at: $0) }
         let fallback = Calendar.current.date(byAdding: .day, value: 1, to: now)!
-        let reloadAfter = (entry.candleTime.map { $0 > now ? $0 : fallback }) ?? fallback
-        completion(Timeline(entries: [entry], policy: .after(reloadAfter)))
+        completion(Timeline(entries: entries, policy: .after(dates.last ?? fallback)))
     }
 
-    private func makeEntry(snapshot: BetElSharedData.Snapshot) -> BetElCandleEntry {
-        BetElCandleEntry(
-            date: Date(),
+    /// Every synced lighting, oldest first (falls back to the single legacy time).
+    private static func candles(_ snapshot: BetElSharedData.Snapshot) -> [(time: Date, label: String)] {
+        let iso = ISO8601DateFormatter(); iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let plain = ISO8601DateFormatter()
+        if let json = snapshot.candlesJSON, let data = json.data(using: .utf8),
+           let rows = try? JSONDecoder().decode([CandleRow].self, from: data), !rows.isEmpty {
+            return rows.compactMap { r in
+                guard let d = iso.date(from: r.t) ?? plain.date(from: r.t) else { return nil }
+                return (d, r.l)
+            }.sorted { $0.time < $1.time }
+        }
+        if let t = snapshot.candleTime { return [(t, snapshot.candleLabel ?? "")] }
+        return []
+    }
+
+    private func makeEntry(snapshot: BetElSharedData.Snapshot, at date: Date) -> BetElCandleEntry {
+        let next = Self.candles(snapshot).first(where: { $0.time > date })
+        var entry = BetElCandleEntry(
+            date: date,
             theme: snapshot.theme,
             lang: snapshot.lang,
-            candleTime: snapshot.candleTime,
-            candleLabel: snapshot.candleLabel
+            candleTime: next?.time,
+            candleLabel: (next?.label.isEmpty == false) ? next?.label : snapshot.candleLabel
         )
+        if let t = next?.time, t.timeIntervalSince(date) <= 4 * 3600 {
+            entry.relevance = TimelineEntryRelevance(score: 100, duration: max(60, t.timeIntervalSince(date) + 1800))
+        }
+        return entry
     }
 }
 
@@ -67,6 +93,7 @@ private struct BetElCandleWidgetView: View {
             }
         }
         .environment(\.layoutDirection, .leftToRight)
+        .widgetURL(URL(string: "betel://calendar"))
         .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
 
@@ -120,7 +147,11 @@ struct BetElCandleWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElCandleProvider()) { entry in
-            BetElCandleWidgetView(entry: entry)
+            SystemTheme { (theme: String) -> BetElCandleWidgetView in
+                var e = entry
+                e.theme = theme
+                return BetElCandleWidgetView(entry: e)
+            }
         }
         .configurationDisplayName("הַדְלָקַת נֵרוֹת")
         .description("זְמַן הַדְלָקַת הַנֵּרוֹת הַקָּרוֹב")
