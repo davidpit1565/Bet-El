@@ -757,6 +757,17 @@ a.set-item{text-decoration:none;color:inherit}
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
 
 /* toast */
+.ctx-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+.ctx-sheet{width:100%;max-width:420px;display:flex;flex-direction:column;gap:2px;border-radius:18px;overflow:hidden;background:var(--panel-solid);box-shadow:0 12px 40px rgba(0,0,0,.45);animation:ctxUp .2s ease-out}
+.ctx-title{padding:12px 16px;font-size:13px;color:var(--muted);text-align:center;border-bottom:1px solid rgba(128,128,128,.18)}
+.ctx-sheet button{all:unset;box-sizing:border-box;padding:15px 16px;text-align:center;font-size:17px;color:var(--ink);cursor:pointer;border-bottom:1px solid rgba(128,128,128,.14)}
+.ctx-sheet button:active{background:rgba(128,128,128,.18)}
+.ctx-sheet .ctx-cancel{font-weight:700;border-bottom:0;margin-top:6px}
+@keyframes ctxUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+#ptr{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;transform:translate(-50%,-46px);width:34px;height:34px;border-radius:50%;background:var(--panel-solid);box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:8000;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+#ptr .ptr-dot{width:16px;height:16px;border:2.5px solid var(--gold);border-top-color:transparent;border-radius:50%}
+#ptr.spin .ptr-dot{animation:ptrSpin .7s linear infinite}
+@keyframes ptrSpin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:calc(var(--nav-h) + 20px);left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--panel-solid);border:1px solid var(--line-strong);color:var(--ink);padding:12px 20px;
   border-radius:999px;font-size:14px;z-index:70;opacity:0;pointer-events:none;transition:.3s var(--ease);box-shadow:var(--card-shadow);white-space:nowrap}
@@ -2629,6 +2640,10 @@ Object.assign(I18N.en,{"אנו מעריכים את הזמן שלך. נשמח ל�
 Object.assign(I18N.fr,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Nous apprécions votre temps. Nous serons heureux de recevoir vos suggestions d’amélioration ou vos signalements de problèmes", "הכנס את שמך": "Saisissez votre nom", "הכנס את האימייל שלך": "Saisissez votre e-mail", "הכנס את הודעתך": "Saisissez votre message", "שלח": "Envoyer"});
 Object.assign(I18N.ru,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Мы ценим ваше время. Будем рады предложениям по улучшению и сообщениям о неполадках", "הכנס את שמך": "Введите ваше имя", "הכנס את האימייל שלך": "Введите ваш e-mail", "הכנס את הודעתך": "Введите ваше сообщение", "שלח": "Отправить"});
 Object.assign(I18N.ka,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "ჩვენ ვაფასებთ თქვენს დროს. სიამოვნებით მოვისმენთ გაუმჯობესების წინადადებებს ან შეტყობინებებს პრობლემების შესახებ", "הכנס את שמך": "შეიყვანეთ თქვენი სახელი", "הכנס את האימייל שלך": "შეიყვანეთ თქვენი ელფოსტა", "הכנס את הודעתך": "შეიყვანეთ თქვენი შეტყობინება", "שלח": "გაგზავნა"});
+Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": "Copy", "ביטול": "Cancel", "הטקסט הועתק": "Text copied", "שתוף פרק": "Share chapter"});
+Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
+Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
+Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
 Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
@@ -3249,6 +3264,85 @@ window.betelTabReselect=function(){
     if(inward>70 && Math.abs(dy)<inward*0.6 && Date.now()-st<700){ if(appBack()) { try{ nativeHaptic('impact','light'); }catch(_){} } }
   },{passive:true});
   document.addEventListener('touchcancel',()=>{ edge=''; },{passive:true});
+})();
+
+/* Long-press menu on items (prayer tiles, Tehillim chapters): a small action sheet with Share / Copy,
+   like iOS's own context menus. Plain text selection inside readers stays native (iOS shows its own
+   Copy / Share / Look Up there), so this only targets whole items. */
+(function initLongPressMenu(){
+  let timer=null, sx=0, sy=0, target=null, fired=0;
+  const find=el=>{
+    const q=el.closest&&el.closest('.q-tile[onclick*="openPrayer"], .chapter[data-ch]');
+    if(!q) return null;
+    if(q.classList.contains('chapter')){ const ch=+q.dataset.ch; return ch?{title:ckChrome('שִׁתּוּף פֶּרֶק ')+heNum(ch), text:()=>chapterShareText(ch)}:null; }
+    const m=/openPrayer\('([^']+)'/.exec(q.getAttribute('onclick')||''); if(!m) return null;
+    const key=m[1]; return PRAYERS_EXTRA[key]?{title:PRAYERS_EXTRA[key].title, text:()=>prayerShareText(key), open:()=>q.click()}:null;
+  };
+  function close(){ const o=document.getElementById('ctxSheet'); if(o) o.remove(); }
+  function show(it){
+    close(); nativeHaptic('impact','medium');
+    const o=document.createElement('div'); o.id='ctxSheet'; o.className='ctx-ov';
+    o.innerHTML=`<div class="ctx-sheet"><div class="ctx-title"></div>`+
+      (it.open?`<button data-a="open">${ckChrome('פְּתִיחָה')}</button>`:'')+
+      `<button data-a="share">${ckChrome('שִׁתּוּף')}</button><button data-a="copy">${ckChrome('הַעְתָּקָה')}</button>`+
+      `<button class="ctx-cancel" data-a="x">${ckChrome('בִּטּוּל')}</button></div>`;
+    o.querySelector('.ctx-title').textContent=it.title;
+    o.addEventListener('click',e=>{
+      if(Date.now()-fired<700) return;   // the lift of the long-press finger
+      const a=e.target.closest('button'); const act=a?a.dataset.a:'x';
+      close();
+      if(act==='share') shareDirect(it.title,it.text()); else if(act==='copy') copyText(it.text()); else if(act==='open') it.open();
+    });
+    document.body.appendChild(o);
+  }
+  document.addEventListener('touchstart',e=>{
+    if(HOME_EDIT||e.touches.length!==1) return;
+    const it=find(e.target); if(!it) return;
+    const t=e.touches[0]; sx=t.clientX; sy=t.clientY; target=e.target;
+    clearTimeout(timer); timer=setTimeout(()=>{ fired=Date.now(); show(it); },480);
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    const t=e.touches[0]; if(timer && (Math.abs(t.clientX-sx)>8||Math.abs(t.clientY-sy)>8)){ clearTimeout(timer); timer=null; }
+  },{passive:true});
+  ['touchend','touchcancel'].forEach(ev=>document.addEventListener(ev,()=>{ clearTimeout(timer); timer=null; },{passive:true}));
+  /* the finger lifting after the menu opened must not also "tap" the item underneath */
+  document.addEventListener('click',e=>{ if(Date.now()-fired<700){ e.stopPropagation(); e.preventDefault(); } },true);
+})();
+/* Pull down from the top of the page to refresh the current screen (re-renders it, recomputes
+   today's date/times, re-syncs the widgets). Same gesture and haptic feel as iOS's own. */
+(function initPullToRefresh(){
+  let sy=0, sx=0, pulling=false, dist=0, ind=null, busy=false;
+  const TH=78;
+  const sc=()=>homeScroller();
+  function ensure(){ if(ind) return ind; ind=document.createElement('div'); ind.id='ptr'; ind.innerHTML='<div class="ptr-dot"></div>'; document.body.appendChild(ind); return ind; }
+  function set(d,spin){ const i=ensure(); i.style.transform=`translate(-50%,${Math.max(0,d)-46}px)`; i.style.opacity=Math.min(1,d/TH); i.classList.toggle('spin',!!spin); i.firstChild.style.transform=spin?'':`rotate(${d*3.2}deg)`; }
+  document.addEventListener('touchstart',e=>{
+    pulling=false; dist=0;
+    if(busy||HOME_EDIT||e.touches.length!==1) return;
+    if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov, #ctxSheet')) return;
+    const t=e.touches[0]; if(t.clientX<26||t.clientX>innerWidth-26) return;
+    if(e.target.closest&&e.target.closest('textarea,input,select,[contenteditable],.home-item')) return;
+    if((sc().scrollTop||0)>0) return;
+    sy=t.clientY; sx=t.clientX; pulling=true;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!pulling) return;
+    const t=e.touches[0], dy=t.clientY-sy;
+    if(dy<=0 || Math.abs(t.clientX-sx)>dy){ if(dist===0) pulling=false; return; }
+    if((sc().scrollTop||0)>0){ pulling=false; set(0); return; }
+    const prev=dist; dist=Math.min(120, dy*0.5); set(dist);
+    if(prev<TH && dist>=TH) nativeHaptic('impact','light');
+  },{passive:true});
+  function end(){
+    if(!pulling) return; pulling=false;
+    if(dist>=TH){
+      busy=true; set(TH,true); nativeHaptic('impact','medium');
+      setTimeout(()=>{ try{ render(); }catch(e){} try{ syncWidgetData(); }catch(e){} setTimeout(()=>{ set(0); busy=false; },450); },250);
+    } else if(dist>0) set(0);
+    dist=0;
+  }
+  document.addEventListener('touchend',end,{passive:true});
+  document.addEventListener('touchcancel',end,{passive:true});
 })();
 /* Widget taps: the widgets link to betel://tehillim | calendar | tracker. Needs the "betel" URL
    scheme in Info.plist; arrives through Capacitor's App plugin (appUrlOpen, plus getLaunchUrl for
@@ -8503,8 +8597,7 @@ function shareDayDetail(hd,events,weekKey){
   if(st.candle) lines.push(T('הַדְלָקַת נֵרוֹת')+': '+fmtTime(st.candle));
   if(st.havdala) lines.push(T('צֵאת הַשַּׁבָּת / חַג')+': '+fmtTime(st.havdala));
   const text=lines.join('\n')+'\n\n— '+T('בית א״ל');
-  if(navigator.share){ navigator.share({text}).catch(()=>{}); }
-  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>toast('הַטֶּקְסְט הֹעֻתַּק')).catch(()=>{}); }
+  shareDirect(lines[0], text);
 }
 
 /* ================= ADDITIONAL PRAYERS ================= */
@@ -12634,24 +12727,23 @@ function settingsRowsTappable(root){
 
 /* ================= ACHIEVEMENTS PAGE (#10) ================= */
 /* ================= SHARE ================= */
+/* ONE share path for the whole app: the system share sheet (iOS/Android native sheet via
+   navigator.share), falling back to copy-to-clipboard + a toast where unavailable. Everything
+   that shares text (chapters, prayers, the day card, the app link, feedback) goes through here. */
+function copyText(text){
+  const done=()=>{ nativeHaptic('notify','success'); toast('הַטֶּקְסְט הֹעֻתַּק'); };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(()=>{}); return; }
+  }catch(e){}
+  try{ const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); }catch(e){}
+}
 function shareDirect(title, text){
-  if(navigator.share){
-    navigator.share({title, text}).catch(()=>{});
-  } else if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(()=>{
-      const t=document.createElement('div');
-      t.textContent=ckChrome('הַטֶּקְסְט הֹעֻתַּק');
-      t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:9999';
-      document.body.appendChild(t);
-      setTimeout(()=>t.remove(),2000);
-    }).catch(()=>{});
-  }
+  nativeHaptic('impact','light');
+  if(navigator.share){ navigator.share({title, text}).catch(()=>{}); }
+  else copyText(text);
 }
-function shareChapter(ch){
-  const verses=T[ch]||[];
-  const text='תהילים · פרק '+heNum(ch)+'\n\n'+verses.join('\n');
-  shareDirect(ckChrome('שִׁתּוּף פֶּרֶק ')+heNum(ch), text);
-}
+function chapterShareText(ch){ return 'תהילים · פרק '+heNum(ch)+'\n\n'+(T[ch]||[]).join('\n'); }
+function shareChapter(ch){ shareDirect(ckChrome('שִׁתּוּף פֶּרֶק ')+heNum(ch), chapterShareText(ch)); }
 function shareApp(){
   const text='📖 תמיד — אפליקציית הלימוד היומי\nחוק לישראל · תהילים יומי · זוהר יומי · לוח עברי וזמני היום:\n'+APP_STORE_URL;
   shareDirect(ckChrome('שִׁתּוּף הָאַפְּלִיקַצְיָה'), text);
@@ -12771,7 +12863,7 @@ function openFeedbackForm(opts){
   if(opts.failed) showFail();
   const txt=()=>feedbackFallbackText(nameEl.value.trim(),emailEl.value.trim(),subjEl.value.trim(),msgEl.value.trim());
   ov.querySelector('#fbCopy').onclick=()=>{ try{ navigator.clipboard.writeText(txt()).then(()=>toast(ckChrome('הועתק'))); }catch(e){} };
-  ov.querySelector('#fbShare').onclick=()=>{ if(navigator.share) navigator.share({title:'תמיד',text:txt()}).catch(()=>{}); else { try{ navigator.clipboard.writeText(txt()); toast(ckChrome('הועתק')); }catch(e){} } };
+  ov.querySelector('#fbShare').onclick=()=>shareDirect('תמיד',txt());
   ov.querySelector('#fbMail').onclick=()=>feedbackMailto(nameEl.value.trim(),emailEl.value.trim(),subjEl.value.trim(),msgEl.value.trim());
   sendBtn.onclick=async()=>{
     sendBtn.disabled=true; errEl.style.display='none';
@@ -13656,24 +13748,17 @@ window.celebrateMilestone = celebrateMilestone;
 window.ckMilestoneCheck = ckMilestoneCheck;
 window.openPrayer = openPrayer;
 window.shareApp = shareApp;
-function sharePrayer(key){
-  const p = PRAYERS_EXTRA[key]; if(!p) return;
+function prayerShareText(key){
+  const p = PRAYERS_EXTRA[key]; if(!p) return '';
   const plain = (p.text||'').split('\n\n')
     .filter(l=>l!=='[[MENORAH]]')
     .map(l=>l.startsWith('[[NOTE]]')?l.slice(8):l)
     .join('\n\n');
-  const text = p.title + '\n\n' + plain + '\n\n— בית א״ל';
-  if(navigator.share){
-    navigator.share({title:p.title, text}).catch(()=>{});
-  } else if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(()=>{
-      const t=document.createElement('div');
-      t.textContent=ckChrome('הַטֶּקְסְט הֹעֻתַּק');
-      t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:9999';
-      document.body.appendChild(t);
-      setTimeout(()=>t.remove(),2000);
-    }).catch(()=>{});
-  }
+  return p.title + '\n\n' + plain + '\n\n— בית א״ל';
+}
+function sharePrayer(key){
+  const p = PRAYERS_EXTRA[key]; if(!p) return;
+  shareDirect(p.title, prayerShareText(key));
 }
 window.sharePrayer = sharePrayer;
 window.shareQR = shareQR;

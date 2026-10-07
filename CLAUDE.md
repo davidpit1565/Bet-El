@@ -276,6 +276,15 @@ in English as usual.
   UIScrollView is the only `scrollsToTop` view; the web view's own is off). Swift not
   compile-verified. The same pair was ported to the friend's halacha-yomit-ios repo (PR #3).
 
+- **Native-feel gestures (index.html, before "Widget taps")**: pull-down-to-refresh
+  (`initPullToRefresh`: at scrollTop 0, re-runs `render()` + `syncWidgetData()`), a long-press
+  action sheet on prayer tiles and Tehillim chapters (`initLongPressMenu`: Open / Share / Copy;
+  add a new target by extending its `find()` selector), and ONE share path - `shareDirect()` /
+  `copyText()` (system share sheet via `navigator.share`, clipboard + toast fallback). Never call
+  `navigator.share` directly in a new feature; go through `shareDirect`. Edge-swipe back is native
+  (`MainViewController.edgePanned`), tapping the active tab again scrolls to top
+  (`betelTabReselect`). New Hebrew UI strings still need nikud-free keys in all four I18N blocks.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
