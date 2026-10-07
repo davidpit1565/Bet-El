@@ -92,6 +92,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeToastBridge())
         bridge?.registerPluginInstance(NativeHomeEditBridge())
         bridge?.registerPluginInstance(NativeCalendarBridge())
+        bridge?.registerPluginInstance(NativeLibraryBridge())
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
@@ -117,6 +118,7 @@ class MainViewController: CAPBridgeViewController {
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
         NativeCalendarBridge.activeController = self
+        NativeLibraryBridge.activeController = self
         NativeToastBridge.activeController = self
         NativeHomeEditBridge.activeController = self
         NativeSettingsBridge.activeController = self
@@ -429,6 +431,7 @@ class MainViewController: CAPBridgeViewController {
         webView?.scrollView.scrollsToTop = false
         let scrollToTop: () -> Void = { [weak self] in
             self?.webView?.evaluateJavaScript("window.betelScrollTop && window.betelScrollTop()", completionHandler: nil)
+            if let lib = self?.nativeLibraryView, !lib.isHidden { lib.scrollToTop() }
             if let sv = self?.nativeCalendarScroll, self?.nativeCalendarView?.isHidden == false {
                 sv.setContentOffset(CGPoint(x: 0, y: -sv.adjustedContentInset.top), animated: true)
             }
@@ -438,6 +441,35 @@ class MainViewController: CAPBridgeViewController {
         view.insertSubview(scrollTopCatcher, at: 0)
         topBar.onTitleTap = scrollToTop
     }
+
+    // MARK: - Native library screen (UICollectionView + glass cards) - see NativeLibrary.swift
+    private var nativeLibraryView: NativeLibraryView?
+
+    func showNativeLibrary(items: [NLItem], rtl: Bool, isDark: Bool) {
+        let lib: NativeLibraryView
+        if let existing = nativeLibraryView {
+            lib = existing
+        } else {
+            lib = NativeLibraryView()
+            lib.translatesAutoresizingMaskIntoConstraints = false
+            lib.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            lib.onSelect = { [weak self] key in
+                self?.webView?.evaluateJavaScript("window.NativeLibraryHost && window.NativeLibraryHost.open('\(key)')", completionHandler: nil)
+            }
+            view.insertSubview(lib, belowSubview: tabBar)
+            NSLayoutConstraint.activate([
+                lib.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+                lib.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                lib.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                lib.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            nativeLibraryView = lib
+        }
+        lib.isHidden = false
+        lib.show(items: items, rtl: rtl, isDark: isDark)
+    }
+
+    func hideNativeLibrary() { nativeLibraryView?.isHidden = true }
 
     // MARK: - Native calendar screen (UICalendarView, iOS 16+) - see NativeCalendar.swift
     private var nativeCalendarView: UIView?

@@ -6677,6 +6677,7 @@ function checkAppUpdate(){
 function render(){
   stopAutoScroll();
   if(TAB!=='calendar') nativeCalHide();
+  if(TAB!=='library') nativeLibHide();
   if(window.__bootHide) setTimeout(window.__bootHide,0); // first screen is about to paint
   try{
     if(TAB==='home') renderHome();
@@ -8663,7 +8664,7 @@ window.NativeCalendarHost={
   },
   onSelect(ymd){ try{ calSetSelected(hdOfYmd(ymd)); }catch(e){} },
   onMode(civil){ CAL.civil=!!civil; },
-  openPortion(a,b){ NATIVE_CAL_SHOWN=false; openReader(chaptersOf([a,b]),{daily:false}); },
+  openPortion(a,b){ openReader(chaptersOf([a,b]),{daily:false}); },
   share(ymd){
     const hd=hdOfYmd(ymd), g=hd.greg();
     shareDayDetail(hd,(calMonthEvents(g,g)[hd.abs()]||[]),currentWeekParshaKey(g));
@@ -9163,7 +9164,23 @@ function openLibraryCat(key){
   if(key==='mishnah') return go('libraryMishnahSedarim');
   if(key==='neviim' || key==='ketuvim'){ LIB.nkCat=key; return go('libraryNKBooks'); }
 }
+/* The Library category grid is a REAL native iOS screen in the app (NativeLibrary.swift: UICollectionView +
+   glass cards); the HTML tiles below are the web/PWA fallback. Set false to force the HTML version. */
+const NATIVE_LIB_ENABLED=true;
+let NATIVE_LIB_SHOWN=false;
+const LIB_CAT_COLORS={torah:'#c45a6e',neviim:'#4f7ea8',ketuvim:'#c98a3f',tehillim:'#d4af5f',mishnah:'#8a6fc9',gemara:'#966e46',rambam:'#969e46',benishchai:'#38a3a5',musar:'#9662a8',tikkuneiZohar:'#e0562e',zohar:'#e0562e',tanya:'#589b4b',chokLeyisrael:'#6f83d6',shnayimMikra:'#3aa87c'};
+function nativeLibHide(){ if(!NATIVE_LIB_SHOWN) return; NATIVE_LIB_SHOWN=false; try{ window.Capacitor.Plugins.NativeLibrary.hide(); }catch(e){} }
+window.NativeLibraryHost={ open(key){ try{ openLibraryCat(key); }catch(e){} } };   // render() of the next tab hides the native screen
 function renderLibrary(){
+  const NL=NATIVE_LIB_ENABLED && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeLibrary;
+  if(NL){
+    app.innerHTML=`${topbar('עיון בספרים','prayers')}<div class="view"></div>`;
+    tr(app);
+    NATIVE_LIB_SHOWN=true;
+    NL.show({isRTL:S.lang==='he', isDark:document.documentElement.dataset.theme==='dark',
+      items:LIBRARY_CATS.map(c=>({key:c.key, title:libCatTileLabel(c.key), color:LIB_CAT_COLORS[c.key]||'#d4af5f'}))}).catch(()=>{});
+    return;
+  }
   app.innerHTML=`
   ${topbar('עיון בספרים','prayers')}
   <div class="view">

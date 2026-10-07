@@ -310,6 +310,12 @@ in English as usual.
   `NATIVE_CAL_ENABLED=false` in index.html - the native calendar code is kept but off.
   Pull-to-refresh is native too (`MainViewController.refreshPanned`: UIPanGestureRecognizer + glass UIActivityIndicatorView, gated by JS `betelCanPull()`; the JS pull is web-only). Still HTML: most list/tile screens.
 
+- **Library category grid is native** (`NativeLibrary.swift`: UICollectionView + compositional layout + glass cards;
+  JS `renderLibrary()` sends `LIBRARY_CATS` titles/colours via `NativeLibrary.show` and gets taps back through
+  `window.NativeLibraryHost.open(key)`; `NATIVE_LIB_ENABLED` toggles it; HTML tiles remain the web fallback). The native
+  overlay is hidden by `render()` whenever TAB !== 'library' - never set the SHOWN flag false yourself before navigating.
+  Next planned conversions: prayers list, then the Library sub-screens.
+
 - **Every visual change must be checked in ALL five languages (he/en/fr/ru/ka), RTL and LTR (user rule)**:
   screenshot each (set `betel_settings` `{lang}` via `addInitScript`), confirm nothing overflows, arrows/buttons are
   mirrored correctly, and translated labels read naturally (add exact I18N keys instead of relying on substring
