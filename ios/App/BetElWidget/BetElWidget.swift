@@ -201,12 +201,12 @@ private struct NextZmanBlock: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(palette.ink)
                 .lineLimit(1).minimumScaleFactor(0.7)
-            Countdown(target: entry.nextZmanTime, from: entry.date, size: countdownSize, color: palette.gold)
-            if showTime, let t = entry.nextZmanTime {
-                Text(timeString(t))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(palette.inkSoft)
-            }
+            // the clock time of the next zman (hours:minutes only - no seconds, no second line)
+            Text(timeString(entry.nextZmanTime))
+                .font(.system(size: countdownSize, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(palette.gold)
+                .lineLimit(1).minimumScaleFactor(0.5)
         }
         .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
     }
@@ -386,7 +386,9 @@ private struct ZmanimWidgetView: View {
                     }
                     Spacer(minLength: 0)
                     GoldDivider(palette: palette)
-                    Countdown(target: entry.nextZmanTime, from: entry.date, size: 22, color: palette.goldBright)
+                    Text(timeString(entry.nextZmanTime))
+                        .font(.system(size: 22, weight: .bold, design: .rounded)).monospacedDigit()
+                        .foregroundColor(palette.goldBright)
                         .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
                 }
                 .padding(12)
@@ -441,7 +443,7 @@ private struct BetElZmanAccessoryView: View {
             Text(entry.nextZmanLabel).font(.system(size: 12)).lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             if let t = entry.nextZmanTime, t > entry.date {
-                Text(t, style: .timer).font(.system(size: 17, weight: .bold)).monospacedDigit()
+                Text(timeString(t)).font(.system(size: 17, weight: .bold)).monospacedDigit()
                     .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             }
         }
