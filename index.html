@@ -2677,6 +2677,14 @@ Object.assign(I18N.en,{"מקום ריק": "Empty space"});
 Object.assign(I18N.fr,{"מקום ריק": "Espace vide"});
 Object.assign(I18N.ru,{"מקום ריק": "Пустое место"});
 Object.assign(I18N.ka,{"מקום ריק": "ცარიელი ადგილი"});
+Object.assign(I18N.en,{"קטגוריה": "Category"});
+Object.assign(I18N.fr,{"קטגוריה": "Catégorie"});
+Object.assign(I18N.ru,{"קטגוריה": "Категория"});
+Object.assign(I18N.ka,{"קטגוריה": "კატეგორია"});
+Object.assign(I18N.en,{"שנה א׳": "Year 1", "שנה ב׳": "Year 2"});
+Object.assign(I18N.fr,{"שנה א׳": "Année 1", "שנה ב׳": "Année 2"});
+Object.assign(I18N.ru,{"שנה א׳": "Год 1", "שנה ב׳": "Год 2"});
+Object.assign(I18N.ka,{"שנה א׳": "წელი 1", "שנה ב׳": "წელი 2"});
 Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
@@ -5402,7 +5410,7 @@ function ckNorm(x){
    with its ו stripped from both sides, which brings the two spellings
    together. The י is left alone: it also marks tens in a numeral (קי״ט,
    ק״ט), and dropping it would let a chapter search match the wrong chapter. */
-function ckSkel(s){ return (s||'').replace(/ו/g,''); }
+function ckSkel(s){ return (s||'').replace(/ו/g,'').toLowerCase(); }   // lower-case too: Latin/Cyrillic names ('Bereshit') must match the lower-cased query
 /* Hebrew numeral -> number, so "פרק י" and "פרק 10" both work */
 const CK_GEM={א:1,ב:2,ג:3,ד:4,ה:5,ו:6,ז:7,ח:8,ט:9,י:10,כ:20,ל:30,מ:40,נ:50,ס:60,ע:70,פ:80,צ:90,ק:100,ר:200,ש:300,ת:400};
 function ckNum(tok){
@@ -8963,7 +8971,46 @@ function libPrefetchSearchData(){
   });
 }
 function libBareMatch(nameSkel, candidateSkel){
-  return !!candidateSkel && !!nameSkel && (nameSkel.indexOf(candidateSkel)>=0 || candidateSkel.indexOf(nameSkel)>=0);
+  if(!candidateSkel || !nameSkel) return false;
+  // a very short query ("נח") must be the START of a name, not a random substring of another one ("פינחס")
+  if(nameSkel.length<=2) return candidateSkel===nameSkel || candidateSkel.indexOf(nameSkel)===0;
+  return nameSkel.indexOf(candidateSkel)>=0 || candidateSkel.indexOf(nameSkel)>=0;
+}
+/* Latin / Cyrillic / Georgian queries: the search keys are Hebrew, so find the Hebrew names whose
+   TRANSLATION in the current language matches what was typed (via the UI dictionary) and search those. */
+const LIB_HE_RE=/[\u0590-\u05FF]/;
+function libFold(x){ return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N} ]/gu,' ').replace(/\s+/g,' ').trim(); }
+/* Well-known English / French / Russian / Georgian names that the UI dictionary does not carry. */
+const LIB_ALIASES=[
+  [['genesis','genese','бытие','დაბადება'],'בראשית','Bereshit'],[['exodus','exode','исход','გამოსვლა'],'שמות','Shemot'],
+  [['leviticus','levitique','левит','ლევიანნი'],'ויקרא','Vayikra'],[['numbers','nombres','числа','რიცხვნი'],'במדבר','Bamidbar'],
+  [['deuteronomy','deuteronome','второзаконие','მეორე რჯული'],'דברים','Devarim'],
+  [['psalms','psalm','psaumes','псалмы','псалтирь','ფსალმუნები','ფსალმუნი'],'תהילים'],
+  [['shema','chema','шма','შემა'],'שמע'],[['proverbs','proverbes','притчи','იგავნი'],'משלי'],
+  [['job','iyov','иов','იობი'],'איוב'],[['noah','noach','ноах','ной','ნოე'],'נח','Noach'],
+];
+function libReverseHebrewKeys(q){
+  const found0=[];
+  const qa=libFold(q);
+  LIB_ALIASES.forEach(([names,he,en])=>{ if(qa.length>=2 && names.some(n=>{ const f=libFold(n); return f===qa || f.indexOf(qa)===0; })){ found0.push(he); if(en) found0.push(en);
+    try{ const pk=Object.keys(PARSHA_HE_NAMES).find(k=>ckBare(PARSHA_HE_NAMES[k])===he); if(pk) found0.push(ckBare(parshaName(pk))); }catch(e){}   // the parasha's name in the current UI language
+  } });
+  // parasha names: their translation in the current language is generated from the Hebrew name
+  try{ if(LEYNING && qa.length>=3) individualParshaKeys().forEach(k=>{ const t=libFold(ckChrome(parshaName(k))); if(t && t.indexOf(qa)===0) found0.push(ckBare(parshaName(k))); }); }catch(e){}
+  return found0.concat(libReverseHebrewKeys0(q)).slice(0,10);
+}
+function libReverseHebrewKeys0(q){
+  const d=(S.lang && S.lang!=='he' && I18N[S.lang]) ? I18N[S.lang] : null; if(!d) return [];
+  const qn=libFold(q); if(qn.length<2) return [];
+  const found=[];
+  for(const k in d){
+    if(!LIB_HE_RE.test(k) || k.length>40) continue;
+    const vn=libFold(d[k]); if(vn.length<2) continue;
+    const sc = vn===qn ? 0 : vn.indexOf(qn)===0 ? 1 : vn.split(' ').some(w=>w.indexOf(qn)===0) ? 2 : -1;
+    if(sc>=0) found.push({k,sc,len:k.length});
+  }
+  found.sort((a,b)=>a.sc-b.sc||a.len-b.len);
+  return found.slice(0,6).map(f=>f.k);
 }
 /* Splits off one trailing chapter/daf number (digit or Hebrew numeral) from
    the query, e.g. "ברכות ב"/"ברכות פרק ב"/"ברכות 2" all yield name="ברכות
@@ -9031,7 +9078,7 @@ function libSearchHits(q){
       if(BIC_INDEX){
         ['year1','year2'].forEach(track=>{
           if(bicParshiot(track).some(p=>p.key===k)){
-            hits.push({group:ckBicUI().title, label:parshaName(k)+' · '+(track==='year1'?'שָׁנָה א׳':'שָׁנָה ב׳'), action:()=>openBicReader(track,k,0)});
+            hits.push({group:ckBicUI().title, label:parshaName(k)+' · '+((S.lang!=='he'&&I18N[S.lang]&&I18N[S.lang][track==='year1'?'שנה א׳':'שנה ב׳'])||(track==='year1'?'שָׁנָה א׳':'שָׁנָה ב׳')), action:()=>openBicReader(track,k,0)});
           }
         });
       }
@@ -9172,14 +9219,19 @@ function libDrawSearch(){
   const active=ckNorm(q).length>=2;
   if(browse) browse.style.display=active?'none':'';
   if(!active){ box.innerHTML=''; return; }
-  const hits=libSearchHits(q);
+  let hits=libSearchHits(q);
+  if(S.lang!=='he' && !LIB_HE_RE.test(q)){
+    const seen=new Set(hits.map(h=>h.group+'|'+h.label));
+    libReverseHebrewKeys(q).forEach(k=>libSearchHits(k).forEach(h=>{ const id=h.group+'|'+h.label; if(!seen.has(id)){ seen.add(id); hits.push(h); } }));
+    hits=hits.slice(0,60);
+  }
   if(!hits.length){ box.innerHTML=`<div class="empty-note">${ckChrome('לֹא נִמְצָא')}</div>`; return; }
   const groups={};
   hits.forEach(h=>{ (groups[h.group]=groups[h.group]||[]).push(h); });
   box.innerHTML=Object.keys(groups).map(g=>`
-    <div class="ck-grp">${g}</div>
+    <div class="ck-grp">${ckChrome(g)}</div>
     <div class="prayers-list">${groups[g].map((h,ix)=>
-      `<div class="prayer-row" data-g="${g}" data-i="${ix}"><span class="prayer-row-title">${h.label}</span>${I.chev}</div>`).join('')}
+      `<div class="prayer-row" data-g="${g}" data-i="${ix}"><span class="prayer-row-title">${ckChrome(h.label)}</span>${I.chev}</div>`).join('')}
     </div>`).join('');
   box.querySelectorAll('.prayer-row').forEach(r=>r.onclick=()=>{ groups[r.dataset.g][+r.dataset.i].action(); });
   tr(box);
