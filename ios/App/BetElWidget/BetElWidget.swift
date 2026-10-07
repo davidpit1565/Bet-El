@@ -673,6 +673,66 @@ struct BetElWidget: Widget {
     }
 }
 
+// MARK: - StandBy (phone charging on its side): big date + parasha, readable from across the room
+
+/// StandBy shows a systemSmall widget at a large scale (two side by side) and, in night mode, drops the
+/// background and tints everything red - so this one is just big type, no card, and it adapts to
+/// `showsWidgetContainerBackground`.
+@available(iOS 17.0, *)
+struct BetElStandByWidget: Widget {
+    let kind: String = "BetElStandByWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            SystemTheme { (theme: String) -> BetElStandByView in
+                var e = entry
+                e.theme = theme
+                return BetElStandByView(entry: e)
+            }
+        }
+        .configurationDisplayName("תָּאֲרִיךְ גָּדוֹל (StandBy)")
+        .description("הַתַּאֲרִיךְ הָעִבְרִי וְהַפָּרָשָׁה בְּאוֹתִיּוֹת גְּדוֹלוֹת, לְמַצַּב StandBy")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+@available(iOS 17.0, *)
+private struct BetElStandByView: View {
+    @Environment(\.showsWidgetContainerBackground) private var showsBackground
+    let entry: BetElEntry
+    var body: some View {
+        let palette = BetElTheme.palette(for: entry.theme)
+        let rtl = WidgetL10n.isRTL(entry.lang)
+        VStack(alignment: .center, spacing: 0) {
+            Text(entry.weekdayText)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(showsBackground ? palette.inkSoft : .primary)
+                .widgetAccentable(false)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(entry.dayText)
+                .font(.system(size: 64, weight: .heavy))
+                .foregroundColor(showsBackground ? palette.goldBright : .primary)
+                .widgetAccentable()
+                .lineLimit(1).minimumScaleFactor(0.4)
+            Text("\(entry.monthText) \(entry.yearText)")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(showsBackground ? palette.ink : .primary)
+                .lineLimit(1).minimumScaleFactor(0.5)
+            if !entry.parashaText.isEmpty {
+                Text(entry.parashaText)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(showsBackground ? palette.inkSoft : .primary)
+                    .lineLimit(1).minimumScaleFactor(0.5)
+                    .padding(.top, 2)
+            }
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .environment(\.layoutDirection, rtl ? .rightToLeft : .leftToRight)
+        .widgetURL(entry.link("calendar"))
+        .widgetBackground(palette: palette)
+    }
+}
+
 /// Lock Screen date: rectangle (date + parasha/holiday), circle (day + month), inline.
 @available(iOS 16.0, *)
 struct BetElDateLockWidget: Widget {

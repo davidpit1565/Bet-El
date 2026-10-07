@@ -31,7 +31,7 @@ If it fails with **"must contain a higher version than the previously
 approved version"**: someone already used that version number on Apple's
 side. Bump both numbers a step further in
 `ios/App/App.xcodeproj/project.pbxproj` (`MARKETING_VERSION` and
-`CURRENT_PROJECT_VERSION`, both appear twice in the file), commit, push,
+`CURRENT_PROJECT_VERSION`, each appears four times: app Debug+Release and the Widget Extension Debug+Release - keep all four equal), commit, push,
 `git pull` again, then repeat steps 3–5. (This app's history: 1.0 build 1 =
 original release; 1.1 was already used somewhere and rejected; 1.2 build 3
 is the next one to try.)
