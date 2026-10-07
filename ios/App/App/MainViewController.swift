@@ -91,6 +91,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeSettingsBridge())
         bridge?.registerPluginInstance(NativeToastBridge())
         bridge?.registerPluginInstance(NativeHomeEditBridge())
+        bridge?.registerPluginInstance(NativeCalendarBridge())
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
@@ -114,6 +115,7 @@ class MainViewController: CAPBridgeViewController {
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
+        NativeCalendarBridge.activeController = self
         NativeToastBridge.activeController = self
         NativeHomeEditBridge.activeController = self
         NativeSettingsBridge.activeController = self
@@ -426,11 +428,53 @@ class MainViewController: CAPBridgeViewController {
         webView?.scrollView.scrollsToTop = false
         let scrollToTop: () -> Void = { [weak self] in
             self?.webView?.evaluateJavaScript("window.betelScrollTop && window.betelScrollTop()", completionHandler: nil)
+            if let sv = self?.nativeCalendarScroll, self?.nativeCalendarView?.isHidden == false {
+                sv.setContentOffset(CGPoint(x: 0, y: -sv.adjustedContentInset.top), animated: true)
+            }
         }
         scrollTopCatcher.frame = CGRect(x: 0, y: 0, width: 2, height: 2)
         scrollTopCatcher.onScrollToTop = scrollToTop
         view.insertSubview(scrollTopCatcher, at: 0)
         topBar.onTitleTap = scrollToTop
+    }
+
+    // MARK: - Native calendar screen (UICalendarView, iOS 16+) - see NativeCalendar.swift
+    private var nativeCalendarView: UIView?
+    private var nativeCalendarScroll: UIScrollView?
+
+    func showNativeCalendar(rtl: Bool, isDark: Bool, lang: String, ymd: String, civil: Bool,
+                            hebrew: String, civilLabel: String, jump: String, today: String, ok: String, share: String) {
+        guard #available(iOS 16.0, *) else { return }
+        let cal: NativeCalendarView
+        if let existing = nativeCalendarView as? NativeCalendarView {
+            cal = existing
+        } else {
+            cal = NativeCalendarView()
+            cal.translatesAutoresizingMaskIntoConstraints = false
+            cal.runJS = { [weak self] js, done in self?.webView?.evaluateJavaScript(js) { r, _ in done(r) } }
+            cal.fire = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+            cal.present = { [weak self] vc in (self?.presentedViewController ?? self)?.present(vc, animated: true) }
+            cal.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            view.insertSubview(cal, belowSubview: tabBar)
+            NSLayoutConstraint.activate([
+                cal.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+                cal.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                cal.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                cal.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            nativeCalendarView = cal
+            nativeCalendarScroll = cal.scrollView
+        }
+        var c = NativeCalendarView.Config()
+        c.rtl = rtl; c.isDark = isDark; c.lang = lang; c.ymd = ymd; c.civil = civil
+        c.hebrewLabel = hebrew; c.civilLabel = civilLabel; c.jumpLabel = jump
+        c.todayLabel = today; c.okLabel = ok; c.shareLabel = share
+        cal.isHidden = false
+        cal.show(c)
+    }
+
+    func hideNativeCalendar() {
+        nativeCalendarView?.isHidden = true
     }
 
     // MARK: - Interactive edge-swipe back (like UINavigationController's pop gesture)

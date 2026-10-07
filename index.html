@@ -2663,6 +2663,10 @@ Object.assign(I18N.en,{"עברי": "Hebrew", "לועזי": "Gregorian", "קפו�
 Object.assign(I18N.fr,{"עברי": "Hébraïque", "לועזי": "Grégorien", "קפוץ": "Aller"});
 Object.assign(I18N.ru,{"עברי": "Евр.", "לועזי": "Григ.", "קפוץ": "Перейти"});
 Object.assign(I18N.ka,{"עברי": "ებრ.", "לועזי": "გრიგ.", "קפוץ": "გადასვლა"});
+Object.assign(I18N.en,{"אישור": "OK"});
+Object.assign(I18N.fr,{"אישור": "OK"});
+Object.assign(I18N.ru,{"אישור": "ОК"});
+Object.assign(I18N.ka,{"אישור": "კარგი"});
 Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
@@ -6658,6 +6662,7 @@ function checkAppUpdate(){
 
 function render(){
   stopAutoScroll();
+  if(TAB!=='calendar') nativeCalHide();
   if(window.__bootHide) setTimeout(window.__bootHide,0); // first screen is about to paint
   try{
     if(TAB==='home') renderHome();
@@ -8435,8 +8440,38 @@ function calMonthEventsHTML(evMap,firstAbs,len){
     <div class="cal-month-ev-list">${rows.join('')}</div>
   </div>`;
 }
+/* The Calendar tab is a REAL native iOS screen when available (NativeCalendar.swift: UICalendarView +
+   UISegmentedControl + glass buttons + a paging day pager). It needs iOS 16+; on older iOS, the web and
+   the PWA, the web calendar below is used. NATIVE_CAL_OK: null = not asked yet, true/false = answer. */
+let NATIVE_CAL_OK=null;
+function nativeCalPlugin(){ try{ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeCalendar; }catch(e){ return null; } }
+function ymdOf(g){ return g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0'); }
+function hdOfYmd(ymd){ const [y,m,d]=ymd.split('-').map(Number); return new HDate(new Date(y,m-1,d,12)); }
+let NATIVE_CAL_SHOWN=false;
+function nativeCalHide(){ if(!NATIVE_CAL_SHOWN) return; NATIVE_CAL_SHOWN=false; try{ nativeCalPlugin().hide(); }catch(e){} }
+function renderCalendarNative(){
+  const NC=nativeCalPlugin();
+  app.innerHTML=`${topbar('לוח עברי')}<div class="view"></div>`;
+  tr(app);
+  const sel=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY):currentHDate();
+  NATIVE_CAL_SHOWN=true;
+  NC.show({
+    isRTL:S.lang==='he', isDark:document.documentElement.dataset.theme==='dark', lang:S.lang||'he',
+    ymd:ymdOf(sel.greg()), civil:!!CAL.civil,
+    labels:{hebrew:ckChrome('עברי'), civil:ckChrome('לועזי'), jump:ckChrome('קפוץ'), today:ckChrome('היום'), ok:ckChrome('אישור'), share:ckChrome('שתף את פרטי היום')}
+  }).catch(()=>{});
+}
 function renderCalendar(){
   if(!CAL){ CAL={civil:false}; calSetSelected(currentHDate()); }
+  const NC=nativeCalPlugin();
+  if(NC){
+    if(NATIVE_CAL_OK===true){ renderCalendarNative(); return; }
+    if(NATIVE_CAL_OK===null){
+      app.innerHTML=`${topbar('לוח עברי')}<div class="view"></div>`;
+      NC.isSupported().then(r=>{ NATIVE_CAL_OK=!!(r&&r.supported); if(TAB==='calendar') renderCalendar(); }).catch(()=>{ NATIVE_CAL_OK=false; if(TAB==='calendar') renderCalendar(); });
+      return;
+    }
+  }
   const today=currentHDate();
   let firstHD,lastHD,len,startDow,monthLabel,yearLabel;
   if(CAL.civil){
@@ -8582,6 +8617,43 @@ function fillJumpSelects(){
   fillM(); fillD();
   y.onchange=()=>{fillM();fillD();}; m.onchange=fillD;
 }
+/* Data + actions for the native calendar screen (NativeCalendar.swift pulls these via evaluateJavaScript). */
+window.NativeCalendarHost={
+  day(ymd){
+    const hd=hdOfYmd(ymd), g=hd.greg(), T=ckChrome;
+    const events=(calMonthEvents(g,g)[hd.abs()]||[]).map(e=>T(e));
+    const mRange=monthlyPortion(hd), wRange=weeklyPortion(hd);
+    const zlist=zmanimList(g).filter(z=>ZMANIM_LIVE||ZMANIM_READY.includes(z.key));
+    const isToday=hd.abs()===currentHDate().abs(); let nextKey=null;
+    if(isToday){ const nx=zlist.find(z=>z.date&&z.date>new Date()); if(nx) nextKey=nx.key; }
+    const weekKey=currentWeekParshaKey(g);
+    const st=shabbatTimes(hd), shabbat=[];
+    if(st.candle) shabbat.push({label:T('הַדְלָקַת נֵרוֹת'),time:fmtTime(st.candle),next:false});
+    if(st.havdala) shabbat.push({label:T('צֵאת הַשַּׁבָּת / חַג'),time:fmtTime(st.havdala),next:false});
+    return {
+      ymd, title:T(dowName(hd)+' · '+heNum(hd.getDate())+' '+monthName(hd)),
+      greg:g.toLocaleDateString(civilDateLocale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
+      events, parashaLabel:weekKey?T('פָּרָשַׁת הַשָּׁבוּעַ'):null, parasha:weekKey?parshaName(weekKey):null,
+      portions:[{label:T('קְרִיאָה חָדְשִׁית'),val:heNum(mRange[0])+'–'+heNum(mRange[1]),a:mRange[0],b:mRange[1]},
+                {label:T('קְרִיאָה שְׁבוּעִית'),val:heNum(wRange[0])+'–'+heNum(wRange[1]),a:wRange[0],b:wRange[1]}],
+      loc:T(LOC.name),
+      zmanim:zlist.map(z=>({label:T(z.label),time:fmtTime(z.date),next:z.key===nextKey})),
+      shabbat
+    };
+  },
+  events(a,b){
+    const [y1,m1,d1]=a.split('-').map(Number), [y2,m2,d2]=b.split('-').map(Number);
+    const map=calMonthEvents(new Date(y1,m1-1,d1),new Date(y2,m2-1,d2));
+    return Object.keys(map).map(k=>ymdOf(new HDate(+k).greg()));
+  },
+  onSelect(ymd){ try{ calSetSelected(hdOfYmd(ymd)); }catch(e){} },
+  onMode(civil){ CAL.civil=!!civil; },
+  openPortion(a,b){ NATIVE_CAL_SHOWN=false; openReader(chaptersOf([a,b]),{daily:false}); },
+  share(ymd){
+    const hd=hdOfYmd(ymd), g=hd.greg();
+    shareDayDetail(hd,(calMonthEvents(g,g)[hd.abs()]||[]),currentWeekParshaKey(g));
+  }
+};
 function renderDayDetail(hd, events){
   const el=document.getElementById('dayDetail'); if(!el) return;
   const g=hd.greg();

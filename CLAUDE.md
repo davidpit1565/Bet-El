@@ -299,10 +299,14 @@ in English as usual.
   "Library" for the active-tab highlight (`LIBRARY_NESTED_TABS`, `navActiveTab`). The home screen's
   Tehillim shortcut still works.
 
-- **Calendar screen is iOS-Calendar styled** (`renderCalendar`/`renderDayDetail`, `.ical-*` CSS): segmented
-  Hebrew/Gregorian control, big month title with round chevrons, plain number grid in one glass card with a
-  filled gold circle on the selected day, and a day card you can swipe sideways (or use its arrows) to move
-  day by day - `calStepDay(delta)` moves the selection and the displayed month follows. Flat fills only.
+- **"iOS" in a user request means the REAL Apple component, never a web look-alike (user rule, stated
+  repeatedly).** If UIKit/SwiftUI has the control, use it via a native bridge; the HTML version is only the
+  fallback for web/PWA/old iOS. The Calendar tab is the example: `NativeCalendar.swift` (UICalendarView with a
+  real `.hebrew`/`.gregorian` Calendar, UISegmentedControl, glass `UIButton.Configuration`, UIDatePicker sheet
+  for "jump", and a paging UIScrollView day pager: swipe sideways = next/previous day). Day data comes from
+  `window.NativeCalendarHost.day(ymd)` / `.events(a,b)` in index.html (`renderCalendarNative`; needs iOS 16+,
+  `NATIVE_CAL_OK`). The web calendar (`renderCalendar`, `.ical-*` CSS, `calStepDay`) remains the fallback.
+  Still HTML imitations (no native equivalent wired yet): pull-to-refresh indicator, most list/tile screens.
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
