@@ -93,6 +93,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeHomeEditBridge())
         bridge?.registerPluginInstance(NativeCalendarBridge())
         bridge?.registerPluginInstance(NativeLibraryBridge())
+        bridge?.registerPluginInstance(NativeHomeBridge())
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
@@ -120,6 +121,7 @@ class MainViewController: CAPBridgeViewController {
         NativeModalBridge.activeController = self
         NativeCalendarBridge.activeController = self
         NativeLibraryBridge.activeController = self
+        NativeHomeBridge.activeController = self
         NativeToastBridge.activeController = self
         NativeHomeEditBridge.activeController = self
         NativeSettingsBridge.activeController = self
@@ -433,6 +435,7 @@ class MainViewController: CAPBridgeViewController {
         let scrollToTop: () -> Void = { [weak self] in
             self?.webView?.evaluateJavaScript("window.betelScrollTop && window.betelScrollTop()", completionHandler: nil)
             if let lib = self?.nativeLibraryView, !lib.isHidden { lib.scrollToTop() }
+            if let home = self?.nativeHomeView, !home.isHidden { home.scrollToTop() }
             if let sv = self?.nativeCalendarScroll, self?.nativeCalendarView?.isHidden == false {
                 sv.setContentOffset(CGPoint(x: 0, y: -sv.adjustedContentInset.top), animated: true)
             }
@@ -471,6 +474,37 @@ class MainViewController: CAPBridgeViewController {
     }
 
     func hideNativeLibrary() { nativeLibraryView?.isHidden = true }
+
+    // MARK: - Native home screen (UICollectionView + real edit mode) - see NativeHome.swift
+    private var nativeHomeView: NativeHomeView?
+
+    func showNativeHome(items: [NHItem], editing: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
+        let home: NativeHomeView
+        if let existing = nativeHomeView {
+            home = existing
+        } else {
+            home = NativeHomeView()
+            home.translatesAutoresizingMaskIntoConstraints = false
+            home.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            home.js = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+            view.insertSubview(home, belowSubview: tabBar)
+            NSLayoutConstraint.activate([
+                home.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+                home.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                home.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                home.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            home.setLogo(pendingHomeLogo)
+            nativeHomeView = home
+        }
+        home.isHidden = false
+        home.show(items: items, editing: editing, rtl: rtl, isDark: isDark, pool: pool)
+    }
+
+    func hideNativeHome() { nativeHomeView?.isHidden = true }
+    func updateNativeHomeNumbers(_ map: [String: String]) { nativeHomeView?.updateNumbers(map) }
+    func setNativeHomeLogo(_ image: UIImage?) { pendingHomeLogo = image; nativeHomeView?.setLogo(image) }
+    private var pendingHomeLogo: UIImage?
 
     // MARK: - Native calendar screen (UICalendarView, iOS 16+) - see NativeCalendar.swift
     private var nativeCalendarView: UIView?

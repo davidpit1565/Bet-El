@@ -430,3 +430,13 @@ in English as usual.
   actually exercise all of these - especially starting the Live Activity
   and checking the Lock Screen banner and Dynamic Island - before
   assuming any of them work.
+
+- **The HOME screen is a real native iOS screen** (`NativeHome.swift`: `NativeHomeView` UICollectionView + glass `NHCell`s;
+  JS `homeNativePush()` / `homeNativeSpec()` in index.html read every `.home-item` out of the (now hidden) HTML home and send a
+  plain spec through `NativeHome.show`; taps/layout come back through `window.NativeHomeHost`: open / sub / enterEdit / layout).
+  The HTML home still renders and stays the source of truth (translations, order, sizes, data, loaders); `html.native-home`
+  hides it. Edit mode is native: long press -> wiggle (`nhWiggleEnabled`), minus badge -> `NativeHomeEditHost.minus`, + / check
+  glass pills, drag to move (my own long-press + snapshot; dropping on an empty cell swaps so nothing slides up), corner grip to
+  toggle regular <-> wide, add sheet = `NativeHomeEdit.showAddSheet` (native). Empty cells are real `spacer1..12` items kept
+  complete per row by `normalizeSpacers()`. Tile sizes are only `s`/`l` (stat cards and social: `s`/`m`). To change what a home
+  item shows natively, extend `homeNativeSpec()` (JS) + `NHCell.configure` (Swift). Web/PWA keep the HTML home. Not compile-verified.

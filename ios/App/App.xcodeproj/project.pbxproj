@@ -48,6 +48,7 @@
 		A1B2C3D4E5F60718293A4B5C /* NativeHomeEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5D /* NativeHomeEdit.swift */; };
 		A1B2C3D4E5F60718293A4B60 /* NativeCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B61 /* NativeCalendar.swift */; };
 		A1B2C3D4E5F60718293A4B62 /* NativeLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B63 /* NativeLibrary.swift */; };
+		A1B2C3D4E5F60718293A4B64 /* NativeHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B65 /* NativeHome.swift */; };
 		7BE1EC9F2197E2A403D8C9D9 /* NativeToastBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EE0FBFC77A3BB2EDF48C60 /* NativeToastBridge.swift */; };
 		D7FDDA1C5DE4E8BEC38E0C7E /* NativeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0560A6B6A92127FD742CD38 /* NativeSettingsView.swift */; };
 		F67D27C4CF665B6C3EDE3DB5 /* NativeSettingsBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C52B520E04435FBB9792A7 /* NativeSettingsBridge.swift */; };
@@ -123,6 +124,7 @@
 		A1B2C3D4E5F60718293A4B5D /* NativeHomeEdit.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeHomeEdit.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B61 /* NativeCalendar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeCalendar.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B63 /* NativeLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeLibrary.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B65 /* NativeHome.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeHome.swift; sourceTree = "<group>"; };
 		D0EE0FBFC77A3BB2EDF48C60 /* NativeToastBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeToastBridge.swift; sourceTree = "<group>"; };
 		C0560A6B6A92127FD742CD38 /* NativeSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeSettingsView.swift; sourceTree = "<group>"; };
 		C1C52B520E04435FBB9792A7 /* NativeSettingsBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeSettingsBridge.swift; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				A1B2C3D4E5F60718293A4B5D /* NativeHomeEdit.swift */,
 				A1B2C3D4E5F60718293A4B61 /* NativeCalendar.swift */,
 				A1B2C3D4E5F60718293A4B63 /* NativeLibrary.swift */,
+				A1B2C3D4E5F60718293A4B65 /* NativeHome.swift */,
 				C0560A6B6A92127FD742CD38 /* NativeSettingsView.swift */,
 				C1C52B520E04435FBB9792A7 /* NativeSettingsBridge.swift */,
 				1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */,
@@ -390,6 +393,7 @@
 				A1B2C3D4E5F60718293A4B5C /* NativeHomeEdit.swift in Sources */,
 				A1B2C3D4E5F60718293A4B60 /* NativeCalendar.swift in Sources */,
 				A1B2C3D4E5F60718293A4B62 /* NativeLibrary.swift in Sources */,
+				A1B2C3D4E5F60718293A4B64 /* NativeHome.swift in Sources */,
 				D7FDDA1C5DE4E8BEC38E0C7E /* NativeSettingsView.swift in Sources */,
 				F67D27C4CF665B6C3EDE3DB5 /* NativeSettingsBridge.swift in Sources */,
 				7EEB8A1EC9332A30A983694D /* NativeModalView.swift in Sources */,

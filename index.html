@@ -1716,6 +1716,7 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
 /* edit mode (modelled on the iPhone's home-screen edit mode: a gentle wiggle, a small gray minus,
    a corner handle to resize, drag the tile itself, a quiet + and check at the top) */
 .home-edit .home-item{animation:none!important}   /* perfectly still in edit mode - no wiggle, no re-entry animation */
+html.native-home #app>.view{display:none}   /* the real native home (NativeHome.swift) replaces the HTML grid in the iOS app */
 .home-spacer{min-height:104px;border-radius:var(--radius-sm)}
 .home-edit .home-spacer{border:2px dashed var(--line-strong);opacity:.65}
 /* in the iOS app the controls are native overlays - keep the tiles still (no wiggle, it read as jitter) */
@@ -6698,6 +6699,7 @@ function render(){
   stopAutoScroll();
   if(TAB!=='calendar') nativeCalHide();
   if(TAB!=='library') nativeLibHide();
+  if(TAB!=='home') homeNativeHide();
   if(TAB!=='prayers'){ try{ if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.NativeTabBar) Capacitor.Plugins.NativeTabBar.hideSearch().catch(()=>{}); }catch(e){} }   // the native search field belongs to the Prayers/search screen only
   if(window.__bootHide) setTimeout(window.__bootHide,0); // first screen is about to paint
   try{
@@ -6865,6 +6867,7 @@ function heTitle(plain,nikud){ return (S.lang && S.lang!=='he') ? plain : nikud;
    full width. HOME_CATALOG is declarative - to offer a new button, add it
    here and give it a renderer in renderHome()'s `mods`. */
 const HOME_LAYOUT_KEY='betel_home_layout_v1';
+const HOME_SPACER_IDS=Array.from({length:12},(_,i)=>'spacer'+(i+1));
 let HOME_EDIT=false, HOME_LP_AT=0;
 const HOME_CATALOG={
   hero:{kind:'block',label:'כותרת ותאריך'},
@@ -6902,13 +6905,13 @@ const HOME_CATALOG={
   spacer1:{kind:'tile',label:'מקום ריק'},   // invisible placeholders: leave a gap anywhere (e.g. one tile on the left only)
   spacer2:{kind:'tile',label:'מקום ריק'},
   spacer3:{kind:'tile',label:'מקום ריק'},
-  spacer4:{kind:'tile',label:'מקום ריק'},
-  spacer5:{kind:'tile',label:'מקום ריק'},
-  spacer6:{kind:'tile',label:'מקום ריק'},
+  spacer4:{kind:'tile',label:'מקום ריק'},spacer5:{kind:'tile',label:'מקום ריק'},spacer6:{kind:'tile',label:'מקום ריק'},
+  spacer7:{kind:'tile',label:'מקום ריק'},spacer8:{kind:'tile',label:'מקום ריק'},spacer9:{kind:'tile',label:'מקום ריק'},
+  spacer10:{kind:'tile',label:'מקום ריק'},spacer11:{kind:'tile',label:'מקום ריק'},spacer12:{kind:'tile',label:'מקום ריק'},
 };
 const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
-  {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
+  {id:'chok',size:'s'},{id:'tehillim',size:'s'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},
   {id:'tikkunei',size:'l'},{id:'visitors',size:'s'},{id:'live',size:'s'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
@@ -6916,7 +6919,7 @@ function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
   let raw=null;
   try{ raw=JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)||'null'); }catch(e){}
-  if(!Array.isArray(raw)) return homeDefaultLayout();
+  if(!Array.isArray(raw)) raw=homeDefaultLayout();   // the default goes through the same size clean-up below
   // the old single "stats" block became two separate ones
   raw=raw.flatMap(it=> it && it.id==='stats' ? [{id:'visitors',size:'s'},{id:'live',size:'s'}] : [it]);
   const seen=new Set(), out=[];
@@ -6987,7 +6990,7 @@ function homeGridHTML(mods){
 
 function homeAddSheet(){
   const layout0=getHomeLayout(), have=new Set(layout0.map(x=>x.id));
-  const isSp=id=>/^spacer\d$/.test(id);
+  const isSp=id=>/^spacer\d+$/.test(id);
   const SPACER_LABEL=ckChrome('מקום ריק');
   // available: everything not on the home yet; the empty-space slot is offered while a slot is free
   const rows=Object.keys(HOME_CATALOG).filter(id=>!HOME_CATALOG[id].fixed && !HOME_CATALOG[id].keep && !have.has(id) && !isSp(id))
@@ -7129,10 +7132,10 @@ function homeBindDrag(grid){
        an empty-space cell is inserted before it instead of the grid pulling everything up (iPhone-style). */
     try{
       const gr=grid.getBoundingClientRect(), mid=gr.left+gr.width/2, id0=it.dataset.homeItem;
-      if(!it.classList.contains('hi-wide') && !/^spacer\d$/.test(id0)){
+      if(!it.classList.contains('hi-wide') && !/^spacer\d+$/.test(id0)){
         const r=it.getBoundingClientRect(), flowRight=(r.left+r.width/2)>mid, wantRight=st.px>mid;
-        const usedSp=new Set(order.filter(x=>/^spacer\d$/.test(x)));
-        const freeSp=['spacer1','spacer2','spacer3','spacer4','spacer5','spacer6'].find(x=>!usedSp.has(x));
+        const usedSp=new Set(order.filter(x=>/^spacer\d+$/.test(x)));
+        const freeSp=HOME_SPACER_IDS.find(x=>!usedSp.has(x));
         if(flowRight!==wantRight && freeSp){ const i=order.indexOf(id0); order.splice(i,0,freeSp); }
       }
     }catch(_){}
@@ -7184,7 +7187,7 @@ function homeResizeApply(item,size){
 /* positions of every tile, handed to the native glass overlay */
 let HOME_SYNC_RAF=0, HOME_SYNC_HIDE=false, HOME_SCROLL_T=null;
 function homeSyncNative(){
-  if(!homeNativeEdit()) return;
+  if(!homeNativeEdit() || HOME_NG_ON) return;
   if(HOME_SYNC_RAF) cancelAnimationFrame(HOME_SYNC_RAF);
   HOME_SYNC_RAF=requestAnimationFrame(()=>{
     HOME_SYNC_RAF=0;
@@ -7241,6 +7244,85 @@ window.NativeHomeEditHost={
     delete HOME_NRES[id];
     st.item.classList.remove('resizing');
     if(st.changed) homeKeepScroll(renderHome); else homeSyncNative();
+  }
+};
+
+/* ================= NATIVE HOME (NativeHome.swift) =================
+   In the iOS app the home is a real UICollectionView with the iPhone's own edit mode. The HTML home still renders
+   (hidden) and is the source of truth: homeNativePush() reads every .home-item out of it and sends a plain spec. */
+const NATIVE_HOME_ENABLED=true;
+let HOME_NG_ON=false, HOME_NG_LOGO=false, HOME_NG_TIMER=null, HOME_NG_LAST='';
+function homeNativePlugin(){ try{ return NATIVE_HOME_ENABLED && window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.NativeHome; }catch(e){ return null; } }
+const HOME_TILE_COLORS={chok:'#6f83d6',tehillim:'#d4af5f',zohar:'#e0562e',shnayim:'#3aa87c',siddur:'#8a9a3a',musar:'#9662a8',benishchai:'#38a3a5',torah:'#c45a6e',neviim:'#4f7ea8',ketuvim:'#c98a3f',mishnah:'#8a6fc9',gemara:'#966e46',rambam:'#969e46',tanya:'#589b4b',more:'#7f8fa6'};
+function homeNativeSpec(){
+  const out=[], layout=getHomeLayout();
+  document.querySelectorAll('#homeGrid .home-item').forEach(el=>{
+    const id=el.dataset.homeItem, def=HOME_CATALOG[id]||{}, fixed=el.classList.contains('hi-fixed');
+    const T=(root,sel)=>{ const n=(root||el).querySelector(sel); return n?n.textContent.replace(/\s+/g,' ').trim():''; };
+    const lay=layout.find(x=>x.id===id)||{size:'s'};
+    const base={id,kind:'tile',size:el.dataset.size||lay.size||'s',sizes:def.sizes||(def.kind==='tile'?['s','l']:[]),
+      removable:!def.keep&&!fixed,movable:!fixed,resizable:!!(def.sizes||def.kind==='tile'),color:'#d4af5f',done:false,title:'',subtitle:'',lines:[],rows:[],number:'',badge:'',wide:el.classList.contains('hi-wide')};
+    if(HOME_SPACER_IDS.includes(id)){ out.push({...base,kind:'spacer',removable:true,movable:true,resizable:false,sizes:[]}); return; }
+    const tile=el.querySelector('.q-tile'), stat=el.querySelector('.stat-card');
+    if(tile){
+      const qd=[...tile.querySelectorAll('.qd')].map(n=>n.textContent.replace(/\s+/g,' ').trim()).filter(Boolean);
+      out.push({...base,kind:'tile',title:T(tile,'.qt'),subtitle:qd.join('\n'),color:HOME_TILE_COLORS[tile.dataset.cat]||'#d4af5f',done:tile.classList.contains('done')});
+    }else if(stat){
+      out.push({...base,kind:'stat',title:T(stat,'.sc-label'),number:T(stat,'.sc-num'),badge:id==='live'?'dot.radiowaves.left.and.right':'person.2.fill',color:'#d4af5f'});
+    }else if(el.querySelector('.home-hero-frame')){
+      out.push({...base,kind:'hero',title:T(el,'.greeting'),subtitle:T(el,'.date-heb'),lines:[T(el,'.date-greg'),T(el,'.zman-strip')]});
+    }else if(id==='banners'){
+      const lines=[...el.querySelectorAll('.yahrzeit-strip')].map(n=>n.textContent.replace(/\s+/g,' ').trim());
+      if(lines.length) out.push({...base,kind:'banner',lines,color:'#d4af5f'});
+    }else if(id==='candleBand' || id==='dedication'){
+      const lines=[...el.querySelectorAll('.greeting,.ded-multi span')].map(n=>n.textContent.replace(/\s+/g,' ').trim()).filter(Boolean);
+      if(lines.length) out.push({...base,kind:'text',lines});
+    }else if(el.querySelector('.sm-week-card')){
+      out.push({...base,kind:'tikkunei',title:T(el,'.sm-week-tag'),subtitle:T(el,'.sm-week-name'),done:!!el.querySelector('.tr-done')});
+    }else if(el.querySelector('.home-zmanim')){
+      out.push({...base,kind:'zmanim',title:T(el,'.hz-title'),rows:[...el.querySelectorAll('.zman-row')].map(r=>({a:T(r,'.zname'),b:T(r,'.ztime'),hl:r.classList.contains('next')}))});
+    }else if(el.querySelector('.dedication-panel')){
+      out.push({...base,kind:'dedication',title:T(el,'.ded-panel-label'),subtitle:[...el.querySelectorAll('.ded-name-nowrap')].map(n=>n.textContent.trim()).join(' · '),lines:[T(el,'.ded-panel-foot')]});
+    }else if(el.querySelector('.social-links')){
+      out.push({...base,kind:'social',lines:[...el.querySelectorAll('.social-link')].map(a=>a.getAttribute('aria-label')||'')});
+    }
+  });
+  return out;
+}
+function homeNativePush(){
+  const NH=homeNativePlugin();
+  if(!NH || TAB!=='home'){ HOME_NG_ON=false; document.documentElement.classList.remove('native-home'); return; }
+  const items=homeNativeSpec();
+  if(!items.some(i=>i.movable)){   // nothing left to show: the HTML view's big logo / hint takes over
+    HOME_NG_ON=false; document.documentElement.classList.remove('native-home'); NH.hide().catch(()=>{}); return;
+  }
+  HOME_NG_ON=true; document.documentElement.classList.add('native-home');
+  if(!HOME_NG_LOGO && typeof LOGO==='string'){ HOME_NG_LOGO=true; NH.setLogo({data:LOGO}).catch(()=>{ HOME_NG_LOGO=false; }); }
+  const have=new Set(getHomeLayout().map(x=>x.id));
+  NH.show({items,editing:!!HOME_EDIT,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),
+    spacerPool:HOME_SPACER_IDS.filter(x=>!have.has(x))}).catch(()=>{});
+  if(!HOME_NG_TIMER) HOME_NG_TIMER=setInterval(()=>{   // the Firebase counters paint into the (hidden) HTML cards; mirror them
+    if(!HOME_NG_ON||TAB!=='home') return;
+    const v=document.getElementById('visitCount'), l=document.getElementById('liveCount'), key=(v?v.textContent:'')+'|'+(l?l.textContent:'');
+    if(key===HOME_NG_LAST) return; HOME_NG_LAST=key;
+    const nh=homeNativePlugin(); if(!nh) return;
+    nh.setNumbers({items:[{id:'visitors',number:v?v.textContent:''},{id:'live',number:l?l.textContent:''}]}).catch(()=>{});
+  },1200);
+}
+function homeNativeHide(){ if(!HOME_NG_ON) return; HOME_NG_ON=false; document.documentElement.classList.remove('native-home'); try{ homeNativePlugin().hide().catch(()=>{}); }catch(e){} }
+window.NativeHomeHost={
+  open(id){ const el=document.querySelector(`#homeGrid [data-home-item="${id}"]`); if(el && !HOME_EDIT) el.click(); },
+  sub(id,i){
+    const el=document.querySelector(`#homeGrid [data-home-item="${id}"]`); if(!el||HOME_EDIT) return;
+    const subs=el.querySelectorAll('.yahrzeit-strip,.social-link'); if(subs[i]) subs[i].click();
+  },
+  enterEdit(){ HOME_LP_AT=Date.now(); homeEnterEdit(); },
+  layout(list){   // the native edit mode moved / resized things: save it (no re-render, native already shows it)
+    if(!Array.isArray(list)) return;
+    const cur=Object.fromEntries(getHomeLayout().map(x=>[x.id,x]));
+    const next=list.filter(x=>x&&HOME_CATALOG[x.id]).map(x=>({id:x.id,size:x.size||(cur[x.id]&&cur[x.id].size)||'s'}));
+    Object.keys(cur).forEach(id=>{ if(!next.some(x=>x.id===id) && (HOME_CATALOG[id].fixed||HOME_CATALOG[id].keep)) next.push(cur[id]); });
+    saveHomeLayout(homeNormalize(next));
   }
 };
 function homeBindResize(grid){
@@ -7369,6 +7451,7 @@ function HOME_SHORTCUTS(){
   ];
 }
 function renderHome(){
+  if(homeNativePlugin()) document.documentElement.classList.add('native-home');   // no flash of the HTML home before the native one shows
   const hd=currentHDate();
   const range=portionFor(hd); const chs=chaptersOf(range);
   const nz=nextZmanText();
@@ -7496,7 +7579,7 @@ function renderHome(){
         ${sz!=='s'?`<div class="qd">${sc.desc()}</div>`:''}
       </div>`;
   });
-  ['spacer1','spacer2','spacer3','spacer4','spacer5','spacer6'].forEach(id=>{ mods[id]=()=>`<div class="home-spacer" aria-hidden="true"></div>`; });
+  HOME_SPACER_IDS.forEach(id=>{ mods[id]=()=>`<div class="home-spacer" aria-hidden="true"></div>`; });
   app.innerHTML = `
   ${topbar('תמיד', null, null, {title:''})}
   <div class="view">
@@ -7544,6 +7627,7 @@ function renderHome(){
      the tab). */
   if(!document.getElementById('homeChokCard') && !CHOK) ensureChokIndex().then(()=>{ if(TAB==='home') render(); });
   homeWireCustomize();
+  setTimeout(homeNativePush,0);   // after render()'s own translation pass
 }
 
 /* ================= READING TRACKER ================= */
