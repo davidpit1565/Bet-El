@@ -436,7 +436,7 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
    number grid with a filled circle on the selected day, swipeable day card. Flat fills only
    (no backdrop-filter - see the Liquid Glass note below). ---- */
 .ical-seg{display:flex;padding:3px;border-radius:999px;background:var(--panel-2);border:var(--glass-border);margin:2px 0 14px}
-.ical-seg button{flex:1;border:0;background:none;color:var(--ink-soft);font-family:var(--font-ui);font-size:14px;font-weight:600;padding:9px 6px;border-radius:999px;cursor:pointer;transition:background .25s var(--ease),color .25s var(--ease),box-shadow .25s var(--ease)}
+.ical-seg button{flex:1;border:0;background:none;color:var(--ink-soft);font-family:var(--font-ui);font-size:13.5px;font-weight:600;line-height:1.15;padding:9px 6px;border-radius:999px;cursor:pointer;transition:background .25s var(--ease),color .25s var(--ease),box-shadow .25s var(--ease)}
 .ical-seg button.on{background:var(--gold-grad);color:#2a1e05;box-shadow:0 4px 12px -6px rgba(184,134,11,.7),inset 0 1px 0 rgba(255,255,255,.4)}
 .ical-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 10px}
 .ical-title{display:flex;align-items:baseline;gap:8px;min-width:0}
@@ -2665,6 +2665,10 @@ Object.assign(I18N.en,{"אישור": "OK"});
 Object.assign(I18N.fr,{"אישור": "OK"});
 Object.assign(I18N.ru,{"אישור": "ОК"});
 Object.assign(I18N.ka,{"אישור": "კარგი"});
+Object.assign(I18N.en,{"לוח לועזי": "Gregorian Calendar"});
+Object.assign(I18N.fr,{"לוח לועזי": "Calendrier grégorien"});
+Object.assign(I18N.ru,{"לוח לועזי": "Григорианский календарь"});
+Object.assign(I18N.ka,{"לוח לועזי": "გრიგორიანული კალენდარი"});
 Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
@@ -8515,8 +8519,8 @@ function renderCalendar(){
   ${topbar('לוח עברי')}
   <div class="view">
     <div class="ical-seg cal-mode-toggle">
-      <button data-mode="heb" class="${!CAL.civil?'on':''}">${S.lang==='he'?'לוח עברי':'עברי'}</button>
-      <button data-mode="civil" class="${CAL.civil?'on':''}">${S.lang==='he'?'לוח לועזי':'לועזי'}</button>
+      <button data-mode="heb" class="${!CAL.civil?'on':''}">לוח עברי</button>
+      <button data-mode="civil" class="${CAL.civil?'on':''}">לוח לועזי</button>
     </div>
     <div class="ical-head">
       <div class="ical-title cal-month ${_anim}"><span class="m">${monthLabel}</span><span class="y">${yearLabel}</span></div>
