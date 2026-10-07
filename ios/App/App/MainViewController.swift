@@ -665,9 +665,8 @@ class MainViewController: CAPBridgeViewController {
         homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
         homeEditOverlay.topInset = { [weak self] in
             guard let self = self else { return 0 }
-            // below the safe area AND below the native header when it is showing
-            let header = self.topBar.isHidden ? 0 : self.topBar.frame.maxY
-            return max(self.view.safeAreaInsets.top, header)
+            // just under the status bar / Dynamic Island, like the iPhone's own edit mode
+            return self.view.safeAreaInsets.top
         }
         homeEditOverlay.onShow = { [weak self] in
             guard let self = self else { return }

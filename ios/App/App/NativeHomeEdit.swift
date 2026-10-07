@@ -92,7 +92,7 @@ final class HomeEditOverlay: UIView {
 
     private func layoutPills() {
         // Comfortably below the status bar / Dynamic Island and the native header, never under them
-        let y = (topInset?() ?? 0) + 12
+        let y = (topInset?() ?? 0) + 10
         // Physical corners (like the iPhone's own edit mode): + on the left, check on the right
         addButton.frame = CGRect(x: 16, y: y, width: 68, height: 44)
         doneButton.frame = CGRect(x: bounds.width - 16 - 68, y: y, width: 68, height: 44)
@@ -184,10 +184,19 @@ final class ResizeHandle: UIView {
         ])
         accessibilityLabel = "Resize"
         isAccessibilityElement = true
-        addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(pan(_:))))
+        let panGR = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
+        addGestureRecognizer(panGR)
+        // a plain tap also steps the size (small -> medium -> large), so resizing never depends on a perfect drag
+        let tapGR = UITapGestureRecognizer(target: self, action: #selector(tapped))
+        tapGR.require(toFail: panGR)
+        addGestureRecognizer(tapGR)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    @objc private func tapped() {
+        runJS?("window.NativeHomeEditHost && window.NativeHomeEditHost.resizeCycle('\(id)')")
+    }
 
     @objc private func pan(_ gesture: UIPanGestureRecognizer) {
         let t = gesture.translation(in: superview)

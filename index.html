@@ -1715,6 +1715,10 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
    a corner handle to resize, drag the tile itself, a quiet + and check at the top) */
 .home-edit .home-item:not(.hi-fixed){animation:hiWiggle .55s ease-in-out infinite;transform-origin:50% 50%}
 .home-edit .home-item:nth-child(even):not(.hi-fixed){animation-delay:-.27s}
+.home-spacer{min-height:104px;border-radius:var(--radius-sm)}
+.home-edit .home-spacer{border:2px dashed var(--line-strong);opacity:.65}
+/* in the iOS app the controls are native overlays - keep the tiles still (no wiggle, it read as jitter) */
+html.has-native-tabbar .home-edit .home-item:not(.hi-fixed){animation:none;scale:.98}
 .home-edit .home-item.dragging{animation:none;z-index:60;filter:drop-shadow(0 16px 22px rgba(0,0,0,.4));transition:none!important}
 .home-edit .home-item.resizing{animation:none}
 @keyframes hiWiggle{0%{rotate:-.35deg}50%{rotate:.35deg}100%{rotate:-.35deg}}
@@ -2669,6 +2673,10 @@ Object.assign(I18N.en,{"לוח לועזי": "Gregorian Calendar"});
 Object.assign(I18N.fr,{"לוח לועזי": "Calendrier grégorien"});
 Object.assign(I18N.ru,{"לוח לועזי": "Григорианский календарь"});
 Object.assign(I18N.ka,{"לוח לועזי": "გრიგორიანული კალენდარი"});
+Object.assign(I18N.en,{"מקום ריק": "Empty space"});
+Object.assign(I18N.fr,{"מקום ריק": "Espace vide"});
+Object.assign(I18N.ru,{"מקום ריק": "Пустое место"});
+Object.assign(I18N.ka,{"מקום ריק": "ცარიელი ადგილი"});
 Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
@@ -6878,6 +6886,9 @@ const HOME_CATALOG={
   kotel:{kind:'tile',label:'כוון תפילה'},
   search:{kind:'tile',label:'חיפוש'},
   settings:{kind:'tile',label:'הגדרות'},
+  spacer1:{kind:'tile',label:'מקום ריק'},   // invisible placeholders: leave a gap anywhere (e.g. one tile on the left only)
+  spacer2:{kind:'tile',label:'מקום ריק'},
+  spacer3:{kind:'tile',label:'מקום ריק'},
 };
 const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
@@ -7051,10 +7062,18 @@ function homeBindDrag(grid){
       }
     }
   };
+  /* Edge auto-scroll while a tile is held: only in a narrow band at the very top/bottom of the visible area
+     (under the header / above the tab bar), speed grows the deeper you go, and only after a short dwell -
+     so placing a tile near the top or bottom no longer makes the page run away. */
   const loop=()=>{
     if(!st.active) return;
-    const edge=110; let dy=0;
-    if(st.py<edge+70) dy=-12; else if(st.py>window.innerHeight-edge-70) dy=12;
+    const cs=getComputedStyle(document.documentElement);
+    const navH=parseFloat(cs.getPropertyValue('--native-nav-h'))||70, headH=parseFloat(cs.getPropertyValue('--native-header-h'))||60;
+    const topEdge=headH+44, botEdge=window.innerHeight-navH-44;
+    let dy=0;
+    if(st.py<topEdge) dy=-Math.min(16,(topEdge-st.py)/5+2);
+    else if(st.py>botEdge) dy=Math.min(16,(st.py-botEdge)/5+2);
+    if(dy){ if(!st.zoneSince) st.zoneSince=performance.now(); if(performance.now()-st.zoneSince<320) dy=0; } else st.zoneSince=0;
     if(dy){ homeScroller().scrollTop+=dy; place(); reorder(); }
     st.raf=requestAnimationFrame(loop);
   };
@@ -7085,10 +7104,17 @@ function homeBindDrag(grid){
   };
   const target=e=>{ const it=e.target.closest && e.target.closest('.home-item:not(.hi-fixed)'); return (it && !e.target.closest('.hi-minus,.hi-resize')) ? it : null; };
   // touch
-  grid.addEventListener('touchstart',e=>{ const it=target(e); if(it && e.touches.length===1) arm(it,e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+  grid.addEventListener('touchstart',e=>{ const it=target(e); if(it && e.touches.length===1){ st.tid=e.touches[0].identifier; st.t2y=null; arm(it,e.touches[0].clientX,e.touches[0].clientY); } },{passive:true});
   grid.addEventListener('touchmove',e=>{
-    const t=e.touches[0];
-    if(st.active){ e.preventDefault(); move(t.clientX,t.clientY); }
+    const all=[...e.touches];
+    const t=all.find(x=>x.identifier===st.tid)||all[0];
+    if(st.active){
+      e.preventDefault();
+      /* a second finger scrolls the page while the first one keeps holding the tile */
+      const t2=all.find(x=>x!==t);
+      if(t2){ if(st.t2y!=null){ homeScroller().scrollTop-=(t2.clientY-st.t2y); place(); reorder(); } st.t2y=t2.clientY; } else st.t2y=null;
+      move(t.clientX,t.clientY);
+    }
     else if(st.timer && Math.hypot(t.clientX-st.sx,t.clientY-st.sy)>7) disarm();
   },{passive:false});
   grid.addEventListener('touchend',release); grid.addEventListener('touchcancel',release);
@@ -7162,6 +7188,14 @@ window.NativeHomeEditHost={
     homeResizeApply(st.item,st.size);
     saveHomeLayout(getHomeLayout().map(x=>x.id===id?{...x,size:st.size}:x));
     try{ nativeHaptic('selection'); }catch(_){}
+  },
+  resizeCycle(id){   // a plain tap on the handle steps small -> medium -> large -> small
+    const cur=(getHomeLayout().find(x=>x.id===id)||{}).size||'s';
+    const order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','m','l'];
+    const next=order[(Math.max(0,order.indexOf(cur))+1)%order.length];
+    saveHomeLayout(getHomeLayout().map(x=>x.id===id?{...x,size:next}:x));
+    try{ nativeHaptic('selection'); }catch(_){}
+    homeKeepScroll(renderHome);
   },
   resizeEnd(id){
     const st=HOME_NRES[id]; if(!st) return;
@@ -7423,6 +7457,7 @@ function renderHome(){
         ${sz!=='s'?`<div class="qd">${sc.desc()}</div>`:''}
       </div>`;
   });
+  ['spacer1','spacer2','spacer3'].forEach(id=>{ mods[id]=()=>`<div class="home-spacer" aria-hidden="true"></div>`; });
   app.innerHTML = `
   ${topbar('תמיד', null, null, {title:''})}
   <div class="view">
