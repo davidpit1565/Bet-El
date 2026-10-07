@@ -236,9 +236,9 @@ private struct SmallWidgetView: View {
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
         VStack(alignment: hAlign(entry.lang), spacing: 4) {
-            SideRow(lang: entry.lang, label: {
-                Text(entry.weekdayText).font(.system(size: 12, weight: .semibold)).foregroundColor(palette.inkSoft)
-            }, value: { StreakBadge(count: entry.streakCount, palette: palette) })
+            Text(entry.weekdayText)
+                .font(.system(size: 12, weight: .semibold)).foregroundColor(palette.inkSoft)
+                .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
             DateBlock(entry: entry, palette: palette, daySize: 42, showWeekday: false)
             Spacer(minLength: 2)
             GoldDivider(palette: palette)
@@ -268,7 +268,6 @@ private struct MediumWidgetView: View {
         VStack(alignment: hAlign(entry.lang), spacing: 4) {
             DateBlock(entry: entry, palette: palette, daySize: 48, showWeekday: true)
             Spacer(minLength: 0)
-            StreakBadge(count: entry.streakCount, palette: palette)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: frameAlign(entry.lang))
     }
@@ -440,8 +439,10 @@ private struct BetElZmanAccessoryView: View {
         let isRTL = WidgetL10n.isRTL(entry.lang)
         VStack(alignment: isRTL ? .trailing : .leading, spacing: 1) {
             Text(entry.nextZmanLabel).font(.system(size: 12)).lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             if let t = entry.nextZmanTime, t > entry.date {
                 Text(t, style: .timer).font(.system(size: 17, weight: .bold)).monospacedDigit()
+                    .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             }
         }
         .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)

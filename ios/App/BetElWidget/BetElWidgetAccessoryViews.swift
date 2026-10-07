@@ -49,11 +49,13 @@ struct BetElAccessoryRectangularView: View {
                 .font(.system(size: 17, weight: .bold))
                 .lineLimit(1).minimumScaleFactor(0.6)
                 .multilineTextAlignment(isRTL ? .trailing : .leading)
+                .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             if !entry.parashaText.isEmpty {
                 Text(entry.parashaText)
                     .font(.system(size: 14, weight: .medium))
                     .lineLimit(1).minimumScaleFactor(0.6)
                     .multilineTextAlignment(isRTL ? .trailing : .leading)
+                    .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             }
         }
         .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
@@ -81,9 +83,11 @@ struct BetElTehillimAccessoryRectangularView: View {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                 .font(.system(size: 13, weight: .medium))
                 .lineLimit(1).minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
             Text(entry.tehillimRangeText)
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .lineLimit(1).minimumScaleFactor(0.5)
+                .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
         }
         .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
         .widgetAccentable()
@@ -132,11 +136,20 @@ struct BetElCandleAccessoryRectangularView: View {
             Text(entry.candleLabel ?? WidgetL10n.t("candleLighting", lang: entry.lang))
                 .font(.system(size: 12))
                 .lineLimit(1)
-            Text(accessoryTimeString(entry.candleTime))
+                .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
+            Text(candleDayTime(entry))
                 .font(.system(size: 15, weight: .bold))
+                .lineLimit(1).minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
         }
         .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
         .widgetAccentable()
+    }
+
+    /// "יום שישי 18:20" - the day, then the time.
+    private func candleDayTime(_ e: BetElCandleEntry) -> String {
+        guard let d = e.candleTime else { return "--:--" }
+        return "\(HebrewDay.weekdayText(d, lang: e.lang)) \(accessoryTimeString(d))"
     }
 
     private func accessoryTimeString(_ date: Date?) -> String {
