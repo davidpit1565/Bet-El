@@ -198,7 +198,7 @@ in English as usual.
   (confirm dialog), drag the tile itself after a ~0.17s hold (touch events,
   so a quick swipe still scrolls), a corner arc handle to resize (small ->
   medium -> large), a quiet + and check at the top. `memorial` (לעילוי נשמת)
-  has `keep:true`: it can be moved but never removed. `social` (Instagram/YouTube/TikTok links) is also
+  is removable like the rest (user request). Edit mode only ends via the check pill or leaving Home (`go()` ignores `tab==='home'`). `social` (Instagram/YouTube/TikTok links) is also
   `keep:true` and has `sizes:['s','m']` - two sizes only (small icons / bigger icons).
   The app scrolls on `<body>`, not the window - use `homeScroller()`.
   To offer a new button: add it to `HOME_CATALOG` and give it a renderer

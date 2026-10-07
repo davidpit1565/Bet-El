@@ -3557,7 +3557,7 @@ function go(tab){
   }
   if(TAB==='kotelCompass' && tab!=='kotelCompass') stopCompass();
   if(TAB==='tefillinMirror' && tab!=='tefillinMirror') stopTefillinMirror();
-  if(HOME_EDIT){ HOME_EDIT=false; try{ if(homeNativeEdit()) Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
+  if(HOME_EDIT && tab!=='home'){ HOME_EDIT=false; try{ if(homeNativeEdit()) Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
   TAB=tab;
   /* the full-screen AR compass overlay must cover the bottom nav completely,
      but .bottom-nav is a body-level sibling outside #app's own stacking
@@ -6881,7 +6881,7 @@ const HOME_CATALOG={
   visitors:{kind:'block',half:true,sizes:['s','m'],label:'מונה משתמשים'},   // two sizes: half width / full width
   live:{kind:'block',half:true,sizes:['s','m'],label:'מחוברים כעת'},
   hatzlacha:{kind:'block',label:'להצלחת'},
-  memorial:{kind:'block',keep:true,label:'לעלוי נשמת'}, // can be moved, never removed
+  memorial:{kind:'block',label:'לעלוי נשמת'}, // movable and removable like the others
   social:{kind:'block',keep:true,sizes:['s','m'],label:'רשתות חברתיות'}, // can be moved/enlarged (2 sizes), never removed
   streak:{kind:'tile',label:'רצף למוד'},
   library:{kind:'tile',label:'ספרייה'},
