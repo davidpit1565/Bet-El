@@ -16,6 +16,7 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "setActive", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setVisible", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setHidden", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "hideSearch", returnType: CAPPluginReturnPromise),
     ]
 
     /// Set by MainViewController.viewDidLoad(). Weak since the plugin
@@ -52,6 +53,14 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         let visible = call.getBool("visible") ?? true
         DispatchQueue.main.async {
             NativeTabBarBridge.activeController?.setVisible(visible)
+        }
+        call.resolve()
+    }
+
+    /// Closes the native search field (called by JS when it navigates away from the search screen).
+    @objc func hideSearch(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            NativeTabBarBridge.activeController?.hideNativeSearchBar(clear: false)
         }
         call.resolve()
     }

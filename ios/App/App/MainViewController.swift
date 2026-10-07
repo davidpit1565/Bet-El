@@ -110,6 +110,7 @@ class MainViewController: CAPBridgeViewController {
         setupScrollToTop()
         setupEdgeSwipeBack()
         setupPullToRefresh()
+        setupSearchBar()
         setupSettingsView()
         layoutToolsFab()
         topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
@@ -510,6 +511,45 @@ class MainViewController: CAPBridgeViewController {
         nativeCalendarView?.isHidden = true
     }
 
+    // MARK: - Native search field (real UISearchBar). A web <input> cannot be focused from native code
+    // (WKWebView only raises the keyboard for a touch inside the page), so the Search tab shows a genuine
+    // UISearchBar, and what is typed is forwarded to the page's own search box.
+    let nativeSearchBar = UISearchBar()
+    private var searchDebounce: DispatchWorkItem?
+
+    private func setupSearchBar() {
+        nativeSearchBar.searchBarStyle = .minimal
+        nativeSearchBar.showsCancelButton = true
+        nativeSearchBar.autocapitalizationType = .none
+        nativeSearchBar.autocorrectionType = .no
+        nativeSearchBar.delegate = self
+        nativeSearchBar.isHidden = true
+        nativeSearchBar.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nativeSearchBar)
+        NSLayoutConstraint.activate([
+            nativeSearchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            nativeSearchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            nativeSearchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+        ])
+    }
+
+    func showNativeSearchBar() {
+        view.bringSubviewToFront(nativeSearchBar)
+        view.bringSubviewToFront(tabBar)
+        nativeSearchBar.isHidden = false
+        nativeSearchBar.becomeFirstResponder()
+    }
+
+    func hideNativeSearchBar(clear: Bool) {
+        guard !nativeSearchBar.isHidden else { return }
+        nativeSearchBar.resignFirstResponder()
+        nativeSearchBar.isHidden = true
+        if clear {
+            nativeSearchBar.text = ""
+            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery('')", completionHandler: nil)
+        }
+    }
+
     // MARK: - Native pull-to-refresh (UIKit gesture + glass spinner)
     // The page scrolls inside the web content (on <body>), so UIRefreshControl - which only reacts to the
     // WKWebView's own scroll view - never sees a pull. Instead a real UIPanGestureRecognizer watches the
@@ -891,8 +931,10 @@ extension MainViewController: UITabBarDelegate {
         UISelectionFeedbackGenerator().selectionChanged()
         if tabId == "search" {
             webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
+            showNativeSearchBar()
             return
         }
+        hideNativeSearchBar(clear: false)
         let again = (tabId == lastTabId)
         lastTabId = tabId
         if again {
@@ -947,4 +989,22 @@ final class RefreshPanDelegate: NSObject, UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
         return true
     }
+}
+
+extension MainViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchDebounce?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let data = try? JSONSerialization.data(withJSONObject: [searchText]),
+                  let arr = String(data: data, encoding: .utf8) else { return }
+            // arr is a JSON array literal like ["text"]; take its first element
+            self?.webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery(\(arr)[0])", completionHandler: nil)
+        }
+        searchDebounce = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18, execute: work)
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) { searchBar.resignFirstResponder() }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) { hideNativeSearchBar(clear: true) }
 }

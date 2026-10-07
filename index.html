@@ -6694,6 +6694,7 @@ function render(){
   stopAutoScroll();
   if(TAB!=='calendar') nativeCalHide();
   if(TAB!=='library') nativeLibHide();
+  if(TAB!=='prayers'){ try{ if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.NativeTabBar) Capacitor.Plugins.NativeTabBar.hideSearch().catch(()=>{}); }catch(e){} }   // the native search field belongs to the Prayers/search screen only
   if(window.__bootHide) setTimeout(window.__bootHide,0); // first screen is about to paint
   try{
     if(TAB==='home') renderHome();
@@ -13663,9 +13664,11 @@ window.NativeSearchHost = {
       const q=document.getElementById('libSearchQ');
       if(!q) return;
       q.scrollIntoView({block:'center', behavior:'smooth'});
-      q.focus();
+      if(!NATIVE_TABBAR) q.focus();   // in the app the native UISearchBar owns the keyboard
     }, 80);
-  }
+  },
+  /* text typed in the native search bar -> the page's own search box */
+  setQuery(t){ const q=document.getElementById('libSearchQ'); if(!q) return; q.value=t||''; q.dispatchEvent(new Event('input',{bubbles:true})); }
 };
 /* NativeToolsFab - replaces the HTML .reader-tools floating button (font
    size/theme/autoscroll/home) with a genuine native iOS 26 Liquid Glass
