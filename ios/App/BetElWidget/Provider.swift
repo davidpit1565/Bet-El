@@ -36,6 +36,13 @@ struct BetElEntry: TimelineEntry {
     /// that list them.
     let zmanimToday: [ZmanRow]
 
+    /// "א׳–ו׳" in Hebrew (letters, never digits), "1\u{2013}6" in every other language.
+    var tehillimRangeText: String {
+        let (a, b) = (tehillimRange.start, tehillimRange.end)
+        if lang == "he" { return "\(HebrewDay.gematria(a))\u{2013}\(HebrewDay.gematria(b))" }
+        return "\(a)\u{2013}\(b)"
+    }
+
     /// A stable deep link into the app for whatever this entry is
     /// currently showing - opens straight to today's Tehillim portion.
     var deepLinkURL: URL? {

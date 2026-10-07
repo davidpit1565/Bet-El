@@ -15,7 +15,7 @@ import UIKit
 /// REQUIRES BUILDING WITH THE iOS 26 SDK (Xcode 26+) - see
 /// NativeToolsFabView's header comment for why; the same applies here.
 final class NativeFeedbackFormView: UIView {
-    var onSend: ((_ name: String, _ email: String, _ message: String) -> Void)?
+    var onSend: ((_ name: String, _ email: String, _ subject: String, _ message: String) -> Void)?
     var onDismiss: (() -> Void)?
 
     private let maxMessageLength = 500
@@ -27,6 +27,7 @@ final class NativeFeedbackFormView: UIView {
     private var scrollView: UIScrollView?
 
     private let nameField = UITextField()
+    private let subjectField = UITextField()
     private let emailField = UITextField()
     private let messageView = UITextView()
     private let messagePlaceholderLabel = UILabel()
@@ -76,6 +77,7 @@ final class NativeFeedbackFormView: UIView {
 
     private var nameFieldHeightSet = false
     private var emailFieldHeightSet = false
+    private var subjectFieldHeightSet = false
 
     /// Configures a persistent field (`nameField`/`emailField`) in place
     /// for the current presentation, rather than building a throwaway
@@ -108,7 +110,8 @@ final class NativeFeedbackFormView: UIView {
     /// `isRTL` drives field text alignment and the close button's corner,
     /// matching the HTML form's own direction-aware layout.
     func present(title: String, body: String, namePlaceholder: String, emailPlaceholder: String,
-                 messagePlaceholder: String, sendButtonText: String, isRTL: Bool) {
+                 messagePlaceholder: String, sendButtonText: String, isRTL: Bool,
+                 subjectPlaceholder: String = "") {
         card?.removeFromSuperview()
 
         let cardView = glassView(cornerRadius: 28)
@@ -196,16 +199,20 @@ final class NativeFeedbackFormView: UIView {
 
         nameField.removeFromSuperview()
         emailField.removeFromSuperview()
+        subjectField.removeFromSuperview()
         styleTextField(nameField, placeholder: namePlaceholder, isRTL: isRTL, heightSet: &nameFieldHeightSet)
         styleTextField(emailField, placeholder: emailPlaceholder, isRTL: isRTL, heightSet: &emailFieldHeightSet)
+        styleTextField(subjectField, placeholder: subjectPlaceholder, isRTL: isRTL, heightSet: &subjectFieldHeightSet)
         emailField.keyboardType = .emailAddress
         emailField.autocapitalizationType = .none
-        [nameField, emailField].forEach {
+        [nameField, emailField, subjectField].forEach {
             $0.removeTarget(self, action: #selector(updateSendEnabled), for: .editingChanged)
             $0.addTarget(self, action: #selector(updateSendEnabled), for: .editingChanged)
         }
-        stack.addArrangedSubview(nameField)
+        // order: sender email, name, subject, then the message
         stack.addArrangedSubview(emailField)
+        stack.addArrangedSubview(nameField)
+        stack.addArrangedSubview(subjectField)
 
         let messageContainer = UIView()
         messageContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -280,6 +287,7 @@ final class NativeFeedbackFormView: UIView {
     @objc private func updateSendEnabled() {
         let filled = !(nameField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !(emailField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !(subjectField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !messageView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         sendButton.isEnabled = filled
         sendButton.alpha = filled ? 1 : 0.5
@@ -287,7 +295,7 @@ final class NativeFeedbackFormView: UIView {
 
     @objc private func tapSend() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        onSend?(nameField.text ?? "", emailField.text ?? "", messageView.text ?? "")
+        onSend?(nameField.text ?? "", emailField.text ?? "", subjectField.text ?? "", messageView.text ?? "")
     }
 
     @objc private func keyboardWillChange(_ note: Notification) {

@@ -399,15 +399,16 @@ class MainViewController: CAPBridgeViewController {
 
     func presentFeedbackForm(title: String, body: String, namePlaceholder: String, emailPlaceholder: String,
                               messagePlaceholder: String, sendButtonText: String,
-                              subject: String, supportEmail: String, isRTL: Bool) {
-        feedbackForm.onSend = { [weak self] name, email, message in
-            self?.relayFeedbackToJS(name: name, email: email, message: message)
+                              subject: String, supportEmail: String, isRTL: Bool, subjectPlaceholder: String = "") {
+        feedbackForm.onSend = { [weak self] name, email, subject, message in
+            self?.relayFeedbackToJS(name: name, email: email, subject: subject, message: message)
             self?.feedbackForm.dismiss()
         }
         feedbackForm.onDismiss = nil
         feedbackForm.present(
             title: title, body: body, namePlaceholder: namePlaceholder, emailPlaceholder: emailPlaceholder,
-            messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText, isRTL: isRTL
+            messagePlaceholder: messagePlaceholder, sendButtonText: sendButtonText, isRTL: isRTL,
+            subjectPlaceholder: subjectPlaceholder
         )
     }
 
@@ -503,8 +504,8 @@ class MainViewController: CAPBridgeViewController {
     /// environment. The fields are JSON-encoded (not interpolated as raw
     /// JS string literals) so a name/email/message containing a quote,
     /// backslash, or newline can't break out of the JS call.
-    private func relayFeedbackToJS(name: String, email: String, message: String) {
-        let payload = ["name": name, "email": email, "message": message]
+    private func relayFeedbackToJS(name: String, email: String, subject: String, message: String) {
+        let payload = ["name": name, "email": email, "subject": subject, "message": message]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
               let jsonString = String(data: jsonData, encoding: .utf8) else { return }
         let js = "window.NativeFeedbackHost && window.NativeFeedbackHost.send(\(jsonString))"

@@ -193,6 +193,7 @@ private struct NextZmanBlock: View {
     let entry: BetElEntry
     let palette: BetElTheme.Palette
     let countdownSize: CGFloat
+    var showTime: Bool = true
     var body: some View {
         let align = hAlign(entry.lang)
         VStack(alignment: align, spacing: 1) {
@@ -201,7 +202,7 @@ private struct NextZmanBlock: View {
                 .foregroundColor(palette.ink)
                 .lineLimit(1).minimumScaleFactor(0.7)
             Countdown(target: entry.nextZmanTime, from: entry.date, size: countdownSize, color: palette.gold)
-            if let t = entry.nextZmanTime {
+            if showTime, let t = entry.nextZmanTime {
                 Text(timeString(t))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(palette.inkSoft)
@@ -220,7 +221,7 @@ private struct TehillimLine: View {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                 .font(.system(size: size - 3, weight: .medium)).foregroundColor(palette.inkSoft)
         }, value: {
-            Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+            Text("\(entry.tehillimRangeText)")
                 .font(.system(size: size + 4, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
         })
     }
@@ -293,10 +294,10 @@ private struct LargeWidgetView: View {
                 Text(entry.weekdayText).font(.system(size: 14, weight: .semibold)).foregroundColor(palette.inkSoft)
             }, value: { StreakBadge(count: entry.streakCount, palette: palette) })
 
-            DateBlock(entry: entry, palette: palette, daySize: 46, showWeekday: false, compact: true)
+            DateBlock(entry: entry, palette: palette, daySize: 42, showWeekday: false, compact: true)
 
             // next zman, as a card
-            NextZmanBlock(entry: entry, palette: palette, countdownSize: 32)
+            NextZmanBlock(entry: entry, palette: palette, countdownSize: 32, showTime: false)
                 .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(palette.gold.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -331,7 +332,7 @@ private struct LargeWidgetView: View {
     private func tehillimCell(_ palette: BetElTheme.Palette) -> some View {
         VStack(alignment: hAlign(entry.lang), spacing: 1) {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
-            Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+            Text("\(entry.tehillimRangeText)")
                 .font(.system(size: 22, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
         }
         .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
@@ -470,7 +471,7 @@ private struct TehillimWidgetView: View {
                 .font(.system(size: family == .systemSmall ? 14 : 17, weight: .semibold))
                 .foregroundColor(palette.inkSoft)
             Spacer(minLength: 0)
-            Text("\(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+            Text("\(entry.tehillimRangeText)")
                 .font(.system(size: family == .systemSmall ? 40 : 64, weight: .heavy, design: .rounded))
                 .foregroundColor(palette.goldBright)
                 .lineLimit(1).minimumScaleFactor(0.5)

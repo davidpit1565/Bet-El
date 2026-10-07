@@ -2619,6 +2619,10 @@ Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
 Object.assign(I18N.ka,{"מחוברים כעת": "ახლა ონლაინში"});
+Object.assign(I18N.en,{"הכנס נושא": "Enter a subject"});
+Object.assign(I18N.fr,{"הכנס נושא": "Saisissez un objet"});
+Object.assign(I18N.ru,{"הכנס נושא": "Введите тему"});
+Object.assign(I18N.ka,{"הכנס נושא": "შეიყვანეთ თემა"});
 for(const _lg in I18N){
   const _d=I18N[_lg], _nd={};
   for(const _k in _d) _nd[_k.normalize('NFC')]=_d[_k];
@@ -12469,33 +12473,33 @@ const FEEDBACK_FN_URL = 'https://us-central1-bet-el-e6812.cloudfunctions.net/sen
 function withTimeout(promise, ms){
   return new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error('timeout')),ms); promise.then(v=>{clearTimeout(t);res(v);},e=>{clearTimeout(t);rej(e);}); });
 }
-async function submitFeedback(name, email, message){
-  name=(name||'').trim(); email=(email||'').trim(); message=(message||'').trim();
+async function submitFeedback(name, email, subject, message){
+  name=(name||'').trim(); email=(email||'').trim(); subject=(subject||'').trim(); message=(message||'').trim();
   try{
-    const r=await withTimeout(fetch(FEEDBACK_FN_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})}),10000);
+    const r=await withTimeout(fetch(FEEDBACK_FN_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,subject,message})}),10000);
     if(r.ok) return true;
   }catch(e){}
   try{
-    if(window.__betelSaveFeedback){ await withTimeout(window.__betelSaveFeedback({name,email,message}),10000); return true; }
+    if(window.__betelSaveFeedback){ await withTimeout(window.__betelSaveFeedback({name,email,subject,message}),10000); return true; }
   }catch(e){}
   return false;
 }
-function feedbackMailto(name,email,message){
-  const subject=encodeURIComponent('משוב מהאפליקציה — תמיד');
+function feedbackMailto(name,email,subject,message){
+  const su=encodeURIComponent(subject||'משוב מהאפליקציה — תמיד');
   const body=encodeURIComponent('שם: '+name+'\nאימייל: '+email+'\n\n'+message);
-  const a=document.createElement('a'); a.href='mailto:'+SUPPORT_EMAIL+'?subject='+subject+'&body='+body; document.body.appendChild(a); a.click(); a.remove();
+  const a=document.createElement('a'); a.href='mailto:'+SUPPORT_EMAIL+'?subject='+su+'&body='+body; document.body.appendChild(a); a.click(); a.remove();
 }
-function feedbackFallbackText(name,email,message){ return 'שם: '+name+'\nאימייל: '+email+'\n\n'+message; }
+function feedbackFallbackText(name,email,subject,message){ return 'שם: '+name+'\nאימייל: '+email+'\nנושא: '+subject+'\n\n'+message; }
 /* used by the native form (NativeFeedbackHost.send) and the HTML one */
-function sendFeedbackForm(name, email, message){
+function sendFeedbackForm(name, email, subject, message){
   toast(ckChrome('שולח…'));
-  submitFeedback(name,email,message).then(ok=>{
+  submitFeedback(name,email,subject,message).then(ok=>{
     if(ok) toast(ckChrome('ההודעה נשלחה, תודה!'));
-    else openFeedbackForm({name,email,message,failed:true,forceHtml:true});   // native form is gone: bring the text back in the HTML form
+    else openFeedbackForm({name,email,subject,message,failed:true,forceHtml:true});   // native form is gone: bring the text back in the HTML form
   });
 }
 window.NativeFeedbackHost = {
-  send({name,email,message}){ sendFeedbackForm(name,email,message); },
+  send({name,email,subject,message}){ sendFeedbackForm(name,email,subject,message); },
 };
 function openFeedbackForm(opts){
   opts=opts||{};
@@ -12504,11 +12508,12 @@ function openFeedbackForm(opts){
   const namePlaceholder=ckChrome('הַכְנֵס אֶת שִׁמְךָ');
   const emailPlaceholder=ckChrome('הַכְנֵס אֶת הָאִימֵייל שֶׁלָּךְ');
   const messagePlaceholder=ckChrome('הַכְנֵס אֶת הוֹדָעָתְךָ');
+  const subjectPlaceholder=ckChrome('הַכְנֵס נוֹשֵׂא');
   const sendButtonText=ckChrome('שְׁלַח');
   if(NATIVE_MODAL && !opts.forceHtml){
     try{
       window.Capacitor.Plugins.NativeModal.presentFeedbackForm({
-        title, body, namePlaceholder, emailPlaceholder, messagePlaceholder, sendButtonText,
+        title, body, namePlaceholder, emailPlaceholder, messagePlaceholder, subjectPlaceholder, sendButtonText,
         subject: 'משוב מהאפליקציה — תמיד',
         supportEmail: SUPPORT_EMAIL,
         isRTL: document.documentElement.dir!=='ltr',
@@ -12524,8 +12529,9 @@ function openFeedbackForm(opts){
     <p>${body}</p>
     <div class="fb-err" id="fbErr" style="display:none;color:#c0392b;font-size:14px;line-height:1.5;margin:0 0 10px"></div>
     <div class="fld-col">
-      <input class="fld-input" id="fbName" placeholder="${namePlaceholder}"/>
-      <input class="fld-input" id="fbEmail" type="email" placeholder="${emailPlaceholder}"/>
+      <input class="fld-input" id="fbEmail" type="email" autocomplete="email" placeholder="${emailPlaceholder}"/>
+      <input class="fld-input" id="fbName" autocomplete="name" placeholder="${namePlaceholder}"/>
+      <input class="fld-input" id="fbSubject" maxlength="120" placeholder="${subjectPlaceholder}"/>
       <textarea class="fld-input" id="fbMsg" rows="4" maxlength="500" placeholder="${messagePlaceholder}"></textarea>
       <div class="fb-count" id="fbCount">0/500</div>
     </div>
@@ -12537,28 +12543,28 @@ function openFeedbackForm(opts){
     </div>
   </div>`;
   document.body.appendChild(ov);
-  const nameEl=ov.querySelector('#fbName'), emailEl=ov.querySelector('#fbEmail'), msgEl=ov.querySelector('#fbMsg');
+  const nameEl=ov.querySelector('#fbName'), emailEl=ov.querySelector('#fbEmail'), subjEl=ov.querySelector('#fbSubject'), msgEl=ov.querySelector('#fbMsg');
   const countEl=ov.querySelector('#fbCount'), sendBtn=ov.querySelector('#fbSend'), errEl=ov.querySelector('#fbErr'), altEl=ov.querySelector('#fbAlt');
-  nameEl.value=opts.name||''; emailEl.value=opts.email||''; msgEl.value=opts.message||'';
+  nameEl.value=opts.name||''; emailEl.value=opts.email||''; subjEl.value=opts.subject||''; msgEl.value=opts.message||'';
   const showFail=()=>{
     errEl.textContent=ckChrome('לא הצלחנו לשלוח כרגע (בדקו חיבור לאינטרנט). ההודעה שלכם נשמרה כאן - אפשר לנסות שוב, להעתיק או לשלוח במייל.');
     errEl.style.display='block'; altEl.style.display='flex';
   };
   const refresh=()=>{
     countEl.textContent=msgEl.value.length+'/500';
-    sendBtn.disabled = !(nameEl.value.trim() && emailEl.value.trim() && msgEl.value.trim());
+    sendBtn.disabled = !(nameEl.value.trim() && /^\S+@\S+\.\S+$/.test(emailEl.value.trim()) && subjEl.value.trim() && msgEl.value.trim());
   };
-  [nameEl,emailEl,msgEl].forEach(el=>el.addEventListener('input',refresh));
+  [nameEl,emailEl,subjEl,msgEl].forEach(el=>el.addEventListener('input',refresh));
   refresh();
   if(opts.failed) showFail();
-  const txt=()=>feedbackFallbackText(nameEl.value.trim(),emailEl.value.trim(),msgEl.value.trim());
+  const txt=()=>feedbackFallbackText(nameEl.value.trim(),emailEl.value.trim(),subjEl.value.trim(),msgEl.value.trim());
   ov.querySelector('#fbCopy').onclick=()=>{ try{ navigator.clipboard.writeText(txt()).then(()=>toast(ckChrome('הועתק'))); }catch(e){} };
   ov.querySelector('#fbShare').onclick=()=>{ if(navigator.share) navigator.share({title:'תמיד',text:txt()}).catch(()=>{}); else { try{ navigator.clipboard.writeText(txt()); toast(ckChrome('הועתק')); }catch(e){} } };
-  ov.querySelector('#fbMail').onclick=()=>feedbackMailto(nameEl.value.trim(),emailEl.value.trim(),msgEl.value.trim());
+  ov.querySelector('#fbMail').onclick=()=>feedbackMailto(nameEl.value.trim(),emailEl.value.trim(),subjEl.value.trim(),msgEl.value.trim());
   sendBtn.onclick=async()=>{
     sendBtn.disabled=true; errEl.style.display='none';
     const label=sendBtn.querySelector('span'), old=label.textContent; label.textContent=ckChrome('שולח…');
-    const ok=await submitFeedback(nameEl.value,emailEl.value,msgEl.value);
+    const ok=await submitFeedback(nameEl.value,emailEl.value,subjEl.value,msgEl.value);
     if(ok){ ov.remove(); toast(ckChrome('ההודעה נשלחה, תודה!')); }
     else { label.textContent=old; refresh(); showFail(); }
   };

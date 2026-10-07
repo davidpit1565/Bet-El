@@ -41,7 +41,7 @@ struct BetElAccessoryRectangularView: View {
             Text(entry.hebrewDateText)
                 .font(.system(size: 13, weight: .semibold))
                 .lineLimit(1)
-            Text("\(WidgetL10n.t("tehillimToday", lang: entry.lang)) \(entry.tehillimRange.start)\u{2013}\(entry.tehillimRange.end)")
+            Text("\(WidgetL10n.t("tehillimToday", lang: entry.lang)) \(entry.tehillimRangeText)")
                 .font(.system(size: 12))
                 .lineLimit(1)
         }
