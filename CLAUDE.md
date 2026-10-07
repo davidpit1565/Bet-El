@@ -308,7 +308,7 @@ in English as usual.
   `NATIVE_CAL_OK`). The web calendar (`renderCalendar`, `.ical-*` CSS, `calStepDay`) remains the fallback.
   UPDATE: the user then chose the web calendar look (seg control row + month title with today/jump/chevrons), so
   `NATIVE_CAL_ENABLED=false` in index.html - the native calendar code is kept but off.
-  Still HTML imitations (no native equivalent wired yet): pull-to-refresh indicator, most list/tile screens.
+  Pull-to-refresh is native too (`MainViewController.refreshPanned`: UIPanGestureRecognizer + glass UIActivityIndicatorView, gated by JS `betelCanPull()`; the JS pull is web-only). Still HTML: most list/tile screens.
 
 - **Every visual change must be checked in ALL five languages (he/en/fr/ru/ka), RTL and LTR (user rule)**:
   screenshot each (set `betel_settings` `{lang}` via `addInitScript`), confirm nothing overflows, arrows/buttons are

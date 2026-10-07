@@ -108,6 +108,7 @@ class MainViewController: CAPBridgeViewController {
         setupHomeEdit()
         setupScrollToTop()
         setupEdgeSwipeBack()
+        setupPullToRefresh()
         setupSettingsView()
         layoutToolsFab()
         topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
@@ -477,6 +478,93 @@ class MainViewController: CAPBridgeViewController {
         nativeCalendarView?.isHidden = true
     }
 
+    // MARK: - Native pull-to-refresh (UIKit gesture + glass spinner)
+    // The page scrolls inside the web content (on <body>), so UIRefreshControl - which only reacts to the
+    // WKWebView's own scroll view - never sees a pull. Instead a real UIPanGestureRecognizer watches the
+    // downward drag while JS says the page is at the top (`window.betelCanPull()`), and the indicator is a
+    // UIKit glass capsule (UIGlassEffect on iOS 26, system material before) holding Apple's UIActivityIndicatorView.
+    private let refreshIndicator = UIVisualEffectView(effect: nil)
+    private let refreshSpinner = UIActivityIndicatorView(style: .medium)
+    private let refreshDelegate = RefreshPanDelegate()
+    private var refreshCanPull = false
+    private var refreshDist: CGFloat = 0
+    private var refreshArmed = false
+    private var refreshBusy = false
+
+    private func setupPullToRefresh() {
+        if #available(iOS 26.0, *) { refreshIndicator.effect = UIGlassEffect() }
+        else { refreshIndicator.effect = UIBlurEffect(style: .systemThinMaterial) }
+        refreshIndicator.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+        refreshIndicator.layer.cornerRadius = 22
+        refreshIndicator.clipsToBounds = true
+        refreshIndicator.alpha = 0
+        refreshSpinner.center = CGPoint(x: 22, y: 22)
+        refreshIndicator.contentView.addSubview(refreshSpinner)
+        view.insertSubview(refreshIndicator, belowSubview: tabBar)
+        let g = UIPanGestureRecognizer(target: self, action: #selector(refreshPanned(_:)))
+        g.cancelsTouchesInView = false
+        g.delegate = refreshDelegate
+        webView?.addGestureRecognizer(g)
+    }
+
+    private var refreshBaseY: CGFloat {
+        return topBar.isHidden ? view.safeAreaInsets.top : topBar.frame.maxY
+    }
+
+    private func placeRefreshIndicator(_ dist: CGFloat) {
+        refreshIndicator.center = CGPoint(x: view.bounds.midX, y: refreshBaseY + dist - 22)
+        let p = min(1, dist / 70)
+        refreshIndicator.alpha = p
+        refreshIndicator.transform = CGAffineTransform(scaleX: 0.6 + 0.4 * p, y: 0.6 + 0.4 * p)
+    }
+
+    private func hideRefreshIndicator() {
+        UIView.animate(withDuration: 0.25, animations: {
+            self.refreshIndicator.alpha = 0
+            self.refreshIndicator.center = CGPoint(x: self.view.bounds.midX, y: self.refreshBaseY - 30)
+        }, completion: { _ in
+            self.refreshSpinner.stopAnimating()
+            self.refreshBusy = false
+        })
+    }
+
+    @objc private func refreshPanned(_ g: UIPanGestureRecognizer) {
+        guard let web = webView, !refreshBusy else { return }
+        switch g.state {
+        case .began:
+            refreshCanPull = false; refreshDist = 0; refreshArmed = false
+            let x = g.location(in: view).x
+            guard x > 26 && x < view.bounds.width - 26 else { return }
+            web.evaluateJavaScript("window.betelCanPull ? window.betelCanPull() : false") { [weak self] r, _ in
+                self?.refreshCanPull = (r as? Bool) ?? false
+            }
+        case .changed:
+            guard refreshCanPull else { return }
+            let dy = g.translation(in: view).y
+            guard dy > 0 else { refreshDist = 0; placeRefreshIndicator(0); return }
+            refreshDist = min(110, dy * 0.5)
+            placeRefreshIndicator(refreshDist)
+            if !refreshArmed && refreshDist >= 70 {
+                refreshArmed = true
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } else if refreshArmed && refreshDist < 70 { refreshArmed = false }
+        case .ended, .cancelled, .failed:
+            guard refreshCanPull else { return }
+            if g.state == .ended && refreshDist >= 70 {
+                refreshBusy = true
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                refreshSpinner.startAnimating()
+                UIView.animate(withDuration: 0.2) { self.placeRefreshIndicator(70) }
+                web.evaluateJavaScript("window.betelRefresh && window.betelRefresh()", completionHandler: nil)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { [weak self] in self?.hideRefreshIndicator() }
+            } else {
+                hideRefreshIndicator()
+            }
+            refreshCanPull = false; refreshDist = 0
+        default: break
+        }
+    }
+
     // MARK: - Interactive edge-swipe back (like UINavigationController's pop gesture)
     private var edgeCanGoBack = false
     private var lastTabId: String?
@@ -804,5 +892,18 @@ final class ScrollTopCatcher: UIScrollView, UIScrollViewDelegate {
     func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
         onScrollToTop?()
         return false   // never actually scroll this dummy view
+    }
+}
+
+/// Lets the pull-to-refresh pan run alongside the web view's own scrolling, and only starts for a
+/// clearly downward, mostly vertical drag.
+final class RefreshPanDelegate: NSObject, UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+        let v = pan.velocity(in: pan.view)
+        return v.y > 0 && abs(v.y) > abs(v.x) * 1.5
+    }
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+        return true
     }
 }

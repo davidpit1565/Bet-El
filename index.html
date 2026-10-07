@@ -3354,8 +3354,20 @@ window.betelTabReselect=function(){
   const sc=()=>homeScroller();
   function ensure(){ if(ind) return ind; ind=document.createElement('div'); ind.id='ptr'; ind.innerHTML='<div class="ptr-dot"></div>'; document.body.appendChild(ind); return ind; }
   function set(d,spin){ const i=ensure(); i.style.transform=`translate(-50%,${Math.max(0,d)-46}px)`; i.style.opacity=Math.min(1,d/TH); i.classList.toggle('spin',!!spin); i.firstChild.style.transform=spin?'':`rotate(${d*3.2}deg)`; }
+  /* In the iOS app the pull is a native UIKit gesture with a glass spinner (MainViewController.refreshPanned);
+     this JS version is only for the web/PWA. These two are what the native side calls: */
+  window.betelCanPull=function(){
+    try{
+      if(HOME_EDIT||busy) return false;
+      if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov, #ctxSheet')) return false;
+      if(typeof TAB!=='undefined' && (TAB==='calendar' && NATIVE_CAL_SHOWN)) return false;
+      return (sc().scrollTop||0)<=0;
+    }catch(e){ return false; }
+  };
+  window.betelRefresh=function(){ try{ render(); }catch(e){} try{ syncWidgetData(); }catch(e){} };
   document.addEventListener('touchstart',e=>{
     pulling=false; dist=0;
+    if(document.documentElement.classList.contains('has-native-tabbar')) return;   // native pull-to-refresh handles it
     if(busy||HOME_EDIT||e.touches.length!==1) return;
     if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov, #ctxSheet')) return;
     const t=e.touches[0]; if(t.clientX<26||t.clientX>innerWidth-26) return;
