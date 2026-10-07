@@ -1016,7 +1016,14 @@ input,select,button{max-width:100%;box-sizing:border-box}
   padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:8px;
   box-shadow:0 10px 26px -14px rgba(184,134,11,.35),var(--card-shadow);backdrop-filter:blur(10px)}
 .stat-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--gold-grad);opacity:.85}
-.stat-card .sc-info{display:flex;flex-direction:column}
+.stat-card .sc-info{display:flex;flex-direction:column;min-width:0}
+.home-item>.stat-card{height:100%;margin:0}
+.stat-card.long{padding:22px 26px;border-radius:26px;min-height:112px}
+.stat-card.long .sc-num{font-size:46px;line-height:1.05;letter-spacing:.5px}
+.stat-card.long .sc-label{font-size:16px;margin-top:6px}
+.stat-card.long .sc-badge{width:68px;height:68px}
+.stat-card.long .sc-badge svg{width:30px;height:30px}
+.stat-card.long .sc-badge.live svg{width:16px;height:16px}
 .stat-card .sc-num{font-size:22px;font-weight:800;color:var(--ink);font-family:var(--font-ui);line-height:1.15;letter-spacing:.2px}
 .stat-card .sc-label{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-sacred);letter-spacing:.2px}
 .stat-card .sc-badge{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
@@ -2598,6 +2605,20 @@ fr:{'נסח עדות המזרח':'Noussa’h Edot HaMizrah','התכן מתעדכ
    lookup can silently miss. Normalizing every dictionary key once here, and
    normalizing whatever is being looked up against it, makes the two sides
    comparable regardless of which order either happened to be written in. */
+/* settings / feedback strings added after a per-language audit */
+Object.assign(I18N.en,{"תצוגה, גדל גופן, שפה": "Display, font size, language", "התראות": "Notifications", "תכנית הלמוד": "Study plan", "אישי": "Personal", "שמות, הקדשות, יאהרצייט": "Names, dedications, yahrzeit", "שתוף וגבוי": "Sharing & backup", "שתוף, גבוי ושחזור": "Sharing, backup & restore", "תמיכה ומידע": "Support & info", "משוב, דרוג, מדיניות": "Feedback, rating, policies", "משוב ותמיכה": "Feedback & support", "דווח והצעות לשפור": "Report & suggestions", "דווח על תקלות והצעות לשפור": "Report problems and suggest improvements", "דרגו אותנו ב-App Store": "Rate us on the App Store", "דרוג עוזר לנו להגיע לעוד אנשים": "Ratings help us reach more people", "חדשי": "Monthly", "חדשי (5 פרקים ליום)": "Monthly (5 chapters a day)", "ישראל / חוץ לארץ": "Israel / Diaspora", "קובע יום טוב שני, חול המועד וכדומה בלוח השנה": "Determines second day of Yom Tov, Chol HaMoed and so on in the calendar", "אוטומטי": "Automatic", "ישראל": "Israel", "חוץ לארץ": "Outside Israel", "פסוק לפי השם": "Verse by name", "לדגמה: מאיר": "e.g. Meir", "שולח…": "Sending…", "לא הצלחנו לשלוח כרגע (בדקו חיבור לאינטרנט). ההודעה שלכם נשמרה כאן - אפשר לנסות שוב, להעתיק או לשלוח במייל.": "We couldn’t send right now (check your connection). Your message is kept here - try again, copy it or send it by email.", "העתק הודעה": "Copy message", "שלח במייל": "Send by email", "הועתק": "Copied"});
+Object.assign(I18N.fr,{"תצוגה, גדל גופן, שפה": "Affichage, taille du texte, langue", "התראות": "Notifications", "תכנית הלמוד": "Programme d’étude", "אישי": "Personnel", "שמות, הקדשות, יאהרצייט": "Noms, dédicaces, yahrzeit", "שתוף וגבוי": "Partage et sauvegarde", "שתוף, גבוי ושחזור": "Partage, sauvegarde et restauration", "תמיכה ומידע": "Aide et informations", "משוב, דרוג, מדיניות": "Avis, notation, politiques", "משוב ותמיכה": "Avis et assistance", "דווח והצעות לשפור": "Signaler et suggérer", "דווח על תקלות והצעות לשפור": "Signaler un problème ou suggérer une amélioration", "דרגו אותנו ב-App Store": "Notez-nous sur l’App Store", "דרוג עוזר לנו להגיע לעוד אנשים": "Votre note nous aide à toucher plus de monde", "חדשי": "Mensuel", "חדשי (5 פרקים ליום)": "Mensuel (5 chapitres par jour)", "ישראל / חוץ לארץ": "Israël / Diaspora", "קובע יום טוב שני, חול המועד וכדומה בלוח השנה": "Détermine le second jour de Yom Tov, Hol HaMoed, etc. dans le calendrier", "אוטומטי": "Automatique", "ישראל": "Israël", "חוץ לארץ": "Hors d’Israël", "פסוק לפי השם": "Verset selon le prénom", "לדגמה: מאיר": "p. ex. Méir", "שולח…": "Envoi…", "לא הצלחנו לשלוח כרגע (בדקו חיבור לאינטרנט). ההודעה שלכם נשמרה כאן - אפשר לנסות שוב, להעתיק או לשלוח במייל.": "Envoi impossible pour le moment (vérifiez votre connexion). Votre message est conservé ici - réessayez, copiez-le ou envoyez-le par e-mail.", "העתק הודעה": "Copier le message", "שלח במייל": "Envoyer par e-mail", "הועתק": "Copié"});
+Object.assign(I18N.ru,{"תצוגה, גדל גופן, שפה": "Отображение, размер шрифта, язык", "התראות": "Уведомления", "תכנית הלמוד": "План изучения", "אישי": "Личное", "שמות, הקדשות, יאהרצייט": "Имена, посвящения, йорцайт", "שתוף וגבוי": "Обмен и резервная копия", "שתוף, גבוי ושחזור": "Обмен, резервное копирование и восстановление", "תמיכה ומידע": "Поддержка и информация", "משוב, דרוג, מדיניות": "Отзывы, оценка, политика", "משוב ותמיכה": "Отзывы и поддержка", "דווח והצעות לשפור": "Сообщить и предложить", "דווח על תקלות והצעות לשפור": "Сообщить о проблеме или предложить улучшение", "דרגו אותנו ב-App Store": "Оцените нас в App Store", "דרוג עוזר לנו להגיע לעוד אנשים": "Оценки помогают нам охватить больше людей", "חדשי": "Ежемесячно", "חדשי (5 פרקים ליום)": "Ежемесячно (5 глав в день)", "ישראל / חוץ לארץ": "Израиль / диаспора", "קובע יום טוב שני, חול המועד וכדומה בלוח השנה": "Определяет второй день Йом Това, Холь ѓа-моэд и т. д. в календаре", "אוטומטי": "Автоматически", "ישראל": "Израиль", "חוץ לארץ": "За пределами Израиля", "פסוק לפי השם": "Стих по имени", "לדגמה: מאיר": "напр.: Меир", "שולח…": "Отправка…", "לא הצלחנו לשלוח כרגע (בדקו חיבור לאינטרנט). ההודעה שלכם נשמרה כאן - אפשר לנסות שוב, להעתיק או לשלוח במייל.": "Не удалось отправить (проверьте соединение). Сообщение сохранено здесь - попробуйте ещё раз, скопируйте или отправьте по почте.", "העתק הודעה": "Копировать сообщение", "שלח במייל": "Отправить по почте", "הועתק": "Скопировано"});
+Object.assign(I18N.ka,{"תצוגה, גדל גופן, שפה": "ჩვენება, შრიფტის ზომა, ენა", "התראות": "შეტყობინებები", "תכנית הלמוד": "სწავლის გეგმა", "אישי": "პირადი", "שמות, הקדשות, יאהרצייט": "სახელები, მიძღვნები, იორცაიტი", "שתוף וגבוי": "გაზიარება და სარეზერვო ასლი", "שתוף, גבוי ושחזור": "გაზიარება, სარეზერვო ასლი და აღდგენა", "תמיכה ומידע": "მხარდაჭერა და ინფორმაცია", "משוב, דרוג, מדיניות": "გამოხმაურება, შეფასება, პოლიტიკა", "משוב ותמיכה": "გამოხმაურება და მხარდაჭერა", "דווח והצעות לשפור": "შეატყობინეთ და შემოგვთავაზეთ", "דווח על תקלות והצעות לשפור": "შეგვატყობინეთ პრობლემის შესახებ ან შემოგვთავაზეთ გაუმჯობესება", "דרגו אותנו ב-App Store": "შეგვაფასეთ App Store-ში", "דרוג עוזר לנו להגיע לעוד אנשים": "შეფასება გვეხმარება მეტ ადამიანამდე მიღწევაში", "חדשי": "ყოველთვიური", "חדשי (5 פרקים ליום)": "ყოველთვიური (დღეში 5 თავი)", "ישראל / חוץ לארץ": "ისრაელი / დიასპორა", "קובע יום טוב שני, חול המועד וכדומה בלוח השנה": "განსაზღვრავს იომ ტოვის მეორე დღეს, ხოლ ჰამოედს და ა. შ. კალენდარში", "אוטומטי": "ავტომატური", "ישראל": "ისრაელი", "חוץ לארץ": "ისრაელს გარეთ", "פסוק לפי השם": "ლექსი სახელის მიხედვით", "לדגמה: מאיר": "მაგ.: მეირი", "שולח…": "იგზავნება…", "לא הצלחנו לשלוח כרגע (בדקו חיבור לאינטרנט). ההודעה שלכם נשמרה כאן - אפשר לנסות שוב, להעתיק או לשלוח במייל.": "ახლა გაგზავნა ვერ მოხერხდა (შეამოწმეთ ინტერნეტი). შეტყობინება აქ შენახულია - სცადეთ თავიდან, დააკოპირეთ ან გაგზავნეთ ელფოსტით.", "העתק הודעה": "შეტყობინების კოპირება", "שלח במייל": "ელფოსტით გაგზავნა", "הועתק": "დაკოპირდა"});
+/* feedback form strings */
+Object.assign(I18N.en,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "We value your time. We’d love to hear suggestions for improvement or reports of problems", "הכנס את שמך": "Enter your name", "הכנס את האימייל שלך": "Enter your email", "הכנס את הודעתך": "Enter your message", "שלח": "Send"});
+Object.assign(I18N.fr,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Nous apprécions votre temps. Nous serons heureux de recevoir vos suggestions d’amélioration ou vos signalements de problèmes", "הכנס את שמך": "Saisissez votre nom", "הכנס את האימייל שלך": "Saisissez votre e-mail", "הכנס את הודעתך": "Saisissez votre message", "שלח": "Envoyer"});
+Object.assign(I18N.ru,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Мы ценим ваше время. Будем рады предложениям по улучшению и сообщениям о неполадках", "הכנס את שמך": "Введите ваше имя", "הכנס את האימייל שלך": "Введите ваш e-mail", "הכנס את הודעתך": "Введите ваше сообщение", "שלח": "Отправить"});
+Object.assign(I18N.ka,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "ჩვენ ვაფასებთ თქვენს დროს. სიამოვნებით მოვისმენთ გაუმჯობესების წინადადებებს ან შეტყობინებებს პრობლემების შესახებ", "הכנס את שמך": "შეიყვანეთ თქვენი სახელი", "הכנס את האימייל שלך": "შეიყვანეთ თქვენი ელფოსტა", "הכנס את הודעתך": "შეიყვანეთ თქვენი შეტყობინება", "שלח": "გაგზავნა"});
+Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
+Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
+Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
+Object.assign(I18N.ka,{"מחוברים כעת": "ახლა ონლაინში"});
 for(const _lg in I18N){
   const _d=I18N[_lg], _nd={};
   for(const _k in _d) _nd[_k.normalize('NFC')]=_d[_k];
@@ -2986,9 +3007,9 @@ function weeklyPortion(hd){ return WEEKLY[hd.getDay()].slice(); }
 function portionFor(hd,mode){ mode=mode||S.division; return mode==='weekly'?weeklyPortion(hd):(mode==='monthly'?monthlyPortion(hd):stdMonthlyPortion(hd)); }
 function ckDivisionLabel(mode){
   mode=mode||S.division;
-  if(mode==='weekly') return 'שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)';
-  if(mode==='monthly') return 'חָדְשִׁי (5 פְּרָקִים לְיוֹם)';
-  return 'חָדְשִׁי';
+  if(mode==='weekly') return ckChrome('שְׁבוּעִי (לְפִי יְמוֹת הַשָּׁבוּעַ)');
+  if(mode==='monthly') return ckChrome('חָדְשִׁי (5 פְּרָקִים לְיוֹם)');
+  return ckChrome('חָדְשִׁי');
 }
 function chaptersOf(range){ const a=[]; for(let i=range[0];i<=range[1];i++) a.push(i); return a; }
 
@@ -6476,7 +6497,8 @@ const HOME_CATALOG={
   benishchai:{kind:'tile',label:'בן איש חי'},
   tikkunei:{kind:'block',label:'תיקוני הזהר'},
   zmanimCard:{kind:'block',label:'זמני היום'},
-  stats:{kind:'block',label:'מונה משתמשים'},
+  visitors:{kind:'block',half:true,sizes:['s','m'],label:'מונה משתמשים'},   // two sizes: half width / full width
+  live:{kind:'block',half:true,sizes:['s','m'],label:'מחוברים כעת'},
   hatzlacha:{kind:'block',label:'להצלחת'},
   memorial:{kind:'block',keep:true,label:'לעלוי נשמת'}, // can be moved, never removed
   social:{kind:'block',keep:true,sizes:['s','m'],label:'רשתות חברתיות'}, // can be moved/enlarged (2 sizes), never removed
@@ -6499,13 +6521,15 @@ const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
   {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},
-  {id:'tikkunei',size:'l'},{id:'stats',size:'l'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
+  {id:'tikkunei',size:'l'},{id:'visitors',size:'s'},{id:'live',size:'s'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
   let raw=null;
   try{ raw=JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)||'null'); }catch(e){}
   if(!Array.isArray(raw)) return homeDefaultLayout();
+  // the old single "stats" block became two separate ones
+  raw=raw.flatMap(it=> it && it.id==='stats' ? [{id:'visitors',size:'s'},{id:'live',size:'s'}] : [it]);
   const seen=new Set(), out=[];
   raw.forEach(it=>{
     if(!it || !HOME_CATALOG[it.id] || seen.has(it.id)) return;
@@ -6565,7 +6589,7 @@ function homeGridHTML(mods){
     const inner=fn(it.size)||''; if(!inner) return;
     if(def.fixed){ html+=`<div class="home-item hi-wide hi-fixed" data-home-item="${it.id}">${inner}</div>`; return; }
     if(!def.keep) shown++;   // the always-present memorial block doesn't count as "something on the home" 
-    const wide = def.kind==='block' || it.size==='l';
+    const wide = def.half ? it.size==='m' : (def.kind==='block' || it.size==='l');
     html+=`<div class="home-item${wide?' hi-wide':''}" data-home-item="${it.id}" data-size="${it.size}">${inner}${HOME_EDIT?homeEditControls(it.id,def,it.size):''}</div>`;
   });
   const grid=`<div class="home-grid${HOME_EDIT?' home-edit':''}" id="homeGrid">${html}</div>`;
@@ -6577,7 +6601,7 @@ function homeAddSheet(){
   const rows=Object.keys(HOME_CATALOG).filter(id=>!HOME_CATALOG[id].fixed && !HOME_CATALOG[id].keep && !have.has(id));
   const addId=id=>{
     const layout=getHomeLayout();
-    layout.push({id,size:HOME_CATALOG[id].kind==='tile'?'s':'l'});
+    layout.push({id,size:HOME_CATALOG[id].sizes?HOME_CATALOG[id].sizes[0]:(HOME_CATALOG[id].kind==='tile'?'s':'l')});
     saveHomeLayout(layout); homeKeepScroll(renderHome);
     setTimeout(()=>{ const el=document.querySelector(`[data-home-item="${id}"]`); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); },60);
   };
@@ -6723,7 +6747,10 @@ function homeBindDrag(grid){
 const HOME_NRES={};
 function homeResizeApply(item,size){
   item.dataset.size=size;
-  if(item.querySelector('.q-tile')) item.classList.toggle('hi-wide', size==='l');
+  const hd=HOME_CATALOG[item.dataset.homeItem]||{};
+  if(hd.half) item.classList.toggle('hi-wide', size==='m');
+  else if(item.querySelector('.q-tile')) item.classList.toggle('hi-wide', size==='l');
+  const lg=item.querySelector('.stat-card'); if(lg) lg.classList.toggle('long', size==='m');
   const t=item.querySelector('.q-tile');
   if(t){ t.classList.remove('primary','hi-l'); if(size!=='s') t.classList.add('primary'); if(size==='l') t.classList.add('hi-l'); }
 }
@@ -6783,12 +6810,7 @@ window.NativeHomeEditHost={
 function homeBindResize(grid){
   const rtl=document.documentElement.dir!=='ltr';
   const order=['s','m','l'];
-  const apply=(item,size)=>{
-    item.dataset.size=size;
-    if(item.querySelector('.q-tile')) item.classList.toggle('hi-wide', size==='l');
-    const t=item.querySelector('.q-tile');
-    if(t){ t.classList.remove('primary','hi-l'); if(size!=='s') t.classList.add('primary'); if(size==='l') t.classList.add('hi-l'); }
-  };
+  const apply=homeResizeApply;
   grid.querySelectorAll('.hi-resize').forEach(h=>{
     h.addEventListener('pointerdown',ev=>{
       ev.preventDefault(); ev.stopPropagation();
@@ -7025,10 +7047,8 @@ function renderHome(){
         <div class="zmanim-list">${zl.map(z=>`<div class="zman-row ${nxt&&z.key===nxt.key?'next':''}"><div class="zl"><span class="zname">${z.label}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}</div>
       </div>`;
     },
-    stats:()=>`<div class="stats-row">
-      <div class="stat-card"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">משתמשים</span></div><span class="sc-badge gold">${I.users}</span></div>
-      <div class="stat-card"><div class="sc-info"><span class="sc-num" id="liveCount">–</span><span class="sc-label">מחברים כעת</span></div><span class="sc-badge live">${I.liveDot}</span></div>
-    </div>`,
+    visitors:(sz)=>`<div class="stat-card${sz==='m'?' long':''}"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">משתמשים</span></div><span class="sc-badge gold">${I.users}</span></div>`,
+    live:(sz)=>`<div class="stat-card${sz==='m'?' long':''}"><div class="sc-info"><span class="sc-num" id="liveCount">–</span><span class="sc-label">מחוברים כעת</span></div><span class="sc-badge live">${I.liveDot}</span></div>`,
     hatzlacha:()=>hatzlachaHTML(),
     memorial:()=>memorialHTML(),
     social:(sz)=>socialLinksHTML(sz),
@@ -12160,13 +12180,13 @@ function settingsCategoryBody(catId, notifPerm){
     </div>`;
     case 'personal': return `
     <div class="set-group">
-      <h3>פָּסוּק לְפִי הַשֵּׁם</h3>
+      <h3>${ckChrome('פָּסוּק לְפִי הַשֵּׁם')}</h3>
       <div class="set-item col">
         <div class="si-d" style="margin-bottom:10px">${ckChrome('כתבו שם או כמה שמות עבריים, ובסוף כל עמידה יופיעו כל פסוקי תהלים המתחילים ומסתימים באותיות כל שם, לפי הסדר שנרשמו כאן')}</div>
         <div id="hebrewNamesList">${(S.hebrewNames||[]).map((n,i)=>`<div class="ded-row"><span class="ded-txt">${n}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||`<div class="si-d">${ckChrome('אין שמות עדין')}</div>`}</div>
         <div class="ded-add">
           <div class="ded-add-row">
-            <input id="hebrewNameIn" class="fld-input" placeholder="לְדֻגְמָה: מֵאִיר"/>
+            <input id="hebrewNameIn" class="fld-input" placeholder="${ckChrome('לְדֻגְמָה: מֵאִיר')}"/>
           </div>
           <button class="ded-add-btn" id="hebrewNameAdd">${I.plus}<span>${ckChrome('הוֹסֵף')}</span></button>
         </div>
@@ -12441,32 +12461,51 @@ const SUPPORT_EMAIL = 'info@bet-el.be';
    HTML form below and the native one (NativeFeedbackFormView.swift calls
    back into window.NativeFeedbackHost.send() below). */
 const FEEDBACK_FN_URL = 'https://us-central1-bet-el-e6812.cloudfunctions.net/sendFeedback';
-function sendFeedbackForm(name, email, message){
+/* Resolves true when the message really reached us, false otherwise (never
+   hangs: every network step has a timeout). Order: the Cloud Function (emails
+   it), then a Firestore "feedback" document (read it in the Firebase Console).
+   If both fail the caller keeps the user's text on screen and offers
+   copy / share / mail, so nothing is lost and nothing looks "stuck". */
+function withTimeout(promise, ms){
+  return new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error('timeout')),ms); promise.then(v=>{clearTimeout(t);res(v);},e=>{clearTimeout(t);rej(e);}); });
+}
+async function submitFeedback(name, email, message){
   name=(name||'').trim(); email=(email||'').trim(); message=(message||'').trim();
-  fetch(FEEDBACK_FN_URL, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({name,email,message}),
-  }).then(r=>{
-    if(!r.ok) throw new Error('bad status');
-    toast(ckChrome('ההודעה נשלחה, תודה!'));
-  }).catch(()=>{
-    const subject=encodeURIComponent('משוב מהאפליקציה — תמיד');
-    const mailBody=encodeURIComponent('שם: '+name+'\nאימייל: '+email+'\n\n'+message);
-    location.href='mailto:'+SUPPORT_EMAIL+'?subject='+subject+'&body='+mailBody;
+  try{
+    const r=await withTimeout(fetch(FEEDBACK_FN_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})}),10000);
+    if(r.ok) return true;
+  }catch(e){}
+  try{
+    if(window.__betelSaveFeedback){ await withTimeout(window.__betelSaveFeedback({name,email,message}),10000); return true; }
+  }catch(e){}
+  return false;
+}
+function feedbackMailto(name,email,message){
+  const subject=encodeURIComponent('משוב מהאפליקציה — תמיד');
+  const body=encodeURIComponent('שם: '+name+'\nאימייל: '+email+'\n\n'+message);
+  const a=document.createElement('a'); a.href='mailto:'+SUPPORT_EMAIL+'?subject='+subject+'&body='+body; document.body.appendChild(a); a.click(); a.remove();
+}
+function feedbackFallbackText(name,email,message){ return 'שם: '+name+'\nאימייל: '+email+'\n\n'+message; }
+/* used by the native form (NativeFeedbackHost.send) and the HTML one */
+function sendFeedbackForm(name, email, message){
+  toast(ckChrome('שולח…'));
+  submitFeedback(name,email,message).then(ok=>{
+    if(ok) toast(ckChrome('ההודעה נשלחה, תודה!'));
+    else openFeedbackForm({name,email,message,failed:true,forceHtml:true});   // native form is gone: bring the text back in the HTML form
   });
 }
 window.NativeFeedbackHost = {
   send({name,email,message}){ sendFeedbackForm(name,email,message); },
 };
-function openFeedbackForm(){
+function openFeedbackForm(opts){
+  opts=opts||{};
   const title=ckChrome('דִּוּוּחַ וְהַצָּעוֹת לְשִׁפּוּר');
   const body=ckChrome('אָנוּ מַעֲרִיכִים אֶת הַזְּמַן שֶׁלָּךְ. נִשְׂמַח לִשְׁמֹעַ הַצָּעוֹת לְשִׁפּוּר אוֹ לְקַבֵּל דִּוּוּחַ עַל תַּקָּלוֹת');
   const namePlaceholder=ckChrome('הַכְנֵס אֶת שִׁמְךָ');
   const emailPlaceholder=ckChrome('הַכְנֵס אֶת הָאִימֵייל שֶׁלָּךְ');
   const messagePlaceholder=ckChrome('הַכְנֵס אֶת הוֹדָעָתְךָ');
   const sendButtonText=ckChrome('שְׁלַח');
-  if(NATIVE_MODAL){
+  if(NATIVE_MODAL && !opts.forceHtml){
     try{
       window.Capacitor.Plugins.NativeModal.presentFeedbackForm({
         title, body, namePlaceholder, emailPlaceholder, messagePlaceholder, sendButtonText,
@@ -12483,6 +12522,7 @@ function openFeedbackForm(){
     <div class="m-crown">${I.wrench}</div>
     <h3 class="gold-text">${title}</h3>
     <p>${body}</p>
+    <div class="fb-err" id="fbErr" style="display:none;color:#c0392b;font-size:14px;line-height:1.5;margin:0 0 10px"></div>
     <div class="fld-col">
       <input class="fld-input" id="fbName" placeholder="${namePlaceholder}"/>
       <input class="fld-input" id="fbEmail" type="email" placeholder="${emailPlaceholder}"/>
@@ -12490,18 +12530,37 @@ function openFeedbackForm(){
       <div class="fb-count" id="fbCount">0/500</div>
     </div>
     <button class="btn btn-gold" id="fbSend" disabled><span>${sendButtonText}</span></button>
+    <div id="fbAlt" style="display:none;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="fbCopy" type="button"><span>${ckChrome('העתק הודעה')}</span></button>
+      <button class="btn" id="fbShare" type="button"><span>${ckChrome('שתף')}</span></button>
+      <button class="btn" id="fbMail" type="button"><span>${ckChrome('שלח במייל')}</span></button>
+    </div>
   </div>`;
   document.body.appendChild(ov);
   const nameEl=ov.querySelector('#fbName'), emailEl=ov.querySelector('#fbEmail'), msgEl=ov.querySelector('#fbMsg');
-  const countEl=ov.querySelector('#fbCount'), sendBtn=ov.querySelector('#fbSend');
+  const countEl=ov.querySelector('#fbCount'), sendBtn=ov.querySelector('#fbSend'), errEl=ov.querySelector('#fbErr'), altEl=ov.querySelector('#fbAlt');
+  nameEl.value=opts.name||''; emailEl.value=opts.email||''; msgEl.value=opts.message||'';
+  const showFail=()=>{
+    errEl.textContent=ckChrome('לא הצלחנו לשלוח כרגע (בדקו חיבור לאינטרנט). ההודעה שלכם נשמרה כאן - אפשר לנסות שוב, להעתיק או לשלוח במייל.');
+    errEl.style.display='block'; altEl.style.display='flex';
+  };
   const refresh=()=>{
     countEl.textContent=msgEl.value.length+'/500';
     sendBtn.disabled = !(nameEl.value.trim() && emailEl.value.trim() && msgEl.value.trim());
   };
   [nameEl,emailEl,msgEl].forEach(el=>el.addEventListener('input',refresh));
-  sendBtn.onclick=()=>{
-    sendFeedbackForm(nameEl.value, emailEl.value, msgEl.value);
-    ov.remove();
+  refresh();
+  if(opts.failed) showFail();
+  const txt=()=>feedbackFallbackText(nameEl.value.trim(),emailEl.value.trim(),msgEl.value.trim());
+  ov.querySelector('#fbCopy').onclick=()=>{ try{ navigator.clipboard.writeText(txt()).then(()=>toast(ckChrome('הועתק'))); }catch(e){} };
+  ov.querySelector('#fbShare').onclick=()=>{ if(navigator.share) navigator.share({title:'תמיד',text:txt()}).catch(()=>{}); else { try{ navigator.clipboard.writeText(txt()); toast(ckChrome('הועתק')); }catch(e){} } };
+  ov.querySelector('#fbMail').onclick=()=>feedbackMailto(nameEl.value.trim(),emailEl.value.trim(),msgEl.value.trim());
+  sendBtn.onclick=async()=>{
+    sendBtn.disabled=true; errEl.style.display='none';
+    const label=sendBtn.querySelector('span'), old=label.textContent; label.textContent=ckChrome('שולח…');
+    const ok=await submitFeedback(nameEl.value,emailEl.value,msgEl.value);
+    if(ok){ ov.remove(); toast(ckChrome('ההודעה נשלחה, תודה!')); }
+    else { label.textContent=old; refresh(); showFail(); }
   };
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
@@ -13452,6 +13511,8 @@ window.shareQR = shareQR;
   // Public visit counter (Firestore stats/visits), shown on the home page
   const db = getFirestore(firebaseApp);
   const visitsRef = doc(db, "stats", "visits");
+  // Feedback fallback when the email Cloud Function isn't reachable: store it in Firestore "feedback"
+  window.__betelSaveFeedback = (d) => setDoc(doc(db, 'feedback', Date.now()+'-'+Math.random().toString(36).slice(2,8)), { ...d, ua: navigator.userAgent, lang: navigator.language, createdAt: Date.now() });
   let lastVisitCount = null, lastPaintedVisitCount = null;
   window.__paintVisitCount = function(){
     const el = document.getElementById('visitCount');

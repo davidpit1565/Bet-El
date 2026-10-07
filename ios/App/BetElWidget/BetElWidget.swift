@@ -149,8 +149,25 @@ private struct DateBlock: View {
     let palette: BetElTheme.Palette
     let daySize: CGFloat
     let showWeekday: Bool
+    /// One line: big day numeral beside "month year" (used by the Large widget,
+    /// which is otherwise too tall for its 354pt).
+    var compact: Bool = false
     var body: some View {
         let align = hAlign(entry.lang)
+        if compact {
+            let day = Text(entry.dayText)
+                .font(.system(size: daySize, weight: .heavy))
+                .foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
+            let rest = Text("\(entry.monthText) \(entry.yearText)")
+                .font(.system(size: max(16, daySize * 0.42), weight: .semibold))
+                .foregroundColor(palette.ink)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            HStack(alignment: .lastTextBaseline, spacing: 8) {
+                if WidgetL10n.isRTL(entry.lang) { rest; day } else { day; rest }
+            }
+            .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+        } else {
         VStack(alignment: align, spacing: 0) {
             if showWeekday {
                 Text(entry.weekdayText)
@@ -167,6 +184,7 @@ private struct DateBlock: View {
                 .lineLimit(1).minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
+        }
     }
 }
 
@@ -245,7 +263,7 @@ private struct MediumWidgetView: View {
     // "left"/"right" are just the two columns: the date, and the live info
     private func left(_ palette: BetElTheme.Palette) -> some View {
         VStack(alignment: hAlign(entry.lang), spacing: 4) {
-            DateBlock(entry: entry, palette: palette, daySize: 54, showWeekday: true)
+            DateBlock(entry: entry, palette: palette, daySize: 48, showWeekday: true)
             Spacer(minLength: 0)
             StreakBadge(count: entry.streakCount, palette: palette)
         }
@@ -270,16 +288,16 @@ private struct LargeWidgetView: View {
     var body: some View {
         let palette = BetElTheme.palette(for: entry.theme)
         let upcoming = firstUpcoming(entry.zmanimToday, after: entry.date)
-        VStack(alignment: hAlign(entry.lang), spacing: 8) {
+        VStack(alignment: hAlign(entry.lang), spacing: 6) {
             SideRow(lang: entry.lang, label: {
                 Text(entry.weekdayText).font(.system(size: 14, weight: .semibold)).foregroundColor(palette.inkSoft)
             }, value: { StreakBadge(count: entry.streakCount, palette: palette) })
 
-            DateBlock(entry: entry, palette: palette, daySize: 60, showWeekday: false)
+            DateBlock(entry: entry, palette: palette, daySize: 46, showWeekday: false, compact: true)
 
             // next zman, as a card
-            NextZmanBlock(entry: entry, palette: palette, countdownSize: 38)
-                .padding(.horizontal, 12).padding(.vertical, 8)
+            NextZmanBlock(entry: entry, palette: palette, countdownSize: 32)
+                .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(palette.gold.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
@@ -306,7 +324,7 @@ private struct LargeWidgetView: View {
                 else { tehillimCell(palette); candleCell(palette) }
             }
         }
-        .padding(16)
+        .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -366,28 +384,38 @@ private struct ZmanimWidgetView: View {
                 }
                 .padding(12)
             } else {
-                // medium & large: next-zman countdown on top, the four times as tiles
-                VStack(alignment: hAlign(entry.lang), spacing: 10) {
-                    NextZmanBlock(entry: entry, palette: palette, countdownSize: family == .systemLarge ? 46 : 34)
-                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                        ForEach(entry.zmanimToday) { row in
-                            let isNext = row.key == upcoming
-                            VStack(spacing: 2) {
-                                Text(row.label).font(.system(size: 12, weight: .medium)).foregroundColor(palette.inkSoft)
-                                    .lineLimit(1).minimumScaleFactor(0.6)
-                                Text(timeString(row.time))
-                                    .font(.system(size: family == .systemLarge ? 26 : 20, weight: .bold, design: .rounded)).monospacedDigit()
-                                    .foregroundColor(isNext ? palette.goldBright : palette.gold)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, family == .systemLarge ? 14 : 6)
-                            .background(palette.gold.opacity(isNext ? 0.22 : 0.10))
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                // medium: countdown beside a 2x2 grid; large: countdown on top, grid below
+                let isLarge = family == .systemLarge
+                let grid = LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
+                    ForEach(entry.zmanimToday) { row in
+                        let isNext = row.key == upcoming
+                        VStack(spacing: 1) {
+                            Text(row.label).font(.system(size: 11, weight: .medium)).foregroundColor(palette.inkSoft)
+                                .lineLimit(1).minimumScaleFactor(0.6)
+                            Text(timeString(row.time))
+                                .font(.system(size: isLarge ? 26 : 18, weight: .bold, design: .rounded)).monospacedDigit()
+                                .foregroundColor(isNext ? palette.goldBright : palette.gold)
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, isLarge ? 14 : 5)
+                        .background(palette.gold.opacity(isNext ? 0.22 : 0.10))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
-                    if family == .systemLarge { Spacer(minLength: 0) }
                 }
-                .padding(14)
+                if isLarge {
+                    VStack(alignment: hAlign(entry.lang), spacing: 10) {
+                        NextZmanBlock(entry: entry, palette: palette, countdownSize: 46)
+                        grid
+                        Spacer(minLength: 0)
+                    }
+                    .padding(14)
+                } else {
+                    HStack(alignment: .center, spacing: 10) {
+                        if WidgetL10n.isRTL(entry.lang) { grid; NextZmanBlock(entry: entry, palette: palette, countdownSize: 28) }
+                        else { NextZmanBlock(entry: entry, palette: palette, countdownSize: 28); grid }
+                    }
+                    .padding(12)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

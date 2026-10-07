@@ -204,6 +204,21 @@ in English as usual.
   To offer a new button: add it to `HOME_CATALOG` and give it a renderer
   (`mods.<id>`) or a `HOME_SHORTCUTS()` entry; ask the user which new
   buttons they want. Removing everything shows only the big logo.
+- **Home stats are two separate blocks** (`visitors` = total users, `live` =
+  online now; the old single `stats` block migrates into both in
+  `getHomeLayout()`). Both are removable and have `half:true, sizes:['s','m']`:
+  small = half width (two sit side by side), `m` = full-width `.stat-card.long`
+  with a bigger number/label/badge. Their DOM ids (`visitCount`/`liveCount`)
+  are what the Firebase module paints.
+- **Feedback form** (`openFeedbackForm`/`submitFeedback`): the Cloud Function
+  `sendFeedback` is not deployed (404), so sending tries it with a 10s timeout,
+  then a Firestore `feedback` document, and on total failure keeps the text in
+  the HTML form with copy/share/mail buttons instead of silently closing.
+  Firestore rules must allow creating in `feedback` for tier 2 to work.
+- **Every Hebrew string shown through `ckChrome()` needs a nikud-free key in all
+  four `I18N` blocks** (en/fr/ru/ka); a missing key shows up as Hebrew mixed
+  with translated fragments (substring fallback). Audit by loading Settings in
+  each language and scanning for Hebrew letters.
 - **Home edit-mode controls are real native Liquid Glass** (`NativeHomeEdit.swift`:
   `NativeHomeEditBridge` + `HomeEditOverlay`): minus badges, corner resize
   handles (pan gesture), the +/check pills (`UIButton.Configuration.glass()`),

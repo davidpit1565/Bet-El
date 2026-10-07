@@ -415,9 +415,6 @@ class MainViewController: CAPBridgeViewController {
         feedbackForm.dismiss()
     }
 
-    /// Pinned just above the tab bar, matching the HTML `.toast`'s own
-    /// `bottom: calc(var(--native-nav-h) + 20px)` position when a native
-    /// tab bar is present (see the `.has-native-tabbar .toast` CSS rule).
     private func setupHomeEdit() {
         homeEditOverlay.frame = view.bounds
         homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
@@ -425,6 +422,9 @@ class MainViewController: CAPBridgeViewController {
         view.insertSubview(homeEditOverlay, belowSubview: tabBar)
     }
 
+    /// Pinned just above the tab bar, matching the HTML `.toast`'s own
+    /// `bottom: calc(var(--native-nav-h) + 20px)` position when a native
+    /// tab bar is present (see the `.has-native-tabbar .toast` CSS rule).
     private func setupToast() {
         toastView.translatesAutoresizingMaskIntoConstraints = false
         toastView.isHidden = true
