@@ -435,8 +435,9 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 /* ---- Calendar, iOS Calendar style: segmented control, big month title, round chevrons, plain
    number grid with a filled circle on the selected day, swipeable day card. Flat fills only
    (no backdrop-filter - see the Liquid Glass note below). ---- */
-.ical-seg{display:flex;padding:3px;border-radius:999px;background:var(--panel-2);border:var(--glass-border);margin:2px 0 14px}
-.ical-seg button{flex:1;border:0;background:none;color:var(--ink-soft);font-family:var(--font-ui);font-size:14px;font-weight:600;padding:9px 6px;border-radius:999px;cursor:pointer;transition:background .25s var(--ease),color .25s var(--ease),box-shadow .25s var(--ease)}
+.ical-bar{display:flex;align-items:center;gap:6px;margin:2px 0 12px}
+.ical-seg{flex:1;min-width:0;display:flex;padding:3px;border-radius:999px;background:var(--panel-2);border:var(--glass-border)}
+.ical-seg button{flex:1;border:0;background:none;color:var(--ink-soft);font-family:var(--font-ui);font-size:13.5px;font-weight:600;padding:7px 4px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .25s var(--ease),color .25s var(--ease),box-shadow .25s var(--ease)}
 .ical-seg button.on{background:var(--gold-grad);color:#2a1e05;box-shadow:0 4px 12px -6px rgba(184,134,11,.7),inset 0 1px 0 rgba(255,255,255,.4)}
 .ical-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 10px}
 .ical-title{display:flex;align-items:baseline;gap:8px;min-width:0}
@@ -446,8 +447,9 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .ical-round{width:36px;height:36px;border-radius:50%;border:var(--glass-border);background:var(--panel);color:var(--gold);display:grid;place-items:center;cursor:pointer;padding:0;transition:transform .15s var(--ease)}
 .ical-round svg{width:18px;height:18px}
 .ical-round:active{transform:scale(.88)}
-.ical-pill{height:36px;padding:0 14px;border-radius:999px;border:var(--glass-border);background:var(--panel);color:var(--gold);font-family:var(--font-ui);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .15s var(--ease)}
+.ical-pill{height:36px;padding:0 11px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex:none;border-radius:999px;border:var(--glass-border);background:var(--panel);color:var(--gold);font-family:var(--font-ui);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .15s var(--ease)}
 .ical-pill:active{transform:scale(.94)}
+.ical-pill svg{width:15px;height:15px}
 .ical-card{border-radius:26px;padding:8px 6px 6px;background:var(--panel);border:var(--glass-border);box-shadow:var(--card-shadow)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0}
 .cal-dow{text-align:center;font-size:11px;color:var(--muted);padding:6px 0 4px;font-weight:700}
@@ -2657,6 +2659,10 @@ Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": 
 Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
 Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
 Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
+Object.assign(I18N.en,{"עברי": "Hebrew", "לועזי": "Gregorian", "קפוץ": "Jump"});
+Object.assign(I18N.fr,{"עברי": "Hébraïque", "לועזי": "Grégorien", "קפוץ": "Aller"});
+Object.assign(I18N.ru,{"עברי": "Евр.", "לועזי": "Григ.", "קפוץ": "Перейти"});
+Object.assign(I18N.ka,{"עברי": "ებრ.", "לועזי": "გრიგ.", "קפוץ": "გადასვლა"});
 Object.assign(I18N.en,{"מחוברים כעת": "Online now"});
 Object.assign(I18N.fr,{"מחוברים כעת": "En ligne"});
 Object.assign(I18N.ru,{"מחוברים כעת": "Сейчас онлайн"});
@@ -8472,15 +8478,17 @@ function renderCalendar(){
   app.innerHTML=`
   ${topbar('לוח עברי')}
   <div class="view">
-    <div class="ical-seg cal-mode-toggle">
-      <button data-mode="heb" class="${!CAL.civil?'on':''}">לוח עברי</button>
-      <button data-mode="civil" class="${CAL.civil?'on':''}">לוח לועזי</button>
+    <div class="ical-bar">
+      <div class="ical-seg cal-mode-toggle">
+        <button data-mode="heb" class="${!CAL.civil?'on':''}">עברי</button>
+        <button data-mode="civil" class="${CAL.civil?'on':''}">לועזי</button>
+      </div>
+      <button class="ical-pill" id="calJumpBtn">${I.search}<span>קפוץ</span></button>
+      <button class="ical-pill" id="calToday">היום</button>
     </div>
     <div class="ical-head">
       <div class="ical-title cal-month ${_anim}"><span class="m">${monthLabel}</span><span class="y">${yearLabel}</span></div>
       <div class="ical-ctrls">
-        <button class="ical-pill today-btn-ical" id="calToday">היום</button>
-        <button class="ical-round" id="calJumpBtn" aria-label="קפץ לתאריך">${I.search}</button>
         <button class="ical-round" id="calPrevM">${I.prev}</button>
         <button class="ical-round" id="calNextM">${I.next}</button>
       </div>
