@@ -17,7 +17,7 @@ enum WidgetL10n {
         "best": ["he": "שִׂיא", "en": "Best"],
         "sunrise": ["he": "זְרִיחָה", "en": "Sunrise"],
         "sunset": ["he": "שְׁקִיעָה", "en": "Sunset"],
-        "tehillimToday": ["he": "תְּהִלִּים הַיּוֹם", "en": "Tehillim today"],
+        "tehillimToday": ["he": "פִּרְקֵי תְּהִלִּים לְהַיּוֹם", "en": "Today's Tehillim chapters"],
         "chapter": ["he": "פֶּרֶק", "en": "Chapter"],
         "dayStreak": ["he": "יָמִים בְּרֶצֶף", "en": "day streak"],
         "candleLighting": ["he": "הַדְלָקַת נֵרוֹת", "en": "Candle lighting"],

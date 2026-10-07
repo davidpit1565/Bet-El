@@ -43,7 +43,7 @@ struct BetElAccessoryRectangularView: View {
                 .lineLimit(1)
             Text("\(WidgetL10n.t("tehillimToday", lang: entry.lang)) \(entry.tehillimRangeText)")
                 .font(.system(size: 12))
-                .lineLimit(1)
+                .lineLimit(1).minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity, alignment: isRTL ? .trailing : .leading)
         .widgetAccentable()

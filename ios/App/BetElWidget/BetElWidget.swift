@@ -220,9 +220,11 @@ private struct TehillimLine: View {
         SideRow(lang: entry.lang, label: {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                 .font(.system(size: size - 3, weight: .medium)).foregroundColor(palette.inkSoft)
+                .lineLimit(1).minimumScaleFactor(0.6)
         }, value: {
             Text("\(entry.tehillimRangeText)")
                 .font(.system(size: size + 4, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
         })
     }
 }
@@ -331,9 +333,10 @@ private struct LargeWidgetView: View {
 
     private func tehillimCell(_ palette: BetElTheme.Palette) -> some View {
         VStack(alignment: hAlign(entry.lang), spacing: 1) {
-            Text(WidgetL10n.t("tehillimToday", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft)
+            Text(WidgetL10n.t("tehillimToday", lang: entry.lang)).font(.system(size: 11)).foregroundColor(palette.inkSoft).lineLimit(1).minimumScaleFactor(0.6)
             Text("\(entry.tehillimRangeText)")
                 .font(.system(size: 22, weight: .bold, design: .rounded)).foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
         }
         .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
     }
@@ -474,14 +477,14 @@ private struct TehillimWidgetView: View {
             Text(WidgetL10n.t("tehillimToday", lang: entry.lang))
                 .font(.system(size: family == .systemSmall ? 14 : 17, weight: .semibold))
                 .foregroundColor(palette.inkSoft)
+                .lineLimit(2).minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
             Spacer(minLength: 0)
             Text("\(entry.tehillimRangeText)")
-                .font(.system(size: family == .systemSmall ? 40 : 64, weight: .heavy, design: .rounded))
+                .font(.system(size: family == .systemSmall ? 38 : 60, weight: .heavy, design: .rounded))
                 .foregroundColor(palette.goldBright)
-                .lineLimit(1).minimumScaleFactor(0.5)
-            Text(WidgetL10n.t("chapter", lang: entry.lang))
-                .font(.system(size: family == .systemSmall ? 14 : 18, weight: .medium))
-                .foregroundColor(palette.ink)
+                .lineLimit(1).minimumScaleFactor(0.3)
+                .frame(maxWidth: .infinity, alignment: frameAlign(entry.lang))
             Spacer(minLength: 0)
             SideRow(lang: entry.lang, label: {
                 Text("\(entry.dayText) \(entry.monthText)").font(.system(size: 13, weight: .medium)).foregroundColor(palette.inkSoft)
