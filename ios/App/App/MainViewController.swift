@@ -49,7 +49,6 @@ class MainViewController: CAPBridgeViewController {
     /// one more place for the two to drift out of sync.
     static let tabOrder: [(id: String, icon: String)] = [
         ("home", "house.fill"),
-        ("tehillim", "book.closed.fill"),
         ("prayers", "books.vertical.fill"),
         ("calendar", "calendar"),
         ("settings", "gearshape.fill"),

@@ -293,6 +293,12 @@ in English as usual.
   looks - gate with `#available` instead. Menus/sheets use real system UIKit (e.g.
   `NativeModal.presentActionSheet`) so they look native on every iOS.
 
+- **Tehillim lives in the Library, not the nav bar** (user request): `LIBRARY_CATS` has a `tehillim`
+  tile between Ketuvim and Mishnah (opens the same `renderTehillim()` screen), and the bottom/native
+  tab bar is just Home / Library / Calendar / Settings (+ native Search). Tehillim's screens count as
+  "Library" for the active-tab highlight (`LIBRARY_NESTED_TABS`, `navActiveTab`). The home screen's
+  Tehillim shortcut still works.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair

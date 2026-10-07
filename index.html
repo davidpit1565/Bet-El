@@ -7606,7 +7606,7 @@ function tehillimVersesByName(name){
 }
 function renderTehillim(){
   app.innerHTML = `
-  ${topbar('ספר תהלים')}
+  ${topbar('ספר תהלים','library')}
   <div class="view">
     <div class="search-box">${I.search}<input id="psSearch" placeholder="חיפוש פרק (מספר) או מילה בפסוקים…"/></div>
     <div class="chip-row">
@@ -8700,6 +8700,7 @@ const LIBRARY_CATS = [
   {key:'torah', label:'תורה'},
   {key:'neviim', label:'נביאים'},
   {key:'ketuvim', label:'כתובים'},
+  {key:'tehillim', label:'תהילים'},
   {key:'mishnah', label:'משנה'},
   {key:'gemara', label:'גמרא'},
   {key:'rambam', label:'רמב״ם'},
@@ -8719,7 +8720,7 @@ function libCatLabel(key){
 /* Library screen's own big tile titles keep nikud (see heTitle()) -
    libCatLabel() above stays the plain tr()-translatable form used
    everywhere else (search groups, etc). */
-const LIBRARY_CATS_NIKUD = {torah:'תּוֹרָה', neviim:'נְבִיאִים', ketuvim:'כְּתוּבִים', mishnah:'מִשְׁנָה',
+const LIBRARY_CATS_NIKUD = {torah:'תּוֹרָה', neviim:'נְבִיאִים', ketuvim:'כְּתוּבִים', tehillim:'תְּהִלִּים', mishnah:'מִשְׁנָה',
   gemara:'גְּמָרָא', rambam:'רמב״ם', musar:'מוּסָר', tikkuneiZohar:'תִּיקּוּנֵי הַזֹּהַר', zohar:'זֹהַר',
   tanya:'תַּנְיָא', chokLeyisrael:'חוֹק לְיִשְׂרָאֵל', shnayimMikra:'שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם'};
 function libCatTileLabel(key){
@@ -9002,6 +9003,7 @@ function openLibraryCat(key){
   if(key==='musar') return go('musarList');
   if(key==='benishchai') return go('bicHome');
   if(key==='torah') return go('libraryTorahBooks');
+  if(key==='tehillim') return go('tehillim');
   if(key==='gemara') return go('libraryGemaraMasechtot');
   if(key==='rambam') return go('libraryRambamSefarim');
   if(key==='zohar') return go('libraryZoharParts');
@@ -13315,7 +13317,7 @@ window.NativeSettingsHost = {
    used for the home screen's daily-reading flow, where RD.daily is true
    and 'home' should stay lit instead) lights that icon rather than
    Library's, via the special case below rather than joining this set. */
-const LIBRARY_NESTED_TABS=new Set(['library',
+const LIBRARY_NESTED_TABS=new Set(['library','tehillim',
   'libraryTorahBooks','libraryTorahParshiot','libraryTorahReader',
   'libraryGemaraMasechtot','libraryGemaraReader',
   'libraryRambamSefarim','libraryRambamBooks','libraryRambamReader',
@@ -13327,7 +13329,7 @@ const LIBRARY_NESTED_TABS=new Set(['library',
   'prayersGroup','siddurHome','siddurReader']);
 function navActiveTab(tab){
   tab=tab||'home';
-  if(tab==='reader' && RD && !RD.daily) return 'tehillim';
+  if(tab==='reader' && RD && !RD.daily) return 'prayers';   // Tehillim's own chapter reader now lives under Library
   if(LIBRARY_NESTED_TABS.has(tab)) return 'prayers';
   return tab;
 }
@@ -13336,7 +13338,7 @@ function buildNav(){
   if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); syncNativeTabBar(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['tehillim','תהילים',I.book],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
+  const items=[['home','דף הבית',I.home],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
   nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===navActiveTab(TAB)?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
@@ -13391,7 +13393,7 @@ function syncNativeTabBar(){
   try{
     const plugin=window.Capacitor.Plugins.NativeTabBar;
     if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ plugin.setVisible({visible:false}).catch(()=>{}); return; }
-    const items=[['home','דף הבית'],['tehillim','תהילים'],['prayers','ספרייה'],['calendar','לוח שנה'],['settings','הגדרות'],['search','חיפוש']]
+    const items=[['home','דף הבית'],['prayers','ספרייה'],['calendar','לוח שנה'],['settings','הגדרות'],['search','חיפוש']]
       .map(([id,he])=>({id,label:nativeTabBarLabel(he)}));
     plugin.configure({items, activeTab:navActiveTab(TAB), isRTL:S.lang==='he', isDark:S.theme==='dark'}).catch(()=>{});
   }catch(e){}
