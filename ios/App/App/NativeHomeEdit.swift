@@ -23,11 +23,14 @@ final class HomeEditOverlay: UIView {
     var runJS: ((String) -> Void)?
     /// Bottom edge of the native header, so the pills sit just under it.
     var topInset: (() -> CGFloat)?
+    /// Called when the overlay appears so the owner can lift it above the native header (which otherwise
+    /// covers the + / check pills and swallows their taps).
+    var onShow: (() -> Void)?
 
     private var minusButtons: [String: UIButton] = [:]
     private var resizeHandles: [String: ResizeHandle] = [:]
-    private let addButton = HomeEditOverlay.glassButton(symbol: "plus", pointSize: 16, size: CGSize(width: 56, height: 36))
-    private let doneButton = HomeEditOverlay.glassButton(symbol: "checkmark", pointSize: 16, size: CGSize(width: 56, height: 36))
+    private let addButton = HomeEditOverlay.glassButton(symbol: "plus", pointSize: 18, size: CGSize(width: 68, height: 44))
+    private let doneButton = HomeEditOverlay.glassButton(symbol: "checkmark", pointSize: 18, size: CGSize(width: 68, height: 44))
     private var pillsInstalled = false
 
     override init(frame: CGRect) {
@@ -88,24 +91,25 @@ final class HomeEditOverlay: UIView {
     }
 
     private func layoutPills() {
-        let y = (topInset?() ?? 0) + 4
+        // Comfortably below the status bar / Dynamic Island and the native header, never under them
+        let y = (topInset?() ?? 0) + 12
         // Physical corners (like the iPhone's own edit mode): + on the left, check on the right
-        addButton.frame = CGRect(x: 16, y: y, width: 56, height: 36)
-        doneButton.frame = CGRect(x: bounds.width - 16 - 56, y: y, width: 56, height: 36)
+        addButton.frame = CGRect(x: 16, y: y, width: 68, height: 44)
+        doneButton.frame = CGRect(x: bounds.width - 16 - 68, y: y, width: 68, height: 44)
     }
 
     // MARK: - Updating from JS
 
     func apply(specs: [Spec], rtl: Bool, isDark: Bool) {
         overrideUserInterfaceStyle = isDark ? .dark : .light
-        isHidden = false
+        if isHidden { isHidden = false; onShow?() }
         installPills()
         layoutPills()
         bringSubviewToFront(addButton)
         bringSubviewToFront(doneButton)
 
         let minusSize: CGFloat = 28
-        let handleSize: CGFloat = 40
+        let handleSize: CGFloat = 56
         var keepMinus = Set<String>()
         var keepResize = Set<String>()
 
@@ -168,15 +172,15 @@ final class ResizeHandle: UIView {
     init(id: String) {
         self.id = id
         super.init(frame: .zero)
-        let glass = HomeEditOverlay.glassButton(symbol: "arrow.up.left.and.arrow.down.right", pointSize: 12, size: CGSize(width: 32, height: 32))
+        let glass = HomeEditOverlay.glassButton(symbol: "arrow.up.left.and.arrow.down.right", pointSize: 13, size: CGSize(width: 34, height: 34))
         glass.isUserInteractionEnabled = false   // the pan below owns all touches
         glass.translatesAutoresizingMaskIntoConstraints = false
         addSubview(glass)
         NSLayoutConstraint.activate([
             glass.centerXAnchor.constraint(equalTo: centerXAnchor),
             glass.centerYAnchor.constraint(equalTo: centerYAnchor),
-            glass.widthAnchor.constraint(equalToConstant: 32),
-            glass.heightAnchor.constraint(equalToConstant: 32),
+            glass.widthAnchor.constraint(equalToConstant: 34),
+            glass.heightAnchor.constraint(equalToConstant: 34),
         ])
         accessibilityLabel = "Resize"
         isAccessibilityElement = true

@@ -49,8 +49,8 @@ class MainViewController: CAPBridgeViewController {
     /// one more place for the two to drift out of sync.
     static let tabOrder: [(id: String, icon: String)] = [
         ("home", "house.fill"),
-        ("prayers", "books.vertical.fill"),
         ("calendar", "calendar"),
+        ("prayers", "books.vertical.fill"),
         ("settings", "gearshape.fill"),
         // Not a screen of its own - selecting it opens the Library search
         // (window.NativeSearchHost) and the bar re-selects the real tab.
@@ -663,7 +663,17 @@ class MainViewController: CAPBridgeViewController {
     private func setupHomeEdit() {
         homeEditOverlay.frame = view.bounds
         homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
-        homeEditOverlay.topInset = { [weak self] in self?.view.safeAreaInsets.top ?? 0 }
+        homeEditOverlay.topInset = { [weak self] in
+            guard let self = self else { return 0 }
+            // below the safe area AND below the native header when it is showing
+            let header = self.topBar.isHidden ? 0 : self.topBar.frame.maxY
+            return max(self.view.safeAreaInsets.top, header)
+        }
+        homeEditOverlay.onShow = { [weak self] in
+            guard let self = self else { return }
+            self.view.bringSubviewToFront(self.homeEditOverlay)
+            self.view.bringSubviewToFront(self.tabBar)
+        }
         view.insertSubview(homeEditOverlay, belowSubview: tabBar)
     }
 

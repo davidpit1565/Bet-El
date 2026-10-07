@@ -1713,11 +1713,11 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
 .home-zmanim .hz-title{font-family:var(--font-sacred);font-weight:700;font-size:16px;color:var(--gold);margin-bottom:8px}
 /* edit mode (modelled on the iPhone's home-screen edit mode: a gentle wiggle, a small gray minus,
    a corner handle to resize, drag the tile itself, a quiet + and check at the top) */
-.home-edit .home-item:not(.hi-fixed){animation:hiWiggle .26s ease-in-out infinite;transform-origin:50% 50%}
-.home-edit .home-item:nth-child(even):not(.hi-fixed){animation-delay:-.13s}
+.home-edit .home-item:not(.hi-fixed){animation:hiWiggle .55s ease-in-out infinite;transform-origin:50% 50%}
+.home-edit .home-item:nth-child(even):not(.hi-fixed){animation-delay:-.27s}
 .home-edit .home-item.dragging{animation:none;z-index:60;filter:drop-shadow(0 16px 22px rgba(0,0,0,.4));transition:none!important}
 .home-edit .home-item.resizing{animation:none}
-@keyframes hiWiggle{0%{rotate:-.55deg}50%{rotate:.55deg}100%{rotate:-.55deg}}
+@keyframes hiWiggle{0%{rotate:-.35deg}50%{rotate:.35deg}100%{rotate:-.35deg}}
 @media (prefers-reduced-motion:reduce){.home-edit .home-item:not(.hi-fixed){animation:none}}
 .home-edit .home-item>:not(.hi-minus):not(.hi-resize){pointer-events:none}
 .home-edit .home-item:not(.hi-fixed){cursor:grab}
@@ -7126,8 +7126,9 @@ function homeSyncNative(){
     const NH=Capacitor.Plugins.NativeHomeEdit;
     if(!HOME_EDIT||TAB!=='home'||HOME_SYNC_HIDE){ if(!HOME_EDIT||TAB!=='home') NH.hide().catch(()=>{}); else NH.setControls({items:[],rtl:true,isDark:false}).catch(()=>{}); return; }
     const items=[...document.querySelectorAll('#homeGrid .home-item:not(.hi-fixed)')].map(el=>{
-      const id=el.dataset.homeItem, def=HOME_CATALOG[id]||{}, r=el.getBoundingClientRect();
-      return {id,minus:!def.keep,resize:(def.kind==='tile'||!!def.sizes),x:r.left,y:r.top,w:r.width,h:r.height};
+      const id=el.dataset.homeItem, def=HOME_CATALOG[id]||{}, b=el.getBoundingClientRect();
+      const w=el.offsetWidth, h=el.offsetHeight, cx=b.left+b.width/2, cy=b.top+b.height/2;   // unrotated box, so the wiggle never moves the controls
+      return {id,minus:!def.keep,resize:(def.kind==='tile'||!!def.sizes),x:cx-w/2,y:cy-h/2,w,h};
     }).filter(i=>i.y+i.h>0&&i.y<innerHeight);
     NH.setControls({items,rtl:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark')}).catch(()=>{});
   });
@@ -7154,8 +7155,8 @@ window.NativeHomeEditHost={
     const rtl=document.documentElement.dir!=='ltr', order=(HOME_CATALOG[id]&&HOME_CATALOG[id].sizes)||['s','m','l'];
     const g=(ty-st.y0)+(rtl ? (st.x0-tx) : (tx-st.x0));
     const k=order.indexOf(st.size);
-    if(g>46 && k<order.length-1) st.size=order[k+1];
-    else if(g<-46 && k>0) st.size=order[k-1];
+    if(g>30 && k<order.length-1) st.size=order[k+1];
+    else if(g<-30 && k>0) st.size=order[k-1];
     else return;
     st.changed=true; st.x0=tx; st.y0=ty;
     homeResizeApply(st.item,st.size);
@@ -13504,7 +13505,7 @@ function buildNav(){
   if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); syncNativeTabBar(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['prayers','ספרייה',I.library],['calendar','לוח שנה',I.cal],['settings','הגדרות',I.gear]];
+  const items=[['home','דף הבית',I.home],['calendar','לוח שנה',I.cal],['prayers','ספרייה',I.library],['settings','הגדרות',I.gear]];
   nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===navActiveTab(TAB)?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
@@ -13559,7 +13560,7 @@ function syncNativeTabBar(){
   try{
     const plugin=window.Capacitor.Plugins.NativeTabBar;
     if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ plugin.setVisible({visible:false}).catch(()=>{}); return; }
-    const items=[['home','דף הבית'],['prayers','ספרייה'],['calendar','לוח שנה'],['settings','הגדרות'],['search','חיפוש']]
+    const items=[['home','דף הבית'],['calendar','לוח שנה'],['prayers','ספרייה'],['settings','הגדרות'],['search','חיפוש']]
       .map(([id,he])=>({id,label:nativeTabBarLabel(he)}));
     plugin.configure({items, activeTab:navActiveTab(TAB), isRTL:S.lang==='he', isDark:S.theme==='dark'}).catch(()=>{});
   }catch(e){}
