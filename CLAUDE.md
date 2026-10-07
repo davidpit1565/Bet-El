@@ -299,6 +299,11 @@ in English as usual.
   "Library" for the active-tab highlight (`LIBRARY_NESTED_TABS`, `navActiveTab`). The home screen's
   Tehillim shortcut still works.
 
+- **Calendar screen is iOS-Calendar styled** (`renderCalendar`/`renderDayDetail`, `.ical-*` CSS): segmented
+  Hebrew/Gregorian control, big month title with round chevrons, plain number grid in one glass card with a
+  filled gold circle on the selected day, and a day card you can swipe sideways (or use its arrows) to move
+  day by day - `calStepDay(delta)` moves the selection and the displayed month follows. Flat fills only.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
