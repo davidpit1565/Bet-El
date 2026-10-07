@@ -107,6 +107,7 @@ class MainViewController: CAPBridgeViewController {
         setupToast()
         setupHomeEdit()
         setupScrollToTop()
+        setupEdgeSwipeBack()
         setupSettingsView()
         layoutToolsFab()
         topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
@@ -433,6 +434,69 @@ class MainViewController: CAPBridgeViewController {
         topBar.onTitleTap = scrollToTop
     }
 
+    // MARK: - Interactive edge-swipe back (like UINavigationController's pop gesture)
+    private var edgeCanGoBack = false
+    private var lastTabId: String?
+
+    /// Real system edge-pan recognizers on both edges (the app is RTL-friendly): the page follows the
+    /// finger with a soft shadow, and on release either commits (runs the page's own back action) or
+    /// springs back - same feel as iOS's own swipe-back instead of a one-shot jump.
+    private func setupEdgeSwipeBack() {
+        webView?.scrollView.keyboardDismissMode = .interactive
+        for edge in [UIRectEdge.left, UIRectEdge.right] {
+            let g = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(edgePanned(_:)))
+            g.edges = edge
+            view.addGestureRecognizer(g)
+        }
+    }
+
+    @objc private func edgePanned(_ g: UIScreenEdgePanGestureRecognizer) {
+        guard let web = webView else { return }
+        let w = view.bounds.width
+        let fromLeft = g.edges == .left
+        let raw = g.translation(in: view).x
+        let dist = max(0, fromLeft ? raw : -raw)
+        let sign: CGFloat = fromLeft ? 1 : -1
+        switch g.state {
+        case .began:
+            edgeCanGoBack = false
+            web.evaluateJavaScript("window.betelCanGoBack ? window.betelCanGoBack() : false") { [weak self] r, _ in
+                self?.edgeCanGoBack = (r as? Bool) ?? false
+            }
+        case .changed:
+            // Rubber-band when there is nothing to go back to, full follow otherwise.
+            let d = edgeCanGoBack ? dist : min(dist, 60) * 0.35
+            web.transform = CGAffineTransform(translationX: sign * d, y: 0)
+            web.layer.shadowColor = UIColor.black.cgColor
+            web.layer.shadowOpacity = edgeCanGoBack ? Float(0.25 * min(1, dist / (w * 0.4))) : 0
+            web.layer.shadowRadius = 12
+        case .ended, .cancelled, .failed:
+            let vx = (fromLeft ? 1 : -1) * g.velocity(in: view).x
+            let commit = g.state == .ended && edgeCanGoBack && (dist > w * 0.35 || vx > 800)
+            if commit {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                UIView.animate(withDuration: 0.18, delay: 0, options: .curveEaseOut, animations: {
+                    web.transform = CGAffineTransform(translationX: sign * w, y: 0)
+                    web.alpha = 0.6
+                }, completion: { _ in
+                    web.evaluateJavaScript("window.betelAppBack && window.betelAppBack()") { _, _ in
+                        web.transform = CGAffineTransform(translationX: -sign * w * 0.25, y: 0)
+                        UIView.animate(withDuration: 0.22, delay: 0.05, options: .curveEaseOut, animations: {
+                            web.transform = .identity
+                            web.alpha = 1
+                        }, completion: { _ in web.layer.shadowOpacity = 0 })
+                    }
+                })
+            } else {
+                UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.8,
+                               initialSpringVelocity: 0.5, options: [], animations: {
+                    web.transform = .identity
+                }, completion: { _ in web.layer.shadowOpacity = 0 })
+            }
+        default: break
+        }
+    }
+
     private func setupHomeEdit() {
         homeEditOverlay.frame = view.bounds
         homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
@@ -655,6 +719,18 @@ extension MainViewController: UITabBarDelegate {
         UISelectionFeedbackGenerator().selectionChanged()
         if tabId == "search" {
             webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
+            return
+        }
+        let again = (tabId == lastTabId)
+        lastTabId = tabId
+        if again {
+            // iOS convention: tapping the already-selected tab scrolls to top first, then (if already
+            // at top) behaves like a normal tab tap.
+            webView?.evaluateJavaScript("window.betelTabReselect ? window.betelTabReselect() : false") { [weak self] r, _ in
+                if (r as? Bool) != true {
+                    self?.webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
+                }
+            }
             return
         }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)

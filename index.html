@@ -3216,10 +3216,27 @@ function appBack(){
   }catch(e){}
   return false;
 }
+function canGoBack(){
+  try{
+    if(HOME_EDIT) return false;
+    if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov')) return true;
+    if(typeof TOPBAR_BACK_ACTION==='function') return true;
+    return [...document.querySelectorAll('.tb-back')].some(b=>b.offsetParent!==null);
+  }catch(e){ return false; }
+}
+window.betelCanGoBack=canGoBack; window.betelAppBack=appBack;
+/* Tapping the already-selected tab: scroll to top first (iOS convention). Returns true if it scrolled. */
+window.betelTabReselect=function(){
+  try{
+    const sc=document.scrollingElement||document.body;
+    if((sc.scrollTop||document.body.scrollTop||0)>8){ window.betelScrollTop(); return true; }
+  }catch(e){}
+  return false;
+};
 (function initEdgeSwipeBack(){
   let sx=0,sy=0,st=0,edge='';
   document.addEventListener('touchstart',e=>{
-    if(e.touches.length!==1){ edge=''; return; }
+    if(e.touches.length!==1 || document.documentElement.classList.contains('has-native-tabbar')){ edge=''; return; }   // native recognizer handles it in the app
     const t=e.touches[0], w=innerWidth;
     edge = t.clientX<=22 ? 'l' : (t.clientX>=w-22 ? 'r' : '');
     sx=t.clientX; sy=t.clientY; st=Date.now();
