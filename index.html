@@ -1593,19 +1593,19 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-cv-qr img{width:19mm;height:19mm;padding:1.4mm;background:#fffdf8;border:1px solid rgba(162,128,63,.6);border-radius:1.8mm;display:block}
 .bk-cv-qr div{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);letter-spacing:.04em}
 /* dedication */
-.bk-dd-bsd{top:7mm;right:10mm;left:auto;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
-.bk-dd-lead{top:39mm;font-family:var(--font-sacred);font-size:13px;letter-spacing:.24em;color:var(--bk-muted);padding-inline-start:.24em}
-.bk-dd-band{top:59mm;height:19mm;justify-content:center;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:33px;color:#6e5426;
-  text-shadow:-1px -1px 0 #fffdf7,1.1px 1.4px 0 rgba(98,74,34,.35)}
-.bk-dd-body{top:82mm;left:37mm;right:37mm;gap:1.6mm}
-.bk-dd-name{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:19px;line-height:1.45;text-wrap:balance}
-.bk-dd-txt{font-family:var(--font-sacred);font-size:12.5px;line-height:1.65;text-wrap:balance}
-.bk-dd-tnz{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
-.bk-dd-crest{width:26mm;height:5.4mm;display:block;margin:1.2mm 0 .6mm}
-.bk-dd-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:25px;line-height:1.1;color:#6e5426;
+.bk-dd-bsd{top:6mm;right:10mm;left:auto;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
+.bk-dd-hdr{top:25.5mm;flex-direction:row;justify-content:center;gap:24mm;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:26px;color:#6e5426;
   text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
+.bk-dd-box{left:20mm;right:20mm;justify-content:center;gap:1.8mm}
+.bk-dd-box1{top:48mm;height:65mm}
+.bk-dd-box2{top:121mm;height:55mm}
+.bk-dd-lead{font-family:var(--font-sacred);font-size:12px;letter-spacing:.24em;color:var(--bk-muted);padding-inline-start:.24em}
+.bk-dd-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:24px;line-height:1.15;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
+.bk-dd-name{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:19px;line-height:1.45;max-width:98mm;text-wrap:balance}
+.bk-dd-txt{font-family:var(--font-sacred);font-size:12.5px;line-height:1.65;max-width:96mm;text-wrap:balance}
+.bk-dd-tnz{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
 .bk-dd-amen{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
-.bk-dd-foot{font-family:var(--font-sacred);font-size:10px;line-height:1.5;color:var(--bk-muted);margin-top:1.2mm}
+.bk-dd-foot{top:182mm;font-family:var(--font-sacred);font-size:10px;line-height:1.45;color:var(--bk-muted)}
 .bk-dd-foot small{display:block;font-size:8.5px}
 .bk-ded-blank{display:inline-block;min-width:50mm;border-bottom:1px solid var(--bk-gold);height:1.3em}
 
@@ -5485,7 +5485,7 @@ const BK_UI={
       qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', musar:'מוּסָר', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתַקָּלוֹת:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], musar:'מוּסָר', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתַקָּלוֹת:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['נוצר מתוך אפליקציית התמיד','כל הטקסטים על פי המקורות המובאים באפליקציה','כל הזכויות שמורות © התמיד'],
       backDist:'ניתן להפיץ חוברת זו לזיכוי הרבים, ובלבד שלא ייעשה בה כל שינוי בתוכן או בעריכה.',
       parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
@@ -5496,7 +5496,7 @@ const BK_UI={
       qrCap:'Get the app', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', musar:'מוּסָר', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתַקָּלוֹת:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], musar:'מוּסָר', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתַקָּלוֹת:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['Created with the HaTamid app','All texts follow the sources cited in the app','All rights reserved © HaTamid'],
       backDist:'This booklet may be freely distributed for the merit of the public, provided nothing in its content or editing is changed.',
       parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
@@ -6314,46 +6314,52 @@ function ornRingText(txt,rmm){
   const ch=[...txt], n=ch.length, step=360/n;
   return ch.map((c,i)=>`<span style="transform:translate(-50%,-50%) rotate(${f2(-i*step)}deg) translateY(-${rmm}mm)">${c}</span>`).join('');
 }
+/* a box frame with curled corner volutes, after the owner's memorial-page
+   reference: a double line broken at each corner by a large volute curling
+   outward, with a small curl on each adjacent side where the lines start */
+function ornVoluteFrame(x0,y0,x1,y1,o){
+  const k=78, gold='#b8923f';
+  const lines=`<path d="M${x0+k} ${y0} H${x1-k} M${x0+k} ${y1} H${x1-k} M${x0} ${y0+k} V${y1-k} M${x1} ${y0+k} V${y1-k}" stroke="${gold}" stroke-width="3.2"/>
+    <rect x="${x0+15}" y="${y0+15}" width="${x1-x0-30}" height="${y1-y0-30}" fill="none" stroke="${gold}" stroke-width="1.4" opacity=".85"/>`;
+  /* one corner, drawn for the top-left at (0,0) */
+  const cs=`<path d="${ornSpiral(6,6,24,1,4,.22)}"/><path d="M30 6 C40 -4 54 -6 62 0"/><path d="M6 30 C-4 40 -6 54 0 62"/>
+    <path d="${ornSpiral(70,-1,9,-1,3,.28)}"/><path d="${ornSpiral(-1,70,9,1,3,.28)}"/>`;
+  const cf=`<circle cx="${k-2}" cy="0" r="3.4"/><circle cx="0" cy="${k-2}" r="3.4"/>`;
+  const c=ornEmboss(cs,cf,3.4,o);
+  return `${lines}<g transform="translate(${x0} ${y0})">${c}</g><g transform="translate(${x1} ${y0}) scale(-1 1)">${c}</g>
+    <g transform="translate(${x0} ${y1}) scale(1 -1)">${c}</g><g transform="translate(${x1} ${y1}) scale(-1 -1)">${c}</g>`;
+}
+/* the hanging oil lamp: three chains from a hook to a bowl with a flame */
+function ornLamp(cx,top,o){
+  const by=top+150;
+  const chains=`<path d="M${cx} ${top} L${cx-46} ${by} M${cx} ${top} L${cx} ${by-6} M${cx} ${top} L${cx+46} ${by}" stroke="#a8843c" stroke-width="2" stroke-dasharray="5 3"/>`;
+  const bowl=`<path d="M${cx-62} ${by} H${cx+62} C${cx+60} ${by+58} ${cx+30} ${by+86} ${cx} ${by+88} C${cx-30} ${by+86} ${cx-60} ${by+58} ${cx-62} ${by} Z"/>
+    <path d="M${cx-74} ${by-2} C${cx-86} ${by+8} ${cx-84} ${by+30} ${cx-64} ${by+28} M${cx+74} ${by-2} C${cx+86} ${by+8} ${cx+84} ${by+30} ${cx+64} ${by+28}" fill="none"/>
+    <rect x="${cx-70}" y="${by-8}" width="140" height="10" rx="4"/>`;
+  const flame=`<path d="M${cx} ${by-58} C${cx+14} ${by-38} ${cx+12} ${by-20} ${cx} ${by-12} C${cx-12} ${by-20} ${cx-14} ${by-38} ${cx} ${by-58} Z" fill="#e8b85a" stroke="#b07a1e" stroke-width="1.2"/>
+    <path d="M${cx} ${by-38} C${cx+5} ${by-30} ${cx+4} ${by-22} ${cx} ${by-18} C${cx-4} ${by-22} ${cx-5} ${by-30} ${cx} ${by-38} Z" fill="#fff4cc"/>`;
+  return chains+ornEmboss(`<path d="M${cx-74} ${by-2} C${cx-86} ${by+8} ${cx-84} ${by+30} ${cx-64} ${by+28}"/><path d="M${cx+74} ${by-2} C${cx+86} ${by+8} ${cx+84} ${by+30} ${cx+64} ${by+28}"/>`,
+    `<path d="M${cx-62} ${by} H${cx+62} C${cx+60} ${by+58} ${cx+30} ${by+86} ${cx} ${by+88} C${cx-30} ${by+86} ${cx-60} ${by+58} ${cx-62} ${by} Z"/><rect x="${cx-70}" y="${by-8}" width="140" height="10" rx="4"/><circle cx="${cx}" cy="${top}" r="6"/>`,6,o)+flame;
+}
+/* The dedication page, after the owner's memorial-page reference ("לְזִכְרוֹן
+   עוֹלָם בְּהֵיכַל ה׳"): a top band rising to a scroll crest, a hanging oil
+   lamp between the two halves of the header, and the memorial and the
+   blessing each in its own volute-cornered frame. */
 function ornDedicationSvg(){
   const W=1480, H=2100, id='dd'+(++ORN_ID), cx=740;
-  const fx0=90, fx1=1390, fy0=330, fy1=1860;
-  const sx0=330, sx1=1150, ay=560;
-  const shield=`M${sx0} ${ay} C${sx0} 300 ${cx-230} 120 ${cx} 120 C${cx+230} 120 ${sx1} 300 ${sx1} ${ay} V1700 C${sx1} 1800 ${sx1-120} 1850 ${cx+170} 1900 C${cx+80} 1935 ${cx+22} 1975 ${cx} 2020 C${cx-22} 1975 ${cx-80} 1935 ${cx-170} 1900 C${sx0+120} 1850 ${sx0} 1800 ${sx0} 1700 Z`;
-  const drop=`M${cx} 1735 C${cx+62} 1800 ${cx+80} 1860 ${cx+46} 1905 C${cx+26} 1932 ${cx-26} 1932 ${cx-46} 1905 C${cx-80} 1860 ${cx-62} 1800 ${cx} 1735 Z`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="bk-orn-page" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-  <defs>
-    ${ornWallPattern(id+'w',1.7,{mid:'#cfb88c',shade:'rgba(90,66,26,.5)',d:1,sw:3.3})}
-    <linearGradient id="${id}f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6efdf"/><stop offset="1" stop-color="#ece0c4"/></linearGradient>
-    <linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#fdfaf3"/><stop offset="1" stop-color="#f3ead6"/></linearGradient>
-    <linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffdf7"/><stop offset=".5" stop-color="#f4ead3"/><stop offset="1" stop-color="#e2d0a8"/></linearGradient>
-    <linearGradient id="${id}c" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e7dcc4"/><stop offset=".45" stop-color="#fffdf8"/><stop offset="1" stop-color="#d9c9a6"/></linearGradient>
-    <clipPath id="${id}k"><rect x="${fx0}" y="${fy0}" width="${fx1-fx0}" height="${fy1-fy0}" rx="42"/></clipPath>
-  </defs>
-  <!-- the scroll-filled frame -->
-  <rect x="${fx0+6}" y="${fy0+8}" width="${fx1-fx0}" height="${fy1-fy0}" rx="42" fill="rgba(98,74,34,.2)"/>
-  <rect x="${fx0}" y="${fy0}" width="${fx1-fx0}" height="${fy1-fy0}" rx="42" fill="url(#${id}f)"/>
-  <g clip-path="url(#${id}k)"><rect x="${fx0}" y="${fy0}" width="${fx1-fx0}" height="${fy1-fy0}" fill="url(#${id}w)"/></g>
-  <rect x="${fx0}" y="${fy0}" width="${fx1-fx0}" height="${fy1-fy0}" rx="42" fill="none" stroke="#fffdf7" stroke-width="16"/>
-  <rect x="${fx0}" y="${fy0}" width="${fx1-fx0}" height="${fy1-fy0}" rx="42" fill="none" stroke="${ORN_C.deep}" stroke-width="3"/>
-  <rect x="${fx0+14}" y="${fy0+14}" width="${fx1-fx0-28}" height="${fy1-fy0-28}" rx="30" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".55" stroke-width="1.8"/>
-  <!-- the shield panel -->
-  <path d="${shield}" transform="translate(7 10)" fill="rgba(98,74,34,.28)"/>
-  <path d="${shield}" fill="url(#${id}s)" stroke="${ORN_C.mid}" stroke-width="22"/>
-  <path d="${shield}" fill="none" stroke="#fffdf7" stroke-width="12"/>
-  <path d="${shield}" fill="none" stroke="${ORN_C.deep}" stroke-width="3"/>
-  ${ornLaceArc(cx,ay,356,Math.PI*1.03,Math.PI*1.97,15,58,{mid:'#d8c498',d:1.3})}
-  <path d="M${sx0+50} ${ay} A${cx-sx0-50} ${cx-sx0-50} 0 0 1 ${sx1-50} ${ay}" fill="none" stroke="${ORN_C.deep}" stroke-opacity=".5" stroke-width="1.8"/>
-  <!-- the ribbon band across -->
-  <path d="M150 604 L110 640 L150 676 Z M1330 604 L1370 640 L1330 676 Z" fill="#c9b184"/>
-  <rect x="146" y="590" width="1188" height="190" transform="translate(5 8)" fill="rgba(98,74,34,.22)"/>
-  <rect x="146" y="590" width="1188" height="190" fill="url(#${id}b)" stroke="${ORN_C.deep}" stroke-width="2.6"/>
-  <path d="M146 604 H1334 M146 766 H1334" stroke="${ORN_C.deep}" stroke-opacity=".45" stroke-width="1.4"/>
-  <!-- the candle drop -->
-  <path d="${drop}" fill="url(#${id}c)" stroke="${ORN_C.deep}" stroke-width="2.4"/>
-  <rect x="${cx-15}" y="1818" width="30" height="78" rx="4" fill="#f6efe0" stroke="${ORN_C.deep}" stroke-width="1.6"/>
-  <path d="M${cx} 1768 C${cx+15} 1788 ${cx+13} 1806 ${cx} 1814 C${cx-13} 1806 ${cx-15} 1788 ${cx} 1768 Z" fill="#e8b85a" stroke="#b07a1e" stroke-width="1.2"/>
-  <path d="M${cx} 1790 C${cx+5} 1798 ${cx+4} 1806 ${cx} 1809 C${cx-4} 1806 ${cx-5} 1798 ${cx} 1790 Z" fill="#fff4cc"/>
-  ${ornEmboss(`<path d="${ornSpiral(cx-28,1880,12,1)}"/><path d="${ornSpiral(cx+28,1880,12,-1)}"/>`,'',3.2,{mid:'#cdb98f',d:1})}
+  const O={mid:'#c9a24a', shade:'rgba(110,80,22,.5)', hi:'#fff4d2', d:1.1};
+  const band=`M0 150 H${cx-250} C${cx-190} 150 ${cx-170} 92 ${cx-110} 92 H${cx+110} C${cx+170} 92 ${cx+190} 150 ${cx+250} 150 H${W} V210 H${cx+260} C${cx+200} 210 ${cx+180} 152 ${cx+120} 152 H${cx-120} C${cx-180} 152 ${cx-200} 210 ${cx-260} 210 H0 Z`;
+  return `<svg class="bk-orn-page" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+  <defs><radialGradient id="${id}v" cx=".5" cy=".45" r=".75"><stop offset="0" stop-color="#fdf8ec"/><stop offset=".75" stop-color="#f9f1df"/><stop offset="1" stop-color="#f1e4c6"/></radialGradient>
+    <linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6ecd4"/><stop offset="1" stop-color="#e6d3a8"/></linearGradient></defs>
+  <rect width="${W}" height="${H}" fill="url(#${id}v)"/>
+  <rect x="0" y="0" width="${W}" height="150" fill="#f3e8cf" opacity=".7"/>
+  <path d="${band}" transform="translate(3 5)" fill="rgba(110,80,22,.18)"/>
+  <path d="${band}" fill="url(#${id}b)" stroke="#b8923f" stroke-width="2.4"/>
+  <g transform="translate(${cx} 30) scale(3.4)">${ornCrestG(O)}</g>
+  ${ornLamp(cx,152,O)}
+  ${ornVoluteFrame(150,480,1330,1130,O)}
+  ${ornVoluteFrame(150,1210,1330,1760,O)}
   </svg>`;
 }
 
@@ -6440,19 +6446,21 @@ function bkDedicationHtml(){
     :`<div class="bk-dd-name"><span class="bk-ded-blank"></span>${zl?` ${zl}`:''}</div>`;
   return `<div class="bk-page bk-matter bk-ornp bk-dedic">${ornDedicationSvg()}
     <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
-    <div class="bk-ol bk-dd-lead">${t.dedLead}</div>
-    <div class="bk-ol bk-dd-band">${t.dedNiftar}</div>
-    <div class="bk-ol bk-dd-body">
+    <div class="bk-ol bk-dd-hdr"><span>${t.dedHdr[0]}</span><i></i><span>${t.dedHdr[1]}</span></div>
+    <div class="bk-ol bk-dd-box bk-dd-box1">
+      <div class="bk-dd-lead">${t.dedLead}</div>
+      <div class="bk-dd-h">${t.dedNiftar}</div>
       ${name(D.niftar,t.dedZl)}
       <div class="bk-dd-txt">${t.dedMerit}</div>
       <div class="bk-dd-tnz">${t.dedTnzbh}</div>
-      <i class="bk-dd-crest">${ornCrest()}</i>
+    </div>
+    <div class="bk-ol bk-dd-box bk-dd-box2">
       <div class="bk-dd-h">${t.dedHatzlacha}</div>
       ${name(D.hatzlacha,'')}
       <div class="bk-dd-txt">${t.dedBless}</div>
       <div class="bk-dd-amen">${t.dedAmen}</div>
-      <div class="bk-dd-foot">${t.dedFoot}<small>${t.dedFootSrc}</small></div>
     </div>
+    <div class="bk-ol bk-dd-foot">${t.dedFoot}<small>${t.dedFootSrc}</small></div>
   </div>`;
 }
 /* the contents page: by day (each day, then its subjects with the page they

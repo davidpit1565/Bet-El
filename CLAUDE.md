@@ -211,9 +211,11 @@ in English as usual.
   "חוֹבֶרֶת לִמּוּד", the parasha, dates, QR - supporting lines in Taamey
   Frank Bold. The dedication and back pages were NOT changed with it - ask
   the owner before restyling them to match.
-  Dedication: a scroll-filled bevelled frame with an arched shield panel
-  (lace arch, ribbon band carrying "לְעִלּוּי נִשְׁמַת", a candle in the
-  pointed foot) holding the memorial + blessing wording from
+  Dedication (after the owner's memorial-page reference "לְזִכְרוֹן עוֹלָם
+  בְּהֵיכַל ה׳"): a top band rising to a scroll crest, a hanging oil lamp
+  (`ornLamp`) between the two halves of the header (`BK_UI.dedHdr`), and
+  the memorial and the blessing each in its own double-line frame with
+  curled corner volutes (`ornVoluteFrame`), holding the wording from
   `BK_UI` dedLead/dedMerit/dedTnzbh/dedBless/dedAmen/dedFoot around the
   names in `BK_DEDICATION` - the owner's confirmed names, verbatim, never
   "fix" them; empty = a blank line. And a
