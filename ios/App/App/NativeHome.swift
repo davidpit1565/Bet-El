@@ -393,7 +393,6 @@ final class NHCell: UICollectionViewCell {
             stack.axis = .horizontal
             stack.alignment = .center
             stack.distribution = .equalCentering
-            stack.distribution = .equalCentering
             stack.spacing = it.size == "m" ? 30 : 18
             // the ORIGINAL icons (rasterized from the app's own SVGs by the web layer) - never SF Symbol stand-ins
             let big = it.size == "m"
@@ -610,16 +609,19 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
             return ceil((s as NSString).boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude),
                                                      options: .usesLineFragmentOrigin, attributes: [.font: f], context: nil).height)
         }
+        // fixed card heights grow with Dynamic Type so larger text is never clipped
+        let k = min(1.6, max(1, UIFont.preferredFont(forTextStyle: .body).pointSize / 17))
+        func scaled(_ v: CGFloat) -> CGFloat { ceil(v * k) }
         switch it.kind {
-        case "tile": return it.wide ? 132 : (it.size == "m" ? 112 : 92)
-        case "stat": return it.wide ? 96 : 68
+        case "tile": return scaled(it.wide ? 132 : (it.size == "m" ? 112 : 92))
+        case "stat": return scaled(it.wide ? 96 : 68)
         case "spacer": return 92
         case "hero": return 118 + 24 + 34 + 22 + 22 + 36
-        case "banner": return CGFloat(max(1, it.lines.count)) * 40 + 24
-        case "tikkunei": return 78
-        case "row": return it.subtitle.isEmpty ? 64 : 80
-        case "zmanim": return 56 + CGFloat(it.rows.count) * 26
-        case "text": return CGFloat(max(1, it.lines.count)) * 28 + 28
+        case "banner": return scaled(CGFloat(max(1, it.lines.count)) * 40 + 24)
+        case "tikkunei": return scaled(78)
+        case "row": return scaled(it.subtitle.isEmpty ? 64 : 80)
+        case "zmanim": return scaled(56 + CGFloat(it.rows.count) * 26)
+        case "text": return scaled(CGFloat(max(1, it.lines.count)) * 28 + 28)
         case "social": return it.size == "m" ? 96 : 68
         case "dedication":
             return 28 + 24 + textH(it.subtitle, .subheadline, .regular, w - 32) + (it.lines.first?.isEmpty == false ? 24 : 0) + 20
