@@ -276,9 +276,28 @@ in English as usual.
   Verse/halacha markers (`.bk-vn`) are bold gold numerals at .82em on the
   text baseline, not raised superscripts. `ckCommFor(id,key)` /
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
-  this kind of not-the-reader's-week rendering. Scope so far: ONE day;
-  still to build: the Sun-Thu/Leil Shishi/Fri week loop, Ben
-  Ish Chai year 1 + 2 (listed in the TOC already), and the Motzei
+  this kind of not-the-reader's-week rendering. **Ben Ish Chai** closes the
+  booklet (`bkBicBlocks`, after the day): a part opening a new page
+  ("בֶּן אִישׁ חַי" + parasha), then year 1 and year 2 as its subjects - the
+  week's parasha per track (`ckKeysOf(slot.key)`, de-duped by unit; a
+  track with no unit for the week is left out) read exactly as the
+  standalone reader reads it: `bicFlatItems` (intro, then every halacha
+  in source order with its own number `h.chapter`) and `bicI18nItem` for
+  a translation. Per halacha (the owner's printed-sefer reference,
+  "שבילי הנהר"): the halacha body full width (`.bk-bic-h`), then a
+  labelled divider "בֵּיאוּר" (`.bk-bdiv`, a 'sub' heading block so the
+  paginator never strands it), then the biur (`clarification.explanation`
+  + `takeaways`) in two columns (`.bk-bic-b`) - inline, not a toggle; a
+  faint rule between halachot. Loaded with the day
+  (`ensureBkBic`/`bkBicReady`; `BK_BIC_FAIL` never blocks the day). The
+  TOC lists the two years with real pages (the "בְּהֲכָנָה" placeholders
+  remain only when no Ben Ish Chai content was built). Vayera = ~43 A5
+  pages of it.
+  Owner decisions (settled, don't re-ask): Rashi on Yehoshua / Melachim
+  stays absent (the Sefaria edition is CC-BY; not added); the Gemara stays
+  on the world Daf Yomi cycle (not the parasha-linked Chok LeYisrael
+  gemara). Scope so far: ONE day;
+  still to build: the Sun-Thu/Leil Shishi/Fri week loop, and the Motzei
   Shabbat `checkBookletNotification()`. Check with
   `node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]` (fakes the date,
   emulates the Vercel rewrite, saves screen/print/PDF output), and
