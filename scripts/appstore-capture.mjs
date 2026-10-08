@@ -31,6 +31,10 @@ for(const lang of langs){
   await shot('06-meein',()=>window.openPrayer('birkatMeeinShalosh','brachot'),2000);
   await shot('07-settings',()=>window.go('settings'),2000);
   await shot('08-library',()=>window.go('library'),2000);
+  // the shareable QR card (image only, used by the bonus slide)
+  try{ await p.evaluate(()=>window.shareQR()); await p.waitForSelector('.overlay img',{timeout:20000});
+    const src=await p.evaluate(()=>document.querySelector('.overlay img').src);
+    fs.writeFileSync(`${out}/${lang}-09-qr.png`,Buffer.from(src.split(',')[1],'base64')); console.log('ok',lang,'09-qr'); }catch(e){ console.log('ERR qr',e.message); }
   await ctx.close();
 }
 await b.close();
