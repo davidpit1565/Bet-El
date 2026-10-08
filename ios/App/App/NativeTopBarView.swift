@@ -80,8 +80,9 @@ final class NativeTopBarView: UIView {
         let bg = isDark
             ? UIColor(red: 0.051, green: 0.078, blue: 0.165, alpha: 1)
             : UIColor(red: 0.965, green: 0.937, blue: 0.875, alpha: 1)
-        fadeLayer.colors = [bg.cgColor, bg.withAlphaComponent(0.9).cgColor, bg.withAlphaComponent(0).cgColor]
-        fadeLayer.locations = [0, 0.62, 1]
+        // fully OPAQUE (no fade to transparent): scrolled text must never show through the header
+        fadeLayer.colors = [bg.cgColor, bg.cgColor]
+        fadeLayer.locations = [0, 1]
         overrideUserInterfaceStyle = isDark ? .dark : .light
     }
 
