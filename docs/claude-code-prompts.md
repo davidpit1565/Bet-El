@@ -100,3 +100,13 @@ cd ~/Bet-El (Bet-El repo ONLY). Goal: the in-app "report and suggestions" form m
 5. Then test the real app form in the Simulator (Settings -> report/suggestions -> send) in he and en and show the new document in the Firebase console / via admin read. Also build a small way for me to read submissions (a Firebase Console link to the feedback collection is enough) and tell me in Hebrew where they land.
 6. Commit firestore.rules + firebase.json and push. Report in Hebrew with the exact outputs.
 ```
+
+---
+## פרומט לילה – הכל חוץ ממה שדורש אותי (בלי Firebase login ובלי מכשיר פיזי)
+בטרמינל: `cd ~/Bet-El && git pull origin claude/additional-file-fas9ie` ואז להדביק:
+```
+cd ~/Bet-El (Bet-El repo ONLY). Work autonomously all night, no questions. I am back in the morning.
+Never print/commit the App Store Connect key or my local DEVELOPMENT_TEAM change. Do NOT submit for review. Do NOT touch Firebase (login needed - I do it in the morning). Do NOT merge the PR.
+Do "פרומט 5" from docs/claude-code-prompts.md fully, using ONLY simulators (no physical iPhone): PART 1 header check/fix in the simulator, PART 2 real simulator screenshots (iPhone 6.9" + iPad 13", he+en, dark+light, 9 screens, with the Birkat HaMazon screen scrolled to the main blessing "HaZan"), PART 3 `node scripts/appstore-slides.mjs he,en dark|light` (and iPad) - LOOK at every slide, keep the zoom cards on chok/calendar/mazon slides, no eyebrow chips, fix overlaps/clipping in the script, PART 4 copy to fastlane folders and upload with fastlane deliver using the ASC env vars (he, en-US, fr-FR, ru metadata; screenshots he + en-US), stop before Submit.
+Commit and push to the same branch regularly (merge origin first). At the end write MORNING-REPORT.md (Hebrew): what is done, what failed, screenshots checked, what I must do (Firebase login + prompt 6, widgets on my iPhone, App Privacy/age rating/export compliance, Submit).
+```
