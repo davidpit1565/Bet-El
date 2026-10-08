@@ -3447,9 +3447,36 @@ function openWidgetLink(url){
       try{ const hd=currentHDate(); const chs=chaptersOf(portionFor(hd)); renderContinuous(chs,hd); }catch(e){ go('tehillim'); }
     } else if(kind==='calendar') go('calendar');
     else if(kind==='tracker') go('tracker');
+    else if(kind==='shot') shotLink(url);
     else go('home');
   }catch(e){}
 }
+/* Screenshot helper for the App Store pack (simulator / Xcode builds only, never in a store build):
+     xcrun simctl openurl booted "betel://shot?screen=home&lang=he&theme=dark"
+   Sets language/theme, reloads, then opens the screen. screens: home chok calendar tehillim prayers meein settings library qr */
+const SHOT_ALLOWED = window.__BETEL_DEV_BUILD===true || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+function shotLink(url){
+  if(!SHOT_ALLOWED) return;
+  const q=new URLSearchParams((String(url).split('?')[1])||'');
+  const lang=q.get('lang'), theme=q.get('theme'), screen=q.get('screen')||'home';
+  if(lang && ['he','en','fr','ru','ka'].includes(lang)) S.lang=lang;
+  if(theme && ['light','dark'].includes(theme)) S.theme=theme;
+  saveS();
+  try{ sessionStorage.setItem('betel_shot_screen',screen); }catch(e){}
+  location.reload();
+}
+function shotNavigate(screen){
+  try{
+    if(screen==='chok'){ go('home'); setTimeout(()=>{ const t=document.querySelector('[data-home-item="chok"] .q-tile'); if(t) t.click(); },600); }
+    else if(screen==='meein') openPrayer('birkatMeeinShalosh','brachot');
+    else if(screen==='qr') shareQR();
+    else go(screen);
+  }catch(e){}
+}
+(function(){ try{
+  const sc=sessionStorage.getItem('betel_shot_screen'); if(!sc || !SHOT_ALLOWED) return;
+  sessionStorage.removeItem('betel_shot_screen'); setTimeout(()=>shotNavigate(sc),2500);
+}catch(e){} })();
 window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
 (function initWidgetLinks(){
   try{

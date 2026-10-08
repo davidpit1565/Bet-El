@@ -7,17 +7,18 @@ import {chromium} from 'playwright';
 import fs from 'fs';
 const langs=(process.argv[2]||'he,en,fr,ru,ka').split(',');
 const ipad=process.argv[3]==='ipad';
-const out=`docs/appstore/${ipad?'raw-web-ipad':'raw-web'}`; fs.mkdirSync(out,{recursive:true});
+const THEME=process.argv[4]==='light'?'light':'dark';   // 3rd arg: light|dark
+const out=`docs/appstore/${ipad?'raw-web-ipad':'raw-web'}${THEME==='light'?'-light':''}`; fs.mkdirSync(out,{recursive:true});
 const vp=ipad?{width:1032,height:1376}:{width:430,height:932}, dsf=ipad?2:3;
 const b=await chromium.launch({executablePath:process.env.CHROME||'/opt/pw-browsers/chromium'});
 for(const lang of langs){
   const ctx=await b.newContext({viewport:vp,deviceScaleFactor:dsf,hasTouch:true,isMobile:!ipad});
   const p=await ctx.newPage();
-  await p.addInitScript(l=>{
-    localStorage.setItem('betel_settings',JSON.stringify({lang:l,theme:'dark'}));
+  await p.addInitScript(([l,TH])=>{
+    localStorage.setItem('betel_settings',JSON.stringify({lang:l,theme:TH}));
     localStorage.setItem('betel_onboard_v1','1'); localStorage.setItem('betel_chok_pace_v1','1');
     localStorage.setItem('betel_loc',JSON.stringify({lat:31.7683,lon:35.2137,tz:'Asia/Jerusalem',name:'ירושלים',auto:false}));
-  },lang);
+  },[lang,THEME]);
   await p.goto('http://localhost:8899/index.html'); await p.waitForTimeout(2500);
   const shot=async(name,fn,wait)=>{ try{ await p.evaluate(fn); }catch(e){ console.log('ERR',name,e.message); }
     await p.waitForTimeout(wait||2000); await p.evaluate(()=>window.scrollTo(0,0));

@@ -7,6 +7,7 @@ import {chromium} from 'playwright';
 import fs from 'fs';
 import path from 'path';
 const langs=(process.argv[2]||'he,en,fr,ru,ka').split(',');
+const SFX=process.argv[3]==='light'?'-light':'';   // `light` reads raw-*-light and writes screenshots-light
 const C={
  he:['כל הלימוד היומי במקום אחד','חוק לישראל – כל יום, בקצב אחד','לוח עברי וזמני היום','תהילים יומי עם מעקב','סידור, ברכות ותפילות','ברכות בנוסח עדות המזרח','מותאם אליך: שפות, תזכורות ומיקום','ספרייה מלאה של ספרי קודש'],
  en:['Your whole daily study in one place','Chok LeYisrael – every day, one steady pace','Hebrew calendar and daily times','Daily Tehillim with progress tracking','Siddur, blessings and prayers','Blessings in Edot HaMizrach nusach','Made for you: languages, reminders, location','A full library of holy books'],
@@ -16,8 +17,8 @@ const C={
 };
 const names=['01-home','02-chok','03-calendar','04-tehillim','05-prayers','06-meein','07-settings','08-library'];
 const find=(lang,n,ipad)=>{
-  const c=ipad?[`docs/appstore/raw-device-ipad/${lang}-${n}.png`,`docs/appstore/raw-web-ipad/${lang}-${n}.png`]
-              :[`docs/appstore/raw-device/${lang}-${n}.png`,`docs/appstore/raw-web/${lang}-${n}.png`];
+  const c=ipad?[`docs/appstore/raw-device-ipad${SFX}/${lang}-${n}.png`,`docs/appstore/raw-web-ipad${SFX}/${lang}-${n}.png`]
+              :[`docs/appstore/raw-device${SFX}/${lang}-${n}.png`,`docs/appstore/raw-web${SFX}/${lang}-${n}.png`];
   return c.find(f=>fs.existsSync(f));
 };
 const b=await chromium.launch({executablePath:process.env.CHROME||'/opt/pw-browsers/chromium'});
@@ -25,7 +26,7 @@ for(const lang of langs){
   const rtl=lang==='he';
   for(const ipad of [false,true]){
     const W=ipad?2064:1320, H=ipad?2752:2868, imgW=ipad?1560:1100;
-    const dir=`docs/appstore/screenshots/${lang}/${ipad?'ipad-13':'iphone-6.9'}`; fs.mkdirSync(dir,{recursive:true});
+    const dir=`docs/appstore/screenshots${SFX}/${lang}/${ipad?'ipad-13':'iphone-6.9'}`; fs.mkdirSync(dir,{recursive:true});
     const page=await b.newPage({viewport:{width:W,height:H},deviceScaleFactor:1});
     for(let i=0;i<names.length;i++){
       const src=find(lang,names[i],ipad); if(!src) continue;
@@ -64,7 +65,7 @@ for(const lang of langs){
   const rtl=lang==='he';
   for(const ipad of [false,true]){
     const W=ipad?2064:1320, H=ipad?2752:2868;
-    const dir=`docs/appstore/screenshots/${lang}/${ipad?'ipad-13':'iphone-6.9'}`; fs.mkdirSync(dir,{recursive:true});
+    const dir=`docs/appstore/screenshots${SFX}/${lang}/${ipad?'ipad-13':'iphone-6.9'}`; fs.mkdirSync(dir,{recursive:true});
     const page=await b.newPage({viewport:{width:W,height:H},deviceScaleFactor:1});
     const wrap=inner=>`<html dir="${rtl?'rtl':'ltr'}"><body style="margin:0;width:${W}px;height:${H}px;overflow:hidden;position:relative;background:${bg};font-family:'Noto Sans Hebrew','Noto Sans Georgian','Noto Sans',sans-serif">${inner}</body></html>`;
     const other=lang==='en'?'he':'en';

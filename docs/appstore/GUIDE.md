@@ -39,7 +39,7 @@ App Store Connect ← TestFlight ← הבילד ← **Internal Testing** ← מ�
 My Apps ← **תמיד** ← **+** ליד iOS App ← **2.0**.
 
 1. **Screenshots** – מעלים לכל שפה לפי שלב 3.
-2. **Promotional Text, Description, Keywords, Subtitle, Name** – מ-`LISTING.md`, לכל שפה (Localizations: Hebrew, English, French, Russian, Georgian – מוסיפים שפה דרך "+" ליד שם השפה).
+2. **Promotional Text, Description, Keywords, Subtitle, Name** – מ-`LISTING.md`, לכל שפה (Localizations: Hebrew, English (U.S.), French, Russian – מוסיפים שפה דרך "+" ליד שם השפה. **גאורגית לא קיימת ב-App Store Connect** – הטקסטים בגאורגית ב-`LISTING.md` נשארים לשימוש עתידי; האפליקציה עצמה כן תומכת בגאורגית).
 3. **What's New** – מ-`release-update-checklist.md` סעיף 3.
 4. **Support URL / Marketing URL / Privacy Policy URL** – מ-`LISTING.md` (בראש הקובץ).
 5. **Build** – בוחרים את build 6.
