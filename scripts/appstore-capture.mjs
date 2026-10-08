@@ -29,7 +29,10 @@ for(const lang of langs){
   await shot('03-calendar',()=>window.go('calendar'),2500);
   await shot('04-tehillim',()=>window.go('tehillim'),2500);
   await shot('05-prayers',()=>window.go('prayers'),2000);
-  await shot('06-meein',()=>window.openPrayer('birkatMeeinShalosh','brachot'),2000);
+  await shot('06-meein',()=>window.openPrayer('birkatHamazon','brachot'),2000);
+  /* zoom on the main blessing itself (HaZan), past the zimun */
+  try{ await p.evaluate(()=>{ const q=document.querySelectorAll('.prayer-para')[2]; if(q){ const d=q.getBoundingClientRect().top-170; window.scrollBy(0,d); document.body.scrollTop+=d; document.documentElement.scrollTop+=d; } }); await p.waitForTimeout(500);
+    await p.screenshot({path:`${out}/${lang}-06-meein.png`}); }catch(e){ console.log('ERR mazon',e.message); }
   await shot('07-settings',()=>window.go('settings'),2000);
   await shot('08-library',()=>window.go('library'),2000);
   // the shareable QR card (image only, used by the bonus slide)

@@ -3475,6 +3475,7 @@ function shotNavigate(screen){
   try{
     if(screen==='chok'){ go('home'); setTimeout(()=>{ const t=document.querySelector('[data-home-item="chok"] .q-tile'); if(t) t.click(); },600); }
     else if(screen==='meein') openPrayer('birkatMeeinShalosh','brachot');
+    else if(screen==='mazon'){ openPrayer('birkatHamazon','brachot'); setTimeout(()=>{ const p=document.querySelectorAll('.prayer-para')[2]; if(p){ const r=p.getBoundingClientRect(); const sc=(typeof homeScroller==='function'&&homeScroller())||document.scrollingElement; (sc||window).scrollBy?.(0,r.top-170); } },900); }
     else if(screen==='qr') shareQR();
     else go(screen);
   }catch(e){}

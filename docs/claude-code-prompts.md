@@ -73,3 +73,40 @@ C. SCREENSHOTS from the iOS Simulator (real native UI): follow "פרומט 2 / P
 D. APP STORE CONNECT upload with fastlane using my API key from the env vars: follow "פרומט 2 / PART B" (locales he, en-US, fr-FR, ru; Georgian does not exist in App Store Connect). Upload build 6 and the 2.0 metadata + screenshots, select the build, fill the review notes - and STOP before "Submit for Review".
 E. Finish with a Hebrew checklist: what is ready, what failed, and what only I can do (App Privacy answers, age rating, export compliance, widget screenshots from my iPhone, pressing Submit). Commit and push everything except secrets.
 ```
+
+---
+## פרומט 5 – תמונות חנות אמיתיות מהסימולטור + עיצוב שיווקי, ובדיקת ההדר
+```
+cd ~/Bet-El (Bet-El repo ONLY). git pull origin claude/additional-file-fas9ie first. Never print/commit the ASC key or my DEVELOPMENT_TEAM change. Do NOT submit for review.
+PART 1 - HEADER (still broken on my real iPhone): in the Simulator (iPhone 17 Pro, iOS 26), open Chok LeYisrael, Torah reader, Tehillim, Calendar and Library sub-screens. Scroll down and up with real touch (simctl/AppleScript/idb) and take screenshots at each state. The header must tuck away on scroll-down and return on scroll-up, never be transparent (text running under it), never leave a gap or jump. Check NativeTopBar.setCollapsed / setTopBarCollapsed / initNavScrollHide and the HTML .topbar fallback. Fix what you SEE is wrong, reinstall, re-screenshot, and show me before/after in Hebrew.
+PART 2 - STORE SCREENSHOTS, REAL SIMULATOR ONLY (no Playwright/web screenshots): for iPhone 6.9" (iPhone 17 Pro Max) and iPad 13" (iPad Pro 13"), languages he and en, themes dark and light: set status bar clean (xcrun simctl status_bar booted override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3), open each screen via `xcrun simctl openurl booted "betel://shot?screen=<x>&lang=<he|en>&theme=<dark|light>"` and save to docs/appstore/raw-device[-light][-ipad][-ipad-light]/<lang>-<NN>-<name>.png : 01-home, 02-chok, 03-calendar, 04-tehillim, 05-prayers, 06-meein, 07-settings, 08-library, 09-qr. Wait for the screen to fully render (no launch logo, no spinner). LOOK at every image: no Hebrew in English, nothing clipped.
+PART 3 - DESIGN: then run `node scripts/appstore-slides.mjs he,en dark` and `node scripts/appstore-slides.mjs he,en light` (and with the iPad args if the script supports them; if not, extend it - same design at 2064x2752). Match the style of the reference "Kosher Switch" App Store listing: each output slide is a real marketing design (small letter-spaced gold eyebrow, big headline with gold accent word, sub-line, callouts, device frame) and NOT the bare screen. View every output; fix overlaps (e.g. callout over the sub-line) in the script. Output goes to docs/appstore/slides*/<lang>/<device>/.
+PART 4 - copy those finished slides into the fastlane screenshots folders for he and en-US (iPhone 6.9 + iPad 13, dark set first, light as extra if limit 10 allows), upload with fastlane deliver using ASC_KEY_ID/ASC_ISSUER_ID/ASC_KEY_PATH, STOP before Submit. Commit and push (except secrets). Report in Hebrew.
+```
+
+---
+## פרומט 6 – דיווח והצעות לשיפור (feedback) לא עובד: תיקון Firestore עד שמוכח שעובד
+הקוד באפליקציה כותב ל-Firestore באוסף `feedback` (`window.__betelSaveFeedback` ב-index.html). הכתיבה נחסמת (403) כי הכללים ב-Firebase לא מאפשרים `create` שם. אי אפשר לפרסם כללים בלי התחברות שלך ל-Firebase.
+קודם, פעם אחת בטרמינל: `npx firebase-tools login` ואז `npx firebase-tools use bet-el-e6812`.
+```
+cd ~/Bet-El (Bet-El repo ONLY). Goal: the in-app "report and suggestions" form must really deliver. Do NOT break existing rules for stats/visits, presence, pushTokens, etc.
+1. Fetch the CURRENT deployed Firestore rules (firebase CLI or the Firebase Rules REST API with `firebase login` credentials) and print them. Save a backup copy to /tmp/firestore.rules.backup (do not commit it).
+2. Reproduce first: POST to https://firestore.googleapis.com/v1/projects/bet-el-e6812/databases/(default)/documents/feedback with a small test document and show the 403.
+3. Add ONLY this to the existing rules (create-only, no read/update/delete from clients, bounded size):
+   match /feedback/{id} { allow create: if request.resource.data.keys().hasOnly(['name','email','subject','message','ua','lang','ts','createdAt']) && request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() < 5000; allow read, update, delete: if false; }
+   (check the real field names written by __betelSaveFeedback in index.html and adjust hasOnly accordingly - extra fields would make the create fail.)
+   Deploy only the rules (`firebase deploy --only firestore:rules`). Save the final rules file in the repo as firestore.rules and add a "firestore" entry to firebase.json so it is reproducible.
+4. Verify: repeat the POST from step 2 and show it now succeeds (200), and that a READ of /feedback is still denied. Delete the test document with admin credentials.
+5. Then test the real app form in the Simulator (Settings -> report/suggestions -> send) in he and en and show the new document in the Firebase console / via admin read. Also build a small way for me to read submissions (a Firebase Console link to the feedback collection is enough) and tell me in Hebrew where they land.
+6. Commit firestore.rules + firebase.json and push. Report in Hebrew with the exact outputs.
+```
+
+---
+## פרומט לילה – הכל חוץ ממה שדורש אותי (בלי Firebase login ובלי מכשיר פיזי)
+בטרמינל: `cd ~/Bet-El && git pull origin claude/additional-file-fas9ie` ואז להדביק:
+```
+cd ~/Bet-El (Bet-El repo ONLY). Work autonomously all night, no questions. I am back in the morning.
+Never print/commit the App Store Connect key or my local DEVELOPMENT_TEAM change. Do NOT submit for review. Do NOT touch Firebase (login needed - I do it in the morning). Do NOT merge the PR.
+Do "פרומט 5" from docs/claude-code-prompts.md fully, using ONLY simulators (no physical iPhone): PART 1 header check/fix in the simulator, PART 2 real simulator screenshots (iPhone 6.9" + iPad 13", he+en, dark+light, 9 screens, with the Birkat HaMazon screen scrolled to the main blessing "HaZan"), PART 3 `node scripts/appstore-slides.mjs he,en dark|light` (and iPad) - LOOK at every slide, keep the zoom cards on chok/calendar/mazon slides, no eyebrow chips, fix overlaps/clipping in the script, PART 4 copy to fastlane folders and upload with fastlane deliver using the ASC env vars (he, en-US, fr-FR, ru metadata; screenshots he + en-US), stop before Submit.
+Commit and push to the same branch regularly (merge origin first). At the end write MORNING-REPORT.md (Hebrew): what is done, what failed, screenshots checked, what I must do (Firebase login + prompt 6, widgets on my iPhone, App Privacy/age rating/export compliance, Submit).
+```
