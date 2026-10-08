@@ -61,3 +61,15 @@ cd ~/Bet-El (Bet-El repo only). Widgets still crash in BetElWidgetBundle.body (E
 ---
 ## לפני פרומט Firebase: התחברות (פעם אחת, אינטראקטיבי)
 Claude Code לא יכול להתחבר ל-Firebase לבד. בטרמינל, פעם אחת: `npx firebase-tools login` (נפתח דפדפן, מאשרים), ואז `npx firebase-tools use bet-el-e6812`. אחרי זה פרומט 1 (שלב 3) יעבוד.
+
+---
+## פרומט מאסטר – הכל ברצף (בלי Firebase), כדי להמשיך ב-Remote Control מהטלפון
+בטרמינל, בתיקיית הפרויקט: `cd ~/Bet-El && claude remote-control` – הסשן מופיע באפליקציית Claude Code בטלפון ואפשר להמשיך משם. (הפרומט למטה אפשר להדביק כבר בסשן או לשלוח מהטלפון.)
+```
+cd ~/Bet-El (Bet-El repo ONLY). Work through these in order, autonomously, and report in Hebrew. Do NOT touch Firebase (I will do the Firestore rule myself). Do NOT submit the app for review. Never print, log or commit the App Store Connect key (env ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH) or my local DEVELOPMENT_TEAM change.
+A. git stash if needed, pull origin claude/additional-file-fas9ie (latest), stash pop. npm run cap:sync. Build and install the App scheme on my iPhone (com.beitel.tehilim, build 6, widget embedded and signed). Fix compile errors minimally (iOS 15 app target, #available for newer APIs), commit and push.
+B. WIDGETS (they still do not appear): follow "פרומט 4" in docs/claude-code-prompts.md - read the newest BetElWidget crash reports with the real exception message, bisect the widget bundle (ios/App/BetElWidget/BetElWidgetBundle.swift), fix the cause (if it is the `if #available` blocks, raise ONLY the widget extension target to iOS 17.0 and remove them), reinstall, then ask me to open the widget gallery and re-check the crash logs.
+C. SCREENSHOTS from the iOS Simulator (real native UI): follow "פרומט 2 / PART A" in docs/claude-code-prompts.md - iPhone 6.9" and iPad 13" simulators, deep link `betel://shot?screen=...&lang=he|en&theme=dark|light`, clean status bar, 8 screens + qr, save into docs/appstore/raw-device[-light|-ipad|-ipad-light]/, LOOK at every image (no launch logo, no Hebrew leaking in English, nothing cut off), then `node scripts/appstore-compose.mjs he,en` and `... he,en light`. Replace the web-made screenshots in docs/appstore/screenshots*/ for he and en with these.
+D. APP STORE CONNECT upload with fastlane using my API key from the env vars: follow "פרומט 2 / PART B" (locales he, en-US, fr-FR, ru; Georgian does not exist in App Store Connect). Upload build 6 and the 2.0 metadata + screenshots, select the build, fill the review notes - and STOP before "Submit for Review".
+E. Finish with a Hebrew checklist: what is ready, what failed, and what only I can do (App Privacy answers, age rating, export compliance, widget screenshots from my iPhone, pressing Submit). Commit and push everything except secrets.
+```
