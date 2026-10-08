@@ -83,3 +83,20 @@ PART 2 - STORE SCREENSHOTS, REAL SIMULATOR ONLY (no Playwright/web screenshots):
 PART 3 - DESIGN: then run `node scripts/appstore-slides.mjs he,en dark` and `node scripts/appstore-slides.mjs he,en light` (and with the iPad args if the script supports them; if not, extend it - same design at 2064x2752). Match the style of the reference "Kosher Switch" App Store listing: each output slide is a real marketing design (small letter-spaced gold eyebrow, big headline with gold accent word, sub-line, callouts, device frame) and NOT the bare screen. View every output; fix overlaps (e.g. callout over the sub-line) in the script. Output goes to docs/appstore/slides*/<lang>/<device>/.
 PART 4 - copy those finished slides into the fastlane screenshots folders for he and en-US (iPhone 6.9 + iPad 13, dark set first, light as extra if limit 10 allows), upload with fastlane deliver using ASC_KEY_ID/ASC_ISSUER_ID/ASC_KEY_PATH, STOP before Submit. Commit and push (except secrets). Report in Hebrew.
 ```
+
+---
+## פרומט 6 – דיווח והצעות לשיפור (feedback) לא עובד: תיקון Firestore עד שמוכח שעובד
+הקוד באפליקציה כותב ל-Firestore באוסף `feedback` (`window.__betelSaveFeedback` ב-index.html). הכתיבה נחסמת (403) כי הכללים ב-Firebase לא מאפשרים `create` שם. אי אפשר לפרסם כללים בלי התחברות שלך ל-Firebase.
+קודם, פעם אחת בטרמינל: `npx firebase-tools login` ואז `npx firebase-tools use bet-el-e6812`.
+```
+cd ~/Bet-El (Bet-El repo ONLY). Goal: the in-app "report and suggestions" form must really deliver. Do NOT break existing rules for stats/visits, presence, pushTokens, etc.
+1. Fetch the CURRENT deployed Firestore rules (firebase CLI or the Firebase Rules REST API with `firebase login` credentials) and print them. Save a backup copy to /tmp/firestore.rules.backup (do not commit it).
+2. Reproduce first: POST to https://firestore.googleapis.com/v1/projects/bet-el-e6812/databases/(default)/documents/feedback with a small test document and show the 403.
+3. Add ONLY this to the existing rules (create-only, no read/update/delete from clients, bounded size):
+   match /feedback/{id} { allow create: if request.resource.data.keys().hasOnly(['name','email','subject','message','ua','lang','ts','createdAt']) && request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() < 5000; allow read, update, delete: if false; }
+   (check the real field names written by __betelSaveFeedback in index.html and adjust hasOnly accordingly - extra fields would make the create fail.)
+   Deploy only the rules (`firebase deploy --only firestore:rules`). Save the final rules file in the repo as firestore.rules and add a "firestore" entry to firebase.json so it is reproducible.
+4. Verify: repeat the POST from step 2 and show it now succeeds (200), and that a READ of /feedback is still denied. Delete the test document with admin credentials.
+5. Then test the real app form in the Simulator (Settings -> report/suggestions -> send) in he and en and show the new document in the Firebase console / via admin read. Also build a small way for me to read submissions (a Firebase Console link to the feedback collection is enough) and tell me in Hebrew where they land.
+6. Commit firestore.rules + firebase.json and push. Report in Hebrew with the exact outputs.
+```

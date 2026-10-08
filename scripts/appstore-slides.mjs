@@ -87,11 +87,10 @@ for(const lang of langs){ const rtl=lang==='he';
     const devW=ipad?1240:1090, devTop=ipad?800:800;
     const device=f=>`<div style="position:absolute;left:50%;transform:translateX(-50%);top:${devTop}px;width:${devW}px;border-radius:${ipad?64:96}px;overflow:hidden;border:${ipad?14:14}px solid ${LIGHT?'#1c1c1e':'#0a0a0c'};box-shadow:0 0 0 3px ${TH.ring},${TH.shadow}"><img src="data:image/png;base64,${b64(f)}" style="display:block;width:100%"/></div>`;
     if(key==='hero'){
-      body=`${logo?`<img src="data:image/png;base64,${logo}" style="position:absolute;left:50%;transform:translateX(-50%);top:${ipad?330:300}px;width:${ipad?620:600}px;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 52%,transparent 70%)"/>`:''}
-      <div style="position:absolute;left:0;right:0;top:${ipad?1010:930}px;text-align:center;font-weight:900;font-size:${(lang==='he'?230:200)*k}px;background:${TH.goldText};-webkit-background-clip:text;color:transparent">${lang==='he'?'תמיד':'Tamid'}</div>
-      <div style="position:absolute;left:90px;right:90px;top:${ipad?1330:1230}px;text-align:center;font-weight:800;font-size:${78*k}px;line-height:1.2;color:${TH.ink}">${acc(T.h,col)}</div>
-      <div style="position:absolute;left:90px;right:90px;top:${ipad?1560:1480}px;text-align:center;font-size:${42*k}px;color:${TH.soft}">${T.s}</div>
-      <div style="position:absolute;left:70px;right:70px;top:${ipad?1760:1700}px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center">${T.pills.map((p,i)=>`<span style="padding:${22*k}px ${40*k}px;border-radius:70px;font-size:${50*k}px;font-weight:700;color:${LIGHT?'#22314e':'#fff'};background:linear-gradient(135deg,${['#6f83d6','#d4af5f','#e0562e','#38a3a5','#9662a8','#8a9a3a'][i]}${LIGHT?'55':'cc'},${['#6f83d6','#d4af5f','#e0562e','#38a3a5','#9662a8','#8a9a3a'][i]}33);border:2px solid ${['#6f83d6','#d4af5f','#e0562e','#38a3a5','#9662a8','#8a9a3a'][i]}">${p}</span>`).join('')}</div>`;
+      const f1=find(lang,'01-home',ipad), f2=find(lang,'02-chok',ipad); if(!f1||!f2) continue;
+      const pw=ipad?840:640;
+      const ph=(f,st)=>`<div style="position:absolute;${st};width:${pw}px;border-radius:${ipad?56:84}px;overflow:hidden;border:14px solid ${LIGHT?'#1c1c1e':'#0a0a0c'};box-shadow:0 0 0 3px ${TH.ring},${TH.shadow}"><img src="data:image/png;base64,${b64(f)}" style="display:block;width:100%"/></div>`;
+      body=headBlock+ph(f2,`${rtl?'left':'right'}:${ipad?150:40}px;top:${ipad?980:1000}px`)+ph(f1,`${rtl?'right':'left'}:${ipad?150:40}px;top:${ipad?820:830}px`);
     } else if(key==='lang'){
       const f1=find(lang,'01-home',ipad), f2=find(lang==='en'?'he':'en','01-home',ipad); if(!f1||!f2) continue;
       const pw=ipad?800:560;
