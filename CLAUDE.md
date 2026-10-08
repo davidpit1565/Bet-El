@@ -466,3 +466,6 @@ in English as usual.
   on foreground. Feedback goes straight to Firestore `feedback` (rules must allow `create`), the Cloud Function is only the fallback.
 - **Birkat Meein Shalosh / Birkot HaNehenin** are PRAYERS_EXTRA entries in the `brachot` group (Hebrew only for now,
   Edot HaMizrach wording - have a rabbi proof-read them; transliterations for en/fr/ru/ka are still to be added to `data/prayers-*.json`).
+- **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
+  length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
+  `npm run serve:local`) then `node scripts/appstore-compose.mjs`; screenshots taken on the real iPhone go in `docs/appstore/raw-device/` and override the web ones.
