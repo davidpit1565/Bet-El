@@ -22,6 +22,7 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "configure", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "hide", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setCollapsed", returnType: CAPPluginReturnPromise),
     ]
 
     static weak var activeController: MainViewController?
@@ -47,6 +48,12 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
                 actions: actions
             )
         }
+        call.resolve()
+    }
+
+    @objc func setCollapsed(_ call: CAPPluginCall) {
+        let collapsed = call.getBool("collapsed") ?? false
+        DispatchQueue.main.async { NativeTopBarBridge.activeController?.setTopBarCollapsed(collapsed) }
         call.resolve()
     }
 

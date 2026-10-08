@@ -450,3 +450,19 @@ in English as usual.
   live `#libResults`) is read out of the rendered HTML and shown natively (kinds `tile`, `row`, `tikkunei`); taps come back as
   `NativeHomeHost.open('n<i>')` which clicks the hidden element. A MutationObserver on `#app` (runs as a microtask right after each render, no timer) + `libDrawSearch` call `nativeAutoPush()`; `render()` does NOT hide the native view first (that caused a flash) - the decision is made after the render. `NativeHome.show` resets scroll to the top whenever the item set changes.
   Anything not eligible stays web. Readers (long text) stay web by design - they cannot be glass.
+
+- **NativeSystem plugin** (`NativeSystemBridge.swift`; registered in `capacitor-native-bridge.js` + `MainViewController`):
+  `openURL` (SFSafariViewController - the global click/`window.open` interceptor in index.html sends every external
+  http(s) link, except apps.apple.com, through `openExternal()` so links stay in the app), `shareImage`, `qrImage`
+  (offline Core Image QR, no network) and `requestReview` (Apple's star sheet, asked at most weekly, never in the
+  first 3 days). Web/PWA fall back to the old behaviour. Not compile-verified.
+- **HTML dialogs vs the native list**: `.overlay` dialogs live in the web layer UNDER the native list view, so
+  `nativeAutoPush()` hides the native list while any `body > .overlay` exists and re-pushes when it closes.
+- **Header scroll-away**: the shared scroll-direction listener (`initNavScrollHide`) also calls
+  `NativeTopBar.setCollapsed` (Swift `setTopBarCollapsed`: slides the header row up, keeps the status-bar strip, shrinks
+  `--native-header-h` and shifts the scroll offset by the same amount); the HTML `.topbar` gets `.topbar-hidden`.
+- **Location is automatic by default**: `FALLBACK` is Jerusalem for an Israel-timezone phone (else Antwerp),
+  `calIsIL()` 'auto' uses the device time zone until a real place exists, GPS is retried (timeouts only) and refreshed
+  on foreground. Feedback goes straight to Firestore `feedback` (rules must allow `create`), the Cloud Function is only the fallback.
+- **Birkat Meein Shalosh / Birkot HaNehenin** are PRAYERS_EXTRA entries in the `brachot` group (Hebrew only for now,
+  Edot HaMizrach wording - have a rabbi proof-read them; transliterations for en/fr/ru/ka are still to be added to `data/prayers-*.json`).

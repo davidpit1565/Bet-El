@@ -342,12 +342,42 @@ class MainViewController: CAPBridgeViewController {
             self.webView?.evaluateJavaScript(js, completionHandler: nil)
         }
         topBar.isHidden = false
+        resetTopBarCollapse()
         reportHeightToWebView()
     }
 
     func setTopBarVisible(_ visible: Bool) {
         topBar.isHidden = !visible
+        resetTopBarCollapse()
         reportHeightToWebView()
+    }
+
+    // MARK: - Scroll-away header (like Safari / Music: the bar tucks away on scroll down, returns on scroll up)
+
+    private var topBarCollapsed = false
+
+    private func resetTopBarCollapse() {
+        topBarCollapsed = false
+        topBar.transform = .identity
+        topBar.alpha = 1
+    }
+
+    /// Slides the header row up (the status-bar strip stays so the clock keeps its backdrop) and gives the freed
+    /// height to the web content, keeping the text where it is on screen by shifting the scroll offset the same amount.
+    func setTopBarCollapsed(_ collapsed: Bool) {
+        guard !topBar.isHidden, collapsed != topBarCollapsed else { return }
+        topBarCollapsed = collapsed
+        let d = topBar.contentHeight
+        UIView.animate(withDuration: 0.28, delay: 0, options: [.curveEaseInOut, .beginFromCurrentState, .allowUserInteraction]) {
+            self.topBar.transform = collapsed ? CGAffineTransform(translationX: 0, y: -d) : .identity
+            self.topBar.alpha = collapsed ? 0 : 1
+        }
+        let sign = collapsed ? -1 : 1
+        let js = """
+        (function(){var r=document.documentElement;var cur=parseFloat(getComputedStyle(r).getPropertyValue('--native-header-h'))||0;
+        r.style.setProperty('--native-header-h',Math.max(0,cur+(\(sign)*\(d)))+'px');window.scrollBy(0,\(sign)*\(d));})();
+        """
+        webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
     /// Spans the whole view (its own backdrop dims everything beneath it,
