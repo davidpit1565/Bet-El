@@ -3455,6 +3455,11 @@ function openWidgetLink(url){
      xcrun simctl openurl booted "betel://shot?screen=home&lang=he&theme=dark"
    Sets language/theme, reloads, then opens the screen. screens: home chok calendar tehillim prayers meein settings library qr */
 const SHOT_ALLOWED = window.__BETEL_DEV_BUILD===true || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+/* Set true once a screenshot-automation navigation is actually underway (see
+   the boot IIFE below) - lets boot-time code (e.g. notifBootSync's native
+   permission auto-prompt) skip side effects that would pop a blocking OS
+   dialog over the capture, without touching their normal (non-shot) behavior. */
+let SHOT_MODE=false;
 function shotLink(url){
   if(!SHOT_ALLOWED) return;
   const q=new URLSearchParams((String(url).split('?')[1])||'');
@@ -3462,6 +3467,7 @@ function shotLink(url){
   if(lang && ['he','en','fr','ru','ka'].includes(lang)) S.lang=lang;
   if(theme && ['light','dark'].includes(theme)) S.theme=theme;
   saveS();
+  try{ localStorage.setItem('betel_onboard_v1','1'); }catch(e){}
   try{ sessionStorage.setItem('betel_shot_screen',screen); }catch(e){}
   location.reload();
 }
@@ -3475,6 +3481,7 @@ function shotNavigate(screen){
 }
 (function(){ try{
   const sc=sessionStorage.getItem('betel_shot_screen'); if(!sc || !SHOT_ALLOWED) return;
+  SHOT_MODE=true;
   sessionStorage.removeItem('betel_shot_screen'); setTimeout(()=>shotNavigate(sc),2500);
 }catch(e){} })();
 window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
@@ -14359,7 +14366,7 @@ function checkMusarNotification(){
    prompts for real (requestPermissions) once, the very first time the OS
    hasn't been asked yet; never auto-reprompts after an explicit denial. */
 function notifBootSync(){
-  if(!S.notifEnabled) return Promise.resolve();
+  if(!S.notifEnabled || SHOT_MODE) return Promise.resolve();
   const ln=notifLocalPlugin();
   if(ln){
     return ln.checkPermissions().then(p=>{
@@ -14418,7 +14425,7 @@ try{
         }).catch(()=>{ if(!localStorage.getItem('betel_gps_tried')) askFirst(); });
       } else if(!localStorage.getItem('betel_gps_tried')) askFirst();
     };
-    boot();
+    if(!SHOT_MODE) boot();
     let lastGpsTs=Date.now();
     document.addEventListener('visibilitychange',()=>{
       if(document.visibilityState!=='visible' || Date.now()-lastGpsTs<30*60*1000) return;

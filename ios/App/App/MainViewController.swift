@@ -66,24 +66,85 @@ class MainViewController: CAPBridgeViewController {
     /// proxies (so index.html hides its HTML nav/FAB/etc. in favor of the
     /// native ones), but every call into them rejects as unimplemented and
     /// no native UI ever appears.
-    /// Tells the web app whether this is a development install, before any
-    /// page script runs: there is no App Store/TestFlight receipt on a build
-    /// installed straight from Xcode (Debug or Release) or on the simulator.
-    /// index.html uses `window.__BETEL_DEV_BUILD` to keep such installs out
-    /// of the Firebase visit counter, live presence and Analytics, so
-    /// repeated test installs don't inflate the real user numbers.
-    override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
-        let configuration = super.webViewConfiguration(for: instanceConfiguration)
+    ///
+    /// Adds our `WKUserScript`s directly to the webview's own
+    /// `userContentController` from `capacitorDidLoad()` (webView is set by
+    /// then, but `loadWebView()`/the first navigation hasn't happened yet).
+    /// Overriding `webViewConfiguration(for:)` to call `addUserScript` on
+    /// its `configuration.userContentController` does NOT work - Capacitor's
+    /// own `prepareWebView` throws that whole object away right after,
+    /// replacing it with `delegationHandler.contentController` (see
+    /// `CAPBridgeViewController.prepareWebView`), so any script added there
+    /// is silently discarded before the webview is even created with it.
+    private func injectBootstrapUserScripts() {
+        guard let userContentController = webView?.configuration.userContentController else { return }
+
+        // Tells the web app whether this is a development install, before
+        // any page script runs: there is no App Store/TestFlight receipt on
+        // a build installed straight from Xcode (Debug or Release) or on
+        // the simulator. index.html uses `window.__BETEL_DEV_BUILD` to keep
+        // such installs out of the Firebase visit counter, live presence
+        // and Analytics, so repeated test installs don't inflate the real
+        // user numbers.
         let hasReceipt = Bundle.main.appStoreReceiptURL
             .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
-        let script = WKUserScript(
+        let devBuildScript = WKUserScript(
             source: "window.__BETEL_DEV_BUILD = \(hasReceipt ? "false" : "true");",
             injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        configuration.userContentController.addUserScript(script)
-        return configuration
+        userContentController.addUserScript(devBuildScript)
+
+        if let shotScript = screenshotBootstrapScript() {
+            userContentController.addUserScript(shotScript)
+        }
+    }
+
+    /// Debug-only App Store screenshot automation: lets `simctl launch` (with
+    /// SIMCTL_CHILD_BETEL_SHOT_* env vars) pre-seed the same localStorage/
+    /// sessionStorage keys index.html's own `shotLink()` writes before a
+    /// reload, so the existing JS-side screenshot flow runs on a plain app
+    /// launch instead of `simctl openurl betel://shot?...` - the latter
+    /// always triggers the OS "Open in" confirmation dialog, which nothing
+    /// in this sandboxed environment can dismiss programmatically.
+    private func screenshotBootstrapScript() -> WKUserScript? {
+        let env = ProcessInfo.processInfo.environment
+        guard let screen = env["BETEL_SHOT_SCREEN"], !screen.isEmpty else { return nil }
+        let lang = env["BETEL_SHOT_LANG"] ?? ""
+        let theme = env["BETEL_SHOT_THEME"] ?? ""
+
+        func jsString(_ s: String) -> String {
+            let data = try? JSONSerialization.data(withJSONObject: [s])
+            let encoded = data.flatMap { String(data: $0, encoding: .utf8) } ?? "[\"\"]"
+            return String(encoded.dropFirst().dropLast())
+        }
+
+        let source = """
+        (function(){
+          try {
+            var screen = \(jsString(screen));
+            var lang = \(jsString(lang));
+            var theme = \(jsString(theme));
+            var s = {};
+            try { s = JSON.parse(localStorage.getItem('betel_settings') || '{}'); } catch(e) {}
+            if (lang && ['he','en','fr','ru','ka'].indexOf(lang) !== -1) s.lang = lang;
+            if (theme && ['light','dark'].indexOf(theme) !== -1) s.theme = theme;
+            localStorage.setItem('betel_settings', JSON.stringify(s));
+            localStorage.setItem('betel_onboard_v1', '1');
+            // Chok LeYisrael's own pace wizard (halacha/musar/Tehillim division
+            // questions) is a SEPARATE first-run gate from the main onboarding
+            // screen above - go() redirects any of CK_PACE_FAMILY_TABS (chokList,
+            // chokReader, etc.) to it until this is set, regardless of
+            // betel_onboard_v1. The app's own defaults are enough to render the
+            // reader normally, so just mark it done rather than re-answer it here.
+            localStorage.setItem('betel_chok_pace_v1', '1');
+            sessionStorage.setItem('betel_shot_screen', screen);
+          } catch(e) {}
+        })();
+        """
+        return WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true)
     }
 
     override func capacitorDidLoad() {
+        injectBootstrapUserScripts()
         bridge?.registerPluginInstance(NativeTabBarBridge())
         bridge?.registerPluginInstance(NativeToolsFabBridge())
         bridge?.registerPluginInstance(NativeTopBarBridge())
