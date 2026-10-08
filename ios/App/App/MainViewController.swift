@@ -478,7 +478,7 @@ class MainViewController: CAPBridgeViewController {
     // MARK: - Native home screen (UICollectionView + real edit mode) - see NativeHome.swift
     private var nativeHomeView: NativeHomeView?
 
-    func showNativeHome(items: [NHItem], editing: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
+    func showNativeHome(items: [NHItem], editing: Bool, canEdit: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
         let home: NativeHomeView
         if let existing = nativeHomeView {
             home = existing
@@ -498,7 +498,7 @@ class MainViewController: CAPBridgeViewController {
             nativeHomeView = home
         }
         home.isHidden = false
-        home.show(items: items, editing: editing, rtl: rtl, isDark: isDark, pool: pool)
+        home.show(items: items, editing: editing, canEdit: canEdit, rtl: rtl, isDark: isDark, pool: pool)
     }
 
     func hideNativeHome() { nativeHomeView?.isHidden = true }

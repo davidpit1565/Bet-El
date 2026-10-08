@@ -446,7 +446,7 @@ in English as usual.
   edit code (HTML and `NativeHomeEdit.swift`) is still there; flip the flag to bring it back. The native home (`NativeHome.swift`) now shows
   that default layout read-only, with glass cells.
 - **Generic native lists**: `nativeScreenSpec()` (index.html) reuses the NativeHome collection for plain list/grid screens - any screen whose
-  `#app > .view` is only `.q-tile` / `.prayer-row` / `.sm-week-card` / `.set-item` / `.search-box` rows (no inputs, toggles, chips, readers, or
+  `#app > .view` is only `.q-tile` / `.prayer-row` / `.sm-week-card` / `.set-item` rows (a `.search-box` is allowed but NOT shown natively - search lives in the native tab bar; no other inputs, toggles, chips, readers, or
   live `#libResults`) is read out of the rendered HTML and shown natively (kinds `tile`, `row`, `tikkunei`); taps come back as
-  `NativeHomeHost.open('n<i>')` which clicks the hidden element. A MutationObserver on `#app` + `libDrawSearch` call `nativeAutoPush()`.
+  `NativeHomeHost.open('n<i>')` which clicks the hidden element. A MutationObserver on `#app` (runs as a microtask right after each render, no timer) + `libDrawSearch` call `nativeAutoPush()`; `render()` does NOT hide the native view first (that caused a flash) - the decision is made after the render. `NativeHome.show` resets scroll to the top whenever the item set changes.
   Anything not eligible stays web. Readers (long text) stay web by design - they cannot be glass.

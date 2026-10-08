@@ -6699,7 +6699,6 @@ function render(){
   stopAutoScroll();
   if(TAB!=='calendar') nativeCalHide();
   if(TAB!=='library') nativeLibHide();
-  if(TAB!=='home') homeNativeHide();
   if(TAB!=='prayers'){ try{ if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.NativeTabBar) Capacitor.Plugins.NativeTabBar.hideSearch().catch(()=>{}); }catch(e){} }   // the native search field belongs to the Prayers/search screen only
   if(window.__bootHide) setTimeout(window.__bootHide,0); // first screen is about to paint
   try{
@@ -7303,7 +7302,7 @@ function homeNativePush(){
   HOME_NG_ON=true; document.documentElement.classList.add('native-home');
   if(!HOME_NG_LOGO && typeof LOGO==='string'){ HOME_NG_LOGO=true; NH.setLogo({data:LOGO}).catch(()=>{ HOME_NG_LOGO=false; }); }
   const have=new Set(getHomeLayout().map(x=>x.id));
-  NH.show({items,editing:!!HOME_EDIT,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),
+  NH.show({items,editing:!!HOME_EDIT,canEdit:HOME_CUSTOMIZE,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),
     spacerPool:HOME_SPACER_IDS.filter(x=>!have.has(x))}).catch(()=>{});
   if(!HOME_NG_TIMER) HOME_NG_TIMER=setInterval(()=>{   // the Firebase counters paint into the (hidden) HTML cards; mirror them
     if(!HOME_NG_ON||TAB!=='home') return;
@@ -7318,7 +7317,7 @@ function homeNativeHide(){ if(!HOME_NG_ON) return; HOME_NG_ON=false; document.do
 /* Plain list / grid screens (prayers, library lists, settings list...) reuse the same native glass collection:
    nativeScreenSpec() reads the screen's rows out of the rendered HTML (only when the screen is nothing but rows -
    anything with inputs, toggles, chips or text to read stays web) and sends them to NativeHome.show. */
-const NSCR_ROWS='.search-box,.q-tile,.prayer-row,.sm-week-card,.set-item';
+const NSCR_ROWS='.q-tile,.prayer-row,.sm-week-card,.set-item';   // (the .search-box is NOT a row: search lives in the native tab bar)
 const NSCR_BLOCK='input,select,textarea,button,.reader-top,.reader-head,.ck-track-btn,.ck-yr-btn,.sm-aliyah-chip,.empty-note,.card,.home-grid,canvas,video,iframe,.reader';
 function nativeScreenSpec(){
   const view=document.querySelector('#app > .view'); if(!view) return null;
@@ -7330,7 +7329,6 @@ function nativeScreenSpec(){
   const base={size:'s',sizes:[],removable:false,movable:false,resizable:false,color:'#d4af5f',done:false,title:'',subtitle:'',lines:[],rows:[],number:'',badge:'',wide:true};
   return top.map((el,i)=>{
     el.dataset.nid=i; const id='n'+i, done=el.classList.contains('done')||!!el.querySelector('.tr-done');
-    if(el.matches('.search-box')){ const inp=el.querySelector('input'); return {...base,id,kind:'row',title:(inp&&inp.placeholder)||'',badge:'magnifyingglass'}; }
     if(el.matches('.q-tile')){
       const qd=[...el.querySelectorAll('.qd')].map(n=>n.textContent.replace(/\s+/g,' ').trim()).filter(Boolean);
       return {...base,id,kind:'tile',wide:false,title:T(el,'.qt'),subtitle:qd.join('\n'),done,color:HOME_TILE_COLORS[el.dataset.cat]||LIB_CAT_COLORS[el.dataset.cat]||'#d4af5f'};
@@ -7345,12 +7343,11 @@ function nativeScreenPush(){
   const items=nativeScreenSpec();
   if(!items||!items.length){ homeNativeHide(); return; }
   HOME_NG_ON=true; document.documentElement.classList.add('native-home');
-  NH.show({items,editing:false,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),spacerPool:[]}).catch(()=>{});
+  NH.show({items,editing:false,canEdit:false,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),spacerPool:[]}).catch(()=>{});
 }
 function nativeAutoPush(){ try{ if(TAB==='home') homeNativePush(); else nativeScreenPush(); }catch(e){ console.error(e); } }
 try{
-  let nsTimer=null;
-  new MutationObserver(()=>{ clearTimeout(nsTimer); nsTimer=setTimeout(nativeAutoPush,30); }).observe(document.getElementById('app'),{childList:true});
+  new MutationObserver(()=>{ nativeAutoPush(); }).observe(document.getElementById('app'),{childList:true});
 }catch(e){}
 window.NativeHomeHost={
   open(id){

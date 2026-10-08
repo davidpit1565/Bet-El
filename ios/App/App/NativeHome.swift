@@ -423,6 +423,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
     private var rtl = true
     private var logo: UIImage?
     private var spacerPool: [String] = []
+    private var screenSignature = ""
 
     private let addPill = UIButton(type: .custom)
     private let donePill = UIButton(type: .custom)
@@ -446,6 +447,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear
         collectionView.alwaysBounceVertical = true
+        collectionView.contentInsetAdjustmentBehavior = .never   // the bottom inset below already includes the safe area
         collectionView.showsVerticalScrollIndicator = false
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -514,7 +516,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
 
     func setLogo(_ image: UIImage?) { logo = image }
 
-    func show(items newItems: [NHItem], editing: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
+    func show(items newItems: [NHItem], editing: Bool, canEdit: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
         overrideUserInterfaceStyle = isDark ? .dark : .light
         let attr: UISemanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
         semanticContentAttribute = attr
@@ -525,9 +527,12 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         if dragIndex != nil { return }
         let wasEditing = self.editing
         self.editing = editing
+        let newSig = newItems.map { $0.id + $0.kind + $0.title }.joined(separator: "|")
+        let isNewScreen = newSig != screenSignature
+        screenSignature = newSig
         items = newItems
         if editing { normalizeSpacers() }
-        enterEditLP.isEnabled = !editing
+        enterEditLP.isEnabled = !editing && canEdit
         dragLP.isEnabled = editing
         addPill.isHidden = !editing
         donePill.isHidden = !editing
@@ -538,6 +543,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
             if atTop { collectionView.contentOffset.y = -top }
         }
         collectionView.reloadData()
+        if isNewScreen { collectionView.setContentOffset(CGPoint(x: 0, y: -collectionView.contentInset.top), animated: false) }
         if wasEditing != editing { UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
     }
 
@@ -828,11 +834,12 @@ public class NativeHomeBridge: CAPPlugin, CAPBridgedPlugin {
         let rtl = call.getBool("isRTL") ?? true
         let isDark = call.getBool("isDark") ?? true
         let editing = call.getBool("editing") ?? false
+        let canEdit = call.getBool("canEdit") ?? false
         let pool = (call.getArray("spacerPool") as? [String]) ?? []
         var items: [NHItem] = []
         for case let d as [String: Any] in (call.getArray("items") ?? []) { items.append(NHItem(dict: d)) }
         DispatchQueue.main.async {
-            NativeHomeBridge.activeController?.showNativeHome(items: items, editing: editing, rtl: rtl, isDark: isDark, pool: pool)
+            NativeHomeBridge.activeController?.showNativeHome(items: items, editing: editing, canEdit: canEdit, rtl: rtl, isDark: isDark, pool: pool)
         }
         call.resolve()
     }
