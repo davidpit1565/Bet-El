@@ -7317,8 +7317,10 @@ function homeNativeSpec(){
   });
   return out;
 }
+function nativeOverlayOpen(){ return !!document.querySelector('body > .overlay'); }
 function homeNativePush(){
   const NH=homeNativePlugin();
+  if(NH && nativeOverlayOpen()) return;   // an HTML dialog (QR, feedback, rate...) is open: the native list must not cover it
   if(!NH || TAB!=='home'){ HOME_NG_ON=false; document.documentElement.classList.remove('native-home'); return; }
   let items=homeNativeSpec();
   { /* the two counters always sit side by side on their own row: pad the row before 'visitors' with an empty cell */
@@ -7373,12 +7375,20 @@ function nativeScreenSpec(){
 }
 function nativeScreenPush(){
   const NH=homeNativePlugin(); if(!NH||TAB==='home') return;
+  if(nativeOverlayOpen()) return;
   const items=nativeScreenSpec();
   if(!items||!items.length){ homeNativeHide(true); return; }
   HOME_NG_ON=true; document.documentElement.classList.add('native-home');
   NH.show({items,editing:false,canEdit:false,isRTL:document.documentElement.dir!=='ltr',isDark:document.documentElement.dataset.theme==='dark'||document.body.classList.contains('dark'),spacerPool:[]}).catch(()=>{});
 }
-function nativeAutoPush(){ try{ if(TAB==='home') homeNativePush(); else nativeScreenPush(); }catch(e){ console.error(e); } }
+function nativeAutoPush(){ try{ if(nativeOverlayOpen()){ homeNativeHide(true); return; } if(TAB==='home') homeNativePush(); else nativeScreenPush(); }catch(e){ console.error(e); } }
+/* HTML dialogs (.overlay) live in the web layer, UNDER the native list view: hide the native list while one is
+   open (otherwise it covers the dialog, e.g. the QR picture) and bring it back when the dialog closes. */
+try{
+  new MutationObserver(ms=>{
+    if(ms.some(m=>[...m.addedNodes,...m.removedNodes].some(n=>n.classList&&n.classList.contains('overlay')))) nativeAutoPush();
+  }).observe(document.body,{childList:true});
+}catch(e){}
 try{
   new MutationObserver(()=>{ nativeAutoPush(); }).observe(document.getElementById('app'),{childList:true});
 }catch(e){}
@@ -13308,19 +13318,13 @@ async function shareQR(){
     <img src="${dataUrl}" alt="QR" style="width:100%;max-width:300px;border-radius:16px;display:block;margin:4px auto 14px"/>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-gold" id="qrShare" type="button"><span>${ckChrome('שתף')}</span></button>
-      <button class="btn" id="qrSave" type="button"><span>${ckChrome('שמור תמונה')}</span></button>
     </div>
   </div>`;
   document.body.appendChild(ov);
   const n=nativeSys();
   ov.querySelector('#qrShare').onclick=()=>{
-    if(n){ n.shareImage({data:dataUrl,text:APP_STORE_URL}).catch(()=>{}); return; }
+    if(n){ n.shareImage({data:dataUrl,text:APP_STORE_URL}).catch(()=>{}); return; }   // the iOS share sheet also has "Save Image"
     shareGeneratedImage(async()=>cv,'tamid-app-qr.png',APP_STORE_URL);
-  };
-  ov.querySelector('#qrSave').onclick=()=>{
-    if(n){ n.shareImage({data:dataUrl}).catch(()=>{}); return; }   // the iOS sheet has "Save Image"
-    const a=document.createElement('a'); a.href=dataUrl; a.download='tamid-app-qr.png'; document.body.appendChild(a); a.click(); a.remove();
-    toast(ckChrome('התמונה נשמרה'));
   };
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
@@ -13513,7 +13517,11 @@ function maybeShowRatePrompt(){
 }
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
-  const th = { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
+  /* the picture uses the app's CURRENT paper: parchment in the light theme, navy in the dark one */
+  const lightTheme=document.documentElement.getAttribute('data-theme')==='light';
+  const th = lightTheme
+    ? { bg1:'#fbf5e6', bg2:'#e7dcc2', gold:'#8a6414', goldDeep:'#7a5a14', cream:'#22314e', line:'rgba(150,116,44,.5)' }
+    : { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
   const url = APP_STORE_URL;
   const W=1080, H=1400;
   const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
@@ -13530,7 +13538,8 @@ async function appQrImage(){
   ctx.strokeStyle=th.line; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(150,430); ctx.lineTo(W-150,430); ctx.stroke();
   ctx.fillStyle=th.gold; ctx.font='30px serif'; ctx.fillText('✦', W/2, 440);
   const qrSize=560, qrX=(W-qrSize)/2, qrY=490;
-  ctx.fillStyle='#f6f1e4'; ctx.fillRect(qrX-24,qrY-24,qrSize+48,qrSize+48);   // light ground: dark-on-light is what scanners read reliably
+  ctx.fillStyle='#f6f1e4'; ctx.fillRect(qrX-24,qrY-24,qrSize+48,qrSize+48);
+  ctx.strokeStyle=th.line; ctx.lineWidth=3; ctx.strokeRect(qrX-24,qrY-24,qrSize+48,qrSize+48);   // light ground: dark-on-light is what scanners read reliably
   const qrSrc='https://api.qrserver.com/v1/create-qr-code/?size='+qrSize+'x'+qrSize+'&margin=0&data='+encodeURIComponent(url)+'&color=0d1730&bgcolor=f6f1e4';
   let nativeQr=false;
   if(nativeSys()){
