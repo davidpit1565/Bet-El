@@ -3,7 +3,7 @@
 > נכתב אחרי סבב העבודה של אוקטובר 2026. קוד ה-Swift (ווידג'טים, כפתורי זכוכית נייטיב, Live Activity, כותרת, סרגל תחתון) **לא קומפל ולא נבדק ב-Xcode עדיין** - זה השלב הראשון.
 
 ## 0. גרסה
-- **עודכן ל-2.0 (build 5)** בכל 4 המקומות (אפליקציה + Widget Extension). אם בכל זאת רוצים 1.x – לשנות ב-`project.pbxproj`; ה-build חייב להיות מספר שעוד לא הועלה ל-App Store Connect.
+- **עודכן ל-2.0 (build 6)** בכל 4 המקומות (אפליקציה + Widget Extension). אם בכל זאת רוצים 1.x – לשנות ב-`project.pbxproj`; ה-build חייב להיות מספר שעוד לא הועלה ל-App Store Connect.
 - לשנות ב-`ios/App/App.xcodeproj/project.pbxproj` ב-**4 מקומות** כל אחד (`MARKETING_VERSION` ו-`CURRENT_PROJECT_VERSION`): Debug+Release של האפליקציה **וגם** של ה-Widget Extension. הרחבה חייבת להיות זהה לאפליקציה (עד עכשיו היא הייתה 1.0/1 - יישרתי אותה ל-1.3/4 כדי שלא תיפול בולידציה).
 
 ## 1. לפני העלאה (על המק)
@@ -41,6 +41,8 @@
 • הגדרות מתורגמות במלואן: עברית, אנגלית, צרפתית, רוסית וגאורגית
 • מראה לתפילין עם זיהוי מדויק של מקום הנחת הבית
 • דיווח והצעות לשיפור – ישירות מהאפליקציה
+• ברכה מעין שלוש וברכות הנהנין בנוסח עדות המזרח
+• קוד QR לשיתוף האפליקציה, קישורים הנפתחים בתוך האפליקציה, מיקום אוטומטי וכותרת שנעלמת בגלילה
 • מסך פתיחה חדש ושיפורי יציבות
 ```
 **English**
@@ -51,6 +53,8 @@ Major update:
 • Fully translated Settings: Hebrew, English, French, Russian and Georgian
 • Tefillin mirror with precise placement guidance
 • Send feedback and suggestions right from the app
+• Birkat Meein Shalosh and Birkot HaNehenin (Edot HaMizrach wording)
+• Shareable QR code, links that open inside the app, automatic location and a header that tucks away as you scroll
 • New launch screen and stability improvements
 ```
 **Français**
@@ -61,6 +65,8 @@ Mise à jour majeure :
 • Réglages entièrement traduits : hébreu, anglais, français, russe, géorgien
 • Miroir pour téfilin avec placement précis
 • Envoyez vos remarques directement depuis l’app
+• Berakha méèn chalosh et bénédictions avant de manger (rite séfarade orientale)
+• QR code de partage, liens ouverts dans l’app, localisation automatique et en-tête qui se replie au défilement
 ```
 **Русский**
 ```
@@ -70,6 +76,8 @@ Mise à jour majeure :
 • Настройки полностью переведены: иврит, английский, французский, русский, грузинский
 • Зеркало для тфилин с точным указанием места
 • Отправка отзывов прямо из приложения
+• Браха меэйн шалош и благословения перед едой (нусах мизрах)
+• QR-код для обмена приложением, ссылки открываются внутри приложения, автоматическая геолокация и заголовок, скрывающийся при прокрутке
 ```
 **ქართული**
 ```
@@ -79,12 +87,16 @@ Mise à jour majeure :
 • მთლიანად ნათარგმნი პარამეტრები: ებრაული, ინგლისური, ფრანგული, რუსული, ქართული
 • თეფილინის სარკე ზუსტი მითითებით
 • გამოხმაურების გაგზავნა პირდაპირ აპიდან
+• ბრაქა მეეინ შალოშ და ბრაქოტ ჰანეჰენინ (აღმოსავლური წესი)
+• გაზიარების QR კოდი, აპის შიგნით გახსნადი ბმულები, ავტომატური მდებარეობა და გადაფურცვლისას მიმალული სათაური
 ```
 
 ### Review Notes (למבקר של אפל)
 ```
 No login or account is required. The app is a daily Torah-study companion.
-Location (when in use) calculates daily prayer times and the compass; it stays on device.
+Location (when in use) calculates daily prayer times and the compass; it stays on device. The app asks for it automatically on first launch so the times match the user's place.
+External links (donation page, privacy, terms, social profiles) open in an in-app Safari sheet. The donation link goes to the community's own website; there is no in-app payment.
+The star-rating prompt uses Apple's own SKStoreReviewController (at most about once a week, iOS decides).
 Camera is used only by the optional "Tefillin mirror" screen; processed on device, nothing is saved or sent.
 Widgets (Home Screen, Lock Screen, StandBy) and a Live Activity (countdown to sunrise/sunset) read a small App Group snapshot written by the app.
 Optional push notifications ("New content") use Firebase Cloud Messaging.
