@@ -19,3 +19,5 @@ Thumbs.db
 # App Store raw captures (regenerate with scripts/appstore-capture.mjs)
 docs/appstore/raw-web/
 docs/appstore/raw-web-ipad/
+docs/appstore/raw-web-light/
+docs/appstore/raw-web-ipad-light/
