@@ -29,6 +29,7 @@ struct NHItem {
     var subtitle: String
     var lines: [String]
     var rows: [NHRow]
+    var images: [String]
     var number: String
     var badge: String
     var color: UIColor
@@ -73,6 +74,7 @@ extension NHItem {
             subtitle: d["subtitle"] as? String ?? "",
             lines: (d["lines"] as? [String]) ?? [],
             rows: rowsRaw.map { NHRow(a: $0["a"] as? String ?? "", b: $0["b"] as? String ?? "", highlight: $0["hl"] as? Bool ?? false) },
+            images: (d["images"] as? [String]) ?? [],
             number: d["number"] as? String ?? "",
             badge: d["badge"] as? String ?? "",
             color: UIColor.nhHex(d["color"] as? String ?? ""),
@@ -121,12 +123,26 @@ final class NHGrip: UIView {
     }
 }
 
+/// A view whose layer IS the gradient, so it always fills its bounds (a sublayer sized in layoutSubviews was
+/// left at a stale partial frame, which showed as a half-coloured card).
+final class NHGradientView: UIView {
+    override class var layerClass: AnyClass { CAGradientLayer.self }
+    var gradient: CAGradientLayer { layer as! CAGradientLayer }
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 1, y: 1)
+        isUserInteractionEnabled = false
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+}
+
 final class NHCell: UICollectionViewCell {
     static let reuseId = "NHCell"
 
     private let glass: UIVisualEffectView
-    private let tintLayer = CAGradientLayer()
-    private let accentLayer = CALayer()
+    private let tintView = NHGradientView()
+    private let accentView = UIView()
     private let dashLayer = CAShapeLayer()
     private let stack = UIStackView()
     let minusButton = UIButton(type: .custom)
@@ -158,10 +174,21 @@ final class NHCell: UICollectionViewCell {
             glass.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             glass.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
         ])
-        tintLayer.startPoint = CGPoint(x: 0, y: 0)
-        tintLayer.endPoint = CGPoint(x: 1, y: 1)
-        glass.contentView.layer.addSublayer(tintLayer)
-        glass.contentView.layer.addSublayer(accentLayer)
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        accentView.translatesAutoresizingMaskIntoConstraints = false
+        accentView.isUserInteractionEnabled = false
+        glass.contentView.addSubview(tintView)
+        glass.contentView.addSubview(accentView)
+        NSLayoutConstraint.activate([
+            tintView.topAnchor.constraint(equalTo: glass.contentView.topAnchor),
+            tintView.bottomAnchor.constraint(equalTo: glass.contentView.bottomAnchor),
+            tintView.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor),
+            tintView.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor),
+            accentView.topAnchor.constraint(equalTo: glass.contentView.topAnchor),
+            accentView.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor),
+            accentView.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor),
+            accentView.heightAnchor.constraint(equalToConstant: 2.5),
+        ])
 
         dashLayer.fillColor = UIColor.clear.cgColor
         dashLayer.strokeColor = UIColor.secondaryLabel.cgColor
@@ -173,13 +200,13 @@ final class NHCell: UICollectionViewCell {
         stack.axis = .vertical
         stack.spacing = 4
         stack.translatesAutoresizingMaskIntoConstraints = false
-        glass.contentView.addSubview(stack)
+        contentView.addSubview(stack)   // on the cell itself (not inside the glass) so frameless text still shows
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor, constant: -16),
-            stack.centerYAnchor.constraint(equalTo: glass.contentView.centerYAnchor),
-            stack.topAnchor.constraint(greaterThanOrEqualTo: glass.contentView.topAnchor, constant: 10),
-            stack.bottomAnchor.constraint(lessThanOrEqualTo: glass.contentView.bottomAnchor, constant: -10),
+            stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            stack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            stack.topAnchor.constraint(greaterThanOrEqualTo: contentView.topAnchor, constant: 10),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -10),
         ])
 
         // minus badge (top corner on the reading-direction start side), like the iPhone's
@@ -211,8 +238,6 @@ final class NHCell: UICollectionViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        tintLayer.frame = glass.contentView.bounds
-        accentLayer.frame = CGRect(x: 0, y: 0, width: glass.contentView.bounds.width, height: 2.5)
         dashLayer.frame = contentView.bounds
         dashLayer.path = UIBezierPath(roundedRect: contentView.bounds.insetBy(dx: 1, dy: 1), cornerRadius: 24).cgPath
         let m: CGFloat = 28
@@ -258,9 +283,12 @@ final class NHCell: UICollectionViewCell {
         let isSpacer = it.isSpacer
         glass.isHidden = isSpacer
         dashLayer.isHidden = !(isSpacer && editing)
-        tintLayer.colors = [it.color.withAlphaComponent(0.34).cgColor, it.color.withAlphaComponent(0.04).cgColor]
-        accentLayer.backgroundColor = it.color.withAlphaComponent(0.9).cgColor
-        accentLayer.isHidden = !(it.kind == "tile" || it.kind == "stat" || it.kind == "row")
+        // dedications are plain text (no card, no frame)
+        let plain = it.kind == "dedication"
+        glass.isHidden = isSpacer || plain
+        tintView.gradient.colors = [it.color.withAlphaComponent(0.42).cgColor, it.color.withAlphaComponent(0.12).cgColor]
+        accentView.backgroundColor = it.color.withAlphaComponent(0.9)
+        accentView.isHidden = !(it.kind == "tile" || it.kind == "stat" || it.kind == "row")
         minusButton.isHidden = !(editing && it.removable)
         grip.isHidden = !(editing && it.resizable)
 
@@ -365,19 +393,25 @@ final class NHCell: UICollectionViewCell {
             stack.axis = .horizontal
             stack.alignment = .center
             stack.distribution = .equalCentering
+            stack.distribution = .equalCentering
+            stack.spacing = it.size == "m" ? 30 : 18
+            // the ORIGINAL icons (rasterized from the app's own SVGs by the web layer) - never SF Symbol stand-ins
+            let big = it.size == "m"
+            let box: CGFloat = big ? 52 : 32
+            let glyph: CGFloat = big ? 40 : 24
             for (i, key) in it.lines.enumerated() {
-                let symbol: String
-                switch key {
-                case "instagram": symbol = "camera.circle.fill"
-                case "youtube": symbol = "play.rectangle.fill"
-                default: symbol = "music.note"
+                let b = UIButton(type: .custom)
+                if i < it.images.count, let data = Data(base64Encoded: it.images[i]), let img = UIImage(data: data, scale: 3) {
+                    b.setImage(img.withRenderingMode(.alwaysOriginal), for: .normal)
                 }
-                let b = UIButton(type: .system)
-                b.setImage(UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: it.size == "m" ? 34 : 24, weight: .regular)), for: .normal)
-                b.tintColor = gold
+                b.imageView?.contentMode = .scaleAspectFit
+                b.contentEdgeInsets = UIEdgeInsets(top: (box - glyph) / 2, left: (box - glyph) / 2, bottom: (box - glyph) / 2, right: (box - glyph) / 2)
+                b.alpha = big ? 1 : 0.8
                 b.tag = i
                 b.accessibilityLabel = key
                 b.addTarget(self, action: #selector(subTapped(_:)), for: .touchUpInside)
+                b.widthAnchor.constraint(equalToConstant: box).isActive = true
+                b.heightAnchor.constraint(equalToConstant: box).isActive = true
                 stack.addArrangedSubview(b)
             }
         default:
@@ -646,7 +680,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
             let used = Set(items.filter { $0.isSpacer }.map { $0.id } + out.filter { $0.isSpacer }.map { $0.id })
             guard let id = spacerPool.first(where: { !used.contains($0) }) else { return nil }
             return NHItem(id: id, kind: "spacer", size: "s", sizes: [], givenWide: false, title: "", subtitle: "", lines: [],
-                          rows: [], number: "", badge: "", color: .clear, done: false, removable: true, movable: true, resizable: false)
+                          rows: [], images: [], number: "", badge: "", color: .clear, done: false, removable: true, movable: true, resizable: false)
         }
         func push(_ it: NHItem) {
             if it.isSpacer, col == 1, let last = out.last, last.isSpacer {

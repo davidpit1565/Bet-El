@@ -17,7 +17,7 @@ struct NLItem {
 final class NLCell: UICollectionViewCell {
     static let reuseId = "NLCell"
     private let glass: UIVisualEffectView
-    private let tintLayer = CAGradientLayer()
+    private let tintView = NHGradientView()
     private let titleLabel = UILabel()
 
     override init(frame: CGRect) {
@@ -37,9 +37,14 @@ final class NLCell: UICollectionViewCell {
             glass.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             glass.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
         ])
-        tintLayer.startPoint = CGPoint(x: 0, y: 0)
-        tintLayer.endPoint = CGPoint(x: 1, y: 1)
-        glass.contentView.layer.addSublayer(tintLayer)
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        glass.contentView.addSubview(tintView)
+        NSLayoutConstraint.activate([
+            tintView.topAnchor.constraint(equalTo: glass.contentView.topAnchor),
+            tintView.bottomAnchor.constraint(equalTo: glass.contentView.bottomAnchor),
+            tintView.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor),
+            tintView.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor),
+        ])
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.numberOfLines = 3
@@ -64,13 +69,12 @@ final class NLCell: UICollectionViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        tintLayer.frame = glass.contentView.bounds
     }
 
     func configure(_ item: NLItem) {
         titleLabel.text = item.title
         accessibilityLabel = item.title
-        tintLayer.colors = [item.color.withAlphaComponent(0.34).cgColor, item.color.withAlphaComponent(0.04).cgColor]
+        tintView.gradient.colors = [item.color.withAlphaComponent(0.42).cgColor, item.color.withAlphaComponent(0.12).cgColor]
     }
 
     override var isHighlighted: Bool {

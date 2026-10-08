@@ -501,7 +501,9 @@ class MainViewController: CAPBridgeViewController {
         home.show(items: items, editing: editing, canEdit: canEdit, rtl: rtl, isDark: isDark, pool: pool)
     }
 
-    func hideNativeHome() { nativeHomeView?.isHidden = true }
+    /// Hiding also takes the view OUT of the hierarchy, so a stale native overlay can never sit over (or
+    /// steal touches from) the web view's own scrolling; it is recreated on the next show.
+    func hideNativeHome() { nativeHomeView?.removeFromSuperview(); nativeHomeView = nil }
     func updateNativeHomeNumbers(_ map: [String: String]) { nativeHomeView?.updateNumbers(map) }
     func setNativeHomeLogo(_ image: UIImage?) { pendingHomeLogo = image; nativeHomeView?.setLogo(image) }
     private var pendingHomeLogo: UIImage?
