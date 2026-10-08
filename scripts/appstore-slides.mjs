@@ -60,7 +60,7 @@ ru:{hero:{h:'Ваше ежедневное изучение – *везде*',s:
  qr:{e:'Поделиться',h:'Поделитесь по *QR-коду*',s:'Красивый код для обмена приложением – работает и офлайн'}}};
 /* slide = [key, raw name, accent, zoom crop {y0,y1} of the raw image or null] */
 const SLIDES=[['hero',null,'hero'],['home','01-home','home'],['chok','02-chok','chok',{y0:.26,y1:.56}],['cal','03-calendar','cal',{y0:.60,y1:.90}],['teh','04-tehillim','teh'],
- ['meein','06-meein','meein',{y0:.22,y1:.52}],['lib','08-library','lib'],['wid','10-widgets','wid'],['set','07-settings','set'],['lang',null,'lang'],['qr','09-qr','qr']];
+ ['meein','06-meein','meein',{y0:.27,y1:.5}],['lib','08-library','lib'],['wid','10-widgets','wid'],['set','07-settings','set'],['lang',null,'lang'],['qr','09-qr','qr']];
 const b64=f=>fs.readFileSync(f).toString('base64');
 const pngSize=f=>{ const d=fs.readFileSync(f); return {w:d.readUInt32BE(16),h:d.readUInt32BE(20)}; };
 const logo=fs.existsSync('assets/logo.png')?b64('assets/logo.png'):'';
@@ -103,8 +103,8 @@ for(const lang of langs){ const rtl=lang==='he';
       body=headBlock+(key==='wid'?`<img src="data:image/png;base64,${b64(src)}" style="position:absolute;left:50%;transform:translateX(-50%);top:${devTop}px;width:${devW}px;border-radius:90px;box-shadow:${TH.shadow},0 0 0 3px ${TH.ring}"/>`:device(src));
       if(false&&T.b) body+=`<div style="position:absolute;left:${ipad?160:90}px;right:${ipad?160:90}px;top:${ipad?620:700}px;display:flex;flex-direction:column;gap:${18*k}px">${T.b.map(x=>`<div style="display:flex;align-items:center;gap:22px;font-size:${46*k}px;color:${TH.ink};font-weight:600"><span style="flex:none;width:${60*k}px;height:${60*k}px;border-radius:50%;background:${col};display:grid;place-items:center;color:#fff;font-size:${38*k}px">✓</span><span>${x}</span></div>`).join('')}</div>`;
       for(const [ic,tx,side,top] of (process.env.CALLOUTS?(T.co||[]):[])){ const tp=ipad?Math.round(top*0.95)-40:top-(T.b?0:120); body+=`<div style="position:absolute;${side==='l'?'left':'right'}:${ipad?90:30}px;top:${tp}px;display:flex;align-items:center;gap:20px;padding:${24*k}px ${34*k}px;border-radius:44px;background:${TH.card};color:${TH.cardInk};font-size:${42*k}px;font-weight:700;border:3px solid ${col};box-shadow:0 24px 60px rgba(0,0,0,.4);max-width:${ipad?800:640}px"><span style="font-size:${56*k}px">${ic}</span><span>${tx}</span></div>`; }
-      if(false && zoom && src){ const f=b64(src), sz=pngSize(src); const cw=ipad?1000:780, ch=ipad?520:420, iw=Math.round((devW-36)*1.5);
-        body+=`<div style="position:absolute;${rtl?'right':'left'}:${ipad?100:50}px;top:${ipad?2080:2230}px;width:${cw}px;height:${ch}px;border-radius:48px;overflow:hidden;border:4px solid ${col};box-shadow:0 30px 80px rgba(0,0,0,.55);background:${TH.card}"><img src="data:image/png;base64,${f}" style="position:absolute;width:${iw}px;left:${-(iw-cw)/2}px;top:${-zoom.y0*iw*(sz.h/sz.w)}px"/></div>`; }
+      if(zoom && src){ const f=b64(src), sz=pngSize(src); const cw=ipad?1100:900, ch=ipad?560:440, iw=Math.round(cw*1.28);
+        body+=`<div style="position:absolute;${rtl?'right':'left'}:${ipad?120:60}px;top:${ipad?2100:2280}px;width:${cw}px;height:${ch}px;border-radius:48px;overflow:hidden;border:4px solid ${col};box-shadow:0 36px 90px rgba(0,0,0,.7);background:${LIGHT?'#fffaf0':'#0b1226'}"><img src="data:image/png;base64,${f}" style="position:absolute;width:${iw}px;left:${-(iw-cw)/2}px;top:${-zoom.y0*iw*(sz.h/sz.w)}px"/></div>`; }
     }
     await page.setContent(`<html dir="${rtl?'rtl':'ltr'}" style="overflow:hidden"><body style="margin:0;overflow:hidden"><div style="position:absolute;left:0;top:0;width:${W}px;height:${H}px;overflow:hidden;background:${TH.bg};font-family:'Noto Sans Hebrew','Noto Sans','Noto Sans Georgian',sans-serif">${glow}${orn}${body}</div></body></html>`);
     await page.waitForTimeout(150); n++;
