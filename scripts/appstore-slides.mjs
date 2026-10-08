@@ -19,7 +19,7 @@ he:{hero:{h:'הלימוד היומי שלך, *בכל מקום*',s:'חוק ליש
  chok:{e:'חוק לישראל',h:'לימוד יומי, *בקצב אחד*',s:'תורה עם רש״י ואור החיים, נביאים, משנה, גמרא, זוהר והלכה',b:['רש״י ואור החיים בלחיצה','תרגום ותעתיק בכל שפה','מעקב התקדמות ותזכורות']},
  cal:{e:'לוח עברי',h:'לוח עברי *וזמני היום*',s:'התאריך, הפרשה והזמנים – לפי המקום שלך',co:[['📖','פרשת השבוע והקריאה היומית','r',1500],['📍','זמנים לפי המקום – אוטומטי','l',2050]]},
  teh:{e:'תהילים',h:'תהילים *יומי*',s:'חלוקה חודשית או שבועית, מעקב פרקים ותזכורת עדינה',b:['חלוקה חודשית / שבועית','סימון פרקים שנקראו','שיתוף פרק בלחיצה']},
- meein:{e:'נוסח עדות המזרח',h:'ברכות ותפילות *בנוסח עדות המזרח*',s:'ברכת המזון · ברכה מעין שלוש · ברכות הנהנין · סידור מלא',co:[['✦','נוסח עדות המזרח','r',700]]},
+ meein:{e:'נוסח עדות המזרח',h:'ברכת המזון *בנוסח עדות המזרח*',s:'מותאמת אוטומטית ליום – שבת, ראש חודש, חנוכה ופורים'},
  lib:{e:'ספרייה',h:'ספרייה *מלאה* של ספרי קודש',s:'תורה, נביאים, כתובים, משנה, גמרא, רמב״ם, זוהר ותניא',b:['מעל 6 תחומים וספרים','חיפוש בכל הספרים','קריאה בנוחות, בערכה בהירה וכהה']},
  wid:{e:'ווידג׳טים',h:'ווידג׳טים *לבית ולמסך הנעילה*',s:'תאריך עברי, זמני היום, תהילים, נרות שבת וספירת העומר'},
  set:{e:'מותאם אליך',h:'מותאם *אליך*',s:'חמש שפות · ערכה בהירה וכהה · תזכורות · מיקום אוטומטי',b:['עברית, אנגלית, צרפתית, רוסית וגאורגית','תזכורות יומיות עדינות','מיקום אוטומטי']},
@@ -30,7 +30,7 @@ en:{hero:{h:'Your daily study, *anywhere*',s:'Chok LeYisrael · Tehillim · Zoha
  chok:{e:'Chok LeYisrael',h:'Daily learning, *one steady pace*',s:'Torah with Rashi and Ohr HaChaim, Nevi\'im, Mishnah, Gemara, Zohar and Halacha',b:['Rashi & Ohr HaChaim on tap','Transliteration in every language','Progress tracking & reminders']},
  cal:{e:'Hebrew calendar',h:'Hebrew calendar *& daily times*',s:'The date, the parasha and the times - for your place',co:[['📖','Parasha & daily reading','r',1500],['📍','Times for your location - automatic','l',2050]]},
  teh:{e:'Tehillim',h:'Daily *Tehillim*',s:'Monthly or weekly division, chapter tracking and a gentle reminder',b:['Monthly / weekly division','Mark chapters as read','Share a chapter in one tap']},
- meein:{e:'Edot HaMizrach nusach',h:'Blessings & prayers *in Edot HaMizrach nusach*',s:'Birkat HaMazon · Meein Shalosh · Blessings before eating · Full siddur',co:[['✦','Edot HaMizrach nusach','r',700]]},
+ meein:{e:'Edot HaMizrach nusach',h:'Birkat HaMazon *Edot HaMizrach nusach*',s:'Adapts automatically to the day - Shabbat, Rosh Chodesh, Chanukah, Purim'},
  lib:{e:'Library',h:'A *full library* of holy books',s:'Torah, Nevi\'im, Ketuvim, Mishnah, Gemara, Rambam, Zohar and Tanya',b:['6+ study tracks and books','Search across all books','Comfortable reading, light & dark']},
  wid:{e:'Widgets',h:'Widgets for the *Home & Lock Screen*',s:'Hebrew date, daily times, Tehillim, Shabbat candles and the Omer count'},
  set:{e:'Made for you',h:'Made *for you*',s:'Five languages · light & dark · reminders · automatic location',b:['Hebrew, English, French, Russian, Georgian','Gentle daily reminders','Automatic location']},
@@ -41,7 +41,7 @@ fr:{hero:{h:'Votre étude quotidienne, *partout*',s:'Ḥok LeYisraël · Tehilim
  chok:{e:'Ḥok LeYisraël',h:'Étude quotidienne, *un seul rythme*',s:'Torah avec Rachi et Or HaḤaïm, Prophètes, Michna, Guemara, Zohar',b:['Rachi et Or HaḤaïm en un geste','Translittération dans chaque langue','Suivi et rappels']},
  cal:{e:'Calendrier',h:'Calendrier hébraïque *et horaires*',s:'La date, la paracha et les horaires de votre lieu',co:[['📖','Paracha et lecture du jour','r',1500],['📍','Horaires selon votre lieu','l',2050]]},
  teh:{e:'Tehilim',h:'Tehilim *quotidiens*',s:'Division mensuelle ou hebdomadaire, suivi et rappel discret',b:['Mensuel / hebdomadaire','Chapitres lus','Partage en un geste']},
- meein:{e:'Rite séfarade oriental',h:'Bénédictions et prières *rite séfarade oriental*',s:'Birkat HaMazon · Méèn Chalosh · Bénédictions avant de manger · Sidour',co:[['✦','Rite séfarade oriental','r',700]]},
+ meein:{e:'Rite séfarade oriental',h:'Birkat HaMazon *rite séfarade*',s:'S’adapte automatiquement au jour – Chabbat, Roch ‘Hodesh, Hanouka, Pourim'},
  lib:{e:'Bibliothèque',h:'Une *bibliothèque complète*',s:'Torah, Prophètes, Hagiographes, Michna, Guemara, Rambam, Zohar',b:['Plus de 6 parcours','Recherche dans tous les livres','Mode clair et sombre']},
  wid:{e:'Widgets',h:'Widgets pour l’*écran d’accueil et verrouillé*',s:'Date hébraïque, horaires, Tehilim, bougies et Omer'},
  set:{e:'Pour vous',h:'Pensé *pour vous*',s:'Cinq langues · clair et sombre · rappels · localisation automatique',b:['Hébreu, anglais, français, russe, géorgien','Rappels quotidiens discrets','Localisation automatique']},
@@ -52,7 +52,7 @@ ru:{hero:{h:'Ваше ежедневное изучение – *везде*',s:
  chok:{e:'Хок ле-Исраэль',h:'Ежедневное изучение, *в одном ритме*',s:'Тора с Раши и Ор ха-Хаим, Пророки, Мишна, Гемара, Зоар',b:['Раши и Ор ха-Хаим одним касанием','Транслитерация на каждом языке','Прогресс и напоминания']},
  cal:{e:'Календарь',h:'Еврейский календарь *и времена дня*',s:'Дата, глава недели и времена для вашего места',co:[['📖','Глава недели и чтение дня','r',1500],['📍','Времена для вашего места','l',2050]]},
  teh:{e:'Теилим',h:'Ежедневные *Теилим*',s:'Месячное или недельное деление, отслеживание и мягкое напоминание',b:['Месяц / неделя','Отметка прочитанных глав','Поделиться главой']},
- meein:{e:'Нусах мизрах',h:'Благословения и молитвы *по нусах мизрах*',s:'Биркат ха-мазон · Меэйн шалош · Благословения перед едой · Сидур',co:[['✦','Нусах мизрах','r',700]]},
+ meein:{e:'Нусах мизрах',h:'Биркат ха-мазон *по нусах мизрах*',s:'Автоматически подстраивается под день – Шабат, Рош ходеш, Ханука, Пурим'},
  lib:{e:'Библиотека',h:'*Полная* библиотека священных книг',s:'Тора, Пророки, Писания, Мишна, Гемара, Рамбам, Зоар',b:['Более 6 направлений','Поиск по всем книгам','Светлая и тёмная тема']},
  wid:{e:'Виджеты',h:'Виджеты для *экрана и блокировки*',s:'Еврейская дата, времена дня, Теилим, свечи и счёт Омера'},
  set:{e:'Для вас',h:'Настроено *для вас*',s:'Пять языков · светлая и тёмная тема · напоминания · геолокация',b:['Иврит, английский, французский, русский, грузинский','Мягкие ежедневные напоминания','Автоматическое местоположение']},
@@ -81,9 +81,9 @@ for(const lang of langs){ const rtl=lang==='he';
     else if(raw && !src) continue;
     const glow=`<div style="position:absolute;right:-20%;top:-8%;width:90%;height:36%;border-radius:50%;background:#d4af5f;opacity:${LIGHT?.35:.38};filter:blur(170px)"></div>`+`<div style="position:absolute;left:-10%;top:30%;width:70%;height:40%;border-radius:50%;background:${col};opacity:${TH.glowA*.55};filter:blur(160px)"></div><div style="position:absolute;right:-15%;top:55%;width:60%;height:35%;border-radius:50%;background:${col};opacity:${TH.glowA*.4};filter:blur(150px)"></div>`;
     const orn=['12%,8%','88%,14%','8%,46%','93%,62%'].map((p,i)=>{const [x,y]=p.split(',');return `<div style="position:absolute;left:${x};top:${y};font-size:${34+i*6}px;color:${TH.gold};opacity:.55">✦</div>`}).join('');
-    const eyebrow=T.e?`<div style="color:${TH.gold};font-size:${36*k}px;font-weight:700;letter-spacing:${lang==='he'?2:7}px;text-transform:uppercase">${T.e}</div>`:'';
+    const eyebrow='';
     let body='';
-    const headBlock=`<div style="position:absolute;top:${(ipad?110:120)}px;left:70px;right:70px;text-align:center">${eyebrow}<div style="margin-top:${34*k}px;font-weight:900;font-size:${(key==='hero'?118:100)*k}px;line-height:1.1;text-wrap:balance;color:${TH.ink}">${acc(T.h||'',col)}</div><div style="margin-top:${26*k}px;font-size:${40*k}px;line-height:1.35;color:${TH.soft};font-weight:500">${T.s||''}</div></div>`;
+    const headBlock=`<div style="position:absolute;top:${(ipad?110:120)}px;left:70px;right:70px;text-align:center">${eyebrow}<div style="font-weight:900;font-size:${(key==='hero'?118:100)*k}px;line-height:1.1;text-wrap:balance;color:${TH.ink}">${acc(T.h||'',col)}</div><div style="margin-top:${26*k}px;font-size:${40*k}px;line-height:1.35;color:${TH.soft};font-weight:500">${T.s||''}</div></div>`;
     const devW=ipad?1240:1090, devTop=ipad?800:800;
     const device=f=>`<div style="position:absolute;left:50%;transform:translateX(-50%);top:${devTop}px;width:${devW}px;border-radius:${ipad?64:96}px;overflow:hidden;border:${ipad?14:14}px solid ${LIGHT?'#1c1c1e':'#0a0a0c'};box-shadow:0 0 0 3px ${TH.ring},${TH.shadow}"><img src="data:image/png;base64,${b64(f)}" style="display:block;width:100%"/></div>`;
     if(key==='hero'){
