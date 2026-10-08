@@ -45,3 +45,19 @@ cd ~/Bet-El (Bet-El repo only). Pull the latest of claude/additional-file-fas9ie
 4. Tell me exactly which one manual step is left (uploading the APNs key to Firebase) and how to send from the Firebase Console afterwards (Engage > Messaging > New campaign > target the iOS app).
 5. Report in Hebrew. Do not send any notification to real users without asking me first.
 ```
+
+---
+## פרומט 4 – קריסת הווידג'טים (BetElWidgetBundle)
+Claude Code מצא קריסות `EXC_BREAKPOINT` בתוך ה-getter של `BetElWidgetBundle.body` (ה-extension קורס לפני שהוא בונה את רשימת הווידג'טים) – זה מסביר גלריה ריקה ו-Live Activity שלא מופיע. הפרומט:
+```
+cd ~/Bet-El (Bet-El repo only). Widgets still crash in BetElWidgetBundle.body (EXC_BREAKPOINT) and the widget gallery shows nothing.
+1. Read the newest BetElWidget crash reports (~/Library/Logs/DiagnosticReports, device crash logs via Xcode/devicectl). Print the exception message / "asi" (application specific information), termination reason and the symbolicated top frames - not just "EXC_BREAKPOINT".
+2. Suspect #1: the `if #available` blocks inside WidgetBundle.body in ios/App/BetElWidget/BetElWidgetBundle.swift (9 widgets incl. StandBy, 3 lock-screen widgets and the Live Activity). Suspect #2: a widget whose Provider/body traps on construction, or a Live Activity widget in the same bundle (ActivityConfiguration needs NSSupportsLiveActivities in the APP Info.plist, and BetElActivityAttributes compiled in both targets).
+3. Bisect: build variants of the bundle with only the 5 plain widgets, then add the others one at a time, until you know exactly which one crashes. Install and check the crash log each time.
+4. Fix it for real. If the cause is the availability checks, raise ONLY the BetElWidget extension's IPHONEOS_DEPLOYMENT_TARGET to 17.0 (the app target must stay 15.0) and remove the `if #available` wrappers; if it is one widget, fix that widget. Keep widgets compile-safe, commit and push to the same branch (never my local DEVELOPMENT_TEAM change).
+5. Reinstall and ask me to open the widget gallery (long-press home screen, +). Then re-read the crash logs and tell me in Hebrew whether a new crash appeared, and whether the Live Activity can start.
+```
+
+---
+## לפני פרומט Firebase: התחברות (פעם אחת, אינטראקטיבי)
+Claude Code לא יכול להתחבר ל-Firebase לבד. בטרמינל, פעם אחת: `npx firebase-tools login` (נפתח דפדפן, מאשרים), ואז `npx firebase-tools use bet-el-e6812`. אחרי זה פרומט 1 (שלב 3) יעבוד.
