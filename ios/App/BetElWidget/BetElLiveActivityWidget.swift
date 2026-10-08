@@ -24,7 +24,7 @@ struct BetElLiveActivityWidget: Widget {
                         .foregroundColor(BetElTheme.palette(for: "dark").gold)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(timerInterval: Date()...context.state.endDate, countsDown: true)
+                    CountdownText(endDate: context.state.endDate)
                         .monospacedDigit()
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(BetElTheme.palette(for: "dark").goldBright)
@@ -38,7 +38,7 @@ struct BetElLiveActivityWidget: Widget {
                 Image(systemName: "sun.horizon.fill")
                     .foregroundColor(BetElTheme.palette(for: "dark").gold)
             } compactTrailing: {
-                Text(timerInterval: Date()...context.state.endDate, countsDown: true)
+                CountdownText(endDate: context.state.endDate)
                     .monospacedDigit()
                     .font(.system(size: 13, weight: .semibold))
                     .frame(maxWidth: 44)
@@ -68,12 +68,32 @@ private struct LockScreenView: View {
                     .foregroundColor(palette.ink)
             }
             Spacer()
-            Text(timerInterval: Date()...context.state.endDate, countsDown: true)
+            CountdownText(endDate: context.state.endDate)
                 .monospacedDigit()
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(palette.goldBright)
         }
         .padding(16)
+    }
+}
+
+/// `Text(timerInterval:)` needs a valid `ClosedRange<Date>` (lowerBound <=
+/// upperBound) - constructing `Date()...endDate` directly crashes the whole
+/// widget extension (process shared by every widget + this Live Activity)
+/// the moment `endDate` is in the past, which happens on its own well
+/// before the app calls `refresh()` again to update/end the activity (the
+/// system re-evaluates this body independently, e.g. waking the Lock
+/// Screen or tapping the Dynamic Island). Falls back to a static "done"
+/// countdown display instead of trapping.
+@available(iOS 16.2, *)
+private struct CountdownText: View {
+    let endDate: Date
+    var body: some View {
+        if endDate > Date() {
+            Text(timerInterval: Date()...endDate, countsDown: true)
+        } else {
+            Text(endDate, style: .time)
+        }
     }
 }
 #endif
