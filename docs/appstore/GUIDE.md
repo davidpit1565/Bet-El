@@ -50,7 +50,7 @@ My Apps ← **תמיד** ← **+** ליד iOS App ← **2.0**.
 השווה למה שכבר מוגדר ועדכן. התשובות המומלצות לפי הקוד הנוכחי:
 | סוג נתון | מה אוסף | מטרה | מקושר למשתמש | מעקב |
 |---|---|---|---|---|
-| Contact Info – Name, Email | טופס דיווח והצעות (רק אם המשתמש שולח) | App Functionality | כן | לא |
+| Contact Info – Name | טופס דיווח והצעות (רק אם המשתמש שולח; אין שדה אימייל) | App Functionality | כן | לא |
 | User Content – Other User Content | תוכן ההודעה | App Functionality | כן | לא |
 | Identifiers – Device ID | טוקן Push (Firebase) + מזהה של Firebase Analytics | App Functionality, Analytics | לא | לא |
 | Usage Data – Product Interaction | Firebase Analytics | Analytics | לא | לא |

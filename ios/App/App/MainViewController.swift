@@ -527,6 +527,11 @@ class MainViewController: CAPBridgeViewController {
             ])
             home.setLogo(pendingHomeLogo)
             nativeHomeView = home
+            if !nativeHomeEverShown {   // the very first appearance (right after the launch overlay) eases in
+                nativeHomeEverShown = true
+                home.alpha = 0
+                UIView.animate(withDuration: 0.28, delay: 0, options: [.curveEaseOut]) { home.alpha = 1 }
+            }
         }
         home.isHidden = false
         home.show(items: items, editing: editing, canEdit: canEdit, rtl: rtl, isDark: isDark, pool: pool)
@@ -538,6 +543,7 @@ class MainViewController: CAPBridgeViewController {
     func updateNativeHomeNumbers(_ map: [String: String]) { nativeHomeView?.updateNumbers(map) }
     func setNativeHomeLogo(_ image: UIImage?) { pendingHomeLogo = image; nativeHomeView?.setLogo(image) }
     private var pendingHomeLogo: UIImage?
+    private var nativeHomeEverShown = false
 
     // MARK: - Native calendar screen (UICalendarView, iOS 16+) - see NativeCalendar.swift
     private var nativeCalendarView: UIView?
