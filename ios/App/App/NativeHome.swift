@@ -284,7 +284,7 @@ final class NHCell: UICollectionViewCell {
         glass.isHidden = isSpacer
         dashLayer.isHidden = !(isSpacer && editing)
         // dedications are plain text (no card, no frame)
-        let plain = it.kind == "dedication"
+        let plain = it.kind == "dedication" || it.kind == "social"
         glass.isHidden = isSpacer || plain
         tintView.gradient.colors = [it.color.withAlphaComponent(0.42).cgColor, it.color.withAlphaComponent(0.12).cgColor]
         accentView.backgroundColor = it.color.withAlphaComponent(0.9)

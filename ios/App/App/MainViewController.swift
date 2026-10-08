@@ -94,6 +94,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeCalendarBridge())
         bridge?.registerPluginInstance(NativeLibraryBridge())
         bridge?.registerPluginInstance(NativeHomeBridge())
+        bridge?.registerPluginInstance(NativeSystemBridge())
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
