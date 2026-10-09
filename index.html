@@ -7720,34 +7720,43 @@ function bookletWindow(b){
 }
 function bookletExpired(b){ if(!b) return true; return Date.now()>=bookletWindow(b)[1]; }
 function bookletActive(b){ if(!b||!b.pdf) return false; const [st,en]=bookletWindow(b), n=Date.now(); return n>=st && n<en; }
-function bookletForget(){ BOOKLET=null; try{ localStorage.removeItem('betel_booklet'); }catch(e){} }
-let BOOKLET=(()=>{ try{ const b=JSON.parse(localStorage.getItem('betel_booklet')||'null'); if(bookletExpired(b)){ localStorage.removeItem('betel_booklet'); return null; } return b; }catch(e){ return null; } })();
-let bookletLoadPromise=null;
+/* the whole published list is kept (it is tiny); which booklet shows is decided at every render, so the
+   Sunday-netz switch happens on its own even with the app left open, and past weeks are dropped from it. */
+let BOOKLET_LIST=(()=>{ try{ const l=JSON.parse(localStorage.getItem('betel_booklet')||'[]'); return (Array.isArray(l)?l:[l]).filter(b=>b&&!bookletExpired(b)); }catch(e){ return []; } })();
+function bookletSave(){ BOOKLET_LIST=BOOKLET_LIST.filter(b=>!bookletExpired(b)); try{ if(BOOKLET_LIST.length) localStorage.setItem('betel_booklet',JSON.stringify(BOOKLET_LIST)); else localStorage.removeItem('betel_booklet'); }catch(e){} }
+function currentBooklet(){ return BOOKLET_LIST.find(bookletActive)||null; }
+let bookletLoadPromise=null, bookletShownId=null;
 function bookletTitle(){
-  const t=BOOKLET&&BOOKLET.title; if(!t) return '';
+  const b=currentBooklet(), t=b&&b.title; if(!t) return '';
   if(typeof t==='string') return t;
   return t[S.lang]||t.he||'';
 }
 function ensureBooklet(){
   if(bookletLoadPromise) return bookletLoadPromise;
   bookletLoadPromise=fetch(dataURL('data/booklet/current.json')+'?t='+Date.now(),{cache:'no-store'})
-    .then(r=>{ if(r.status===404) return null; if(!r.ok) throw new Error('booklet '+r.status); return r.json(); })
+    .then(r=>{ if(r.status===404) return []; if(!r.ok) throw new Error('booklet '+r.status); return r.json(); })
     .then(j=>{
-      const list=(Array.isArray(j)?j:[j]).filter(x=>x&&x.pdf).map(x=>({...x, seenAt:(BOOKLET&&BOOKLET.id===x.id&&BOOKLET.seenAt)||Date.now()}));
-      let next=list.find(bookletActive)||null;                  // an old booklet left on the server is never shown
-      const changed=JSON.stringify(next)!==JSON.stringify(BOOKLET);
-      BOOKLET=next;
-      try{ if(next) localStorage.setItem('betel_booklet',JSON.stringify(next)); else localStorage.removeItem('betel_booklet'); }catch(e){}
+      const old=BOOKLET_LIST;
+      BOOKLET_LIST=(Array.isArray(j)?j:[j]).filter(x=>x&&x.pdf).map(x=>{ const o=old.find(y=>y.id===x.id); return {...x, seenAt:(o&&o.seenAt)||Date.now()}; });
+      bookletSave();                                            // an old booklet left on the server is never kept or shown
       if(window.caches) caches.keys().then(ks=>ks.forEach(k=>caches.open(k).then(c=>c.keys().then(reqs=>reqs.forEach(q=>{ if(q.url.includes('/data/booklet/')) c.delete(q); }))))).catch(()=>{});
-      if(changed && TAB==='home') render();
+      bookletTick();
     })
     .catch(e=>{ bookletLoadPromise=null; });
   return bookletLoadPromise;
 }
+/* re-render home when the shown booklet changes (Sunday netz passing while the app is open) */
+function bookletTick(){
+  bookletSave();
+  const b=currentBooklet(), id=b?b.id:null;
+  if(id!==bookletShownId && TAB==='home') render();
+}
+setInterval(bookletTick, 60000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ bookletLoadPromise=null; ensureBooklet(); } });
 function openBooklet(){
-  if(BOOKLET&&bookletExpired(BOOKLET)){ bookletForget(); if(TAB==='home') render(); return; }
-  if(!BOOKLET||!BOOKLET.pdf) return;
-  openExternal(new URL(dataURL(BOOKLET.pdf), location.href).href);
+  const b=currentBooklet();
+  if(!b){ bookletTick(); return; }
+  openExternal(new URL(dataURL(b.pdf), location.href).href);
 }
 function renderHome(){
   setTimeout(()=>ensureBooklet(),1200);
@@ -7847,7 +7856,7 @@ function renderHome(){
       </div>`;
     },
     /* the weekly booklet PDF (data/booklet/current.json) - the slot beside Ben Ish Chai stays empty until one is published */
-    booklet:(sz)=>(BOOKLET&&bookletExpired(BOOKLET)&&bookletForget(),bookletActive(BOOKLET))?`<div class="q-tile${TC(sz)}" data-cat="chok" id="homeBookletCard">
+    booklet:(sz)=>(bookletShownId=(currentBooklet()||{}).id||null)?`<div class="q-tile${TC(sz)}" data-cat="chok" id="homeBookletCard">
         <div class="qt">${heTitle('חוברת השבוע','חוֹבֶרֶת הַשָּׁבוּעַ')}</div>
         <div class="qd">${bookletTitle()}</div>
       </div>`:'',
