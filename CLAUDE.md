@@ -207,6 +207,13 @@ in English as usual.
   (weekly physical print cost) - every gold accent (double border,
   corner ornaments, cartouches, medallion/header band, text accents)
   becomes black/dark grey on white/off-white, same shapes and ornaments.
+  Friday closes with "שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!" (`bkWeekBlocks`; Shabbat
+  has no pages). The enlarged opening words were dropped (owner: they came
+  out inconsistent). A day never ends on a near-empty page: before each
+  day break `pullBack` tries to fit a last page of <= `BK_PULL_LINES` (3)
+  lines back onto the previous page set a little tighter (`.bk-tight`,
+  then `.bk-tighter`), rejoining the paragraph cut between them; if it
+  still doesn't fit, nothing changes.
   Built as a booklet-only mode (`BK_BW`, per-viewer
   `localStorage['betel_bk_bw']`, default on; a toggle button in the booklet
   reader): ONE colour function `bkMonoRGB` (warm hues 12-62deg only:
@@ -334,10 +341,7 @@ in English as usual.
   Interior richness (after the reference booklet's own reading pages):
   each subject title is a framed cartouche on tapered gold rules
   (`.bk-page .bk-sec-t` + ::before/::after; the "בֵּיאוּר" divider `.bk-bdiv`
-  matches), every section opens with its first two words large and bold
-  (`bkOpeningWords` post-pass in `bkBlocks` → `.bk-ow`, skipping a leading
-  number/Musar label, never across a tag; Ben Ish Chai's first piece per
-  track too), a filigree crest over each day title (`.bk-day-crest`), and a
+  matches), a filigree crest over each day title (`.bk-day-crest`), and a
   faint paper vignette on `.bk-page`. The running header's labels are
   optically centred on the band's light strip (row = strip, labels nudged
   down for nikud, title nudged up) - the owner's "too high" fix.
@@ -351,20 +355,20 @@ in English as usual.
   track with no unit for the week is left out) read exactly as the
   standalone reader reads it: `bicFlatItems` (intro, then every halacha
   in source order with its own number `h.chapter`) and `bicI18nItem` for
-  a translation. Print layout (the owner's printed-sefer reference
-  "שבילי הנהר", then their correction): NOT per-halacha boxes but two
-  independently flowing zones per page, like main text over a running
-  commentary - `bkBicParts` makes two streams per track (halacha texts;
-  biur texts, each opened by its halacha's number, tied by `hi`) and
-  `bkPaginateBic` (its own paginator, run after the day's `bkPaginate`)
-  fills each page: halacha text on top (`.bk-bic-h`, full width) while it
-  and every biur it has started still fit; a halacha that doesn't fit whole
-  goes on in part if its biur can still begin under it
-  (`BK_BIC_MIN_BIUR`); the rest of the page is biur (`.bk-bic-b`, two
-  columns) under the "בֵּיאוּר" divider - so a long biur carries over and
-  can fill a page by itself. Continuations never repeat the number; cuts
-  go through `bkFitWords` (prefers a sentence end, then a comma; never
-  leaves fewer than 4 words on either side). The on-screen sheet keeps the
+  a translation. Print layout: halacha text on top (`.bk-bic-h`, full
+  width), biur below the "בֵּיאוּר" divider (`.bk-bic-b`, two columns) - and
+  per the owner, the two zones are ALWAYS in sync: every page shows the same
+  halachot (or the same part of one) in both. `bkPaginateBic` builds pages
+  from units (`bkBicUnits`: one halacha's text + its whole biur; the intro
+  is text only under a "פְּתִיחָה" heading): whole units while both zones
+  fit; else a matched piece - the largest fraction f (of `BK_BIC_STEPS`)
+  with the first f of the text AND of the biur fitting together, the text
+  cut snapped to a sentence end (`bkSnapCut`) and the biur recomputed to
+  the same share; on a page already holding units a unit is cut only if
+  >= `BK_BIC_MIN_FRAC` of it fits (and `BK_BIC_MIN_WORDS` of text), else it
+  starts the next page. (The earlier design - two independently flowing
+  streams - was rejected: pages came out nearly all biur or all halacha.)
+  `bkTidy` closes the source's stray spaces before punctuation. The on-screen sheet keeps the
   simple halacha-then-biur sequence (`bkBicBlocks`, all noPrint). Loaded with the day
   (`ensureBkBic`/`bkBicReady`; `BK_BIC_FAIL` never blocks the day). The
   TOC lists the two years with real pages (the "בְּהֲכָנָה" placeholders
