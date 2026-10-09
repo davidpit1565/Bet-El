@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /stats/visits {
+      allow get: if true;
+      allow update: if request.resource.data.count == resource.data.count + 1;
+      allow create: if request.resource.data.count == 1;
+    }
+
+    /* App "Rate us / feedback" form (index.html __betelSaveFeedback).
+       Public, unauthenticated clients write-only: anyone can create a
+       feedback doc, nobody can read, update or delete it back (so a
+       stranger can't browse other users' messages or tamper with one
+       already sent). Field set is locked to exactly what the client
+       writes, each with its real type and a sane max length, to stop
+       spammy/huge payloads. */
+    match /feedback/{feedbackId} {
+      allow read, update, delete: if false;
+      allow create: if request.resource.data.keys().hasOnly(['name','email','subject','message','ua','lang','createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() < 200
+        && request.resource.data.email is string && request.resource.data.email.size() < 200
+        && request.resource.data.subject is string && request.resource.data.subject.size() < 200
+        && request.resource.data.message is string && request.resource.data.message.size() < 5000
+        && request.resource.data.ua is string && request.resource.data.ua.size() < 500
+        && request.resource.data.lang is string && request.resource.data.lang.size() < 20
+        && request.resource.data.createdAt is number;
+    }
+  }
+}
