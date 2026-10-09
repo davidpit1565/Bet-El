@@ -7886,7 +7886,7 @@ function renderHome(){
       const nowD=new Date(), nxt=zl.find(z=>z.date&&z.date>nowD);
       return `<div class="card home-zmanim">
         <div class="hz-title">${ckChrome('זמני היום')} · ${LOC.name}</div>
-        <div class="zmanim-list">${zl.map(z=>`<div class="zman-row ${nxt&&z.key===nxt.key?'next':''}"><div class="zl"><span class="zname">${z.label}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}</div>
+        <div class="zmanim-list">${zl.map(z=>`<div class="zman-row ${nxt&&z.key===nxt.key?'next':''}"><div class="zl"><span class="zname">${ckChrome(z.label)}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}</div>
       </div>`;
     },
     visitors:(sz)=>`<div class="stat-card${sz==='m'?' long':''}"><div class="sc-info"><span class="sc-num" id="visitCount">–</span><span class="sc-label">משתמשים</span></div><span class="sc-badge gold">${I.users}</span></div>`,
@@ -9237,12 +9237,12 @@ function renderDayDetail(hd, events){
       <div class="dd-portion" style="flex:1" data-open="${wRange[0]},${wRange[1]}"><div class="lbl">${ckChrome('קְרִיאָה שְׁבוּעִית')}</div><div class="val">${heNum(wRange[0])}–${heNum(wRange[1])}</div></div>
     </div>
     ${hillulotHTML(hd)}
-    ${ZMANIM_LIVE?`<div class="loc-line">${I.loc}<span>${LOC.name}</span></div>
+    ${ZMANIM_LIVE?`<div class="loc-line">${I.loc}<span>${ckChrome(LOC.name)}</span></div>
     <div class="zmanim-list">
-      ${zlist.map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${z.label}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
-    </div>`:`<div class="loc-line">${I.loc}<span>${LOC.name}</span></div>
+      ${zlist.map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${ckChrome(z.label)}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
+    </div>`:`<div class="loc-line">${I.loc}<span>${ckChrome(LOC.name)}</span></div>
     <div class="zmanim-list">
-      ${zlist.filter(z=>ZMANIM_READY.includes(z.key)).map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${z.label}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
+      ${zlist.filter(z=>ZMANIM_READY.includes(z.key)).map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${ckChrome(z.label)}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
     </div>
     <div class="zmanim-soon">${I.clock}<span>${ckChrome('שְׁאָר הַזְּמַנִּים יִתְעַדְכְּנוּ בְּקָרוֹב')}</span></div>`}
     ${(function(){const st=shabbatTimes(hd); if(!st.candle&&!st.havdala) return ''; return `<div class="shabbat-times">
