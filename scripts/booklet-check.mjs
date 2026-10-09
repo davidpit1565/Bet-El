@@ -81,11 +81,16 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   await p.screenshot({ path: `${OUT}/1-booklet-home.png`, fullPage: true });
   await p.evaluate(() => document.getElementById('bkOpenBtn').click());
   await waitFor(p, () => !!document.querySelector('.bk-sheet'));
-  await waitFor(p, () => !document.querySelector('.bk-sheet .bk-loading') && document.querySelectorAll('#bkPrint .bk-page').length > 0, 90000);
+  // the printed booklet is the whole week: wait for every day's daf
+  await waitFor(p, () => !document.querySelector('.bk-sheet .bk-loading') && !document.querySelector('#bkPrint .bk-loading') && document.querySelectorAll('#bkPrint .bk-page').length > 0, 300000);
+  await p.waitForTimeout(1500);
   const info = await p.evaluate(() => ({
     sections: [...document.querySelectorAll('.bk-sheet .bk-sec-t')].map(e => e.textContent),
     sources: [...document.querySelectorAll('.bk-sheet .bk-sec-src')].map(e => e.textContent),
     dafImgs: document.querySelectorAll('.bk-sheet .bk-daf img').length,
+    printDafImgs: document.querySelectorAll('#bkPrint .bk-dafpage img').length,
+    days: [...document.querySelectorAll('#bkPrint .bk-day-t')].map(e => e.textContent),
+    toc: [...document.querySelectorAll('#bkPrint .bk-toc-day span, #bkPrint .bk-toc-row span')].map(e => e.textContent),
     cites: [...document.querySelectorAll('.bk-sheet .bk-cite')].map(e => e.textContent),
     comm: [...document.querySelectorAll('.bk-sheet .bk-comm-l')].map(e => e.textContent),
     pages: document.querySelectorAll('#bkPrint .bk-page').length,
@@ -116,7 +121,7 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(4, -2).some(c => c !== 'content'))
     errs.push('page order is ' + o.join(','));
   if (info.qrImgs !== 2) errs.push('expected the QR on the cover and the back page, got ' + info.qrImgs);
-  if (info.dafPages.length !== info.dafImgs) errs.push('each scanned amud should get its own page');
+  if (!info.dafPages.length || info.dafPages.length !== info.printDafImgs) errs.push('each scanned amud should get its own page');
   if (info.dafPages.some(d => d.extra)) errs.push('a daf page carries something besides the scan');
   // the app scrolls <body>, not the window, so walk it one screen at a time
   for (let i = 0; i < 32; i++) {
@@ -141,9 +146,10 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   await p.setViewportSize({ width: 600, height: 840 });
   await p.emulateMedia({ media: 'print' });
   await p.waitForTimeout(500);
-  await p.screenshot({ path: `${OUT}/3-print-media.png`, fullPage: true });
+  // a whole week is ~170 pages: one full-page capture is too tall, so the viewport only
+  await p.screenshot({ path: `${OUT}/3-print-media.png` });
   const pages = await p.$$('#bkPrint .bk-page');
-  for (let i = 0; i < pages.length; i++) await pages[i].screenshot({ path: `${OUT}/5-page-${String(i + 1).padStart(2, '0')}.png` });
+  for (let i = 0; i < pages.length; i++) await pages[i].screenshot({ path: `${OUT}/5-page-${String(i + 1).padStart(3, '0')}.png`, timeout: 120000 });
   const pdf = await p.pdf({ preferCSSPageSize: true, printBackground: true });
   writeFileSync(`${OUT}/3-print.pdf`, pdf);
   await ctx.close();

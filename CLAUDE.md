@@ -182,7 +182,27 @@ in English as usual.
   band sits above it, narrowed to the scan's width via `--bk-daf-w`; the
   Gemara section's title/divider are print-hidden (`dafSec`/`noPrint`
   blocks); no credit line on the scan pages - see the license note below.
-  `bkBuildPrint` wraps the day in front/back matter built from the same
+  **The printed booklet is the whole Chok LeYisrael week** of the selected
+  date, while the on-screen `.bk-sheet` still shows just that day:
+  `bkWeekRows(date)` walks `CHOK_ROWS` (Sun-Thu, Leil Shishi, Fri), each
+  row resolved for its own real date (Leil Shishi = Thursday's date, its
+  `night` row; `bkSections(date,'night')` keeps only the tzeruf - the
+  night's other subjects are Thursday's, already printed - its Hebrew date
+  line shows Friday's, with "(בָּעֶרֶב)"); `bkWeekBlocks` concatenates
+  `bkBlocks(date,{day,week:1,brk})` (each day after the first starts a
+  page, no per-day Ben Ish Chai or license blocks); week-level
+  `bkWeekReady`/`ensureBookletWeek`/`bkWeekDafs`/`ensureBkWeekDafs`/
+  `bkWeekDafPending` gate the reader, print and PDF; the cover shows the
+  week's date range (`bkHebRange`); TOC day subtitles are the day's Hebrew
+  date. Ben Ish Chai closes the week once, per track via
+  `bkBicKeys(slot,track)`, which for a content gap (year 2) falls back to
+  `bicNearestAvailableKey()` exactly like the live reader, naming the
+  parasha actually used under that year's title. The Halacha section's
+  cartouche reads "רַמְבַּ״ם · <hilchot · perek>" (no separate source line;
+  band/TOC label "רַמְבַּ״ם"). `booklet-audit.mjs` audits every row of the
+  week (duplicate source lines are checked per day - a Tanya letter can
+  span days).
+  `bkBuildPrint` wraps the week in front/back matter built from the same
   frame/strip/medallion, except the cover and dedication, which are
   full-page ornament compositions modelled on the owner's reference booklet
   ("האוצר", נהר שלום): one inline SVG per page (`ornCoverSvg` /
