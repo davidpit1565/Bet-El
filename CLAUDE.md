@@ -193,7 +193,8 @@ in English as usual.
   page, no per-day Ben Ish Chai or license blocks); week-level
   `bkWeekReady`/`ensureBookletWeek`/`bkWeekDafs`/`ensureBkWeekDafs`/
   `bkWeekDafPending` gate the reader, print and PDF; the cover shows the
-  week's date range (`bkHebRange`); TOC day subtitles are the day's Hebrew
+  full calendar week Sunday-Shabbat inclusive (`bkHebRange`; owner's call -
+  even though printed days stop at Friday); TOC day subtitles are the day's Hebrew
   date. Ben Ish Chai closes the week once, per track via
   `bkBicKeys(slot,track)`, which for a content gap (year 2) falls back to
   `bicNearestAvailableKey()` exactly like the live reader, naming the

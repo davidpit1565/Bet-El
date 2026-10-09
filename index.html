@@ -6811,7 +6811,9 @@ function bkBlankHtml(){ return '<div class="bk-page bk-blank" aria-hidden="true"
 function bkBuildPrint(date){
   const host=document.getElementById('bkPrint'); if(!host) return 0;
   const {slot}=bkSections(date), rows=bkWeekRows(date);
-  const first=rows.length?rows[0].date:date, last=rows.length?rows[rows.length-1].date:date;
+  /* the cover names the whole calendar week, Sunday through Shabbat
+     inclusive (owner's call), though the printed days stop at Friday */
+  const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
   host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkDedicationHtml()+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:4, toc});
