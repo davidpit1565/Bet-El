@@ -207,6 +207,22 @@ in English as usual.
   (weekly physical print cost) - every gold accent (double border,
   corner ornaments, cartouches, medallion/header band, text accents)
   becomes black/dark grey on white/off-white, same shapes and ornaments.
+  **Hillulot (owner's "לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים")** - every week's booklet
+  shows, under each day's heading and before its first subject, that
+  date's yahrzeits exactly as the app's calendar day card does: same data
+  (`data/hillulot.json`, Nahar Shalom luach - names verbatim, never edited)
+  and same resolver (`ensureHillulot`/`hillulotFor`, ported verbatim from
+  main's 681474f/6dadfb7/456f273 - Adar leap-year lists, a missing 30th on
+  the 29th). Nothing on a day without one; none for Leil Shishi (its Hebrew
+  date is Friday's). `bkHillulotHtml` -> a framed `.bk-hill` block marked
+  `head:1` (moves with the day/subject headings, keeps the header label);
+  loaded with the week (`ensureBkHillulot`; `BK_HILL_FAIL` never blocks).
+  NOTE: this branch has not merged main (326+ commits behind at the time):
+  main restructured the home tiles and reuses `homeBookletCard` for its own
+  published weekly-booklet PDF - merging needs those two features
+  reconciled; until then the hillulot code here loads with plain fetch
+  instead of main's cachedFetch/dataURL. When main is merged, keep main's
+  copies of ensureHillulot/hillulotFor and drop this branch's duplicates.
   Friday closes with "שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!" (`bkWeekBlocks`; Shabbat
   has no pages). The enlarged opening words were dropped (owner: they came
   out inconsistent). A day never ends on a near-empty page: before each

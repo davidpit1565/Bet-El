@@ -1630,6 +1630,17 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-dd-amen{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
 .bk-dd-foot{top:182mm;font-family:var(--font-sacred);font-size:10px;line-height:1.45;color:var(--bk-muted)}
 .bk-dd-foot small{display:block;font-size:8.5px}
+.bk-hill{margin:2mm auto 1mm;padding:1.6mm 4mm 1.4mm;border:1px solid var(--bk-line);border-radius:2mm;text-align:center;max-width:118mm}
+.bk-hill-h{display:flex;align-items:center;justify-content:center;gap:1.4mm;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;color:var(--bk-gold-deep)}
+.bk-hill-h i{display:inline-flex;width:13px;height:13px}
+.bk-hill-h svg{width:100%;height:100%}
+.bk-hill ul{list-style:none;margin:1mm 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:.4mm 5mm}
+.bk-hill li{font-family:var(--font-sacred);font-size:11.5px;line-height:1.45}
+.bk-hill-n{font-weight:700}
+.bk-hill-s{color:var(--bk-muted);font-size:10px;margin-inline-start:1.2mm}
+.bk-hill-s::before{content:'(';}
+.bk-hill-s::after{content:')';}
+.bk-hill-f{margin-top:.8mm;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
 .bk-shabbat{margin:6mm 0 2mm;text-align:center}
 .bk-shabbat-t{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:24px;line-height:1.3;color:#6e5426;margin-top:2mm}
 .bk-bic-h .bk-bic-intro{margin:0 0 2mm}
@@ -5523,7 +5534,7 @@ const BK_UI={
       qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedBlessPl:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפְּחוֹתָם בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedMeritPl:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתָם', dedTnzbhPl:'תִּהְיֶינָה נִשְׁמוֹתֵיהֶם צְרוּרוֹת בִּצְרוֹר הַחַיִּים',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], hillH:'לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים', hillF:'זְכוּתָם תָּגֵן עָלֵינוּ, אָמֵן', bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['נוצר מתוך אפליקציית התמיד','כל הטקסטים על פי המקורות המובאים באפליקציה','כל הזכויות שמורות © התמיד'],
       backDist:'ניתן להפיץ חוברת זו לזיכוי הרבים, ובלבד שלא ייעשה בה כל שינוי בתוכן או בעריכה.',
       parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
@@ -5534,7 +5545,7 @@ const BK_UI={
       qrCap:'Get the app', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedBlessPl:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפְּחוֹתָם בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedMeritPl:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתָם', dedTnzbhPl:'תִּהְיֶינָה נִשְׁמוֹתֵיהֶם צְרוּרוֹת בִּצְרוֹר הַחַיִּים',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], hillH:'לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים', hillF:'זְכוּתָם תָּגֵן עָלֵינוּ, אָמֵן', bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['Created with the HaTamid app','All texts follow the sources cited in the app','All rights reserved © HaTamid'],
       backDist:'This booklet may be freely distributed for the merit of the public, provided nothing in its content or editing is changed.',
       parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
@@ -5610,13 +5621,13 @@ function bkReady(date){
   if(!CHOK) return false;
   const slot=bkSlot(date); if(!slot) return true;
   const hd=new HDate(date);
-  return ckWeekReady(slot.key) && !!TORAH && ckCycReady(hd) && ckTanyaReady(hd) && bkMusarReady(hd) && bkBicReady(slot);
+  return ckWeekReady(slot.key) && !!TORAH && ckCycReady(hd) && ckTanyaReady(hd) && bkMusarReady(hd) && bkBicReady(slot) && bkHillulotReady();
 }
 function ensureBookletDay(date){
   return ensureChokIndex().then(()=>{
     const slot=chokSlotFor(date); if(!slot) return;
     const hd=new HDate(date);
-    return Promise.all([ensureChokDataFor(slot.key,hd), ensureBkMusar(hd), ensureBkBic(slot)]);
+    return Promise.all([ensureChokDataFor(slot.key,hd), ensureBkMusar(hd), ensureBkBic(slot), ensureBkHillulot()]);
   });
 }
 function bkSections(date,day){
@@ -5684,6 +5695,52 @@ const BK_HB_LICENSE='1. Limited License: The Society for the Preservation of Heb
 const BK_DAF={};   // 'masechta/daf/amud[|bw]' -> {state:'loading'|'ok'|'fail', p, src, w, h}
 /* the scan is tinted to the booklet's paper, so each colour mode keeps its own */
 function bkDafKey(e,side){ return BK_SHAS_KEY[e.t]+'/'+e.daf+'/'+side+(BK_BW?'|bw':''); }
+
+/* ================= HILLULOT (yahrzeits of tzaddikim) =================
+   Ported verbatim from main (the owner's calendar day-card feature,
+   681474f / 6dadfb7 / 456f273): data/hillulot.json
+   {entries:{<monthKey>:{<day>:[{name,note,year}]}}} - names exactly as
+   printed in the Nahar Shalom luach, in its order; Adar follows the luach's
+   own leap-year sheets; a 30th the month doesn't have this year is shown on
+   the 29th. (main loads it through its cachedFetch/dataURL layer, which this
+   branch doesn't have yet - same file, plain fetch.) */
+let HILLULOT=null, hillulotLoadPromise=null;
+function ensureHillulot(){
+  if(HILLULOT) return Promise.resolve(HILLULOT);
+  if(hillulotLoadPromise) return hillulotLoadPromise;
+  hillulotLoadPromise=fetch('data/hillulot.json').then(r=>{ if(!r.ok) throw new Error('hillulot '+r.status); return r.json(); })
+    .then(j=>{ HILLULOT=(j&&j.entries)||{}; return HILLULOT; })
+    .catch(e=>{ hillulotLoadPromise=null; throw e; });
+  return hillulotLoadPromise;
+}
+function hillulotFor(hd){
+  if(!HILLULOT) return null;
+  const m=hd.getMonth(), d=hd.getDate(), leap=HDate.isLeapYear(hd.getFullYear());
+  const K={[HMONTHS.TISHREI]:'tishrei',[HMONTHS.CHESHVAN]:'cheshvan',[HMONTHS.KISLEV]:'kislev',[HMONTHS.TEVET]:'tevet',[HMONTHS.SHVAT]:'shevat',
+    [HMONTHS.NISAN]:'nisan',[HMONTHS.IYYAR]:'iyar',[HMONTHS.SIVAN]:'sivan',[HMONTHS.TAMUZ]:'tamuz',[HMONTHS.AV]:'av',[HMONTHS.ELUL]:'elul'};
+  let keys;
+  if(m===HMONTHS.ADAR_I) keys = leap ? (HILLULOT.adar1 ? ['adar1'] : []) : ['adar'];
+  else if(m===HMONTHS.ADAR_II) keys = HILLULOT.adar2 ? ['adar2'] : ['adar'];
+  else keys=[K[m]];
+  const days=[d]; if(d===29 && hd.daysInMonth()===29) days.push(30);
+  const out=[];
+  keys.forEach(k=>{ const mm=HILLULOT[k]; if(!mm) return; days.forEach(dd=>(mm[dd]||[]).forEach(x=>out.push(x))); });
+  return out;
+}
+/* the booklet: under each day's heading, before its first subject - the
+   same list the app's calendar day card shows for that date, names as
+   printed; nothing on a day without one. Leil Shishi shows none of its own
+   (its Hebrew date is Friday's, which Friday's page already carries). */
+let BK_HILL_FAIL=false;
+function ensureBkHillulot(){ return ensureHillulot().catch(e=>{ console.warn('[booklet] hillulot unavailable:',e&&e.message); BK_HILL_FAIL=true; }); }
+function bkHillulotReady(){ return BK_HILL_FAIL || !!HILLULOT; }
+function bkHillulotHtml(hd){
+  const list=hillulotFor(hd); if(!list||!list.length) return '';
+  const t=bkUI();
+  return `<div class="bk-hill"><div class="bk-hill-h"><i>${I.candle}</i><span>${t.hillH}</span></div><ul>${
+    list.map(x=>`<li><span class="bk-hill-n">${x.name}</span>${(x.note||x.year)?`<span class="bk-hill-s">${[x.note,x.year].filter(Boolean).join(' · ')}</span>`:''}</li>`).join('')
+  }</ul><div class="bk-hill-f">${t.hillF}</div></div>`;
+}
 
 /* ---------- black & white ----------
    The owner's call for the printed booklet (weekly print cost): every gold /
@@ -5968,9 +6025,13 @@ function bkBlocks(date,opt){
   /* Leil Shishi is the eve of Friday: its Hebrew date is Friday's */
   const hdShown=night?new HDate(addDays(date,1)):hd;
   let musarDone=night;
+  const hillHtml=night?'':bkHillulotHtml(hd);
   B.push({t:'day', brk:opt.brk?1:0, label:dayLabel, tocSub:opt.week?localizeHebDateStr(hdShown.renderGematriya(true)).split(' ').slice(0,-1).join(' '):undefined, html:`<div class="bk-day"><i class="bk-day-crest">${ornCrest()}</i><div class="bk-day-t">${dayLabel}</div>
     <div class="bk-day-s">${bkParashaLine(slot)}</div>
     <div class="bk-day-d">${localizeHebDateStr(hdShown.renderGematriya(true))} · ${date.toLocaleDateString(civilDateLocale())}${night?' '+bkUI().evening:''}</div></div>`});
+  /* part of the day's opening: it moves with the day and first subject
+     headings and doesn't stop the header label from following them */
+  if(hillHtml) B.push({t:'atom', head:1, html:hillHtml});
   secs.forEach((s,si)=>{
     /* a Gemara whose amudim all rendered becomes whole scanned pages in
        print: its divider and title stay on screen only (the header band
@@ -6385,7 +6446,7 @@ function bkPaginate(host,blocks,meta){
     if(b.dafSec){ pend=[]; tocDaf=b.label; return; }  // the scans' own pages name the subject
     if(b.t==='atom' && b.daf){ dafPage(b.daf); return; }
     if(needNew){ if(b.t==='rule') return; needNew=false; newPage(); }
-    const heading=(b.t==='day'||b.t==='sec'||b.t==='sub');
+    const heading=(b.t==='day'||b.t==='sec'||b.t==='sub'||!!b.head);
     if(b.t!=='flow'){
       if(b.t==='rule' && !filled) return;             // a divider never opens a page
       const n=el(b.html);
