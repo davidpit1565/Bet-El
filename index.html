@@ -14268,7 +14268,7 @@ setTimeout(startBackgroundDataPrefetch, 1500); // after the initial screen's own
 })();
 var TB_LAST=null;   // last header state sent to the native bar (reset on every screen change)
 (function initNavScrollHide(){
-  let lastY = 0, ticking = false, accum = 0, lastDir = 0;
+  let lastY = 0, ticking = false, accum = 0, lastDir = 0, suppressUntil = 0;
   const THRESHOLD = 10, COMMIT = 28;
   function getY(){
     const se = document.scrollingElement || document.documentElement;
@@ -14293,7 +14293,14 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
   function set(hide){
     if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setHidden({hidden:hide}).catch(()=>{});
     /* the header tucks away on scroll-down and returns on scroll-up too (native bar via NativeTopBar.setCollapsed; the HTML .topbar gets a class) */
-    if(NATIVE_TOPBAR && TB_LAST!==hide){ TB_LAST=hide; try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hide}).catch(()=>{}); }catch(e){} }
+    if(NATIVE_TOPBAR && TB_LAST!==hide){
+      TB_LAST=hide;
+      /* setCollapsed compensates for the header's own height change with a native window.scrollBy,
+         which fires a real scroll event large enough to blow past COMMIT in the opposite direction
+         and immediately re-flip the state it just set - suppress onScroll's reaction to it */
+      suppressUntil = Date.now()+400;
+      try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hide}).catch(()=>{}); }catch(e){}
+    }
     document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hide));
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
@@ -14318,6 +14325,7 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
   function onScroll(){
     ticking = false;
     const y = getY();
+    if(Date.now() < suppressUntil){ lastY = y; accum = 0; return; }
     const dy = y - lastY;
     lastY = y;
     if(y < 40){ set(false); accum = 0; lastDir = 0; return; }
