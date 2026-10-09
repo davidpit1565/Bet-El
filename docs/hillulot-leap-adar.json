@@ -1,0 +1,681 @@
+{
+ "source": "Nahar Shalom weekly zmanim sheets, leap year 5784 (2024)",
+ "note": "adar2 matches the regular-year adar list line for line. Only some 5784 Adar I sheets have a hillulot box (Teruma, Tetzaveh and Vayakhel have none), so adar1 lists only the six lines printed: three in a 'next week' preview on the Mishpatim sheet and three in a short 'this week' box on the Ki Tisa sheet. Adar I days not listed are not on any 5784 sheet; they are not confirmed empty.",
+ "adar1": {
+  "5": [
+   {
+    "name": "רבי סעדיה בן אור",
+    "note": "נתיבות החכמה (אדר א')",
+    "year": "תשנ\"ז",
+    "uncertain": false
+   }
+  ],
+  "7": [
+   {
+    "name": "משה רבינו ע\"ה",
+    "note": "(לדעת הבא\"ח אף באדר א)",
+    "year": "ב' תפ\"ח",
+    "uncertain": false
+   }
+  ],
+  "11": [
+   {
+    "name": "רבי אברהם בורנשטיין מסוכטשוב",
+    "note": "האבני נזר",
+    "year": "תע\"ר",
+    "uncertain": false
+   }
+  ],
+  "18": [
+   {
+    "name": "רבי שמעון ב\"ר שמואל אביחצירא",
+    "note": "(אד\"א)",
+    "year": "התשנ\"ה",
+    "uncertain": false
+   }
+  ],
+  "20": [
+   {
+    "name": "רבי שלמה זלמן אויערבך",
+    "note": "ר\"י קול תורה",
+    "year": "התשנ\"ה",
+    "uncertain": false
+   }
+  ],
+  "21": [
+   {
+    "name": "רבי שלמה יוסף זוין",
+    "note": "האנציקלופדיה התלמודית",
+    "year": "התשל\"ח",
+    "uncertain": false
+   }
+  ]
+ },
+ "adar2": {
+  "1": [
+   {
+    "name": "רבינו אברהם אבן עזרא",
+    "note": "ד' תתקנ\"ד, טמון בכפר כבול",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי שבתי כהן",
+    "note": "בעל הש\"ך",
+    "year": "ה' תכ\"ג",
+    "uncertain": false
+   },
+   {
+    "name": "בניהו בן יהוידע (תאריך לא ידוע)",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי צדקה חוצין",
+    "note": "מחכמי בבל, מקיץ נרדמים",
+    "year": "תשכ\"א",
+    "uncertain": false
+   },
+   {
+    "name": "רבי רפאל עמנואל חי ריקי",
+    "note": "בעל משנת חסידים",
+    "year": "תק\"ג",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יחזקאל עזרא ב\"ר רחמים",
+    "note": "מח\"ס עצי היער",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי עזרא פיג'ו",
+    "note": "בינה לעיתים",
+    "year": "",
+    "uncertain": false
+   }
+  ],
+  "2": [
+   {
+    "name": "רבי יום טוב אלגזי",
+    "note": "ראשל\"צ, מח\"ס שמחת יו\"ט",
+    "year": "תקס\"ב",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יוסף דוד הלוי סולוביצ'יק",
+    "note": "בן הגרי\"ז מבריסק",
+    "year": "תשמ\"א",
+    "uncertain": false
+   },
+   {
+    "name": "רבי מאיר פפירש",
+    "note": "בעל אור צדיקים",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אלישע נסים דנגור",
+    "note": "חכם באשי בבבל",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי וידאל קואינקה",
+    "note": "מראשי ישיבת בית אל",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק אלמלית",
+    "note": "מח\"ס ויזרע יצחק",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי ישראל אלתר",
+    "note": "האדמו\"ר מגור",
+    "year": "תשל\"ז",
+    "uncertain": false
+   }
+  ],
+  "3": [
+   {
+    "name": "רבי אליהו דוד רבינוביץ תאומים",
+    "note": "האדר\"ת",
+    "year": "תרס\"ה",
+    "uncertain": false
+   },
+   {
+    "name": "רבי נסים דוד עזראן",
+    "note": "ראש ישיבת בית שמואל",
+    "year": "תדש\"ם",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יעקב מונסה",
+    "note": "מחכמי המקובלים בירושלים",
+    "year": "תשי\"ד",
+    "uncertain": false
+   },
+   {
+    "name": "רבי מרדכי יפה",
+    "note": "בעל הלבושים",
+    "year": "ה' שע\"ב",
+    "uncertain": false
+   }
+  ],
+  "4": [
+   {
+    "name": "רב אחאי בר רב הונא מראשי רבנן סבוראי",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יוסף בן רבי אהרון אביחצירא",
+    "note": "",
+    "year": "התשל\"ז",
+    "uncertain": false
+   }
+  ],
+  "5": [
+   {
+    "name": "רבי שלום בן רבי אהרון אביחצירא",
+    "note": "",
+    "year": "התשל\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יהושע דוד פוברסקי",
+    "note": "ר\"י פוניביז'",
+    "year": "תשנ\"ט",
+    "uncertain": false
+   }
+  ],
+  "6": [
+   {
+    "name": "רבי אברהם ענתבי סקא",
+    "note": "ראש רבני אר\"צ בירושלים",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי ישעיה אזולאי",
+    "note": "סבו של הרב חיד\"א",
+    "year": "התצ\"ב",
+    "uncertain": false
+   }
+  ],
+  "7": [
+   {
+    "name": "משה רבינו ע\"ה",
+    "note": "",
+    "year": "ב' תפ\"ח",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אברהם בנימין הכהן (בן מזל טוב) ממייסדי ותומכי ישיבת נהר שלום",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי נסים בן עזרא עיני",
+    "note": "מגדולי המקובלים בבית אל",
+    "year": "התר\"ס",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יחיא בן שלום הכהן",
+    "note": "חיי שלום",
+    "year": "התרכ\"ז",
+    "uncertain": false
+   }
+  ],
+  "8": [
+   {
+    "name": "רבי יוסף ידיד הלוי",
+    "note": "מח\"ס ימי יוסף",
+    "year": "תר\"ץ",
+    "uncertain": false
+   }
+  ],
+  "9": [
+   {
+    "name": "רבי יהודה החסיד",
+    "note": "ספר חסידים",
+    "year": "ד' תתקע\"ז",
+    "uncertain": false
+   },
+   {
+    "name": "רבי שלמה זלמן ב\"ר יצחק אח ר' חיים מולוז'ין",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק בן ואליד",
+    "note": "מח\"ס ויאמר יצחק",
+    "year": "התר\"ל",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יעקב דוויק הכהן מחו\"ר פורת יוסף",
+    "note": "",
+    "year": "תש\"ן",
+    "uncertain": false
+   },
+   {
+    "name": "רבי שמואל אויערבך",
+    "note": "ר\"י מעלות התורה",
+    "year": "תשע\"ח",
+    "uncertain": false
+   }
+  ],
+  "10": [
+   {
+    "name": "רבי דוד שמואל אלקלעי",
+    "note": "מחכמי בית אל בירושלים",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יחיא אדהאן",
+    "note": "נכד ר\"י אביחצירא, בעל אני לדודי",
+    "year": "תש\"ז",
+    "uncertain": false
+   }
+  ],
+  "11": [
+   {
+    "name": "רבי אברהם בורנשטיין מסוכטשוב",
+    "note": "האבני נזר",
+    "year": "תע\"ר",
+    "uncertain": false,
+    "comment": "year printed as תע\"ר (kept as printed)"
+   },
+   {
+    "name": "רבי שמואל שטרשון מוילנא בעל הגהות הרש\"ש על הש\"ס",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי חיים יוסף דוד אזולאי",
+    "note": "החיד\"א",
+    "year": "תקס\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אברהם בן אביר יעקב",
+    "note": "התער\"ג, טבריה",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יוסף רוז'ין",
+    "note": "מח\"ס צפנת פענח",
+    "year": "תרצ\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי שלום מזרחי עדני",
+    "note": "בעל סוכת שלום",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי משה פרדו",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   }
+  ],
+  "13": [
+   {
+    "name": "רבי משה פיינשטיין",
+    "note": "מח\"ס אגרות משה",
+    "year": "תשמ\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יוחנן ג'יניאן",
+    "note": "מחלק ההדסים",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יוסף מונסה בן רבי יעקב",
+    "note": "",
+    "year": "התשל\"ז",
+    "uncertain": false
+   }
+  ],
+  "14": [
+   {
+    "name": "רבי משה דאנציג מוילנא",
+    "note": "בן החיי אדם",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי הלל כהן",
+    "note": "ראש ישיבת כנסת בני הגולה",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי משה מלכה",
+    "note": "ראב\"ד פתח תקוה",
+    "year": "",
+    "uncertain": false
+   }
+  ],
+  "15": [
+   {
+    "name": "רבי יצחק אבולעפיה",
+    "note": "מח\"ס שו\"ת פני יצחק",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי צבי קיידנובר",
+    "note": "מח\"ס קב הישר",
+    "year": "התע\"ב",
+    "uncertain": false
+   },
+   {
+    "name": "רבי חיים כמיל",
+    "note": "ר\"י הנגב",
+    "year": "התשס\"ה",
+    "uncertain": false
+   },
+   {
+    "name": "רבי חיים קנייבסקי (ב\"ר יעקב ישראל)",
+    "note": "",
+    "year": "התשפ\"ב",
+    "uncertain": false
+   }
+  ],
+  "16": [
+   {
+    "name": "רבי פנחס מנחם אלתר",
+    "note": "הפני מנחם מגור",
+    "year": "התשנ\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אליעזר מנחם מנדל בידרמן",
+    "note": "האדמו\"ר מללוב",
+    "year": "תרמ\"ג",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק ברכה",
+    "note": "מחכמי אר\"ץ, ברך יצחק",
+    "year": "תקל\"ב",
+    "uncertain": false
+   },
+   {
+    "name": "רבי מרדכי עזראן",
+    "note": "מגדולי ירושלים",
+    "year": "התרח\"ץ",
+    "uncertain": false
+   }
+  ],
+  "17": [
+   {
+    "name": "רבי גרשון לפידות",
+    "note": "מופת השקדנים",
+    "year": "התשט\"ז",
+    "uncertain": false
+   },
+   {
+    "name": "רבי פתחיה מרדכי בירדוגו",
+    "note": "מח\"ס נופת צופים",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי ברוך שמעון סלומון",
+    "note": "רבה של פ\"ת",
+    "year": "התשס\"ט",
+    "uncertain": false
+   }
+  ],
+  "18": [
+   {
+    "name": "רבי אלכסנדר זיסקינד",
+    "note": "בעל יסוד ושורש העבודה",
+    "year": "תקנ\"ד",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יחזקאל לוינשטיין משגיח ישי' פוניב'ז",
+    "note": "",
+    "year": "התשל\"ד",
+    "uncertain": false
+   }
+  ],
+  "19": [
+   {
+    "name": "רבי יוסף חיים זוננפלד",
+    "note": "גאב\"ד ירושלים",
+    "year": "התרצ\"ב",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק חדאד הראשון",
+    "note": "מח\"ס תולדות יצחק",
+    "year": "התקט\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי דוד מדינוב",
+    "note": "בעל הצמח דוד",
+    "year": "התרל\"ד",
+    "uncertain": false
+   },
+   {
+    "name": "ר' רחמים לוי",
+    "note": "מתלמידי רבינו מרדכי שרעבי",
+    "year": "תשמ\"א",
+    "uncertain": false
+   },
+   {
+    "name": "רבי שמעון יהושע חירארי",
+    "note": "",
+    "year": "התשע\"ה",
+    "uncertain": false
+   }
+  ],
+  "20": [
+   {
+    "name": "רבי שלמה זלמן אויערבך",
+    "note": "ר\"י קול תורה",
+    "year": "התשנ\"ה",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יואל סירקיש מקראקא",
+    "note": "הבית חדש, ה' ת'",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אליהו משען",
+    "note": "מגדולי מקובלי אר\"ץ",
+    "year": "התרמ\"ב",
+    "uncertain": false
+   }
+  ],
+  "21": [
+   {
+    "name": "רבי שלמה יוסף זוין",
+    "note": "האנציקלופדיה התלמודית",
+    "year": "התשל\"ח",
+    "uncertain": false
+   },
+   {
+    "name": "רבי מאיר הכהן שיף",
+    "note": "המהר\"ם שי\"ף",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אלימלך מליז'נסק",
+    "note": "בעל נועם אלימלך",
+    "year": "תקמ\"ז",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק אלחנן ספקטור",
+    "note": "ה'באר יצחק'",
+    "year": "תרנ\"ו",
+    "uncertain": false
+   }
+  ],
+  "22": [
+   {
+    "name": "רבי יחיאל מיכל הלוי עפשטיין",
+    "note": "מח\"ס ערוך השולחן",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי חיים ב\"ר ישראל אביחצירא",
+    "note": "",
+    "year": "",
+    "uncertain": false
+   }
+  ],
+  "23": [
+   {
+    "name": "רבי מנחם סירירו",
+    "note": "רבו של היעב\"ץ",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק מאיר אלתר",
+    "note": "החידושי הרי\"מ מגור",
+    "year": "התרכ\"ז",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יאשיהו פינטו",
+    "note": "הרי\"ף על עין יעקב",
+    "year": "ה'ת\"ח",
+    "uncertain": false
+   }
+  ],
+  "24": [
+   {
+    "name": "רבי חיים אלגאזי מקושטא",
+    "note": "מח\"ס נתיבות המשפט",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אליהו הכהן מאיזמיר",
+    "note": "בעל שבט מוסר",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "משה יהודא ליב לנדא",
+    "note": "רב העיר ב\"ב",
+    "year": "התשע\"ט",
+    "uncertain": false
+   }
+  ],
+  "25": [
+   {
+    "name": "רבי סלמאן חוגי עבודי",
+    "note": "אב\"ד בירושלים",
+    "year": "התשל\"ג",
+    "uncertain": false
+   },
+   {
+    "name": "רבי גרשון מקיטוב",
+    "note": "גיסו של הבעש\"ט",
+    "year": "התקכ\"ה",
+    "uncertain": false
+   },
+   {
+    "name": "רבי יצחק אביחצירא",
+    "note": "בבא האקי, רבה של רמלה-לוד",
+    "year": "תש\"ל",
+    "uncertain": false
+   }
+  ],
+  "27": [
+   {
+    "name": "רבי שלמה אלישיב",
+    "note": "בעל הלשם",
+    "year": "תרפ\"ו",
+    "uncertain": false
+   },
+   {
+    "name": "רבי חיים סינואני",
+    "note": "מרבותיו של הגר\"מ שרעבי",
+    "year": "התשל\"ט",
+    "uncertain": false
+   },
+   {
+    "name": "רבי רפאל משה בולא",
+    "note": "ראב\"ד י-ם, בעל גט מקושר",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי חיים פנחס שיינברג",
+    "note": "ר\"י תורה אור",
+    "year": "התשע\"ב",
+    "uncertain": false
+   },
+   {
+    "name": "הרבנית שרה שנירר",
+    "note": "מיסדת בית יעקב",
+    "year": "",
+    "uncertain": false
+   }
+  ],
+  "28": [
+   {
+    "name": "רבי שמואל הלוי קליין",
+    "note": "מח\"ס מחצית השקל",
+    "year": "התקס\"ז",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אברהם הכהן פמינטיל",
+    "note": "מח\"ס מנחת כהן",
+    "year": "",
+    "uncertain": false
+   },
+   {
+    "name": "רבי אליעזר גולדשמידט חבר ביה\"ד הרבני העליון",
+    "note": "",
+    "year": "התשנ\"ב",
+    "uncertain": false
+   }
+  ],
+  "29": [
+   {
+    "name": "רבי מאיר ועקנין רבה של טבריה",
+    "note": "",
+    "year": "התשל\"ה",
+    "uncertain": false
+   },
+   {
+    "name": "רבי שלמה מרדומסק",
+    "note": "בעל תפארת שלמה",
+    "year": "התרכ\"ו",
+    "uncertain": false
+   }
+  ]
+ }
+}
