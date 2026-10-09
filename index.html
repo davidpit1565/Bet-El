@@ -9163,8 +9163,8 @@ window.NativeCalendarHost={
 /* ================= HILLULOT (yahrzeits of tzaddikim) =================
    data/hillulot.json: {entries:{<monthKey>:{<day>:[{name,note,year}]}}} - names exactly as printed in the
    Nahar Shalom luach, in its order. Shown in the calendar's day card for whatever day is selected
-   (it follows the day as you move). Sephardi custom: a plain-Adar yahrzeit is kept in Adar II in a leap year;
-   a 30th that the month doesn't have this year is shown on the 29th. */
+   (it follows the day as you move). Adar follows the luach's own leap-year sheets (see hillulotFor); a 30th
+   that the month doesn't have this year is shown on the 29th. */
 let HILLULOT=null, hillulotLoadPromise=null;
 function ensureHillulot(){
   if(HILLULOT) return Promise.resolve(HILLULOT);
@@ -9180,8 +9180,11 @@ function hillulotFor(hd){
   const K={[HMONTHS.TISHREI]:'tishrei',[HMONTHS.CHESHVAN]:'cheshvan',[HMONTHS.KISLEV]:'kislev',[HMONTHS.TEVET]:'tevet',[HMONTHS.SHVAT]:'shevat',
     [HMONTHS.NISAN]:'nisan',[HMONTHS.IYYAR]:'iyar',[HMONTHS.SIVAN]:'sivan',[HMONTHS.TAMUZ]:'tamuz',[HMONTHS.AV]:'av',[HMONTHS.ELUL]:'elul'};
   let keys;
-  if(m===HMONTHS.ADAR_I) keys = leap ? ['adar1'] : ['adar','adar2'];
-  else if(m===HMONTHS.ADAR_II) keys=['adar','adar2'];
+  /* Adar exactly like the Nahar Shalom luach: a regular year shows 'adar'; a leap year shows its own leap-year
+     lists ('adar1' / 'adar2', taken from the luach's leap-year sheets) and only falls back to the regular
+     'adar' list for Adar II when no leap-year list exists. */
+  if(m===HMONTHS.ADAR_I) keys = leap ? (HILLULOT.adar1 ? ['adar1'] : []) : ['adar'];
+  else if(m===HMONTHS.ADAR_II) keys = HILLULOT.adar2 ? ['adar2'] : ['adar'];
   else keys=[K[m]];
   const days=[d]; if(d===29 && hd.daysInMonth()===29) days.push(30);
   const out=[];
