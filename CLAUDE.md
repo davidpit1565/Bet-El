@@ -483,6 +483,12 @@ in English as usual.
   (`booklet` home item, `ensureBooklet()`/`openBooklet()`). It reads `data/booklet/current.json` fresh (no-store) and
   opens the PDF in the in-app browser; no current.json = slot stays empty. A booklet's week is netz on the Sunday before its `shabbat` to netz on the Sunday after (`bookletWindow`); at that Sunday netz the new one appears or, if none, the old one is removed - an old booklet is never shown. Never put another tile there. Each week the old
   PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
+- **Hillulot (yahrzeits of tzaddikim)**: `data/hillulot.json` (1,038 names, every Hebrew date; transcribed from Yeshivat Nahar
+  Shalom's weekly zmanim sheets - names/dates only, never their photos; raw draft + per-date sources in `docs/hillulot-*`).
+  Shown as "לעילוי נשמת הצדיקים" in the calendar day card (`hillulotHTML`), following the selected day; plain-Adar names go
+  to Adar II in a leap year. Add names by editing the JSON (keep the luach's order).
+- **Weekly booklets archive**: branch `booklets-archive` (never deployed) - `scripts/booklet-publish.mjs` publishes the week's
+  booklet to `data/booklet/` and archives it there as `<Hebrew year>/<slug>_<shabbat>.pdf` + `index.json`.
 - **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
   length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
   `npm run serve:local`) then `node scripts/appstore-compose.mjs`; screenshots taken on the real iPhone go in `docs/appstore/raw-device/` and override the web ones.
