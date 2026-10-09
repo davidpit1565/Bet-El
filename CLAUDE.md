@@ -285,15 +285,24 @@ in English as usual.
   track with no unit for the week is left out) read exactly as the
   standalone reader reads it: `bicFlatItems` (intro, then every halacha
   in source order with its own number `h.chapter`) and `bicI18nItem` for
-  a translation. Per halacha (the owner's printed-sefer reference,
-  "שבילי הנהר"): the halacha body full width (`.bk-bic-h`), then a
-  labelled divider "בֵּיאוּר" (`.bk-bdiv`, a 'sub' heading block so the
-  paginator never strands it), then the biur (`clarification.explanation`
-  + `takeaways`) in two columns (`.bk-bic-b`) - inline, not a toggle; a
-  faint rule between halachot. Loaded with the day
+  a translation. Print layout (the owner's printed-sefer reference
+  "שבילי הנהר", then their correction): NOT per-halacha boxes but two
+  independently flowing zones per page, like main text over a running
+  commentary - `bkBicParts` makes two streams per track (halacha texts;
+  biur texts, each opened by its halacha's number, tied by `hi`) and
+  `bkPaginateBic` (its own paginator, run after the day's `bkPaginate`)
+  fills each page: halacha text on top (`.bk-bic-h`, full width) while it
+  and every biur it has started still fit; a halacha that doesn't fit whole
+  goes on in part if its biur can still begin under it
+  (`BK_BIC_MIN_BIUR`); the rest of the page is biur (`.bk-bic-b`, two
+  columns) under the "בֵּיאוּר" divider - so a long biur carries over and
+  can fill a page by itself. Continuations never repeat the number; cuts
+  go through `bkFitWords` (prefers a sentence end, then a comma; never
+  leaves fewer than 4 words on either side). The on-screen sheet keeps the
+  simple halacha-then-biur sequence (`bkBicBlocks`, all noPrint). Loaded with the day
   (`ensureBkBic`/`bkBicReady`; `BK_BIC_FAIL` never blocks the day). The
   TOC lists the two years with real pages (the "בְּהֲכָנָה" placeholders
-  remain only when no Ben Ish Chai content was built). Vayera = ~43 A5
+  remain only when no Ben Ish Chai content was built). Vayera = ~42 A5
   pages of it.
   Owner decisions (settled, don't re-ask): Rashi on Yehoshua / Melachim
   stays absent (the Sefaria edition is CC-BY; not added); the Gemara stays

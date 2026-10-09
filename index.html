@@ -1443,6 +1443,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 /* Musar's per-book marks: a small sub-heading line at the head of each
    book's text (name + a hairline to the column edge) - clearly under the
    "מוּסָר" heading, but reading as a few mini-chapters */
+.bk-bic-h .bk-p,.bk-bic-b .bk-p{display:block}
 .bk-bic-h .bk-p+.bk-p{margin-top:5px}
 .bk-bic-sep{height:1px;margin:9px 18% 7px;background:linear-gradient(to left,rgba(162,128,63,0),var(--bk-line),rgba(162,128,63,0))}
 /* the labelled divider between a halacha and its biur */
@@ -5879,41 +5880,194 @@ function bkMusarSection(hd,B){
   B.push({t:'sec', label:title, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div></div>`});
   B.push({t:'flow', cls:'bk-text bk-prose bk-cols', pieces});
 }
-function bkBicBlocks(slot,B){
-  if(BK_BIC_FAIL||!slot) return;
-  const t=bkUI(), ui=ckBicUI(), parts=[];
+/* the week's Ben Ish Chai per track, as two independent streams: the
+   halacha texts (intro, then each halacha's paragraphs, its number on the
+   first) and the biur texts (each halacha's explanation opened by the same
+   number, then its takeaways) - `hi` ties a biur to its halacha */
+function bkBicParts(slot){
+  if(BK_BIC_FAIL||!slot) return [];
+  const parts=[];
   BIC_TRACKS.forEach((track,ti)=>{
     const seen=new Set();
     bkBicKeys(slot).forEach(k=>{
       const u=BIC_INDEX&&BIC_INDEX[track]&&BIC_INDEX[track].unitOf[k];
       if(!u||seen.has(u)) return; seen.add(u);
-      const items=bicFlatItems(track,k); if(items.length) parts.push({track, ti, items});
+      const items=bicFlatItems(track,k); if(!items.length) return;
+      const top=[], biur=[];
+      items.forEach((h,hi)=>{
+        if(h.type==='intro'){ h.paragraphs.forEach(p=>top.push({html:bkP(p), hi:-1})); return; }
+        const t18n=bicI18nItem(track,h.unit,h.dayIdx,h.itemIdx);
+        const paras=(t18n&&t18n.paragraphs)||h.paragraphs||[];
+        const c=(t18n&&t18n.clarification)||h.clarification;
+        const num=`<span class="bk-vn">${heNum(h.chapter)}</span>`;
+        paras.forEach((p,i)=>top.push({html:bkP((i?'':num)+p), hi}));
+        if(c&&c.explanation){
+          biur.push({html:bkP(num+c.explanation), hi});
+          (c.takeaways||[]).forEach(x=>biur.push({html:`<span class="bk-p bk-biur-t">${x}</span>`, hi}));
+        }
+      });
+      parts.push({track, ti, top, biur});
     });
   });
-  if(!parts.length) return;
-  B.push({t:'day', brk:1, label:t.tocBic, tocSub:bkParashaLine(slot), html:`<div class="bk-day bk-part"><div class="bk-day-t">${t.tocBic}</div>
+  return parts;
+}
+/* on screen (the reflowing sheet) each halacha is followed by its biur;
+   print uses bkPaginateBic's two-zone pages instead (these are noPrint) */
+function bkBicBlocks(slot,B){
+  const parts=bkBicParts(slot); if(!parts.length) return;
+  const t=bkUI();
+  B.push({t:'day', noPrint:1, label:t.tocBic, html:`<div class="bk-day bk-part"><div class="bk-day-t">${t.tocBic}</div>
     <div class="bk-day-s">${bkParashaLine(slot)}</div></div>`});
   parts.forEach((pt,pi)=>{
-    if(pi) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
-    const label=t.tocBicY[pt.ti];
-    B.push({t:'sec', label, html:`<div class="bk-sec"><div class="bk-sec-t">${label}</div></div>`});
-    /* per halacha, after the owner's printed-sefer reference: the halacha
-       full width, then a labelled divider ("בֵּיאוּר", a heading block, so
-       the paginator keeps it with what follows), then the biur and its
-       takeaways in two columns */
-    pt.items.forEach((h,hi)=>{
-      if(h.type==='intro'){ B.push({t:'flow', cls:'bk-text bk-prose bk-bic-h', pieces:h.paragraphs.map(bkP)}); return; }
-      const t18n=bicI18nItem(pt.track,h.unit,h.dayIdx,h.itemIdx);
-      const paras=(t18n&&t18n.paragraphs)||h.paragraphs||[];
-      const c=(t18n&&t18n.clarification)||h.clarification;
-      if(hi) B.push({t:'rule', cls:'bk-bic-sep', html:`<div class="bk-bic-sep"></div>`});
-      B.push({t:'flow', cls:'bk-text bk-prose bk-bic-h', pieces:paras.map((p,i)=>bkP((i?'':`<span class="bk-vn">${heNum(h.chapter)}</span>`)+p))});
-      if(!c||!c.explanation) return;
-      B.push({t:'sub', html:`<div class="bk-bdiv"><i>${ORN}</i><span>${t.biurH}</span><i>${ORN}</i></div>`});
-      B.push({t:'flow', cls:'bk-text bk-prose bk-cols bk-bic-b',
-        pieces:[bkP(c.explanation)].concat((c.takeaways||[]).map(x=>`<span class="bk-p bk-biur-t">${x}</span>`))});
+    if(pi) B.push({t:'rule', noPrint:1, html:`<div class="bk-rule"><span>${ORN}</span></div>`});
+    B.push({t:'sec', noPrint:1, label:t.tocBicY[pt.ti], html:`<div class="bk-sec"><div class="bk-sec-t">${t.tocBicY[pt.ti]}</div></div>`});
+    let lastHi=null;
+    pt.top.forEach(x=>{
+      if(lastHi!==null && x.hi!==lastHi) bkBicScreenBiur(pt,lastHi,B,t);
+      B.push({t:'flow', noPrint:1, cls:'bk-text bk-prose bk-bic-h', pieces:[x.html]}); lastHi=x.hi;
     });
+    if(lastHi!==null) bkBicScreenBiur(pt,lastHi,B,t);
   });
+}
+function bkBicScreenBiur(pt,hi,B,t){
+  const ps=pt.biur.filter(b=>b.hi===hi).map(b=>b.html); if(!ps.length) return;
+  B.push({t:'sub', noPrint:1, html:`<div class="bk-bdiv"><i>${ORN}</i><span>${t.biurH}</span><i>${ORN}</i></div>`});
+  B.push({t:'flow', noPrint:1, cls:'bk-text bk-prose bk-bic-b', pieces:ps});
+}
+/* ---------- Ben Ish Chai print pages: two independently flowing zones ----------
+   As in a printed sefer with a running commentary (the owner's "שבילי הנהר"
+   reference): each page holds a top zone of halacha text (full width) and,
+   under a "בֵּיאוּר" divider, a bottom zone of biur text (two columns) - and
+   each stream simply continues on the next page. How the page divides is
+   decided by the content, page by page:
+   - halacha text goes on top while it AND every biur it has started still
+     fit on the page;
+   - a halacha that doesn't fit whole goes on in part (cut at a sentence end)
+     if its biur can still begin under it (BK_BIC_MIN_BIUR);
+   - the rest of the page is biur, in order - so a long biur carries over
+     and may fill a page of its own before the next halacha starts.
+   A continuation (of a halacha or a biur) never repeats its number; every
+   page with biur shows the divider. Cuts prefer a sentence end, so neither
+   zone ends on a stray word. */
+const BK_BIC_MIN_BIUR=72, BK_BIC_MIN_WORDS=18;   // px of biur a started halacha must leave room for; shortest cut
+/* the most words of `node` (a .bk-p) that still fit, preferring a cut after
+   a sentence end (. : ; ? !) when that keeps most of the space used */
+function bkFitWords(node,fits){
+  const wc=bkWordCount(node);
+  let lo=0, hi=wc;
+  while(lo<hi){ const mid=(lo+hi+1)>>1; if(fits(mid)) lo=mid; else hi=mid-1; }
+  if(lo<=0||lo>=wc) return lo;
+  /* never leave a stray word on either side: at least 4 words each way,
+     else a short piece moves to the next page whole */
+  const W=4; if(wc<2*W) return 0;
+  lo=Math.min(lo,wc-W); if(lo<W) return 0;
+  const words=[]; bkTextNodes(node).forEach(t=>(t.data.match(/\S+/g)||[]).forEach(w=>words.push(w)));
+  for(let k=lo;k>=Math.max(W,Math.ceil(lo*.6));k--) if(/[.:;?!׃]["״']?$/.test(words[k-1])) return k;
+  for(let k=lo;k>=Math.max(W,Math.ceil(lo*.75));k--) if(/,["״']?$/.test(words[k-1])) return k;
+  return lo;
+}
+function bkPaginateBic(host,parts,meta,no,toc){
+  if(!parts.length) return no;
+  const t=bkUI(), tmp=document.createElement('div');
+  const el=html=>{ tmp.innerHTML=html.trim(); return tmp.firstElementChild; };
+  const mk=cls=>{ const d=document.createElement('div'); d.className=cls; return d; };
+  const divHtml=`<div class="bk-bdiv"><i>${ORN}</i><span>${t.biurH}</span><i>${ORN}</i></div>`;
+  let page=null, body=null;
+  const newPage=label=>{ no++; page=el(bkPageHtml(meta,no,label)); page.dataset.no=no; host.appendChild(page); body=page.querySelector('.bk-pbody'); };
+  const over=()=>body.scrollHeight>body.clientHeight+1;
+  parts.forEach((pt,pi)=>{
+    const label=t.tocBic+' · '+t.tocBicY[pt.ti];
+    newPage(label);
+    if(pi===0){
+      const h=el(`<div class="bk-day bk-part"><div class="bk-day-t">${t.tocBic}</div><div class="bk-day-s">${meta.parasha}</div></div>`);
+      body.appendChild(h); toc.push({t:'day', label:t.tocBic, sub:meta.parasha, el:h});
+    }
+    const sec=el(`<div class="bk-sec"><div class="bk-sec-t">${t.tocBicY[pt.ti]}</div></div>`);
+    body.appendChild(sec); toc.push({t:'sec', label:t.tocBicY[pt.ti], el:sec});
+    /* stream state: next index + the unplaced rest of a cut piece */
+    let ti=0, tRest=null, bi=0, bRest=null, started=-1;
+    const nextTop=()=>tRest||(ti<pt.top.length?{node:el(pt.top[ti].html), hi:pt.top[ti].hi}:null);
+    /* `nx` is now placed - whole (k>=words) or its first k words */
+    const consume=(nx,k)=>{
+      const wc=bkWordCount(nx.node);
+      if(!nx.isRest) ti++;
+      tRest=k<wc?{node:bkKeepWords(nx.node.cloneNode(true),k,Infinity), hi:nx.hi, isRest:1}:null;
+    };
+    const pendingBiur=upto=>{
+      const out=[]; if(bRest) out.push(bRest.node.cloneNode(true));
+      for(let k=bi;k<pt.biur.length&&pt.biur[k].hi<=upto;k++) out.push(el(pt.biur[k].html));
+      return out;
+    };
+    const anyLeft=()=>tRest||ti<pt.top.length||bRest||bi<pt.biur.length;
+    let first=true;
+    while(anyLeft()){
+      if(!first) newPage(label);
+      first=false;
+      const top=mk('bk-text bk-prose bk-bic-h'); body.appendChild(top);
+      const div=el(divHtml), bot=mk('bk-text bk-prose bk-cols bk-bic-b');
+      /* would top + divider + these biur pieces (+ extra px) fit? */
+      const fitsWith=(nodes,extra)=>{
+        let ph=null;
+        if(nodes.length||extra){ body.appendChild(div); body.appendChild(bot); nodes.forEach(n=>bot.appendChild(n));
+          if(extra){ ph=document.createElement('div'); ph.style.height=extra+'px'; body.appendChild(ph); } }
+        const ok=!over();
+        if(ph) ph.remove(); bot.innerHTML=''; if(div.parentNode) div.remove(); if(bot.parentNode) bot.remove();
+        return ok;
+      };
+      let placed=false;
+      /* the top zone */
+      for(;;){
+        const nx=nextTop(); if(!nx) break;
+        const upto=Math.max(started,nx.hi);
+        top.appendChild(nx.node);
+        if(fitsWith(pendingBiur(upto),0)){
+          consume(nx,Infinity);
+          started=upto; placed=true; continue;
+        }
+        top.removeChild(nx.node);
+        /* a part of it, if the biur it starts can still begin below */
+        const extra=nx.hi>started&&pt.biur.some(b=>b.hi===nx.hi)?BK_BIC_MIN_BIUR:0;
+        const base=pendingBiur(started);
+        const k=bkFitWords(nx.node,n=>{ const a=bkKeepWords(nx.node.cloneNode(true),0,n); top.appendChild(a);
+          const ok=fitsWith(base.map(x=>x.cloneNode(true)),extra); top.removeChild(a); return ok; });
+        const wc=bkWordCount(nx.node);
+        if(k>=Math.min(BK_BIC_MIN_WORDS,wc) && k>0){
+          top.appendChild(bkKeepWords(nx.node.cloneNode(true),0,k));
+          consume(nx,k);
+          started=Math.max(started,nx.hi); placed=true;
+        }
+        break;
+      }
+      if(!top.childNodes.length) top.remove();
+      /* the bottom zone: biur of every halacha started so far, in order */
+      const queue=()=>{ if(bRest){ const n=bRest.node; bRest=null; return n; } if(bi<pt.biur.length&&pt.biur[bi].hi<=started) return el(pt.biur[bi++].html); return null; };
+      let n=queue();
+      if(n){
+        body.appendChild(div); body.appendChild(bot);
+        while(n){
+          bot.appendChild(n);
+          if(!over()){ placed=true; n=queue(); continue; }
+          bot.removeChild(n);
+          const k=bkFitWords(n,m=>{ const a=bkKeepWords(n.cloneNode(true),0,m); bot.appendChild(a); const ok=!over(); bot.removeChild(a); return ok; });
+          if(k>0){ bot.appendChild(bkKeepWords(n.cloneNode(true),0,k)); placed=true; }
+          if(k<bkWordCount(n)) bRest={node:bkKeepWords(n.cloneNode(true),k,Infinity)};
+          break;
+        }
+        if(!bot.childNodes.length){ bot.remove(); div.remove(); }
+      }
+      /* never leave a page empty: put the next halacha text on regardless */
+      if(!placed){
+        const nx=nextTop(); if(!nx) break;
+        top.isConnected||body.appendChild(top);
+        const k=bkFitWords(nx.node,m=>{ const a=bkKeepWords(nx.node.cloneNode(true),0,m); top.appendChild(a); const ok=!over(); top.removeChild(a); return ok; });
+        const kk=Math.max(1,k);
+        top.appendChild(bkKeepWords(nx.node.cloneNode(true),0,kk));
+        consume(nx,kk);
+        started=Math.max(started,nx.hi);
+      }
+    }
+  });
+  return no;
 }
 function bkBlockHtml(b){
   if(b.t!=='flow') return b.html;
@@ -6563,7 +6717,9 @@ function bkBuildPrint(date){
   const {slot}=bkSections(date);
   host.innerHTML=bkCoverHtml(date,slot)+bkRightsHtml()+bkDedicationHtml()+'<div class="bk-toc-slot"></div>';
   const blocks=bkBlocks(date), toc=[];
-  const n=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:4, toc});
+  const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:4, toc});
+  /* Ben Ish Chai closes the day: its own two-zone pages */
+  const n=bkPaginateBic(host, bkBicParts(slot), {parasha:bkParashaLine(slot)}, n0, toc);
   const slotEl=host.querySelector('.bk-toc-slot');
   slotEl.insertAdjacentHTML('afterend',bkTocHtml(bkTocDays(toc,bkParashaLine(slot)))); slotEl.remove();
   /* the Gemara scans' credit + HebrewBooks.org license: once, on the back */
