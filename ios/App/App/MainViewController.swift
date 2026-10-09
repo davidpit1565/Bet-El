@@ -117,6 +117,7 @@ class MainViewController: CAPBridgeViewController {
         guard let screen = env["BETEL_SHOT_SCREEN"], !screen.isEmpty else { return nil }
         let lang = env["BETEL_SHOT_LANG"] ?? ""
         let theme = env["BETEL_SHOT_THEME"] ?? ""
+        let scroll = env["BETEL_SHOT_SCROLL"] ?? ""
 
         func jsString(_ s: String) -> String {
             let data = try? JSONSerialization.data(withJSONObject: [s])
@@ -130,6 +131,7 @@ class MainViewController: CAPBridgeViewController {
             var screen = \(jsString(screen));
             var lang = \(jsString(lang));
             var theme = \(jsString(theme));
+            var scroll = \(jsString(scroll));
             var s = {};
             try { s = JSON.parse(localStorage.getItem('betel_settings') || '{}'); } catch(e) {}
             if (lang && ['he','en','fr','ru','ka'].indexOf(lang) !== -1) s.lang = lang;
@@ -144,6 +146,7 @@ class MainViewController: CAPBridgeViewController {
             // reader normally, so just mark it done rather than re-answer it here.
             localStorage.setItem('betel_chok_pace_v1', '1');
             sessionStorage.setItem('betel_shot_screen', screen);
+            if (scroll) sessionStorage.setItem('betel_shot_scroll', scroll);
           } catch(e) {}
         })();
         """

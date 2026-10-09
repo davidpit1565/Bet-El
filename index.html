@@ -3465,27 +3465,51 @@ let SHOT_MODE=false;
 function shotLink(url){
   if(!SHOT_ALLOWED) return;
   const q=new URLSearchParams((String(url).split('?')[1])||'');
-  const lang=q.get('lang'), theme=q.get('theme'), screen=q.get('screen')||'home';
+  const lang=q.get('lang'), theme=q.get('theme'), screen=q.get('screen')||'home', scroll=q.get('scroll');
   if(lang && ['he','en','fr','ru','ka'].includes(lang)) S.lang=lang;
   if(theme && ['light','dark'].includes(theme)) S.theme=theme;
   saveS();
   try{ localStorage.setItem('betel_onboard_v1','1'); }catch(e){}
   try{ sessionStorage.setItem('betel_shot_screen',screen); }catch(e){}
+  try{ if(scroll) sessionStorage.setItem('betel_shot_scroll',scroll); else sessionStorage.removeItem('betel_shot_scroll'); }catch(e){}
   location.reload();
 }
-function shotNavigate(screen){
+/* Debug-only scroll simulation for testing the header scroll-collapse behavior
+   (initNavScrollHide) without a real touch drag: fires real incremental `scroll`
+   events on the actual scroll container (same code path a touch-drag produces),
+   just like a human scrolling - not a single instant jump. 'down' settles into the
+   collapsed state; 'revealed' goes on to scroll back up far enough (well past the
+   COMMIT threshold, but away from the y<40 always-visible zone) to test that the
+   header reappears correctly mid-page, which is the easier state to get wrong. */
+function shotScrollSeq(mode){
   try{
-    if(screen==='chok'){ go('home'); setTimeout(()=>{ const t=document.querySelector('[data-home-item="chok"] .q-tile'); if(t) t.click(); },600); }
-    else if(screen==='meein') openPrayer('birkatMeeinShalosh','brachot');
+    const sc=(typeof homeScroller==='function'&&homeScroller())||document.scrollingElement||document.body;
+    const by=(dy)=>{ try{ if(sc.scrollBy) sc.scrollBy(0,dy); else sc.scrollTop=(sc.scrollTop||0)+dy; }catch(e){} };
+    const steps=(total,n,gap,cb)=>{
+      const each=total/n; let i=0;
+      const tick=()=>{ by(each); i++; if(i<n) setTimeout(tick,gap); else if(cb) setTimeout(cb,gap); };
+      tick();
+    };
+    if(mode==='down') steps(900,9,110);
+    else if(mode==='revealed') steps(900,9,110,()=>{ setTimeout(()=>steps(-180,4,110),700); });
+  }catch(e){}
+}
+function shotNavigate(screen,scrollMode){
+  try{
+    const afterReady=(delay)=>{ if(scrollMode) setTimeout(()=>shotScrollSeq(scrollMode),delay); };
+    if(screen==='chok'){ go('home'); let tries=0; const tryClick=()=>{ const t=document.querySelector('[data-home-item="chok"] .q-tile'); if(t){ t.click(); afterReady(900); } else if(tries++<20){ setTimeout(tryClick,300); } }; setTimeout(tryClick,600); }
+    else if(screen==='meein'){ openPrayer('birkatMeeinShalosh','brachot'); afterReady(900); }
     else if(screen==='mazon'){ openPrayer('birkatHamazon','brachot'); setTimeout(()=>{ const p=document.querySelectorAll('.prayer-para')[2]; if(p){ const r=p.getBoundingClientRect(); const sc=(typeof homeScroller==='function'&&homeScroller())||document.scrollingElement; (sc||window).scrollBy?.(0,r.top-170); } },900); }
     else if(screen==='qr') shareQR();
-    else go(screen);
+    else { go(screen); afterReady(900); }
   }catch(e){}
 }
 (function(){ try{
   const sc=sessionStorage.getItem('betel_shot_screen'); if(!sc || !SHOT_ALLOWED) return;
   SHOT_MODE=true;
-  sessionStorage.removeItem('betel_shot_screen'); setTimeout(()=>shotNavigate(sc),2500);
+  const scrollMode=sessionStorage.getItem('betel_shot_scroll')||'';
+  sessionStorage.removeItem('betel_shot_screen'); sessionStorage.removeItem('betel_shot_scroll');
+  setTimeout(()=>shotNavigate(sc,scrollMode),2500);
 }catch(e){} })();
 window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
 (function initWidgetLinks(){
