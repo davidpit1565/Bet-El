@@ -49,6 +49,10 @@ final class NativeTopBarView: UIView {
     /// MainViewController to report --native-header-h to the web view.
     var contentHeight: CGFloat { barHeight }
 
+    /// Tapping the header title scrolls the page back to the top (like tapping the iOS status bar).
+    var onTitleTap: (() -> Void)?
+    @objc private func titleTapped() { onTitleTap?() }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupBar()
@@ -76,8 +80,9 @@ final class NativeTopBarView: UIView {
         let bg = isDark
             ? UIColor(red: 0.051, green: 0.078, blue: 0.165, alpha: 1)
             : UIColor(red: 0.965, green: 0.937, blue: 0.875, alpha: 1)
-        fadeLayer.colors = [bg.cgColor, bg.withAlphaComponent(0.9).cgColor, bg.withAlphaComponent(0).cgColor]
-        fadeLayer.locations = [0, 0.62, 1]
+        // fully OPAQUE (no fade to transparent): scrolled text must never show through the header
+        fadeLayer.colors = [bg.cgColor, bg.cgColor]
+        fadeLayer.locations = [0, 1]
         overrideUserInterfaceStyle = isDark ? .dark : .light
     }
 
@@ -118,6 +123,7 @@ final class NativeTopBarView: UIView {
         titleLabel.numberOfLines = 1
         titleLabel.lineBreakMode = .byTruncatingTail
         titleLabel.isUserInteractionEnabled = true
+        titleLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(titleTapped)))
         titleLabel.addInteraction(UIContextMenuInteraction(delegate: self))
         contentView.addSubview(titleLabel)
 

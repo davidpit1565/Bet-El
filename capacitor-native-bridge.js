@@ -29,6 +29,10 @@ var capacitorNativeBridge = (function (core) {
         core.registerPlugin('NativeSettings');
         core.registerPlugin('NativeToast');
         core.registerPlugin('NativeHomeEdit');
+        core.registerPlugin('NativeCalendar');
+        core.registerPlugin('NativeLibrary');
+        core.registerPlugin('NativeHome');
+        core.registerPlugin('NativeSystem');
         core.registerPlugin('NativeHaptics');
         core.registerPlugin('NativeTabBar');
         core.registerPlugin('BetElWidgetBridge');

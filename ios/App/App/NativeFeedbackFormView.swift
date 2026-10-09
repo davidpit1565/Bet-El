@@ -198,19 +198,14 @@ final class NativeFeedbackFormView: UIView {
         stack.addArrangedSubview(bodyLabel)
 
         nameField.removeFromSuperview()
-        emailField.removeFromSuperview()
         subjectField.removeFromSuperview()
         styleTextField(nameField, placeholder: namePlaceholder, isRTL: isRTL, heightSet: &nameFieldHeightSet)
-        styleTextField(emailField, placeholder: emailPlaceholder, isRTL: isRTL, heightSet: &emailFieldHeightSet)
         styleTextField(subjectField, placeholder: subjectPlaceholder, isRTL: isRTL, heightSet: &subjectFieldHeightSet)
-        emailField.keyboardType = .emailAddress
-        emailField.autocapitalizationType = .none
-        [nameField, emailField, subjectField].forEach {
+        [nameField, subjectField].forEach {
             $0.removeTarget(self, action: #selector(updateSendEnabled), for: .editingChanged)
             $0.addTarget(self, action: #selector(updateSendEnabled), for: .editingChanged)
         }
-        // order: sender email, name, subject, then the message
-        stack.addArrangedSubview(emailField)
+        // order: name, subject, then the message (no email field - nothing is sent by e-mail)
         stack.addArrangedSubview(nameField)
         stack.addArrangedSubview(subjectField)
 
@@ -286,7 +281,6 @@ final class NativeFeedbackFormView: UIView {
 
     @objc private func updateSendEnabled() {
         let filled = !(nameField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !(emailField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !(subjectField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !messageView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         sendButton.isEnabled = filled
@@ -295,7 +289,7 @@ final class NativeFeedbackFormView: UIView {
 
     @objc private func tapSend() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        onSend?(nameField.text ?? "", emailField.text ?? "", subjectField.text ?? "", messageView.text ?? "")
+        onSend?(nameField.text ?? "", "", subjectField.text ?? "", messageView.text ?? "")
     }
 
     @objc private func keyboardWillChange(_ note: Notification) {
@@ -313,7 +307,7 @@ final class NativeFeedbackFormView: UIView {
     }
 
     func dismiss() {
-        [nameField, emailField, messageView].forEach { $0.resignFirstResponder() }
+        [nameField, subjectField, messageView].forEach { $0.resignFirstResponder() }
         guard let cardView = card else { isHidden = true; return }
         UIView.animate(
             withDuration: ReduceMotion.duration(0.2),

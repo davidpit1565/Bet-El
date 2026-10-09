@@ -8,6 +8,54 @@ struct ZmanRow: Identifiable {
     var id: String { key }
 }
 
+/// One day's zmanim (exact ones from the app when synced, else Solar.swift's approximation).
+struct ZDay {
+    let dawn: Date
+    let sunrise: Date
+    let solarNoon: Date
+    let sunset: Date
+    /// nightfall - only synced once the app turns on its Hebrew-day rollover for the widgets
+    let tzeit: Date?
+}
+
+extension BetElSharedData.Snapshot {
+    private struct ZRowJSON: Decodable { let d: String; let a: String?; let r: String?; let c: String?; let s: String?; let t: String? }
+    private struct OmerJSONRow: Decodable { let d: String; let n: Int }
+
+    private static func dayKey(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f.string(from: date)
+    }
+
+    func zday(for date: Date) -> ZDay? {
+        if let json = zmanimJSON, let data = json.data(using: .utf8),
+           let rows = try? JSONDecoder().decode([ZRowJSON].self, from: data),
+           let row = rows.first(where: { $0.d == Self.dayKey(date) }) {
+            let frac = ISO8601DateFormatter(); frac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let plain = ISO8601DateFormatter()
+            func parse(_ s: String?) -> Date? {
+                guard let s = s else { return nil }
+                return frac.date(from: s) ?? plain.date(from: s)
+            }
+            if let a = parse(row.a), let r = parse(row.r), let c = parse(row.c), let s = parse(row.s) {
+                return ZDay(dawn: a, sunrise: r, solarNoon: c, sunset: s, tzeit: parse(row.t))
+            }
+        }
+        guard let t = Solar.times(for: date, latitude: latitude, longitude: longitude) else { return nil }
+        return ZDay(dawn: t.dawn, sunrise: t.sunrise, solarNoon: t.solarNoon, sunset: t.sunset, tzeit: nil)
+    }
+
+    /// The Omer count for that day (nil outside the Omer).
+    func omerDay(for date: Date) -> Int? {
+        guard let json = omerJSON, let data = json.data(using: .utf8),
+              let rows = try? JSONDecoder().decode([OmerJSONRow].self, from: data) else { return nil }
+        let key = Self.dayKey(date)
+        return rows.first(where: { $0.d == key })?.n
+    }
+}
+
 struct BetElEntry: TimelineEntry {
     let date: Date
     let hebrewDateText: String
@@ -17,7 +65,8 @@ struct BetElEntry: TimelineEntry {
     let secondZmanLabel: String?
     let secondZmanTime: Date?
     let streakCount: Int
-    let theme: String
+    /// "dark"/"light" - the widget views override this with the system appearance (SchemeResolved).
+    var theme: String
     /// Mirrors the app's own S.lang ("he"/"en"/"fr"/"ru"/"ka") - see
     /// WidgetL10n for which languages the widget's own chrome text
     /// actually has a translation for.
@@ -44,6 +93,10 @@ struct BetElEntry: TimelineEntry {
     /// Today's dawn / sunrise / midday / sunset, in order, for the widgets
     /// that list them.
     let zmanimToday: [ZmanRow]
+    /// Omer count for this Hebrew day (nil outside the Omer).
+    let omerDay: Int?
+    /// Smart Stack: how much this entry deserves to be on top right now.
+    var relevance: TimelineEntryRelevance? = nil
 
     /// "א׳–ו׳" in Hebrew (letters, never digits), "1\u{2013}6" in every other language.
     var tehillimRangeText: String {
@@ -59,6 +112,9 @@ struct BetElEntry: TimelineEntry {
     var deepLinkURL: URL? {
         URL(string: "betel://tehillim/\(tehillimRange.start)")
     }
+
+    /// Where a tap on each kind of widget goes (handled by the app's appUrlOpen listener).
+    func link(_ kind: String) -> URL? { URL(string: "betel://\(kind)") }
 }
 
 struct BetElProvider: TimelineProvider {
@@ -79,8 +135,9 @@ struct BetElProvider: TimelineProvider {
         // One entry per zman today (so "next zman" advances through the
         // day) plus one for right now, deduplicated and sorted.
         var refreshDates: [Date] = [now]
-        if let times = Solar.times(for: now, latitude: snapshot.latitude, longitude: snapshot.longitude) {
+        if let times = snapshot.zday(for: now) {
             refreshDates.append(contentsOf: [times.dawn, times.sunrise, times.solarNoon, times.sunset])
+            if let tz = times.tzeit { refreshDates.append(tz) }
         }
         // Also refresh right after local midnight, for the next day's
         // Hebrew date + Tehillim portion + a fresh zmanim set.
@@ -101,7 +158,7 @@ struct BetElProvider: TimelineProvider {
         completion(Timeline(entries: entries, policy: .after(reloadAfter)))
     }
 
-    private static func zmanimRows(_ times: Solar.DayTimes?, lang: String) -> [ZmanRow] {
+    private static func zmanimRows(_ times: ZDay?, lang: String) -> [ZmanRow] {
         guard let t = times else { return [] }
         return [
             ZmanRow(key: "dawn", label: WidgetL10n.t("dawn", lang: lang), time: t.dawn),
@@ -113,9 +170,14 @@ struct BetElProvider: TimelineProvider {
 
     private func makeEntry(for date: Date, snapshot: BetElSharedData.Snapshot) -> BetElEntry {
         let lang = snapshot.lang
-        let portion = HebrewDay.tehillimPortion(for: date)
-        let times = Solar.times(for: date, latitude: snapshot.latitude, longitude: snapshot.longitude)
-
+        let times = snapshot.zday(for: date)
+        // The Hebrew day rolls over at nightfall once the app syncs tzeit (WIDGET_TZEIT_ROLLOVER in
+        // index.html) - until then `tzeit` is nil and this is just the calendar date, as before.
+        let hDate: Date = {
+            if let tz = times?.tzeit, date >= tz { return Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date }
+            return date
+        }()
+        let portion = HebrewDay.tehillimPortion(for: hDate)
         let dawnLabel = WidgetL10n.t("dawn", lang: lang)
         let sunriseLabel = WidgetL10n.t("sunrise", lang: lang)
         let sunsetLabel = WidgetL10n.t("sunset", lang: lang)
@@ -137,7 +199,7 @@ struct BetElProvider: TimelineProvider {
             } else {
                 // after sunset - show tomorrow's dawn as "next"
                 let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date
-                let tTimes = Solar.times(for: tomorrow, latitude: snapshot.latitude, longitude: snapshot.longitude)
+                let tTimes = snapshot.zday(for: tomorrow)
                 nextLabel = dawnLabel; nextTime = tTimes?.dawn
                 secondLabel = tTimes != nil ? sunriseLabel : nil
                 secondTime = tTimes?.sunrise
@@ -152,18 +214,18 @@ struct BetElProvider: TimelineProvider {
                 sunSpan = (t.sunrise, t.sunset, true)
             } else if date < t.sunrise {
                 let y = cal.date(byAdding: .day, value: -1, to: date) ?? date
-                let yT = Solar.times(for: y, latitude: snapshot.latitude, longitude: snapshot.longitude)
+                let yT = snapshot.zday(for: y)
                 sunSpan = (yT?.sunset, t.sunrise, false)
             } else {
                 let tm = cal.date(byAdding: .day, value: 1, to: date) ?? date
-                let tT = Solar.times(for: tm, latitude: snapshot.latitude, longitude: snapshot.longitude)
+                let tT = snapshot.zday(for: tm)
                 sunSpan = (t.sunset, tT?.sunrise, false)
             }
         }
 
-        return BetElEntry(
+        var entry = BetElEntry(
             date: date,
-            hebrewDateText: HebrewDay.formatted(date, lang: lang),
+            hebrewDateText: HebrewDay.formatted(hDate, lang: lang),
             tehillimRange: portion,
             nextZmanLabel: nextLabel,
             nextZmanTime: nextTime,
@@ -177,12 +239,21 @@ struct BetElProvider: TimelineProvider {
             streakBest: snapshot.streakBest,
             sunStart: sunSpan.start, sunEnd: sunSpan.end, sunIsDay: sunSpan.isDay,
             sunriseToday: times?.sunrise, sunsetToday: times?.sunset,
-            parashaText: snapshot.dayLabel(for: date),
-            weekdayText: HebrewDay.weekdayText(date, lang: lang),
-            dayText: HebrewDay.dayText(date, lang: lang),
-            monthText: HebrewDay.monthText(date, lang: lang),
-            yearText: HebrewDay.yearText(date, lang: lang),
-            zmanimToday: Self.zmanimRows(times, lang: lang)
+            parashaText: snapshot.dayLabel(for: hDate),
+            weekdayText: HebrewDay.weekdayText(hDate, lang: lang),
+            dayText: HebrewDay.dayText(hDate, lang: lang),
+            monthText: HebrewDay.monthText(hDate, lang: lang),
+            yearText: HebrewDay.yearText(hDate, lang: lang),
+            zmanimToday: Self.zmanimRows(times, lang: lang),
+            omerDay: snapshot.omerDay(for: hDate)
         )
+        // Smart Stack: rise to the top around dawn, sunrise and sunset (30 min before .. 10 min after)
+        if let z = times {
+            for t in [z.dawn, z.sunrise, z.sunset] where date >= t.addingTimeInterval(-1800) && date < t.addingTimeInterval(600) {
+                entry.relevance = TimelineEntryRelevance(score: 80, duration: 2400)
+                break
+            }
+        }
+        return entry
     }
 }

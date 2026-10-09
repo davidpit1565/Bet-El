@@ -57,7 +57,24 @@ enum HebrewDay {
         return letters.dropLast().joined() + "\u{05F4}" + letters.last!
     }
 
-    private static func isHebrew(_ lang: String) -> Bool { WidgetL10n.isRTL(lang) }
+    private static func isHebrew(_ lang: String) -> Bool { lang == "he" }
+
+    /// Month names the app itself uses (index.html MONTHS_*), keyed by a canonical English name.
+    private static let monthTables: [String: [String: String]] = [
+        "fr": ["Nisan": "Nissan", "Iyar": "Iyar", "Sivan": "Sivan", "Tammuz": "Tamouz", "Av": "Av", "Elul": "Éloul", "Tishrei": "Tichri",
+               "Cheshvan": "Hèchvan", "Kislev": "Kislev", "Tevet": "Tévét", "Shvat": "Chevat", "Adar": "Adar", "Adar I": "Adar I", "Adar II": "Adar II"],
+        "ru": ["Nisan": "Нисан", "Iyar": "Ияр", "Sivan": "Сиван", "Tammuz": "Таммуз", "Av": "Ав", "Elul": "Элул", "Tishrei": "Тишрей",
+               "Cheshvan": "Хешван", "Kislev": "Кислев", "Tevet": "Тевет", "Shvat": "Шват", "Adar": "Адар", "Adar I": "Адар I", "Adar II": "Адар II"],
+        "ka": ["Nisan": "ნისანი", "Iyar": "იარი", "Sivan": "სივანი", "Tammuz": "თამუზი", "Av": "აბი", "Elul": "ელული", "Tishrei": "თიშრეი",
+               "Cheshvan": "ხეშვანი", "Kislev": "ქისლევი", "Tevet": "თევეთი", "Shvat": "შვატი", "Adar": "ადარი", "Adar I": "ადარი I", "Adar II": "ადარ II"],
+    ]
+
+    private static let weekdayTables: [String: [String]] = [
+        "en": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Shabbat"],
+        "fr": ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Chabbat"],
+        "ru": ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Шаббат"],
+        "ka": ["კვირა", "ორშაბათი", "სამშაბათი", "ოთხშაბათი", "ხუთშაბათი", "პარასკევი", "შაბათი"],
+    ]
 
     private static func monthName(_ date: Date, lang: String) -> String {
         let locale = Locale(identifier: isHebrew(lang) ? "he" : "en")
@@ -69,10 +86,9 @@ enum HebrewDay {
         f.dateFormat = "MMMM"
         let raw = f.string(from: date)
         // Foundation's spellings differ a little from the ones the app itself uses
-        let fixes: [String: String] = isHebrew(lang)
-            ? ["חשוון": "חשון", "סיוון": "סיון"]
-            : ["Tishri": "Tishrei", "Heshvan": "Cheshvan", "Shevat": "Shvat", "Tamuz": "Tammuz"]
-        return fixes[raw] ?? raw
+        if isHebrew(lang) { return ["חשוון": "חשון", "סיוון": "סיון"][raw] ?? raw }
+        let canonical = ["Tishri": "Tishrei", "Heshvan": "Cheshvan", "Shevat": "Shvat", "Tamuz": "Tammuz"][raw] ?? raw
+        return monthTables[lang]?[canonical] ?? canonical
     }
 
     /// Day of the Hebrew month: "כ״ו" / "26".
@@ -94,12 +110,16 @@ enum HebrewDay {
 
     /// Weekday: "יום רביעי" / "Wednesday".
     static func weekdayText(_ date: Date, lang: String) -> String {
-        let locale = Locale(identifier: isHebrew(lang) ? "he" : "en")
+        if let table = weekdayTables[lang] {
+            let idx = Calendar(identifier: .gregorian).component(.weekday, from: date) - 1   // 1 = Sunday
+            return table[max(0, min(6, idx))]
+        }
+        let locale = Locale(identifier: "he")
         let f = DateFormatter()
         f.locale = locale
         f.dateFormat = "EEEE"
         let name = f.string(from: date)
-        return isHebrew(lang) && !name.hasPrefix("יום") ? "יום " + name : name
+        return !name.hasPrefix("יום") ? "יום " + name : name
     }
 
     /// The whole date on one line: "כ״ו תשרי תשפ״ז" / "26 Tishrei 5787".

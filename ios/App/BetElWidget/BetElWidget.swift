@@ -61,6 +61,14 @@ private func textAlign(_ lang: String) -> TextAlignment {
     WidgetL10n.isRTL(lang) ? .trailing : .leading
 }
 
+/// The widgets follow the iPhone's light/dark appearance automatically (switching it in Control
+/// Center re-colours widgets that are already on the Home Screen), instead of a fixed theme.
+struct SystemTheme<Content: View>: View {
+    @Environment(\.colorScheme) private var scheme
+    let build: (String) -> Content
+    var body: some View { build(scheme == .dark ? "dark" : "light") }
+}
+
 // MARK: - Shared pieces
 
 private struct BackgroundView: View {
@@ -96,30 +104,6 @@ private struct StreakBadge: View {
 }
 
 // MARK: - Building blocks
-
-/// A live, system-ticking countdown ("5:26:00") to `target` - driven by
-/// `Text(_, style: .timer)`, so it keeps counting down on the Home/Lock
-/// Screen on its own with no extra timeline entries.
-private struct Countdown: View {
-    let target: Date?
-    let from: Date
-    let size: CGFloat
-    let color: Color
-    var body: some View {
-        if let t = target, t > from {
-            Text(t, style: .timer)
-                .font(.system(size: size, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundColor(color)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-        } else {
-            Text("--:--")
-                .font(.system(size: size, weight: .bold, design: .rounded))
-                .foregroundColor(color)
-        }
-    }
-}
 
 /// [leading content][Spacer][trailing content], flipped for Hebrew so the
 /// label hugs the right edge - the whole widget is laid out left-to-right
@@ -429,7 +413,7 @@ private struct ZmanimWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .environment(\.layoutDirection, .leftToRight)
-        .widgetURL(entry.deepLinkURL)
+        .widgetURL(entry.link("calendar"))
         .widgetBackground(palette: palette)
     }
 }
@@ -456,7 +440,11 @@ struct BetElZmanimWidget: Widget {
     let kind: String = "BetElZmanimWidget"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
-            ZmanimWidgetView(entry: entry)
+            SystemTheme { (theme: String) -> ZmanimWidgetView in
+                var e = entry
+                e.theme = theme
+                return ZmanimWidgetView(entry: e)
+            }
         }
         .configurationDisplayName("זְמַנֵּי הַיּוֹם")
         .description("עֲלוֹת הַשַּׁחַר, זְרִיחָה, חֲצוֹת וּשְׁקִיעָה, עִם סְפִירָה לַאֲחוֹרָה")
@@ -518,7 +506,11 @@ struct BetElTehillimWidget: Widget {
     let kind: String = "BetElTehillimWidget"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
-            TehillimWidgetView(entry: entry)
+            SystemTheme { (theme: String) -> TehillimWidgetView in
+                var e = entry
+                e.theme = theme
+                return TehillimWidgetView(entry: e)
+            }
         }
         .configurationDisplayName("תְּהִלִּים הַיּוֹם")
         .description("הַפְּרָקִים שֶׁל הַיּוֹם בְּגוֹדֶל גָּדוֹל, לִלְחִיצָה וּפְתִיחָה")
@@ -539,7 +531,7 @@ private struct StreakWidgetView: View {
     var body: some View {
         if #available(iOS 16.0, *), family == .accessoryCircular {
             BetElStreakAccessoryCircularView(entry: entry)
-                .widgetURL(entry.deepLinkURL).widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+                .widgetURL(entry.link("tracker")).widgetBackground(palette: BetElTheme.palette(for: entry.theme))
         } else {
             homeBody
         }
@@ -566,7 +558,7 @@ private struct StreakWidgetView: View {
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .environment(\.layoutDirection, .leftToRight)
-        .widgetURL(entry.deepLinkURL)
+        .widgetURL(entry.link("tracker"))
         .widgetBackground(palette: palette)
     }
 }
@@ -575,7 +567,11 @@ struct BetElStreakWidget: Widget {
     let kind: String = "BetElStreakWidget"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
-            StreakWidgetView(entry: entry)
+            SystemTheme { (theme: String) -> StreakWidgetView in
+                var e = entry
+                e.theme = theme
+                return StreakWidgetView(entry: e)
+            }
         }
         .configurationDisplayName("רֶצֶף לִמּוּד")
         .description("כַּמָּה יָמִים בְּרֶצֶף לָמַדְתָּ")
@@ -623,7 +619,7 @@ struct BetElWidgetEntryView: View {
         // explicitly here rather than left to inherit from the OS
         // locale (which the widget extension would otherwise pick up).
         .environment(\.layoutDirection, .leftToRight)
-        .widgetURL(entry.deepLinkURL)
+        .widgetURL(entry.link("calendar"))
         .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
 }
@@ -655,7 +651,11 @@ struct BetElWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
-            BetElWidgetEntryView(entry: entry)
+            SystemTheme { (theme: String) -> BetElWidgetEntryView in
+                var e = entry
+                e.theme = theme
+                return BetElWidgetEntryView(entry: e)
+            }
         }
         .configurationDisplayName("תָּמִיד")
         .description("תַּאֲרִיךְ עִבְרִי, תְּהִלִּים הַיּוֹם וְהִתְקַדְּמוּתְךָ")
@@ -673,13 +673,77 @@ struct BetElWidget: Widget {
     }
 }
 
+// MARK: - StandBy (phone charging on its side): big date + parasha, readable from across the room
+
+/// StandBy shows a systemSmall widget at a large scale (two side by side) and, in night mode, drops the
+/// background and tints everything red - so this one is just big type, no card, and it adapts to
+/// `showsWidgetContainerBackground`.
+@available(iOS 17.0, *)
+struct BetElStandByWidget: Widget {
+    let kind: String = "BetElStandByWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            SystemTheme { (theme: String) -> BetElStandByView in
+                var e = entry
+                e.theme = theme
+                return BetElStandByView(entry: e)
+            }
+        }
+        .configurationDisplayName("תָּאֲרִיךְ גָּדוֹל (StandBy)")
+        .description("הַתַּאֲרִיךְ הָעִבְרִי וְהַפָּרָשָׁה בְּאוֹתִיּוֹת גְּדוֹלוֹת, לְמַצַּב StandBy")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+@available(iOS 17.0, *)
+private struct BetElStandByView: View {
+    @Environment(\.showsWidgetContainerBackground) private var showsBackground
+    let entry: BetElEntry
+    var body: some View {
+        let palette = BetElTheme.palette(for: entry.theme)
+        let rtl = WidgetL10n.isRTL(entry.lang)
+        VStack(alignment: .center, spacing: 0) {
+            Text(entry.weekdayText)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(showsBackground ? palette.inkSoft : .primary)
+                .widgetAccentable(false)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(entry.dayText)
+                .font(.system(size: 64, weight: .heavy))
+                .foregroundColor(showsBackground ? palette.goldBright : .primary)
+                .widgetAccentable()
+                .lineLimit(1).minimumScaleFactor(0.4)
+            Text("\(entry.monthText) \(entry.yearText)")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(showsBackground ? palette.ink : .primary)
+                .lineLimit(1).minimumScaleFactor(0.5)
+            if !entry.parashaText.isEmpty {
+                Text(entry.parashaText)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(showsBackground ? palette.inkSoft : .primary)
+                    .lineLimit(1).minimumScaleFactor(0.5)
+                    .padding(.top, 2)
+            }
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .environment(\.layoutDirection, rtl ? .rightToLeft : .leftToRight)
+        .widgetURL(entry.link("calendar"))
+        .widgetBackground(palette: palette)
+    }
+}
+
 /// Lock Screen date: rectangle (date + parasha/holiday), circle (day + month), inline.
 @available(iOS 16.0, *)
 struct BetElDateLockWidget: Widget {
     let kind: String = "BetElDateLockWidget"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
-            BetElDateLockView(entry: entry)
+            SystemTheme { (theme: String) -> BetElDateLockView in
+                var e = entry
+                e.theme = theme
+                return BetElDateLockView(entry: e)
+            }
         }
         .configurationDisplayName("תַּאֲרִיךְ עִבְרִי")
         .description("הַתַּאֲרִיךְ הָעִבְרִי, הַפָּרָשָׁה אוֹ הֶחָג")
@@ -700,7 +764,7 @@ private struct BetElDateLockView: View {
             }
         }
         .environment(\.layoutDirection, .leftToRight)   // so "trailing" is always the physical right
-        .widgetURL(entry.deepLinkURL)
+        .widgetURL(entry.link("calendar"))
         .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
 }

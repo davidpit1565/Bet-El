@@ -39,11 +39,19 @@ enum BetElSharedData {
         /// built by the app (hebcal): the holiday on that day, else the coming
         /// Shabbat's parasha. The widget can't compute either, so it just looks up today.
         var dayLabelsJSON: String?
+        /// JSON `[{"d":"2026-10-07","a":dawn,"r":sunrise,"c":chatzot,"s":sunset,"t":tzeit?}]` (ISO times) -
+        /// the app's own exact zmanim for ~60 days; the widget only falls back to its own
+        /// approximation (Solar.swift) when a day is missing.
+        var zmanimJSON: String?
+        /// JSON `[{"d":"2027-04-23","n":1},...]` - the Omer count for the coming days (empty outside the Omer).
+        var omerJSON: String?
+        /// JSON `[{"t":ISO time,"l":label},...]` - every Shabbat/Yom Tov lighting for ~60 days (the candle widget moves on by itself).
+        var candlesJSON: String?
 
         static let placeholder = Snapshot(
             streakCount: 0, streakBest: 0, theme: "dark", lang: "he",
             latitude: 51.2194, longitude: 4.4025,
-            candleTimeISO: nil, candleLabel: nil, dayLabelsJSON: nil
+            candleTimeISO: nil, candleLabel: nil, dayLabelsJSON: nil, zmanimJSON: nil, omerJSON: nil, candlesJSON: nil
         )
 
         /// Parasha / holiday text for `date` ("" until the app has synced, or past the synced range).

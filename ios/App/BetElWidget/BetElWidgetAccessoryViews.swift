@@ -262,6 +262,94 @@ private struct BetElSunLockView: View {
             if family == .accessoryCircular { BetElSunCircularView(entry: entry) }
             else { BetElSunRectangularView(entry: entry) }
         }
+        .widgetURL(entry.link("calendar"))
+        .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
+    }
+}
+
+
+// MARK: - Sefirat HaOmer (counts only during the Omer; otherwise a quiet placeholder)
+
+@available(iOS 16.0, *)
+struct BetElOmerCircularView: View {
+    let entry: BetElEntry
+    var body: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            if let n = entry.omerDay {
+                VStack(spacing: 0) {
+                    Text(WidgetL10n.t("omer", lang: entry.lang)).font(.system(size: 11, weight: .semibold))
+                        .lineLimit(1).minimumScaleFactor(0.5)
+                    Text("\(n)").font(.system(size: 26, weight: .heavy, design: .rounded))
+                }
+            } else {
+                Image(systemName: "sparkles").font(.system(size: 18))
+            }
+        }
+        .widgetAccentable()
+    }
+}
+
+@available(iOS 16.0, *)
+struct BetElOmerRectangularView: View {
+    let entry: BetElEntry
+    var body: some View {
+        let isRTL = WidgetL10n.isRTL(entry.lang)
+        let align: Alignment = isRTL ? .trailing : .leading
+        VStack(alignment: isRTL ? .trailing : .leading, spacing: 1) {
+            if let n = entry.omerDay {
+                Text(WidgetL10n.omerDayLine(n, lang: entry.lang))
+                    .font(.system(size: 17, weight: .bold))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity, alignment: align)
+                let weeks = WidgetL10n.omerWeeksLine(n, lang: entry.lang)
+                if !weeks.isEmpty {
+                    Text(weeks)
+                        .font(.system(size: 14, weight: .medium))
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                        .frame(maxWidth: .infinity, alignment: align)
+                }
+            } else {
+                Text(WidgetL10n.t("omerOutside", lang: entry.lang))
+                    .font(.system(size: 15, weight: .bold))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity, alignment: align)
+                Text(WidgetL10n.t("omerSoon", lang: entry.lang))
+                    .font(.system(size: 12, weight: .regular))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .opacity(0.7)
+                    .frame(maxWidth: .infinity, alignment: align)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: align)
+        .widgetAccentable()
+    }
+}
+
+@available(iOS 16.0, *)
+struct BetElOmerLockWidget: Widget {
+    let kind: String = "BetElOmerLockWidget"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BetElProvider()) { entry in
+            BetElOmerLockView(entry: entry)
+        }
+        .configurationDisplayName("סְפִירַת הָעֹמֶר")
+        .description("הַיּוֹם בָּעֹמֶר - מוֹפִיעַ רַק בִּימֵי הַסְּפִירָה")
+        .supportedFamilies([.accessoryCircular, .accessoryRectangular])
+    }
+}
+
+@available(iOS 16.0, *)
+private struct BetElOmerLockView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: BetElEntry
+    var body: some View {
+        Group {
+            if family == .accessoryCircular { BetElOmerCircularView(entry: entry) }
+            else { BetElOmerRectangularView(entry: entry) }
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .widgetURL(entry.link("calendar"))
         .widgetBackground(palette: BetElTheme.palette(for: entry.theme))
     }
 }

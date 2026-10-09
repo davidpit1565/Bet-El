@@ -23,11 +23,14 @@ final class HomeEditOverlay: UIView {
     var runJS: ((String) -> Void)?
     /// Bottom edge of the native header, so the pills sit just under it.
     var topInset: (() -> CGFloat)?
+    /// Called when the overlay appears so the owner can lift it above the native header (which otherwise
+    /// covers the + / check pills and swallows their taps).
+    var onShow: (() -> Void)?
 
     private var minusButtons: [String: UIButton] = [:]
     private var resizeHandles: [String: ResizeHandle] = [:]
-    private let addButton = HomeEditOverlay.glassButton(symbol: "plus", pointSize: 16, size: CGSize(width: 56, height: 36))
-    private let doneButton = HomeEditOverlay.glassButton(symbol: "checkmark", pointSize: 16, size: CGSize(width: 56, height: 36))
+    private let addButton = HomeEditOverlay.glassButton(symbol: "plus", pointSize: 18, size: CGSize(width: 68, height: 44))
+    private let doneButton = HomeEditOverlay.glassButton(symbol: "checkmark", pointSize: 18, size: CGSize(width: 68, height: 44))
     private var pillsInstalled = false
 
     override init(frame: CGRect) {
@@ -88,24 +91,25 @@ final class HomeEditOverlay: UIView {
     }
 
     private func layoutPills() {
-        let y = (topInset?() ?? 0) + 4
+        // Comfortably below the status bar / Dynamic Island and the native header, never under them
+        let y = (topInset?() ?? 0) + 10
         // Physical corners (like the iPhone's own edit mode): + on the left, check on the right
-        addButton.frame = CGRect(x: 16, y: y, width: 56, height: 36)
-        doneButton.frame = CGRect(x: bounds.width - 16 - 56, y: y, width: 56, height: 36)
+        addButton.frame = CGRect(x: 16, y: y, width: 68, height: 44)
+        doneButton.frame = CGRect(x: bounds.width - 16 - 68, y: y, width: 68, height: 44)
     }
 
     // MARK: - Updating from JS
 
     func apply(specs: [Spec], rtl: Bool, isDark: Bool) {
         overrideUserInterfaceStyle = isDark ? .dark : .light
-        isHidden = false
+        if isHidden { isHidden = false; onShow?() }
         installPills()
         layoutPills()
         bringSubviewToFront(addButton)
         bringSubviewToFront(doneButton)
 
         let minusSize: CGFloat = 28
-        let handleSize: CGFloat = 40
+        let handleSize: CGFloat = 56
         var keepMinus = Set<String>()
         var keepResize = Set<String>()
 
@@ -140,6 +144,7 @@ final class HomeEditOverlay: UIView {
                     addSubview(handle)
                     resizeHandles[spec.id] = handle
                 }
+                handle.rtl = rtl
                 // bottom corner on the reading-direction end side
                 let cx = rtl ? spec.frame.minX + handleSize / 2 + 2 : spec.frame.maxX - handleSize / 2 - 2
                 handle.frame = CGRect(x: cx - handleSize / 2, y: spec.frame.maxY - handleSize - 2, width: handleSize, height: handleSize)
@@ -168,19 +173,42 @@ final class ResizeHandle: UIView {
     init(id: String) {
         self.id = id
         super.init(frame: .zero)
-        let glass = HomeEditOverlay.glassButton(symbol: "arrow.up.left.and.arrow.down.right", pointSize: 12, size: CGSize(width: 32, height: 32))
-        glass.isUserInteractionEnabled = false   // the pan below owns all touches
-        glass.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(glass)
-        NSLayoutConstraint.activate([
-            glass.centerXAnchor.constraint(equalTo: centerXAnchor),
-            glass.centerYAnchor.constraint(equalTo: centerYAnchor),
-            glass.widthAnchor.constraint(equalToConstant: 32),
-            glass.heightAnchor.constraint(equalToConstant: 32),
-        ])
+        // a small curved corner grip drawn like the one on an iPhone widget (no arrows, no circle)
+        isOpaque = false
+        backgroundColor = .clear
+        let grip = CAShapeLayer()
+        let r: CGFloat = 20
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: r, y: 0))
+        path.addQuadCurve(to: CGPoint(x: 0, y: r), controlPoint: CGPoint(x: r, y: r))
+        grip.path = path.cgPath
+        grip.fillColor = UIColor.clear.cgColor
+        grip.strokeColor = UIColor.white.cgColor
+        grip.lineWidth = 4
+        grip.lineCap = .round
+        grip.shadowColor = UIColor.black.cgColor
+        grip.shadowOpacity = 0.45
+        grip.shadowRadius = 2
+        grip.shadowOffset = .zero
+        grip.frame = CGRect(x: 0, y: 0, width: r, height: r)
+        gripLayer = grip
+        layer.addSublayer(grip)
         accessibilityLabel = "Resize"
         isAccessibilityElement = true
-        addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(pan(_:))))
+        let panGR = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
+        addGestureRecognizer(panGR)
+    }
+
+    private var gripLayer: CAShapeLayer?
+    var rtl = false { didSet { setNeedsLayout() } }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // bottom-trailing corner of the handle; mirrored in RTL
+        guard let grip = gripLayer else { return }
+        let r: CGFloat = 20
+        grip.frame = CGRect(x: rtl ? 8 : bounds.width - r - 8, y: bounds.height - r - 8, width: r, height: r)
+        grip.setAffineTransform(rtl ? CGAffineTransform(scaleX: -1, y: 1) : .identity)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -205,9 +233,12 @@ final class ResizeHandle: UIView {
 /// button that isn't on the home yet.
 final class HomeAddSheetController: UITableViewController, UIAdaptivePresentationControllerDelegate {
     var rows: [(id: String, label: String)] = []
+    var installed: [(id: String, label: String)] = []
+    var addHeader = ""
+    var installedHeader = ""
     var resetLabel = ""
     var emptyLabel = ""
-    var onFinish: ((String?, Bool) -> Void)?
+    var onFinish: ((String?, Bool, String?) -> Void)?
     private var finished = false
 
     override init(style: UITableView.Style) { super.init(style: style) }
@@ -220,41 +251,70 @@ final class HomeAddSheetController: UITableViewController, UIAdaptivePresentatio
 
     @objc private func closeTapped() { finish(nil, false) }
 
-    func finish(_ id: String?, _ reset: Bool) {
+    func finish(_ id: String?, _ reset: Bool, remove: String? = nil) {
         guard !finished else { return }
         finished = true
         let callback = onFinish
-        dismiss(animated: true) { callback?(id, reset) }
+        dismiss(animated: true) { callback?(id, reset, remove) }
     }
 
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         guard !finished else { return }
         finished = true
-        onFinish?(nil, false)
+        onFinish?(nil, false, nil)
     }
 
-    override func numberOfSections(in tableView: UITableView) -> Int { resetLabel.isEmpty ? 1 : 2 }
+    // sections: 0 = available to add, 1 = already on the home (tap the minus to remove), 2 = reset
+    private var sectionKinds: [Int] {
+        var k = [0]
+        if !installed.isEmpty { k.append(1) }
+        if !resetLabel.isEmpty { k.append(2) }
+        return k
+    }
+
+    override func numberOfSections(in tableView: UITableView) -> Int { sectionKinds.count }
+
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch sectionKinds[section] {
+        case 0: return addHeader.isEmpty ? nil : addHeader
+        case 1: return installedHeader.isEmpty ? nil : installedHeader
+        default: return nil
+        }
+    }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        section == 0 ? max(rows.count, rows.isEmpty ? 1 : 0) : 1
+        switch sectionKinds[section] {
+        case 0: return max(rows.count, 1)
+        case 1: return installed.count
+        default: return 1
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
         var content = cell.defaultContentConfiguration()
-        if indexPath.section == 1 {
+        switch sectionKinds[indexPath.section] {
+        case 2:
             content.text = resetLabel
             content.textProperties.color = .systemRed
-        } else if rows.isEmpty {
-            content.text = emptyLabel
-            content.textProperties.color = .secondaryLabel
-            cell.selectionStyle = .none
-        } else {
-            content.text = rows[indexPath.row].label
-            let plus = UIImageView(image: UIImage(systemName: "plus.circle.fill"))
-            plus.tintColor = .betelGold
-            plus.sizeToFit()
-            cell.accessoryView = plus
+        case 1:
+            content.text = installed[indexPath.row].label
+            let minus = UIImageView(image: UIImage(systemName: "minus.circle.fill"))
+            minus.tintColor = .systemRed
+            minus.sizeToFit()
+            cell.accessoryView = minus
+        default:
+            if rows.isEmpty {
+                content.text = emptyLabel
+                content.textProperties.color = .secondaryLabel
+                cell.selectionStyle = .none
+            } else {
+                content.text = rows[indexPath.row].label
+                let plus = UIImageView(image: UIImage(systemName: "plus.circle.fill"))
+                plus.tintColor = .betelGold
+                plus.sizeToFit()
+                cell.accessoryView = plus
+            }
         }
         cell.contentConfiguration = content
         return cell
@@ -262,9 +322,13 @@ final class HomeAddSheetController: UITableViewController, UIAdaptivePresentatio
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if indexPath.section == 1 { finish(nil, true); return }
-        guard !rows.isEmpty else { return }
-        finish(rows[indexPath.row].id, false)
+        switch sectionKinds[indexPath.section] {
+        case 2: finish(nil, true)
+        case 1: finish(nil, false, remove: installed[indexPath.row].id)
+        default:
+            guard !rows.isEmpty else { return }
+            finish(rows[indexPath.row].id, false)
+        }
     }
 }
 
@@ -278,11 +342,15 @@ extension MainViewController {
         (presentedViewController ?? self).present(alert, animated: true)
     }
 
-    func homeEditSheet(title: String, rows: [(id: String, label: String)], resetLabel: String, emptyLabel: String,
-                       rtl: Bool, isDark: Bool, completion: @escaping (String?, Bool) -> Void) {
+    func homeEditSheet(title: String, rows: [(id: String, label: String)], installed: [(id: String, label: String)],
+                       addHeader: String, installedHeader: String, resetLabel: String, emptyLabel: String,
+                       rtl: Bool, isDark: Bool, completion: @escaping (String?, Bool, String?) -> Void) {
         let list = HomeAddSheetController(style: .insetGrouped)
         list.title = title
         list.rows = rows
+        list.installed = installed
+        list.addHeader = addHeader
+        list.installedHeader = installedHeader
         list.resetLabel = resetLabel
         list.emptyLabel = emptyLabel
         list.onFinish = completion
@@ -360,15 +428,22 @@ public class NativeHomeEditBridge: CAPPlugin, CAPBridgedPlugin {
         let emptyLabel = call.getString("emptyLabel") ?? ""
         let rtl = call.getBool("rtl") ?? true
         let isDark = call.getBool("isDark") ?? false
-        let rawRows = call.getArray("rows") ?? []
+        let addHeader = call.getString("addHeader") ?? ""
+        let installedHeader = call.getString("installedHeader") ?? ""
         var rows: [(id: String, label: String)] = []
-        for case let d as [String: Any] in rawRows {
+        for case let d as [String: Any] in (call.getArray("rows") ?? []) {
             rows.append((d["id"] as? String ?? "", d["label"] as? String ?? ""))
+        }
+        var installed: [(id: String, label: String)] = []
+        for case let d as [String: Any] in (call.getArray("installed") ?? []) {
+            installed.append((d["id"] as? String ?? "", d["label"] as? String ?? ""))
         }
         DispatchQueue.main.async {
             guard let controller = NativeHomeEditBridge.activeController else { call.resolve([:]); return }
-            controller.homeEditSheet(title: title, rows: rows, resetLabel: resetLabel, emptyLabel: emptyLabel, rtl: rtl, isDark: isDark) { id, reset in
+            controller.homeEditSheet(title: title, rows: rows, installed: installed, addHeader: addHeader, installedHeader: installedHeader,
+                                     resetLabel: resetLabel, emptyLabel: emptyLabel, rtl: rtl, isDark: isDark) { id, reset, remove in
                 if let id = id { call.resolve(["id": id]) }
+                else if let remove = remove { call.resolve(["remove": remove]) }
                 else if reset { call.resolve(["reset": true]) }
                 else { call.resolve([:]) }
             }

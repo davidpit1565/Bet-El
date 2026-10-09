@@ -29,6 +29,7 @@ class MainViewController: CAPBridgeViewController {
     private let feedbackForm = NativeFeedbackFormView()
     private let toastView = NativeToastView()
     let homeEditOverlay = HomeEditOverlay()
+    private let scrollTopCatcher = ScrollTopCatcher()
     private let settingsView = NativeSettingsView()
     /// The app's own language direction (S.lang), from the last tab bar
     /// configure() - also used to place the tools FAB on the matching side.
@@ -48,9 +49,8 @@ class MainViewController: CAPBridgeViewController {
     /// one more place for the two to drift out of sync.
     static let tabOrder: [(id: String, icon: String)] = [
         ("home", "house.fill"),
-        ("tehillim", "book.closed.fill"),
-        ("prayers", "books.vertical.fill"),
         ("calendar", "calendar"),
+        ("prayers", "books.vertical.fill"),
         ("settings", "gearshape.fill"),
         // Not a screen of its own - selecting it opens the Library search
         // (window.NativeSearchHost) and the bar re-selects the real tab.
@@ -66,24 +66,95 @@ class MainViewController: CAPBridgeViewController {
     /// proxies (so index.html hides its HTML nav/FAB/etc. in favor of the
     /// native ones), but every call into them rejects as unimplemented and
     /// no native UI ever appears.
-    /// Tells the web app whether this is a development install, before any
-    /// page script runs: there is no App Store/TestFlight receipt on a build
-    /// installed straight from Xcode (Debug or Release) or on the simulator.
-    /// index.html uses `window.__BETEL_DEV_BUILD` to keep such installs out
-    /// of the Firebase visit counter, live presence and Analytics, so
-    /// repeated test installs don't inflate the real user numbers.
-    override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
-        let configuration = super.webViewConfiguration(for: instanceConfiguration)
+    ///
+    /// Adds our `WKUserScript`s directly to the webview's own
+    /// `userContentController` from `capacitorDidLoad()` (webView is set by
+    /// then, but `loadWebView()`/the first navigation hasn't happened yet).
+    /// Overriding `webViewConfiguration(for:)` to call `addUserScript` on
+    /// its `configuration.userContentController` does NOT work - Capacitor's
+    /// own `prepareWebView` throws that whole object away right after,
+    /// replacing it with `delegationHandler.contentController` (see
+    /// `CAPBridgeViewController.prepareWebView`), so any script added there
+    /// is silently discarded before the webview is even created with it.
+    private func injectBootstrapUserScripts() {
+        guard let userContentController = webView?.configuration.userContentController else { return }
+
+        // Tells the web app whether this is a development install, before
+        // any page script runs: there is no App Store/TestFlight receipt on
+        // a build installed straight from Xcode (Debug or Release) or on
+        // the simulator. index.html uses `window.__BETEL_DEV_BUILD` to keep
+        // such installs out of the Firebase visit counter, live presence
+        // and Analytics, so repeated test installs don't inflate the real
+        // user numbers.
         let hasReceipt = Bundle.main.appStoreReceiptURL
             .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
-        let script = WKUserScript(
+        let devBuildScript = WKUserScript(
             source: "window.__BETEL_DEV_BUILD = \(hasReceipt ? "false" : "true");",
             injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        configuration.userContentController.addUserScript(script)
-        return configuration
+        userContentController.addUserScript(devBuildScript)
+
+        if let shotScript = screenshotBootstrapScript() {
+            userContentController.addUserScript(shotScript)
+        }
+    }
+
+    /// Debug-only App Store screenshot automation: lets `simctl launch` (with
+    /// SIMCTL_CHILD_BETEL_SHOT_* env vars) pre-seed the same localStorage/
+    /// sessionStorage keys index.html's own `shotLink()` writes before a
+    /// reload, so the existing JS-side screenshot flow runs on a plain app
+    /// launch instead of `simctl openurl betel://shot?...` - the latter
+    /// always triggers the OS "Open in" confirmation dialog, which nothing
+    /// in this sandboxed environment can dismiss programmatically.
+    private func screenshotBootstrapScript() -> WKUserScript? {
+        // Belt-and-suspenders alongside index.html's own SHOT_ALLOWED check:
+        // a real App Store/TestFlight install always has a receipt, so this
+        // never activates there even if the env vars were somehow present.
+        let hasReceipt = Bundle.main.appStoreReceiptURL
+            .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        guard !hasReceipt else { return nil }
+
+        let env = ProcessInfo.processInfo.environment
+        guard let screen = env["BETEL_SHOT_SCREEN"], !screen.isEmpty else { return nil }
+        let lang = env["BETEL_SHOT_LANG"] ?? ""
+        let theme = env["BETEL_SHOT_THEME"] ?? ""
+        let scroll = env["BETEL_SHOT_SCROLL"] ?? ""
+
+        func jsString(_ s: String) -> String {
+            let data = try? JSONSerialization.data(withJSONObject: [s])
+            let encoded = data.flatMap { String(data: $0, encoding: .utf8) } ?? "[\"\"]"
+            return String(encoded.dropFirst().dropLast())
+        }
+
+        let source = """
+        (function(){
+          try {
+            var screen = \(jsString(screen));
+            var lang = \(jsString(lang));
+            var theme = \(jsString(theme));
+            var scroll = \(jsString(scroll));
+            var s = {};
+            try { s = JSON.parse(localStorage.getItem('betel_settings') || '{}'); } catch(e) {}
+            if (lang && ['he','en','fr','ru','ka'].indexOf(lang) !== -1) s.lang = lang;
+            if (theme && ['light','dark'].indexOf(theme) !== -1) s.theme = theme;
+            localStorage.setItem('betel_settings', JSON.stringify(s));
+            localStorage.setItem('betel_onboard_v1', '1');
+            // Chok LeYisrael's own pace wizard (halacha/musar/Tehillim division
+            // questions) is a SEPARATE first-run gate from the main onboarding
+            // screen above - go() redirects any of CK_PACE_FAMILY_TABS (chokList,
+            // chokReader, etc.) to it until this is set, regardless of
+            // betel_onboard_v1. The app's own defaults are enough to render the
+            // reader normally, so just mark it done rather than re-answer it here.
+            localStorage.setItem('betel_chok_pace_v1', '1');
+            sessionStorage.setItem('betel_shot_screen', screen);
+            if (scroll) sessionStorage.setItem('betel_shot_scroll', scroll);
+          } catch(e) {}
+        })();
+        """
+        return WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true)
     }
 
     override func capacitorDidLoad() {
+        injectBootstrapUserScripts()
         bridge?.registerPluginInstance(NativeTabBarBridge())
         bridge?.registerPluginInstance(NativeToolsFabBridge())
         bridge?.registerPluginInstance(NativeTopBarBridge())
@@ -91,6 +162,10 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeSettingsBridge())
         bridge?.registerPluginInstance(NativeToastBridge())
         bridge?.registerPluginInstance(NativeHomeEditBridge())
+        bridge?.registerPluginInstance(NativeCalendarBridge())
+        bridge?.registerPluginInstance(NativeLibraryBridge())
+        bridge?.registerPluginInstance(NativeHomeBridge())
+        bridge?.registerPluginInstance(NativeSystemBridge())
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
@@ -105,6 +180,10 @@ class MainViewController: CAPBridgeViewController {
         setupFeedbackForm()
         setupToast()
         setupHomeEdit()
+        setupScrollToTop()
+        setupEdgeSwipeBack()
+        setupPullToRefresh()
+        setupSearchBar()
         setupSettingsView()
         layoutToolsFab()
         topBar.onActionsChanged = { [weak self] in self?.layoutToolsFab() }
@@ -112,6 +191,9 @@ class MainViewController: CAPBridgeViewController {
         NativeToolsFabBridge.activeController = self
         NativeTopBarBridge.activeController = self
         NativeModalBridge.activeController = self
+        NativeCalendarBridge.activeController = self
+        NativeLibraryBridge.activeController = self
+        NativeHomeBridge.activeController = self
         NativeToastBridge.activeController = self
         NativeHomeEditBridge.activeController = self
         NativeSettingsBridge.activeController = self
@@ -331,12 +413,42 @@ class MainViewController: CAPBridgeViewController {
             self.webView?.evaluateJavaScript(js, completionHandler: nil)
         }
         topBar.isHidden = false
+        resetTopBarCollapse()
         reportHeightToWebView()
     }
 
     func setTopBarVisible(_ visible: Bool) {
         topBar.isHidden = !visible
+        resetTopBarCollapse()
         reportHeightToWebView()
+    }
+
+    // MARK: - Scroll-away header (like Safari / Music: the bar tucks away on scroll down, returns on scroll up)
+
+    private var topBarCollapsed = false
+
+    private func resetTopBarCollapse() {
+        topBarCollapsed = false
+        topBar.transform = .identity
+        topBar.alpha = 1
+    }
+
+    /// Slides the header row up (the status-bar strip stays so the clock keeps its backdrop) and gives the freed
+    /// height to the web content, keeping the text where it is on screen by shifting the scroll offset the same amount.
+    func setTopBarCollapsed(_ collapsed: Bool) {
+        guard !topBar.isHidden, collapsed != topBarCollapsed else { return }
+        topBarCollapsed = collapsed
+        let d = topBar.contentHeight
+        UIView.animate(withDuration: 0.28, delay: 0, options: [.curveEaseInOut, .beginFromCurrentState, .allowUserInteraction]) {
+            self.topBar.transform = collapsed ? CGAffineTransform(translationX: 0, y: -d) : .identity
+            self.topBar.alpha = collapsed ? 0 : 1
+        }
+        let sign = collapsed ? -1 : 1
+        let js = """
+        (function(){var r=document.documentElement;var cur=parseFloat(getComputedStyle(r).getPropertyValue('--native-header-h'))||0;
+        r.style.setProperty('--native-header-h',Math.max(0,cur+(\(sign)*\(d)))+'px');window.scrollBy(0,\(sign)*\(d));})();
+        """
+        webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
     /// Spans the whole view (its own backdrop dims everything beneath it,
@@ -416,10 +528,335 @@ class MainViewController: CAPBridgeViewController {
         feedbackForm.dismiss()
     }
 
+    /// The app scrolls inside the web page (on <body>), so iOS's own "tap the status bar to scroll to
+    /// top" has nothing to scroll. A tiny invisible UIScrollView that is the ONLY one with
+    /// `scrollsToTop` catches that system gesture; its delegate runs the page's own smooth scroll
+    /// (window.betelScrollTop) instead. Tapping the header title does the same.
+    private func setupScrollToTop() {
+        webView?.scrollView.scrollsToTop = false
+        let scrollToTop: () -> Void = { [weak self] in
+            self?.webView?.evaluateJavaScript("window.betelScrollTop && window.betelScrollTop()", completionHandler: nil)
+            if let lib = self?.nativeLibraryView, !lib.isHidden { lib.scrollToTop() }
+            if let home = self?.nativeHomeView, !home.isHidden { home.scrollToTop() }
+            if let sv = self?.nativeCalendarScroll, self?.nativeCalendarView?.isHidden == false {
+                sv.setContentOffset(CGPoint(x: 0, y: -sv.adjustedContentInset.top), animated: true)
+            }
+        }
+        scrollTopCatcher.frame = CGRect(x: 0, y: 0, width: 2, height: 2)
+        scrollTopCatcher.onScrollToTop = scrollToTop
+        view.insertSubview(scrollTopCatcher, at: 0)
+        topBar.onTitleTap = scrollToTop
+    }
+
+    // MARK: - Native library screen (UICollectionView + glass cards) - see NativeLibrary.swift
+    private var nativeLibraryView: NativeLibraryView?
+
+    func showNativeLibrary(items: [NLItem], rtl: Bool, isDark: Bool) {
+        let lib: NativeLibraryView
+        if let existing = nativeLibraryView {
+            lib = existing
+        } else {
+            lib = NativeLibraryView()
+            lib.translatesAutoresizingMaskIntoConstraints = false
+            lib.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            lib.onSelect = { [weak self] key in
+                self?.webView?.evaluateJavaScript("window.NativeLibraryHost && window.NativeLibraryHost.open('\(key)')", completionHandler: nil)
+            }
+            view.insertSubview(lib, belowSubview: tabBar)
+            NSLayoutConstraint.activate([
+                lib.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+                lib.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                lib.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                lib.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            nativeLibraryView = lib
+        }
+        lib.isHidden = false
+        lib.show(items: items, rtl: rtl, isDark: isDark)
+    }
+
+    func hideNativeLibrary() { nativeLibraryView?.isHidden = true }
+
+    // MARK: - Native home screen (UICollectionView + real edit mode) - see NativeHome.swift
+    private var nativeHomeView: NativeHomeView?
+
+    func showNativeHome(items: [NHItem], editing: Bool, canEdit: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
+        let home: NativeHomeView
+        if let existing = nativeHomeView {
+            home = existing
+        } else {
+            home = NativeHomeView()
+            home.translatesAutoresizingMaskIntoConstraints = false
+            home.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            home.js = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+            view.insertSubview(home, belowSubview: tabBar)
+            NSLayoutConstraint.activate([
+                home.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+                home.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                home.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                home.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            home.setLogo(pendingHomeLogo)
+            nativeHomeView = home
+            if !nativeHomeEverShown {   // the very first appearance (right after the launch overlay) eases in
+                nativeHomeEverShown = true
+                home.alpha = 0
+                UIView.animate(withDuration: 0.28, delay: 0, options: [.curveEaseOut]) { home.alpha = 1 }
+            }
+        }
+        home.isHidden = false
+        home.show(items: items, editing: editing, canEdit: canEdit, rtl: rtl, isDark: isDark, pool: pool)
+    }
+
+    /// Hiding also takes the view OUT of the hierarchy, so a stale native overlay can never sit over (or
+    /// steal touches from) the web view's own scrolling; it is recreated on the next show.
+    func hideNativeHome() { nativeHomeView?.removeFromSuperview(); nativeHomeView = nil }
+    func updateNativeHomeNumbers(_ map: [String: String]) { nativeHomeView?.updateNumbers(map) }
+    func setNativeHomeLogo(_ image: UIImage?) { pendingHomeLogo = image; nativeHomeView?.setLogo(image) }
+    private var pendingHomeLogo: UIImage?
+    private var nativeHomeEverShown = false
+
+    // MARK: - Native calendar screen (UICalendarView, iOS 16+) - see NativeCalendar.swift
+    private var nativeCalendarView: UIView?
+    private var nativeCalendarScroll: UIScrollView?
+
+    func showNativeCalendar(rtl: Bool, isDark: Bool, lang: String, ymd: String, civil: Bool,
+                            hebrew: String, civilLabel: String, jump: String, today: String, ok: String, share: String) {
+        guard #available(iOS 16.0, *) else { return }
+        let cal: NativeCalendarView
+        if let existing = nativeCalendarView as? NativeCalendarView {
+            cal = existing
+        } else {
+            cal = NativeCalendarView()
+            cal.translatesAutoresizingMaskIntoConstraints = false
+            cal.runJS = { [weak self] js, done in self?.webView?.evaluateJavaScript(js) { r, _ in done(r) } }
+            cal.fire = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+            cal.present = { [weak self] vc in (self?.presentedViewController ?? self)?.present(vc, animated: true) }
+            cal.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            view.insertSubview(cal, belowSubview: tabBar)
+            NSLayoutConstraint.activate([
+                cal.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+                cal.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                cal.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                cal.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            nativeCalendarView = cal
+            nativeCalendarScroll = cal.scrollView
+        }
+        var c = NativeCalendarView.Config()
+        c.rtl = rtl; c.isDark = isDark; c.lang = lang; c.ymd = ymd; c.civil = civil
+        c.hebrewLabel = hebrew; c.civilLabel = civilLabel; c.jumpLabel = jump
+        c.todayLabel = today; c.okLabel = ok; c.shareLabel = share
+        cal.isHidden = false
+        cal.show(c)
+    }
+
+    func hideNativeCalendar() {
+        nativeCalendarView?.isHidden = true
+    }
+
+    // MARK: - Native search field (real UISearchBar). A web <input> cannot be focused from native code
+    // (WKWebView only raises the keyboard for a touch inside the page), so the Search tab shows a genuine
+    // UISearchBar, and what is typed is forwarded to the page's own search box.
+    let nativeSearchBar = UISearchBar()
+    private var searchDebounce: DispatchWorkItem?
+
+    private func setupSearchBar() {
+        nativeSearchBar.searchBarStyle = .minimal
+        nativeSearchBar.showsCancelButton = true
+        nativeSearchBar.autocapitalizationType = .none
+        nativeSearchBar.autocorrectionType = .no
+        nativeSearchBar.delegate = self
+        nativeSearchBar.isHidden = true
+        nativeSearchBar.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nativeSearchBar)
+        NSLayoutConstraint.activate([
+            nativeSearchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            nativeSearchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            nativeSearchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+        ])
+    }
+
+    func showNativeSearchBar() {
+        view.bringSubviewToFront(nativeSearchBar)
+        view.bringSubviewToFront(tabBar)
+        nativeSearchBar.isHidden = false
+        nativeSearchBar.becomeFirstResponder()
+    }
+
+    func hideNativeSearchBar(clear: Bool) {
+        guard !nativeSearchBar.isHidden else { return }
+        nativeSearchBar.resignFirstResponder()
+        nativeSearchBar.isHidden = true
+        if clear {
+            nativeSearchBar.text = ""
+            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery('')", completionHandler: nil)
+        }
+    }
+
+    // MARK: - Native pull-to-refresh (UIKit gesture + glass spinner)
+    // The page scrolls inside the web content (on <body>), so UIRefreshControl - which only reacts to the
+    // WKWebView's own scroll view - never sees a pull. Instead a real UIPanGestureRecognizer watches the
+    // downward drag while JS says the page is at the top (`window.betelCanPull()`), and the indicator is a
+    // UIKit glass capsule (UIGlassEffect on iOS 26, system material before) holding Apple's UIActivityIndicatorView.
+    private let refreshIndicator = UIVisualEffectView(effect: nil)
+    private let refreshSpinner = UIActivityIndicatorView(style: .medium)
+    private let refreshDelegate = RefreshPanDelegate()
+    private var refreshCanPull = false
+    private var refreshDist: CGFloat = 0
+    private var refreshArmed = false
+    private var refreshBusy = false
+
+    private func setupPullToRefresh() {
+        if #available(iOS 26.0, *) { refreshIndicator.effect = UIGlassEffect() }
+        else { refreshIndicator.effect = UIBlurEffect(style: .systemThinMaterial) }
+        refreshIndicator.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+        refreshIndicator.layer.cornerRadius = 22
+        refreshIndicator.clipsToBounds = true
+        refreshIndicator.alpha = 0
+        refreshSpinner.center = CGPoint(x: 22, y: 22)
+        refreshIndicator.contentView.addSubview(refreshSpinner)
+        view.insertSubview(refreshIndicator, belowSubview: tabBar)
+        let g = UIPanGestureRecognizer(target: self, action: #selector(refreshPanned(_:)))
+        g.cancelsTouchesInView = false
+        g.delegate = refreshDelegate
+        webView?.addGestureRecognizer(g)
+    }
+
+    private var refreshBaseY: CGFloat {
+        return topBar.isHidden ? view.safeAreaInsets.top : topBar.frame.maxY
+    }
+
+    private func placeRefreshIndicator(_ dist: CGFloat) {
+        refreshIndicator.center = CGPoint(x: view.bounds.midX, y: refreshBaseY + dist - 22)
+        let p = min(1, dist / 70)
+        refreshIndicator.alpha = p
+        refreshIndicator.transform = CGAffineTransform(scaleX: 0.6 + 0.4 * p, y: 0.6 + 0.4 * p)
+    }
+
+    private func hideRefreshIndicator() {
+        UIView.animate(withDuration: 0.25, animations: {
+            self.refreshIndicator.alpha = 0
+            self.refreshIndicator.center = CGPoint(x: self.view.bounds.midX, y: self.refreshBaseY - 30)
+        }, completion: { _ in
+            self.refreshSpinner.stopAnimating()
+            self.refreshBusy = false
+        })
+    }
+
+    @objc private func refreshPanned(_ g: UIPanGestureRecognizer) {
+        guard let web = webView, !refreshBusy else { return }
+        switch g.state {
+        case .began:
+            refreshCanPull = false; refreshDist = 0; refreshArmed = false
+            let x = g.location(in: view).x
+            guard x > 26 && x < view.bounds.width - 26 else { return }
+            web.evaluateJavaScript("window.betelCanPull ? window.betelCanPull() : false") { [weak self] r, _ in
+                self?.refreshCanPull = (r as? Bool) ?? false
+            }
+        case .changed:
+            guard refreshCanPull else { return }
+            let dy = g.translation(in: view).y
+            guard dy > 0 else { refreshDist = 0; placeRefreshIndicator(0); return }
+            refreshDist = min(110, dy * 0.5)
+            placeRefreshIndicator(refreshDist)
+            if !refreshArmed && refreshDist >= 70 {
+                refreshArmed = true
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } else if refreshArmed && refreshDist < 70 { refreshArmed = false }
+        case .ended, .cancelled, .failed:
+            guard refreshCanPull else { return }
+            if g.state == .ended && refreshDist >= 70 {
+                refreshBusy = true
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                refreshSpinner.startAnimating()
+                UIView.animate(withDuration: 0.2) { self.placeRefreshIndicator(70) }
+                web.evaluateJavaScript("window.betelRefresh && window.betelRefresh()", completionHandler: nil)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { [weak self] in self?.hideRefreshIndicator() }
+            } else {
+                hideRefreshIndicator()
+            }
+            refreshCanPull = false; refreshDist = 0
+        default: break
+        }
+    }
+
+    // MARK: - Interactive edge-swipe back (like UINavigationController's pop gesture)
+    private var edgeCanGoBack = false
+    private var lastTabId: String?
+
+    /// Real system edge-pan recognizers on both edges (the app is RTL-friendly): the page follows the
+    /// finger with a soft shadow, and on release either commits (runs the page's own back action) or
+    /// springs back - same feel as iOS's own swipe-back instead of a one-shot jump.
+    private func setupEdgeSwipeBack() {
+        webView?.scrollView.keyboardDismissMode = .interactive
+        for edge in [UIRectEdge.left, UIRectEdge.right] {
+            let g = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(edgePanned(_:)))
+            g.edges = edge
+            view.addGestureRecognizer(g)
+        }
+    }
+
+    @objc private func edgePanned(_ g: UIScreenEdgePanGestureRecognizer) {
+        guard let web = webView else { return }
+        let w = view.bounds.width
+        let fromLeft = g.edges == .left
+        let raw = g.translation(in: view).x
+        let dist = max(0, fromLeft ? raw : -raw)
+        let sign: CGFloat = fromLeft ? 1 : -1
+        switch g.state {
+        case .began:
+            edgeCanGoBack = false
+            web.evaluateJavaScript("window.betelCanGoBack ? window.betelCanGoBack() : false") { [weak self] r, _ in
+                self?.edgeCanGoBack = (r as? Bool) ?? false
+            }
+        case .changed:
+            // Rubber-band when there is nothing to go back to, full follow otherwise.
+            let d = edgeCanGoBack ? dist : min(dist, 60) * 0.35
+            web.transform = CGAffineTransform(translationX: sign * d, y: 0)
+            web.layer.shadowColor = UIColor.black.cgColor
+            web.layer.shadowOpacity = edgeCanGoBack ? Float(0.25 * min(1, dist / (w * 0.4))) : 0
+            web.layer.shadowRadius = 12
+        case .ended, .cancelled, .failed:
+            let vx = (fromLeft ? 1 : -1) * g.velocity(in: view).x
+            let commit = g.state == .ended && edgeCanGoBack && (dist > w * 0.35 || vx > 800)
+            if commit {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                UIView.animate(withDuration: 0.18, delay: 0, options: .curveEaseOut, animations: {
+                    web.transform = CGAffineTransform(translationX: sign * w, y: 0)
+                    web.alpha = 0.6
+                }, completion: { _ in
+                    web.evaluateJavaScript("window.betelAppBack && window.betelAppBack()") { _, _ in
+                        web.transform = CGAffineTransform(translationX: -sign * w * 0.25, y: 0)
+                        UIView.animate(withDuration: 0.22, delay: 0.05, options: .curveEaseOut, animations: {
+                            web.transform = .identity
+                            web.alpha = 1
+                        }, completion: { _ in web.layer.shadowOpacity = 0 })
+                    }
+                })
+            } else {
+                UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.8,
+                               initialSpringVelocity: 0.5, options: [], animations: {
+                    web.transform = .identity
+                }, completion: { _ in web.layer.shadowOpacity = 0 })
+            }
+        default: break
+        }
+    }
+
     private func setupHomeEdit() {
         homeEditOverlay.frame = view.bounds
         homeEditOverlay.runJS = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
-        homeEditOverlay.topInset = { [weak self] in self?.view.safeAreaInsets.top ?? 0 }
+        homeEditOverlay.topInset = { [weak self] in
+            guard let self = self else { return 0 }
+            // just under the status bar / Dynamic Island, like the iPhone's own edit mode
+            return self.view.safeAreaInsets.top
+        }
+        homeEditOverlay.onShow = { [weak self] in
+            guard let self = self else { return }
+            self.view.bringSubviewToFront(self.homeEditOverlay)
+            self.view.bringSubviewToFront(self.tabBar)
+        }
         view.insertSubview(homeEditOverlay, belowSubview: tabBar)
     }
 
@@ -638,8 +1075,80 @@ extension MainViewController: UITabBarDelegate {
         UISelectionFeedbackGenerator().selectionChanged()
         if tabId == "search" {
             webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
+            showNativeSearchBar()
+            return
+        }
+        hideNativeSearchBar(clear: false)
+        let again = (tabId == lastTabId)
+        lastTabId = tabId
+        if again {
+            // iOS convention: tapping the already-selected tab scrolls to top first, then (if already
+            // at top) behaves like a normal tab tap.
+            webView?.evaluateJavaScript("window.betelTabReselect ? window.betelTabReselect() : false") { [weak self] r, _ in
+                if (r as? Bool) != true {
+                    self?.webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
+                }
+            }
             return
         }
         webView?.evaluateJavaScript("window.go && window.go('\(tabId)')", completionHandler: nil)
     }
+}
+
+
+/// See `MainViewController.setupScrollToTop()`.
+final class ScrollTopCatcher: UIScrollView, UIScrollViewDelegate {
+    var onScrollToTop: (() -> Void)?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        delegate = self
+        scrollsToTop = true
+        isScrollEnabled = true
+        alpha = 0.02                       // must be "visible" for the system to pick it
+        backgroundColor = .clear
+        showsVerticalScrollIndicator = false
+        showsHorizontalScrollIndicator = false
+        contentSize = CGSize(width: 2, height: 4000)
+        contentOffset = CGPoint(x: 0, y: 2000)   // not at the top, so a scroll-to-top is requested
+        isAccessibilityElement = false
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        onScrollToTop?()
+        return false   // never actually scroll this dummy view
+    }
+}
+
+/// Lets the pull-to-refresh pan run alongside the web view's own scrolling, and only starts for a
+/// clearly downward, mostly vertical drag.
+final class RefreshPanDelegate: NSObject, UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+        let v = pan.velocity(in: pan.view)
+        return v.y > 0 && abs(v.y) > abs(v.x) * 1.5
+    }
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+        return true
+    }
+}
+
+extension MainViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchDebounce?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let data = try? JSONSerialization.data(withJSONObject: [searchText]),
+                  let arr = String(data: data, encoding: .utf8) else { return }
+            // arr is a JSON array literal like ["text"]; take its first element
+            self?.webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery(\(arr)[0])", completionHandler: nil)
+        }
+        searchDebounce = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18, execute: work)
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) { searchBar.resignFirstResponder() }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) { hideNativeSearchBar(clear: true) }
 }

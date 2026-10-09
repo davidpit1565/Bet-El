@@ -27,7 +27,7 @@ function walk(dir) {
   for (const name of readdirSync(dir).sort()) {
     const full = join(dir, name);
     const st = statSync(full);
-    if (st.isDirectory()) walk(full);
+    if (st.isDirectory()) { if (full !== join(dataDir, 'booklet')) walk(full); }   // the weekly booklet is replaced every week - never prefetched/cached
     else if (name !== 'manifest.json') out.push('data/' + relative(dataDir, full).split(/\\|\//).join('/'));
   }
 }

@@ -198,7 +198,7 @@ in English as usual.
   (confirm dialog), drag the tile itself after a ~0.17s hold (touch events,
   so a quick swipe still scrolls), a corner arc handle to resize (small ->
   medium -> large), a quiet + and check at the top. `memorial` (לעילוי נשמת)
-  has `keep:true`: it can be moved but never removed. `social` (Instagram/YouTube/TikTok links) is also
+  is removable like the rest (user request). Edit mode only ends via the check pill or leaving Home (`go()` ignores `tab==='home'`). `social` (Instagram/YouTube/TikTok links) is also
   `keep:true` and has `sizes:['s','m']` - two sizes only (small icons / bigger icons).
   The app scrolls on `<body>`, not the window - use `homeScroller()`.
   To offer a new button: add it to `HOME_CATALOG` and give it a renderer
@@ -245,6 +245,18 @@ in English as usual.
   lighting offset is Hebcal's default (18 min before sunset; 40 in
   Jerusalem etc.) - NOT a fixed 20 minutes.
 
+- **Widget data sync** (`syncWidgetData()` in index.html -> `BetElWidgetBridge` -> App Group
+  `SharedData.Snapshot`): besides streak/theme/lang/location, the app pushes pre-computed 60-day tables
+  (`WIDGET_DAYS`): exact zmanim (`zmanim`, same values as the app incl. its custom dawn; the widget's
+  `Solar.swift` is only a fallback), parasha/holiday per day (`dayLabels`), the Omer count (`omer`) and
+  every Shabbat/Yom Tov candle lighting (`candles`, Chanukah deliberately excluded). The widgets keep
+  working for ~2 months without opening the app. `WIDGET_TZEIT_ROLLOVER` (index.html) is **false** until
+  nightfall is added to the app UI; flipping it syncs `tzeit` and the widgets then roll their Hebrew
+  date/parasha/Tehillim at nightfall automatically. Widgets follow the iPhone's light/dark appearance
+  (`SystemTheme`), only "he" lays out RTL (fr/ru/ka are LTR with their own strings in `Localization.swift`),
+  taps deep-link via the `betel://` URL scheme (Info.plist) handled by `openWidgetLink()` (tehillim |
+  calendar | tracker), and Smart Stack relevance is set on zmanim/candle entries. Lock Screen widgets
+  (all accessory families) live in `BetElWidgetAccessoryViews.swift`. None of the Swift is compile-verified.
 - **Tefillin Mirror placement guide** (`MirrorGuide` in index.html): MediaPipe
   Face Landmarker loaded lazily from jsDelivr + Google's model bucket on
   first use (needs internet once; nothing at boot). The bayit's bottom edge
@@ -256,6 +268,58 @@ in English as usual.
   over a hairline line read as a cross) - corner brackets + a dotted
   hairline curve only. The color-only hairline proved ~4cm too low on a
   real photo, which is why segmentation is used.
+
+- **Back / scroll-to-top gestures**: swiping in from either screen edge (<=22px, >70px inward,
+  mostly horizontal) calls `appBack()` (index.html; closes overlays/sheets first, else the
+  topbar back action). Tapping the iPhone status bar or the native header title calls
+  `window.betelScrollTop()` via `ScrollTopCatcher` (MainViewController.swift - a hidden
+  UIScrollView is the only `scrollsToTop` view; the web view's own is off). Swift not
+  compile-verified. The same pair was ported to the friend's halacha-yomit-ios repo (PR #3).
+
+- **Native-feel gestures (index.html, before "Widget taps")**: pull-down-to-refresh
+  (`initPullToRefresh`: at scrollTop 0, re-runs `render()` + `syncWidgetData()`), a long-press
+  action sheet on prayer tiles and Tehillim chapters (`initLongPressMenu`: Open / Share / Copy;
+  add a new target by extending its `find()` selector), and ONE share path - `shareDirect()` /
+  `copyText()` (system share sheet via `navigator.share`, clipboard + toast fallback). Never call
+  `navigator.share` directly in a new feature; go through `shareDirect`. Edge-swipe back is native
+  (`MainViewController.edgePanned`), tapping the active tab again scrolls to top
+  (`betelTabReselect`). New Hebrew UI strings still need nikud-free keys in all four I18N blocks.
+
+- **Always build for the NEWEST iOS (iOS 26 / Liquid Glass) - but keep the app installable on
+  old phones (user's rule).** Design and Apple APIs target the latest iOS: use real system UIKit/
+  SwiftUI/WidgetKit (`UIGlassEffect`, `UIButton.Configuration.glass()`, `UIAlertController`
+  sheets...) behind `if #available(iOS 26, *)`, with a plain fallback so older iOS (down to the
+  15.0 deployment target) still works. Never raise `IPHONEOS_DEPLOYMENT_TARGET` to get newer
+  looks - gate with `#available` instead. Menus/sheets use real system UIKit (e.g.
+  `NativeModal.presentActionSheet`) so they look native on every iOS.
+
+- **Tehillim lives in the Library, not the nav bar** (user request): `LIBRARY_CATS` has a `tehillim`
+  tile between Ketuvim and Mishnah (opens the same `renderTehillim()` screen), and the bottom/native
+  tab bar is just Home / Library / Calendar / Settings (+ native Search). Tehillim's screens count as
+  "Library" for the active-tab highlight (`LIBRARY_NESTED_TABS`, `navActiveTab`). The home screen's
+  Tehillim shortcut still works.
+
+- **"iOS" in a user request means the REAL Apple component, never a web look-alike (user rule, stated
+  repeatedly).** If UIKit/SwiftUI has the control, use it via a native bridge; the HTML version is only the
+  fallback for web/PWA/old iOS. The Calendar tab is the example: `NativeCalendar.swift` (UICalendarView with a
+  real `.hebrew`/`.gregorian` Calendar, UISegmentedControl, glass `UIButton.Configuration`, UIDatePicker sheet
+  for "jump", and a paging UIScrollView day pager: swipe sideways = next/previous day). Day data comes from
+  `window.NativeCalendarHost.day(ymd)` / `.events(a,b)` in index.html (`renderCalendarNative`; needs iOS 16+,
+  `NATIVE_CAL_OK`). The web calendar (`renderCalendar`, `.ical-*` CSS, `calStepDay`) remains the fallback.
+  UPDATE: the user then chose the web calendar look (seg control row + month title with today/jump/chevrons), so
+  `NATIVE_CAL_ENABLED=false` in index.html - the native calendar code is kept but off.
+  Pull-to-refresh is native too (`MainViewController.refreshPanned`: UIPanGestureRecognizer + glass UIActivityIndicatorView, gated by JS `betelCanPull()`; the JS pull is web-only). Still HTML: most list/tile screens.
+
+- **Library category grid is native** (`NativeLibrary.swift`: UICollectionView + compositional layout + glass cards;
+  JS `renderLibrary()` sends `LIBRARY_CATS` titles/colours via `NativeLibrary.show` and gets taps back through
+  `window.NativeLibraryHost.open(key)`; `NATIVE_LIB_ENABLED` toggles it; HTML tiles remain the web fallback). The native
+  overlay is hidden by `render()` whenever TAB !== 'library' - never set the SHOWN flag false yourself before navigating.
+  Next planned conversions: prayers list, then the Library sub-screens.
+
+- **Every visual change must be checked in ALL five languages (he/en/fr/ru/ka), RTL and LTR (user rule)**:
+  screenshot each (set `betel_settings` `{lang}` via `addInitScript`), confirm nothing overflows, arrows/buttons are
+  mirrored correctly, and translated labels read naturally (add exact I18N keys instead of relying on substring
+  fallback, which produced e.g. "Calendar Gregorian").
 
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
@@ -312,6 +376,17 @@ in English as usual.
   with verbose diagnostics before concluding anything. Sequential
   back-to-back browser launches in one Node process are themselves a
   common source of sandbox flakiness unrelated to the app.
+- **A native bridge call that compensates for its own side effect can
+  create a feedback loop with a JS scroll listener.** `setTopBarCollapsed`
+  (Swift) issues its own `window.scrollBy()` to keep content visually
+  anchored when the native header's height changes - that synthetic
+  scroll fires a real DOM `scroll` event comfortably past
+  `initNavScrollHide`'s `COMMIT` threshold, which the listener misreads
+  as a genuine user scroll in the opposite direction and immediately
+  flips the collapse state right back. Any native call that moves the
+  scroll position as a side effect needs the JS listener to suppress
+  itself for the duration of that round-trip (`suppressUntil` window in
+  `initNavScrollHide`), not just filter by distance/threshold.
 
 ## Standing open items
 - **Firebase push notifications**: real push infrastructure now exists
@@ -366,3 +441,54 @@ in English as usual.
   actually exercise all of these - especially starting the Live Activity
   and checking the Lock Screen banner and Dynamic Island - before
   assuming any of them work.
+
+- **The HOME screen is a real native iOS screen** (`NativeHome.swift`: `NativeHomeView` UICollectionView + glass `NHCell`s;
+  JS `homeNativePush()` / `homeNativeSpec()` in index.html read every `.home-item` out of the (now hidden) HTML home and send a
+  plain spec through `NativeHome.show`; taps/layout come back through `window.NativeHomeHost`: open / sub / enterEdit / layout).
+  The HTML home still renders and stays the source of truth (translations, order, sizes, data, loaders); `html.native-home`
+  hides it. Edit mode is native: long press -> wiggle (`nhWiggleEnabled`), minus badge -> `NativeHomeEditHost.minus`, + / check
+  glass pills, drag to move (my own long-press + snapshot; dropping on an empty cell swaps so nothing slides up), corner grip to
+  toggle regular <-> wide, add sheet = `NativeHomeEdit.showAddSheet` (native). Empty cells are real `spacer1..12` items kept
+  complete per row by `normalizeSpacers()`. Tile sizes are only `s`/`l` (stat cards and social: `s`/`m`). To change what a home
+  item shows natively, extend `homeNativeSpec()` (JS) + `NHCell.configure` (Swift). Web/PWA keep the HTML home. Not compile-verified.
+
+- **Home customization is OFF (user decision):** `HOME_CUSTOMIZE=false` in index.html - `getHomeLayout()` always returns the fixed default
+  layout (chok/tehillim `m`, visitors+live side by side) and `homeEnterEdit()` is a no-op, so no edit mode / minus / plus / drag. All of the
+  edit code (HTML and `NativeHomeEdit.swift`) is still there; flip the flag to bring it back. The native home (`NativeHome.swift`) now shows
+  that default layout read-only, with glass cells.
+- **Generic native lists**: `nativeScreenSpec()` (index.html) reuses the NativeHome collection for plain list/grid screens - any screen whose
+  `#app > .view` is only `.q-tile` / `.prayer-row` / `.sm-week-card` / `.set-item` rows (a `.search-box` is allowed but NOT shown natively - search lives in the native tab bar; no other inputs, toggles, chips, readers, or
+  live `#libResults`) is read out of the rendered HTML and shown natively (kinds `tile`, `row`, `tikkunei`); taps come back as
+  `NativeHomeHost.open('n<i>')` which clicks the hidden element. A MutationObserver on `#app` (runs as a microtask right after each render, no timer) + `libDrawSearch` call `nativeAutoPush()`; `render()` does NOT hide the native view first (that caused a flash) - the decision is made after the render. `NativeHome.show` resets scroll to the top whenever the item set changes.
+  Anything not eligible stays web. Readers (long text) stay web by design - they cannot be glass.
+
+- **NativeSystem plugin** (`NativeSystemBridge.swift`; registered in `capacitor-native-bridge.js` + `MainViewController`):
+  `openURL` (SFSafariViewController - the global click/`window.open` interceptor in index.html sends every external
+  http(s) link, except apps.apple.com, through `openExternal()` so links stay in the app), `shareImage`, `qrImage`
+  (offline Core Image QR, no network) and `requestReview` (Apple's star sheet, asked at most weekly, never in the
+  first 3 days). Web/PWA fall back to the old behaviour. Not compile-verified.
+- **HTML dialogs vs the native list**: `.overlay` dialogs live in the web layer UNDER the native list view, so
+  `nativeAutoPush()` hides the native list while any `body > .overlay` exists and re-pushes when it closes.
+- **Header scroll-away**: the shared scroll-direction listener (`initNavScrollHide`) also calls
+  `NativeTopBar.setCollapsed` (Swift `setTopBarCollapsed`: slides the header row up, keeps the status-bar strip, shrinks
+  `--native-header-h` and shifts the scroll offset by the same amount); the HTML `.topbar` gets `.topbar-hidden`.
+- **Location is automatic by default**: `FALLBACK` is Jerusalem for an Israel-timezone phone (else Antwerp),
+  `calIsIL()` 'auto' uses the device time zone until a real place exists, GPS is retried (timeouts only) and refreshed
+  on foreground. Feedback goes straight to Firestore `feedback` (rules must allow `create`), the Cloud Function is only the fallback.
+- **Birkat Meein Shalosh / Birkot HaNehenin** are PRAYERS_EXTRA entries in the `brachot` group (Hebrew only for now,
+  Edot HaMizrach wording - have a rabbi proof-read them; transliterations for en/fr/ru/ka are still to be added to `data/prayers-*.json`).
+- **Home "prayer now" tile schedule (user's rule)** - `homeNowPrayerKey()`: chatzot halayla -> alot (ZCUSTOM dawn) = Tikkun
+  Chatzot; alot -> chatzot hayom = Shacharit; chatzot hayom -> tzeit = Mincha; tzeit -> chatzot halayla = Arvit.
+- **Weekly booklet slot (user's rule):** the home slot right beside Ben Ish Chai is reserved for the weekly booklet
+  (`booklet` home item, `ensureBooklet()`/`openBooklet()`). It reads `data/booklet/current.json` fresh (no-store) and
+  opens the PDF in the in-app browser; no current.json = slot stays empty. A booklet's week is netz on the Sunday before its `shabbat` to netz on the Sunday after (`bookletWindow`); at that Sunday netz the new one appears or, if none, the old one is removed - an old booklet is never shown. Never put another tile there. Each week the old
+  PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
+- **Hillulot (yahrzeits of tzaddikim)**: `data/hillulot.json` (1,038 names, every Hebrew date; transcribed from Yeshivat Nahar
+  Shalom's weekly zmanim sheets - names/dates only, never their photos; raw draft + per-date sources in `docs/hillulot-*`).
+  Shown as "לעילוי נשמת הצדיקים" in the calendar day card (`hillulotHTML`), following the selected day; plain-Adar names go
+  to Adar II in a leap year. Add names by editing the JSON (keep the luach's order).
+- **Weekly booklets archive**: branch `booklets-archive` (never deployed) - `scripts/booklet-publish.mjs` publishes the week's
+  booklet to `data/booklet/` and archives it there as `<Hebrew year>/<slug>_<shabbat>.pdf` + `index.json`.
+- **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
+  length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
+  `npm run serve:local`) then `node scripts/appstore-compose.mjs`; screenshots taken on the real iPhone go in `docs/appstore/raw-device/` and override the web ones.

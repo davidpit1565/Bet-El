@@ -25,11 +25,40 @@ public class NativeModalBridge: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "presentRateModal", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "presentCelebration", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "presentFeedbackForm", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "presentActionSheet", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "dismiss", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "dismissFeedbackForm", returnType: CAPPluginReturnPromise),
     ]
 
     static weak var activeController: MainViewController?
+
+    /// System action sheet (UIAlertController, `.actionSheet`) - picks up the real Liquid Glass look
+    /// on iOS 26 and the classic sheet on older iOS. Resolves with `{ id }` of the tapped action, or
+    /// `{ id: "cancel" }`. Params: title, actions: [{ id, title, destructive? }], cancelTitle.
+    @objc func presentActionSheet(_ call: CAPPluginCall) {
+        let title = call.getString("title")
+        let cancelTitle = call.getString("cancelTitle") ?? "Cancel"
+        let actions = call.getArray("actions", JSObject.self) ?? []
+        DispatchQueue.main.async {
+            guard let vc = NativeModalBridge.activeController else { call.resolve(["id": "cancel"]); return }
+            let sheet = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+            for a in actions {
+                let id = a["id"] as? String ?? ""
+                let t = a["title"] as? String ?? ""
+                let destructive = a["destructive"] as? Bool ?? false
+                sheet.addAction(UIAlertAction(title: t, style: destructive ? .destructive : .default) { _ in
+                    call.resolve(["id": id])
+                })
+            }
+            sheet.addAction(UIAlertAction(title: cancelTitle, style: .cancel) { _ in call.resolve(["id": "cancel"]) })
+            if let pop = sheet.popoverPresentationController {
+                pop.sourceView = vc.view
+                pop.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.midY, width: 1, height: 1)
+                pop.permittedArrowDirections = []
+            }
+            (vc.presentedViewController ?? vc).present(sheet, animated: true)
+        }
+    }
 
     @objc func presentRateModal(_ call: CAPPluginCall) {
         let title = call.getString("title") ?? ""
