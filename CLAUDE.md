@@ -223,9 +223,18 @@ in English as usual.
   Page order: cover, rights/contact, the Rav's honour page (`bkRavHtml`,
   `BK_RAV` - owner's text verbatim), dedication, contents, days, Ben Ish
   Chai, back, blank (`startNo` counts the front pages actually built).
-  Keep-with-text rule: a flow that opens under a heading with fewer than
-  `BK_MIN_LINES` (6) lines on the page moves to the next page together
-  with its heading(s) (in `bkPaginate`, all section types).
+  Keep-with-text rule (`bkPaginate`): at any page break inside a section,
+  if that section's heading run is on this page with fewer than
+  `BK_MIN_LINES` (6) lines of text below it (over however many blocks -
+  `bkLinesAfter`), the heading(s) and everything after move to the next
+  page. A chapter heading alone (`sub`: Tehillim/Mishnah/Rambam perek)
+  needs only `BK_SUB_MIN_LINES` (2) - text runs on across chapters rather
+  than leaving a page foot empty (owner's Tehillim complaint).
+  Header band title: no shadow, highlight or glow at all (owner) -
+  `ornTitleSvg(...,soft)`; the band's old centre glow rendered on some pages
+  only, so it is gone. Dedication slots take one or more names; the
+  surrounding wording switches singular/plural by count (`dedBlessPl`,
+  `dedMeritPl`, `dedTnzbhPl`).
   `bkBuildPrint` wraps the week in front/back matter built from the same
   frame/strip/medallion, except the cover and dedication, which are
   full-page ornament compositions modelled on the owner's reference booklet
