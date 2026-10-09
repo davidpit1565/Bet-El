@@ -1145,6 +1145,11 @@ input,select,button{max-width:100%;box-sizing:border-box}
   text-align:right;color:var(--text);text-justify:distribute;letter-spacing:.3px}
 .prayer-para{margin-bottom:16px;padding-bottom:12px}
 .prayer-para-tight{margin-bottom:6px;padding-bottom:0}
+.prayer-alt{display:flex;align-items:baseline;gap:10px;margin:0 0 6px;padding:6px 12px;border-radius:12px;background:color-mix(in srgb,var(--gold) 9%,transparent)}
+.prayer-alt-lbl{flex:none;min-width:58px;font-size:12px;font-weight:700;color:var(--gold);opacity:.9}
+.prayer-para:has(+ .prayer-alt){margin-bottom:8px;padding-bottom:0}
+.prayer-alt+.prayer-para,.prayer-alt+.prayer-note{margin-top:14px}
+.prayer-ins{border-inline-start:3px solid var(--gold);padding-inline-start:12px;color:var(--gold)}
 .prayer-menorah-wrap{margin-bottom:16px;padding-bottom:12px;text-align:center}
 [data-theme="dark"] .prayer-menorah-wrap img{filter:invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.4)) !important}
 .prayer-note{margin:4px 0 14px;font-size:14px;font-weight:700;color:var(--gold);text-align:center;
@@ -2467,6 +2472,40 @@ function prayerGroupKeys(group){
 /* Prayer Reader State */
 let PR = { prayer: null, text: null, idx: 0 };
 let PRAYERS_TRANSLIT = {}, prayersLoadPromise = null;
+/* Berachah Me'ein Shalosh as ONE text (not three separate versions): the three openings/endings are
+   short alternatives shown inline ([[ALT:label]]), and the day's insert (Shabbat, Rosh Chodesh, Yom Tov,
+   Chol HaMoed, Rosh Hashana) is added automatically - the same day logic Birkat HaMazon uses.
+   MEEIN_STYLE: 'list' = each alternative on its own compact line with a small label,
+   'inline' = alternatives joined with " / " inside the sentence. */
+var MEEIN_STYLE=(()=>{ try{ return localStorage.getItem('betel_meein_style')||'list'; }catch(e){ return 'list'; } })();
+function birkatMeeinShaloshDayText(hd){
+  const di = siddurDayInfo(hd);
+  let chag = null;
+  if(di.isCholHaMoed && di.cholHaMoedChag) chag = di.cholHaMoedChag;
+  if(di.yaaleVeyavoChag) chag = di.yaaleVeyavoChag;
+  const alts = (items) => MEEIN_STYLE==='inline'
+    ? [items.map(([,t])=>t).join(' / ')]
+    : items.map(([l,t])=>`[[ALT:${l}]]${t}`);
+  const open = [['מְזוֹנוֹת','עַל הַמִּחְיָה וְעַל הַכַּלְכָּלָה'],['יַיִן','עַל הַגֶּפֶן וְעַל פְּרִי הַגֶּפֶן'],['פֵּרוֹת','עַל הָעֵץ וְעַל פְּרִי הָעֵץ']];
+  const close = [['מְזוֹנוֹת','עַל הָאָרֶץ וְעַל הַמִּחְיָה'],['יַיִן','עַל הָאָרֶץ וְעַל פְּרִי הַגֶּפֶן'],['פֵּרוֹת','עַל הָאָרֶץ וְעַל הַפֵּרוֹת']];
+  const out = ['[[NOTE]]אַחַר מְזוֹנוֹת, יַיִן אוֹ פֵּרוֹת מִשִּׁבְעַת הַמִּינִים · אָכַל כַּמָּה מִינִים – כּוֹלְלָם יַחַד'];
+  out.push('בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם,');
+  out.push(...alts(open));
+  let mid = 'וְעַל תְּנוּבַת הַשָּׂדֶה, וְעַל אֶרֶץ חֶמְדָּה טוֹבָה וּרְחָבָה, שֶׁרָצִיתָ וְהִנְחַלְתָּ לַאֲבוֹתֵינוּ, לֶאֱכֹל מִפִּרְיָהּ וְלִשְׂבֹּעַ מִטּוּבָהּ. רַחֵם יְיָ אֱלֹהֵינוּ עָלֵינוּ וְעַל יִשְׂרָאֵל עַמֶּךָ, וְעַל יְרוּשָׁלַיִם עִירֶךָ, וְעַל הַר צִיּוֹן מִשְׁכַּן כְּבוֹדֶךָ, וְעַל מִזְבְּחֶךָ וְעַל הֵיכָלֶךָ. וּבְנֵה יְרוּשָׁלַיִם עִיר הַקֹּדֶשׁ בִּמְהֵרָה בְיָמֵינוּ, וְהַעֲלֵנוּ לְתוֹכָהּ, וְשַׂמְּחֵנוּ בְּבִנְיָנָהּ, וְנֹאכַל מִפִּרְיָהּ וְנִשְׂבַּע מִטּוּבָהּ, וּנְבָרֶכְךָ עָלֶיהָ בִּקְדֻשָּׁה וּבְטָהֳרָה.';
+  const ins = [];
+  if(di.isShabbat) ins.push('וּרְצֵה וְהַחֲלִיצֵנוּ בְּיוֹם הַשַּׁבָּת הַזֶּה.');
+  if(di.isRoshChodesh) ins.push('וְזָכְרֵנוּ לְטוֹבָה בְּיוֹם רֹאשׁ הַחֹדֶשׁ הַזֶּה.');
+  const chagName = {pesach:'חַג הַמַּצּוֹת',shavuot:'חַג הַשָּׁבוּעוֹת',sukkot:'חַג הַסֻּכּוֹת',shminiAtzeret:'שְׁמִינִי חַג עֲצֶרֶת'}[chag];
+  if(chagName) ins.push(`וְשַׂמְּחֵנוּ בְּיוֹם ${chagName} הַזֶּה.`);
+  if(chag==='roshHashana') ins.push('וְזָכְרֵנוּ לְטוֹבָה בְּיוֹם הַזִּכָּרוֹן הַזֶּה.');
+  if(ins.length) mid += '\n\n[[INS]]' + ins.join(' ');
+  out.push(mid);
+  out.push('כִּי אַתָּה יְיָ טוֹב וּמֵטִיב לַכֹּל, וְנוֹדֶה לְּךָ');
+  out.push(...alts(close.map(([l,t])=>[l,t+'.'])));
+  out.push('בָּרוּךְ אַתָּה יְיָ,');
+  out.push(...alts(close.map(([l,t])=>[l,t+':'])));
+  return out.join('\n\n');
+}
 function ensurePrayersTranslit(){
   if(PRAYERS_TRANSLIT.en) return Promise.resolve();
   if(prayersLoadPromise) return prayersLoadPromise;
@@ -2483,6 +2522,7 @@ function openPrayer(prayerKey, fromGroup){
   const p = PRAYERS_EXTRA[prayerKey];
   let text = p.text;
   if(prayerKey==='birkatHamazon'){ try{ text = birkatHamazonDayText(); }catch(e){} }
+  if(prayerKey==='birkatMeeinShalosh'){ try{ text = birkatMeeinShaloshDayText(); }catch(e){} }
   PR = { group: fromGroup||null, prayer: prayerKey, title: p.title, subtitle: p.subtitle, text: text };
   TAB = 'prayerReader';
   render();
@@ -10421,6 +10461,9 @@ function renderPrayerReader(){
   const fullText = lines.map(line => {
     if(line==='[[MENORAH]]') return `<div class="prayer-menorah-wrap">${menorahSVG()}</div>`;
     if(line.startsWith('[[NOTE]]')) return `<div class="prayer-note">${line.slice(8)}</div>`;
+    const alt=line.match(/^\[\[ALT:([^\]]*)\]\]([\s\S]*)$/);
+    if(alt) return `<div class="prayer-alt"><span class="prayer-alt-lbl">${ckChrome(alt[1])}</span>${alt[2]}</div>`;
+    if(line.startsWith('[[INS]]')) return `<div class="prayer-para prayer-ins">${line.slice(7)}</div>`;
     const coll=line.match(/^\[\[COLLAPSE:([^\]]*)\]\]([\s\S]*)\[\[\/COLLAPSE\]\]$/);
     if(coll) return siddurCollapseHTML(coll[1], coll[2]);
     /* the "הרחמן הוא..." run in Birkat HaMazon is ~25 short one-line
