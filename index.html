@@ -9788,9 +9788,9 @@ function libDrawSearch0(){
 }
 /* ================= SEARCH TAB =================
    Its own screen, like the App Store's Search tab: suggestions + recent searches until something is typed, then live
-   results (the same libSearchHits() the Library box uses). In the app the text comes from the native search field at
-   the bottom (MainViewController: the tab bar collapses into the previous tab's circle + a glass search field); on the
-   web/PWA the page's own input is shown instead. */
+   results (the same libSearchHits() the Library box uses). In the app the text comes from the native search field
+   (MainViewController: a glass UISearchBar right above the full tab bar, which always stays); on the web/PWA the
+   page's own input is shown instead. */
 let SEARCH_Q='', SEARCH_NAV=false;
 const searchEsc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const SEARCH_SUGGEST=['תהלים','בראשית','ברכת המזון','קריאת שמע','תניא','זהר','משנה ברכות','רמב״ם'];
