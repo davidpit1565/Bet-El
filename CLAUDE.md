@@ -166,7 +166,10 @@ in English as usual.
   JS-paginated **A5** (148x210mm, the printed booklet's real page - type is
   set for it, not shrunk from A4) `.bk-page` boxes in `#bkPrint` (`bkPaginate`) shared by
   `window.print()` (`@media print` shows only `#bkPrint`) and the PDF
-  export (html2canvas at scale 3 + jsPDF `format:'a5'` per page, lazy-loaded from cdnjs via
+  export (html2canvas at scale 3 + jsPDF `format:'a5'` per page - its
+  `ignoreElements` leaves the other pages and the on-screen sheet out of each
+  capture's document clone, or a 65-page booklet takes 10+ minutes instead
+  of ~75s - lazy-loaded from cdnjs via
   `loadScriptOnce`). Real page boxes are what allow the per-page header band
   (parasha / medallion / day · subject). The Gemara is the real Vilna page
   image from shas.org's Daf PDF API, rendered to an `<img>` with PDF.js;

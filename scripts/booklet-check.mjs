@@ -131,8 +131,8 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   await p.evaluate(() => { document.body.scrollTop = 0; });
 
   // the in-app PDF export (html2canvas + jsPDF), saved via its download link
-  const dl = p.waitForEvent('download', { timeout: 180000 });
-  await p.evaluate(() => document.getElementById('bkPdfBtn').click());
+  const dl = p.waitForEvent('download', { timeout: 600000 });   // ~4s a page at scale 3
+  await p.evaluate(() => { window.__bkPdfT = performance.now(); document.getElementById('bkPdfBtn').click(); });
   const d = await dl;
   await d.saveAs(`${OUT}/4-export.pdf`);
   console.log('exported PDF:', d.suggestedFilename());

@@ -6868,13 +6868,19 @@ async function bkExportPdf(date){
     for(let i=0;i<pages.length;i++){
       toast(`${t.pdfMaking} ${t.pdfPage} ${heNum(i+1)} ${t.pdfOf} ${heNum(pages.length)}`);
       /* scale 3 = ~290dpi at A5: crisp nikud and a legible daf in print */
-      const cv=await window.html2canvas(pages[i],{scale:3, useCORS:true, backgroundColor:'#fbf7ee', logging:false,
+      /* html2canvas clones the whole document for every capture: leave out
+         the other pages and the on-screen sheet, or a long booklet (65
+         pages with Ben Ish Chai) costs time quadratic in its length */
+      const cur=pages[i];
+      const cv=await window.html2canvas(cur,{scale:3, useCORS:true, backgroundColor:'#fbf7ee', logging:false,
+        ignoreElements:e=>e!==cur && e.classList && (e.classList.contains('bk-page') || e.classList.contains('bk-sheet')),
         /* the page boxes live off-screen and transparent (they're only
            meant to be seen in print) - make the cloned copy a normal,
            visible, in-flow element before it is captured */
         onclone:d=>{ const h=d.getElementById('bkPrint'); if(h) h.classList.add('bk-capture'); }});
       if(i) doc.addPage();
       doc.addImage(cv.toDataURL('image/jpeg',0.9),'JPEG',0,0,148,210,undefined,'FAST');
+      if(window.__bkPdfT) console.log('[booklet] pdf page',i+1,'of',pages.length,Math.round(performance.now()-window.__bkPdfT)+'ms');
     }
     const {slot}=bkSections(date);
     const name='hatamid-'+(slot?chokSlug(slot.key)+'-'+slot.day:'booklet')+'.pdf';
