@@ -2459,8 +2459,8 @@ const PRAYER_GROUPS = {
   siddur: {he:'סדור', keys:[]}, // now a real full screen (siddurHome/siddurReader), not a flat prayer list - see renderSiddurHome/renderSiddurReader. tefilatHaderech falls through to "more" below (prayerGroupKeys collects any key no other group claims).
   // (spelling matches the Siddur topbar's own 'סדור' so both share the same I18N translation entry)
   brachot: {he:'ברכות האכילה', keys:['birkatHamazon','birkatMeeinShalosh','birkotHanehenin']},
-  // (matches the Library tile's label exactly - see LIBRARY_CATS'brachot' entry -
-  // so the group's topbar title is the same text the user tapped to get here)
+  // (lives on the Library's top screen next to the Siddur only - NOT in the books grid
+  // (LIBRARY_CATS), by the user's request; same text as the tile the user tapped)
   more: {he:'תפילות נוספות', keys:null},
 };
 /* Library screen's own big tile titles keep nikud (see heTitle()) - the
@@ -9401,7 +9401,6 @@ const LIBRARY_CATS = [
   {key:'tikkuneiZohar', label:'תיקוני הזהר', cssCat:'zohar'},
   {key:'zohar', label:'זהר'},
   {key:'tanya', label:'תניא'},
-  {key:'brachot', label:'ברכות האכילה', cssCat:'siddur'},   // Birkat HaMazon, Meein Shalosh, Birkot HaNehenin
   {key:'chokLeyisrael', label:'חוק לישראל', cssCat:'chok'},
   {key:'shnayimMikra', label:'שנים מקרא ואחד תרגום', cssCat:'shnayim'},
 ];
