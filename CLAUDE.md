@@ -202,6 +202,13 @@ in English as usual.
   band/TOC label "רַמְבַּ״ם"). `booklet-audit.mjs` audits every row of the
   week (duplicate source lines are checked per day - a Tanya letter can
   span days).
+  **Owner decision (2026-10): the printed booklet goes black & white**
+  (weekly physical print cost) - every gold accent (double border,
+  corner ornaments, cartouches, medallion/header band, text accents)
+  becomes black/dark grey on white/off-white, same shapes and ornaments.
+  Not wired yet - only a recolour preview exists; scope (print-only vs.
+  the whole app) still to be decided. The earlier weekly colour-rotation
+  idea (gold/blue/pink/green/orange/purple) is dropped.
   `bkBuildPrint` wraps the week in front/back matter built from the same
   frame/strip/medallion, except the cover and dedication, which are
   full-page ornament compositions modelled on the owner's reference booklet
