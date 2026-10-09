@@ -1447,10 +1447,13 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-bic-h .bk-p+.bk-p{margin-top:5px}
 .bk-bic-sep{height:1px;margin:9px 18% 7px;background:linear-gradient(to left,rgba(162,128,63,0),var(--bk-line),rgba(162,128,63,0))}
 /* the labelled divider between a halacha and its biur */
-.bk-bdiv{display:flex;align-items:center;gap:7px;margin:7px 0 5px;color:var(--bk-gold)}
-.bk-bdiv::before,.bk-bdiv::after{content:'';flex:1;height:1px;background:var(--bk-line)}
-.bk-bdiv i{line-height:0}.bk-bdiv i svg{width:9px;height:9px;display:block}
-.bk-bdiv span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--bk-gold-deep)}
+.bk-bdiv{display:flex;align-items:center;gap:0;margin:7px 0 5px;color:var(--bk-gold)}
+.bk-bdiv::before,.bk-bdiv::after{content:'';flex:1;height:1.6px}
+.bk-bdiv::before{background:linear-gradient(to left,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0));margin-inline-end:5px}
+.bk-bdiv::after{background:linear-gradient(to right,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0));margin-inline-start:5px}
+.bk-bdiv i{display:none}
+.bk-bdiv span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--bk-gold-deep);
+  padding:0 12px 1px;border:1px solid var(--bk-gold);border-radius:5px;background:linear-gradient(#fffdf7,#f3e7cb);box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line)}
 .bk-page .bk-bic-b{font-size:12px;line-height:1.62;color:#3e3322}
 .bk-bic-b .bk-p+.bk-p{margin-top:3px}
 .bk-bic-b .bk-biur-t::before{content:'◆';color:var(--bk-gold);font-size:.7em;margin-inline-end:.45em;vertical-align:.12em}
@@ -1494,7 +1497,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    commentary-under-text ratio of a printed chumash). */
 .bk-print{position:fixed;top:0;left:0;width:148mm;opacity:0;pointer-events:none;z-index:-1}
 .bk-print.bk-capture{position:absolute;opacity:1;z-index:auto}
-.bk-page{width:148mm;height:210mm;padding:8mm 10mm 6mm;background:var(--bk-paper);color:var(--bk-ink);
+.bk-page{width:148mm;height:210mm;padding:8mm 10mm 6mm;background:var(--bk-paper) radial-gradient(ellipse 85% 75% at 50% 45%,#fdfaf2 0%,#fbf7ee 55%,#f4ead3 100%);color:var(--bk-ink);
   display:flex;flex-direction:column;overflow:hidden;direction:rtl;position:relative;
   -webkit-print-color-adjust:exact;print-color-adjust:exact}
 .bk-page::after{content:'';position:absolute;inset:4mm;border:1px solid var(--bk-line);pointer-events:none}
@@ -1505,9 +1508,13 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-ph-lbl{text-align:left}
 .bk-ph.bk-band{position:relative;height:13mm;margin-bottom:2.5mm}
 .bk-band-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.bk-band .bk-ph-row{position:absolute;left:0;right:0;top:3.8mm;height:5.4mm;padding:0 3mm}
-.bk-band .bk-ph-side{font-weight:700;font-size:10.5px;color:#5b4a2a}
-.bk-band-t{flex:none;width:25mm;height:6.4mm;display:block}
+/* the row spans exactly the band's light strip (38.5-91.5 of the 130-unit
+   band = 3.85-9.15mm); the side labels' letter bodies are optically centred
+   on it (nikud hangs below, so the line box is nudged down), the title's
+   ascender tag rises above, so the title is nudged up */
+.bk-band .bk-ph-row{position:absolute;left:0;right:0;top:3.85mm;height:5.3mm;padding:0 3mm}
+.bk-band .bk-ph-side{font-weight:700;font-size:10.5px;color:#5b4a2a;line-height:1;padding-top:.75mm}
+.bk-band-t{flex:none;width:25mm;height:6.4mm;display:block;transform:translateY(-.3mm)}
 .bk-band-t svg{width:100%;height:100%;display:block}
 .bk-medal{flex:none;display:inline-flex;align-items:center;gap:5px;padding:2px 11px;border:1px solid var(--bk-gold);
   border-radius:999px;box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line);color:var(--bk-gold-deep)}
@@ -1520,7 +1527,18 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page .bk-day-t{font-size:20px}
 .bk-page .bk-day-s{font-size:13px}
 .bk-page .bk-day-d{font-size:10px}
-.bk-page .bk-sec{margin:2px 0 4px}
+.bk-page .bk-sec{margin:4px 0 6px;display:flex;flex-direction:column;align-items:center}
+/* section titles as a framed cartouche on tapered gold rules - the printed
+   sefer's own section plaque (the reference's "עיונים והערות") */
+.bk-page .bk-sec-t{position:relative;display:inline-block;padding:1px 15px 2px;border:1px solid var(--bk-gold);border-radius:5px;
+  background:linear-gradient(#fffdf7,#f3e7cb);box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line)}
+.bk-page .bk-sec-t::before,.bk-page .bk-sec-t::after{content:'';position:absolute;top:50%;width:34mm;height:1.6px;margin-top:-.8px}
+.bk-page .bk-sec-t::before{right:calc(100% + 5px);background:linear-gradient(to left,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
+.bk-page .bk-sec-t::after{left:calc(100% + 5px);background:linear-gradient(to right,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
+.bk-page .bk-sec-src{margin-top:3px}
+.bk-ow{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:1.22em;color:var(--bk-gold-deep);letter-spacing:.01em}
+.bk-day-crest{display:block;width:30mm;height:6.3mm;margin:0 auto 1mm}
+.bk-day-crest svg{width:100%;height:100%;display:block}
 .bk-page .bk-sec-t{font-size:15.5px}
 .bk-page .bk-sec-src{font-size:9.5px}
 .bk-page .bk-sub{font-size:12.5px;margin:5px 0 2px}
@@ -5829,7 +5847,7 @@ function bkBlocks(date){
   const B=[]; if(!slot) return B;
   const dayLabel=chokRowLabel(slot.day,slot.dayIdx);
   let musarDone=false;
-  B.push({t:'day', label:dayLabel, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
+  B.push({t:'day', label:dayLabel, html:`<div class="bk-day"><i class="bk-day-crest">${ornCrest()}</i><div class="bk-day-t">${dayLabel}</div>
     <div class="bk-day-s">${bkParashaLine(slot)}</div>
     <div class="bk-day-d">${localizeHebDateStr(hd.renderGematriya(true))} · ${date.toLocaleDateString(civilDateLocale())}</div></div>`});
   secs.forEach((s,si)=>{
@@ -5848,6 +5866,7 @@ function bkBlocks(date){
   });
   if(!musarDone) bkMusarSection(hd,B);
   bkBicBlocks(slot,B);
+  bkOpeningWords(B);
   /* the HebrewBooks.org license travels with any booklet that carries one
      of its pages: on screen here, at the end of the day; in print, once on
      the back page (bkBackHtml), with the scans' credit */
@@ -5906,6 +5925,7 @@ function bkBicParts(slot){
           (c.takeaways||[]).forEach(x=>biur.push({html:`<span class="bk-p bk-biur-t">${x}</span>`, hi}));
         }
       });
+      if(top.length) top[0].html=bkOpenWords(top[0].html);
       parts.push({track, ti, top, biur});
     });
   });
@@ -6068,6 +6088,23 @@ function bkPaginateBic(host,parts,meta,no,toc){
     }
   });
   return no;
+}
+/* A sefer opens each section with its first words set larger and bold
+   (פתיחת מילים): the first two words of the first paragraph under every
+   subject heading - after any verse / halacha number or Musar book label,
+   and never across a tag, so nikud and markup stay intact. */
+function bkOpenWords(html){
+  const m=/^(<span class="bk-p[^"]*">)((?:<span class="bk-(?:vn|ml)">[\s\S]*?<\/span>)?)([^\s<]+(?:[ \u00a0]+[^\s<]+)?)/.exec(html);
+  if(!m) return html;
+  return m[1]+m[2]+`<b class="bk-ow">${m[3]}</b>`+html.slice(m[0].length);
+}
+function bkOpeningWords(B){
+  let want=false;
+  B.forEach(b=>{
+    if(b.t==='sec'||b.t==='day'){ want=true; return; }
+    if(want && b.t==='flow' && b.pieces && b.pieces.length && !b.ltr){ b.pieces=b.pieces.slice(); b.pieces[0]=bkOpenWords(b.pieces[0]); want=false; }
+    if(b.t==='atom') want=false;
+  });
 }
 function bkBlockHtml(b){
   if(b.t!=='flow') return b.html;

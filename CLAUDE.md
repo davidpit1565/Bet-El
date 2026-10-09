@@ -278,6 +278,16 @@ in English as usual.
   drop them. In print they appear once, together, on the back page (owner's
   decision, replacing a per-scan credit line); on screen the reader keeps
   them beside each scan / at the end of the day (`noPrint` blocks).
+  Interior richness (after the reference booklet's own reading pages):
+  each subject title is a framed cartouche on tapered gold rules
+  (`.bk-page .bk-sec-t` + ::before/::after; the "בֵּיאוּר" divider `.bk-bdiv`
+  matches), every section opens with its first two words large and bold
+  (`bkOpeningWords` post-pass in `bkBlocks` → `.bk-ow`, skipping a leading
+  number/Musar label, never across a tag; Ben Ish Chai's first piece per
+  track too), a filigree crest over each day title (`.bk-day-crest`), and a
+  faint paper vignette on `.bk-page`. The running header's labels are
+  optically centred on the band's light strip (row = strip, labels nudged
+  down for nikud, title nudged up) - the owner's "too high" fix.
   Verse/halacha markers (`.bk-vn`) are bold gold numerals at .82em on the
   text baseline, not raised superscripts. `ckCommFor(id,key)` /
   `ckTargumFor(...,key)` take an optional explicit parasha key for exactly
