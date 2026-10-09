@@ -6251,6 +6251,10 @@ function bkPaginate(host,blocks,meta){
         const fits=k=>{ const a=bkKeepWords(node.cloneNode(true),0,k); add(a); const ok=!over(); undo(a); return ok; };
         let lo=0, hi=wc-1;
         while(lo<hi){ const mid=(lo+hi+1)>>1; if(fits(mid)) lo=mid; else hi=mid-1; }
+        /* a Musar book label never stays at a page foot without at least a
+           few words of its text */
+        const lab=node.querySelector&&node.querySelector('.bk-ml');
+        if(lab && lo>0 && lo<bkWordCount(lab)+4) lo=0;
         const fresh=!filled && !box.childNodes.length && !pend.length;
         if(lo===0 && fresh){ add(node); node=null; placed(); break; }   // cannot shrink further: let it be
         if(lo>0){ add(bkKeepWords(node.cloneNode(true),0,lo)); node=bkKeepWords(node.cloneNode(true),lo,Infinity); placed(); }
