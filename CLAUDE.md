@@ -478,8 +478,11 @@ in English as usual.
 - **Birkat Meein Shalosh / Birkot HaNehenin** are PRAYERS_EXTRA entries in the `brachot` group (Hebrew only for now,
   Edot HaMizrach wording - have a rabbi proof-read them; transliterations for en/fr/ru/ka are still to be added to `data/prayers-*.json`).
 - **Home "prayer now" tile schedule (user's rule)** - `homeNowPrayerKey()`: chatzot halayla -> alot (ZCUSTOM dawn) = Tikkun
-  Chatzot; alot -> chatzot hayom = Shacharit, with the `mirror` (Tefillin Mirror) tile inserted right after it (not on
-  Shabbat/Yom Tov/Chol HaMoed); chatzot hayom -> tzeit = Mincha; tzeit -> chatzot halayla = Arvit.
+  Chatzot; alot -> chatzot hayom = Shacharit; chatzot hayom -> tzeit = Mincha; tzeit -> chatzot halayla = Arvit.
+- **Weekly booklet slot (user's rule):** the home slot right beside Ben Ish Chai is reserved for the weekly booklet
+  (`booklet` home item, `ensureBooklet()`/`openBooklet()`). It reads `data/booklet/current.json` fresh (no-store) and
+  opens the PDF in the in-app browser; no current.json = slot stays empty. Never put another tile there. Each week the old
+  PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
 - **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
   length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
   `npm run serve:local`) then `node scripts/appstore-compose.mjs`; screenshots taken on the real iPhone go in `docs/appstore/raw-device/` and override the web ones.
