@@ -16,3 +16,6 @@ at netz on the Sunday after it - even if no new booklet was published (no date =
 `current.json` may also be an array of two booklets (this week + next week uploaded early); the app shows the one
 whose week is now. Remove past weeks' PDFs from this folder. `title` may also be a plain string. No `current.json` (or no `pdf`) = the tile stays hidden and the slot stays empty.
 This folder is left out of `data/manifest.json` on purpose (never prefetched, never kept on the device).
+
+Easiest: `node scripts/booklet-publish.mjs <file.pdf> <shabbat YYYY-MM-DD> <parasha> <slug> [title-en]` does all of this
+and also archives the booklet forever on the `booklets-archive` branch (by Hebrew year, parasha and date).
