@@ -6970,22 +6970,26 @@ function nextZmanText(){
   }
   return {label:z.label, t, time:fmtTime(z.date)};
 }
-/* Which of the day's prayers is "current" right now, for the home screen's
-   dynamic prayer tile (replaces the old static Ben Ish Chai tile - Ben Ish
-   Chai itself is unaffected, still reachable from the Library, see
-   LIBRARY_CATS). Reuses the same Zmanim object the "next zman" strip above
-   already builds - no new zmanim math. Only sunrise/chatzot/sunset are
-   considered production-ready right now (ZMANIM_READY, see its own comment)
-   - alot hashachar isn't, so rather than guess at a Tikun Chatzot window we
-   can't accurately start, the chatzot-halayla-to-alot-hashachar stretch
-   simply stays Arvit too (falls out of the final `return 'arvit'` below,
-   covering both "after shkia" and "before netz"). */
+/* Which prayer the home screen's dynamic tile shows right now (user's schedule):
+     chatzot halayla -> alot hashachar : Tikkun Chatzot
+     alot hashachar  -> chatzot hayom  : Shacharit (+ the Tefillin Mirror tile beside it)
+     chatzot hayom   -> tzeit          : Mincha (it may be prayed from mincha gedola, half a
+                                         seasonal hour after chatzot; the short gap before it
+                                         already shows Mincha as the next prayer)
+     tzeit           -> chatzot halayla: Arvit
+   Dawn is the app's own ZCUSTOM.alotHaShachar. chatzotNight(D) is the midnight of the night
+   leading INTO D (see the Vidui comment in siddurArvit), so tonight's is chatzotNight(D+1). */
 function homeNowPrayerKey(){
   try{
-    const now=new Date(), z=zmanimFor(civilToday());
-    const netz=z.sunrise(), chatzotYom=z.chatzot(), shkia=z.sunset();
-    if(netz && chatzotYom && now>=netz && now<chatzotYom) return 'shacharit';
-    if(chatzotYom && shkia && now>=chatzotYom && now<shkia) return 'mincha';
+    const now=new Date(), d=civilToday(), z=zmanimFor(d);
+    const cnEarly=z.chatzotNight(), alot=ZCUSTOM.alotHaShachar(z), chatzotYom=z.chatzot(), tzeit=z.tzeit();
+    let cnLate=null; try{ cnLate=zmanimFor(addDays(d,1)).chatzotNight(); }catch(e){}
+    if(cnEarly && now<cnEarly) return 'arvit';                      // after civil midnight, before halachic midnight
+    if(alot && now<alot) return 'tikunChatzot';
+    if(chatzotYom && now<chatzotYom) return 'shacharit';
+    if(tzeit && now<tzeit) return 'mincha';
+    if(cnLate && now>=cnLate) return 'tikunChatzot';                // halachic midnight before civil midnight
+    return 'arvit';
   }catch(e){}
   return 'arvit';
 }
@@ -7061,7 +7065,13 @@ const HOME_DEFAULT_LAYOUT=[
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
-  if(!HOME_CUSTOMIZE) return homeNormalize(homeDefaultLayout());   // fixed default home: any saved layout is ignored
+  if(!HOME_CUSTOMIZE){
+    const lay=homeDefaultLayout();
+    /* during Shacharit time the Tefillin Mirror sits right beside the prayer tile (not on Shabbat, Yom Tov or Chol HaMoed - no tefillin then) */
+    let noTefillin=false; try{ const di=siddurDayInfo(); noTefillin=di.isShabbat||di.isYomTov||di.isCholHaMoed; }catch(e){}
+    if(homeNowPrayerKey()==='shacharit' && !noTefillin){ const i=lay.findIndex(x=>x.id==='siddur'); if(i>=0) lay.splice(i+1,0,{id:'mirror',size:'s'}); }
+    return homeNormalize(lay);
+  }   // fixed default home: any saved layout is ignored
   let raw=null;
   try{ raw=JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)||'null'); }catch(e){}
   if(!Array.isArray(raw)) raw=homeDefaultLayout();   // the default goes through the same size clean-up below
