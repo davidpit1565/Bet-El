@@ -185,7 +185,8 @@ in English as usual.
   live presence and Analytics. `MainViewController.webViewConfiguration`
   injects `window.__BETEL_DEV_BUILD` (true when there's no App Store/
   TestFlight receipt - Xcode/simulator installs), and index.html's Firebase
-  module (`IS_DEV_BUILD`, also true on localhost) skips the visit
+  module (`IS_DEV_BUILD`, also true on an http(s) localhost - NEVER on capacitor://localhost, which is every
+  native install; a bare hostname check once excluded all App Store users) skips the visit
   increment, presence write and `getAnalytics()` for those. Reads/listeners
   stay on. The existing inflated `stats/visits` count was never touched -
   it can be lowered by hand in the Firebase Console if wanted.
