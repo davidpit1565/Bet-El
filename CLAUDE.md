@@ -207,9 +207,25 @@ in English as usual.
   (weekly physical print cost) - every gold accent (double border,
   corner ornaments, cartouches, medallion/header band, text accents)
   becomes black/dark grey on white/off-white, same shapes and ornaments.
-  Not wired yet - only a recolour preview exists; scope (print-only vs.
-  the whole app) still to be decided. The earlier weekly colour-rotation
-  idea (gold/blue/pink/green/orange/purple) is dropped.
+  Built as a booklet-only mode (`BK_BW`, per-viewer
+  `localStorage['betel_bk_bw']`, default on; a toggle button in the booklet
+  reader): ONE colour function `bkMonoRGB` (warm hues 12-62deg only:
+  accents -> near black/dark grey, l>=.86 paper/highlights -> neutral
+  off-white) applied to (1) a generated copy of every `.bk-*`/`orn` CSS rule
+  in source order under the ZERO-specificity `:where(.bk-bw)` prefix
+  (`bkBwStyles`; copying under plain `.bk-bw` raised specificity and broke
+  the cascade - BIC font sizes changed, the page count moved), and (2) the
+  colours inside generated pages (`bkBwDom`: fill/stroke/stop-color/style
+  attributes). Never a CSS filter (html2canvas ignores filters; print would
+  rasterize). Daf scans and the QR are tinted to the mode's paper and
+  cached per mode (`bkDafKey` '|bw' suffix, `bkQrKey`). The earlier weekly
+  colour-rotation idea (gold/blue/pink/green/orange/purple) is dropped.
+  Page order: cover, rights/contact, the Rav's honour page (`bkRavHtml`,
+  `BK_RAV` - owner's text verbatim), dedication, contents, days, Ben Ish
+  Chai, back, blank (`startNo` counts the front pages actually built).
+  Keep-with-text rule: a flow that opens under a heading with fewer than
+  `BK_MIN_LINES` (6) lines on the page moves to the next page together
+  with its heading(s) (in `bkPaginate`, all section types).
   `bkBuildPrint` wraps the week in front/back matter built from the same
   frame/strip/medallion, except the cover and dedication, which are
   full-page ornament compositions modelled on the owner's reference booklet

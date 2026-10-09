@@ -44,7 +44,7 @@ const R = await p.evaluate(() => {
   const tmp = document.createElement('div');
   const txt = h => { tmp.innerHTML = String(h); return tmp.textContent.replace(/\s+/g, ' ').trim(); };
   const pages = [...document.querySelectorAll('#bkPrint .bk-page')];
-  const content = pages.filter(pg => !/bk-cover|bk-rights|bk-blank|bk-dedic|bk-tocpage|bk-backpage/.test(pg.className));
+  const content = pages.filter(pg => !/bk-cover|bk-rights|bk-rav|bk-blank|bk-dedic|bk-tocpage|bk-backpage/.test(pg.className));
   const printed = content.map(pg => pg.querySelector('.bk-pbody').textContent).join(' ').replace(/\s+/g, ' ');
   const miss = [];
   const has = (sec, label, h) => { const t = txt(h); if (t && printed.indexOf(t) < 0) miss.push({ day: out.days.length ? out.days[out.days.length - 1].day : '', sec, label, t: t.slice(0, 80) }); return !!t; };
