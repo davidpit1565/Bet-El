@@ -485,8 +485,9 @@ in English as usual.
   PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
 - **Hillulot (yahrzeits of tzaddikim)**: `data/hillulot.json` (1,038 names, every Hebrew date; transcribed from Yeshivat Nahar
   Shalom's weekly zmanim sheets - names/dates only, never their photos; raw draft + per-date sources in `docs/hillulot-*`).
-  Shown as "לעילוי נשמת הצדיקים" in the calendar day card (`hillulotHTML`), following the selected day; plain-Adar names go
-  to Adar II in a leap year. Add names by editing the JSON (keep the luach's order).
+  Shown as "לעילוי נשמת הצדיקים" in the calendar day card (`hillulotHTML`), following the selected day. Must match the luach EXACTLY (user rule). Adar:
+  regular year = `adar`; leap year = `adar1`/`adar2` from the luach's 5784 leap sheets (`docs/hillulot-leap-adar.json`; Adar I is
+  only partly known - 6 names - the rest of its days are unpublished on the site). Add names by editing the JSON (keep the luach's order).
 - **Weekly booklets archive**: branch `booklets-archive` (never deployed) - `scripts/booklet-publish.mjs` publishes the week's
   booklet to `data/booklet/` and archives it there as `<Hebrew year>/<slug>_<shabbat>.pdf` + `index.json`.
 - **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's

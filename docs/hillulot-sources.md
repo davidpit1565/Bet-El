@@ -102,3 +102,31 @@ Kept exactly as printed (each has a `comment`):
 - Adar 11, the Avnei Nezer's year "תע"ר"
 - Av 14, "הכם באשי"
 - Elul 6, the second Tosafot Yom Tov line with the year תשכ"ט
+
+## Leap year (5784 / 2024): Adar I and Adar II (`docs/hillulot-leap-adar.json`)
+
+I scanned post ids 1-~520 sequentially. Weekly "זמני היום" posts start at id 128 (Bo 5783). No sheets from 5782 (2022) exist on the site, so 5784 is the only leap year available. The 5784 sheets use content-hashed image names under `media.naharshalom.co.il/images/content/`.
+
+| Sheet (5784) | Post | Image | Hillulot printed |
+|---|---|---|---|
+| Mishpatim (Shevat 25-Adar I 1) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/280/ | https://media.naharshalom.co.il/images/content/d0b3621cb30f4bb8131c.jpg | Shevat 25-30, plus a "next week" preview: Adar I 5, 7, 11 |
+| Teruma (Adar I 2-8) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/284/ | https://media.naharshalom.co.il/images/content/764ef1aa72eed05c9756.jpg | no hillulot box (a photo instead) |
+| Tetzaveh (Adar I 9-15) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/287/ | https://media.naharshalom.co.il/images/content/da7234ca4faf533581b0.jpg | no hillulot box (segulot text instead) |
+| Ki Tisa (Adar I 16-22) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/291/ | https://media.naharshalom.co.il/images/content/e6a44415cb298d407e40.jpg | short "this week" box: Adar I 18, 20, 21 |
+| Vayakhel (Adar I 23-29) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/293/ | https://media.naharshalom.co.il/images/content/fee529e2e97c67071bbc.jpg | the image has no bottom section and no box |
+| Pekudei (Adar I 30-Adar II 6) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/296/ | https://media.naharshalom.co.il/images/content/64a2779a6ba80d41271a.jpg | Adar II 1-6 |
+| Vayikra (Adar II 7-13) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/299/ | https://media.naharshalom.co.il/images/content/b952837ddfa96833400c.jpg | Adar II 7-13 |
+| Tzav (Adar II 14-20) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/302/ | https://media.naharshalom.co.il/images/content/731981827734d7ef292c.jpg | Adar II 14-20 |
+| Shemini (Adar II 21-27) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/306/ | https://media.naharshalom.co.il/images/content/c1c75def61c2f6493e9d.jpg | Adar II 21-27 |
+| Tazria (Adar II 28-Nisan 5) | https://naharshalom.co.il/%D7%9E%D7%94-%D7%97%D7%93%D7%A9/310/ | https://media.naharshalom.co.il/images/content/a2d259cb4af89a708e85.jpg | Adar II 28-29 |
+
+Findings:
+- **Adar II** = the regular-year Adar list, line for line and in the same order: 101 entries in total (95 in Adar II, 6 in Adar I). Adar II 12 and 26 have no lines, the same as in a regular year.
+- **Adar I** is only partly documented. Three of the five Adar I sheets have no hillulot box, so the only Adar I lines are these six:
+  - 5: רבי סעדיה בן אור, marked "(אדר א')"
+  - 7: משה רבינו, with the note "(לדעת הבא"ח אף באדר א)"; he is also on Adar II 7
+  - 11: the Avnei Nezer, also on Adar II 11
+  - 18: רבי שמעון ב"ר שמואל אביחצירא, marked "(אד"א)"
+  - 20: רבי שלמה זלמן אויערבך, also on Adar II 20
+  - 21: רבי שלמה יוסף זוין, also on Adar II 21
+- The other Adar I days (1-4, 6, 8-10, 12-17, 19, 22-30) are not printed anywhere. They are unknown, not confirmed empty.
