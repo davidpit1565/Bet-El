@@ -3537,7 +3537,7 @@ function shotLink(url){
   if(lang && ['he','en','fr','ru','ka'].includes(lang)) S.lang=lang;
   if(theme && ['light','dark'].includes(theme)) S.theme=theme;
   saveS();
-  try{ localStorage.setItem('betel_onboard_v1','1'); }catch(e){}
+  try{ localStorage.setItem('betel_onboard_v1','1'); localStorage.setItem('betel_chok_pace_v1','1'); }catch(e){}
   try{ sessionStorage.setItem('betel_shot_screen',screen); }catch(e){}
   try{ if(scroll) sessionStorage.setItem('betel_shot_scroll',scroll); else sessionStorage.removeItem('betel_shot_scroll'); }catch(e){}
   location.reload();
@@ -3573,7 +3573,8 @@ function shotNavigate(screen,scrollMode){
   }catch(e){}
 }
 (function(){ try{
-  const sc=sessionStorage.getItem('betel_shot_screen'); if(!sc || !SHOT_ALLOWED) return;
+  const sc=sessionStorage.getItem('betel_shot_screen');
+  if(!sc || !SHOT_ALLOWED) return;
   SHOT_MODE=true;
   const scrollMode=sessionStorage.getItem('betel_shot_scroll')||'';
   sessionStorage.removeItem('betel_shot_screen'); sessionStorage.removeItem('betel_shot_scroll');
@@ -5325,7 +5326,7 @@ function renderChokPace(){
     </div>`;
     document.getElementById('paceDoneGo').onclick=()=>{
       localStorage.setItem('betel_chok_pace_v1','1');
-      if(CK_PACE_AFTER_LANG==='onboard' && S.pushEnabled && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
+      if(CK_PACE_AFTER_LANG==='onboard' && S.pushEnabled && !SHOT_MODE && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
         (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
       }
       CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList');

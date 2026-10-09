@@ -16,7 +16,7 @@
 // (see `npm root -g` / `/opt/pw-browsers/`) - not a project devDependency.
 import { chromium } from 'playwright';
 
-const CHROME_PATH = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROME_PATH = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const b = await chromium.launch({ executablePath: CHROME_PATH });
 const errs = [];
