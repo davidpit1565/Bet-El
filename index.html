@@ -2443,13 +2443,15 @@ const PRAYERS_EXTRA_TITLE_NIKUD = {
 const PRAYER_GROUPS = {
   siddur: {he:'סדור', keys:[]}, // now a real full screen (siddurHome/siddurReader), not a flat prayer list - see renderSiddurHome/renderSiddurReader. tefilatHaderech falls through to "more" below (prayerGroupKeys collects any key no other group claims).
   // (spelling matches the Siddur topbar's own 'סדור' so both share the same I18N translation entry)
-  brachot: {he:'ברכות', keys:['birkatHamazon','birkatMeeinShalosh','birkotHanehenin']},
+  brachot: {he:'ברכות האכילה', keys:['birkatHamazon','birkatMeeinShalosh','birkotHanehenin']},
+  // (matches the Library tile's label exactly - see LIBRARY_CATS'brachot' entry -
+  // so the group's topbar title is the same text the user tapped to get here)
   more: {he:'תפילות נוספות', keys:null},
 };
 /* Library screen's own big tile titles keep nikud (see heTitle()) - the
    plain PRAYER_GROUPS.he values above stay as the tr()-translatable/lookup
    form used everywhere else (search groups, etc). */
-const PRAYER_GROUPS_NIKUD = {siddur:'סִדּוּר', brachot:'בְּרָכוֹת', more:'תְּפִלּוֹת נוֹסָפוֹת'};
+const PRAYER_GROUPS_NIKUD = {siddur:'סִדּוּר', brachot:'בִּרְכוֹת הָאֲכִילָה', more:'תְּפִלּוֹת נוֹסָפוֹת'};
 // PRAYERS_EXTRA.birkotHashachar's text is also the data source
 // siddurBirkotHashacharHTML() reads from for the real Siddur reader - keep
 // the entry, just don't let it show up a second time in the flat Tefilot
@@ -14160,7 +14162,14 @@ function syncNativeTopBar(title, backTo, opts){
       // Top-level tab screens (no back action) show no title: the tab bar
       // already names them, and the extra word read as clutter (by user
       // request). Inner screens keep their title beside the back button.
-      title: String(opts.title!=null ? opts.title : (backTo ? (title||'') : '')).replace(/<[^>]*>/g,''),
+      // ckChrome() translates it here because this native title bypasses
+      // the HTML tr(app) pass entirely (it's sent straight to Swift, never
+      // rendered into the DOM) - without it, every screen whose title is a
+      // plain literal Hebrew UI string (as opposed to a per-item name like
+      // a parasha/masechet already resolved in the caller's own language)
+      // showed untranslated Hebrew in the native topbar in every other
+      // language.
+      title: ckChrome(String(opts.title!=null ? opts.title : (backTo ? (title||'') : '')).replace(/<[^>]*>/g,'')),
       backTo: (typeof backTo==='function') ? '​' : (backTo||''), // zero-width space: "has a back action" without a real tab name Swift would otherwise try to display/log
       isRTL: document.documentElement.dir!=='ltr',
       isDark: S.theme==='dark',

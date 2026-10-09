@@ -106,6 +106,13 @@ class MainViewController: CAPBridgeViewController {
     /// always triggers the OS "Open in" confirmation dialog, which nothing
     /// in this sandboxed environment can dismiss programmatically.
     private func screenshotBootstrapScript() -> WKUserScript? {
+        // Belt-and-suspenders alongside index.html's own SHOT_ALLOWED check:
+        // a real App Store/TestFlight install always has a receipt, so this
+        // never activates there even if the env vars were somehow present.
+        let hasReceipt = Bundle.main.appStoreReceiptURL
+            .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        guard !hasReceipt else { return nil }
+
         let env = ProcessInfo.processInfo.environment
         guard let screen = env["BETEL_SHOT_SCREEN"], !screen.isEmpty else { return nil }
         let lang = env["BETEL_SHOT_LANG"] ?? ""
