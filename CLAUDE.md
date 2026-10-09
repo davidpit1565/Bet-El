@@ -376,6 +376,17 @@ in English as usual.
   with verbose diagnostics before concluding anything. Sequential
   back-to-back browser launches in one Node process are themselves a
   common source of sandbox flakiness unrelated to the app.
+- **A native bridge call that compensates for its own side effect can
+  create a feedback loop with a JS scroll listener.** `setTopBarCollapsed`
+  (Swift) issues its own `window.scrollBy()` to keep content visually
+  anchored when the native header's height changes - that synthetic
+  scroll fires a real DOM `scroll` event comfortably past
+  `initNavScrollHide`'s `COMMIT` threshold, which the listener misreads
+  as a genuine user scroll in the opposite direction and immediately
+  flips the collapse state right back. Any native call that moves the
+  scroll position as a side effect needs the JS listener to suppress
+  itself for the duration of that round-trip (`suppressUntil` window in
+  `initNavScrollHide`), not just filter by distance/threshold.
 
 ## Standing open items
 - **Firebase push notifications**: real push infrastructure now exists
