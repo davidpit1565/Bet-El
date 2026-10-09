@@ -177,7 +177,9 @@ in English as usual.
   app's own HTML design (`NATIVE_SETTINGS = false` in index.html - the
   native glass-card `NativeSettingsView` is kept but unused), with
   `settingsRowsTappable()` making whole rows the touch target like iOS.
-  Search is an item inside the native tab bar (`NativeSearchHost.open()`),
+  Search is its own tab, App Store style (`TAB==='search'`, `renderSearch()`: suggestions + recent searches, then
+  live results; native: the bar collapses into the previous tab's circle + a glass UISearchBar at the bottom, keyboard
+  only on tap; a result opened from Search keeps the Search tab lit via `SEARCH_NAV`),
   the tab bar minimizes Apple Music-style on scroll, and the reader tools
   "…" button lives in the native header row (`layoutToolsFab()`).
 - **Dev builds don't count as Firebase users.** Every Xcode install (delete +
