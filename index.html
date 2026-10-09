@@ -7703,7 +7703,19 @@ function HOME_SHORTCUTS(){
    app completely. The small index is fetched fresh (no-store, NOT cachedFetch, which is cache-first forever)
    and only its last good copy is kept for offline; data/booklet/ is also left out of data/manifest.json and
    purged from the data cache so the background prefetch never keeps an old copy around. */
-let BOOKLET=(()=>{ try{ return JSON.parse(localStorage.getItem('betel_booklet')||'null'); }catch(e){ return null; } })();
+/* A booklet is never shown past its week, even if nothing new was published: it expires after its
+   "shabbat" date (YYYY-MM-DD, the Shabbat of that week; "until" is accepted too), or 7 days after the app
+   first saw it when the file has no date. Expired = hidden and forgotten. */
+function bookletExpired(b){
+  if(!b) return true;
+  const d=b.until||b.shabbat;
+  let end;
+  if(d && /^\d{4}-\d{2}-\d{2}$/.test(d)){ const [y,m,dd]=d.split('-').map(Number); end=new Date(y,m-1,dd+1).getTime(); }   // the day after = Motzei Shabbat has passed
+  else end=(b.seenAt||Date.now())+7*864e5;
+  return Date.now()>=end;
+}
+function bookletForget(){ BOOKLET=null; try{ localStorage.removeItem('betel_booklet'); }catch(e){} }
+let BOOKLET=(()=>{ try{ const b=JSON.parse(localStorage.getItem('betel_booklet')||'null'); if(bookletExpired(b)){ localStorage.removeItem('betel_booklet'); return null; } return b; }catch(e){ return null; } })();
 let bookletLoadPromise=null;
 function bookletTitle(){
   const t=BOOKLET&&BOOKLET.title; if(!t) return '';
@@ -7715,7 +7727,10 @@ function ensureBooklet(){
   bookletLoadPromise=fetch(dataURL('data/booklet/current.json')+'?t='+Date.now(),{cache:'no-store'})
     .then(r=>{ if(r.status===404) return null; if(!r.ok) throw new Error('booklet '+r.status); return r.json(); })
     .then(j=>{
-      const next=(j&&j.pdf)?j:null, changed=JSON.stringify(next)!==JSON.stringify(BOOKLET);
+      let next=(j&&j.pdf)?j:null;
+      if(next) next={...next, seenAt:(BOOKLET&&BOOKLET.id===next.id&&BOOKLET.seenAt)||Date.now()};
+      if(bookletExpired(next)) next=null;                       // an old booklet left on the server is still not shown
+      const changed=JSON.stringify(next)!==JSON.stringify(BOOKLET);
       BOOKLET=next;
       try{ if(next) localStorage.setItem('betel_booklet',JSON.stringify(next)); else localStorage.removeItem('betel_booklet'); }catch(e){}
       if(window.caches) caches.keys().then(ks=>ks.forEach(k=>caches.open(k).then(c=>c.keys().then(reqs=>reqs.forEach(q=>{ if(q.url.includes('/data/booklet/')) c.delete(q); }))))).catch(()=>{});
@@ -7725,6 +7740,7 @@ function ensureBooklet(){
   return bookletLoadPromise;
 }
 function openBooklet(){
+  if(BOOKLET&&bookletExpired(BOOKLET)){ bookletForget(); if(TAB==='home') render(); return; }
   if(!BOOKLET||!BOOKLET.pdf) return;
   openExternal(new URL(dataURL(BOOKLET.pdf), location.href).href);
 }
@@ -7826,7 +7842,7 @@ function renderHome(){
       </div>`;
     },
     /* the weekly booklet PDF (data/booklet/current.json) - the slot beside Ben Ish Chai stays empty until one is published */
-    booklet:(sz)=>BOOKLET&&BOOKLET.pdf?`<div class="q-tile${TC(sz)}" data-cat="chok" id="homeBookletCard">
+    booklet:(sz)=>(BOOKLET&&bookletExpired(BOOKLET)&&bookletForget(),BOOKLET&&BOOKLET.pdf)?`<div class="q-tile${TC(sz)}" data-cat="chok" id="homeBookletCard">
         <div class="qt">${heTitle('חוברת השבוע','חוֹבֶרֶת הַשָּׁבוּעַ')}</div>
         <div class="qd">${bookletTitle()}</div>
       </div>`:'',

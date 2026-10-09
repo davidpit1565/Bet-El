@@ -481,7 +481,7 @@ in English as usual.
   Chatzot; alot -> chatzot hayom = Shacharit; chatzot hayom -> tzeit = Mincha; tzeit -> chatzot halayla = Arvit.
 - **Weekly booklet slot (user's rule):** the home slot right beside Ben Ish Chai is reserved for the weekly booklet
   (`booklet` home item, `ensureBooklet()`/`openBooklet()`). It reads `data/booklet/current.json` fresh (no-store) and
-  opens the PDF in the in-app browser; no current.json = slot stays empty. Never put another tile there. Each week the old
+  opens the PDF in the in-app browser; no current.json = slot stays empty. A booklet always expires after its `shabbat` date (or 7 days) even if nothing new is published - an old booklet is never shown. Never put another tile there. Each week the old
   PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
 - **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
   length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
