@@ -1,6 +1,7 @@
 /* Builds fastlane/metadata/<locale>/*.txt from docs/appstore/LISTING.md (store texts) and
    docs/release-update-checklist.md section 3 (What's New), and copies the App Store slides into
-   fastlane/screenshots/<locale>/ for `fastlane deliver`.
+   fastlane/screenshots/<locale>/ for `fastlane deliver`, and the App Review notes into
+   fastlane/metadata/review_information/notes.txt.
    usage: node scripts/fastlane-metadata.mjs            (he, en-US, fr-FR, ru; screenshots for he + en-US)
    Georgian is skipped - App Store Connect has no Georgian localization. */
 import fs from 'fs';
@@ -48,6 +49,10 @@ for (const [head, locale, notesLabel] of LOCALES) {
   }
   console.log('metadata', locale);
 }
+const notes = (checklist.slice(checklist.indexOf('### Review Notes')).match(/```\n([\s\S]*?)\n```/) || [])[1];
+if (!notes || [...notes].length > 4000) throw new Error('review notes missing or over 4000');
+fs.mkdirSync(path.join(out, 'review_information'), { recursive: true });
+fs.writeFileSync(path.join(out, 'review_information', 'notes.txt'), notes.trim() + '\n');
 fs.writeFileSync(path.join(out, 'copyright.txt'), (listing.match(/\*\*Copyright:\*\*\s*(.+)/) || [])[1].trim() + '\n');
 
 for (const [locale, lang] of Object.entries(SHOT_LANGS)) {

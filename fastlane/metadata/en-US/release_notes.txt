@@ -1,10 +1,11 @@
 Major update:
-• New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, exact daily times, Tehillim, Shabbat & Yom Tov candle lighting, Sefirat HaOmer, time until sunset
-• New Liquid Glass design (iOS 26): tab bar, header, search and controls
-• New Search tab: find any chapter, prayer or book in the library
-• Fully translated Settings: Hebrew, English, French, Russian and Georgian
-• Tefillin mirror with precise placement guidance
-• Send feedback and suggestions right from the app
-• Birkat Meein Shalosh and Birkot HaNehenin (Edot HaMizrach wording)
-• Shareable QR code, links that open inside the app, automatic location and a header that tucks away as you scroll
-• New launch screen and stability improvements
+• A weekly study booklet on the Home screen, next to Ben Ish Chai: renewed every week, no app update needed
+• Tzaddikim yahrzeits in the calendar: "In memory of the tzaddikim" for the selected day
+• New Search tab: any chapter, prayer or book across the whole library, with recent searches and suggestions
+• The blessings over food (Birkat HaMazon, Meein Shalosh and Birkot HaNehenin) in Edot HaMizrach nusach, next to the Siddur in the Library
+• New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, daily times, Tehillim, Shabbat candles, Sefirat HaOmer
+• Liquid Glass design (iOS 26): tab bar, header, search and controls
+• Settings, calendar and daily times fully translated: Hebrew, English, French, Russian and Georgian
+• Tefillin mirror with precise detection of where the bayit is placed
+• Send feedback and suggestions right from the app, a QR code for sharing, and automatic location
+• Stability and speed improvements

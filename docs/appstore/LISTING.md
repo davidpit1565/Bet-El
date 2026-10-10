@@ -13,9 +13,9 @@
 
 **Subtitle** (29/30): `חוק לישראל, תהילים וזוהר יומי`
 
-**Promotional Text** (121/170):
+**Promotional Text** (133/170):
 ```
-חדש: ווידג׳טים למסך הבית והנעילה, ברכה מעין שלוש וברכות הנהנין בנוסח עדות המזרח, קוד QR לשיתוף ומיקום אוטומטי. בחמש שפות.
+חדש: חיפוש בכל הספרים, חוברת לימוד שבועית, הילולות הצדיקים בלוח השנה, ווידג׳טים למסך הנעילה, ברכה מעין שלוש וברכות הנהנין. בחמש שפות.
 ```
 
 **Keywords** (90/100):
@@ -23,7 +23,7 @@
 תמיד,חוק לישראל,תהילים,זוהר,בן איש חי,מוסר,תפילה,סידור,לוח עברי,זמני היום,לימוד יומי,ברכות
 ```
 
-**Description** (1112/4000):
+**Description** (1283/4000):
 ```
 תמיד היא אפליקציית הלימוד היומי של קהילת בית אל – כל מה שצריך כדי להתמיד בלימוד תורה יום יום, במקום אחד.
 
@@ -43,10 +43,16 @@
 שישה ספרי מוסר קלאסיים בקצב של שלוש יחידות ביום, עם אפשרות לדפדף בכל הספר.
 
 סידור, ברכות ותפילות
-סידור מלא בנוסח עדות המזרח, ברכת המזון, ברכה מעין שלוש, ברכות הנהנין, תפילת הדרך ועוד.
+סידור מלא בנוסח עדות המזרח, ברכת המזון, ברכה מעין שלוש, ברכות הנהנין, תפילת הדרך ועוד, וחיפוש בכל הספרים.
 
 לוח עברי וזמני היום
 תאריכים עבריים, הדלקת נרות וצאת שבת, וזמני היום לפי המקום שלך – נקבע אוטומטית.
+
+חוברת השבוע
+חוברת לימוד חדשה כל שבוע, במסך הבית – נפתחת ישירות מהאפליקציה.
+
+לעילוי נשמת הצדיקים
+בלוח השנה, לכל יום עברי: שמות הצדיקים שהילולתם חלה בו.
 
 ווידג׳טים
 תאריך עברי ופרשה, זמני היום, תהילים, רצף לימוד, נרות שבת וספירת העומר – במסך הבית, במסך הנעילה וב-StandBy.
@@ -63,9 +69,9 @@
 
 **Subtitle** (25/30): `Chok LeYisrael · Tehillim`
 
-**Promotional Text** (150/170):
+**Promotional Text** (164/170):
 ```
-New: Home and Lock Screen widgets, Birkat Meein Shalosh and blessings before eating (Edot HaMizrach nusach), shareable QR code and automatic location.
+New: search every book, a weekly study booklet, tzaddikim yahrzeits in the calendar, Lock Screen widgets, Birkat Meein Shalosh and Birkot HaNehenin. In 5 languages.
 ```
 
 **Keywords** (90/100):
@@ -73,7 +79,7 @@ New: Home and Lock Screen widgets, Birkat Meein Shalosh and blessings before eat
 tamid,torah,chok leyisrael,tehillim,zohar,ben ish chai,musar,siddur,jewish calendar,zmanim
 ```
 
-**Description** (1435/4000):
+**Description** (1683/4000):
 ```
 Tamid is the daily study companion of the Beit-El community - everything you need to keep a daily Torah habit, in one app.
 
@@ -93,10 +99,16 @@ Musar
 Six classic Musar works at three units a day, with free browsing through each book.
 
 Siddur, blessings and prayers
-A full siddur in Edot HaMizrach nusach, Birkat HaMazon, Birkat Meein Shalosh, blessings before eating, the Traveler's Prayer and more.
+A full siddur in Edot HaMizrach nusach, Birkat HaMazon, Birkat Meein Shalosh, blessings before eating, the Traveler's Prayer and more - and search across all books.
 
 Hebrew calendar and daily times
 Hebrew dates, candle lighting and Havdalah, and daily zmanim for your place - set automatically.
+
+Weekly booklet
+A new study booklet every week on the Home screen - opens right inside the app.
+
+In memory of the tzaddikim
+In the calendar, for every Hebrew day: the names of the tzaddikim whose yahrzeit falls on it.
 
 Widgets
 Hebrew date and parasha, daily times, Tehillim, study streak, Shabbat candles and the Omer count - on the Home Screen, Lock Screen and in StandBy.

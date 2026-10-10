@@ -38,28 +38,30 @@
 **עברית**
 ```
 עדכון גדול:
-• ווידג'טים חדשים למסך הבית, למסך הנעילה ול-StandBy: תאריך עברי ופרשה, זמני היום המדויקים, תהילים, נרות שבת ויום טוב, ספירת העומר, עד השקיעה
-• עיצוב חדש בליקוויד גלס (iOS 26): סרגל תחתון, כותרת, חיפוש ופקדים
-• טאב חיפוש חדש: פרק, תפילה או ספר בכל הספרייה
-• הגדרות מתורגמות במלואן: עברית, אנגלית, צרפתית, רוסית וגאורגית
+• חוברת לימוד שבועית במסך הבית, ליד בן איש חי: מתחדשת כל שבוע, בלי עדכון אפליקציה
+• הילולות הצדיקים בלוח השנה: "לעילוי נשמת הצדיקים" של היום הנבחר
+• טאב חיפוש חדש: פרק, תפילה או ספר בכל הספרייה, עם חיפושים אחרונים והצעות
+• ברכות האכילה (ברכת המזון, מעין שלוש וברכות הנהנין) בנוסח עדות המזרח, ליד הסידור בספרייה
+• ווידג'טים חדשים למסך הבית, למסך הנעילה ול-StandBy: תאריך עברי ופרשה, זמני היום, תהילים, נרות שבת, ספירת העומר
+• עיצוב ליקוויד גלס (iOS 26): סרגל תחתון, כותרת, חיפוש ופקדים
+• הגדרות, לוח שנה וזמני היום מתורגמים במלואם: עברית, אנגלית, צרפתית, רוסית וגאורגית
 • מראה לתפילין עם זיהוי מדויק של מקום הנחת הבית
-• דיווח והצעות לשיפור – ישירות מהאפליקציה
-• ברכה מעין שלוש וברכות הנהנין בנוסח עדות המזרח
-• קוד QR לשיתוף האפליקציה, קישורים הנפתחים בתוך האפליקציה, מיקום אוטומטי וכותרת שנעלמת בגלילה
-• מסך פתיחה חדש ושיפורי יציבות
+• דיווח והצעות לשיפור ישירות מהאפליקציה, קוד QR לשיתוף ומיקום אוטומטי
+• שיפורי יציבות ומהירות
 ```
 **English**
 ```
 Major update:
-• New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, exact daily times, Tehillim, Shabbat & Yom Tov candle lighting, Sefirat HaOmer, time until sunset
-• New Liquid Glass design (iOS 26): tab bar, header, search and controls
-• New Search tab: find any chapter, prayer or book in the library
-• Fully translated Settings: Hebrew, English, French, Russian and Georgian
-• Tefillin mirror with precise placement guidance
-• Send feedback and suggestions right from the app
-• Birkat Meein Shalosh and Birkot HaNehenin (Edot HaMizrach wording)
-• Shareable QR code, links that open inside the app, automatic location and a header that tucks away as you scroll
-• New launch screen and stability improvements
+• A weekly study booklet on the Home screen, next to Ben Ish Chai: renewed every week, no app update needed
+• Tzaddikim yahrzeits in the calendar: "In memory of the tzaddikim" for the selected day
+• New Search tab: any chapter, prayer or book across the whole library, with recent searches and suggestions
+• The blessings over food (Birkat HaMazon, Meein Shalosh and Birkot HaNehenin) in Edot HaMizrach nusach, next to the Siddur in the Library
+• New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, daily times, Tehillim, Shabbat candles, Sefirat HaOmer
+• Liquid Glass design (iOS 26): tab bar, header, search and controls
+• Settings, calendar and daily times fully translated: Hebrew, English, French, Russian and Georgian
+• Tefillin mirror with precise detection of where the bayit is placed
+• Send feedback and suggestions right from the app, a QR code for sharing, and automatic location
+• Stability and speed improvements
 ```
 **Français**
 ```
@@ -99,16 +101,29 @@ Mise à jour majeure :
 
 ### Review Notes (למבקר של אפל)
 ```
-No login or account is required. The app is a daily Torah-study companion.
-Location (when in use) calculates daily prayer times and the compass; it stays on device. The app asks for it automatically on first launch so the times match the user's place.
-External links (donation page, privacy, terms, social profiles) open in an in-app Safari sheet. The donation link goes to the community's own website; there is no in-app payment.
-The star-rating prompt uses Apple's own SKStoreReviewController (at most about once a week, iOS decides).
-Camera is used only by the optional "Tefillin mirror" screen; processed on device, nothing is saved or sent.
-Widgets (Home Screen, Lock Screen, StandBy) and a Live Activity (countdown to sunrise/sunset) read a small App Group snapshot written by the app.
-Optional push notifications ("New content") use Firebase Cloud Messaging.
-Feedback form: name/email/subject/message are sent to the developer only to answer the user.
-The app loads its static study texts from https://davidpit1565.github.io/Bet-El/ (GitHub Pages).
-Built with Xcode 27 / iOS 27 SDK; Liquid Glass APIs have fallbacks on earlier iOS (deployment target 15).
+App purpose
+"Tamid" is a free daily Jewish study and prayer companion for the Beit-El community and anyone following the traditional daily study cycles: Chok LeYisrael, daily Tehillim, Ben Ish Chai, six classic Musar works and Tikkunei HaZohar, plus a full Siddur (Edot HaMizrach nusach), a Hebrew calendar and daily prayer times. Languages: Hebrew, English, French, Russian and Georgian.
+
+Access
+No login, account or registration is needed. Every feature is available on first launch, so there is no demo account.
+
+Permissions (all optional)
+- Location (when in use): only to calculate daily prayer and candle-lighting times and the compass direction to Jerusalem. It stays on the device. Without it the app works fully with a default location.
+- Camera: only on the optional "Tefillin mirror" screen. Frames are processed on the device; nothing is saved or sent.
+- Notifications: a daily study reminder, and opt-in "new content" announcements.
+
+External services
+- Firebase (Google): anonymous usage analytics, an anonymous visit counter and "online now" counter shown on the home screen (no personal data), and optional push notifications (Cloud Messaging, opt-in in Settings). The optional feedback form stores the name, email and message the user types, only so the developer can reply.
+- Donation: a voluntary donation link to the community's own website (bet-el.be), which uses Stripe. It opens in Safari (SFSafariViewController), not inside the app's own screens. No payment is processed in the app and there are no in-app purchases.
+- Hebrew calendar (dates, holidays, prayer times): the open-source hebcal library is bundled in the app and runs entirely on the device; no network calls.
+- Tefillin mirror: on first use it downloads Google's open-source MediaPipe face model (jsDelivr / Google storage); the camera image itself never leaves the device.
+- Study texts are static files downloaded from the app's own GitHub Pages site (davidpit1565.github.io/Bet-El) and cached for offline use.
+
+Other
+- Widgets (Home Screen, Lock Screen, StandBy) and a Live Activity read a small App Group snapshot written by the app.
+- The rating prompt is Apple's SKStoreReviewController.
+- Content: classic Jewish religious texts (Torah, Mishnah, Talmud, Zohar, Rambam, Ben Ish Chai, Musar works) in the public domain. No protected third-party material.
+- Behaviour is the same in every region; only the prayer times depend on the user's location.
 ```
 
 ## 4. דברים שפתוחים אצלך (לא קשורים לקוד)
