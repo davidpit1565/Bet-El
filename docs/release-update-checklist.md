@@ -40,6 +40,7 @@
 עדכון גדול:
 • ווידג'טים חדשים למסך הבית, למסך הנעילה ול-StandBy: תאריך עברי ופרשה, זמני היום המדויקים, תהילים, נרות שבת ויום טוב, ספירת העומר, עד השקיעה
 • עיצוב חדש בליקוויד גלס (iOS 26): סרגל תחתון, כותרת, חיפוש ופקדים
+• טאב חיפוש חדש: פרק, תפילה או ספר בכל הספרייה
 • הגדרות מתורגמות במלואן: עברית, אנגלית, צרפתית, רוסית וגאורגית
 • מראה לתפילין עם זיהוי מדויק של מקום הנחת הבית
 • דיווח והצעות לשיפור – ישירות מהאפליקציה
@@ -52,6 +53,7 @@
 Major update:
 • New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, exact daily times, Tehillim, Shabbat & Yom Tov candle lighting, Sefirat HaOmer, time until sunset
 • New Liquid Glass design (iOS 26): tab bar, header, search and controls
+• New Search tab: find any chapter, prayer or book in the library
 • Fully translated Settings: Hebrew, English, French, Russian and Georgian
 • Tefillin mirror with precise placement guidance
 • Send feedback and suggestions right from the app
@@ -64,6 +66,7 @@ Major update:
 Mise à jour majeure :
 • Nouveaux widgets (écran d’accueil, écran verrouillé, StandBy) : date hébraïque et paracha, horaires exacts, Tehilim, bougies de Chabbat et Yom Tov, Omer, temps jusqu’au coucher du soleil
 • Nouveau design Liquid Glass (iOS 26)
+• Nouvel onglet Recherche : un chapitre, une prière ou un livre dans toute la bibliothèque
 • Réglages entièrement traduits : hébreu, anglais, français, russe, géorgien
 • Miroir pour téfilin avec placement précis
 • Envoyez vos remarques directement depuis l’app
@@ -75,6 +78,7 @@ Mise à jour majeure :
 Большое обновление:
 • Новые виджеты (главный экран, экран блокировки, StandBy): еврейская дата и недельная глава, точные времена, Теилим, свечи Шаббата и Йом-Това, счёт Омера, время до заката
 • Новый дизайн Liquid Glass (iOS 26)
+• Новая вкладка «Поиск»: глава, молитва или книга во всей библиотеке
 • Настройки полностью переведены: иврит, английский, французский, русский, грузинский
 • Зеркало для тфилин с точным указанием места
 • Отправка отзывов прямо из приложения
@@ -104,7 +108,7 @@ Widgets (Home Screen, Lock Screen, StandBy) and a Live Activity (countdown to su
 Optional push notifications ("New content") use Firebase Cloud Messaging.
 Feedback form: name/email/subject/message are sent to the developer only to answer the user.
 The app loads its static study texts from https://davidpit1565.github.io/Bet-El/ (GitHub Pages).
-Built with Xcode 26 / iOS 26 SDK; Liquid Glass APIs have fallbacks on earlier iOS (deployment target 15).
+Built with Xcode 27 / iOS 27 SDK; Liquid Glass APIs have fallbacks on earlier iOS (deployment target 15).
 ```
 
 ## 4. דברים שפתוחים אצלך (לא קשורים לקוד)
@@ -126,7 +130,7 @@ Built with Xcode 26 / iOS 26 SDK; Liquid Glass APIs have fallbacks on earlier iO
 ## 7. בדיקת עמידה בכללי אפל (נבדק בקוד לפני העדכון)
 - ✅ **ITSAppUsesNonExemptEncryption=false**, הרשאות מצלמה/מיקום/תנועה עם נוסח ברור, `NSSupportsLiveActivities`, אין חריגי ATS, אין `server.url` בפיתוח, אייקון 1024 בלי שקיפות (RGB).
 - ✅ **Privacy manifest** נוסף (ראו סעיף 4). **לעדכן ידנית את תוויות הפרטיות** ב-App Store Connect (סעיף 2) - Firebase Analytics/נוכחות + טופס משוב.
-- ✅ **Xcode 26 / iOS 26 SDK** נדרש לארכיב (דרישת אפל); יעד הפריסה נשאר 15.0.
+- ✅ **Xcode 26+ / iOS 26+ SDK** נדרש לארכיב (דרישת אפל); build 6 נבנה עם Xcode 27 / iOS 27 SDK. יעד הפריסה נשאר 15.0.
 - ⚠️ **תרומות (הגדרות → "תמכו בבית אל")**: קישור חיצוני לדף תרומה (`bet-el.be`). זה היה קיים כבר בגרסה המאושרת, אבל סעיף 3.2.1(vi) מתיר גיוס תרומות באפליקציה רק לעמותה מאושרת. אם אפל תשאל: להסביר שהקישור הוא לדף תרומה של העמותה בלבד ולא פותח תוכן. אם רוצים אפס סיכון - להסתיר את השורה באפליקציית ה-iOS (להשאיר רק ב-PWA).
 - ⚠️ **התראות "תוכן חדש" (FCM Web Push)**: ב-WKWebView של iOS הן לא נתמכות. לוודא שהמתג בהגדרות לא מבטיח משהו שלא עובד בבילד של האפליקציה (אחרת אפל עלולה לראות תכונה שבורה, סעיף 2.1) - אם לא עובד, להסתיר אותו בנייטיב.
 - ⚠️ **קוד שנטען מרחוק**: מראה התפילין טוענת MediaPipe (WASM/מודל) מ-jsDelivr ומ-Google בשימוש הראשון. מותר כשהוא רץ בתוך ה-WebView, אבל כדאי לציין ב-Review Notes (כבר כתוב שם שטקסטים נטענים מ-GitHub Pages - להוסיף גם את זה).

@@ -145,6 +145,19 @@ class MainViewController: CAPBridgeViewController {
             // betel_onboard_v1. The app's own defaults are enough to render the
             // reader normally, so just mark it done rather than re-answer it here.
             localStorage.setItem('betel_chok_pace_v1', '1');
+            // Pre-seed a fixed location (Jerusalem, mirrors scripts/appstore-
+            // capture.mjs's web seed) AND betel_gps_tried. index.html's own
+            // boot() (see the "Location is AUTOMATIC by default" block) gates
+            // its FIRST navigator.geolocation.getCurrentPosition() call solely
+            // on the betel_gps_tried flag - LOC.auto/betel_loc is NOT checked
+            // there - so betel_loc alone does not stop the native location-
+            // permission dialog from firing. Both must be set.
+            try {
+              if (!localStorage.getItem('betel_loc')) {
+                localStorage.setItem('betel_loc', JSON.stringify({lat:31.7683,lon:35.2137,tz:'Asia/Jerusalem',name:'ירושלים',auto:false}));
+              }
+              localStorage.setItem('betel_gps_tried', '1');
+            } catch(e) {}
             sessionStorage.setItem('betel_shot_screen', screen);
             if (scroll) sessionStorage.setItem('betel_shot_scroll', scroll);
           } catch(e) {}
@@ -548,6 +561,43 @@ class MainViewController: CAPBridgeViewController {
         topBar.onTitleTap = scrollToTop
     }
 
+    // MARK: - Debug-only native scroll simulation for App Store screenshot automation
+
+    /// Mirrors `BETEL_SHOT_SCROLL` (see `screenshotBootstrapScript()`). index.html's own
+    /// `shotScrollSeq()` only scrolls the web DOM, which does nothing for a native-overlay
+    /// screen (Library, native-promoted Home/lists) since the visible content there is a real
+    /// `UICollectionView`, not the DOM underneath it - so those screens drive their own native
+    /// scroll here instead.
+    private lazy var shotScrollMode: String? = {
+        let hasReceipt = Bundle.main.appStoreReceiptURL
+            .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        guard !hasReceipt else { return nil }
+        return ProcessInfo.processInfo.environment["BETEL_SHOT_SCROLL"].flatMap { $0.isEmpty ? nil : $0 }
+    }()
+
+    /// Drives the collection view's real `contentOffset` in small stepped increments (same
+    /// cadence as `shotScrollSeq`'s DOM steps) so `ScrollCollapseTracker`'s threshold/commit
+    /// accumulation sees the same shape of updates a human swipe would produce, through the
+    /// exact `scrollViewDidScroll` -> `onCollapseChange` -> `setTopBarCollapsed` path - not a
+    /// shortcut that bypasses it.
+    private func simulateNativeShotScroll(on collectionView: UICollectionView) {
+        guard let mode = shotScrollMode, mode == "down" || mode == "revealed" else { return }
+        let down = Array(repeating: CGFloat(100), count: 9)
+        let steps: [CGFloat] = mode == "down" ? down : down + down.map { -$0 }
+        var delay: TimeInterval = 0.3
+        for dy in steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak collectionView] in
+                guard let cv = collectionView else { return }
+                cv.layoutIfNeeded()
+                let top = -cv.adjustedContentInset.top
+                let maxY = max(top, cv.contentSize.height - cv.bounds.height + cv.adjustedContentInset.bottom)
+                let newY = min(max(cv.contentOffset.y + dy, top), maxY)
+                cv.setContentOffset(CGPoint(x: 0, y: newY), animated: false)
+            }
+            delay += 0.11
+        }
+    }
+
     // MARK: - Native library screen (UICollectionView + glass cards) - see NativeLibrary.swift
     private var nativeLibraryView: NativeLibraryView?
 
@@ -562,6 +612,7 @@ class MainViewController: CAPBridgeViewController {
             lib.onSelect = { [weak self] key in
                 self?.webView?.evaluateJavaScript("window.NativeLibraryHost && window.NativeLibraryHost.open('\(key)')", completionHandler: nil)
             }
+            lib.onCollapseChange = { [weak self] hide in self?.setTopBarCollapsed(hide) }
             view.insertSubview(lib, belowSubview: tabBar)
             NSLayoutConstraint.activate([
                 lib.topAnchor.constraint(equalTo: topBar.bottomAnchor),
@@ -573,6 +624,7 @@ class MainViewController: CAPBridgeViewController {
         }
         lib.isHidden = false
         lib.show(items: items, rtl: rtl, isDark: isDark)
+        simulateNativeShotScroll(on: lib.collectionView)
     }
 
     func hideNativeLibrary() { nativeLibraryView?.isHidden = true }
@@ -589,6 +641,7 @@ class MainViewController: CAPBridgeViewController {
             home.translatesAutoresizingMaskIntoConstraints = false
             home.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
             home.js = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
+            home.onCollapseChange = { [weak self] hide in self?.setTopBarCollapsed(hide) }
             view.insertSubview(home, belowSubview: tabBar)
             NSLayoutConstraint.activate([
                 home.topAnchor.constraint(equalTo: topBar.bottomAnchor),
@@ -606,6 +659,7 @@ class MainViewController: CAPBridgeViewController {
         }
         home.isHidden = false
         home.show(items: items, editing: editing, canEdit: canEdit, rtl: rtl, isDark: isDark, pool: pool)
+        simulateNativeShotScroll(on: home.collectionView)
     }
 
     /// Hiding also takes the view OUT of the hierarchy, so a stale native overlay can never sit over (or
@@ -1015,7 +1069,7 @@ class MainViewController: CAPBridgeViewController {
 
     private func reportHeightToWebView() {
         let navHeight = (tabBar.isHidden ? 0 : tabBar.frame.height) + (isSearchMode ? searchFieldHeight + 8 : 0)
-        let headerHeight = topBar.isHidden ? 0 : (topBar.frame.height)
+        let headerHeight = (topBar.isHidden || topBarCollapsed) ? 0 : topBar.frame.height
         let js = """
         document.documentElement.style.setProperty('--native-nav-h','\(navHeight)px');
         document.documentElement.style.setProperty('--native-header-h','\(headerHeight)px');
@@ -1166,6 +1220,69 @@ extension MainViewController: UITabBarDelegate {
     }
 }
 
+
+/// Mirrors index.html's `initNavScrollHide` direction-commit algorithm so native
+/// `UICollectionView`-backed screens (NativeLibraryView, NativeHomeView) can drive
+/// the same header tuck/reveal behaviour as the web DOM scroll path.
+final class ScrollCollapseTracker {
+    private let threshold: CGFloat = 10
+    private let commit: CGFloat = 28
+    private var lastY: CGFloat = 0
+    private var accum: CGFloat = 0
+    private var dir: Int = 0
+    private(set) var collapsed = false
+
+    func reset() {
+        lastY = 0
+        accum = 0
+        dir = 0
+        collapsed = false
+    }
+
+    /// Feed the scroll view's current content offset (`maxY`: the furthest a
+    /// normal, non-bounced offset can reach - `contentSize.height -
+    /// bounds.height + adjustedContentInset.top + .bottom`, in the same
+    /// coordinate space as `y`, i.e. already including `adjustedContentInset.top`).
+    /// Returns true if the collapsed state changed (caller should apply the
+    /// new `collapsed` value).
+    @discardableResult
+    func update(y: CGFloat, maxY: CGFloat = .greatestFiniteMagnitude) -> Bool {
+        let wasBounced = lastY > maxY
+        let dy = y - lastY
+        lastY = y
+        if y < 40 {
+            accum = 0
+            dir = 0
+            if collapsed { collapsed = false; return true }
+            return false
+        }
+        // Elastic rubber-band past the end of short content (and the sample that
+        // snaps back out of it) moves `y` backwards on its own, with no real
+        // upward scroll intent - without this guard that snap-back reads as a
+        // genuine reversal and immediately un-collapses a header that just
+        // correctly collapsed. See CLAUDE.md "Header scroll-away" for the
+        // sibling bug this is the same family as (a side effect misread as intent).
+        if y > maxY || wasBounced {
+            accum = 0
+            return false
+        }
+        if abs(dy) < threshold { return false }
+        let newDir = dy > 0 ? 1 : -1
+        if newDir != dir {
+            dir = newDir
+            accum = abs(dy)
+        } else {
+            accum += abs(dy)
+        }
+        if accum < commit { return false }
+        let wantHide = dir == 1
+        if wantHide != collapsed {
+            collapsed = wantHide
+            return true
+        }
+        return false
+    }
+}
 
 /// See `MainViewController.setupScrollToTop()`.
 final class ScrollTopCatcher: UIScrollView, UIScrollViewDelegate {

@@ -1,0 +1,9 @@
+Mise à jour majeure :
+• Nouveaux widgets (écran d’accueil, écran verrouillé, StandBy) : date hébraïque et paracha, horaires exacts, Tehilim, bougies de Chabbat et Yom Tov, Omer, temps jusqu’au coucher du soleil
+• Nouveau design Liquid Glass (iOS 26)
+• Nouvel onglet Recherche : un chapitre, une prière ou un livre dans toute la bibliothèque
+• Réglages entièrement traduits : hébreu, anglais, français, russe, géorgien
+• Miroir pour téfilin avec placement précis
+• Envoyez vos remarques directement depuis l’app
+• Berakha méèn chalosh et bénédictions avant de manger (rite séfarade orientale)
+• QR code de partage, liens ouverts dans l’app, localisation automatique et en-tête qui se replie au défilement

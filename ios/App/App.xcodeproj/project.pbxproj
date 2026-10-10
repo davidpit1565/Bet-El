@@ -616,7 +616,7 @@
 				DEVELOPMENT_TEAM = 43DB56398H;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BetElWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -643,7 +643,7 @@
 				DEVELOPMENT_TEAM = 43DB56398H;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BetElWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

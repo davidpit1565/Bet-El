@@ -449,6 +449,8 @@ final class NHCell: UICollectionViewCell {
 final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var bottomInset: (() -> CGFloat)?
     var js: ((String) -> Void)?
+    var onCollapseChange: ((Bool) -> Void)?
+    private let collapseTracker = ScrollCollapseTracker()
 
     let collectionView: UICollectionView
     private(set) var items: [NHItem] = []
@@ -564,6 +566,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         let isNewScreen = newSig != screenSignature
         screenSignature = newSig
         items = newItems
+        if isNewScreen { collapseTracker.reset() }
         if editing { normalizeSpacers() }
         enterEditLP.isEnabled = !editing && canEdit
         dragLP.isEnabled = editing
@@ -593,6 +596,18 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
 
     func scrollToTop() {
         collectionView.setContentOffset(CGPoint(x: 0, y: -collectionView.adjustedContentInset.top), animated: true)
+    }
+
+    // MARK: UIScrollView
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard dragIndex == nil else { return }
+        let y = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
+        let maxY = max(0, scrollView.contentSize.height - scrollView.bounds.height)
+            + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom
+        if collapseTracker.update(y: y, maxY: maxY) {
+            onCollapseChange?(collapseTracker.collapsed)
+        }
     }
 
     // MARK: layout

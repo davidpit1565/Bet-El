@@ -89,8 +89,10 @@ final class NLCell: UICollectionViewCell {
 final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionViewDelegate {
     var onSelect: ((String) -> Void)?
     var bottomInset: (() -> CGFloat)?
+    var onCollapseChange: ((Bool) -> Void)?
     let collectionView: UICollectionView
     private var items: [NLItem] = []
+    private let collapseTracker = ScrollCollapseTracker()
 
     override init(frame: CGRect) {
         let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
@@ -137,11 +139,23 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
         semanticContentAttribute = attr
         collectionView.semanticContentAttribute = attr
         self.items = items
+        collapseTracker.reset()
         collectionView.reloadData()
     }
 
     func scrollToTop() {
         collectionView.setContentOffset(CGPoint(x: 0, y: -collectionView.adjustedContentInset.top), animated: true)
+    }
+
+    // MARK: UIScrollView
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let y = scrollView.contentOffset.y + scrollView.adjustedContentInset.top
+        let maxY = max(0, scrollView.contentSize.height - scrollView.bounds.height)
+            + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom
+        if collapseTracker.update(y: y, maxY: maxY) {
+            onCollapseChange?(collapseTracker.collapsed)
+        }
     }
 
     // MARK: UICollectionView
