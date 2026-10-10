@@ -16,10 +16,16 @@ Musar
 Six classic Musar works at three units a day, with free browsing through each book.
 
 Siddur, blessings and prayers
-A full siddur in Edot HaMizrach nusach, Birkat HaMazon, Birkat Meein Shalosh, blessings before eating, the Traveler's Prayer and more.
+A full siddur in Edot HaMizrach nusach, Birkat HaMazon, Birkat Meein Shalosh, blessings before eating, the Traveler's Prayer and more - and search across all books.
 
 Hebrew calendar and daily times
 Hebrew dates, candle lighting and Havdalah, and daily zmanim for your place - set automatically.
+
+Weekly booklet
+A new study booklet every week on the Home screen - opens right inside the app.
+
+In memory of the tzaddikim
+In the calendar, for every Hebrew day: the names of the tzaddikim whose yahrzeit falls on it.
 
 Widgets
 Hebrew date and parasha, daily times, Tehillim, study streak, Shabbat candles and the Omer count - on the Home Screen, Lock Screen and in StandBy.

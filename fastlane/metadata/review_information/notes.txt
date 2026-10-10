@@ -1,0 +1,23 @@
+App purpose
+"Tamid" is a free daily Jewish study and prayer companion for the Beit-El community and anyone following the traditional daily study cycles: Chok LeYisrael, daily Tehillim, Ben Ish Chai, six classic Musar works and Tikkunei HaZohar, plus a full Siddur (Edot HaMizrach nusach), a Hebrew calendar and daily prayer times. Languages: Hebrew, English, French, Russian and Georgian.
+
+Access
+No login, account or registration is needed. Every feature is available on first launch, so there is no demo account.
+
+Permissions (all optional)
+- Location (when in use): only to calculate daily prayer and candle-lighting times and the compass direction to Jerusalem. It stays on the device. Without it the app works fully with a default location.
+- Camera: only on the optional "Tefillin mirror" screen. Frames are processed on the device; nothing is saved or sent.
+- Notifications: a daily study reminder, and opt-in "new content" announcements.
+
+External services
+- Firebase (Google): anonymous usage analytics, an anonymous visit counter and "online now" counter shown on the home screen (no personal data), and optional push notifications (Cloud Messaging, opt-in in Settings). The optional feedback form stores the name, email and message the user types, only so the developer can reply.
+- Donation: a voluntary donation link to the community's own website (bet-el.be), which uses Stripe. It opens in Safari (SFSafariViewController), not inside the app's own screens. No payment is processed in the app and there are no in-app purchases.
+- Hebrew calendar (dates, holidays, prayer times): the open-source hebcal library is bundled in the app and runs entirely on the device; no network calls.
+- Tefillin mirror: on first use it downloads Google's open-source MediaPipe face model (jsDelivr / Google storage); the camera image itself never leaves the device.
+- Study texts are static files downloaded from the app's own GitHub Pages site (davidpit1565.github.io/Bet-El) and cached for offline use.
+
+Other
+- Widgets (Home Screen, Lock Screen, StandBy) and a Live Activity read a small App Group snapshot written by the app.
+- The rating prompt is Apple's SKStoreReviewController.
+- Content: classic Jewish religious texts (Torah, Mishnah, Talmud, Zohar, Rambam, Ben Ish Chai, Musar works) in the public domain. No protected third-party material.
+- Behaviour is the same in every region; only the prayer times depend on the user's location.

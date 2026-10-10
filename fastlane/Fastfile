@@ -3,7 +3,9 @@
 # Nothing here ever submits for review; press "Submit for Review" by hand in App Store Connect.
 #   node scripts/fastlane-metadata.mjs              # refresh fastlane/metadata + fastlane/screenshots
 #   fastlane ios upload_build ipa:build/export/App.ipa  # binary only
-#   fastlane ios upload_listing                     # texts + screenshots
+#   fastlane ios upload_listing                     # texts + screenshots (he, en-US)
+#   fastlane ios upload_texts                       # texts + App Review notes only (he, en-US)
+#   fastlane ios asc_status                         # read-only: localizations, review notes
 #   fastlane ios select_build                       # attach build 6 to version 2.0
 default_platform(:ios)
 
@@ -15,6 +17,17 @@ platform :ios do
       key_filepath: ENV.fetch("ASC_KEY_PATH"),
       in_house: false
     )
+  end
+
+  # Version 2.0 is he + en-US only (fr-FR / ru were removed so Apple doesn't ask for their screenshots),
+  # so deliver gets a copy of fastlane/metadata without them.
+  def staged_metadata
+    staged = File.expand_path("../build/metadata-he-en", __dir__)
+    FileUtils.rm_rf(staged)
+    FileUtils.mkdir_p(staged)
+    %w[he en-US review_information].each { |d| FileUtils.cp_r(File.expand_path("metadata/#{d}", __dir__), staged) }
+    FileUtils.cp(File.expand_path("metadata/copyright.txt", __dir__), staged)
+    staged
   end
 
   lane :upload_build do |options|
@@ -32,6 +45,7 @@ platform :ios do
   lane :upload_listing do |options|
     deliver(
       api_key: asc_key,
+      metadata_path: staged_metadata,
       app_version: options[:version] || "2.0",
       build_number: options[:build] || "6",
       skip_binary_upload: true,
@@ -42,6 +56,55 @@ platform :ios do
       run_precheck_before_submit: false,
       force: true
     )
+  end
+
+  # Texts only (no screenshots) for he + en-US, plus the App Review notes; fr-FR / ru are never sent.
+  # Sign-in stays "not required" (deliver sets demo_account_required=false without demo credentials).
+  lane :upload_texts do |options|
+    deliver(
+      api_key: asc_key,
+      app_version: options[:version] || "2.0",
+      metadata_path: staged_metadata,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_app_version_update: true,
+      submit_for_review: false,
+      automatic_release: false,
+      run_precheck_before_submit: false,
+      force: true
+    )
+  end
+
+  # Remove version localizations that the live version does not have (never one the live version has).
+  lane :remove_locales do |options|
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("com.beitel.tehilim")
+    platform = Spaceship::ConnectAPI::Platform::IOS
+    edit = app.get_edit_app_store_version(platform: platform)
+    live_locales = app.get_live_app_store_version(platform: platform).get_app_store_version_localizations.map(&:locale)
+    (options[:locales] || "").split(",").each do |locale|
+      UI.user_error!("#{locale} exists on the live version - not removing") if live_locales.include?(locale)
+      loc = edit.get_app_store_version_localizations.find { |l| l.locale == locale }
+      next UI.message("#{locale}: not on #{edit.version_string}") unless loc
+      loc.delete!
+      UI.success("Removed #{locale} from #{edit.version_string}")
+    end
+  end
+
+  # Read-only: localizations of the editable and the live version, plus the App Review details.
+  lane :asc_status do
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("com.beitel.tehilim")
+    platform = Spaceship::ConnectAPI::Platform::IOS
+    { "edit" => app.get_edit_app_store_version(platform: platform),
+      "live" => app.get_live_app_store_version(platform: platform) }.each do |label, v|
+      next UI.message("#{label}: none") unless v
+      UI.message("#{label} #{v.version_string} (#{v.app_store_state}): " + v.get_app_store_version_localizations.map(&:locale).sort.join(", "))
+    end
+    detail = app.get_edit_app_store_version(platform: platform).fetch_app_store_review_detail(includes: "appStoreReviewAttachments")
+    UI.message("demo_account_required: #{detail.demo_account_required.inspect}")
+    UI.message("attachments: #{(detail.app_store_review_attachments || []).map(&:file_name).inspect}")
+    puts "----- review notes -----\n#{detail.notes}\n------------------------"
   end
 
   # deliver only attaches a build when it submits, so attach it here (still no submission).
