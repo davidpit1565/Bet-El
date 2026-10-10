@@ -3533,7 +3533,7 @@ function openWidgetLink(url){
 /* Screenshot helper for the App Store pack (simulator / Xcode builds only, never in a store build):
      xcrun simctl openurl booted "betel://shot?screen=home&lang=he&theme=dark"
    Sets language/theme, reloads, then opens the screen. screens: home chok calendar tehillim prayers meein settings library qr */
-const SHOT_ALLOWED = window.__BETEL_DEV_BUILD===true || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const SHOT_ALLOWED = window.__BETEL_DEV_BUILD===true || (/^https?:$/.test(location.protocol) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));   // NOT capacitor://localhost (every native install)
 /* Set true once a screenshot-automation navigation is actually underway (see
    the boot IIFE below) - lets boot-time code (e.g. notifBootSync's native
    permission auto-prompt) skip side effects that would pop a blocking OS
@@ -7746,7 +7746,7 @@ function bookletWindow(b){
   const seen=(b&&b.seenAt)||Date.now(); return [0, seen+7*864e5];
 }
 function bookletExpired(b){ if(!b) return true; return Date.now()>=bookletWindow(b)[1]; }
-function bookletActive(b){ if(!b||!b.pdf) return false; const [st,en]=bookletWindow(b), n=Date.now(); return n>=st && n<en; }
+function bookletActive(b){ if(!b||!b.pdf) return false; const [st,en]=bookletWindow(b), n=Date.now(); return (n>=st || SHOT_MODE) && n<en; }   // screenshots (dev builds only): show a published booklet before its Sunday netz
 /* the whole published list is kept (it is tiny); which booklet shows is decided at every render, so the
    Sunday-netz switch happens on its own even with the app left open, and past weeks are dropped from it. */
 let BOOKLET_LIST=(()=>{ try{ const l=JSON.parse(localStorage.getItem('betel_booklet')||'[]'); return (Array.isArray(l)?l:[l]).filter(b=>b&&!bookletExpired(b)); }catch(e){ return []; } })();
