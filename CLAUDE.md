@@ -207,6 +207,12 @@ in English as usual.
   (weekly physical print cost) - every gold accent (double border,
   corner ornaments, cartouches, medallion/header band, text accents)
   becomes black/dark grey on white/off-white, same shapes and ornaments.
+  Names: the booklet itself is "הַתָּמִיד" (cover, header band, medallion,
+  "© התמיד"), but the live app is "תמיד" - so the credit line naming the
+  app (`BK_UI.backMade[0]`, shown on the rights page and the back page)
+  reads "נוצר מתוך אפליקציית תמיד" / "Created with the Tamid app", without
+  the article (owner, from the booklet after Lech Lecha on; Noach, Vayera
+  and Lech Lecha were printed before and stay as they are).
   **Hillulot (owner's "לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים")** - every week's booklet
   shows, under each day's heading and before its first subject, that
   date's yahrzeits exactly as the app's calendar day card does: same data
