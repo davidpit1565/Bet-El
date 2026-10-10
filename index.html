@@ -14829,9 +14829,12 @@ window.shareQR = shareQR;
      Analytics. A build counts as "dev" when the iOS shell injected
      window.__BETEL_DEV_BUILD (MainViewController: no App Store/TestFlight
      receipt, i.e. installed straight from Xcode or the simulator) or when
-     it's served from localhost (local servers, Playwright sweeps). */
+     it's served from a local http(s) server (local servers, Playwright sweeps).
+     The localhost check must NOT apply inside the native app: Capacitor serves the bundled app from
+     capacitor://localhost, so a plain hostname test made EVERY App Store user look like a dev build (no visit,
+     no presence, no Analytics). In the app only the shell's own __BETEL_DEV_BUILD flag decides. */
   const IS_DEV_BUILD = window.__BETEL_DEV_BUILD === true
-    || ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname);
+    || (/^https?:$/.test(location.protocol) && ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname));
   if(!IS_DEV_BUILD) getAnalytics(firebaseApp);
 
   // Public visit counter (Firestore stats/visits), shown on the home page
