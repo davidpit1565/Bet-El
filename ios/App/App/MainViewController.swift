@@ -52,8 +52,8 @@ class MainViewController: CAPBridgeViewController {
         ("calendar", "calendar"),
         ("prayers", "books.vertical.fill"),
         ("settings", "gearshape.fill"),
-        // Not a screen of its own - selecting it opens the Library search
-        // (window.NativeSearchHost) and the bar re-selects the real tab.
+        // The Search tab (App Store style): its own screen in JS (TAB 'search'), and while it is open the bar
+        // collapses into the previous tab's circle + a glass search field - see showNativeSearchBar(focus:).
         ("search", "magnifyingglass"),
     ]
 
@@ -655,43 +655,107 @@ class MainViewController: CAPBridgeViewController {
         nativeCalendarView?.isHidden = true
     }
 
-    // MARK: - Native search field (real UISearchBar). A web <input> cannot be focused from native code
-    // (WKWebView only raises the keyboard for a touch inside the page), so the Search tab shows a genuine
-    // UISearchBar, and what is typed is forwarded to the page's own search box.
+    // MARK: - Search tab (App Store style)
+    // A web <input> cannot be focused from native code (WKWebView only raises the keyboard for a touch inside the
+    // page), so the Search tab uses a genuine UISearchBar and forwards what is typed to the page (NativeSearchHost).
+    // Like the App Store: selecting Search keeps the Search tab selected and the full tab bar stays in place (by the
+    // user's request - the bar never disappears); a glass search field sits right above it, riding up above the
+    // keyboard while typing. The keyboard opens only when the field is tapped or the Search tab is tapped again,
+    // never by itself - same as Apple's apps.
     let nativeSearchBar = UISearchBar()
+    private let searchField = UIVisualEffectView(effect: nil)
     private var searchDebounce: DispatchWorkItem?
+    private(set) var isSearchMode = false
+    private let searchFieldHeight: CGFloat = 52
 
     private func setupSearchBar() {
+        if #available(iOS 26.0, *) { searchField.effect = UIGlassEffect() }
+        else { searchField.effect = UIBlurEffect(style: .systemMaterial) }
+        searchField.layer.cornerRadius = searchFieldHeight / 2
+        searchField.layer.cornerCurve = .continuous
+        searchField.clipsToBounds = true
+        searchField.isHidden = true
+        searchField.alpha = 0
+        searchField.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchField)
+
         nativeSearchBar.searchBarStyle = .minimal
-        nativeSearchBar.showsCancelButton = true
+        nativeSearchBar.backgroundImage = UIImage()
+        nativeSearchBar.showsCancelButton = false
         nativeSearchBar.autocapitalizationType = .none
         nativeSearchBar.autocorrectionType = .no
+        nativeSearchBar.returnKeyType = .search
         nativeSearchBar.delegate = self
-        nativeSearchBar.isHidden = true
+        nativeSearchBar.tintColor = MainViewController.tabTint
         nativeSearchBar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(nativeSearchBar)
+        searchField.contentView.addSubview(nativeSearchBar)
+
+        let guide = view.safeAreaLayoutGuide
+        // Right above the tab bar; while typing, above the keyboard instead (whichever is higher).
+        let aboveBar = searchField.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -8)
+        aboveBar.priority = .defaultHigh
         NSLayoutConstraint.activate([
-            nativeSearchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            nativeSearchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            nativeSearchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            searchField.heightAnchor.constraint(equalToConstant: searchFieldHeight),
+            searchField.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 16),
+            searchField.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -16),
+            aboveBar,
+            searchField.bottomAnchor.constraint(lessThanOrEqualTo: tabBar.topAnchor, constant: -8),
+            searchField.bottomAnchor.constraint(lessThanOrEqualTo: view.keyboardLayoutGuide.topAnchor, constant: -8),
+            nativeSearchBar.leadingAnchor.constraint(equalTo: searchField.contentView.leadingAnchor, constant: 4),
+            nativeSearchBar.trailingAnchor.constraint(equalTo: searchField.contentView.trailingAnchor, constant: -4),
+            nativeSearchBar.centerYAnchor.constraint(equalTo: searchField.contentView.centerYAnchor),
         ])
+        layoutSearchField()
     }
 
-    func showNativeSearchBar() {
-        view.bringSubviewToFront(nativeSearchBar)
-        view.bringSubviewToFront(tabBar)
-        nativeSearchBar.isHidden = false
-        nativeSearchBar.becomeFirstResponder()
+    private func layoutSearchField() {
+        nativeSearchBar.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
+        nativeSearchBar.searchTextField.textAlignment = isRTL ? .right : .left
     }
 
+    /// Enters the Search tab's state (idempotent): Search selected, full tab bar kept, field shown above it.
+    /// `focus` raises the keyboard.
+    func showNativeSearchBar(focus: Bool) {
+        if !isSearchMode {
+            setHidden(false)          // a minimized bar springs back - the search screen always shows the full bar
+            isSearchMode = true       // (after setHidden: it ignores calls while searching)
+            layoutSearchField()
+            searchField.isHidden = false
+            view.bringSubviewToFront(searchField)
+            view.bringSubviewToFront(tabBar)
+            searchField.transform = CGAffineTransform(translationX: 0, y: 12)
+            UIView.animate(
+                withDuration: ReduceMotion.duration(0.32), delay: 0,
+                usingSpringWithDamping: 0.85, initialSpringVelocity: 0.3, options: [.allowUserInteraction, .beginFromCurrentState],
+                animations: {
+                    self.searchField.alpha = 1
+                    self.searchField.transform = .identity
+                })
+            reportHeightToWebView()
+        }
+        setActive(tab: "search")
+        if focus { nativeSearchBar.becomeFirstResponder() }
+    }
+
+    /// Leaves the Search tab's state (JS calls this whenever any other screen renders). `clear` also empties the
+    /// query; otherwise it is kept, so coming back to Search shows the same results - like the App Store.
     func hideNativeSearchBar(clear: Bool) {
-        guard !nativeSearchBar.isHidden else { return }
-        nativeSearchBar.resignFirstResponder()
-        nativeSearchBar.isHidden = true
         if clear {
             nativeSearchBar.text = ""
             webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery('')", completionHandler: nil)
         }
+        guard isSearchMode else { return }
+        isSearchMode = false
+        nativeSearchBar.resignFirstResponder()
+        UIView.animate(
+            withDuration: ReduceMotion.duration(0.22), delay: 0, options: [.allowUserInteraction, .beginFromCurrentState],
+            animations: { self.searchField.alpha = 0 },
+            completion: { _ in if !self.isSearchMode { self.searchField.isHidden = true } })
+        reportHeightToWebView()
+    }
+
+    func setNativeSearchText(_ text: String) {
+        nativeSearchBar.text = text
     }
 
     // MARK: - Native pull-to-refresh (UIKit gesture + glass spinner)
@@ -950,7 +1014,7 @@ class MainViewController: CAPBridgeViewController {
     }
 
     private func reportHeightToWebView() {
-        let navHeight = tabBar.isHidden ? 0 : tabBar.frame.height
+        let navHeight = (tabBar.isHidden ? 0 : tabBar.frame.height) + (isSearchMode ? searchFieldHeight + 8 : 0)
         let headerHeight = topBar.isHidden ? 0 : (topBar.frame.height)
         let js = """
         document.documentElement.style.setProperty('--native-nav-h','\(navHeight)px');
@@ -979,8 +1043,10 @@ class MainViewController: CAPBridgeViewController {
         tabBar.semanticContentAttribute = .forceLeftToRight
         tabBar.items = isRTL ? ordered.reversed() : ordered
         self.isRTL = isRTL
+        nativeSearchBar.placeholder = byId["search"]
         layoutToolsFab()
         layoutMiniTabButton()
+        layoutSearchField()
         setActive(tab: activeTab)
         setVisible(true)
     }
@@ -1016,6 +1082,7 @@ class MainViewController: CAPBridgeViewController {
     }
 
     func setVisible(_ visible: Bool) {
+        if !visible { hideNativeSearchBar(clear: false) }
         tabBar.isHidden = !visible
         if !visible {
             miniTabButton.isHidden = true
@@ -1032,7 +1099,7 @@ class MainViewController: CAPBridgeViewController {
     /// circle (current tab's icon) springs in - Apple Music's behavior.
     /// Scrolling back up, or tapping the circle, expands it again.
     func setHidden(_ hidden: Bool) {
-        guard !tabBar.isHidden, hidden != isTabBarMinimized else { return }
+        guard !isSearchMode, !tabBar.isHidden, hidden != isTabBarMinimized else { return }
         isTabBarMinimized = hidden
         if hidden {
             refreshMiniTabIcon()
@@ -1074,8 +1141,12 @@ extension MainViewController: UITabBarDelegate {
         guard let tabId = item.accessibilityIdentifier else { return }
         UISelectionFeedbackGenerator().selectionChanged()
         if tabId == "search" {
-            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open()", completionHandler: nil)
-            showNativeSearchBar()
+            // Tapping Search while already there activates the field (App Store behavior); the first tap only
+            // opens the Search screen, without the keyboard. The rest of the tab bar stays usable throughout.
+            let again = isSearchMode
+            lastTabId = "search"
+            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.open(false)", completionHandler: nil)
+            showNativeSearchBar(focus: again)
             return
         }
         hideNativeSearchBar(clear: false)
@@ -1150,5 +1221,15 @@ extension MainViewController: UISearchBarDelegate {
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) { searchBar.resignFirstResponder() }
 
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) { hideNativeSearchBar(clear: true) }
+    // Cancel appears only while typing (like Apple's apps); it clears the query and closes the keyboard but stays on
+    // the Search tab, back on the suggestions.
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) { searchBar.setShowsCancelButton(true, animated: true) }
+
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) { searchBar.setShowsCancelButton(false, animated: true) }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery('')", completionHandler: nil)
+    }
 }

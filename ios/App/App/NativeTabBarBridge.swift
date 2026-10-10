@@ -17,6 +17,8 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "setVisible", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setHidden", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "hideSearch", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "showSearch", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setSearchText", returnType: CAPPluginReturnPromise),
     ]
 
     /// Set by MainViewController.viewDidLoad(). Weak since the plugin
@@ -61,6 +63,26 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
     @objc func hideSearch(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             NativeTabBarBridge.activeController?.hideNativeSearchBar(clear: false)
+        }
+        call.resolve()
+    }
+
+    /// Puts the bar into its Search-tab state (App Store style: the bar collapses into the previous tab's circle and a
+    /// glass search field takes its place). Called by JS whenever the Search screen renders - also when it was reached
+    /// from a search box or shortcut inside the app rather than from the tab bar itself. `focus` raises the keyboard.
+    @objc func showSearch(_ call: CAPPluginCall) {
+        let focus = call.getBool("focus") ?? false
+        DispatchQueue.main.async {
+            NativeTabBarBridge.activeController?.showNativeSearchBar(focus: focus)
+        }
+        call.resolve()
+    }
+
+    /// Mirrors a query chosen on the page (a suggestion / recent search) into the native field.
+    @objc func setSearchText(_ call: CAPPluginCall) {
+        let text = call.getString("text") ?? ""
+        DispatchQueue.main.async {
+            NativeTabBarBridge.activeController?.setNativeSearchText(text)
         }
         call.resolve()
     }
