@@ -1,0 +1,61 @@
+# App Store Connect upload for Tamid (com.beitel.tehilim).
+# Auth: App Store Connect API key from the environment - ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH (.p8).
+# Nothing here ever submits for review; press "Submit for Review" by hand in App Store Connect.
+#   node scripts/fastlane-metadata.mjs              # refresh fastlane/metadata + fastlane/screenshots
+#   fastlane ios upload_build ipa:build/export/App.ipa  # binary only
+#   fastlane ios upload_listing                     # texts + screenshots
+#   fastlane ios select_build                       # attach build 6 to version 2.0
+default_platform(:ios)
+
+platform :ios do
+  def asc_key
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH"),
+      in_house: false
+    )
+  end
+
+  lane :upload_build do |options|
+    upload_to_app_store(
+      api_key: asc_key,
+      ipa: options[:ipa] || "build/export/App.ipa",
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: true
+    )
+  end
+
+  lane :upload_listing do |options|
+    deliver(
+      api_key: asc_key,
+      app_version: options[:version] || "2.0",
+      build_number: options[:build] || "6",
+      skip_binary_upload: true,
+      skip_app_version_update: false,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      run_precheck_before_submit: false,
+      force: true
+    )
+  end
+
+  # deliver only attaches a build when it submits, so attach it here (still no submission).
+  lane :select_build do |options|
+    asc_key
+    version_string = options[:version] || "2.0"
+    build_number = options[:build] || "6"
+    app = Spaceship::ConnectAPI::App.find("com.beitel.tehilim")
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+    UI.user_error!("No editable #{version_string} version") unless version && version.version_string == version_string
+    build = Spaceship::ConnectAPI::Build.all(app_id: app.id, version: version_string, build_number: build_number).first
+    UI.user_error!("Build #{build_number} not found yet") unless build
+    UI.user_error!("Build #{build_number} is still #{build.processing_state}") unless build.processed?
+    version.select_build(build_id: build.id)
+    UI.success("Selected build #{build_number} for #{version_string}")
+  end
+end

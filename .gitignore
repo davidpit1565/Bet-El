@@ -22,3 +22,11 @@ docs/appstore/raw-web-ipad/
 docs/appstore/raw-web-light/
 docs/appstore/raw-web-ipad-light/
 .archive-*/
+
+# Local build output / fastlane copies of docs/appstore/slides (regenerate: node scripts/fastlane-metadata.mjs)
+/build/
+fastlane/screenshots/
+fastlane/report.xml
+fastlane/README.md
+# Simulator raw captures (large; local only)
+docs/appstore/raw-device*/
