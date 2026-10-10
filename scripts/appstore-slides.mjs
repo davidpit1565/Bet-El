@@ -102,13 +102,13 @@ for(const lang of langs){ const rtl=lang==='he';
     const eyebrow='';
     let body='';
     const headBlock=`<div style="position:absolute;top:${(ipad?110:120)}px;left:70px;right:70px;text-align:center">${eyebrow}<div style="font-weight:900;font-size:${(key==='hero'?118:100)*k}px;line-height:1.1;text-wrap:balance;color:${TH.ink}">${acc(T.h||'',col)}</div><div style="margin-top:${26*k}px;font-size:${40*k}px;line-height:1.35;color:${TH.soft};font-weight:500">${T.s||''}</div></div>`;
-    const devW=ipad?1240:1090, devTop=ipad?800:800;
+    const devW=ipad?1720:1090, devTop=ipad?600:800;   // iPad: ~83% of the slide width (bleeds off the bottom) so the screen stays readable
     const device=(f,w=devW,pos=`left:50%;transform:translateX(-50%);top:${devTop}px`)=>frame(f,w,pos,ipad);
     if(key==='hero'){
       const f1=find(lang,'01-home',ipad), f2=find(lang,'02-chok',ipad); if(!f1||!f2) continue;
-      const pw=ipad?840:640;
+      const pw=ipad?1180:640;
       const ph=(f,st)=>frame(f,pw,st,ipad);
-      body=headBlock+ph(f2,`${rtl?'left':'right'}:${ipad?150:40}px;top:${ipad?980:1000}px`)+ph(f1,`${rtl?'right':'left'}:${ipad?150:40}px;top:${ipad?820:830}px`);
+      body=headBlock+ph(f2,`${rtl?'left':'right'}:${ipad?40:40}px;top:${ipad?1000:1000}px`)+ph(f1,`${rtl?'right':'left'}:${ipad?40:40}px;top:${ipad?720:830}px`);
     } else if(key==='lang'){
       const f1=find(lang,'01-home',ipad), f2=find(lang==='en'?'he':'en','01-home',ipad); if(!f1||!f2) continue;
       const pw=ipad?800:560;
@@ -121,9 +121,9 @@ for(const lang of langs){ const rtl=lang==='he';
       body=headBlock+(key==='wid'?`<img src="data:image/png;base64,${b64(src)}" style="position:absolute;left:50%;transform:translateX(-50%);top:${devTop}px;width:${devW}px;border-radius:90px;box-shadow:${TH.shadow},0 0 0 3px ${TH.ring}"/>`:device(src));
       if(false&&T.b) body+=`<div style="position:absolute;left:${ipad?160:90}px;right:${ipad?160:90}px;top:${ipad?620:700}px;display:flex;flex-direction:column;gap:${18*k}px">${T.b.map(x=>`<div style="display:flex;align-items:center;gap:22px;font-size:${46*k}px;color:${TH.ink};font-weight:600"><span style="flex:none;width:${60*k}px;height:${60*k}px;border-radius:50%;background:${col};display:grid;place-items:center;color:#fff;font-size:${38*k}px">✓</span><span>${x}</span></div>`).join('')}</div>`;
       for(const [ic,tx,side,top] of (process.env.CALLOUTS?(T.co||[]):[])){ const tp=ipad?Math.round(top*0.95)-40:top-(T.b?0:120); body+=`<div style="position:absolute;${side==='l'?'left':'right'}:${ipad?90:30}px;top:${tp}px;display:flex;align-items:center;gap:20px;padding:${24*k}px ${34*k}px;border-radius:44px;background:${TH.card};color:${TH.cardInk};font-size:${42*k}px;font-weight:700;border:3px solid ${col};box-shadow:0 24px 60px rgba(0,0,0,.4);max-width:${ipad?800:640}px"><span style="font-size:${56*k}px">${ic}</span><span>${tx}</span></div>`; }
-      if(zoom && src){ const f=b64(src), sz=pngSize(src); const cw=ipad?1100:900, ch=ipad?560:440, iw=ipad?Math.round(cw*1.6):cw;   // phone: full width, never clip lines; iPad: magnify (its source is much wider than the card)
+      if(zoom && src){ const f=b64(src), sz=pngSize(src); const cw=ipad?1200:900, ch=ipad?600:440, iw=ipad?Math.round(cw*1.6):cw;   // phone: full width, never clip lines; iPad: magnify (its source is much wider than the card)
         const y0=ipad&&zoom.iy0!=null?zoom.iy0:zoom.y0, ix=!ipad?0:zoom.ialign==='center'?-(iw-cw)/2:(rtl?cw-iw:0);   // iPad: show where lines start
-        body+=`<div style="position:absolute;${rtl?'right':'left'}:${ipad?120:60}px;top:${ipad?2100:2280}px;width:${cw}px;height:${ch}px;border-radius:48px;overflow:hidden;border:4px solid ${col};box-shadow:0 36px 90px rgba(0,0,0,.7);background:${LIGHT?'#fffaf0':'#0b1226'}"><img src="data:image/png;base64,${f}" style="position:absolute;width:${iw}px;left:${ix}px;top:${-y0*iw*(sz.h/sz.w)}px"/></div>`; }
+        body+=`<div style="position:absolute;${rtl?'right':'left'}:${ipad?70:60}px;top:${ipad?2030:2280}px;width:${cw}px;height:${ch}px;border-radius:48px;overflow:hidden;border:4px solid ${col};box-shadow:0 36px 90px rgba(0,0,0,.7);background:${LIGHT?'#fffaf0':'#0b1226'}"><img src="data:image/png;base64,${f}" style="position:absolute;width:${iw}px;left:${ix}px;top:${-y0*iw*(sz.h/sz.w)}px"/></div>`; }
     }
     await page.setContent(`<html dir="${rtl?'rtl':'ltr'}" style="overflow:hidden"><body style="margin:0;overflow:hidden"><div style="position:absolute;left:0;top:0;width:${W}px;height:${H}px;overflow:hidden;background:${TH.bg};font-family:'Noto Sans Hebrew','Noto Sans','Noto Sans Georgian',sans-serif">${glow}${orn}${body}</div></body></html>`);
     await page.waitForTimeout(150); n++;
