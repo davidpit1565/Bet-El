@@ -86,7 +86,7 @@
 - `check-blocking-resources`
 - `cap:sync`
 - `test:sweep` (0 שגיאות)
-- אין `BETEL_DEBUG` ואין `43DB56398H` בדיף
+- אין `BETEL_DEBUG` ואין מזהה ה-Team בדיף
 
 ---
 
@@ -98,6 +98,9 @@
 5. **צילומים ל-fr/ru** (כרגע יש להם רק טקסטים), אם רוצים.
 6. **ללחוץ Submit for Review** בעצמך, כשהכול נראה טוב.
 7. אחרי האישור: לשקול קמפיין הכרזה ב-Firebase. לא נשלח כלום.
+
+## נספח: מזהה ה-Team ב-`project.pbxproj`
+`ios/App/App.xcodeproj/project.pbxproj` ב-`main` כבר מכיל את `DEVELOPMENT_TEAM` המקומי שלך (4 מופעים). הוא נכנס בקומיט ישן, `3051f62` ("Add scroll-simulation debug hook…"), לפני הסשן הזה, ולא דרך המיזוגים שלי. לא שיניתי היסטוריה ב-`main`. אם רוצים להסיר אותו, צריך קומיט שמחזיר את השדה לריק.
 
 ## נספח: קבצים מקומיים שלא נכנסו ל-git
 - `docs/appstore/raw-device*/`: צילומים גולמיים
