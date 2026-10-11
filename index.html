@@ -3578,6 +3578,10 @@ function shotNavigate(screen,scrollMode){
       // Shabbat has no home Chok card - open the most recent weekday portion directly.
       const chokFallback=()=>ensureChokIndex().then(()=>{ for(let n=1;n<8;n++){ const s=chokSlotFor(new Date(Date.now()-n*86400000)); if(s){ openChok(s.key,s.day); afterReady(900); return; } } }).catch(()=>{});
       setTimeout(tryClick,600); }
+    // 'search' + optional ':kb' (keyboard up), ':recent' (a full recent-searches list), ':q=<query>' - for layout checks
+    else if(/^search(:|$)/.test(screen)){ const parts=screen.split(':'), q=(parts.find(p=>p.startsWith('q='))||'').slice(2);
+      if(parts.includes('recent')) ['תהלים כג','בראשית','ברכת המזון','קריאת שמע','תניא','זהר','משנה ברכות','רמב״ם'].reverse().forEach(addRecentSearch);
+      window.NativeSearchHost.open(parts.includes('kb')); if(q) setTimeout(()=>{ searchRunQuery(q); },400); }
     else if(screen==='meein'){ openPrayer('birkatMeeinShalosh','brachot'); afterReady(900); }
     else if(screen==='mazon'){ openPrayer('birkatHamazon','brachot');
       // Two passes: the header collapses/expands with the scroll, so re-aim once it settles.

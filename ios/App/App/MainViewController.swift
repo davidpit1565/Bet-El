@@ -581,7 +581,19 @@ class MainViewController: CAPBridgeViewController {
     /// exact `scrollViewDidScroll` -> `onCollapseChange` -> `setTopBarCollapsed` path - not a
     /// shortcut that bypasses it.
     private func simulateNativeShotScroll(on collectionView: UICollectionView) {
-        guard let mode = shotScrollMode, mode == "down" || mode == "revealed" else { return }
+        guard let mode = shotScrollMode else { return }
+        if mode == "end" {   // the very end of the list, re-aimed while the keyboard / search field settle
+            for delay in [0.3, 1.0, 2.0, 3.5] as [TimeInterval] {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak collectionView] in
+                    guard let cv = collectionView else { return }
+                    cv.layoutIfNeeded()
+                    let maxY = max(-cv.adjustedContentInset.top, cv.contentSize.height - cv.bounds.height + cv.adjustedContentInset.bottom)
+                    cv.setContentOffset(CGPoint(x: 0, y: maxY), animated: false)
+                }
+            }
+            return
+        }
+        guard mode == "down" || mode == "revealed" else { return }
         let down = Array(repeating: CGFloat(100), count: 9)
         let steps: [CGFloat] = mode == "down" ? down : down + down.map { -$0 }
         var delay: TimeInterval = 0.3
@@ -608,7 +620,7 @@ class MainViewController: CAPBridgeViewController {
         } else {
             lib = NativeLibraryView()
             lib.translatesAutoresizingMaskIntoConstraints = false
-            lib.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            lib.bottomInset = { [weak self] in self?.nativeListBottomInset() ?? 96 }
             lib.onSelect = { [weak self] key in
                 self?.webView?.evaluateJavaScript("window.NativeLibraryHost && window.NativeLibraryHost.open('\(key)')", completionHandler: nil)
             }
@@ -639,7 +651,7 @@ class MainViewController: CAPBridgeViewController {
         } else {
             home = NativeHomeView()
             home.translatesAutoresizingMaskIntoConstraints = false
-            home.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            home.bottomInset = { [weak self] in self?.nativeListBottomInset() ?? 96 }
             home.js = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
             home.onCollapseChange = { [weak self] hide in self?.setTopBarCollapsed(hide) }
             view.insertSubview(home, belowSubview: tabBar)
@@ -686,7 +698,7 @@ class MainViewController: CAPBridgeViewController {
             cal.runJS = { [weak self] js, done in self?.webView?.evaluateJavaScript(js) { r, _ in done(r) } }
             cal.fire = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
             cal.present = { [weak self] vc in (self?.presentedViewController ?? self)?.present(vc, animated: true) }
-            cal.bottomInset = { [weak self] in (self?.view.safeAreaInsets.bottom ?? 0) + 96 }
+            cal.bottomInset = { [weak self] in self?.nativeListBottomInset() ?? 96 }
             view.insertSubview(cal, belowSubview: tabBar)
             NSLayoutConstraint.activate([
                 cal.topAnchor.constraint(equalTo: topBar.bottomAnchor),
@@ -760,6 +772,14 @@ class MainViewController: CAPBridgeViewController {
             nativeSearchBar.centerYAnchor.constraint(equalTo: searchField.contentView.centerYAnchor),
         ])
         layoutSearchField()
+        // The keyboard moves the field (keyboardLayoutGuide); report the new reserved space once it settles too.
+        for name in [UIResponder.keyboardDidShowNotification, UIResponder.keyboardDidHideNotification] {
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                guard let self, self.isSearchMode else { return }
+                self.view.layoutIfNeeded()
+                self.reportHeightToWebView()
+            }
+        }
     }
 
     private func layoutSearchField() {
@@ -1067,8 +1087,27 @@ class MainViewController: CAPBridgeViewController {
         webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
+    /// Space the search field takes at the bottom of the screen: it sits above the tab bar, or above the keyboard
+    /// while typing - everything from its top edge down to the bottom of the screen, so a list always ends above it
+    /// and its last row stays reachable. 0 outside search mode.
+    /// (center/bounds rather than frame: the field's appear animation briefly sets a transform.)
+    private func searchReservedHeight() -> CGFloat {
+        guard isSearchMode else { return 0 }
+        let barHeight = tabBar.isHidden ? 0 : tabBar.frame.height
+        let fieldTop = searchField.center.y - searchField.bounds.height / 2
+        return max(barHeight + searchFieldHeight + 8, view.bounds.height - fieldTop + 8)
+    }
+
+    /// Bottom content inset for the native list screens (home, library, calendar).
+    private func nativeListBottomInset() -> CGFloat {
+        max(view.safeAreaInsets.bottom + 96, searchReservedHeight() + 12)
+    }
+
     private func reportHeightToWebView() {
-        let navHeight = (tabBar.isHidden ? 0 : tabBar.frame.height) + (isSearchMode ? searchFieldHeight + 8 : 0)
+        var navHeight = tabBar.isHidden ? 0 : tabBar.frame.height
+        if isSearchMode { navHeight = searchReservedHeight() }
+        nativeHomeView?.setNeedsLayout()
+        nativeLibraryView?.setNeedsLayout()
         let headerHeight = (topBar.isHidden || topBarCollapsed) ? 0 : topBar.frame.height
         let js = """
         document.documentElement.style.setProperty('--native-nav-h','\(navHeight)px');
@@ -1338,15 +1377,13 @@ extension MainViewController: UISearchBarDelegate {
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) { searchBar.resignFirstResponder() }
 
-    // Cancel appears only while typing (like Apple's apps); it clears the query and closes the keyboard but stays on
-    // the Search tab, back on the suggestions.
+    // Cancel (the X beside the field) appears only while typing, like Apple's apps; it only closes the keyboard - the
+    // query and its results stay on screen. The field's own clear button empties the query.
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) { searchBar.setShowsCancelButton(true, animated: true) }
 
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) { searchBar.setShowsCancelButton(false, animated: true) }
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.text = ""
         searchBar.resignFirstResponder()
-        webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery('')", completionHandler: nil)
     }
 }

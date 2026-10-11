@@ -179,7 +179,7 @@ in English as usual.
   `settingsRowsTappable()` making whole rows the touch target like iOS.
   Search is its own tab, App Store style (`TAB==='search'`, `renderSearch()`: suggestions + recent searches, then
   live results; native: the FULL tab bar always stays (user rule) with Search selected, and a glass UISearchBar sits
-  right above it, riding above the keyboard; keyboard only on tap; a result opened from Search keeps the Search tab lit via `SEARCH_NAV`),
+  right above it, riding above the keyboard; keyboard only on tap; its X only closes the keyboard (list/results stay); every list's bottom inset = field + keyboard (`searchReservedHeight()` / `nativeListBottomInset()` in MainViewController) so nothing ends under the field; a result opened from Search keeps the Search tab lit via `SEARCH_NAV`),
   the tab bar minimizes Apple Music-style on scroll, and the reader tools
   "…" button lives in the native header row (`layoutToolsFab()`).
 - **Dev builds don't count as Firebase users.** Every Xcode install (delete +
