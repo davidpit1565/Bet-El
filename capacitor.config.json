@@ -20,6 +20,32 @@
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#080d19"
+    },
+    "FirebaseMessaging": {
+      "presentationOptions": [
+        "alert",
+        "badge",
+        "sound"
+      ]
     }
+  },
+  "experimental": {
+    "ios": {
+      "spm": {
+        "packageOptions": {
+          "@capacitor-firebase/messaging": {
+            "symlink": true
+          }
+        }
+      }
+    }
+  },
+  "android": {
+    "includePlugins": [
+      "@capacitor/app",
+      "@capacitor/local-notifications",
+      "@capacitor/splash-screen",
+      "@capacitor/status-bar"
+    ]
   }
 }
