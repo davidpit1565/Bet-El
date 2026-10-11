@@ -2,13 +2,18 @@
    docs/release-update-checklist.md section 3 (What's New), and copies the App Store slides into
    fastlane/screenshots/<locale>/ for `fastlane deliver`, and the App Review notes into
    fastlane/metadata/review_information/notes.txt.
-   usage: node scripts/fastlane-metadata.mjs            (he, en-US, fr-FR, ru; screenshots for he + en-US)
+   usage: node scripts/fastlane-metadata.mjs            (he, en-US, fr-FR, ru; screenshots for he, en-US, fr-FR)
+   Screenshots (max 10 per device, from 2.0.1): the app slides in docs/appstore/slides/ plus the widget slides in
+   docs/appstore/widgets/, in the SHOTS order below. ru never gets screenshots (it is never uploaded).
    Georgian is skipped - App Store Connect has no Georgian localization. */
 import fs from 'fs';
 import path from 'path';
 
 const LOCALES = [['עברית', 'he', 'עברית'], ['English', 'en-US', 'English'], ['Français', 'fr-FR', 'Français'], ['Русский', 'ru', 'Русский']];
-const SHOT_LANGS = { he: 'he', 'en-US': 'en' };   // screenshots only for these locales
+const SHOT_LANGS = { he: 'he', 'en-US': 'en', 'fr-FR': 'fr' };   // screenshots only for these locales
+// [source dir under docs/appstore, slide key] in upload order; a missing slide is an error, not a silent gap.
+const SHOTS = [['slides', 'hero'], ['slides', 'home'], ['widgets', 'wid-home'], ['slides', 'chok'], ['slides', 'srch'],
+  ['widgets', 'wid-sizes'], ['slides', 'cal'], ['widgets', 'wid-live'], ['slides', 'teh'], ['slides', 'mazon']];
 const listing = fs.readFileSync('docs/appstore/LISTING.md', 'utf8');
 const checklist = fs.readFileSync('docs/release-update-checklist.md', 'utf8');
 
@@ -60,9 +65,12 @@ for (const [locale, lang] of Object.entries(SHOT_LANGS)) {
   fs.rmSync(dst, { recursive: true, force: true });
   fs.mkdirSync(dst, { recursive: true });
   for (const dev of ['iphone-6.9', 'ipad-13']) {
-    const src = `docs/appstore/slides/${lang}/${dev}`;
-    if (!fs.existsSync(src)) continue;
-    for (const f of fs.readdirSync(src).filter(f => f.endsWith('.png')).sort()) fs.copyFileSync(path.join(src, f), path.join(dst, `${dev}-${f}`));
+    SHOTS.forEach(([dir, key], i) => {
+      const src = `docs/appstore/${dir}/${lang}/${dev}`;
+      const f = fs.existsSync(src) && fs.readdirSync(src).find(f => f.replace(/^\d+-/, '') === key + '.png');
+      if (!f) throw new Error(`${locale}: missing ${dir}/${lang}/${dev} ${key}`);
+      fs.copyFileSync(path.join(src, f), path.join(dst, `${dev}-${String(i + 1).padStart(2, '0')}-${key}.png`));
+    });
   }
   console.log('screenshots', locale, fs.readdirSync(dst).length);
 }

@@ -5,6 +5,8 @@
 #   fastlane ios upload_build ipa:build/export/App.ipa  # binary only
 #   fastlane ios upload_listing                     # texts + screenshots (he, en-US)
 #   fastlane ios upload_texts                       # texts + App Review notes only (he, en-US)
+#   fastlane ios upload_listing version:2.0.1 build:7 locales:he,en-US,fr-FR   # 2.0.1 with the French page
+#   Allowed locales: he, en-US, fr-FR (never ru). Default: he,en-US.
 #   fastlane ios asc_status                         # read-only: localizations, review notes
 #   fastlane ios select_build                       # attach build 6 to version 2.0
 default_platform(:ios)
@@ -19,14 +21,36 @@ platform :ios do
     )
   end
 
-  # Version 2.0 is he + en-US only (fr-FR / ru were removed so Apple doesn't ask for their screenshots),
-  # so deliver gets a copy of fastlane/metadata without them.
-  def staged_metadata
-    staged = File.expand_path("../build/metadata-he-en", __dir__)
+  # Version 2.0 is he + en-US only (fr-FR / ru were removed so Apple doesn't ask for their screenshots);
+  # from 2.0.1 fr-FR can be added with locales:he,en-US,fr-FR. ru is never sent. deliver gets a staged copy
+  # of fastlane/metadata and fastlane/screenshots with only the chosen locales.
+  ALLOWED_LOCALES = %w[he en-US fr-FR].freeze
+
+  def chosen_locales(options)
+    locales = (options[:locales] || "he,en-US").split(",").map(&:strip)
+    bad = locales - ALLOWED_LOCALES
+    UI.user_error!("Locales not allowed: #{bad.join(', ')} (only #{ALLOWED_LOCALES.join(', ')})") unless bad.empty?
+    locales
+  end
+
+  def staged_metadata(locales)
+    staged = File.expand_path("../build/metadata-#{locales.join('-')}", __dir__)
     FileUtils.rm_rf(staged)
     FileUtils.mkdir_p(staged)
-    %w[he en-US review_information].each { |d| FileUtils.cp_r(File.expand_path("metadata/#{d}", __dir__), staged) }
+    (locales + ["review_information"]).each { |d| FileUtils.cp_r(File.expand_path("metadata/#{d}", __dir__), staged) }
     FileUtils.cp(File.expand_path("metadata/copyright.txt", __dir__), staged)
+    staged
+  end
+
+  def staged_screenshots(locales)
+    staged = File.expand_path("../build/screenshots-#{locales.join('-')}", __dir__)
+    FileUtils.rm_rf(staged)
+    FileUtils.mkdir_p(staged)
+    locales.each do |l|
+      src = File.expand_path("screenshots/#{l}", __dir__)
+      UI.user_error!("No screenshots for #{l} - run node scripts/fastlane-metadata.mjs") unless Dir.exist?(src)
+      FileUtils.cp_r(src, staged)
+    end
     staged
   end
 
@@ -43,9 +67,11 @@ platform :ios do
   end
 
   lane :upload_listing do |options|
+    locales = chosen_locales(options)
     deliver(
       api_key: asc_key,
-      metadata_path: staged_metadata,
+      metadata_path: staged_metadata(locales),
+      screenshots_path: staged_screenshots(locales),
       app_version: options[:version] || "2.0",
       build_number: options[:build] || "6",
       skip_binary_upload: true,
@@ -58,13 +84,14 @@ platform :ios do
     )
   end
 
-  # Texts only (no screenshots) for he + en-US, plus the App Review notes; fr-FR / ru are never sent.
+  # Texts only (no screenshots) for the chosen locales (default he + en-US), plus the App Review notes; ru is never sent.
   # Sign-in stays "not required" (deliver sets demo_account_required=false without demo credentials).
   lane :upload_texts do |options|
+    locales = chosen_locales(options)
     deliver(
       api_key: asc_key,
       app_version: options[:version] || "2.0",
-      metadata_path: staged_metadata,
+      metadata_path: staged_metadata(locales),
       skip_binary_upload: true,
       skip_screenshots: true,
       skip_app_version_update: true,

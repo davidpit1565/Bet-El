@@ -80,3 +80,19 @@ Primary: **Reference** (או Education), Secondary: Lifestyle.
 - להיכנס ל-App Store Connect, להעלות, או ללחוץ "Submit" – רק אתה.
 - לצלם את מסך הבית הנייטיב והווידג'טים (שלב 3).
 - לאמת שהנוסח של ברכה מעין שלוש וברכות הנהנין נכון להלכה – **רב צריך לעבור על זה לפני שהגרסה יוצאת**, או שמסירים אותן מרשימת הברכות בגרסה הזו.
+
+---
+
+## גרסה 2.0.1 – עמוד צרפתי (fr-FR) וצילומי ווידג'טים
+> רק **אחרי** ש-2.0 אושרה, ואחרי שהעלית build חדש של 2.0.1 ויצרת את הגרסה 2.0.1 ב-App Store Connect.
+
+1. לרענן טקסטים וצילומי מסך מהריפו (he, en-US, fr-FR; 10 צילומים לכל מכשיר כולל 3 שקפי ווידג'טים):
+   `node scripts/fastlane-metadata.mjs`
+2. **הפקודה האחת להעלאת העמוד הצרפתי** (יחד עם עברית ואנגלית; טקסטים + צילומי מסך, בלי שליחה לבדיקה):
+   `fastlane ios upload_listing version:2.0.1 build:7 locales:he,en-US,fr-FR`
+   (להחליף `7` במספר ה-build שהעלית. רק he / en-US / fr-FR מותרים – ru נדחה תמיד.)
+3. טקסטים בלבד (בלי צילומים): `fastlane ios upload_texts version:2.0.1 locales:he,en-US,fr-FR`
+4. לבדוק: `fastlane ios asc_status` – צריך לראות `en-US, fr-FR, he` בגרסה 2.0.1.
+5. לצרף את ה-build: `fastlane ios select_build version:2.0.1 build:7`, ואז "Submit for Review" ידנית.
+
+מקורות: טקסטים ב-`LISTING.md` (Français), "מה חדש" ב-`docs/release-update-checklist.md`, שקפים ב-`slides[-light]/fr/` ושקפי ווידג'טים ב-`widgets[-light]/<lang>/` (נבנים ב-`node scripts/appstore-widget-slides.mjs he,en,fr dark|light`).

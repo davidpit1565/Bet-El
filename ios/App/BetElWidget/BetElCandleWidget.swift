@@ -49,7 +49,8 @@ struct BetElCandleProvider: TimelineProvider {
     }
 
     /// Every synced lighting, oldest first (falls back to the single legacy time).
-    private static func candles(_ snapshot: BetElSharedData.Snapshot) -> [(time: Date, label: String)] {
+    /// Also used by the main Tamid widget so both show the same next lighting.
+    static func candles(_ snapshot: BetElSharedData.Snapshot) -> [(time: Date, label: String)] {
         let iso = ISO8601DateFormatter(); iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let plain = ISO8601DateFormatter()
         if let json = snapshot.candlesJSON, let data = json.data(using: .utf8),

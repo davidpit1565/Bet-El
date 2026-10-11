@@ -1,1 +1,1 @@
-tamid,torah,tehilim,psaumes,zohar,moussar,halakha,sidour,calendrier hébraïque,horaires,étude,téfilin
+tamid,torah,tehilim,psaumes,zohar,ben ich hai,moussar,halakha,siddour,calendrier juif,zmanim,étude

@@ -65,11 +65,16 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
         let state = BetElActivityAttributes.ContentState(zmanLabel: WidgetL10n.t(next.label, lang: snapshot.lang), endDate: next.date)
         let content = ActivityContent(state: state, staleDate: next.date.addingTimeInterval(60 * 30))
 
-        if let existing = Activity<BetElActivityAttributes>.activities.first {
-            Task { await existing.update(content) }
-            return
-        }
         let attributes = BetElActivityAttributes(title: WidgetL10n.t("nextZman", lang: snapshot.lang))
+        if let existing = Activity<BetElActivityAttributes>.activities.first {
+            // The title is an immutable attribute: after an app-language change the running
+            // Activity would keep the old language's title, so replace it instead of updating.
+            if existing.attributes.title == attributes.title {
+                Task { await existing.update(content) }
+                return
+            }
+            Task { await existing.end(nil, dismissalPolicy: .immediate) }
+        }
         do {
             _ = try Activity<BetElActivityAttributes>.request(attributes: attributes, content: content)
         } catch {

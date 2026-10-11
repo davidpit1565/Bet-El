@@ -1,23 +1,35 @@
-Tamid est l'application d'étude quotidienne de la communauté Beit-El : tout pour garder chaque jour le rythme de l'étude de la Torah, au même endroit.
+Tamid est l’application d’étude quotidienne de la communauté Beit-El : tout ce qu’il faut pour garder chaque jour le rythme de l’étude de la Torah, au même endroit.
 
 Ḥok LeYisraël
-Le cycle d'étude quotidien traditionnel – Torah avec Rachi et Or HaḤaïm, Prophètes et Hagiographes, Tehilim, Michna, Guemara, Zohar, Halakha et Moussar – sur un même rythme, avec suivi et rappels.
+Le cycle d’étude quotidien traditionnel – Torah avec Rachi et Or HaḤaïm, Prophètes et Hagiographes, Tehilim, Michna, Guemara, Zohar, Halakha et Moussar – sur un même rythme, avec suivi des progrès et rappels.
 
 Ben Ich ‘Haï
-La halakha quotidienne selon la paracha, en deux parcours, avec explications simples et suivi par paracha.
+La halakha quotidienne selon la paracha de la semaine, en deux parcours (année 1 et année 2), avec des explications simples et un suivi par paracha.
 
 Tehilim quotidiens
 Division mensuelle ou hebdomadaire, suivi des chapitres et rappels discrets.
 
+Tikouné HaZohar et Chnayim Mikra
+L’étude du Zohar en sa saison et Chnayim Mikra avant chaque Chabbat.
+
+Moussar
+Six grands livres de moussar, trois unités par jour, avec la possibilité de parcourir librement chaque livre.
+
 Siddour, bénédictions et prières
-Un siddour complet selon le rite séfarade oriental, le Birkat HaMazon, Meeïn Chalosh, les bénédictions avant de manger, la prière du voyageur et plus.
+Un siddour complet selon le rite séfarade oriental (Édot HaMizrah), le Birkat HaMazon, Meeïn Chalosh, les bénédictions avant de manger, la prière du voyageur et plus encore – et la recherche dans tous les livres.
 
-Calendrier hébraïque et horaires
-Dates hébraïques, allumage des bougies, sortie de Chabbat et horaires du jour pour votre lieu – détectés automatiquement.
+Calendrier hébraïque et horaires du jour
+Dates hébraïques, allumage des bougies et sortie de Chabbat, horaires du jour (zmanim) pour votre lieu – détecté automatiquement.
 
-Widgets
-Date hébraïque et paracha, horaires, Tehilim, série d'étude, bougies de Chabbat et Omer – écran d'accueil, écran verrouillé et StandBy.
+Livret de la semaine
+Un nouveau livret d’étude chaque semaine sur l’écran d’accueil – il s’ouvre directement dans l’application.
 
-Aussi : miroir pour téfilin, boussole vers Jérusalem, rappels quotidiens, partage par QR code, et cinq langues.
+À la mémoire des tsadikim
+Dans le calendrier, pour chaque jour hébraïque : les noms des tsadikim dont la hiloula tombe ce jour-là.
 
-Sans publicité ni achats intégrés.
+Widgets et Activité en direct
+Date hébraïque et paracha, horaires du jour, Tehilim, série d’étude, bougies de Chabbat et compte du Omer – sur l’écran d’accueil, l’écran verrouillé et en StandBy. Le compte à rebours jusqu’au prochain horaire s’affiche sur l’écran verrouillé et dans la Dynamic Island.
+
+Aussi : miroir pour les téfilin, boussole vers Jérusalem, rappels quotidiens, partage par QR code, et cinq langues – hébreu, anglais, français, russe et géorgien.
+
+Sans publicité ni achats intégrés. Pour le mérite du plus grand nombre.
