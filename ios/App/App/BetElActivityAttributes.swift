@@ -24,11 +24,22 @@ struct BetElActivityAttributes: ActivityAttributes {
         /// everything else zman-related already is, not translated here.
         var zmanLabel: String
         var endDate: Date
+        /// When this countdown segment began (the previous zman, or the moment it was
+        /// started) - the lower bound of the `Text(timerInterval:)` range.
+        var startDate: Date?
+        /// The zman after `endDate`, so the views can roll over to it on their own when
+        /// the system re-renders after the boundary, before the app gets to refresh.
+        var nextLabel: String?
+        var nextDate: Date?
     }
 
-    /// Static for the Activity's lifetime (its own start time), shown in
-    /// the Dynamic Island/Lock Screen banner alongside the live-updating
-    /// countdown from `ContentState.endDate`.
+    /// Static for the Activity's lifetime, shown in the Dynamic Island/Lock Screen
+    /// banner alongside the live-updating countdown from `ContentState.endDate`.
     var title: String
+    /// Right-to-left UI language (he) - the views flip their layout direction.
+    var rtl: Bool?
+    /// When the Activity was requested - iOS ends a Live Activity after ~8h, so the
+    /// app replaces one that is getting close to that on its next foreground.
+    var startedAt: Date?
 }
 #endif
