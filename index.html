@@ -2780,10 +2780,10 @@ Object.assign(I18N.en,{"אנו מעריכים את הזמן שלך. נשמח ל�
 Object.assign(I18N.fr,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Nous apprécions votre temps. Nous serons heureux de recevoir vos suggestions d’amélioration ou vos signalements de problèmes", "הכנס את שמך": "Saisissez votre nom", "הכנס את האימייל שלך": "Saisissez votre e-mail", "הכנס את הודעתך": "Saisissez votre message", "שלח": "Envoyer"});
 Object.assign(I18N.ru,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Мы ценим ваше время. Будем рады предложениям по улучшению и сообщениям о неполадках", "הכנס את שמך": "Введите ваше имя", "הכנס את האימייל שלך": "Введите ваш e-mail", "הכנס את הודעתך": "Введите ваше сообщение", "שלח": "Отправить"});
 Object.assign(I18N.ka,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "ჩვენ ვაფასებთ თქვენს დროს. სიამოვნებით მოვისმენთ გაუმჯობესების წინადადებებს ან შეტყობინებებს პრობლემების შესახებ", "הכנס את שמך": "შეიყვანეთ თქვენი სახელი", "הכנס את האימייל שלך": "შეიყვანეთ თქვენი ელფოსტა", "הכנס את הודעתך": "შეიყვანეთ თქვენი შეტყობინება", "שלח": "გაგზავნა"});
-Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": "Copy", "ביטול": "Cancel", "הטקסט הועתק": "Text copied", "שתוף פרק": "Share chapter"});
-Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
-Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
-Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
+Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": "Copy", "ביטול": "Cancel", "בטול": "Cancel", "הטקסט הועתק": "Text copied", "שתוף פרק": "Share chapter"});
+Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "בטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
+Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "בטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
+Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "בטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
 Object.assign(I18N.en,{"עברי": "Hebrew", "לועזי": "Gregorian", "קפוץ": "Jump"});
 Object.assign(I18N.fr,{"עברי": "Hébraïque", "לועזי": "Grégorien", "קפוץ": "Aller"});
 Object.assign(I18N.ru,{"עברי": "Еврейский", "לועזי": "Григорианский", "קפוץ": "Перейти"});
@@ -4783,7 +4783,7 @@ function ensureDafComm(i){
   const b=ckDafBlock(i);
   if(DAF_C[b]) return Promise.resolve();
   if(!dafCPending[b]) dafCPending[b]=cachedFetch(dataURL('data/chok-daf-c/'+b+'.json')).then(r=>r.json())
-    .then(d=>{ DAF_C[b]=d; }).catch(()=>{ DAF_C[b]={}; });
+    .then(d=>{ DAF_C[b]=d; }).catch(()=>{ delete dafCPending[b]; });
   return dafCPending[b];
 }
 /* absolute day number of a yyyy-mm-dd anchor, so the offset is plain arithmetic */
@@ -6468,7 +6468,7 @@ function renderChokReader(){
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckDayNext" ${ckStepDay(1)?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
       </div>
-      <div class="sm-aliyah-tag ${_anim}">${rowLabel} · ${s.he}${s.note?' · '+s.note:''}</div>
+      <div class="sm-aliyah-tag ${_anim}">${rowLabel} · ${ckChrome(s.he)}${s.note?' · '+s.note:''}</div>
       <div class="ck-viewdate">${localizeHebDateStr(ckViewHDate().renderGematriya(true))}</div>
       ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
       ${s.key==='torah'&&CK_KAVANA?`<div class="ck-kavana">${CK_KAVANA}</div>`:''}
@@ -6485,14 +6485,14 @@ function renderChokReader(){
       <div class="ck-secnav-wrap">
         <button class="sm-aliyah-chip ck-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
         <div class="sm-aliyah-nav ck-secnav">
-          ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${sec.he}</button>`).join('')}
+          ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${ckChrome(sec.he)}</button>`).join('')}
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
       </div>
       </div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
-      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs[CK.resumeTo.sec]||secs[0]).he}</b></div>
+      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${ckChrome((secs[CK.resumeTo.sec]||secs[0]).he)}</b></div>
       <div class="ck-resume-btns">
         <button class="ck-resume-btn primary" id="ckResumeGo">הַמְשֵׁךְ מִשָּׁם</button>
         <button class="ck-resume-btn" id="ckResumeNew">מֵהַתְחָלָה</button>
@@ -6500,9 +6500,9 @@ function renderChokReader(){
     </div>`:''}
     <div class="sm-verses notranslate">${body}</div>
     <div class="reader-nav">
-      <button class="rnav-btn" id="ckPrev" ${CK.sec>0?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
+      <button class="rnav-btn" id="ckPrev" ${CK.sec>0?'':'disabled'}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
       ${CK.sec<secs.length-1
-        ? `<button class="rnav-btn" id="ckNext"><span>הַבָּא</span>${I.next}</button>`
+        ? `<button class="rnav-btn" id="ckNext"><span>${ckChrome('הַבָּא')}</span>${I.next}</button>`
         : `<button class="rnav-btn done" id="ckDone">${I.check}<span>סִיַּמְתִּי אֶת חוֹק לְיִשְׂרָאֵל</span></button>`}
     </div>
     <div style="height:26px"></div>
@@ -7793,7 +7793,7 @@ function bookletURL(path){ return BOOKLET_BASE + String(path).replace(/^\.?\//,'
 function bookletTitle(){
   const b=currentBooklet(), t=b&&b.title; if(!t) return '';
   if(typeof t==='string') return t;
-  return t[S.lang]||t.he||'';
+  return t[S.lang]||(S.lang!=='he'&&t.en)||t.he||'';
 }
 function ensureBooklet(){
   if(bookletLoadPromise) return bookletLoadPromise;
@@ -8317,13 +8317,13 @@ function chapterHTML(ch){
 }
 function renderContinuous(chs,hd){
   TAB='reader'; RD=null; stopAutoScroll();
-  syncNativeTopBar('קְרִיאַת הַיּוֹם','home');
+  syncNativeTopBar(ckChrome('קְרִיאַת הַיּוֹם'),'home');
   app.innerHTML=`
   <div class="reader view">
   <div class="reader-head">
     <div class="reader-top">
       <button class="icon-btn" id="rBack">${I.prev}</button>
-      <div class="reader-title">קְרִיאַת הַיּוֹם</div>
+      <div class="reader-title">${ckChrome('קְרִיאַת הַיּוֹם')}</div>
       ${toolsFab({scroll:true})}
     </div>
   </div>
@@ -8352,7 +8352,7 @@ function renderContinuous(chs,hd){
    favorite icon never goes stale relative to the real isFav(ch) state. */
 function syncReaderTopBar(){
   const ch=RD.chapters[RD.idx];
-  const title = RD.daily ? ('קְרִיאַת הַיּוֹם · '+(RD.idx+1)+'/'+RD.chapters.length) : 'תְּהִלִּים';
+  const title = RD.daily ? (ckChrome('קְרִיאַת הַיּוֹם')+' · '+(RD.idx+1)+'/'+RD.chapters.length) : 'תְּהִלִּים';
   syncNativeTopBar(title, ()=> RD.daily?go('home'):go('tehillim'), {
     actions:[
       {id:'favorite', icon: isFav(ch) ? 'bookmark.fill' : 'bookmark', label: isFav(ch) ? ckChrome('הָסֵר מֵהַמּוּעֲדָפִים') : ckChrome('הוֹסֵף לַמּוּעֲדָפִים')},
@@ -8371,7 +8371,7 @@ function renderReader(){
   const ch=RD.chapters[RD.idx]; setLast(ch);
   const first=RD.idx===0, last=RD.idx===RD.chapters.length-1;
   const total=RD.chapters.length;
-  const headTitle = RD.daily ? ('קְרִיאַת הַיּוֹם · '+(RD.idx+1)+'/'+total) : 'תְּהִלִּים';
+  const headTitle = RD.daily ? (ckChrome('קְרִיאַת הַיּוֹם')+' · '+(RD.idx+1)+'/'+total) : 'תְּהִלִּים';
   // prayers: daily -> before on first, after on last; browse -> both around every chapter
   const showBefore = RD.daily ? first : true;
   const showAfter  = RD.daily ? last  : true;
@@ -8411,10 +8411,10 @@ function renderReader(){
     <div id="chWrap">${chapterHTML(ch)}</div>
     ${showAfter?prayerBlock('after'):''}
     <div class="reader-nav">
-      <button class="rnav-btn" id="rPrev" ${first?'disabled':''}>${I.prev}<span>הַקּוֹדֵם</span></button>
+      <button class="rnav-btn" id="rPrev" ${first?'disabled':''}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
       ${ showDone
         ? `<button class="rnav-btn done" id="rDone">${I.check}<span>סִיַּמְתִּי אֶת הַקְּרִיאָה</span></button>`
-        : `<button class="rnav-btn" id="rNext" ${last?'disabled':''}><span>הַבָּא</span>${I.next}</button>` }
+        : `<button class="rnav-btn" id="rNext" ${last?'disabled':''}><span>${ckChrome('הַבָּא')}</span>${I.next}</button>` }
     </div>
     <div style="height:26px"></div>
   </div>`;
@@ -10042,8 +10042,8 @@ function renderLibraryTorahReader(){
       ${verses.map(v=>`<div class="sm-verse-row"><span class="sm-vnum">${heNum(v.c)}:${heNum(v.v)}</span><div class="sm-he">${v.he}</div>${v.targum!=null?`<span class="sm-tag-badge sm-targum-tag">${ckChrome('תרגום')}</span><div class="sm-targum">${v.targum}</div>`:''}</div>`).join('')}
     </div>
     <div class="reader-nav">
-      <button class="rnav-btn" id="libtPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
-      <button class="rnav-btn" id="libtNext" ${canGoNext?'':'disabled'}><span>הַבָּא</span>${I.next}</button>
+      <button class="rnav-btn" id="libtPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
+      <button class="rnav-btn" id="libtNext" ${canGoNext?'':'disabled'}><span>${ckChrome('הַבָּא')}</span>${I.next}</button>
     </div>
     <div style="height:26px"></div>
   </div>`;
@@ -12531,7 +12531,7 @@ function drawSiddurReader(){
       ${p==='selichot'?`<div class="prayer-reader-subtitle">${PRAYERS_EXTRA.selichotEdotHamizrach.subtitle}</div>`:(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
     </div>
     ${SID.showResume&&SID.resumeTo?`<div class="ck-resume">
-      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${(secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he}</b></div>
+      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${ckChrome((secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he)}</b></div>
       <div class="ck-resume-btns">
         <button class="ck-resume-btn primary" id="sidResumeGo">הַמְשֵׁךְ מִשָּׁם</button>
         <button class="ck-resume-btn" id="sidResumeNew">מֵהַתְחָלָה</button>
@@ -12774,10 +12774,10 @@ function renderShnayimReader(){
       }).join('')}
     </div>
     <div class="reader-nav">
-      <button class="rnav-btn" id="smPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
+      <button class="rnav-btn" id="smPrev" ${canGoPrev?'':'disabled'}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
       ${isLastPage
         ? `<button class="rnav-btn done" id="smDone">${I.check}<span>סִיַּמְתִּי אֶת הַפָּרָשָׁה</span></button>`
-        : `<button class="rnav-btn" id="smNext"><span>הַבָּא</span>${I.next}</button>`}
+        : `<button class="rnav-btn" id="smNext"><span>${ckChrome('הַבָּא')}</span>${I.next}</button>`}
     </div>
     <div style="height:26px"></div>
   </div>`;
@@ -12904,8 +12904,8 @@ function renderZoharReader(){
       ${entry.pdf?`<a class="zh-pdf-link" href="${dataURL(entry.pdf)}" target="_blank" rel="noopener">${I.pdf}<span>פְּתַח מָקוֹר מְנֻקָּד (PDF)</span></a>`:''}
     </div>`:''}
     <div class="reader-nav">
-      <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>הַקּוֹדֵם</span></button>
-      <button class="rnav-btn" id="zhNext" ${ZH.day<ZOHAR.length?'':'disabled'}><span>הַבָּא</span>${I.next}</button>
+      <button class="rnav-btn" id="zhPrev" ${ZH.day>1?'':'disabled'}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
+      <button class="rnav-btn" id="zhNext" ${ZH.day<ZOHAR.length?'':'disabled'}><span>${ckChrome('הַבָּא')}</span>${I.next}</button>
     </div>
     <button class="rnav-btn done" id="zhToggleDone" style="width:100%;margin-top:10px">${I.check}<span>${zoharDone().includes(entry.day)?'הוּשְׁלַם · לְבַטֵּל סִמּוּן':'סִיַּמְתִּי אֶת הַתִּיקּוּן'}</span></button>
     <div style="height:26px"></div>
@@ -13372,7 +13372,7 @@ function settingsCategoriesMeta(){
   ];
 }
 function renderSettings(){
-  if(!MCYC) ensureMusarCycles().then(()=>{ if(TAB==='settings'){ renderSettings(); tr(app); } });
+  if(!MCYC) ensureMusarCycles().then(()=>{ if(TAB==='settings'){ renderSettings(); tr(app); } }).catch(()=>{});
   if(SETTINGS_VIEW==='list') return renderSettingsList();
   return renderSettingsCategory(SETTINGS_VIEW);
 }
