@@ -223,6 +223,7 @@ struct BetElProvider: TimelineProvider {
             }
         }
 
+        let nextCandle = BetElCandleProvider.candles(snapshot).first(where: { $0.time > date })
         var entry = BetElEntry(
             date: date,
             hebrewDateText: HebrewDay.formatted(hDate, lang: lang),
@@ -234,8 +235,8 @@ struct BetElProvider: TimelineProvider {
             streakCount: snapshot.streakCount,
             theme: snapshot.theme,
             lang: lang,
-            candleTime: snapshot.candleTime,
-            candleLabel: snapshot.candleLabel,
+            candleTime: nextCandle?.time,
+            candleLabel: (nextCandle?.label.isEmpty == false) ? nextCandle?.label : snapshot.candleLabel,
             streakBest: snapshot.streakBest,
             sunStart: sunSpan.start, sunEnd: sunSpan.end, sunIsDay: sunSpan.isDay,
             sunriseToday: times?.sunrise, sunsetToday: times?.sunset,
