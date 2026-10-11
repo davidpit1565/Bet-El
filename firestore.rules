@@ -25,5 +25,24 @@ service cloud.firestore {
         && request.resource.data.lang is string && request.resource.data.lang.size() < 20
         && request.resource.data.createdAt is number;
     }
+
+    /* Push tokens (index.html: web window.enablePush and native
+       window.__savePushToken). Doc id = the FCM token itself. Clients may
+       only create or overwrite their own token doc - never read, list or
+       delete (nobody can harvest the token list); campaigns are sent from the
+       Firebase Console / Admin SDK, which bypass these rules. Field set and
+       types are locked to exactly what the clients write. */
+    match /pushTokens/{tokenId} {
+      allow read, delete: if false;
+      allow create, update: if request.resource.data.keys().hasOnly(['token','platform','ua','lang','updatedAt'])
+        && request.resource.data.keys().hasAll(['token','platform','updatedAt'])
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 20 && request.resource.data.token.size() < 4096
+        && request.resource.data.token == tokenId
+        && request.resource.data.platform in ['ios', 'web']
+        && (!('ua' in request.resource.data) || (request.resource.data.ua is string && request.resource.data.ua.size() <= 500))
+        && (!('lang' in request.resource.data) || (request.resource.data.lang is string && request.resource.data.lang.size() <= 40))
+        && request.resource.data.updatedAt is number && request.resource.data.updatedAt > 0;
+    }
   }
 }
