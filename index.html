@@ -6821,7 +6821,7 @@ function ornRavSvg(){
   ${ornVoluteFrame(130,420,1350,1960,O)}
   </svg>`;
 }
-function bkRavHtml(){
+function bkRavHtml(shabbat){
   const t=bkUI(), R=BK_RAV;
   return `<div class="bk-page bk-matter bk-ornp bk-rav">${ornRavSvg()}
     <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
@@ -6829,7 +6829,7 @@ function bkRavHtml(){
     <div class="bk-ol bk-rv-box">
       <div class="bk-dd-lead">${R.lead}</div>
       <div class="bk-rv-to">${R.to}</div>
-      <div class="bk-rv-name">${R.name}<span>${R.title}</span></div>
+      <div class="bk-rv-name">${bkRavName(shabbat)}<span>${R.title}</span></div>
       <div class="bk-rv-role">${R.role}</div>
       <div class="bk-rv-orn">${bkRuleHtml()}</div>
       ${R.body.map(p=>`<p class="bk-rv-p">${p}</p>`).join('')}
@@ -6898,10 +6898,19 @@ function bkImgSrc(key){ if(key===BK_QR_KEY) key=bkQrKey(); const st=BK_IMG[key];
    person */
 const BK_DEDICATION={niftar:'גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב', hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
 /* the Rav's honour page (before the dedication page) - the owner's text,
-   verbatim; laid out by bkRavHtml */
+   verbatim; laid out by bkRavHtml. The Rav's printed name was corrected
+   (family surname, matching the dedication page's own family) starting
+   with Parashat Lech Lecha's week (Shabbat 24.10.2026) - Noach (already
+   built and delivered to the owner) and every earlier week keep printing
+   the ORIGINAL name, so rebuilding an older week never silently changes
+   content the owner already has. Gated by bkRavName() on the week's
+   Shabbat date rather than hardcoded here - do not put the name back as a
+   plain string. */
+const BK_RAV_NAME_EPOCH=new Date(2026,9,24); // Shabbat Parashat Lech Lecha
+function bkRavName(shabbat){ return shabbat && shabbat>=BK_RAV_NAME_EPOCH ? 'הָרַב יִצְחָק פִּישְׁחַדְזִי' : 'הָרַב יִצְחָק בֶּן אֲבִיגַיִל'; }
 const BK_RAV={
   hdr:'לְכָבוֹד וּלְתִפְאֶרֶת', lead:'בִּרְכַּת הַצְלָחָה', to:'לִכְבוֹד מוֹרֵנוּ וְרַבֵּנוּ',
-  name:'הָרַב יִצְחָק פִּישְׁחַדְזִי', title:'שליט״א',
+  title:'שליט״א',
   role:'רַב קְהִלָּתֵנוּ, הָעוֹמֵד עַל מִשְׁמֶרֶת הַקֹּדֶשׁ וּמַקְדִּישׁ אֶת חַיָּיו לְהַרְבָּצַת תּוֹרָה, לְהַדְרָכַת הַצִּבּוּר וּלְהַרְבּוֹת כְּבוֹד שָׁמַיִם.',
   body:['יְהִי רָצוֹן מִלִּפְנֵי אָבִינוּ שֶׁבַּשָּׁמַיִם, שֶׁיִּזְכֶּה הָרַב שליט״א לִבְרָכָה וְהַצְלָחָה בְּכָל מַעֲשֵׂה יָדָיו, לִבְרִיאוּת אֵיתָנָה, לַאֲרִיכוּת יָמִים וְשָׁנִים בְּטוֹב וּבַנְּעִימִים, לְנַחַת דְּקַדּוּשָׁה מִכָּל יוֹצְאֵי חֲלָצָיו וּלְסִיַּעְתָּא דִּשְׁמַיָּא מְרֻבָּה בְּכָל דְּרָכָיו.',
     'יִזְכֶּה לְהַמְשִׁיךְ לְהַגְדִּיל תּוֹרָה וּלְהַאְדִּירָהּ, לְהַרְבִּיץ תּוֹרָה בְּיִשְׂרָאֵל, לְהַעֲמִיד תַּלְמִידִים הַרְבֵּה, לְהַנְהִיג אֶת קְהִלָּתֵנוּ בְּחָכְמָה וּבִתְבוּנָה, וּלְהוֹסִיף אוֹר, קְדֻשָּׁה וּבְרָכָה בְּקֶרֶב הַצִּבּוּר.',
@@ -7065,7 +7074,7 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml()+bkDedicationHtml()+'<div class="bk-toc-slot"></div>';
+  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkDedicationHtml()+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */

@@ -213,6 +213,18 @@ in English as usual.
   reads "נוצר מתוך אפליקציית תמיד" / "Created with the Tamid app", without
   the article (owner, from the booklet after Lech Lecha on; Noach, Vayera
   and Lech Lecha were printed before and stay as they are).
+  **Rav honour page name ("בִּרְכַּת הַצְלָחָה")**: the Rav's printed surname
+  was corrected from "בֶּן אֲבִיגַיִל" to "פִּישְׁחַדְזִי" (matching the family
+  name already used on the booklet's own dedication page) starting with
+  **Parashat Lech Lecha's week (Shabbat 18-24.10.2026) onward only** -
+  Noach (already built and delivered to the owner with the original name)
+  and every earlier week keep the ORIGINAL name. This is gated in code,
+  not a one-off edit: `bkRavName(shabbat)` (index.html, next to `BK_RAV`)
+  compares the week's Shabbat date against `BK_RAV_NAME_EPOCH` (2026-10-24)
+  and `bkRavHtml(shabbat)` calls it instead of a hardcoded string - so
+  rebuilding Noach (or any older week) today still correctly prints the
+  original name instead of silently picking up the correction. Never put
+  the name back as a plain string on `BK_RAV`.
   **Hillulot (owner's "לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים")** - every week's booklet
   shows, under each day's heading and before its first subject, that
   date's yahrzeits exactly as the app's calendar day card does: same data
