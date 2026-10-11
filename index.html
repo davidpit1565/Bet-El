@@ -6895,8 +6895,14 @@ function bkImgSrc(key){ if(key===BK_QR_KEY) key=bkQrKey(); const st=BK_IMG[key];
    (BK_UI dedLead/dedMerit/...). Empty = a line to write on by hand. */
 /* owner's corrections: the surname is Mamusi (not a "from" prefix), the
    mother is Ra'aya (רַעְיָה, after "רַעְיָתִי"); hatzlacha holds one entry per
-   person */
-const BK_DEDICATION={niftar:'גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב', hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
+   person. Lech Lecha's week added a second niftar - יוֹכֶבֶד גּוּגוֹלִי בַּת
+   סִימוֹן, whose yahrzeit (י״ג חשון) falls inside Lech Lecha's own week
+   (ז׳-י״ג חשון תשפ״ז) - niftar is now an array like hatzlacha, and
+   bkDedicationHtml's existing singular/plural switch (dedMerit/dedMeritPl,
+   dedTnzbh/dedTnzbhPl) picks up the plural wording automatically. (A third
+   yahrzeit the owner mentioned, מְנַשֶּׁה בֶּן לֵוִי הַנּוֹלָד מִזִּלְפָּה on כ׳ חשון,
+   falls in the FOLLOWING week - do not add it here.) */
+const BK_DEDICATION={niftar:['גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב','יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'], hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
 /* the Rav's honour page (before the dedication page) - the owner's text,
    verbatim; laid out by bkRavHtml. The Rav's printed name was corrected
    (family surname, matching the dedication page's own family) starting
