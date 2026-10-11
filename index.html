@@ -6895,14 +6895,25 @@ function bkImgSrc(key){ if(key===BK_QR_KEY) key=bkQrKey(); const st=BK_IMG[key];
    (BK_UI dedLead/dedMerit/...). Empty = a line to write on by hand. */
 /* owner's corrections: the surname is Mamusi (not a "from" prefix), the
    mother is Ra'aya (רַעְיָה, after "רַעְיָתִי"); hatzlacha holds one entry per
-   person. Lech Lecha's week added a second niftar - יוֹכֶבֶד גּוּגוֹלִי בַּת
-   סִימוֹן, whose yahrzeit (י״ג חשון) falls inside Lech Lecha's own week
-   (ז׳-י״ג חשון תשפ״ז) - niftar is now an array like hatzlacha, and
-   bkDedicationHtml's existing singular/plural switch (dedMerit/dedMeritPl,
-   dedTnzbh/dedTnzbhPl) picks up the plural wording automatically. (A third
+   person (permanent, every week). The niftar list is PER-WEEK: גַּבְרִיאֵל
+   is the one permanent memorial name, shown every week. יוֹכֶבֶד גּוּגוֹלִי
+   בַּת סִימוֹן's yahrzeit (י״ג חשון) falls specifically inside Lech Lecha's
+   own week (ז׳-י״ג חשון תשפ״ז) - she must show ONLY in that week's booklet,
+   not every week going forward, so she's gated by BK_NIFTAR_EXTRA below
+   (same date-gating pattern as bkRavName) rather than living in this
+   static array. bkDedicationHtml's existing singular/plural switch
+   (dedMerit/dedMeritPl, dedTnzbh/dedTnzbhPl) still picks up the plural
+   wording automatically whenever an extra name applies that week. (A third
    yahrzeit the owner mentioned, מְנַשֶּׁה בֶּן לֵוִי הַנּוֹלָד מִזִּלְפָּה on כ׳ חשון,
-   falls in the FOLLOWING week - do not add it here.) */
-const BK_DEDICATION={niftar:['גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב','יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'], hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
+   falls in the FOLLOWING week - add it as its own BK_NIFTAR_EXTRA entry for
+   that week if/when that booklet is built, not here.) */
+const BK_DEDICATION={niftar:['גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב'], hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
+const BK_NIFTAR_EXTRA=[{shabbat:new Date(2026,9,24), name:'יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'}]; // Lech Lecha's week (24.10.2026) only
+function bkNiftarList(shabbat){
+  const list=[].concat(BK_DEDICATION.niftar);
+  BK_NIFTAR_EXTRA.forEach(e=>{ if(shabbat && shabbat.toDateString()===e.shabbat.toDateString()) list.push(e.name); });
+  return list;
+}
 /* the Rav's honour page (before the dedication page) - the owner's text,
    verbatim; laid out by bkRavHtml. The Rav's printed name was corrected
    (family surname, matching the dedication page's own family) starting
@@ -6953,11 +6964,11 @@ function bkCoverHtml(date,slot,end){
     <div class="bk-ol bk-cv-qr">${q?`<img src="${q}" alt=""/><div>${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>
   </div>`;
 }
-function bkDedicationHtml(){
+function bkDedicationHtml(shabbat){
   const t=bkUI(), D=BK_DEDICATION;
   /* each slot holds one or more people; the wording around it follows the
      count (singular for one, plural for several) */
-  const niftar=[].concat(D.niftar), hatz=[].concat(D.hatzlacha);
+  const niftar=bkNiftarList(shabbat), hatz=[].concat(D.hatzlacha);
   const name=(n,zl)=>n?`<div class="bk-dd-name">${n}</div>`
     :`<div class="bk-dd-name"><span class="bk-ded-blank"></span>${zl?` ${zl}`:''}</div>`;
   return `<div class="bk-page bk-matter bk-ornp bk-dedic">${ornDedicationSvg()}
@@ -7080,7 +7091,7 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkDedicationHtml()+'<div class="bk-toc-slot"></div>';
+  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */
