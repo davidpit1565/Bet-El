@@ -622,7 +622,8 @@ class MainViewController: CAPBridgeViewController {
             lib.translatesAutoresizingMaskIntoConstraints = false
             lib.bottomInset = { [weak self] in self?.nativeListBottomInset() ?? 96 }
             lib.onSelect = { [weak self] key in
-                self?.webView?.evaluateJavaScript("window.NativeLibraryHost && window.NativeLibraryHost.open('\(key)')", completionHandler: nil)
+                guard let self else { return }
+                self.webView?.evaluateJavaScript("window.NativeLibraryHost && window.NativeLibraryHost.open(\(self.jsStringLiteral(key)))", completionHandler: nil)
             }
             lib.onCollapseChange = { [weak self] hide in self?.setTopBarCollapsed(hide) }
             view.insertSubview(lib, belowSubview: tabBar)
@@ -1108,7 +1109,7 @@ class MainViewController: CAPBridgeViewController {
         if isSearchMode { navHeight = searchReservedHeight() }
         nativeHomeView?.setNeedsLayout()
         nativeLibraryView?.setNeedsLayout()
-        let headerHeight = (topBar.isHidden || topBarCollapsed) ? 0 : topBar.frame.height
+        let headerHeight = topBar.isHidden ? 0 : topBar.frame.height - (topBarCollapsed ? topBar.contentHeight : 0)
         let js = """
         document.documentElement.style.setProperty('--native-nav-h','\(navHeight)px');
         document.documentElement.style.setProperty('--native-header-h','\(headerHeight)px');
@@ -1123,10 +1124,10 @@ class MainViewController: CAPBridgeViewController {
     /// for Hebrew, so Home sits on the right in Hebrew and on the left in
     /// every other language no matter what language the device itself is set to.
     func configure(items: [[String: String]], activeTab: String, isRTL: Bool) {
-        let byId = Dictionary(uniqueKeysWithValues: items.compactMap { item -> (String, String)? in
+        let byId = Dictionary(items.compactMap { item -> (String, String)? in
             guard let id = item["id"], let label = item["label"] else { return nil }
             return (id, label)
-        })
+        }, uniquingKeysWith: { first, _ in first })
         let ordered: [UITabBarItem] = MainViewController.tabOrder.compactMap { entry in
             guard let label = byId[entry.id] else { return nil }
             let item = UITabBarItem(title: label, image: UIImage(systemName: entry.icon), tag: 0)

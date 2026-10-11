@@ -45,7 +45,7 @@ struct BetElCandleProvider: TimelineProvider {
         dates = Array(Set(dates.filter { $0 >= now })).sorted()
         let entries = dates.map { makeEntry(snapshot: snapshot, at: $0) }
         let fallback = Calendar.current.date(byAdding: .day, value: 1, to: now)!
-        completion(Timeline(entries: entries, policy: .after(dates.last ?? fallback)))
+        completion(Timeline(entries: entries, policy: .after(dates.count > 1 ? dates.last! : fallback)))
     }
 
     /// Every synced lighting, oldest first (falls back to the single legacy time).

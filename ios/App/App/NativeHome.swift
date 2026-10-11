@@ -467,6 +467,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
     private var logo: UIImage?
     private var spacerPool: [String] = []
     private var screenSignature = ""
+    private var lastLayoutWidth: CGFloat = 0
 
     private let addPill = UIButton(type: .custom)
     private let donePill = UIButton(type: .custom)
@@ -553,6 +554,10 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         }
         bringSubviewToFront(addPill)
         bringSubviewToFront(donePill)
+        if bounds.width != lastLayoutWidth {
+            lastLayoutWidth = bounds.width
+            collectionView.collectionViewLayout.invalidateLayout()
+        }
     }
 
     // MARK: data
