@@ -71,7 +71,12 @@ final class NLCell: UICollectionViewCell {
         super.layoutSubviews()
     }
 
-    func configure(_ item: NLItem) {
+    /// `rtl` is the APP language's direction (from JS), never the device locale: `.natural` and
+    /// leading/trailing would otherwise follow the iPhone's language, not the app's.
+    func configure(_ item: NLItem, rtl: Bool) {
+        let attr: UISemanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
+        for v in [self, contentView, glass, glass.contentView, tintView, titleLabel] as [UIView] { v.semanticContentAttribute = attr }
+        titleLabel.textAlignment = rtl ? .right : .left
         titleLabel.text = item.title
         accessibilityLabel = item.title
         tintView.gradient.colors = [item.color.withAlphaComponent(0.42).cgColor, item.color.withAlphaComponent(0.12).cgColor]
@@ -92,6 +97,7 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
     var onCollapseChange: ((Bool) -> Void)?
     let collectionView: UICollectionView
     private var items: [NLItem] = []
+    private var rtl = true
     private let collapseTracker = ScrollCollapseTracker()
 
     override init(frame: CGRect) {
@@ -138,6 +144,7 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
         let attr: UISemanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
         semanticContentAttribute = attr
         collectionView.semanticContentAttribute = attr
+        self.rtl = rtl
         self.items = items
         collapseTracker.reset()
         collectionView.reloadData()
@@ -164,7 +171,7 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NLCell.reuseId, for: indexPath) as! NLCell
-        cell.configure(items[indexPath.item])
+        cell.configure(items[indexPath.item], rtl: rtl)
         return cell
     }
 

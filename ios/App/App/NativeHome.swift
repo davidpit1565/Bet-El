@@ -313,7 +313,7 @@ final class NHCell: UICollectionViewCell {
             v.spacing = 2
             if !it.subtitle.isEmpty { v.addArrangedSubview(label(it.subtitle, .subheadline, .regular, .secondaryLabel, lines: 2)) }
             stack.addArrangedSubview(v)
-            let rowChev = UIImageView(image: UIImage(systemName: "chevron.forward"))
+            let rowChev = UIImageView(image: UIImage(systemName: rtl ? "chevron.left" : "chevron.right"))
             rowChev.tintColor = .tertiaryLabel
             rowChev.setContentHuggingPriority(.required, for: .horizontal)
             stack.addArrangedSubview(rowChev)
@@ -365,7 +365,7 @@ final class NHCell: UICollectionViewCell {
             v.axis = .vertical
             v.spacing = 2
             stack.addArrangedSubview(v)
-            let chev = UIImageView(image: UIImage(systemName: "chevron.forward"))
+            let chev = UIImageView(image: UIImage(systemName: rtl ? "chevron.left" : "chevron.right"))
             chev.tintColor = .tertiaryLabel
             chev.setContentHuggingPriority(.required, for: .horizontal)
             stack.addArrangedSubview(chev)
@@ -416,7 +416,15 @@ final class NHCell: UICollectionViewCell {
         default:
             break
         }
+        // the APP language's direction (from JS), never the device locale - the horizontal stacks
+        // (badge / text / chevron, zmanim name / time) would otherwise lay out by the iPhone's language
+        applyDirection(self)
         applyEditing(editing)
+    }
+
+    private func applyDirection(_ v: UIView) {
+        v.semanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
+        for s in v.subviews { applyDirection(s) }
     }
 
     @objc private func subTapped(_ sender: Any) {
