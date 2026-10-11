@@ -400,8 +400,12 @@ in English as usual.
   from Firebase Console > Engage > Messaging targeted at the app itself
   reaches every registered token): https://console.firebase.google.com/project/bet-el-e6812/messaging
   **Native iOS** (from 2.0.1) uses `@capacitor-firebase/messaging` (APNs via FCM): the same Settings
-  row, shown when `pushSupported()`; state in `S.nativePushOn` (starts off - permission is asked ONLY
-  from that toggle, never at launch/onboarding; `enableNativePush()`/`disableNativePush()`). The token
+  row, shown when `pushSupported()`; state in `S.nativePushOn` (ON by default - undefined counts as on).
+  `nativePushBoot()` asks the iOS permission ONCE, automatically, right after onboarding finishes (or
+  ~1.2s after boot for an already-onboarded install; flag `betel_push_asked`), refreshes the token on
+  every launch when granted, and never re-asks after "Don't Allow" (`betel_push_denied`; the Settings
+  row then says "iOS Settings → Tamid → Notifications"). `notifBootSync()` no longer prompts on native -
+  the push prompt is the single prompt and grants local notifications too. The token
   is written by the Firebase module's `window.__savePushToken` to `pushTokens/{token}` with
   `platform:'ios'`; if that fails (offline / module not loaded) it waits in localStorage
   `betel_push_pending` and is retried on the next launch. Web/PWA path (`window.enablePush`,
@@ -518,8 +522,7 @@ in English as usual.
 - **Firebase iOS API key** (the one in `ios/App/App/GoogleService-Info.plist`) still needs restricting to bundle id
   `com.beitel.tehilim` (GCP project bet-el-e6812; gcloud was not installed). Don't touch the web key in index.html. Close the
   GitHub secret-scanning alert only after the restriction is verified.
-- **Native review leftovers (not fixed, need a decision or device testing):** LocalNotifications permission is requested at
-  launch (`notifBootSync()`), the Live Activity is always on and goes stale after the zman passes (`isStale` unused) and uses
+- **Native review leftovers (not fixed, need a decision or device testing):** the Live Activity is always on and goes stale after the zman passes (`isStale` unused) and uses
   `Solar` instead of the snapshot zmanim, only the first Live Activity is managed and Hebrew lays out LTR there, a 44pt gap can
   remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize, fixed native heights don't
   follow Dynamic Type, and the FAB has English-only accessibility labels.

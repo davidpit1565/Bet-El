@@ -2616,19 +2616,24 @@ delete S.hebrewName;
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); syncWidgetData(); }
 /* "New content" push. Web/PWA: Firebase JS + service worker (window.enablePush,
    S.pushEnabled, unchanged). Native iOS: @capacitor-firebase/messaging (APNs via
-   FCM), its own S.nativePushOn that starts off - permission is only ever asked
-   from the Settings toggle, never at launch or in onboarding. The token is saved
+   FCM), its own S.nativePushOn - ON by default (undefined counts as on). The
+   permission is asked once, automatically, right after onboarding finishes (or
+   ~1s after the first launch of an already-onboarded install), by
+   nativePushBoot(); a "Don't Allow" is never re-asked automatically (the
+   Settings row then explains how to enable it in iOS Settings). The token is saved
    to Firestore pushTokens/{token} with platform:'ios' by the Firebase module
    (window.__savePushToken); when that module or the network isn't there yet
    (offline) it waits in localStorage and is flushed once the module loads. */
 function nativePushPlugin(){ const C=window.Capacitor; return C&&C.isNativePlatform&&C.isNativePlatform()&&C.getPlatform()==='ios'&&C.Plugins&&C.Plugins.FirebaseMessaging||null; }
 function pushSupported(){ return !!nativePushPlugin() || !!(window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window); }
-function pushIsOn(){ return nativePushPlugin() ? !!S.nativePushOn : !!S.pushEnabled; }
+function pushIsOn(){ return nativePushPlugin() ? S.nativePushOn!==false : !!S.pushEnabled; }
+function nativePushDenied(){ try{ return !!localStorage.getItem('betel_push_denied'); }catch(e){ return false; } }
 async function enableNativePush(){
   const fm=nativePushPlugin(); if(!fm) return false;
   try{
     let perm=(await fm.checkPermissions()).receive;
     if(perm!=='granted') perm=(await fm.requestPermissions()).receive;
+    try{ if(perm==='denied') localStorage.setItem('betel_push_denied','1'); else if(perm==='granted') localStorage.removeItem('betel_push_denied'); }catch(e){}
     if(perm!=='granted') return false;
     const { token }=await fm.getToken();
     if(!token) return false;
@@ -2636,6 +2641,24 @@ async function enableNativePush(){
     if(window.__savePushToken) window.__savePushToken(token);
     return true;
   }catch(e){ console.error('[betel push] native enable failed:', e); return false; }
+}
+/* Boot/onboarding-end hook: refreshes the token every launch when allowed, asks
+   the system prompt once when iOS hasn't asked yet, and never re-asks after a
+   denial or after the user switched the toggle off. */
+async function nativePushBoot(){
+  const fm=nativePushPlugin();
+  if(!fm || SHOT_MODE || S.nativePushOn===false || !localStorage.getItem('betel_onboard_v1') || TAB==='chokPace') return;
+  try{
+    const perm=(await fm.checkPermissions()).receive;
+    if(perm==='granted'){ S.nativePushOn=await enableNativePush(); }
+    else if(perm==='denied'){ S.nativePushOn=false; try{ localStorage.setItem('betel_push_denied','1'); }catch(e){} }
+    else if(!localStorage.getItem('betel_push_asked')){
+      try{ localStorage.setItem('betel_push_asked','1'); }catch(e){}
+      S.nativePushOn=await enableNativePush();
+    } else return;
+    saveS();
+    notifBootSync().then(()=>{ if(TAB==='settings') render(); }).catch(()=>{});
+  }catch(e){}
 }
 async function disableNativePush(){
   const fm=nativePushPlugin(); if(!fm) return;
@@ -2780,10 +2803,10 @@ Object.assign(I18N.en,{"אנו מעריכים את הזמן שלך. נשמח ל�
 Object.assign(I18N.fr,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Nous apprécions votre temps. Nous serons heureux de recevoir vos suggestions d’amélioration ou vos signalements de problèmes", "הכנס את שמך": "Saisissez votre nom", "הכנס את האימייל שלך": "Saisissez votre e-mail", "הכנס את הודעתך": "Saisissez votre message", "שלח": "Envoyer"});
 Object.assign(I18N.ru,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "Мы ценим ваше время. Будем рады предложениям по улучшению и сообщениям о неполадках", "הכנס את שמך": "Введите ваше имя", "הכנס את האימייל שלך": "Введите ваш e-mail", "הכנס את הודעתך": "Введите ваше сообщение", "שלח": "Отправить"});
 Object.assign(I18N.ka,{"אנו מעריכים את הזמן שלך. נשמח לשמע הצעות לשפור או לקבל דווח על תקלות": "ჩვენ ვაფასებთ თქვენს დროს. სიამოვნებით მოვისმენთ გაუმჯობესების წინადადებებს ან შეტყობინებებს პრობლემების შესახებ", "הכנס את שמך": "შეიყვანეთ თქვენი სახელი", "הכנס את האימייל שלך": "შეიყვანეთ თქვენი ელფოსტა", "הכנס את הודעתך": "შეიყვანეთ თქვენი შეტყობინება", "שלח": "გაგზავნა"});
-Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": "Copy", "ביטול": "Cancel", "בטול": "Cancel", "הטקסט הועתק": "Text copied", "שתוף פרק": "Share chapter"});
-Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "בטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
-Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "בטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
-Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "בטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
+Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": "Copy", "ביטול": "Cancel", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "To turn on: iOS Settings → Tamid → Notifications", "בטול": "Cancel", "הטקסט הועתק": "Text copied", "שתוף פרק": "Share chapter"});
+Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "Pour activer : Réglages iOS → Tamid → Notifications", "בטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
+Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "Чтобы включить: Настройки iOS → Tamid → Уведомления", "בטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
+Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "ჩასართავად: iOS პარამეტრები → Tamid → შეტყობინებები", "בטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
 Object.assign(I18N.en,{"עברי": "Hebrew", "לועזי": "Gregorian", "קפוץ": "Jump"});
 Object.assign(I18N.fr,{"עברי": "Hébraïque", "לועזי": "Grégorien", "קפוץ": "Aller"});
 Object.assign(I18N.ru,{"עברי": "Еврейский", "לועזי": "Григорианский", "קפוץ": "Перейти"});
@@ -5379,6 +5402,7 @@ function renderChokPace(){
         (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
       }
       CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList');
+      if(CK_PACE_AFTER_LANG==='onboard') setTimeout(()=>{ nativePushBoot(); }, 700);
     };
     tr(app);
     return;
@@ -13423,7 +13447,7 @@ function settingsCategoryBody(catId, notifPerm){
     <div class="set-group">
       <h3>תזכורת יומית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעת תזכורת לקריאה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
-      ${pushSupported()?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעות על תכן חדש</div><div class="si-d">${pushIsOn()?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${pushIsOn()?'on':''}" id="tgPush"></div></div>`:''}
+      ${pushSupported()?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעות על תכן חדש</div><div class="si-d">${pushIsOn()?'מפעל':(nativePushPlugin()&&nativePushDenied()?'כדי להפעיל: הגדרות iOS ← תמיד ← הודעות':'לא הפעל')}</div></div></div><div class="toggle ${pushIsOn()?'on':''}" id="tgPush"></div></div>`:''}
     </div>`;
     case 'study': return `
     <div class="set-group">
@@ -13540,11 +13564,11 @@ function wireSettingsCategory(catId){
     case 'notifications': {
       const tgp=document.getElementById('tgPush');
       if(tgp && nativePushPlugin()) tgp.onclick=async()=>{
-        if(S.nativePushOn){ S.nativePushOn=false; saveS(); renderSettings(); await disableNativePush(); return; }
+        if(pushIsOn()){ S.nativePushOn=false; saveS(); renderSettings(); await disableNativePush(); return; }
         tgp.classList.add('on');
         const ok = await enableNativePush();
         S.nativePushOn=ok; saveS();
-        if(!ok) toast('לא הפעל - נדרשת הרשאת הודעות');
+        if(!ok) toast(nativePushDenied()?'כדי להפעיל: הגדרות iOS ← תמיד ← הודעות':'לא הפעל - נדרשת הרשאת הודעות');
         renderSettings();
       };
       else if(tgp) tgp.onclick=async()=>{
@@ -14756,7 +14780,7 @@ function notifBootSync(){
   if(ln){
     return ln.checkPermissions().then(p=>{
       if(p.display==='granted') NOTIF_NATIVE_GRANTED=true;
-      else if(p.display==='prompt' && !localStorage.getItem('betel_notif_tried')){
+      else if(p.display==='prompt' && !localStorage.getItem('betel_notif_tried') && !nativePushPlugin()){
         localStorage.setItem('betel_notif_tried','1');
         return notifRequestPermission();
       }
@@ -14775,6 +14799,7 @@ notifBootSync().then(()=>{
   try{checkMusarNotification();}catch(e){}
   if(TAB==='settings'||TAB==='home') render();
 }).catch(()=>{});
+setTimeout(()=>{ nativePushBoot(); }, 1200);
 try{announceChokFeature();}catch(e){}
 try{announceBenishchaiFeature();}catch(e){}
 try{announceSelichotFeature();}catch(e){}
@@ -14969,7 +14994,7 @@ window.shareQR = shareQR;
      token, platform:'ios' so iOS and web tokens can be told apart. */
   window.__savePushToken = async function(token){
     try{
-      await setDoc(doc(db, 'pushTokens', token), { token, platform: 'ios', ua: navigator.userAgent, lang: navigator.language, updatedAt: Date.now() });
+      await setDoc(doc(db, 'pushTokens', token), { token, platform: 'ios', ua: String(navigator.userAgent).slice(0, 400), lang: String(navigator.language).slice(0, 30), updatedAt: Date.now() });
       if(localStorage.getItem('betel_push_pending') === token) localStorage.removeItem('betel_push_pending');
     }catch(e){ console.error('[betel push] token save failed (kept for retry):', e); }
   };
@@ -14985,7 +15010,7 @@ window.shareQR = shareQR;
       if(!messaging) messaging = getMessaging(firebaseApp);
       const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
       if(!token) return false;
-      try{ await setDoc(doc(db, 'pushTokens', token), { token, ua: navigator.userAgent, lang: navigator.language, updatedAt: Date.now() }); }catch(e){}
+      try{ await setDoc(doc(db, 'pushTokens', token), { token, platform: 'web', ua: String(navigator.userAgent).slice(0, 400), lang: String(navigator.language).slice(0, 30), updatedAt: Date.now() }); }catch(e){}
       onMessage(messaging, (payload) => {
         const n = payload.notification || {};
         try{ new Notification(n.title || 'תמיד', { body: n.body || '', icon: './icon-192.png' }); }catch(e){}
