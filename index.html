@@ -7753,6 +7753,10 @@ let BOOKLET_LIST=(()=>{ try{ const l=JSON.parse(localStorage.getItem('betel_book
 function bookletSave(){ BOOKLET_LIST=BOOKLET_LIST.filter(b=>!bookletExpired(b)); try{ if(BOOKLET_LIST.length) localStorage.setItem('betel_booklet',JSON.stringify(BOOKLET_LIST)); else localStorage.removeItem('betel_booklet'); }catch(e){} }
 function currentBooklet(){ return BOOKLET_LIST.find(bookletActive)||null; }
 let bookletLoadPromise=null, bookletShownId=null;
+/* The weekly booklet is published ONLY to GitHub Pages: vercel.json's ignoreCommand skips Vercel builds for data/booklet-only commits, so the Vercel-hosted
+   web app never gets current.json or the PDF (404 -> no tile on the web). Always read the booklet from Pages (CORS-open); local dev keeps same-origin. */
+const BOOKLET_BASE = (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname) ? '' : 'https://davidpit1565.github.io/Bet-El/');
+function bookletURL(path){ return BOOKLET_BASE + String(path).replace(/^\.?\//,''); }
 function bookletTitle(){
   const b=currentBooklet(), t=b&&b.title; if(!t) return '';
   if(typeof t==='string') return t;
@@ -7760,7 +7764,7 @@ function bookletTitle(){
 }
 function ensureBooklet(){
   if(bookletLoadPromise) return bookletLoadPromise;
-  bookletLoadPromise=fetch(dataURL('data/booklet/current.json')+'?t='+Date.now(),{cache:'no-store'})
+  bookletLoadPromise=fetch(bookletURL('data/booklet/current.json')+'?t='+Date.now(),{cache:'no-store'})
     .then(r=>{ if(r.status===404) return []; if(!r.ok) throw new Error('booklet '+r.status); return r.json(); })
     .then(j=>{
       const old=BOOKLET_LIST;
@@ -7783,7 +7787,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 function openBooklet(){
   const b=currentBooklet();
   if(!b){ bookletTick(); return; }
-  openExternal(new URL(dataURL(b.pdf), location.href).href);
+  openExternal(new URL(bookletURL(b.pdf), location.href).href);
 }
 function renderHome(){
   setTimeout(()=>ensureBooklet(),1200);
