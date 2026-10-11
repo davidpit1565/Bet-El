@@ -2614,6 +2614,34 @@ let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')
 if(!Array.isArray(S.hebrewNames) || (!S.hebrewNames.length && S.hebrewName)) S.hebrewNames = S.hebrewName ? [S.hebrewName] : [];
 delete S.hebrewName;
 function saveS(){ localStorage.setItem('betel_settings', JSON.stringify(S)); syncWidgetData(); }
+/* "New content" push. Web/PWA: Firebase JS + service worker (window.enablePush,
+   S.pushEnabled, unchanged). Native iOS: @capacitor-firebase/messaging (APNs via
+   FCM), its own S.nativePushOn that starts off - permission is only ever asked
+   from the Settings toggle, never at launch or in onboarding. The token is saved
+   to Firestore pushTokens/{token} with platform:'ios' by the Firebase module
+   (window.__savePushToken); when that module or the network isn't there yet
+   (offline) it waits in localStorage and is flushed once the module loads. */
+function nativePushPlugin(){ const C=window.Capacitor; return C&&C.isNativePlatform&&C.isNativePlatform()&&C.getPlatform()==='ios'&&C.Plugins&&C.Plugins.FirebaseMessaging||null; }
+function pushSupported(){ return !!nativePushPlugin() || !!(window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window); }
+function pushIsOn(){ return nativePushPlugin() ? !!S.nativePushOn : !!S.pushEnabled; }
+async function enableNativePush(){
+  const fm=nativePushPlugin(); if(!fm) return false;
+  try{
+    let perm=(await fm.checkPermissions()).receive;
+    if(perm!=='granted') perm=(await fm.requestPermissions()).receive;
+    if(perm!=='granted') return false;
+    const { token }=await fm.getToken();
+    if(!token) return false;
+    try{ localStorage.setItem('betel_push_pending', token); }catch(e){}
+    if(window.__savePushToken) window.__savePushToken(token);
+    return true;
+  }catch(e){ console.error('[betel push] native enable failed:', e); return false; }
+}
+async function disableNativePush(){
+  const fm=nativePushPlugin(); if(!fm) return;
+  try{ localStorage.removeItem('betel_push_pending'); }catch(e){}
+  try{ await fm.deleteToken(); }catch(e){}
+}
 /* ---------- i18n ---------- */
 const I18N={
 en:{'נסח עדות המזרח':'Edot HaMizrach nusach','התכן מתעדכן אוטומטית לפי':'content updates automatically for','יום היאהרצייט':'Yahrzeit','ראש חדש':'Rosh Chodesh','בראש חדש מתפללים שחרית כבכל יום ומוסיפים "יעלה ויבא", ואחר חזרת הש"ץ אומרים הלל בדלוג ובלא ברכה תחלה וסוף.':'On Rosh Chodesh, Shacharit is prayed as on any other day with the addition of "Yaaleh veYavo"; after the chazzan\'s repetition, Hallel is said in its abbreviated form, with no blessing before or after.','ברכות השחר':'Birkot Hashachar','סדר טלית ותפלין':'Seder Talit uTefilin','סדר עטיפת טלית':'Seder Atifat Talit','סדר הנחת תפלין':'Seder Hanachat Tefilin','פתח אליהו':'Petach Eliyahu','סדר תקון חצות':'Seder Tikun Chatzot','תקון רחל':'Tikun Rachel','תקון לאה':'Tikun Leah','לשם יחוד':'Leshem Yichud','קדיש':'Kaddish','בריך שמה':'Berich Shemei','לשם יחוד למוסף':'Leshem Yichud LeMusaf','חולצין תפלין':'Tefillin are removed here','כשיאמר "כי אראה שמיך מעשה אצבעותיך" יסתכל בלבנה, אבל כשיתחיל לברך לא יראה בה עוד כלל (בא"ח ש"ב ויקרא הכ"ג).':'When saying "Ki ereh shameicha maase etzbeotecha" one looks at the moon, but once beginning the blessing itself one no longer looks at it (Ben Ish Chai, Shana Bet, Vayikra 23).','לפני הברכה יאמר:':'Before the blessing, one says:','שחרית':'Shacharit','מנחה':'Mincha','ערבית':'Arvit','סדר ראש חדש':'Seder Rosh Chodesh','ספירת העמר':'Sefirat HaOmer','ברכת הלבנה':'Birkat HaLevana','תקון חצות':'Tikun Chatzot','השפה עדכנה':'Language updated','פרשיות':'parshiot','מתוך':'of','מזמור':'Psalm','פסוקים':'verses','סגור':'Close','כוון תפלה':'Prayer Direction','אפשרו חישן כוון':'Enable the compass sensor','אפשרו גישה למקום':'Enable location access','כוון קדש הקדשים':'Direction to the Holy of Holies','מראה לתפלין':'Tefillin Mirror','בדקו שהתפלין מונחים ישר':'Check that your tefillin are positioned straight','זמן תפלין':'Tefillin Time','לא ניתנה הרשאה למצלמה':'Camera access was not granted','המראה משמשת לבדיקה אישית בלבד ואינה מצלמת או שומרת דבר':'This mirror is for personal checking only - nothing is recorded or saved.','ההודעה נשלחה, תודה!':'Your message was sent, thank you!','הכוון החי דורש אשור חישן':'Live direction requires sensor permission','ק״מ מירושלים':'km from Jerusalem','הכוון מחשב לפי המקום וחישן הכוון של המכשיר. שמעו לב: יתכן שתהיה סטיה קלה במצפן הטלפון - השמוש באחריותכם בלבד.':'The direction is calculated from your location and the device\'s compass sensor. Note: your phone\'s compass may be slightly off - use at your own responsibility.','אתם מכוונים נכון!':'You\'re facing the right way!','הסתובבו':'Turn','שמאלה':'left','ימינה':'right','צפון':'North','צפוןמזרח':'Northeast','מזרח':'East','דרוםמזרח':'Southeast','דרום':'South','דרוםמערב':'Southwest','מערב':'West','צפוןמערב':'Northwest','משהו השתבש':'Something went wrong','אפשר לנסות לרענן את העמוד':'Try refreshing the page','רענן':'Refresh','גרסה חדשה זמינה':'New version available','עדכנו לגרסה האחרונה ב-App Store':'Update to the latest version on the App Store','עדכן עכשו':'Update now',
@@ -3588,6 +3616,7 @@ function shotNavigate(screen,scrollMode){
       const aim=()=>{ const p=document.querySelectorAll('.prayer-para')[2]; if(!p) return; let sc=p.parentElement; while(sc && sc!==document.body && !(sc.scrollHeight>sc.clientHeight+20 && /auto|scroll/.test(getComputedStyle(sc).overflowY))) sc=sc.parentElement; sc=(sc && sc!==document.body)?sc:document.scrollingElement; sc.scrollTop+=p.getBoundingClientRect().top-230; };
       setTimeout(aim,900); setTimeout(aim,1700); }
     else if(screen==='qr') shareQR();
+    else if(screen.startsWith('settings:')){ go('settings'); setTimeout(()=>{ SETTINGS_VIEW=screen.slice(9); renderSettings(); },300); }
     else { go(screen); afterReady(900); }
   }catch(e){}
 }
@@ -5346,7 +5375,7 @@ function renderChokPace(){
     </div>`;
     document.getElementById('paceDoneGo').onclick=()=>{
       localStorage.setItem('betel_chok_pace_v1','1');
-      if(CK_PACE_AFTER_LANG==='onboard' && S.pushEnabled && !SHOT_MODE && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
+      if(CK_PACE_AFTER_LANG==='onboard' && S.pushEnabled && !SHOT_MODE && !nativePushPlugin() && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window){
         (window.enablePush?window.enablePush():Promise.resolve(false)).then(ok=>{ S.pushEnabled=!!ok; saveS(); }).catch(()=>{ S.pushEnabled=false; saveS(); });
       }
       CK_PACE_STEP=0; go(CK_PACE_PENDING_TAB||'chokList');
@@ -13394,7 +13423,7 @@ function settingsCategoryBody(catId, notifPerm){
     <div class="set-group">
       <h3>תזכורת יומית</h3>
       <div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעת תזכורת לקריאה</div><div class="si-d">${S.notifEnabled&&notifPerm==='granted'?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.notifEnabled&&notifPerm==='granted'?'on':''}" id="tgNotif"></div></div>
-      ${window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעות על תכן חדש</div><div class="si-d">${S.pushEnabled?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${S.pushEnabled?'on':''}" id="tgPush"></div></div>`:''}
+      ${pushSupported()?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.bell}</span><div><div class="si-t">הודעות על תכן חדש</div><div class="si-d">${pushIsOn()?'מפעל':'לא הפעל'}</div></div></div><div class="toggle ${pushIsOn()?'on':''}" id="tgPush"></div></div>`:''}
     </div>`;
     case 'study': return `
     <div class="set-group">
@@ -13510,7 +13539,15 @@ function wireSettingsCategory(catId){
       break;
     case 'notifications': {
       const tgp=document.getElementById('tgPush');
-      if(tgp) tgp.onclick=async()=>{
+      if(tgp && nativePushPlugin()) tgp.onclick=async()=>{
+        if(S.nativePushOn){ S.nativePushOn=false; saveS(); renderSettings(); await disableNativePush(); return; }
+        tgp.classList.add('on');
+        const ok = await enableNativePush();
+        S.nativePushOn=ok; saveS();
+        if(!ok) toast('לא הפעל - נדרשת הרשאת הודעות');
+        renderSettings();
+      };
+      else if(tgp) tgp.onclick=async()=>{
         if(S.pushEnabled){ S.pushEnabled=false; saveS(); renderSettings(); try{ await window.disablePush(); }catch(e){} return; }
         tgp.classList.add('on'); // optimistic - permission prompt can take a moment
         const ok = await (window.enablePush?window.enablePush():Promise.resolve(false));
@@ -14187,7 +14224,7 @@ function nativeSettingsCategorySpec(catId){
     case 'notifications':
       sections=[{header:ckChrome('תזכורת יומית'), rows:[
         nsRow('notif','toggle',ckChrome('הודעת תזכורת לקריאה'), (S.notifEnabled&&notifPerm==='granted')?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!(S.notifEnabled&&notifPerm==='granted')}),
-        ...((window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window)?[nsRow('push','toggle',ckChrome('הודעות על תכן חדש'), S.pushEnabled?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:!!S.pushEnabled})]:[]),
+        ...(pushSupported()?[nsRow('push','toggle',ckChrome('הודעות על תכן חדש'), pushIsOn()?ckChrome('מפעל'):ckChrome('לא הפעל'), {value:pushIsOn()})]:[]),
       ]}];
       break;
     case 'study':
@@ -14928,6 +14965,15 @@ window.shareQR = shareQR;
      work. window.enablePush/disablePush are called from the Settings
      toggle in the main script (a classic script can't import this
      module's bindings, so they're exposed on window instead). */
+  /* Native iOS token (see enableNativePush in the main script): one doc per
+     token, platform:'ios' so iOS and web tokens can be told apart. */
+  window.__savePushToken = async function(token){
+    try{
+      await setDoc(doc(db, 'pushTokens', token), { token, platform: 'ios', ua: navigator.userAgent, lang: navigator.language, updatedAt: Date.now() });
+      if(localStorage.getItem('betel_push_pending') === token) localStorage.removeItem('betel_push_pending');
+    }catch(e){ console.error('[betel push] token save failed (kept for retry):', e); }
+  };
+  try{ const pending = localStorage.getItem('betel_push_pending'); if(pending) window.__savePushToken(pending); }catch(e){}
   const VAPID_KEY = 'BN48abUdvf3DMSrY2d1P54Pea0BEpSySb90FRaxMclSaT26MqB2rhOpwMbvbu6M9bYuR94jWLCIO1EqKAe26X1g';
   let messaging = null;
   window.enablePush = async function(){

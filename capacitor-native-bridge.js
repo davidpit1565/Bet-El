@@ -41,6 +41,9 @@ var capacitorNativeBridge = (function (core) {
         // note above): index.html's launch screen calls SplashScreen.hide() as
         // soon as it has painted, so the static native image doesn't linger.
         if (!core.Capacitor.Plugins.SplashScreen) core.registerPlugin('SplashScreen');
+        // @capacitor-firebase/messaging (native APNs/FCM push) ships an ES module
+        // only, so it gets the same treatment.
+        if (!core.Capacitor.Plugins.FirebaseMessaging) core.registerPlugin('FirebaseMessaging');
     }
 
     return core;

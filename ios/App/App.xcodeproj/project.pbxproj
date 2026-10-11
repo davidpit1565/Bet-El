@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B7E1A0C2D3F4051627384951 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B7E1A0C2D3F4051627384950 /* GoogleService-Info.plist */; };
 		A1B2C3D4E5F60718293A4B67 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B66 /* PrivacyInfo.xcprivacy */; };
 		A1B2C3D4E5F60718293A4B69 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B68 /* PrivacyInfo.xcprivacy */; };
 		2F72859958551B1E3E967AA2 /* BetElWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF731F19971C018FA05D9FE7 /* BetElWidget.swift */; };
@@ -85,6 +86,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B7E1A0C2D3F4051627384950 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		B7E1A0C2D3F4051627384952 /* AppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppRelease.entitlements; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B66 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B68 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		09C224FC89218B90CFC8E4C0 /* Solar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Solar.swift; sourceTree = "<group>"; };
@@ -194,6 +197,8 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				682EEB13158E5B65AFF23FB7 /* BetElWidgetBridge.swift */,
 				DE278307C742BE5E4186087A /* App.entitlements */,
+				B7E1A0C2D3F4051627384952 /* AppRelease.entitlements */,
+				B7E1A0C2D3F4051627384950 /* GoogleService-Info.plist */,
 				8AA98F6EE9BABA518238B1D5 /* MainViewController.swift */,
 				46751A00A0A858BF4DE9FC7D /* NativeTabBarBridge.swift */,
 				2A3B4C5D6E7F8091A2B3C4D5 /* NativeToolsFabView.swift */,
@@ -353,6 +358,7 @@
 			files = (
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				A1B2C3D4E5F60718293A4B67 /* PrivacyInfo.xcprivacy in Resources */,
+				B7E1A0C2D3F4051627384951 /* GoogleService-Info.plist in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
@@ -587,7 +593,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/AppRelease.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 43DB56398H;
