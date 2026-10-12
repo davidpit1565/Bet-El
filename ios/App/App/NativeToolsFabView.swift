@@ -23,7 +23,10 @@ final class NativeToolsFabView: UIView {
 
     var onAction: ((Action) -> Void)?
 
-    private let fabSize: CGFloat = 38
+    private var fabSize: CGFloat { A11y.scaled(38) }
+    private var fabSizeConstraints: [NSLayoutConstraint] = []
+    private var fabToggle: UIButton?
+    private var fabGlass: UIVisualEffectView?
     private let goldColor = UIColor.betelGold
 
     private var panelContainer: UIView?
@@ -72,9 +75,9 @@ final class NativeToolsFabView: UIView {
         let glass = glassView(cornerRadius: fabSize / 2)
         glass.translatesAutoresizingMaskIntoConstraints = false
         addSubview(glass)
-        NSLayoutConstraint.activate([
-            glass.widthAnchor.constraint(equalToConstant: fabSize),
-            glass.heightAnchor.constraint(equalToConstant: fabSize),
+        fabGlass = glass as? UIVisualEffectView
+        fabSizeConstraints = [glass.widthAnchor.constraint(equalToConstant: fabSize), glass.heightAnchor.constraint(equalToConstant: fabSize)]
+        NSLayoutConstraint.activate(fabSizeConstraints + [
             glass.topAnchor.constraint(equalTo: topAnchor),
             glass.leadingAnchor.constraint(equalTo: leadingAnchor),
             glass.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -85,7 +88,10 @@ final class NativeToolsFabView: UIView {
         fabButton.translatesAutoresizingMaskIntoConstraints = false
         fabButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
         fabButton.tintColor = goldColor
-        fabButton.accessibilityLabel = "Reading tools"
+        fabButton.accessibilityLabel = A11y.t("tools")
+        fabButton.accessibilityTraits = .button
+        fabButton.accessibilityValue = nil
+        fabToggle = fabButton
         fabButton.addTarget(self, action: #selector(toggleExpanded), for: .touchUpInside)
 
         let contentView: UIView = (glass as? UIVisualEffectView)?.contentView ?? glass
@@ -96,6 +102,19 @@ final class NativeToolsFabView: UIView {
             fabButton.widthAnchor.constraint(equalTo: contentView.widthAnchor),
             fabButton.heightAnchor.constraint(equalTo: contentView.heightAnchor),
         ])
+    }
+
+    /// Language pushed from JS: re-read labels on the always-present toggle (panel buttons are built on expand).
+    func refreshA11y() {
+        fabToggle?.accessibilityLabel = A11y.t("tools")
+        if isExpanded { collapsePanel() }
+    }
+
+    /// Dynamic Type changed: resize the toggle and drop an open panel (it is rebuilt at the new size on next expand).
+    func rebuildForContentSize() {
+        fabSizeConstraints.forEach { $0.constant = fabSize }
+        fabGlass?.layer.cornerRadius = fabSize / 2
+        if isExpanded { collapsePanel() }
     }
 
     @objc private func toggleExpanded() {
@@ -109,8 +128,9 @@ final class NativeToolsFabView: UIView {
         b.setImage(UIImage(systemName: systemName, withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)), for: .normal)
         b.tintColor = iconColor
         b.accessibilityLabel = label
-        b.widthAnchor.constraint(equalToConstant: 36).isActive = true
-        b.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        b.accessibilityTraits = .button
+        b.widthAnchor.constraint(equalToConstant: A11y.scaled(36)).isActive = true
+        b.heightAnchor.constraint(equalToConstant: A11y.scaled(36)).isActive = true
         b.addTarget(self, action: action, for: .touchUpInside)
         return b
     }
@@ -122,8 +142,8 @@ final class NativeToolsFabView: UIView {
         // Explicit width (rather than letting the stack size the panel
         // intrinsically) to avoid any Auto Layout ambiguity between the
         // panel's own constraints and its content's.
-        let panelWidth: CGFloat = showAutoscroll ? 240 : 200
-        let panelHeight: CGFloat = 46
+        let panelWidth: CGFloat = A11y.scaled(showAutoscroll ? 240 : 200)
+        let panelHeight: CGFloat = A11y.scaled(46)
 
         let panel = glassView(cornerRadius: panelHeight / 2)
         panel.translatesAutoresizingMaskIntoConstraints = false
@@ -143,7 +163,7 @@ final class NativeToolsFabView: UIView {
         stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let minusBtn = iconButton(systemName: "minus", action: #selector(tapMinus), label: "Decrease text size")
+        let minusBtn = iconButton(systemName: "minus", action: #selector(tapMinus), label: A11y.t("smaller"))
 
         let fsLabel = UILabel()
         fsLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -153,18 +173,23 @@ final class NativeToolsFabView: UIView {
         fsLabel.minimumScaleFactor = 0.7
         fsLabel.textColor = .label
         fsLabel.textAlignment = .center
-        fsLabel.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        fsLabel.widthAnchor.constraint(equalToConstant: A11y.scaled(30)).isActive = true
+        fsLabel.isAccessibilityElement = true
+        fsLabel.accessibilityLabel = A11y.t("fontScale")
+        fsLabel.accessibilityValue = "\(fontScalePercent)%"
+        fsLabel.accessibilityTraits = .staticText
         fontLabel = fsLabel
 
-        let plusBtn = iconButton(systemName: "plus", action: #selector(tapPlus), label: "Increase text size")
+        let plusBtn = iconButton(systemName: "plus", action: #selector(tapPlus), label: A11y.t("larger"))
 
         let sep = UIView()
         sep.translatesAutoresizingMaskIntoConstraints = false
         sep.backgroundColor = UIColor(white: 0.5, alpha: 0.3)
         sep.widthAnchor.constraint(equalToConstant: 1).isActive = true
-        sep.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        sep.heightAnchor.constraint(equalToConstant: A11y.scaled(24)).isActive = true
+        sep.isAccessibilityElement = false
 
-        let themeBtn = iconButton(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill", action: #selector(tapTheme), label: "Toggle dark mode")
+        let themeBtn = iconButton(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill", action: #selector(tapTheme), label: A11y.t("theme"))
         themeButton = themeBtn
 
         stack.addArrangedSubview(minusBtn)
@@ -174,16 +199,20 @@ final class NativeToolsFabView: UIView {
         stack.addArrangedSubview(themeBtn)
 
         if showAutoscroll {
-            let asBtn = iconButton(systemName: isAutoscrollActive ? "pause.fill" : "play.fill", action: #selector(tapAutoscroll), label: isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll")
+            let asBtn = iconButton(systemName: isAutoscrollActive ? "pause.fill" : "play.fill", action: #selector(tapAutoscroll), label: isAutoscrollActive ? A11y.t("pause") : A11y.t("play"))
             autoscrollButton = asBtn
             stack.addArrangedSubview(asBtn)
         }
 
-        let homeBtn = iconButton(systemName: "house.fill", action: #selector(tapHome), label: "Home")
+        let homeBtn = iconButton(systemName: "house.fill", action: #selector(tapHome), label: A11y.t("home"))
         stack.addArrangedSubview(homeBtn)
 
         let contentView: UIView = (panel as? UIVisualEffectView)?.contentView ?? panel
         contentView.addSubview(stack)
+        // VoiceOver follows the APP's reading direction: right-to-left in Hebrew even though the panel keeps its drawn order.
+        let ordered = stack.arrangedSubviews.filter { $0 !== sep }
+        stack.accessibilityElements = isRTL ? Array(ordered.reversed()) : ordered
+        fabToggle?.accessibilityTraits = [.button, .selected]
         NSLayoutConstraint.activate([
             stack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             stack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -198,10 +227,12 @@ final class NativeToolsFabView: UIView {
                 panel.transform = .identity
             }
         )
+        UIAccessibility.post(notification: .layoutChanged, argument: stack.accessibilityElements?.first)
     }
 
     private func collapsePanel() {
         isExpanded = false
+        fabToggle?.accessibilityTraits = .button
         guard let panel = panelContainer else { return }
         panelContainer = nil
         fontLabel = nil
@@ -255,9 +286,10 @@ final class NativeToolsFabView: UIView {
         overrideUserInterfaceStyle = isDarkTheme ? .dark : .light
         panelContainer?.overrideUserInterfaceStyle = overrideUserInterfaceStyle
         fontLabel?.text = "\(fontScalePercent)"
+        fontLabel?.accessibilityValue = "\(fontScalePercent)%"
         themeButton?.setImage(UIImage(systemName: isDarkTheme ? "sun.max.fill" : "moon.fill"), for: .normal)
         autoscrollButton?.setImage(UIImage(systemName: isAutoscrollActive ? "pause.fill" : "play.fill"), for: .normal)
-        autoscrollButton?.accessibilityLabel = isAutoscrollActive ? "Pause autoscroll" : "Start autoscroll"
+        autoscrollButton?.accessibilityLabel = isAutoscrollActive ? A11y.t("pause") : A11y.t("play")
         if #available(iOS 17.0, *) {
             if themeChanged { themeButton?.imageView?.addSymbolEffect(.bounce, options: .nonRepeating) }
             if autoscrollChanged { autoscrollButton?.imageView?.addSymbolEffect(.bounce, options: .nonRepeating) }
