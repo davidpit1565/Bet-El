@@ -6839,29 +6839,43 @@ function bkRavHtml(shabbat){
   </div>`;
 }
 
-/* Rav Mordechai Sharabi zt"l's own full memorial page - the owner asked for
-   a page the same size/weight as the living Rav's honour page above, but a
-   לעילוי נשמת (memorial) page rather than a הצלחה one, placed right after
-   it and before the combined dedication page. His yahrzeit (כ' חשון) falls
-   on Shabbat Vayera itself (31.10.2026, same date as Menashe's niftar entry
-   above) - gated to that one date the same way, via bkNiftarRavHtml()
-   returning '' on every other week instead of a blank page. Reuses
-   bkRavHtml's own markup/ornament (ornRavSvg, .bk-rv-* classes) since the
-   layout need (header band, boxed blessing, body paragraphs, closing
-   verse) is identical - only the wording and the name/title line differ. */
-const BK_NIFTAR_RAV_SHABBAT=new Date(2026,9,31); // Shabbat Vayera only
-const BK_NIFTAR_RAV={
-  hdr:'לְעִלּוּי נִשְׁמַת', lead:'זֵכֶר צַדִּיק לִבְרָכָה',
-  to:'לְזִכְרוֹ הַקָּדוֹשׁ וְהַטָּהוֹר שֶׁל',
-  name:'הַגָּאוֹן הַמְּקֻבָּל רַבִּי מָרְדְּכַי שַׁרְעָבִּי', title:'זצ״ל',
-  role:'רֹאשׁ יְשִׁיבַת ״נַהַר שָׁלוֹם״, מִגְּדוֹלֵי הַמְּקֻבָּלִים בִּירוּשָׁלַיִם בְּדוֹרוֹ, אֲשֶׁר הִקְדִּישׁ אֶת חַיָּיו לַעֲבוֹדַת הַבּוֹרֵא, לְהַפָצַת תּוֹרַת הַנִּסְתָּר וּלְהַעֲמָדַת תַּלְמִידִים הַרְבֵּה.',
-  body:['נִלְקַח לְבֵית עוֹלָמוֹ בְּכ׳ בְּחֶשְׁוָן, וְהִנִּיחַ אַחֲרָיו אוֹר גָּדוֹל שֶׁל תּוֹרָה וְיִרְאַת שָׁמַיִם, הַמֵּאִיר עַד הַיּוֹם הַזֶּה בְּבֵית מִדְרָשׁוֹ וּבְתַלְמִידָיו וְתַלְמִידֵי תַלְמִידָיו.',
-    'יְהִי רָצוֹן שֶׁזְּכוּתוֹ הַגְּדוֹלָה תָּגֵן עָלֵינוּ וְעַל כָּל בֵּית יִשְׂרָאֵל, וְתִתְעַלֶּה נִשְׁמָתוֹ הַטְּהוֹרָה מַעְלָה מַעְלָה, בְּגַן עֵדֶן, בִּמְחִצַּת הַצַּדִּיקִים וְהַחֲסִידִים.'],
-  verse:'תְּהִי נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים', src:'עַל פִּי נוֹסַח הַזְכָּרַת נְשָׁמוֹת'
-};
-function bkNiftarRavHtml(shabbat){
-  if(!shabbat || shabbat.toDateString()!==BK_NIFTAR_RAV_SHABBAT.toDateString()) return '';
-  const t=bkUI(), R=BK_NIFTAR_RAV;
+/* Full memorial (לעילוי נשמת) pages for great Rabbis, one per recurring
+   Hebrew-calendar yahrzeit - the owner's standing request: each entry is
+   gated by HEBREW day+month (not a one-time Gregorian date), so it recurs
+   automatically every year on whichever week that Hebrew date falls in,
+   and more entries get added here over the course of the year as the
+   owner names more Rabbis. Reuses bkRavHtml's own markup/ornament
+   (ornRavSvg, .bk-rv-* classes) since the layout need (header band, boxed
+   blessing, body paragraphs, closing verse) is identical to the living
+   Rav's honour page - only the wording and the name/title line differ.
+   Placed right after that honour page and before the combined dedication
+   page (see bkBuildPrint). bkNiftarRavFor(first) checks all 7 days of the
+   printed week (first..first+6) against every entry's {hDay,hMonth} and
+   returns the first match, or null on an ordinary week (no page added -
+   never a blank page). Add a future Rabbi by appending another entry with
+   its own hDay/hMonth (HMONTHS.<NAME>) and content fields below. */
+const BK_NIFTAR_RAV_LIST=[
+  { hDay:20, hMonth:HMONTHS.CHESHVAN, // Rav Mordechai Sharabi zt"l's yahrzeit (כ' חשון)
+    hdr:'לְעִלּוּי נִשְׁמַת', lead:'זֵכֶר צַדִּיק לִבְרָכָה',
+    to:'לְזִכְרוֹ הַקָּדוֹשׁ וְהַטָּהוֹר שֶׁל',
+    name:'הַגָּאוֹן הַמְּקֻבָּל רַבִּי מָרְדְּכַי שַׁרְעָבִּי', title:'זצ״ל',
+    role:'רֹאשׁ יְשִׁיבַת ״נַהַר שָׁלוֹם״, מִגְּדוֹלֵי הַמְּקֻבָּלִים בִּירוּשָׁלַיִם בְּדוֹרוֹ, אֲשֶׁר הִקְדִּישׁ אֶת חַיָּיו לַעֲבוֹדַת הַבּוֹרֵא, לְהַפָצַת תּוֹרַת הַנִּסְתָּר וּלְהַעֲמָדַת תַּלְמִידִים הַרְבֵּה.',
+    body:['נִלְקַח לְבֵית עוֹלָמוֹ בְּכ׳ בְּחֶשְׁוָן, וְהִנִּיחַ אַחֲרָיו אוֹר גָּדוֹל שֶׁל תּוֹרָה וְיִרְאַת שָׁמַיִם, הַמֵּאִיר עַד הַיּוֹם הַזֶּה בְּבֵית מִדְרָשׁוֹ וּבְתַלְמִידָיו וְתַלְמִידֵי תַלְמִידָיו.',
+      'יְהִי רָצוֹן שֶׁזְּכוּתוֹ הַגְּדוֹלָה תָּגֵן עָלֵינוּ וְעַל כָּל בֵּית יִשְׂרָאֵל, וְתִתְעַלֶּה נִשְׁמָתוֹ הַטְּהוֹרָה מַעְלָה מַעְלָה, בְּגַן עֵדֶן, בִּמְחִצַּת הַצַּדִּיקִים וְהַחֲסִידִים.'],
+    verse:'תְּהִי נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים', src:'עַל פִּי נוֹסַח הַזְכָּרַת נְשָׁמוֹת'
+  }
+];
+function bkNiftarRavFor(first){
+  for(let i=0;i<7;i++){
+    const hd=new HDate(addDays(first,i));
+    const hit=BK_NIFTAR_RAV_LIST.find(r=>r.hDay===hd.getDate()&&r.hMonth===hd.getMonth());
+    if(hit) return hit;
+  }
+  return null;
+}
+function bkNiftarRavHtml(first){
+  const R=bkNiftarRavFor(first); if(!R) return '';
+  const t=bkUI();
   return `<div class="bk-page bk-matter bk-ornp bk-rav bk-niftarrav">${ornRavSvg()}
     <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
     <div class="bk-ol bk-rv-hdr">${R.hdr}</div>
@@ -7134,7 +7148,7 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(last)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
+  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */
