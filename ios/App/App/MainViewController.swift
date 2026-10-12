@@ -52,8 +52,8 @@ class MainViewController: CAPBridgeViewController {
         ("calendar", "calendar"),
         ("prayers", "books.vertical.fill"),
         ("settings", "gearshape.fill"),
-        // The Search tab (App Store style): its own screen in JS (TAB 'search'), and while it is open the bar
-        // collapses into the previous tab's circle + a glass search field - see showNativeSearchBar(focus:).
+        // The Search tab: its own screen in JS (TAB 'search'), with a native search field docked under the
+        // header while it is open - see showNativeSearchBar(focus:).
         ("search", "magnifyingglass"),
     ]
 
@@ -402,6 +402,7 @@ class MainViewController: CAPBridgeViewController {
 
     func configureTopBar(title: String, hasBack: Bool, isRTL: Bool, isDark: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
         topBar.setTheme(isDark: isDark)
+        setSearchDockTheme(isDark: isDark)
         topBar.configure(title: title, hasBack: hasBack, isRTL: isRTL, homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel, actions: actions)
         // Both relay to one fixed JS entry point each rather than this
         // method trying to encode what "back" or a given action id means -
@@ -449,7 +450,7 @@ class MainViewController: CAPBridgeViewController {
     /// Slides the header row up (the status-bar strip stays so the clock keeps its backdrop) and gives the freed
     /// height to the web content, keeping the text where it is on screen by shifting the scroll offset the same amount.
     func setTopBarCollapsed(_ collapsed: Bool) {
-        guard !topBar.isHidden, collapsed != topBarCollapsed else { return }
+        guard !topBar.isHidden, !isSearchMode, collapsed != topBarCollapsed else { return }
         topBarCollapsed = collapsed
         let d = topBar.contentHeight
         UIView.animate(withDuration: 0.28, delay: 0, options: [.curveEaseInOut, .beginFromCurrentState, .allowUserInteraction]) {
@@ -653,6 +654,7 @@ class MainViewController: CAPBridgeViewController {
             home = NativeHomeView()
             home.translatesAutoresizingMaskIntoConstraints = false
             home.bottomInset = { [weak self] in self?.nativeListBottomInset() ?? 96 }
+            home.topInset = { [weak self] in self?.searchDockInset() ?? 0 }
             home.js = { [weak self] js in self?.webView?.evaluateJavaScript(js, completionHandler: nil) }
             home.onCollapseChange = { [weak self] hide in self?.setTopBarCollapsed(hide) }
             view.insertSubview(home, belowSubview: tabBar)
@@ -722,32 +724,29 @@ class MainViewController: CAPBridgeViewController {
         nativeCalendarView?.isHidden = true
     }
 
-    // MARK: - Search tab (App Store style)
+    // MARK: - Search tab
     // A web <input> cannot be focused from native code (WKWebView only raises the keyboard for a touch inside the
-    // page), so the Search tab uses a genuine UISearchBar and forwards what is typed to the page (NativeSearchHost).
-    // Like the App Store: selecting Search keeps the Search tab selected and the full tab bar stays in place (by the
-    // user's request - the bar never disappears); a glass search field sits right above it, riding up above the
-    // keyboard while typing. The keyboard opens only when the field is tapped or the Search tab is tapped again,
-    // never by itself - same as Apple's apps.
+    // page), so the Search tab uses a genuine UISearchBar and forwards what is typed to the page
+    // (window.nativeSetSearchQuery, debounced). Like Halacha Yomit: the bar is docked at the top, right under the
+    // header, on the Search tab only; the full tab bar stays at the bottom with Search selected. `.minimal` lets
+    // iOS 26 draw the field in Liquid Glass by itself. The dock has the header's own opaque background and the page's
+    // --native-header-h includes its height, so the suggestions/results always start below it and never slide
+    // under a see-through field. The keyboard opens only when the field is tapped or the Search tab is tapped again.
     let nativeSearchBar = UISearchBar()
-    private let searchField = UIVisualEffectView(effect: nil)
+    private let searchDock = UIView()
     private var searchDebounce: DispatchWorkItem?
     private(set) var isSearchMode = false
-    private let searchFieldHeight: CGFloat = 52
+    private var searchCancelTitle = ""
+    /// Same width as the page's own column (#app max-width 640 minus its 16pt side padding), so on iPad the field
+    /// lines up with the rows below it instead of stretching across the whole screen.
+    private let searchMaxWidth: CGFloat = 624
 
     private func setupSearchBar() {
-        if #available(iOS 26.0, *) { searchField.effect = UIGlassEffect() }
-        else { searchField.effect = UIBlurEffect(style: .systemMaterial) }
-        searchField.layer.cornerRadius = searchFieldHeight / 2
-        searchField.layer.cornerCurve = .continuous
-        searchField.clipsToBounds = true
-        searchField.isHidden = true
-        searchField.alpha = 0
-        searchField.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(searchField)
+        searchDock.isHidden = true
+        searchDock.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchDock)
 
         nativeSearchBar.searchBarStyle = .minimal
-        nativeSearchBar.backgroundImage = UIImage()
         nativeSearchBar.showsCancelButton = false
         nativeSearchBar.autocapitalizationType = .none
         nativeSearchBar.autocorrectionType = .no
@@ -755,58 +754,65 @@ class MainViewController: CAPBridgeViewController {
         nativeSearchBar.delegate = self
         nativeSearchBar.tintColor = MainViewController.tabTint
         nativeSearchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchField.contentView.addSubview(nativeSearchBar)
+        searchDock.addSubview(nativeSearchBar)
 
         let guide = view.safeAreaLayoutGuide
-        // Right above the tab bar; while typing, above the keyboard instead (whichever is higher).
-        let aboveBar = searchField.bottomAnchor.constraint(equalTo: tabBar.topAnchor, constant: -8)
-        aboveBar.priority = .defaultHigh
+        let fullWidth = nativeSearchBar.widthAnchor.constraint(equalTo: guide.widthAnchor, constant: -8)
+        fullWidth.priority = .defaultHigh
         NSLayoutConstraint.activate([
-            searchField.heightAnchor.constraint(equalToConstant: searchFieldHeight),
-            searchField.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 16),
-            searchField.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -16),
-            aboveBar,
-            searchField.bottomAnchor.constraint(lessThanOrEqualTo: tabBar.topAnchor, constant: -8),
-            searchField.bottomAnchor.constraint(lessThanOrEqualTo: view.keyboardLayoutGuide.topAnchor, constant: -8),
-            nativeSearchBar.leadingAnchor.constraint(equalTo: searchField.contentView.leadingAnchor, constant: 4),
-            nativeSearchBar.trailingAnchor.constraint(equalTo: searchField.contentView.trailingAnchor, constant: -4),
-            nativeSearchBar.centerYAnchor.constraint(equalTo: searchField.contentView.centerYAnchor),
+            searchDock.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+            searchDock.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchDock.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            nativeSearchBar.topAnchor.constraint(equalTo: searchDock.topAnchor),
+            nativeSearchBar.bottomAnchor.constraint(equalTo: searchDock.bottomAnchor, constant: -4),
+            nativeSearchBar.centerXAnchor.constraint(equalTo: guide.centerXAnchor),
+            nativeSearchBar.widthAnchor.constraint(lessThanOrEqualToConstant: searchMaxWidth),
+            fullWidth,
         ])
         layoutSearchField()
-        // The keyboard moves the field (keyboardLayoutGuide); report the new reserved space once it settles too.
-        for name in [UIResponder.keyboardDidShowNotification, UIResponder.keyboardDidHideNotification] {
-            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                guard let self, self.isSearchMode else { return }
-                self.view.layoutIfNeeded()
-                self.reportHeightToWebView()
-            }
-        }
     }
 
+    /// The app's language (S.lang), not the device locale, decides the field's direction.
     private func layoutSearchField() {
-        nativeSearchBar.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
+        let attr: UISemanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
+        nativeSearchBar.semanticContentAttribute = attr
+        nativeSearchBar.searchTextField.semanticContentAttribute = attr
         nativeSearchBar.searchTextField.textAlignment = isRTL ? .right : .left
     }
 
-    /// Enters the Search tab's state (idempotent): Search selected, full tab bar kept, field shown above it.
-    /// `focus` raises the keyboard.
+    /// Placeholder and Cancel title in the app's language (from JS, which owns the translations).
+    func setSearchLabels(placeholder: String, cancel: String) {
+        nativeSearchBar.placeholder = placeholder
+        searchCancelTitle = cancel
+        applySearchCancelTitle()
+    }
+
+    /// UISearchBar only exposes its Cancel title through the bar-button appearance proxy; otherwise it would follow
+    /// the device language.
+    private func applySearchCancelTitle() {
+        guard !searchCancelTitle.isEmpty else { return }
+        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).title = searchCancelTitle
+    }
+
+    /// Same opaque color as the header above it (NativeTopBarView.setTheme), so the two read as one bar.
+    func setSearchDockTheme(isDark: Bool) {
+        searchDock.backgroundColor = NativeTopBarView.background(isDark: isDark)
+        searchDock.overrideUserInterfaceStyle = isDark ? .dark : .light
+    }
+
+    /// Enters the Search tab's state (idempotent): Search selected, full tab bar kept, field docked under the
+    /// header. `focus` raises the keyboard.
     func showNativeSearchBar(focus: Bool) {
         if !isSearchMode {
             setHidden(false)          // a minimized bar springs back - the search screen always shows the full bar
             isSearchMode = true       // (after setHidden: it ignores calls while searching)
+            resetTopBarCollapse()     // the header stays put while the field is docked under it
             layoutSearchField()
-            searchField.isHidden = false
-            view.bringSubviewToFront(searchField)
-            view.bringSubviewToFront(tabBar)
-            searchField.transform = CGAffineTransform(translationX: 0, y: 12)
-            UIView.animate(
-                withDuration: ReduceMotion.duration(0.32), delay: 0,
-                usingSpringWithDamping: 0.85, initialSpringVelocity: 0.3, options: [.allowUserInteraction, .beginFromCurrentState],
-                animations: {
-                    self.searchField.alpha = 1
-                    self.searchField.transform = .identity
-                })
+            searchDock.isHidden = false
+            view.bringSubviewToFront(searchDock)
+            view.layoutIfNeeded()
             reportHeightToWebView()
+            nativeHomeView?.setNeedsLayout()
         }
         setActive(tab: "search")
         if focus { nativeSearchBar.becomeFirstResponder() }
@@ -817,20 +823,29 @@ class MainViewController: CAPBridgeViewController {
     func hideNativeSearchBar(clear: Bool) {
         if clear {
             nativeSearchBar.text = ""
-            webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery('')", completionHandler: nil)
+            webView?.evaluateJavaScript("window.nativeSetSearchQuery && window.nativeSetSearchQuery('')", completionHandler: nil)
         }
         guard isSearchMode else { return }
         isSearchMode = false
         nativeSearchBar.resignFirstResponder()
-        UIView.animate(
-            withDuration: ReduceMotion.duration(0.22), delay: 0, options: [.allowUserInteraction, .beginFromCurrentState],
-            animations: { self.searchField.alpha = 0 },
-            completion: { _ in if !self.isSearchMode { self.searchField.isHidden = true } })
+        searchDock.isHidden = true
         reportHeightToWebView()
+        nativeHomeView?.setNeedsLayout()
+    }
+
+    /// How far the docked search bar reaches below the header - the native lists start their rows under it.
+    func searchDockInset() -> CGFloat {
+        guard isSearchMode, !searchDock.isHidden else { return 0 }
+        return searchDock.frame.height
     }
 
     func setNativeSearchText(_ text: String) {
         nativeSearchBar.text = text
+    }
+
+    /// From JS when the results are dragged: the keyboard steps aside so the rows under it can be reached.
+    func dismissSearchKeyboard() {
+        nativeSearchBar.resignFirstResponder()
     }
 
     // MARK: - Native pull-to-refresh (UIKit gesture + glass spinner)
@@ -1088,28 +1103,18 @@ class MainViewController: CAPBridgeViewController {
         webView?.evaluateJavaScript(js, completionHandler: nil)
     }
 
-    /// Space the search field takes at the bottom of the screen: it sits above the tab bar, or above the keyboard
-    /// while typing - everything from its top edge down to the bottom of the screen, so a list always ends above it
-    /// and its last row stays reachable. 0 outside search mode.
-    /// (center/bounds rather than frame: the field's appear animation briefly sets a transform.)
-    private func searchReservedHeight() -> CGFloat {
-        guard isSearchMode else { return 0 }
-        let barHeight = tabBar.isHidden ? 0 : tabBar.frame.height
-        let fieldTop = searchField.center.y - searchField.bounds.height / 2
-        return max(barHeight + searchFieldHeight + 8, view.bounds.height - fieldTop + 8)
-    }
-
     /// Bottom content inset for the native list screens (home, library, calendar).
     private func nativeListBottomInset() -> CGFloat {
-        max(view.safeAreaInsets.bottom + 96, searchReservedHeight() + 12)
+        view.safeAreaInsets.bottom + 96
     }
 
     private func reportHeightToWebView() {
-        var navHeight = tabBar.isHidden ? 0 : tabBar.frame.height
-        if isSearchMode { navHeight = searchReservedHeight() }
+        let navHeight = tabBar.isHidden ? 0 : tabBar.frame.height
         nativeHomeView?.setNeedsLayout()
         nativeLibraryView?.setNeedsLayout()
-        let headerHeight = topBar.isHidden ? 0 : topBar.frame.height - (topBarCollapsed ? topBar.contentHeight : 0)
+        var headerHeight = topBar.isHidden ? 0 : topBar.frame.height - (topBarCollapsed ? topBar.contentHeight : 0)
+        // the docked search field is part of the header: the page starts below it
+        if isSearchMode && !searchDock.isHidden { headerHeight = searchDock.frame.maxY }
         let js = """
         document.documentElement.style.setProperty('--native-nav-h','\(navHeight)px');
         document.documentElement.style.setProperty('--native-header-h','\(headerHeight)px');
@@ -1137,7 +1142,6 @@ class MainViewController: CAPBridgeViewController {
         tabBar.semanticContentAttribute = .forceLeftToRight
         tabBar.items = isRTL ? ordered.reversed() : ordered
         self.isRTL = isRTL
-        nativeSearchBar.placeholder = byId["search"]
         layoutToolsFab()
         layoutMiniTabButton()
         layoutSearchField()
@@ -1370,7 +1374,7 @@ extension MainViewController: UISearchBarDelegate {
             guard let data = try? JSONSerialization.data(withJSONObject: [searchText]),
                   let arr = String(data: data, encoding: .utf8) else { return }
             // arr is a JSON array literal like ["text"]; take its first element
-            self?.webView?.evaluateJavaScript("window.NativeSearchHost && window.NativeSearchHost.setQuery(\(arr)[0])", completionHandler: nil)
+            self?.webView?.evaluateJavaScript("window.nativeSetSearchQuery && window.nativeSetSearchQuery(\(arr)[0])", completionHandler: nil)
         }
         searchDebounce = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18, execute: work)
@@ -1380,7 +1384,10 @@ extension MainViewController: UISearchBarDelegate {
 
     // Cancel (the X beside the field) appears only while typing, like Apple's apps; it only closes the keyboard - the
     // query and its results stay on screen. The field's own clear button empties the query.
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) { searchBar.setShowsCancelButton(true, animated: true) }
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        applySearchCancelTitle()
+        searchBar.setShowsCancelButton(true, animated: true)
+    }
 
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) { searchBar.setShowsCancelButton(false, animated: true) }
 
