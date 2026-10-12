@@ -12,8 +12,8 @@ import path from 'path';
 const LOCALES = [['עברית', 'he', 'עברית'], ['English', 'en-US', 'English'], ['Français', 'fr-FR', 'Français'], ['Русский', 'ru', 'Русский']];
 const SHOT_LANGS = { he: 'he', 'en-US': 'en', 'fr-FR': 'fr' };   // screenshots only for these locales
 // [source dir under docs/appstore, slide key] in upload order; a missing slide is an error, not a silent gap.
-const SHOTS = [['slides', 'hero'], ['slides', 'home'], ['widgets', 'wid-home'], ['slides', 'chok'], ['slides', 'srch'],
-  ['widgets', 'wid-sizes'], ['slides', 'cal'], ['widgets', 'wid-live'], ['slides', 'teh'], ['slides', 'mazon']];
+const SHOTS = [['slides', 'home'], ['slides', 'chok'], ['slides', 'teh'], ['slides', 'pray'], ['slides', 'cal'],
+  ['widgets', 'wid-sizes'], ['widgets', 'wid-live'], ['slides', 'srch'], ['slides', 'lib'], ['slides', 'lang']];
 const listing = fs.readFileSync('docs/appstore/LISTING.md', 'utf8');
 const checklist = fs.readFileSync('docs/release-update-checklist.md', 'utf8');
 

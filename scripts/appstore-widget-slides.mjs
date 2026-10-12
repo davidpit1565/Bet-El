@@ -16,13 +16,16 @@ const TH=LIGHT
 const C={
  he:{home:{h:'ווידג׳טים *למסך הבית*',s:'תאריך עברי, זמני היום, תהילים ונרות שבת – במבט אחד'},
      sizes:{h:'קטן, בינוני *או גדול*',s:'בוחרים את הגודל ואת המידע שמתאימים לכם',sz:['קטן','בינוני','גדול']},
-     live:{h:'הזמן הבא, *בספירה חיה*',s:'במסך הנעילה וב־Dynamic Island, בלי לפתוח את האפליקציה'}},
+     live:{h:'הזמן הבא, *בספירה חיה*',s:'במסך הנעילה וב־Dynamic Island, בלי לפתוח את האפליקציה'},
+     lock:{h:'מסך הנעילה, *בספירה חיה*',s:'ווידג׳טים למסך הנעילה והזמן הבא ב־Dynamic Island, בלי לפתוח את האפליקציה'}},
  en:{home:{h:'Widgets for your *Home Screen*',s:'Hebrew date, daily times, Tehillim and Shabbat candles at a glance'},
      sizes:{h:'Small, medium *or large*',s:'Pick the size and the details that suit you',sz:['Small','Medium','Large']},
-     live:{h:'The next zman, *counting down live*',s:'On the Lock Screen and in the Dynamic Island, without opening the app'}},
+     live:{h:'The next zman, *counting down live*',s:'On the Lock Screen and in the Dynamic Island, without opening the app'},
+     lock:{h:'Lock Screen widgets, *counting down live*',s:'Daily times on the Lock Screen and the next zman in the Dynamic Island, without opening the app'}},
  fr:{home:{h:'Des widgets *pour l’écran d’accueil*',s:'Date hébraïque, horaires, Tehilim et bougies de Chabbat d’un coup d’œil'},
      sizes:{h:'Petit, moyen *ou grand*',s:'Choisissez la taille et les infos qui vous conviennent',sz:['Petit','Moyen','Grand']},
-     live:{h:'Le prochain horaire, *en direct*',s:'Sur l’écran verrouillé et dans la Dynamic Island, sans ouvrir l’app'}}};
+     live:{h:'Le prochain horaire, *en direct*',s:'Sur l’écran verrouillé et dans la Dynamic Island, sans ouvrir l’app'},
+     lock:{h:'Écran verrouillé, *en direct*',s:'Des widgets sur l’écran verrouillé et le prochain horaire dans la Dynamic Island, sans ouvrir l’app'}}};
 /* crop boxes in pixels of the raw capture: [file, x0, y0, x1, y1] */
 const CROPS={
  phone:{W:1320,H:2868,L:['home1',90,270,1236,1468],standby:['home2',96,278,630,805],candle:['home2',697,278,1231,805],
@@ -70,16 +73,17 @@ for(const lang of langs){ const rtl=lang==='he', T=C[lang];
     body+=zoom(lang,ipad,rtl?z2:'teh',sw,`left:${x}px;top:${y3}px`,{rot:-2})+zoom(lang,ipad,rtl?'teh':z2,sw,`left:${x+sw+gap}px;top:${y3+30}px`,{rot:2});
     body+=chip(T.sizes.sz[0],`left:50%;transform:translateX(-50%);top:${y3+zh(ipad,'teh',sw)+(ipad?40:40)}px`);
     slides.push(['wid-sizes',body]); }
-  /* 3 - Live Activity: the Dynamic Island blown up on top, the Lock Screen below with its banner zoomed
-     (iPad: no Dynamic Island, so the Lock Screen alone, larger) */
+  /* 3 - Live Activity: the Dynamic Island blown up on top, the Lock Screen below with its banner zoomed and
+     (iPhone) its Lock Screen widgets zoomed too (iPad: no Dynamic Island or accessory widgets, so the Lock Screen alone, larger) */
   { const iw=1200, dw=ipad?1360:940, top=ipad?620:1200;
-    let body=head(T.live);
+    let body=head(ipad?T.live:T.lock);
     if(!ipad) body+=zoom(lang,ipad,'island',iw,`left:${Math.round((W-iw)/2)}px;top:780px`,{radius:.5,ring:false});
     body+=frame(src(lang,'lock',ipad),dw,`left:50%;transform:translateX(-50%);top:${top}px`,ipad);
     // the zoomed banner sits right over the device's own banner (same centre), so it is not shown twice
     const cr=CROPS[ipad?'ipad':'phone'], rim=Math.round(dw*(ipad?.012:.016)), bez=Math.round(dw*(ipad?.03:.014)), sc=(dw-2*rim-2*bez)/cr.W;
     const cy=top+rim+bez+(cr.live[2]+cr.live[4])/2*sc, lw=ipad?1700:1220;
     body+=zoom(lang,ipad,'live',lw,`left:${Math.round((W-lw)/2)}px;top:${Math.round(cy-zh(ipad,'live',lw)/2)}px`,{radius:.3});
+    if(!ipad){ const aw=1180; body+=zoom(lang,ipad,'acc',aw,`left:${Math.round((W-aw)/2)}px;top:${H-zh(ipad,'acc',aw)-90}px`,{radius:.3}); }
     slides.push(['wid-live',body]); }
   let n=0;
   for(const [key,body] of slides){
