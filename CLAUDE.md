@@ -444,7 +444,7 @@ in English as usual.
   enough - `window.Capacitor.Plugins.X` only exists once something calls
   `registerPlugin()` client-side, and this app's custom plugins
   (NativeTopBar, NativeToolsFab, NativeModal, NativeSettings, NativeToast,
-  NativeHaptics, NativeTabBar, BetElWidgetBridge, NativeLiveActivity) ship
+  NativeHaptics, NativeTabBar, BetElWidgetBridge, NativeLiveActivity, NativeSpotlight) ship
   no vendored UMD bundle of their own the way `@capacitor/app` does. This
   exact gap went undetected for most of a session (every native Liquid
   Glass feature "worked" by every code-level signal - it built, it ran,
@@ -534,6 +534,17 @@ in English as usual.
   remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize.
   (Dynamic Type heights and the FAB's English-only labels were fixed in the accessibility pass below; the Live Activity
   now reads the snapshot zmanim.)
+- **Spotlight + Siri (NativeSpotlightBridge.swift, TamidIntents.swift):** `spotlightSync()` in index.html indexes every ready prayer
+  (`prayer:<key>`), Tehillim 1-150 (`psalm:<n>`) and the main sections (`go:<tab>`) in Core Spotlight (Hebrew title, keywords in
+  he/en/fr/ru/ka); it replaces the whole domain, so it runs 6s after boot and again after a language change. A tap arrives in
+  `SceneDelegate` (`willConnectTo` cold, `continue userActivity` warm) as `CSSearchableItemActionType` -> `NativeSpotlightBridge.handle`
+  -> JS `spotlightOpen(id)` -> `openPrayer()` / `openReader(...)` / `go()`. Cold start: JS calls `NativeSpotlight.consumePending()`
+  after attaching the `open` listener. Plugin registration done in both places (capacitor-native-bridge.js + MainViewController).
+  Siri/Shortcuts: four App Intents (next zman, sunset today, Hebrew date today, Omer count) + `TamidShortcuts` provider, all
+  `@available(iOS 16.0, *)` (deployment target stays 15.0). They only READ the App Group snapshot (`BetElSharedData`: zmanimJSON,
+  omerJSON, lang), so the answer is exact only for the ~60 days the app last synced, otherwise it says to open the app. Answers are in
+  the app language; the spoken PHRASES are English only (no he.lproj / AppShortcuts.strings - Siri language support for Hebrew was
+  not verified, don't claim it). **Not tested on a device yet:** Spotlight tap-through, Shortcuts, Siri. Simulator build only.
 - **Live Activity (always on, 2.0.1):** `NativeLiveActivityBridge.refreshActivity()` runs on every launch and every
   `willEnterForeground` (plus the JS `syncWidgetData()` chain). It keeps exactly one active Activity: starts one if none
   (also after a swipe-away), ends + restarts it once its zman passed (dawn/sunrise/sunset boundary), and replaces it when the

@@ -3747,6 +3747,56 @@ function shotNavigate(screen,scrollMode){
   sessionStorage.removeItem('betel_shot_screen'); sessionStorage.removeItem('betel_shot_scroll');
   setTimeout(()=>shotNavigate(sc,scrollMode),2500);
 }catch(e){} })();
+/* ---------- Spotlight (Core Spotlight) ----------
+   Native plugin NativeSpotlight indexes prayers, Tehillim chapters and the main sections (Hebrew title + keywords in all five
+   languages). A tap arrives in Swift (SceneDelegate) as CSSearchableItemActionType; NativeSpotlightBridge hands the id over (a listener when
+   warm, consumePending() on cold start) and it ends here. ids: prayer:<key> | psalm:<n> | go:<tab>. Re-indexed on boot and on language change. */
+function spotlightOpen(id){
+  try{
+    const i=id.indexOf(':'), kind=id.slice(0,i), v=id.slice(i+1);
+    if(kind==='prayer') openPrayer(v);
+    else if(kind==='psalm'){ const n=+v; if(n>=1&&n<=150) openReader(Array.from({length:150},(_,k)=>k+1),{daily:false,start:n}); }
+    else if(kind==='go' && ['home','library','calendar','settings','tracker','tehillim','search'].includes(v)) go(v);
+  }catch(e){}
+}
+const SPOT_SECTIONS=[
+  ['home','דף הבית',{en:'Home',fr:'Accueil',ru:'Главная',ka:'მთავარი'}],
+  ['library','ספרייה',{en:'Library',fr:'Bibliothèque',ru:'Библиотека',ka:'ბიბლიოთეკა'}],
+  ['calendar','לוח שנה',{en:'Calendar',fr:'Calendrier',ru:'Календарь',ka:'კალენდარი'}],
+  ['tehillim','תהילים',{en:'Tehillim Psalms',fr:'Tehillim Psaumes',ru:'Теѓилим Псалмы',ka:'თეჰილიმი ფსალმუნები'}],
+  ['tracker','מעקב',{en:'Tracker',fr:'Suivi',ru:'Трекер',ka:'ტრეკერი'}],
+  ['settings','הגדרות',{en:'Settings',fr:'Réglages',ru:'Настройки',ka:'პარამეტრები'}],
+];
+const SPOT_PSALM_KW={en:'Psalms Tehillim',fr:'Psaumes Tehillim',ru:'Псалом Теѓилим',ka:'ფსალმუნი თეჰილიმი',he:'תהילים תהלים'};
+function spotlightSync(){
+  try{
+    const P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeSpotlight;
+    if(!P||!(window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())) return;
+    const strip=t=>String(t||'').replace(/[֑-ׇ]/g,'');
+    const LANGS=['en','fr','ru','ka'], items=[];
+    const kwOf=he=>{ const k=[strip(he)]; LANGS.forEach(l=>{ const d=I18N[l]; if(d&&d[strip(he)]) k.push(d[strip(he)]); }); return k; };
+    Object.keys(PRAYERS_EXTRA).forEach(k=>{
+      const pr=PRAYERS_EXTRA[k]; if(!pr.ready||PRAYER_KEYS_HIDDEN.includes(k)) return;
+      items.push({id:'prayer:'+k,title:strip(pr.title),desc:ckChrome('תפילות'),keywords:kwOf(pr.title)});
+    });
+    for(let n=1;n<=150;n++){
+      const hn=heNum(n);
+      items.push({id:'psalm:'+n,title:'תהילים '+hn,desc:ckChrome('תְּהִלִּים')+' '+n,
+        keywords:[...Object.values(SPOT_PSALM_KW).map(w=>w+' '+n),'תהילים '+hn,'תהלים '+hn]});
+    }
+    SPOT_SECTIONS.forEach(([t,he,tr0])=>items.push({id:'go:'+t,title:he,desc:'Tamid',keywords:[he,...Object.values(tr0)]}));
+    P.index({items,lang:S.lang||'he'}).catch(()=>{});
+  }catch(e){}
+}
+(function spotlightWire(){
+  try{
+    const P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeSpotlight;
+    if(!P||!(window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())) return;
+    P.addListener('open',e=>{ if(e&&e.id) spotlightOpen(e.id); });
+    setTimeout(()=>P.consumePending().then(r=>{ if(r&&r.id) spotlightOpen(r.id); }).catch(()=>{}),1500);
+  }catch(e){}
+})();
+setTimeout(spotlightSync,6000);
 window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
 (function initWidgetLinks(){
   try{
@@ -13679,7 +13729,7 @@ function wireSettingsCategory(catId){
       document.getElementById('tgWake').onclick=()=>{ S.keepAwake=!S.keepAwake; saveS(); applyWakeLock(); renderSettings(); };
       document.getElementById('fsMinus').onclick=()=>{ changeFont(-0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
       document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
-      { const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); }; } }
+      { const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); setTimeout(spotlightSync,800); }; } }
       break;
     case 'notifications': {
       const pdg=document.getElementById('pushDiag');

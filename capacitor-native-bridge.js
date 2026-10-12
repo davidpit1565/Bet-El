@@ -37,6 +37,7 @@ var capacitorNativeBridge = (function (core) {
         core.registerPlugin('NativeTabBar');
         core.registerPlugin('BetElWidgetBridge');
         core.registerPlugin('NativeLiveActivity');
+        core.registerPlugin('NativeSpotlight');
         // @capacitor/splash-screen ships no vendored UMD bundle either (see the
         // note above): index.html's launch screen calls SplashScreen.hide() as
         // soon as it has painted, so the static native image doesn't linger.

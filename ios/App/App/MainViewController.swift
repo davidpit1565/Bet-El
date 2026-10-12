@@ -182,6 +182,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeHapticsBridge())
         bridge?.registerPluginInstance(BetElWidgetBridge())
         bridge?.registerPluginInstance(NativeLiveActivityBridge())
+        bridge?.registerPluginInstance(NativeSpotlightBridge())
     }
 
     override func viewDidLoad() {
