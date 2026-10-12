@@ -1,11 +1,6 @@
-Major update:
-• A weekly study booklet on the Home screen, next to Ben Ish Chai: renewed every week, no app update needed
-• Tzaddikim yahrzeits in the calendar: "In memory of the tzaddikim" for the selected day
-• New Search tab: any chapter, prayer or book across the whole library, with recent searches and suggestions
-• The blessings over food (Birkat HaMazon, Meein Shalosh and Birkot HaNehenin) in Edot HaMizrach nusach, next to the Siddur in the Library
-• New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, daily times, Tehillim, Shabbat candles, Sefirat HaOmer
-• Liquid Glass design (iOS 26): tab bar, header, search and controls
-• Settings, calendar and daily times fully translated: Hebrew, English, French, Russian and Georgian
-• Tefillin mirror with precise detection of where the bayit is placed
-• Send feedback and suggestions right from the app, a QR code for sharing, and automatic location
-• Stability and speed improvements
+What's new in 2.0.1:
+• New content notifications: the weekly booklet and updates straight to your phone (can be turned off in Settings)
+• Search screen: layout and display fix
+• Rambam widget: the text now shows with nikud
+• Library: correct alignment of Hebrew text
+• Stability improvements
