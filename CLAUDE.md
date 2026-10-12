@@ -262,8 +262,30 @@ in English as usual.
   cached per mode (`bkDafKey` '|bw' suffix, `bkQrKey`). The earlier weekly
   colour-rotation idea (gold/blue/pink/green/orange/purple) is dropped.
   Page order: cover, rights/contact, the Rav's honour page (`bkRavHtml`,
-  `BK_RAV` - owner's text verbatim), dedication, contents, days, Ben Ish
-  Chai, back, blank (`startNo` counts the front pages actually built).
+  `BK_RAV` - owner's text verbatim), a niftar's own full memorial page when
+  one applies that week (`bkNiftarRavHtml`, gated by exact Shabbat date -
+  returns '' most weeks, so it adds no blank page; see Rav Mordechai
+  Sharabi's entry, `BK_NIFTAR_RAV`/`BK_NIFTAR_RAV_SHABBAT`, as the pattern
+  for a future one), dedication (`bkDedicationHtml` - its niftar list is
+  built by `bkNiftarList(shabbat)`: `BK_DEDICATION.niftar` is the one
+  permanent name shown every week, `BK_NIFTAR_EXTRA` is a flat list of
+  `{shabbat,name}` entries added only on their exact date, same pattern as
+  `bkRavName`'s epoch gate - add a name here, not to `BK_DEDICATION`
+  itself, unless the owner says it should show every week going forward),
+  contents, days, Ben Ish Chai, back, blank (`startNo` counts the front
+  pages actually built).
+  **Exporting an already-built week after a small content edit: do NOT
+  re-render the whole ~180-page PDF by default.** If the edit doesn't
+  change the page count (a name added/changed inside an existing page,
+  wording tweaked on one page), render only that one page and splice it
+  into the previously exported PDF in place (PyMuPDF: `doc.delete_page(i);
+  doc.insert_pdf(new_page_doc, start_at=i)`) - the rest of the document,
+  including every other page's printed number, is untouched and correct.
+  Only when a page is actually added or removed (like `bkNiftarRavHtml`
+  turning on/off) do the printed page numbers and the contents page shift
+  for everything after it - that genuinely needs a full re-render; there's
+  no cheap patch for it. Check whether the edit changes page count before
+  deciding which path to take.
   Keep-with-text rule (`bkPaginate`): at any page break inside a section,
   if that section's heading run is on this page with fewer than
   `BK_MIN_LINES` (6) lines of text below it (over however many blocks -
