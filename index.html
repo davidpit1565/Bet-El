@@ -6903,12 +6903,15 @@ function bkImgSrc(key){ if(key===BK_QR_KEY) key=bkQrKey(); const st=BK_IMG[key];
    (same date-gating pattern as bkRavName) rather than living in this
    static array. bkDedicationHtml's existing singular/plural switch
    (dedMerit/dedMeritPl, dedTnzbh/dedTnzbhPl) still picks up the plural
-   wording automatically whenever an extra name applies that week. (A third
+   wording automatically whenever an extra name applies that week. A third
    yahrzeit the owner mentioned, מְנַשֶּׁה בֶּן לֵוִי הַנּוֹלָד מִזִּלְפָּה on כ׳ חשון,
-   falls in the FOLLOWING week - add it as its own BK_NIFTAR_EXTRA entry for
-   that week if/when that booklet is built, not here.) */
+   falls in the FOLLOWING week - which turns out to be Shabbat Vayera itself
+   (31.10.2026) - so it's its own BK_NIFTAR_EXTRA entry gated to that date. */
 const BK_DEDICATION={niftar:['גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב'], hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
-const BK_NIFTAR_EXTRA=[{shabbat:new Date(2026,9,24), name:'יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'}]; // Lech Lecha's week (24.10.2026) only
+const BK_NIFTAR_EXTRA=[
+  {shabbat:new Date(2026,9,24), name:'יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'}, // Lech Lecha's week (24.10.2026) only - yahrzeit י"ג חשון
+  {shabbat:new Date(2026,9,31), name:'מְנַשֶּׁה בֶּן לֵוִי הַנּוֹלָד מִזִּלְפָּה'} // Vayera's week (31.10.2026) only - yahrzeit כ' חשון, which is Shabbat Vayera itself
+];
 function bkNiftarList(shabbat){
   const list=[].concat(BK_DEDICATION.niftar);
   BK_NIFTAR_EXTRA.forEach(e=>{ if(shabbat && shabbat.toDateString()===e.shabbat.toDateString()) list.push(e.name); });
