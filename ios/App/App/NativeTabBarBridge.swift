@@ -19,6 +19,7 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "hideSearch", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "showSearch", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setSearchText", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "dismissSearchKeyboard", returnType: CAPPluginReturnPromise),
     ]
 
     /// Set by MainViewController.viewDidLoad(). Weak since the plugin
@@ -36,7 +37,10 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         let activeTab = call.getString("activeTab") ?? "home"
         let isRTL = call.getBool("isRTL") ?? false
         let isDark = call.getBool("isDark") ?? false
+        let searchPlaceholder = call.getString("searchPlaceholder") ?? ""
+        let searchCancel = call.getString("searchCancel") ?? ""
         DispatchQueue.main.async {
+            NativeTabBarBridge.activeController?.setSearchLabels(placeholder: searchPlaceholder, cancel: searchCancel)
             NativeTabBarBridge.activeController?.setTabBarTheme(isDark: isDark)
             NativeTabBarBridge.activeController?.configure(items: items, activeTab: activeTab, isRTL: isRTL)
         }
@@ -67,8 +71,16 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
 
-    /// Puts the bar into its Search-tab state (App Store style: the bar collapses into the previous tab's circle and a
-    /// glass search field takes its place). Called by JS whenever the Search screen renders - also when it was reached
+    /// From JS when the search results are dragged, so the rows under the keyboard can be reached.
+    @objc func dismissSearchKeyboard(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            NativeTabBarBridge.activeController?.dismissSearchKeyboard()
+        }
+        call.resolve()
+    }
+
+    /// Puts the bar into its Search-tab state (Search selected, the native field docked under the header). Called by
+    /// JS whenever the Search screen renders - also when it was reached
     /// from a search box or shortcut inside the app rather than from the tab bar itself. `focus` raises the keyboard.
     @objc func showSearch(_ call: CAPPluginCall) {
         let focus = call.getBool("focus") ?? false

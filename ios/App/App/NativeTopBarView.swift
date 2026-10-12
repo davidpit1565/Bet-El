@@ -76,10 +76,15 @@ final class NativeTopBarView: UIView {
         CATransaction.commit()
     }
 
-    func setTheme(isDark: Bool) {
-        let bg = isDark
+    /// The header's opaque background - also used by the Search tab's docked field right under it.
+    static func background(isDark: Bool) -> UIColor {
+        isDark
             ? UIColor(red: 0.051, green: 0.078, blue: 0.165, alpha: 1)
             : UIColor(red: 0.965, green: 0.937, blue: 0.875, alpha: 1)
+    }
+
+    func setTheme(isDark: Bool) {
+        let bg = NativeTopBarView.background(isDark: isDark)
         // fully OPAQUE (no fade to transparent): scrolled text must never show through the header
         fadeLayer.colors = [bg.cgColor, bg.cgColor]
         fadeLayer.locations = [0, 1]

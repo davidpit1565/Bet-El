@@ -311,7 +311,7 @@ final class NHCell: UICollectionViewCell {
             let v = UIStackView(arrangedSubviews: [label((it.done ? "✓ " : "") + it.title, .headline, .semibold, lines: 2)])
             v.axis = .vertical
             v.spacing = 2
-            if !it.subtitle.isEmpty { v.addArrangedSubview(label(it.subtitle, .subheadline, .regular, .secondaryLabel, lines: 2)) }
+            if !it.subtitle.isEmpty { v.addArrangedSubview(label(it.subtitle, .subheadline, .regular, .secondaryLabel, lines: max(2, it.subtitleLines))) }
             stack.addArrangedSubview(v)
             let rowChev = UIImageView(image: UIImage(systemName: rtl ? "chevron.left" : "chevron.right"))
             rowChev.tintColor = .tertiaryLabel
@@ -456,6 +456,8 @@ final class NHCell: UICollectionViewCell {
 
 final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var bottomInset: (() -> CGFloat)?
+    /// Extra room at the top for chrome docked over the list (the Search tab's search bar).
+    var topInset: (() -> CGFloat)?
     var js: ((String) -> Void)?
     var onCollapseChange: ((Bool) -> Void)?
     private let collapseTracker = ScrollCollapseTracker()
@@ -552,6 +554,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
             collectionView.contentInset.bottom = b
             collectionView.verticalScrollIndicatorInsets.bottom = b
         }
+        applyTopInset()
         bringSubviewToFront(addPill)
         bringSubviewToFront(donePill)
         if bounds.width != lastLayoutWidth {
@@ -563,6 +566,15 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
     // MARK: data
 
     func setLogo(_ image: UIImage?) { logo = image }
+
+    private func applyTopInset() {
+        let top: CGFloat = (editing ? 58 : 0) + (topInset?() ?? 0)
+        guard abs(collectionView.contentInset.top - top) > 0.5 else { return }
+        let atTop = collectionView.contentOffset.y <= -collectionView.contentInset.top + 1
+        collectionView.contentInset.top = top
+        collectionView.verticalScrollIndicatorInsets.top = top
+        if atTop { collectionView.contentOffset.y = -top }
+    }
 
     func show(items newItems: [NHItem], editing: Bool, canEdit: Bool, rtl: Bool, isDark: Bool, pool: [String]) {
         overrideUserInterfaceStyle = isDark ? .dark : .light
@@ -585,12 +597,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         dragLP.isEnabled = editing
         addPill.isHidden = !editing
         donePill.isHidden = !editing
-        let top: CGFloat = editing ? 58 : 0
-        if abs(collectionView.contentInset.top - top) > 0.5 {
-            let atTop = collectionView.contentOffset.y <= -collectionView.contentInset.top + 1
-            collectionView.contentInset.top = top
-            if atTop { collectionView.contentOffset.y = -top }
-        }
+        applyTopInset()
         collectionView.reloadData()
         if isNewScreen { collectionView.setContentOffset(CGPoint(x: 0, y: -collectionView.contentInset.top), animated: false) }
         if wasEditing != editing { UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
@@ -647,7 +654,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         case "hero": return 118 + 24 + 34 + 22 + 22 + 36
         case "banner": return scaled(CGFloat(max(1, it.lines.count)) * 40 + 24)
         case "tikkunei": return scaled(78)
-        case "row": return scaled(it.subtitle.isEmpty ? 64 : 80)
+        case "row": return scaled(it.subtitle.isEmpty ? 64 : 80 + CGFloat(max(0, it.subtitleLines - 2)) * 20)
         case "zmanim": return scaled(56 + CGFloat(it.rows.count) * 26)
         case "text": return scaled(CGFloat(max(1, it.lines.count)) * 28 + 28)
         case "social": return it.size == "m" ? 96 : 68
@@ -929,4 +936,9 @@ public class NativeHomeBridge: CAPPlugin, CAPBridgedPlugin {
         DispatchQueue.main.async { NativeHomeBridge.activeController?.setNativeHomeLogo(image) }
         call.resolve()
     }
+}
+
+extension NHItem {
+    /// Explicit lines in a row subtitle ("\n"-separated, e.g. the push diagnostics row in Settings).
+    var subtitleLines: Int { subtitle.split(separator: "\n", omittingEmptySubsequences: false).count }
 }

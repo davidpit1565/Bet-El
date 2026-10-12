@@ -178,8 +178,12 @@ in English as usual.
   native glass-card `NativeSettingsView` is kept but unused), with
   `settingsRowsTappable()` making whole rows the touch target like iOS.
   Search is its own tab, App Store style (`TAB==='search'`, `renderSearch()`: suggestions + recent searches, then
-  live results; native: the FULL tab bar always stays (user rule) with Search selected, and a glass UISearchBar sits
-  right above it, riding above the keyboard; keyboard only on tap; its X only closes the keyboard (list/results stay); every list's bottom inset = field + keyboard (`searchReservedHeight()` / `nativeListBottomInset()` in MainViewController) so nothing ends under the field; a result opened from Search keeps the Search tab lit via `SEARCH_NAV`),
+  live results; native: like Halacha Yomit - a real `.minimal` UISearchBar docked at the TOP under the header (`searchDock` in
+  MainViewController, Search tab only), the FULL tab bar always stays (user rule) with Search selected; `--native-header-h`
+  includes the dock so the page starts below it (native lists use `searchDockInset()`); the HTML field is hidden and the bar
+  drives the page through a debounced `window.nativeSetSearchQuery(q)`; Search/Cancel and dragging the list put the keyboard
+  away; placeholder/cancel and direction follow the app language (`searchPlaceholder`/`searchCancel` in `NativeTabBar.configure`);
+  the search screen is `data-web-only` (never the native list); a result opened from Search keeps the Search tab lit via `SEARCH_NAV`),
   the tab bar minimizes Apple Music-style on scroll, and the reader tools
   "…" button lives in the native header row (`layoutToolsFab()`).
 - **Dev builds don't count as Firebase users.** Every Xcode install (delete +
@@ -408,7 +412,11 @@ in English as usual.
   the push prompt is the single prompt and grants local notifications too. The token
   is written by the Firebase module's `window.__savePushToken` to `pushTokens/{token}` with
   `platform:'ios'`; if that fails (offline / module not loaded) it waits in localStorage
-  `betel_push_pending` and is retried on the next launch. Web/PWA path (`window.enablePush`,
+  `betel_push_pending` and is retried on the next launch. Native-only "אבחון הודעות" row at the
+  bottom of the notifications group (`pushDiagHtml()`, state in localStorage `betel_push_diag`, set
+  by `setPushDiag()` / `window.__setPushDiag`): iOS permission, FCM token yes/no + first 8 chars ONLY,
+  Firestore save yes/no + last error, app version (build); a tap runs `retryPushRegistration()`
+  (checkPermissions → getToken → save, never prompts). Never store or show the full token. Web/PWA path (`window.enablePush`,
   `S.pushEnabled`) is unchanged. Native setup: `ios/App/App/GoogleService-Info.plist` (bundled),
   AppDelegate forwards the APNs callbacks, `aps-environment` = development in `App.entitlements`
   (Debug) / production in `AppRelease.entitlements` (Release), SPM `symlink` packageOption in
