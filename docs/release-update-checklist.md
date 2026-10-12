@@ -37,31 +37,21 @@
 ### מה חדש (What's New)
 **עברית**
 ```
-עדכון גדול:
-• חוברת לימוד שבועית במסך הבית, ליד בן איש חי: מתחדשת כל שבוע, בלי עדכון אפליקציה
-• הילולות הצדיקים בלוח השנה: "לעילוי נשמת הצדיקים" של היום הנבחר
-• טאב חיפוש חדש: פרק, תפילה או ספר בכל הספרייה, עם חיפושים אחרונים והצעות
-• ברכות האכילה (ברכת המזון, מעין שלוש וברכות הנהנין) בנוסח עדות המזרח, ליד הסידור בספרייה
-• ווידג'טים חדשים למסך הבית, למסך הנעילה ול-StandBy: תאריך עברי ופרשה, זמני היום, תהילים, נרות שבת, ספירת העומר
-• עיצוב ליקוויד גלס (iOS 26): סרגל תחתון, כותרת, חיפוש ופקדים
-• הגדרות, לוח שנה וזמני היום מתורגמים במלואם: עברית, אנגלית, צרפתית, רוסית וגאורגית
-• מראה לתפילין עם זיהוי מדויק של מקום הנחת הבית
-• דיווח והצעות לשיפור ישירות מהאפליקציה, קוד QR לשיתוף ומיקום אוטומטי
-• שיפורי יציבות ומהירות
+מה חדש בגרסה 2.0.1:
+• התראות על תוכן חדש: חוברת השבוע ועדכונים ישירות לטלפון (אפשר לכבות בהגדרות)
+• מסך החיפוש: תיקון פריסה ותצוגה
+• ווידג'ט הרמב"ם: הטקסט מוצג עם ניקוד
+• הספרייה: יישור נכון של טקסט עברי
+• שיפורי יציבות
 ```
 **English**
 ```
-Major update:
-• A weekly study booklet on the Home screen, next to Ben Ish Chai: renewed every week, no app update needed
-• Tzaddikim yahrzeits in the calendar: "In memory of the tzaddikim" for the selected day
-• New Search tab: any chapter, prayer or book across the whole library, with recent searches and suggestions
-• The blessings over food (Birkat HaMazon, Meein Shalosh and Birkot HaNehenin) in Edot HaMizrach nusach, next to the Siddur in the Library
-• New widgets for the Home Screen, Lock Screen and StandBy: Hebrew date and parasha, daily times, Tehillim, Shabbat candles, Sefirat HaOmer
-• Liquid Glass design (iOS 26): tab bar, header, search and controls
-• Settings, calendar and daily times fully translated: Hebrew, English, French, Russian and Georgian
-• Tefillin mirror with precise detection of where the bayit is placed
-• Send feedback and suggestions right from the app, a QR code for sharing, and automatic location
-• Stability and speed improvements
+What's new in 2.0.1:
+• New content notifications: the weekly booklet and updates straight to your phone (can be turned off in Settings)
+• Search screen: layout and display fix
+• Rambam widget: the text now shows with nikud
+• Library: correct alignment of Hebrew text
+• Stability improvements
 ```
 **Français**
 ```

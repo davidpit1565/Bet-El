@@ -20,7 +20,7 @@ he:{hero:{h:'הלימוד היומי שלך, *בכל מקום*',s:'חוק ליש
  cal:{e:'לוח עברי',h:'לוח עברי *וזמני היום*',s:'התאריך, הפרשה והזמנים – לפי המקום שלך',co:[['📖','פרשת השבוע והקריאה היומית','r',1500],['📍','זמנים לפי המקום – אוטומטי','l',2050]]},
  teh:{e:'תהילים',h:'תהילים *יומי*',s:'חלוקה חודשית או שבועית, מעקב פרקים ותזכורת עדינה',b:['חלוקה חודשית / שבועית','סימון פרקים שנקראו','שיתוף פרק בלחיצה']},
  mazon:{e:'נוסח עדות המזרח',h:'ברכת המזון *בנוסח עדות המזרח*',s:'מותאמת אוטומטית ליום – שבת, ראש חודש, חנוכה ופורים'},
- pray:{h:'סידור *וברכות*',s:'תפילות, ברכות וקריאת שמע – בנוסח עדות המזרח'},
+ pray:{h:'ברכת המזון *ומעין שלוש*',s:'ברכות הנהנין בנוסח עדות המזרח – מותאמות אוטומטית ליום'},
  srch:{h:'חיפוש *בכל הספרים*',s:'פרק, תפילה או ספר – ומגיעים ישר למקום'},
  lib:{e:'ספרייה',h:'ספרייה *מלאה* של ספרי קודש',s:'תורה, נביאים, כתובים, משנה, גמרא, רמב״ם, זוהר ותניא',b:['מעל 6 תחומים וספרים','חיפוש בכל הספרים','קריאה בנוחות, בערכה בהירה וכהה']},
  wid:{e:'ווידג׳טים',h:'ווידג׳טים *לבית ולמסך הנעילה*',s:'תאריך עברי, זמני היום, תהילים, נרות שבת וספירת העומר'},
@@ -33,7 +33,7 @@ en:{hero:{h:'Your daily study, *anywhere*',s:'Chok LeYisrael · Tehillim · Zoha
  cal:{e:'Hebrew calendar',h:'Hebrew calendar *& daily times*',s:'The date, the parasha and the times - for your place',co:[['📖','Parasha & daily reading','r',1500],['📍','Times for your location - automatic','l',2050]]},
  teh:{e:'Tehillim',h:'Daily *Tehillim*',s:'Monthly or weekly division, chapter tracking and a gentle reminder',b:['Monthly / weekly division','Mark chapters as read','Share a chapter in one tap']},
  mazon:{e:'Edot HaMizrach nusach',h:'Birkat HaMazon *Edot HaMizrach nusach*',s:'Adapts automatically to the day - Shabbat, Rosh Chodesh, Chanukah, Purim'},
- pray:{h:'Siddur *& blessings*',s:'Prayers, blessings and Shema - Edot HaMizrach nusach'},
+ pray:{h:'Birkat HaMazon *& Meein Shalosh*',s:'Blessings over food, Edot HaMizrach nusach - adapted to the day automatically'},
  srch:{h:'Search *every book*',s:'A chapter, a prayer or a book - straight to the place'},
  lib:{e:'Library',h:'A *full library* of holy books',s:'Torah, Nevi\'im, Ketuvim, Mishnah, Gemara, Rambam, Zohar and Tanya',b:['6+ study tracks and books','Search across all books','Comfortable reading, light & dark']},
  wid:{e:'Widgets',h:'Widgets for the *Home & Lock Screen*',s:'Hebrew date, daily times, Tehillim, Shabbat candles and the Omer count'},
@@ -46,7 +46,7 @@ fr:{hero:{h:'Votre étude quotidienne, *partout*',s:'Ḥok LeYisraël · Tehilim
  cal:{e:'Calendrier',h:'Calendrier hébraïque *et horaires*',s:'La date, la paracha et les horaires de votre lieu',co:[['📖','Paracha et lecture du jour','r',1500],['📍','Horaires selon votre lieu','l',2050]]},
  teh:{e:'Tehilim',h:'Tehilim *quotidiens*',s:'Division mensuelle ou hebdomadaire, suivi et rappel discret',b:['Mensuel / hebdomadaire','Chapitres lus','Partage en un geste']},
  mazon:{e:'Rite séfarade oriental',h:'Birkat HaMazon *rite séfarade*',s:'S’adapte automatiquement au jour – Chabbat, Roch ‘Hodesh, Hanouka, Pourim'},
- pray:{h:'Siddour *et bénédictions*',s:'Prières, bénédictions et Chema – rite séfarade oriental'},
+ pray:{h:'Birkat HaMazon *et Méïn Chaloch*',s:'Bénédictions sur la nourriture, rite séfarade oriental – adaptées au jour'},
  srch:{h:'Recherche dans *tous les livres*',s:'Un chapitre, une prière ou un livre – directement au bon endroit'},
  lib:{e:'Bibliothèque',h:'Une *bibliothèque complète*',s:'Torah, Prophètes, Hagiographes, Michna, Guemara, Rambam, Zohar',b:['Plus de 6 parcours','Recherche dans tous les livres','Mode clair et sombre']},
  wid:{e:'Widgets',h:'Widgets pour l’*écran d’accueil et verrouillé*',s:'Date hébraïque, horaires, Tehilim, bougies et Omer'},
@@ -66,9 +66,10 @@ ru:{hero:{h:'Ваше ежедневное изучение – *везде*',s:
  set:{e:'Для вас',h:'Настроено *для вас*',s:'Пять языков · светлая и тёмная тема · напоминания · геолокация',b:['Иврит, английский, французский, русский, грузинский','Мягкие ежедневные напоминания','Автоматическое местоположение']},
  lang:{e:'Пять языков',h:'Пять языков, *одно касание*',s:'עברית · English · Français · Русский · ქართული'},
  qr:{e:'Поделиться',h:'Поделитесь по *QR-коду*',s:'Красивый код для обмена приложением – работает и офлайн'}}};
-/* slide = [key, raw name, accent, zoom crop {y0,y1} of the raw image or null] */
-const SLIDES=[['hero',null,'hero'],['home','01-home','home'],['chok','02-chok','chok',{y0:.375,y1:.6,iy0:.225}],['cal','03-calendar','cal',{y0:.655,y1:.88,iy0:.435,ialign:'center'}],['teh','04-tehillim','teh'],
- ['pray','05-prayers','pray'],['mazon','06-mazon','mazon',{y0:.27,y1:.5,iy0:.165}],['srch','09-search','srch'],['lib','08-library','lib'],['set','07-settings','set']];   // max 10
+/* slide = [key, raw name, accent, zoom crop {y0,y1} of the raw image (or of zoom.raw) or null] */
+const SLIDES=[['home','01-home','home'],['chok','02-chok','chok',{y0:.375,y1:.6,iy0:.225}],['teh','04-tehillim','teh'],
+ ['pray','10-brachot','mazon',{raw:'06-mazon',y0:.27,y1:.5,iy0:.165}],['cal','11-calendar-hill','cal',{y0:.345,y1:.57,iy0:.58,ipadOnly:true}],
+ ['srch','09-search','srch'],['lib','08-library','lib'],['lang',null,'lang']];   // + 3 widget slides (appstore-widget-slides.mjs) = 10, Apple's max
 const b64=f=>fs.readFileSync(f).toString('base64');
 /* Realistic device: metal rim, black glass bezel, Dynamic Island (iPhone) / front camera (iPad), side buttons. */
 const frame=(f,w,pos,ipad)=>{ const rim=ipad?Math.round(w*.012):Math.round(w*.016), bez=ipad?Math.round(w*.03):Math.round(w*.014);
@@ -121,7 +122,8 @@ for(const lang of langs){ const rtl=lang==='he';
       body=headBlock+(key==='wid'?`<img src="data:image/png;base64,${b64(src)}" style="position:absolute;left:50%;transform:translateX(-50%);top:${devTop}px;width:${devW}px;border-radius:90px;box-shadow:${TH.shadow},0 0 0 3px ${TH.ring}"/>`:device(src));
       if(false&&T.b) body+=`<div style="position:absolute;left:${ipad?160:90}px;right:${ipad?160:90}px;top:${ipad?620:700}px;display:flex;flex-direction:column;gap:${18*k}px">${T.b.map(x=>`<div style="display:flex;align-items:center;gap:22px;font-size:${46*k}px;color:${TH.ink};font-weight:600"><span style="flex:none;width:${60*k}px;height:${60*k}px;border-radius:50%;background:${col};display:grid;place-items:center;color:#fff;font-size:${38*k}px">✓</span><span>${x}</span></div>`).join('')}</div>`;
       for(const [ic,tx,side,top] of (process.env.CALLOUTS?(T.co||[]):[])){ const tp=ipad?Math.round(top*0.95)-40:top-(T.b?0:120); body+=`<div style="position:absolute;${side==='l'?'left':'right'}:${ipad?90:30}px;top:${tp}px;display:flex;align-items:center;gap:20px;padding:${24*k}px ${34*k}px;border-radius:44px;background:${TH.card};color:${TH.cardInk};font-size:${42*k}px;font-weight:700;border:3px solid ${col};box-shadow:0 24px 60px rgba(0,0,0,.4);max-width:${ipad?800:640}px"><span style="font-size:${56*k}px">${ic}</span><span>${tx}</span></div>`; }
-      if(zoom && src){ const f=b64(src), sz=pngSize(src); const cw=ipad?1200:900, ch=ipad?600:440, iw=ipad?Math.round(cw*1.6):cw;   // phone: full width, never clip lines; iPad: magnify (its source is much wider than the card)
+      const zsrc=zoom&&!(zoom.ipadOnly&&!ipad)&&(zoom.raw?find(lang,zoom.raw,ipad):src);   // ipadOnly: the phone already shows it full size
+      if(zoom && zsrc){ const f=b64(zsrc), sz=pngSize(zsrc); const cw=ipad?1200:900, ch=ipad?600:440, iw=ipad?Math.round(cw*1.6):cw;   // phone: full width, never clip lines; iPad: magnify (its source is much wider than the card)
         const y0=ipad&&zoom.iy0!=null?zoom.iy0:zoom.y0, ix=!ipad?0:zoom.ialign==='center'?-(iw-cw)/2:(rtl?cw-iw:0);   // iPad: show where lines start
         body+=`<div style="position:absolute;${rtl?'right':'left'}:${ipad?70:60}px;top:${ipad?2030:2280}px;width:${cw}px;height:${ch}px;border-radius:48px;overflow:hidden;border:4px solid ${col};box-shadow:0 36px 90px rgba(0,0,0,.7);background:${LIGHT?'#fffaf0':'#0b1226'}"><img src="data:image/png;base64,${f}" style="position:absolute;width:${iw}px;left:${ix}px;top:${-y0*iw*(sz.h/sz.w)}px"/></div>`; }
     }

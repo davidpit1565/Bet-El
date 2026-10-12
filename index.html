@@ -3634,6 +3634,11 @@ function shotNavigate(screen,scrollMode){
       if(parts.includes('recent')) ['תהלים כג','בראשית','ברכת המזון','קריאת שמע','תניא','זהר','משנה ברכות','רמב״ם'].reverse().forEach(addRecentSearch);
       window.NativeSearchHost.open(parts.includes('kb')); if(q) setTimeout(()=>{ searchRunQuery(q); },400); }
     else if(screen==='meein'){ openPrayer('birkatMeeinShalosh','brachot'); afterReady(900); }
+    else if(screen==='brachot'){ PR.group='brachot'; go('prayersGroup'); }
+    // calendar scrolled so the day card's "לעילוי נשמת הצדיקים" list is in view
+    else if(screen==='calendar:hill'){ go('calendar'); let tries=0; const aim=()=>{ const h=document.querySelector('.dd-hill'); if(!h){ if(tries++<10) setTimeout(aim,300); return; }
+        const sc=homeScroller(); sc.scrollTop+=h.getBoundingClientRect().top-Math.round(innerHeight*.3); };
+      setTimeout(aim,900); setTimeout(aim,1800); }
     else if(screen==='mazon'){ openPrayer('birkatHamazon','brachot');
       // Two passes: the header collapses/expands with the scroll, so re-aim once it settles.
       const aim=()=>{ const p=document.querySelectorAll('.prayer-para')[2]; if(!p) return; let sc=p.parentElement; while(sc && sc!==document.body && !(sc.scrollHeight>sc.clientHeight+20 && /auto|scroll/.test(getComputedStyle(sc).overflowY))) sc=sc.parentElement; sc=(sc && sc!==document.body)?sc:document.scrollingElement; sc.scrollTop+=p.getBoundingClientRect().top-230; };
