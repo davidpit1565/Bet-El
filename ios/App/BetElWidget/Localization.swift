@@ -7,6 +7,8 @@ import Foundation
 enum WidgetL10n {
     private static let strings: [String: [String: String]] = [
         "dawn": ["he": "עֲלוֹת הַשַּׁחַר", "en": "Dawn", "fr": "Aube", "ru": "Рассвет", "ka": "განთიადი"],
+        "chatzotNight": ["he": "חֲצוֹת הַלַּיְלָה", "en": "Midnight", "fr": "Minuit", "ru": "Полночь", "ka": "შუაღამე"],
+        "tzeit": ["he": "צֵאת הַכּוֹכָבִים", "en": "Nightfall", "fr": "Tombée de la nuit", "ru": "Выход звёзд", "ka": "ვარსკვლავების გამოჩენა"],
         "chatzot": ["he": "חֲצוֹת", "en": "Midday", "fr": "Midi", "ru": "Полдень", "ka": "შუადღე"],
         "zmanimToday": ["he": "זְמַנֵּי הַיּוֹם", "en": "Today's times", "fr": "Horaires du jour", "ru": "Времена на сегодня", "ka": "დღევანდელი დროები"],
         "candleIn": ["he": "עַד הַדְלָקָה", "en": "Until candle lighting", "fr": "Avant l’allumage", "ru": "До зажигания", "ka": "სანთლების ანთებამდე"],
