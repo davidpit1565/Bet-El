@@ -37,20 +37,16 @@
 ### מה חדש (What's New)
 **עברית**
 ```
-מה חדש בגרסה 2.0.1:
-• התראות על תוכן חדש: חוברת השבוע ועדכונים ישירות לטלפון (אפשר לכבות בהגדרות)
-• מסך החיפוש: תיקון פריסה ותצוגה
-• ווידג'ט הרמב"ם: הטקסט מוצג עם ניקוד
-• הספרייה: יישור נכון של טקסט עברי
+מה חדש בגרסה 2.0.2:
+• שורת חיפוש חדשה בראש מסך החיפוש, נוחה ומהירה יותר
+• אבחון הודעות בהגדרות: מצב ההתראות במבט אחד ורישום מחדש בהקשה
 • שיפורי יציבות
 ```
 **English**
 ```
-What's new in 2.0.1:
-• New content notifications: the weekly booklet and updates straight to your phone (can be turned off in Settings)
-• Search screen: layout and display fix
-• Rambam widget: the text now shows with nikud
-• Library: correct alignment of Hebrew text
+What's new in 2.0.2:
+• A new search bar at the top of the Search screen, quicker and easier to use
+• Notification diagnostics in Settings: see the notification status at a glance and re-register with a tap
 • Stability improvements
 ```
 **Français**
