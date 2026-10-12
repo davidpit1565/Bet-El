@@ -7,10 +7,8 @@ import ActivityKit
 
 /// Exposes `window.Capacitor.Plugins.NativeLiveActivity.*` to the web app -
 /// a Live Activity (Lock Screen banner + Dynamic Island) showing a live
-/// countdown to the next zman (dawn/sunrise/sunset only - the same simple solar
-/// calculation `BetElWidget`'s own Provider.swift already uses, not the
-/// app's full halachic zmanim, see Solar.swift's own header comment for
-/// why that's out of scope here too).
+/// countdown to the next zman: dawn, sunrise, midday, sunset, (nightfall when synced)
+/// and midnight, taken from the app's own exact times in the shared snapshot.
 ///
 /// Deliberately local-only (no push-to-update capability, so no
 /// `NSSupportsLiveActivitiesFrequentUpdates`/push entitlement needed
@@ -78,7 +76,7 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let snapshot = BetElSharedData.read()
         let now = Date()
-        let upcoming = nextZmanim(latitude: snapshot.latitude, longitude: snapshot.longitude, after: now)
+        let upcoming = nextZmanim(snapshot: snapshot, after: now)
         guard let next = upcoming.first else { return }
         let following = upcoming.count > 1 ? upcoming[1] : nil
 
@@ -121,20 +119,43 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// The next two of dawn/sunrise/sunset after `now` (today's, then tomorrow's) -
-    /// mirrors Provider.swift's "what's the next zman" logic.
+    private struct ZRow: Decodable { let d: String; let a: String?; let r: String?; let c: String?; let s: String?; let t: String? }
+
+    /// The next two zmanim after `now`: dawn, sunrise, midday (chatzot), sunset, nightfall
+    /// (only when the app syncs it) and midnight (chatzot halayla = midday + 12h, accurate to
+    /// about a minute). Uses the app's own exact times from the synced snapshot (the same
+    /// table the widgets read) and only falls back to Solar.swift's approximation for days
+    /// it doesn't cover. Starts from yesterday so the night after civil midnight still
+    /// finds its own midnight.
     @available(iOS 16.2, *)
-    private static func nextZmanim(latitude: Double, longitude: Double, after now: Date) -> [(label: String, date: Date)] {
-        var out: [(label: String, date: Date)] = []
-        for offset in 0...2 {
-            guard let day = Calendar.current.date(byAdding: .day, value: offset, to: now),
-                  let t = Solar.times(for: day, latitude: latitude, longitude: longitude) else { continue }
-            for z in [("dawn", t.dawn), ("sunrise", t.sunrise), ("sunset", t.sunset)] where z.1 > now {
-                out.append((label: z.0, date: z.1))
-                if out.count == 2 { return out }
-            }
+    private static func nextZmanim(snapshot: BetElSharedData.Snapshot, after now: Date) -> [(label: String, date: Date)] {
+        let frac = ISO8601DateFormatter(); frac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let plain = ISO8601DateFormatter()
+        func parse(_ s: String?) -> Date? {
+            guard let s = s else { return nil }
+            return frac.date(from: s) ?? plain.date(from: s)
         }
-        return out
+        let key = DateFormatter(); key.dateFormat = "yyyy-MM-dd"; key.locale = Locale(identifier: "en_US_POSIX")
+        var rows: [String: ZRow] = [:]
+        if let json = snapshot.zmanimJSON, let data = json.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode([ZRow].self, from: data) {
+            for r in decoded { rows[r.d] = r }
+        }
+        var all: [(label: String, date: Date)] = []
+        for offset in -1...3 {
+            guard let day = Calendar.current.date(byAdding: .day, value: offset, to: now) else { continue }
+            var noon: Date?
+            if let row = rows[key.string(from: day)], let a = parse(row.a), let r = parse(row.r), let c = parse(row.c), let s = parse(row.s) {
+                all += [("dawn", a), ("sunrise", r), ("chatzot", c), ("sunset", s)]
+                if let t = parse(row.t) { all.append(("tzeit", t)) }
+                noon = c
+            } else if let t = Solar.times(for: day, latitude: snapshot.latitude, longitude: snapshot.longitude) {
+                all += [("dawn", t.dawn), ("sunrise", t.sunrise), ("chatzot", t.solarNoon), ("sunset", t.sunset)]
+                noon = t.solarNoon
+            }
+            if let n = noon { all.append(("chatzotNight", n.addingTimeInterval(12 * 60 * 60))) }
+        }
+        return Array(all.filter { $0.date > now }.sorted { $0.date < $1.date }.prefix(2))
     }
     #endif
 }
