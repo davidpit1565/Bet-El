@@ -262,11 +262,16 @@ in English as usual.
   cached per mode (`bkDafKey` '|bw' suffix, `bkQrKey`). The earlier weekly
   colour-rotation idea (gold/blue/pink/green/orange/purple) is dropped.
   Page order: cover, rights/contact, the Rav's honour page (`bkRavHtml`,
-  `BK_RAV` - owner's text verbatim), a niftar's own full memorial page when
-  one applies that week (`bkNiftarRavHtml`, gated by exact Shabbat date -
-  returns '' most weeks, so it adds no blank page; see Rav Mordechai
-  Sharabi's entry, `BK_NIFTAR_RAV`/`BK_NIFTAR_RAV_SHABBAT`, as the pattern
-  for a future one), dedication (`bkDedicationHtml` - its niftar list is
+  `BK_RAV` - owner's text verbatim), a Rabbi's own full memorial page when
+  one applies that week (`bkNiftarRavHtml(first)` / `bkNiftarRavFor(first)`
+  - gated by recurring HEBREW yahrzeit date, not a one-time Gregorian one,
+  so it comes back automatically every year: `BK_NIFTAR_RAV_LIST` holds
+  `{hDay,hMonth,...}` entries checked against all 7 days of the printed
+  week, same technique as `hillulotFor()`; returns '' most weeks, so it
+  adds no blank page. Owner's standing request: this is a growing list -
+  add a future Rabbi here with his own `{hDay,hMonth:HMONTHS.<NAME>,...}`
+  entry, not a one-off date. Rav Mordechai Sharabi (כ' חשון) is the first
+  entry), dedication (`bkDedicationHtml` - its niftar list is
   built by `bkNiftarList(shabbat)`: `BK_DEDICATION.niftar` is the one
   permanent name shown every week, `BK_NIFTAR_EXTRA` is a flat list of
   `{shabbat,name}` entries added only on their exact date, same pattern as
