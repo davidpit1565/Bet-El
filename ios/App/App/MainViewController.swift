@@ -242,12 +242,14 @@ class MainViewController: CAPBridgeViewController {
         miniTabButton.translatesAutoresizingMaskIntoConstraints = false
         miniTabButton.alpha = 0
         miniTabButton.isHidden = true
-        miniTabButton.accessibilityLabel = "Show tab bar"
+        miniTabButton.accessibilityLabel = A11y.t("showTabs")
+        miniTabButton.accessibilityTraits = .button
+        miniTabSizeConstraints = [miniTabButton.widthAnchor.constraint(equalToConstant: A11y.scaled(56)), miniTabButton.heightAnchor.constraint(equalToConstant: A11y.scaled(56))]
         miniTabButton.addTarget(self, action: #selector(miniTabTapped), for: .touchUpInside)
         view.addSubview(miniTabButton)
         NSLayoutConstraint.activate([
-            miniTabButton.widthAnchor.constraint(equalToConstant: 56),
-            miniTabButton.heightAnchor.constraint(equalToConstant: 56),
+            miniTabSizeConstraints[0],
+            miniTabSizeConstraints[1],
             miniTabButton.centerYAnchor.constraint(equalTo: tabBar.safeAreaLayoutGuide.centerYAnchor),
         ])
         layoutMiniTabButton()
@@ -326,10 +328,8 @@ class MainViewController: CAPBridgeViewController {
             self.webView?.evaluateJavaScript(js, completionHandler: nil)
         }
         view.addSubview(toolsFab)
-        NSLayoutConstraint.activate([
-            toolsFab.widthAnchor.constraint(equalToConstant: 38),
-            toolsFab.heightAnchor.constraint(equalToConstant: 38),
-        ])
+        toolsFabSizeConstraints = [toolsFab.widthAnchor.constraint(equalToConstant: A11y.scaled(38)), toolsFab.heightAnchor.constraint(equalToConstant: A11y.scaled(38))]
+        NSLayoutConstraint.activate(toolsFabSizeConstraints)
         // Tapping anywhere outside the FAB/its open panel closes the panel.
         // cancelsTouchesInView=false so the tap still reaches the web view.
         let outsideTap = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
@@ -339,6 +339,26 @@ class MainViewController: CAPBridgeViewController {
     }
 
     private var toolsFabSideConstraints: [NSLayoutConstraint] = []
+    private var topBarBottomConstraint: NSLayoutConstraint!
+    private var toolsFabSizeConstraints: [NSLayoutConstraint] = []
+    private var miniTabSizeConstraints: [NSLayoutConstraint] = []
+
+    /// Dynamic Type changed while running: native chrome with fixed sizes re-reads its scaled size.
+    private func applyDynamicTypeScale() {
+        topBarBottomConstraint.constant = topBar.contentHeight
+        toolsFabSizeConstraints.forEach { $0.constant = A11y.scaled(38) }
+        miniTabSizeConstraints.forEach { $0.constant = A11y.scaled(56) }
+        toolsFab.rebuildForContentSize()
+        layoutToolsFab()
+        view.layoutIfNeeded()
+        reportHeightToWebView()
+    }
+
+    /// Language pushed from JS: refresh the VoiceOver labels owned by this controller.
+    func refreshA11yLabels() {
+        miniTabButton.accessibilityLabel = A11y.t("showTabs")
+        toolsFab.refreshA11y()
+    }
 
     /// Inside the header row itself, as one more glass circle on the side
     /// the header's own actions use (left in Hebrew, right otherwise), just
@@ -387,6 +407,7 @@ class MainViewController: CAPBridgeViewController {
     private func setupTopBar() {
         topBar.translatesAutoresizingMaskIntoConstraints = false
         topBar.isHidden = true
+        topBarBottomConstraint = topBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topBar.contentHeight)
         // onBack is replaced on every configureTopBar() call below with a
         // closure bound to that call's own backTo target.
         view.addSubview(topBar)
@@ -394,8 +415,9 @@ class MainViewController: CAPBridgeViewController {
             topBar.topAnchor.constraint(equalTo: view.topAnchor),
             topBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             topBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            topBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topBar.contentHeight),
+            topBarBottomConstraint,
         ])
+        topBar.onScaleChanged = { [weak self] in self?.applyDynamicTypeScale() }
     }
 
     // MARK: - Called by NativeTopBarBridge (JS-driven)

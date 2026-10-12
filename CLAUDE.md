@@ -531,8 +531,9 @@ in English as usual.
   `com.beitel.tehilim` (GCP project bet-el-e6812; gcloud was not installed). Don't touch the web key in index.html. Close the
   GitHub secret-scanning alert only after the restriction is verified.
 - **Native review leftovers (not fixed, need a decision or device testing):** a 44pt gap can
-  remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize, fixed native heights don't
-  follow Dynamic Type, and the FAB has English-only accessibility labels.
+  remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize.
+  (Dynamic Type heights and the FAB's English-only labels were fixed in the accessibility pass below; the Live Activity
+  now reads the snapshot zmanim.)
 - **Live Activity (always on, 2.0.1):** `NativeLiveActivityBridge.refreshActivity()` runs on every launch and every
   `willEnterForeground` (plus the JS `syncWidgetData()` chain). It keeps exactly one active Activity: starts one if none
   (also after a swipe-away), ends + restarts it once its zman passed (dawn/sunrise/sunset boundary), and replaces it when the
@@ -542,3 +543,18 @@ in English as usual.
   than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. It counts down to dawn, sunrise,
   midday, sunset, nightfall (only once `WIDGET_TZEIT_ROLLOVER` syncs it) and midnight (midday + 12h), read from the
   snapshot's exact `zmanimJSON` (Solar only as a fallback). Hebrew lays out RTL (`attributes.rtl`).
+
+- **Accessibility pass (native + web):** `enum A11y` (DynamicType.swift) holds the language-aware VoiceOver string table
+  (`A11y.t(key)`, he/en/fr/ru/ka) and the shared scale (`A11y.k` = body size / 17, capped 1.6; `A11y.scaled(v)`). The language comes
+  from JS: `syncNativeTabBar` passes `lang` in `NativeTabBar.configure`, which sets `A11y.lang` and calls `refreshA11yLabels()`.
+  Fixed heights now scale: NativeTopBar (bar/buttons, `onScaleChanged` -> `MainViewController.applyDynamicTypeScale()`), tools FAB
+  (panel + buttons, `rebuildForContentSize()`), mini tab button, NativeLibrary (1 column at accessibility sizes, scaled card height),
+  NativeHome label fonts (same 1.6x ceiling as its cell heights). The FAB panel's `accessibilityElements` is reversed in RTL.
+  Web: icon-only buttons get `aria-label` from `a11yIcons()` (runs at the start of `tr()`), with the strings in the separate
+  `ARIA_I18N` table - NOT `I18N`, because `tr()` partial-matches I18N keys inside visible text and short words like "חזרה" would
+  corrupt existing strings. Global `prefers-reduced-motion` rule in the boot `<style>`; light `--verse-num` darkened to #82611a (4.6:1).
+  **Reading settings** (Settings > General > "הגדרות קריאה"): `S.nikud` (strips nikud+teamim from `READER_TEXT_SEL` containers in
+  `applyReadingPrefs()`, called from `tr()` after every render; maqaf/paseq/sof pasuk stay), `S.lineSp` (`--lh-scale` .9/1/1.2,
+  every reader line-height is `calc(N * var(--lh-scale,1))`), `S.readFont` (`html[data-rfont]` overrides `--font-sacred/--font-reading`);
+  `fontScale` is untouched. Mirrored in the native settings spec/`NativeSettingsHost.onAction`. Simulator build succeeds; VoiceOver
+  itself, real-device Dynamic Type and the tab-bar/search-dock/toast (76pt) scaling were NOT tested.
