@@ -625,6 +625,43 @@ a.set-item{text-decoration:none;color:inherit}
   color:#f3e9d0;background:rgba(20,25,40,.55);border:1px solid rgba(255,255,255,.35);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
 .mirror-guide-btn.on{color:#2a1e05;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 55%),var(--gold-grad);border-color:rgba(255,255,255,.45)}
+/* ===== SETTINGS: iOS inset-grouped (same look as the first Settings page), tinted by each category's colour =====
+   Rows of a group join into one rounded surface with hairline separators; icons become coloured squircles; toggles, segmented
+   controls, steppers, select values and buttons use the category colour (--cat, set per screen from settingsCategoriesMeta()).
+   Flat fills + hairlines only - no backdrop-filter (the old .set-item blur is switched off here). */
+.set-ios{--ss:rgba(255,255,255,.06);--sh:rgba(255,255,255,.10);--sctl:rgba(118,118,135,.26);--cat:#8E8E93}
+[data-theme="light"] .set-ios{--ss:rgba(255,255,255,.72);--sh:rgba(110,85,30,.16);--sctl:rgba(120,100,60,.13)}
+.set-ios .set-group{margin-top:22px}
+.set-ios .set-group h3{font-family:var(--font-ui);font-size:12.5px;font-weight:600;letter-spacing:.2px;color:var(--muted);margin:0 16px 7px}
+.set-ios .set-group>.set-item{background:var(--ss);background-image:none;border:0;border-bottom:.5px solid var(--sh);border-radius:0;margin:0;padding:11px 14px;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.set-ios .set-group>.set-item:first-of-type{border-radius:16px 16px 0 0}
+.set-ios .set-group>.set-item:last-of-type{border-radius:0 0 16px 16px;border-bottom:0}
+.set-ios .set-group>.set-item:only-of-type{border-radius:16px;border-bottom:0}
+.set-ios .set-item .si-ico{width:30px;height:30px;border-radius:8px;background:var(--cat);color:#fff;display:grid;place-items:center;flex:none}
+.set-ios .set-item .si-ico svg{width:18px;height:18px}
+.set-ios .set-item .si-t{font-size:16px;font-weight:500}
+.set-ios .set-item .si-d{font-size:13px;color:var(--muted)}
+.set-ios .set-item>svg{color:var(--muted)}
+.set-ios .set-item.row-tap:active,.set-ios .set-item[data-cat]:active{transform:none;filter:brightness(1.25)}
+.set-ios .toggle{width:51px;height:31px;background:var(--sctl);border:0}
+.set-ios .toggle::after{top:2px;right:2px;width:27px;height:27px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.set-ios .toggle.on{background:var(--on,var(--cat))}
+.set-ios .toggle.on::after{right:calc(100% - 29px);background:#fff}
+.set-ios .toggle:active::after{width:31px}
+.set-ios .toggle.on:active::after{right:calc(100% - 33px)}
+.set-ios .seg,.set-ios .stepper{background:var(--sctl)}
+.set-ios .seg button.on{background:var(--on,var(--cat));color:#fff}
+.set-ios .stepper button{color:var(--cat)}
+.set-ios .row-select-val{color:var(--cat)}
+.set-ios .fld-select,.set-ios .fld-input,.set-ios .time-input{background-color:var(--sctl);border:0;color:var(--cat);font-weight:600}
+.set-ios .fld-input,.set-ios .time-input{color:var(--ink)}
+.set-ios .btn-gold{background:var(--cat);color:#fff;box-shadow:none}
+.set-ios .btn-ghost{background:var(--sctl);border:0;color:var(--cat);box-shadow:none}
+.set-ios .ded-add-btn{background:none;border:1px dashed var(--cat);color:var(--cat);box-shadow:none}
+.set-ios .ded-row,.set-ios .yahr-row{background:var(--sctl);border:0}
+.set-ios .ded-txt{color:var(--cat)}
+.set-ios .yahr-selects select,.set-ios .yahr-name-in{background:var(--sctl);border:0;color:var(--ink)}
+.set-ios .card{background:var(--ss);border:0;box-shadow:none}
 .mirror-tip{font-size:13px;color:#d9cfb6;text-align:center;line-height:1.6;max-width:340px;margin-top:12px}
 /* toggle */
 .toggle{width:50px;height:29px;border-radius:999px;background:var(--line);border:1px solid var(--line-strong);
@@ -13458,13 +13495,13 @@ function renderSettingsList(){
   const cats=settingsCategoriesMeta();
   app.innerHTML=`
   ${topbar(ckChrome('הגדרות'))}
-  <div class="view">
+  <div class="view set-ios">
     <div class="set-group">
-      ${cats.map(c=>`<div class="set-item" data-cat="${c.id}" style="cursor:pointer"><div class="si-l"><span class="si-ico">${c.icon}</span><div><div class="si-t">${c.label}</div><div class="si-d">${c.sub}</div></div></div>${I.chev}</div>`).join('')}
+      ${cats.map(c=>`<div class="set-item" data-cat="${c.id}" style="cursor:pointer;--cat:${c.color}"><div class="si-l"><span class="si-ico">${c.icon}</span><div><div class="si-t">${c.label}</div><div class="si-d">${c.sub}</div></div></div>${I.chev}</div>`).join('')}
     </div>
 
     ${STRIPE_DONATE_URL?`<div class="set-group">
-      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תמכו בבית אל</div><div class="si-d">כל תרומה מסיעת להמשך הלמוד היומי</div></div></div>${I.chev}</a>
+      <a class="set-item" href="${STRIPE_DONATE_URL}" target="_blank" rel="noopener" style="--cat:#FF2D55"><div class="si-l"><span class="si-ico">${I.heart}</span><div><div class="si-t">תמכו בבית אל</div><div class="si-d">כל תרומה מסיעת להמשך הלמוד היומי</div></div></div>${I.chev}</a>
     </div>`:''}
 
     <div class="ornament">${ORN}</div>
@@ -13727,7 +13764,7 @@ function renderSettingsCategory(catId){
     <div class="tb-title gold-text">${meta?meta.label:''}</div>
     <div style="width:34px"></div>
   </div>
-  <div class="view">
+  <div class="view set-ios" style="--cat:${meta?meta.color:'#8E8E93'};--on:${catId==='general'?'#34C759':(meta?meta.color:'#8E8E93')}">
     ${settingsCategoryBody(catId, notifPerm)}
     <div class="ornament">${ORN}</div>
     <div class="credit"><span class="cg">מרכז ק״ק הספרדים · בית א-ל</span></div>
