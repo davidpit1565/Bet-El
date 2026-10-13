@@ -7859,8 +7859,9 @@ function bookletSave(){ BOOKLET_LIST=BOOKLET_LIST.filter(b=>!bookletExpired(b));
 function currentBooklet(){ return BOOKLET_LIST.find(bookletActive)||null; }
 let bookletLoadPromise=null, bookletShownId=null;
 /* The weekly booklet is published ONLY to GitHub Pages: vercel.json's ignoreCommand skips Vercel builds for data/booklet-only commits, so the Vercel-hosted
-   web app never gets current.json or the PDF (404 -> no tile on the web). Always read the booklet from Pages (CORS-open); local dev keeps same-origin. */
-const BOOKLET_BASE = (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname) ? '' : 'https://davidpit1565.github.io/Bet-El/');
+   web app never gets current.json or the PDF (404 -> no tile on the web). Always read the booklet from Pages (CORS-open); local dev keeps same-origin.
+   The native app's own host is capacitor://localhost, so it must be recognised by DATA_BASE (non-empty on native), NOT by hostname, or it would look for the booklet inside the bundle (never there). */
+const BOOKLET_BASE = DATA_BASE || (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname) ? '' : 'https://davidpit1565.github.io/Bet-El/');
 function bookletURL(path){ return BOOKLET_BASE + String(path).replace(/^\.?\//,''); }
 function bookletTitle(){
   const b=currentBooklet(), t=b&&b.title; if(!t) return '';
