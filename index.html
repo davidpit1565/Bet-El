@@ -510,6 +510,37 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .zman-row.next .ztime{color:var(--gold)}
 .loc-line{text-align:center;font-size:14px;color:var(--muted);margin:10px 0 2px;display:flex;align-items:center;justify-content:center;gap:6px}
 .loc-line svg{width:13px;height:13px;color:var(--gold)}
+/* ===== CALENDAR: iOS grouped / Liquid-Glass-style surfaces =====
+   The old calendar stacked navy card -> navy card -> navy tiles, all with gold borders on a navy page (too much blue, user feedback).
+   Now one translucent NEUTRAL surface per group (iOS inset-grouped), hairline separators, a gray iOS segmented control; gold stays
+   the accent only (today / selected day / next zman). Flat fills + hairlines only - NO backdrop-filter (see the Liquid Glass note). */
+.cal-ios{--cs:rgba(255,255,255,.06);--ch:rgba(255,255,255,.11);--cseg:rgba(118,118,135,.26);--cthumb:rgba(255,255,255,.2)}
+[data-theme="light"] .cal-ios{--cs:rgba(255,255,255,.68);--ch:rgba(110,85,30,.16);--cseg:rgba(120,100,60,.13);--cthumb:#fffdf7}
+.cal-ios .card{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .ical-seg{background:var(--cseg);border:0;padding:2px}
+.cal-ios .ical-seg button{color:var(--ink-soft);padding:7px 6px}
+.cal-ios .ical-seg button.on{background:var(--cthumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 .5px 0 rgba(255,255,255,.2)}
+.cal-ios .ical-round,.cal-ios .ical-pill{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .ical-card{background:var(--cs);border:0;border-radius:22px;box-shadow:inset 0 0 0 .5px var(--ch),inset 0 1px 0 rgba(255,255,255,.06)}
+.cal-ios .day-detail.card{background:none;background-image:none;box-shadow:none;padding:0;margin-top:20px}
+.cal-ios .day-detail.card::after,.cal-ios .day-detail.card::before{display:none}
+.cal-ios .dd-portion{background:var(--cs);border:0;border-radius:16px;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .zmanim-list,.cal-ios .shabbat-times{background:var(--cs);border:0;border-radius:16px;box-shadow:inset 0 0 0 .5px var(--ch);padding:2px 14px;margin:12px 0}
+.cal-ios .zman-row{padding:12px 0;border-bottom:1px solid var(--ch)}
+.cal-ios .zman-row:last-child{border-bottom:0}
+.cal-ios .zman-row.next{background:none;border-radius:0;padding-inline:0}
+.cal-ios .zman-row.next .zname{color:var(--gold);font-weight:700}
+.cal-ios .shabbat-times{gap:0}
+.cal-ios .sb-row{padding:11px 0;border-bottom:1px solid var(--ch)}
+.cal-ios .sb-row:last-child{border-bottom:0}
+.cal-ios .dd-hill{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .dd-hill li{border-top-color:var(--ch)}
+.cal-ios .dd-share-btn{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .conv-card{margin-top:18px}
+.cal-ios .zmanim-soon{background:none;border:1px dashed var(--ch)}
+.cal-ios .fld-select,.cal-ios .fld-input{background-color:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .conv-dir .chip{background:var(--cseg);border:0;color:var(--ink-soft)}
+.cal-ios .conv-dir .chip.on{background:var(--cthumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 .5px 0 rgba(255,255,255,.2)}
 
 /* ================= SETTINGS ================= */
 .set-group{margin-top:18px}
@@ -9285,7 +9316,7 @@ function renderCalendar(){
   // own events list below the grid already lists them)
   app.innerHTML=`
   ${topbar('לוח עברי')}
-  <div class="view">
+  <div class="view cal-ios">
     <div class="ical-seg cal-mode-toggle">
       <button data-mode="heb" class="${!CAL.civil?'on':''}">לוח עברי</button>
       <button data-mode="civil" class="${CAL.civil?'on':''}">לוח לועזי</button>
