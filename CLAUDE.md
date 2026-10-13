@@ -173,10 +173,14 @@ in English as usual.
   once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
   for it specifically, enabling the general reminder toggle enables both.
 
-- **Native iOS shell decisions (by user request)**: Settings always uses the
-  app's own HTML design (`NATIVE_SETTINGS = false` in index.html - the
-  native glass-card `NativeSettingsView` is kept but unused), with
-  `settingsRowsTappable()` making whole rows the touch target like iOS.
+- **Native iOS shell decisions (by user request)**: Settings category screens are REAL
+  native UIKit when the `NativeSettings` plugin exists (`NATIVE_SETTINGS` = plugin presence in index.html): an inset-grouped
+  `UITableView` in `NativeSettingsView.swift` (UISwitch/UIStepper/UISegmentedControl/UIMenu/text fields; iOS 26 glass buttons)
+  driven by the JS spec `nativeSettingsCategorySpec()`; JS stays the source of truth (`NativeSettingsHost.onAction`, the whole
+  spec is re-sent after each action). Row types: toggle, stepper, segmented, select, button, disclosure, link, item (deletable
+  entry), form (text/menu fields + add button; yahrzeit/dedication/names). Backup export/import run natively
+  (`exportBackupNatively`/`importBackupNatively`). The HTML settings (`renderSettings*`, `settingsRowsTappable()`) remain the
+  web/PWA/old-iOS fallback.
   Search is its own tab, App Store style (`TAB==='search'`, `renderSearch()`: suggestions + recent searches, then
   live results; native: like Halacha Yomit - a real `.minimal` UISearchBar docked at the TOP under the header (`searchDock` in
   MainViewController, Search tab only), the FULL tab bar always stays (user rule) with Search selected; `--native-header-h`
@@ -313,8 +317,9 @@ in English as usual.
   for "jump", and a paging UIScrollView day pager: swipe sideways = next/previous day). Day data comes from
   `window.NativeCalendarHost.day(ymd)` / `.events(a,b)` in index.html (`renderCalendarNative`; needs iOS 16+,
   `NATIVE_CAL_OK`). The web calendar (`renderCalendar`, `.ical-*` CSS, `calStepDay`) remains the fallback.
-  UPDATE: the user then chose the web calendar look (seg control row + month title with today/jump/chevrons), so
-  `NATIVE_CAL_ENABLED=false` in index.html - the native calendar code is kept but off.
+  UPDATE 2: `NATIVE_CAL_ENABLED=true` again (native calendar on iOS 16+ with the plugin; web calendar is the fallback). The day
+  details are now an inset-grouped list (`NCGroup` rows: events, parasha + portions, hillulot, candle lighting, zmanim, share)
+  under the UICalendarView card; `NativeCalendarHost.day()` also returns `hillulot`.
   Pull-to-refresh is native too (`MainViewController.refreshPanned`: UIPanGestureRecognizer + glass UIActivityIndicatorView, gated by JS `betelCanPull()`; the JS pull is web-only). Still HTML: most list/tile screens.
 
 - **Library category grid is native** (`NativeLibrary.swift`: UICollectionView + compositional layout + glass cards;

@@ -19,6 +19,10 @@ import Capacitor
 ///   - "button"     {id, title, subtitle}
 ///   - "disclosure" {id, title, subtitle}
 ///   - "link"       {id, title, subtitle, url: String}          (opened directly, never relayed)
+///   - "item"       {id, title, subtitle, value: String(index)} (deletable list entry; relays id + index)
+///   - "form"       {id, buttonLabel, fields:[{key, kind: "text"|"menu", placeholder, value, options}]}
+///                  (relays id + a JSON object of the entered values when the add button is tapped)
+/// Sections may carry a `footer` string.
 /// Any row may also carry {icon: String (SF Symbol name), iconColor: String
 /// ("#RRGGBB")} for a small colored icon badge leading the row, matching
 /// the real Settings app's own category rows - used by the top-level
@@ -50,6 +54,7 @@ public class NativeSettingsBridge: CAPPlugin, CAPBridgedPlugin {
         var sections: [NativeSettingsSection] = []
         for case let sectionDict as [String: Any] in sectionsRaw {
             let header = sectionDict["header"] as? String ?? ""
+            let footer = sectionDict["footer"] as? String ?? ""
             let rowsRaw = sectionDict["rows"] as? [[String: Any]] ?? []
             let rows: [NativeSettingsRow] = rowsRaw.map { rowDict in
                 let optionsRaw = rowDict["options"] as? [[String: Any]] ?? []
@@ -66,10 +71,21 @@ public class NativeSettingsBridge: CAPPlugin, CAPBridgedPlugin {
                     options: options,
                     url: rowDict["url"] as? String,
                     icon: rowDict["icon"] as? String,
-                    iconColor: rowDict["iconColor"] as? String
+                    iconColor: rowDict["iconColor"] as? String,
+                    fields: ((rowDict["fields"] as? [[String: Any]]) ?? []).map { f in
+                        NativeSettingsField(
+                            key: f["key"] as? String ?? "",
+                            kind: f["kind"] as? String ?? "text",
+                            placeholder: f["placeholder"] as? String ?? "",
+                            value: f["value"] as? String ?? "",
+                            options: ((f["options"] as? [[String: Any]]) ?? []).map {
+                                (($0["value"] as? String) ?? "", ($0["label"] as? String) ?? "")
+                            })
+                    },
+                    buttonLabel: rowDict["buttonLabel"] as? String ?? ""
                 )
             }
-            sections.append(NativeSettingsSection(header: header, rows: rows))
+            sections.append(NativeSettingsSection(header: header, footer: footer, rows: rows))
         }
         DispatchQueue.main.async {
             NativeSettingsBridge.activeController?.configureSettings(title: title, sections: sections, isDark: isDark, isRTL: isRTL)

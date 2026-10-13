@@ -30,71 +30,128 @@ struct NCDayInfo: Decodable {
     let loc: String?
     let zmanim: [Row]
     let shabbat: [Row]
+    struct Hill: Decodable { let name: String; let sub: String? }
+    let hillulot: [Hill]
+    let hillulotTitle: String?
+    let hillulotFooter: String?
 }
 
-// MARK: - Glass card
-
-final class NCGlassCard: UIView {
-    private let effectView: UIVisualEffectView
-
-    override init(frame: CGRect) {
-        if #available(iOS 26.0, *) {
-            effectView = UIVisualEffectView(effect: UIGlassEffect())
-        } else {
-            effectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
-        }
-        super.init(frame: frame)
-        effectView.translatesAutoresizingMaskIntoConstraints = false
-        effectView.layer.cornerRadius = 26
-        effectView.clipsToBounds = true
-        addSubview(effectView)
-        NSLayoutConstraint.activate([
-            effectView.topAnchor.constraint(equalTo: topAnchor),
-            effectView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            effectView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            effectView.trailingAnchor.constraint(equalTo: trailingAnchor),
-        ])
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    /// Pins `view` inside the glass with the given insets.
-    func embed(_ view: UIView, insets: UIEdgeInsets) {
+/// Rounded inset-grouped container holding Apple's UICalendarView.
+final class NCCard: UIView {
+    func embed(_ view: UIView, insets: UIEdgeInsets, isDark: Bool) {
+        backgroundColor = isDark ? UIColor(red: 0.075, green: 0.105, blue: 0.2, alpha: 1) : UIColor(white: 1, alpha: 0.78)
+        if #available(iOS 26.0, *) { cornerConfiguration = .corners(radius: .fixed(26)) } else { layer.cornerRadius = 10 }
+        clipsToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
-        effectView.contentView.addSubview(view)
+        addSubview(view)
         NSLayoutConstraint.activate([
-            view.topAnchor.constraint(equalTo: effectView.contentView.topAnchor, constant: insets.top),
-            view.bottomAnchor.constraint(equalTo: effectView.contentView.bottomAnchor, constant: -insets.bottom),
-            view.leadingAnchor.constraint(equalTo: effectView.contentView.leadingAnchor, constant: insets.left),
-            view.trailingAnchor.constraint(equalTo: effectView.contentView.trailingAnchor, constant: -insets.right),
+            view.topAnchor.constraint(equalTo: topAnchor, constant: insets.top),
+            view.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -insets.bottom),
+            view.leadingAnchor.constraint(equalTo: leadingAnchor, constant: insets.left),
+            view.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -insets.right),
         ])
     }
 }
 
-// MARK: - One day's detail page
+// MARK: - Inset-grouped list pieces (same look as the Settings list: UITableView .insetGrouped)
+
+/// One inset-grouped section: optional header above, rounded rows with hairline separators, optional footer below.
+final class NCGroup: UIStackView {
+    private let box = UIView()
+    private let rows = UIStackView()
+
+    init(header: String?, footer: String?, tint: UIColor, isDark: Bool, rtl: Bool) {
+        super.init(frame: .zero)
+        axis = .vertical
+        spacing = 6
+        let attr: UISemanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
+        semanticContentAttribute = attr
+        if let h = header, !h.isEmpty {
+            let l = UILabel()
+            l.text = h.uppercased(with: .current)
+            l.numberOfLines = 0
+            l.textColor = tint
+            l.font = UIFont.preferredFont(forTextStyle: .footnote)
+            l.adjustsFontForContentSizeCategory = true
+            let wrap = UIView(); l.translatesAutoresizingMaskIntoConstraints = false; wrap.addSubview(l)
+            NSLayoutConstraint.activate([
+                l.topAnchor.constraint(equalTo: wrap.topAnchor), l.bottomAnchor.constraint(equalTo: wrap.bottomAnchor),
+                l.leadingAnchor.constraint(equalTo: wrap.leadingAnchor, constant: 16), l.trailingAnchor.constraint(equalTo: wrap.trailingAnchor, constant: -16),
+            ])
+            addArrangedSubview(wrap)
+        }
+        box.backgroundColor = isDark ? UIColor(red: 0.075, green: 0.105, blue: 0.2, alpha: 1) : UIColor(white: 1, alpha: 0.78)
+        if #available(iOS 26.0, *) { box.cornerRadius26() } else { box.layer.cornerRadius = 10 }
+        box.clipsToBounds = true
+        rows.axis = .vertical
+        rows.semanticContentAttribute = attr
+        rows.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(rows)
+        NSLayoutConstraint.activate([
+            rows.topAnchor.constraint(equalTo: box.topAnchor), rows.bottomAnchor.constraint(equalTo: box.bottomAnchor),
+            rows.leadingAnchor.constraint(equalTo: box.leadingAnchor), rows.trailingAnchor.constraint(equalTo: box.trailingAnchor),
+        ])
+        addArrangedSubview(box)
+        if let f = footer, !f.isEmpty {
+            let l = UILabel()
+            l.text = f; l.numberOfLines = 0; l.textColor = .secondaryLabel
+            l.font = UIFont.preferredFont(forTextStyle: .footnote); l.adjustsFontForContentSizeCategory = true
+            let wrap = UIView(); l.translatesAutoresizingMaskIntoConstraints = false; wrap.addSubview(l)
+            NSLayoutConstraint.activate([
+                l.topAnchor.constraint(equalTo: wrap.topAnchor), l.bottomAnchor.constraint(equalTo: wrap.bottomAnchor),
+                l.leadingAnchor.constraint(equalTo: wrap.leadingAnchor, constant: 16), l.trailingAnchor.constraint(equalTo: wrap.trailingAnchor, constant: -16),
+            ])
+            addArrangedSubview(wrap)
+        }
+    }
+
+    required init(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func addRow(_ row: UIView) {
+        if !rows.arrangedSubviews.isEmpty {
+            let sep = UIView()
+            sep.backgroundColor = UIColor.separator.withAlphaComponent(0.6)
+            sep.translatesAutoresizingMaskIntoConstraints = false
+            sep.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale).isActive = true
+            let holder = UIView(); holder.addSubview(sep)
+            NSLayoutConstraint.activate([
+                sep.topAnchor.constraint(equalTo: holder.topAnchor), sep.bottomAnchor.constraint(equalTo: holder.bottomAnchor),
+                sep.leadingAnchor.constraint(equalTo: holder.leadingAnchor, constant: 16), sep.trailingAnchor.constraint(equalTo: holder.trailingAnchor),
+            ])
+            rows.addArrangedSubview(holder)
+        }
+        rows.addArrangedSubview(row)
+    }
+}
+
+private extension UIView {
+    @available(iOS 26.0, *)
+    func cornerRadius26() { cornerConfiguration = .corners(radius: .fixed(26)) }
+}
+
+// MARK: - One day's detail page (native grouped list)
 
 final class NCDayPage: UIView {
     var onPortion: ((Int, Int) -> Void)?
     var onShare: (() -> Void)?
     var tint: UIColor = .systemYellow { didSet { tintColor = tint } }
+    var isDark = true
 
-    private let card = NCGlassCard()
     private let stack = UIStackView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        card.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(card)
-        NSLayoutConstraint.activate([
-            card.topAnchor.constraint(equalTo: topAnchor),
-            card.bottomAnchor.constraint(equalTo: bottomAnchor),
-            card.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
-            card.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
-        ])
         stack.axis = .vertical
-        stack.spacing = 12
+        stack.spacing = 22
         stack.alignment = .fill
-        card.embed(stack, insets: UIEdgeInsets(top: 18, left: 16, bottom: 18, right: 16))
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+        ])
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -112,75 +169,62 @@ final class NCDayPage: UIView {
         return l
     }
 
-    private func pill(_ text: String) -> UIView {
-        let l = label(text, style: .footnote, weight: .semibold, color: tint, align: .center)
-        let box = UIView()
-        box.backgroundColor = tint.withAlphaComponent(0.16)
-        box.layer.cornerRadius = 12
-        l.translatesAutoresizingMaskIntoConstraints = false
-        box.addSubview(l)
-        NSLayoutConstraint.activate([
-            l.topAnchor.constraint(equalTo: box.topAnchor, constant: 6),
-            l.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -6),
-            l.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
-            l.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
-        ])
-        return box
-    }
-
-    private func infoBox(title: String, value: String) -> UIView {
-        let t = label(title, style: .caption1, color: .secondaryLabel, align: .center)
-        let v = label(value, style: .headline, weight: .semibold, align: .center)
-        let s = UIStackView(arrangedSubviews: [t, v])
-        s.axis = .vertical
-        s.spacing = 2
-        let box = UIView()
-        box.backgroundColor = UIColor.secondarySystemFill
-        box.layer.cornerRadius = 16
-        s.translatesAutoresizingMaskIntoConstraints = false
-        box.addSubview(s)
-        NSLayoutConstraint.activate([
-            s.topAnchor.constraint(equalTo: box.topAnchor, constant: 10),
-            s.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -10),
-            s.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 10),
-            s.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -10),
-        ])
-        return box
-    }
-
-    private func timeRow(_ row: NCDayInfo.Row, highlight: Bool) -> UIView {
-        let name = label(row.label, style: .body, color: highlight ? tint : .label)
-        let time = label(row.time, style: .body, weight: highlight ? .bold : .regular,
-                         color: highlight ? tint : .secondaryLabel)
-        time.font = UIFont.monospacedDigitSystemFont(ofSize: time.font.pointSize, weight: highlight ? .bold : .regular)
-        time.setContentHuggingPriority(.required, for: .horizontal)
-        time.setContentCompressionResistancePriority(.required, for: .horizontal)
-        let s = UIStackView(arrangedSubviews: [name, time])
-        s.axis = .horizontal
-        s.spacing = 8
-        s.alignment = .firstBaseline
+    /// A standard list row: leading title, trailing value, optional disclosure chevron / tap.
+    private func listRow(_ title: String, value: String?, highlight: Bool = false, chevron: Bool = false,
+                         icon: String? = nil, tap: (() -> Void)? = nil) -> UIView {
+        let name = label(title, style: .body, color: highlight ? tint : .label)
+        var parts: [UIView] = []
+        if let icon = icon, let img = UIImage(systemName: icon) {
+            let iv = UIImageView(image: img); iv.tintColor = tint; iv.contentMode = .scaleAspectFit
+            iv.setContentHuggingPriority(.required, for: .horizontal)
+            parts.append(iv)
+        }
+        parts.append(name)
+        if let v = value {
+            let t = label(v, style: .body, weight: highlight ? .semibold : .regular, color: highlight ? tint : .secondaryLabel, align: .right)
+            t.font = UIFont.monospacedDigitSystemFont(ofSize: t.font.pointSize, weight: highlight ? .semibold : .regular)
+            t.textAlignment = .natural
+            t.setContentHuggingPriority(.required, for: .horizontal)
+            t.setContentCompressionResistancePriority(.required, for: .horizontal)
+            let spacer = UIView(); spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            name.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            parts.append(t)
+        }
+        if chevron {
+            let sym = effectiveUserInterfaceLayoutDirection == .rightToLeft ? "chevron.left" : "chevron.right"
+            let c = UIImageView(image: UIImage(systemName: sym)); c.tintColor = .tertiaryLabel
+            c.setContentHuggingPriority(.required, for: .horizontal)
+            parts.append(c)
+        }
+        let s = UIStackView(arrangedSubviews: parts)
+        s.axis = .horizontal; s.spacing = 10; s.alignment = .center
+        s.isLayoutMarginsRelativeArrangement = true
+        s.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 11, leading: 16, bottom: 11, trailing: 16)
+        s.semanticContentAttribute = semanticContentAttribute
+        if let tap = tap {
+            let g = TapAction(tap)
+            s.addGestureRecognizer(g)
+        }
         return s
     }
 
-    private func separator() -> UIView {
-        let v = UIView()
-        v.backgroundColor = UIColor.separator.withAlphaComponent(0.5)
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale).isActive = true
-        return v
+    private final class TapAction: UITapGestureRecognizer {
+        private let handler: () -> Void
+        init(_ h: @escaping () -> Void) { handler = h; super.init(target: nil, action: nil); addTarget(self, action: #selector(fire)) }
+        @objc private func fire() { handler() }
     }
 
-    private func actionButton(title: String, symbol: String, action: @escaping () -> Void) -> UIButton {
-        let b = UIButton(type: .system)
+    private func shareButton(title: String) -> UIView {
         var config: UIButton.Configuration
-        if #available(iOS 26.0, *) { config = UIButton.Configuration.glass() } else { config = UIButton.Configuration.tinted() }
+        if #available(iOS 26.0, *) { config = UIButton.Configuration.prominentGlass() } else { config = UIButton.Configuration.filled() }
         config.title = title
-        config.image = UIImage(systemName: symbol)
+        config.image = UIImage(systemName: "square.and.arrow.up")
         config.imagePadding = 8
         config.cornerStyle = .capsule
-        config.baseForegroundColor = tint
-        b.configuration = config
-        b.addAction(UIAction { _ in action() }, for: .touchUpInside)
+        config.baseBackgroundColor = tint
+        config.baseForegroundColor = UIColor(white: 0.12, alpha: 1)
+        let b = UIButton(configuration: config)
+        b.addAction(UIAction { [weak self] _ in self?.onShare?() }, for: .touchUpInside)
         return b
     }
 
@@ -190,47 +234,48 @@ final class NCDayPage: UIView {
         stack.semanticContentAttribute = semanticContentAttribute
         guard let info = info else { return }
 
-        stack.addArrangedSubview(label(info.title, style: .title2, weight: .bold, align: .center))
-        stack.addArrangedSubview(label(info.greg, style: .subheadline, color: .secondaryLabel, align: .center))
+        // Title block (like a large-title header of a detail screen)
+        let head = UIStackView(arrangedSubviews: [
+            label(info.title, style: .title2, weight: .bold, align: .center),
+            label(info.greg, style: .subheadline, color: .secondaryLabel, align: .center),
+        ])
+        head.axis = .vertical; head.spacing = 2
+        stack.addArrangedSubview(head)
+
+        func group(_ header: String?, footer: String? = nil) -> NCGroup {
+            NCGroup(header: header, footer: footer, tint: tint, isDark: isDark, rtl: rtl)
+        }
 
         if !info.events.isEmpty {
-            for e in info.events { stack.addArrangedSubview(pill(e)) }
+            let g = group(nil)
+            for e in info.events { g.addRow(listRow(e, value: nil, highlight: true, icon: "star.fill")) }
+            stack.addArrangedSubview(g)
         }
-        if let pl = info.parashaLabel, let pv = info.parasha {
-            stack.addArrangedSubview(infoBox(title: pl, value: pv))
-        }
-        if !info.portions.isEmpty {
-            let row = UIStackView()
-            row.axis = .horizontal
-            row.spacing = 10
-            row.distribution = .fillEqually
-            row.semanticContentAttribute = stack.semanticContentAttribute
+        if (info.parasha != nil && info.parashaLabel != nil) || !info.portions.isEmpty {
+            let g = group(nil)
+            if let pl = info.parashaLabel, let pv = info.parasha { g.addRow(listRow(pl, value: pv, icon: "book.closed")) }
             for p in info.portions {
-                let box = infoBox(title: p.label, value: p.val)
-                let tap = UITapGestureRecognizer(target: self, action: #selector(portionTapped(_:)))
-                box.addGestureRecognizer(tap)
-                box.tag = p.a * 1000 + p.b
-                row.addArrangedSubview(box)
+                let a = p.a, b = p.b
+                g.addRow(listRow(p.label, value: p.val, chevron: true, icon: "text.book.closed") { [weak self] in self?.onPortion?(a, b) })
             }
-            stack.addArrangedSubview(row)
+            stack.addArrangedSubview(g)
         }
-        if let loc = info.loc {
-            stack.addArrangedSubview(label("📍 " + loc, style: .footnote, color: .secondaryLabel))
-        }
-        if !info.zmanim.isEmpty {
-            stack.addArrangedSubview(separator())
-            for z in info.zmanim { stack.addArrangedSubview(timeRow(z, highlight: z.next ?? false)) }
+        if !info.hillulot.isEmpty {
+            let g = group(info.hillulotTitle, footer: info.hillulotFooter)
+            for h in info.hillulot { g.addRow(listRow(h.name, value: h.sub, icon: "flame")) }
+            stack.addArrangedSubview(g)
         }
         if !info.shabbat.isEmpty {
-            stack.addArrangedSubview(separator())
-            for z in info.shabbat { stack.addArrangedSubview(timeRow(z, highlight: true)) }
+            let g = group(nil)
+            for z in info.shabbat { g.addRow(listRow(z.label, value: z.time, highlight: true, icon: "flame.fill")) }
+            stack.addArrangedSubview(g)
         }
-        stack.addArrangedSubview(actionButton(title: shareTitle, symbol: "square.and.arrow.up") { [weak self] in self?.onShare?() })
-    }
-
-    @objc private func portionTapped(_ g: UITapGestureRecognizer) {
-        guard let tag = g.view?.tag else { return }
-        onPortion?(tag / 1000, tag % 1000)
+        if !info.zmanim.isEmpty {
+            let g = group(info.loc.map { "📍 " + $0 })
+            for z in info.zmanim { g.addRow(listRow(z.label, value: z.time, highlight: z.next ?? false)) }
+            stack.addArrangedSubview(g)
+        }
+        stack.addArrangedSubview(shareButton(title: shareTitle))
     }
 }
 
@@ -263,7 +308,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
     private let segmented = UISegmentedControl(items: ["", ""])
     private let jumpButton = UIButton(type: .system)
     private let todayButton = UIButton(type: .system)
-    private let calendarCard = NCGlassCard()
+    private let calendarCard = NCCard()
     private let calendarView = UICalendarView()
     private var selectionBehavior: UICalendarSelectionSingleDate!
     private let pager = UIScrollView()
@@ -338,7 +383,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         // Apple's own calendar month grid inside a glass card
         calendarView.delegate = self
         calendarCard.translatesAutoresizingMaskIntoConstraints = false
-        calendarCard.embed(calendarView, insets: UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8))
+        calendarCard.embed(calendarView, insets: UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8), isDark: cfg.isDark)
         content.addArrangedSubview(calendarCard)
 
         // Day pager: three pages (prev / current / next), real paging physics
@@ -378,6 +423,8 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         cfg = config
         isHebrew = !config.civil
         overrideUserInterfaceStyle = config.isDark ? .dark : .light
+        backgroundColor = config.isDark ? UIColor(red: 0.031, green: 0.051, blue: 0.098, alpha: 1) : UIColor(red: 0.937, green: 0.902, blue: 0.824, alpha: 1)
+        calendarCard.backgroundColor = config.isDark ? UIColor(red: 0.075, green: 0.105, blue: 0.2, alpha: 1) : UIColor(white: 1, alpha: 0.78)
         tintColor = gold
         let attr: UISemanticContentAttribute = config.rtl ? .forceRightToLeft : .forceLeftToRight
         semanticContentAttribute = attr
@@ -395,6 +442,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         styleButton(todayButton, title: config.todayLabel, symbol: nil)
         for p in pages {
             p.tint = gold
+            p.isDark = config.isDark
             p.onPortion = { [weak self] a, b in self?.fire?("window.NativeCalendarHost.openPortion(\(a),\(b))") }
             p.onShare = { [weak self] in
                 guard let self = self else { return }

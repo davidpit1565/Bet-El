@@ -9281,9 +9281,9 @@ function calMonthEventsHTML(evMap,firstAbs,len){
 /* The Calendar tab is a REAL native iOS screen when available (NativeCalendar.swift: UICalendarView +
    UISegmentedControl + glass buttons + a paging day pager). It needs iOS 16+; on older iOS, the web and
    the PWA, the web calendar below is used. NATIVE_CAL_OK: null = not asked yet, true/false = answer. */
-/* Off by user decision (2026-10): the web calendar design is the one they want. The native UICalendarView
-   code (NativeCalendar.swift) is kept but unused; flip to true to use it again on iOS 16+. */
-const NATIVE_CAL_ENABLED=false;
+/* On: the native UICalendarView calendar (NativeCalendar.swift) is used on iOS 16+ when the plugin is present.
+   The web calendar below stays as the fallback (old iOS, PWA, browsers). Set false to force the web calendar. */
+const NATIVE_CAL_ENABLED=true;
 let NATIVE_CAL_OK=null;
 function nativeCalPlugin(){ try{ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeCalendar; }catch(e){ return null; } }
 function ymdOf(g){ return g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0'); }
@@ -9296,6 +9296,7 @@ function renderCalendarNative(){
   tr(app);
   const sel=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY):currentHDate();
   NATIVE_CAL_SHOWN=true;
+  if(!HILLULOT) ensureHillulot().then(()=>{ if(NATIVE_CAL_SHOWN && TAB==='calendar') renderCalendarNative(); }).catch(()=>{});
   NC.show({
     isRTL:S.lang==='he', isDark:document.documentElement.dataset.theme==='dark', lang:S.lang||'he',
     ymd:ymdOf(sel.greg()), civil:!!CAL.civil,
@@ -9476,6 +9477,8 @@ window.NativeCalendarHost={
       portions:[{label:T('קְרִיאָה חָדְשִׁית'),val:heNum(mRange[0])+'–'+heNum(mRange[1]),a:mRange[0],b:mRange[1]},
                 {label:T('קְרִיאָה שְׁבוּעִית'),val:heNum(wRange[0])+'–'+heNum(wRange[1]),a:wRange[0],b:wRange[1]}],
       loc:T(LOC.name),
+      hillulot:(hillulotFor(hd)||[]).map(x=>({name:x.name,sub:[x.note,x.year].filter(Boolean).join(' · ')||null})),
+      hillulotTitle:T('לעילוי נשמת הצדיקים'), hillulotFooter:T('זכותם תגן עלינו, אמן'),
       zmanim:zlist.map(z=>({label:T(z.label),time:fmtTime(z.date),next:z.key===nextKey})),
       shabbat
     };
@@ -14458,7 +14461,7 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
    felt inconsistent - Settings now always uses the app's own HTML design
    (with the native-only glass skin) on every platform. The plugin and the
    spec builders below are kept so it can be switched back on in one place. */
-const NATIVE_SETTINGS = false;
+const NATIVE_SETTINGS = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeSettings);
 function nsRow(id,type,title,subtitle,extra){ return Object.assign({id,type,title,subtitle:subtitle||''}, extra||{}); }
 function nativeSettingsSpec(){
   if(SETTINGS_VIEW==='list'){
@@ -14521,25 +14524,41 @@ function nativeSettingsCategorySpec(catId){
         nsRow('region','segmented',ckChrome('ישראל / חוץ לארץ'),ckChrome('קובע יום טוב שני, חול המועד וכדומה בלוח השנה'),{value:S.calRegion||'auto', options:[{value:'auto',label:ckChrome('אוטומטי')},{value:'il',label:ckChrome('ישראל')},{value:'chul',label:ckChrome('חוץ לארץ')}]}),
       ]}];
       break;
-    case 'personal':
+    case 'personal': {
+      const dedTypes=['refua','iluy','hatzlacha','zivug','zera','parnasa','shalombayit','arichut','general'];
+      const monthName=i=>(S.lang&&S.lang!=='he')?(({en:MONTHS_EN,fr:MONTHS_FR,ru:MONTHS_RU,ka:MONTHS_KA}[S.lang]||{})[i+1]||HEB_MONTHS_HE[i]):HEB_MONTHS_HE[i];
+      const names=S.hebrewNames||[];
+      const ded=dedList();
+      const yahr=getYahrzeits();
       sections=[
-        {header:ckChrome('פָּסוּק לְפִי הַשֵּׁם'), rows:[
-          nsRow('hebrewNames','disclosure', (S.hebrewNames&&S.hebrewNames.length)?S.hebrewNames.join(' · '):ckChrome('אין שמות עדין')),
+        {header:ckChrome('פָּסוּק לְפִי הַשֵּׁם'), footer:ckChrome('כתבו שם או כמה שמות עבריים, ובסוף כל עמידה יופיעו כל פסוקי תהלים המתחילים ומסתימים באותיות כל שם, לפי הסדר שנרשמו כאן'), rows:[
+          ...names.map((n,i)=>nsRow('delName','item',n,'',{value:String(i)})),
+          nsRow('addName','form','','',{buttonLabel:ckChrome('הוֹסֵף'),fields:[{key:'n',kind:'text',placeholder:ckChrome('לְדֻגְמָה: מֵאִיר')}]}),
         ]},
         {header:ckChrome('הקדשת הקריאה'), rows:[
-          nsRow('dedications','disclosure', dedicationLine()||ckChrome('אין הקדשות עדין')),
+          ...ded.map((d,i)=>nsRow('delDed','item',ckChrome(dedLabel(d.t))+' '+d.n,'',{value:String(i)})),
+          nsRow('addDed','form','','',{buttonLabel:ckChrome('הוסף הקדשה'),fields:[
+            {key:'t',kind:'menu',value:'refua',options:dedTypes.map(t=>({value:t,label:ckChrome(dedLabel(t))}))},
+            {key:'n',kind:'text',placeholder:ckChrome('שם, למשל: יוסף בן שרה')},
+          ]}),
         ]},
         {header:ckChrome('יאהרצייט · זכרון'), rows:[
-          nsRow('yahrzeit','disclosure', getYahrzeits().length ? getYahrzeits().map(y=>y.name).join(' · ') : ckChrome('אין זכרונות עדין')),
+          ...yahr.map((y,i)=>nsRow('delYahr','item',y.name,yahrzeitHebLabel(y),{value:String(i)})),
+          nsRow('addYahr','form','','',{buttonLabel:ckChrome('הוסף יאהרצייט'),fields:[
+            {key:'name',kind:'text',placeholder:ckChrome('שם הנפטר / הנפטרת')},
+            {key:'hm',kind:'menu',value:'1',options:HEB_MONTHS_HE.map((m,i)=>({value:String(i+1),label:monthName(i)}))},
+            {key:'hd',kind:'menu',value:'1',options:[...Array(30)].map((_,i)=>({value:String(i+1),label:heNum(i+1)}))},
+          ]}),
         ]},
       ];
       break;
+    }
     case 'share':
       sections=[{header:ckChrome('שתוף'), rows:[
-        nsRow('shareApp','disclosure',ckChrome('שתף את האפליקציה'),ckChrome('שלח לחברים בקהלה')),
-        nsRow('shareAppQR','disclosure',ckChrome('שתף קוד QR'),ckChrome('תמונה מעצבת לסריקה')),
-        nsRow('bkExport','disclosure',ckChrome('גבוי לקבץ'),ckChrome('שמירת התקדמות, מועדפים והגדרות')),
-        nsRow('bkImport','disclosure',ckChrome('שחזור מגבוי'),ckChrome('טעינת קבץ גבוי קים')),
+        nsRow('shareApp','button',ckChrome('שתף את האפליקציה'),ckChrome('שלח לחברים בקהלה')),
+        nsRow('shareAppQR','button',ckChrome('שתף קוד QR'),ckChrome('תמונה מעצבת לסריקה')),
+        nsRow('bkExport','button',ckChrome('גבוי לקבץ'),ckChrome('שמירת התקדמות, מועדפים והגדרות')),
+        nsRow('bkImport','button',ckChrome('שחזור מגבוי'),ckChrome('טעינת קבץ גבוי קים')),
         nsRow('resetProg','button',ckChrome('אפוס מעקב היום'),ckChrome('נקה סימון פרקים שנקראו')),
       ]}];
       break;
@@ -14587,10 +14606,30 @@ window.NativeSettingsHost = {
       case 'tefillinMirror': click('#openTefillinMirror'); break;
       case 'tracker': click('#settingsTracker'); break;
       case 'chokExplainer': click('#settingsChokExplainer'); break;
-      case 'hebrewNames': case 'dedications': case 'yahrzeit':
-      case 'shareApp': case 'shareAppQR': case 'bkExport': case 'bkImport':
-        hideNativeSettings(); break;
+      case 'addName': { const n=(JSON.parse(value||'{}').n||'').trim(); if(!n){ toast('הזן שם'); return; }
+        if(!Array.isArray(S.hebrewNames)) S.hebrewNames=[]; S.hebrewNames.push(n); saveS(); renderSettings(); toast('השם נוסף'); break; }
+      case 'delName': { if(Array.isArray(S.hebrewNames)){ S.hebrewNames.splice(+value,1); saveS(); renderSettings(); } break; }
+      case 'addDed': { const f=JSON.parse(value||'{}'); const n=(f.n||'').trim(); if(!n){ toast('הזן שם'); return; }
+        const L=dedList(); L.push({t:f.t||'refua',n}); saveDedList(L); S.dedName=''; S.dedType='none'; saveS(); renderSettings(); toast('ההקדשה נוספה'); break; }
+      case 'delDed': { const L=dedList(); L.splice(+value,1); saveDedList(L); renderSettings(); break; }
+      case 'addYahr': { const f=JSON.parse(value||'{}'); const name=(f.name||'').trim(); if(!name){ toast('הזן שם'); return; }
+        const L=getYahrzeits(); L.push({name,hm:+f.hm||1,hd:+f.hd||1}); saveYahrzeits(L); renderSettings(); toast('נוסף'); break; }
+      case 'delYahr': { const L=getYahrzeits(); L.splice(+value,1); saveYahrzeits(L); renderSettings(); break; }
+      case 'shareApp': shareApp(); break;
+      case 'shareAppQR': shareQR(); break;
     }
+  },
+  /* Backup export/import run natively (share sheet / document picker): the
+     browser download + <input type=file> path needs a real web gesture. */
+  backupJSON(){
+    const keys=['betel_settings','betel_loc','betel_prog','betel_fav','betel_last','betel_streak','betel_yahr','betel_dedl','betel_total_read','betel_books_completed'];
+    const data={}; keys.forEach(k=>{const v=localStorage.getItem(k); if(v!=null)data[k]=v;});
+    return JSON.stringify({app:'betel-tehillim',v:1,data});
+  },
+  importBackup(text){
+    try{ const j=JSON.parse(text); if(j.app!=='betel-tehillim'||!j.data) throw 0;
+      Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
+    }catch(e){ toast('קבץ גבוי לא תקין'); }
   }
 };
 
