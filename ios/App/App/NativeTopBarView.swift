@@ -36,7 +36,9 @@ final class NativeTopBarView: UIView {
     var onQuickAction: ((String) -> Void)?
 
     private let goldColor = UIColor.betelGold
-    private let barHeight: CGFloat = 44
+    private var barHeight: CGFloat { A11y.scaled(44) }
+    private var buttonSize: CGFloat { A11y.scaled(38) }
+    private var scaledConstraints: [(NSLayoutConstraint, CGFloat)] = []
 
     private let titleLabel = UILabel()
     private let backButton = UIButton(type: .system)
@@ -138,22 +140,26 @@ final class NativeTopBarView: UIView {
         actionsStack.alignment = .center
         contentView.addSubview(actionsStack)
 
-        let widthConstraint = backButton.widthAnchor.constraint(equalToConstant: 38)
+        let widthConstraint = backButton.widthAnchor.constraint(equalToConstant: buttonSize)
         backButtonWidthConstraint = widthConstraint
+        let backHeight = backButton.heightAnchor.constraint(equalToConstant: buttonSize)
+        let actionsHeight = actionsStack.heightAnchor.constraint(equalToConstant: buttonSize)
+        let titleHeight = titleLabel.heightAnchor.constraint(equalToConstant: barHeight)
+        scaledConstraints = [(widthConstraint, 38), (backHeight, 38), (actionsHeight, 38), (titleHeight, 44)]
 
         titleLeadingConstraint = titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 40)
         titleTrailingConstraint = titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.trailingAnchor, constant: -40)
 
         NSLayoutConstraint.activate([
             backButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            backButton.heightAnchor.constraint(equalToConstant: 38),
+            backHeight,
             widthConstraint,
 
             actionsStack.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            actionsStack.heightAnchor.constraint(equalToConstant: 38),
+            actionsHeight,
 
             titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor),
-            titleLabel.heightAnchor.constraint(equalToConstant: barHeight),
+            titleHeight,
             titleLeadingConstraint,
             titleTrailingConstraint,
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -173,7 +179,22 @@ final class NativeTopBarView: UIView {
     private(set) var actionCount = 0
     var onActionsChanged: (() -> Void)?
 
+    private var lastActions: [(id: String, icon: String, label: String)] = []
+    private var lastIsRTL = true
+    /// MainViewController re-reads `contentHeight` (header offset, tools FAB) when Dynamic Type changes.
+    var onScaleChanged: (() -> Void)?
+
+    override func traitCollectionDidChange(_ previous: UITraitCollection?) {
+        super.traitCollectionDidChange(previous)
+        guard previous?.preferredContentSizeCategory != traitCollection.preferredContentSizeCategory else { return }
+        for (c, base) in scaledConstraints { c.constant = A11y.scaled(base) }
+        setActions(lastActions, isRTL: lastIsRTL)
+        onScaleChanged?()
+    }
+
     private func setActions(_ actions: [(id: String, icon: String, label: String)], isRTL: Bool) {
+        lastActions = actions
+        lastIsRTL = isRTL
         actionCount = actions.count
         defer { onActionsChanged?() }
         actionsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -182,8 +203,9 @@ final class NativeTopBarView: UIView {
             NativeTopBarView.glassCircle(button, symbol: action.icon, tint: goldColor)
             button.accessibilityIdentifier = action.id
             if !action.label.isEmpty { button.accessibilityLabel = action.label }
-            button.widthAnchor.constraint(equalToConstant: 38).isActive = true
-            button.heightAnchor.constraint(equalToConstant: 38).isActive = true
+            button.widthAnchor.constraint(equalToConstant: buttonSize).isActive = true
+            button.heightAnchor.constraint(equalToConstant: buttonSize).isActive = true
+            button.accessibilityTraits = .button
             button.addTarget(self, action: #selector(tapTrailingAction(_:)), for: .touchUpInside)
             actionsStack.addArrangedSubview(button)
         }
@@ -192,7 +214,7 @@ final class NativeTopBarView: UIView {
         // actions stack ends up on, or a 2-3 icon row would overlap a
         // long title instead of the title just truncating around it.
         // + room for the tools "…" button that can sit past the actions
-        let actionSideMargin: CGFloat = CGFloat(66 + actions.count * 46)
+        let actionSideMargin: CGFloat = CGFloat(66 + actions.count * 46) + buttonSize - 38
         titleLeadingConstraint.constant = isRTL ? 56 : actionSideMargin
         titleTrailingConstraint.constant = isRTL ? -actionSideMargin : -56
     }
@@ -223,14 +245,14 @@ final class NativeTopBarView: UIView {
     /// app's own I.prev getter, which flips by document direction) rather
     /// than relying on automatic UIKit mirroring, since the app's RTL
     /// state is driven by its own language setting, not the device's.
-    private var quickActionLabels: (home: String, settings: String, share: String) = ("Home", "Settings", "Share")
+    private var quickActionLabels: (home: String, settings: String, share: String) = (A11y.t("home"), A11y.t("settings"), A11y.t("share"))
 
     func configure(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
         titleLabel.text = title
         backButton.isHidden = !hasBack
         let symbol = isRTL ? "chevron.right" : "chevron.left"
         NativeTopBarView.glassCircle(backButton, symbol: symbol, tint: goldColor)
-        backButton.accessibilityLabel = isRTL ? "חזור" : "Back"
+        backButton.accessibilityLabel = A11y.t("back")
         if !homeLabel.isEmpty { quickActionLabels.home = homeLabel }
         if !settingsLabel.isEmpty { quickActionLabels.settings = settingsLabel }
         if !shareLabel.isEmpty { quickActionLabels.share = shareLabel }

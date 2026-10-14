@@ -53,8 +53,7 @@ final class NLCell: UICollectionViewCell {
         titleLabel.textAlignment = .natural
         titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = .label
-        let base = UIFont.preferredFont(forTextStyle: .headline)
-        titleLabel.font = UIFont.systemFont(ofSize: base.pointSize + 1, weight: .semibold)
+        titleLabel.setScaledFont(18, weight: .semibold, maximumSize: 30)
         glass.contentView.addSubview(titleLabel)
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor, constant: 16),
@@ -101,15 +100,21 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
     private let collapseTracker = ScrollCollapseTracker()
 
     override init(frame: CGRect) {
-        let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1)))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1), heightDimension: .absolute(92)), subitem: item, count: 2)
-        group.interItemSpacing = .fixed(12)
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 12
-        section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16)
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout(section: section))
+        // Re-evaluated on invalidate (see traitCollectionDidChange): card height scales with Dynamic Type, and the
+        // accessibility sizes switch to one full-width column so long titles are never clipped.
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout { _, env in
+            let big = env.traitCollection.preferredContentSizeCategory.isAccessibilityCategory
+            let cols = big ? 1 : 2
+            let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0 / CGFloat(cols)), heightDimension: .fractionalHeight(1)))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1), heightDimension: .absolute(A11y.scaled(92))), subitem: item, count: cols)
+            group.interItemSpacing = .fixed(12)
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = 12
+            section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16)
+            return section
+        })
         super.init(frame: frame)
         backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -129,6 +134,13 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func traitCollectionDidChange(_ previous: UITraitCollection?) {
+        super.traitCollectionDidChange(previous)
+        if previous?.preferredContentSizeCategory != traitCollection.preferredContentSizeCategory {
+            collectionView.collectionViewLayout.invalidateLayout()
+        }
+    }
 
     override func layoutSubviews() {
         super.layoutSubviews()

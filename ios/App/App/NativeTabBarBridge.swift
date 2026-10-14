@@ -39,7 +39,9 @@ public class NativeTabBarBridge: CAPPlugin, CAPBridgedPlugin {
         let isDark = call.getBool("isDark") ?? false
         let searchPlaceholder = call.getString("searchPlaceholder") ?? ""
         let searchCancel = call.getString("searchCancel") ?? ""
+        let lang = call.getString("lang")
         DispatchQueue.main.async {
+            if let lang = lang, !lang.isEmpty { A11y.lang = lang; NativeTabBarBridge.activeController?.refreshA11yLabels() }
             NativeTabBarBridge.activeController?.setSearchLabels(placeholder: searchPlaceholder, cancel: searchCancel)
             NativeTabBarBridge.activeController?.setTabBarTheme(isDark: isDark)
             NativeTabBarBridge.activeController?.configure(items: items, activeTab: activeTab, isRTL: isRTL)
