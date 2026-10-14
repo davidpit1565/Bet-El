@@ -267,7 +267,9 @@ final class NHCell: UICollectionViewCell {
         l.numberOfLines = lines
         l.textColor = color
         l.adjustsFontForContentSizeCategory = true
-        l.font = UIFont.systemFont(ofSize: UIFont.preferredFont(forTextStyle: style).pointSize * scale, weight: weight)
+        // Same 1.6x ceiling as the cell heights (cellHeight), so text never outgrows its card at accessibility sizes.
+        let basePt = UIFont.preferredFont(forTextStyle: style, compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)).pointSize
+        l.font = UIFont.systemFont(ofSize: min(UIFont.preferredFont(forTextStyle: style).pointSize, basePt * 1.6) * scale, weight: weight)
         l.adjustsFontSizeToFitWidth = true
         l.minimumScaleFactor = 0.75
         l.textAlignment = center ? .center : (rtl ? .right : .left)

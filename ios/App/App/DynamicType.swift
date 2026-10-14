@@ -50,3 +50,33 @@ extension UIColor {
             : UIColor(red: 0.478, green: 0.353, blue: 0.078, alpha: 1)
     }
 }
+
+/// VoiceOver strings for native controls, in the APP language (he/en/fr/ru/ka), not the device locale.
+/// JS pushes the language via `A11y.lang` (NativeTabBar.configure); unknown values fall back to English.
+enum A11y {
+    static var lang = "he"
+
+    /// Fixed native chrome (bars, round buttons, cards) grows with Dynamic Type, capped so it never eats the screen.
+    static var k: CGFloat { min(1.6, max(1, UIFont.preferredFont(forTextStyle: .body).pointSize / 17)) }
+    static func scaled(_ v: CGFloat) -> CGFloat { ceil(v * k) }
+
+    private static let table: [String: [String: String]] = [
+        "tools": ["he": "כלי קריאה", "en": "Reading tools", "fr": "Outils de lecture", "ru": "Инструменты чтения", "ka": "კითხვის ხელსაწყოები"],
+        "smaller": ["he": "הקטן טקסט", "en": "Decrease text size", "fr": "Réduire la taille du texte", "ru": "Уменьшить текст", "ka": "ტექსტის შემცირება"],
+        "larger": ["he": "הגדל טקסט", "en": "Increase text size", "fr": "Augmenter la taille du texte", "ru": "Увеличить текст", "ka": "ტექსტის გადიდება"],
+        "theme": ["he": "החלף מצב כהה", "en": "Toggle dark mode", "fr": "Basculer le mode sombre", "ru": "Переключить тёмную тему", "ka": "მუქი რეჟიმის გადართვა"],
+        "pause": ["he": "השהה גלילה אוטומטית", "en": "Pause autoscroll", "fr": "Mettre en pause le défilement", "ru": "Приостановить прокрутку", "ka": "ავტომატური გადახვევის პაუზა"],
+        "play": ["he": "התחל גלילה אוטומטית", "en": "Start autoscroll", "fr": "Lancer le défilement", "ru": "Запустить прокрутку", "ka": "ავტომატური გადახვევის დაწყება"],
+        "home": ["he": "דף הבית", "en": "Home", "fr": "Accueil", "ru": "Главная", "ka": "მთავარი"],
+        "back": ["he": "חזור", "en": "Back", "fr": "Retour", "ru": "Назад", "ka": "უკან"],
+        "showTabs": ["he": "הצג סרגל לשוניות", "en": "Show tab bar", "fr": "Afficher la barre d'onglets", "ru": "Показать панель вкладок", "ka": "ჩანართების ჩვენება"],
+        "settings": ["he": "הגדרות", "en": "Settings", "fr": "Réglages", "ru": "Настройки", "ka": "პარამეტრები"],
+        "share": ["he": "שיתוף", "en": "Share", "fr": "Partager", "ru": "Поделиться", "ka": "გაზიარება"],
+        "fontScale": ["he": "גודל טקסט באחוזים", "en": "Text size percent", "fr": "Taille du texte en pourcentage", "ru": "Размер текста, проценты", "ka": "ტექსტის ზომა პროცენტებში"],
+    ]
+
+    static func t(_ key: String) -> String {
+        let row = table[key]
+        return row?[lang] ?? row?["en"] ?? key
+    }
+}

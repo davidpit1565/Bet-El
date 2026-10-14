@@ -444,7 +444,7 @@ in English as usual.
   enough - `window.Capacitor.Plugins.X` only exists once something calls
   `registerPlugin()` client-side, and this app's custom plugins
   (NativeTopBar, NativeToolsFab, NativeModal, NativeSettings, NativeToast,
-  NativeHaptics, NativeTabBar, BetElWidgetBridge, NativeLiveActivity) ship
+  NativeHaptics, NativeTabBar, BetElWidgetBridge, NativeLiveActivity, NativeSpotlight) ship
   no vendored UMD bundle of their own the way `@capacitor/app` does. This
   exact gap went undetected for most of a session (every native Liquid
   Glass feature "worked" by every code-level signal - it built, it ran,
@@ -522,6 +522,11 @@ in English as usual.
 - **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
   length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
   `npm run serve:local`) then `node scripts/appstore-compose.mjs`; screenshots taken on the real iPhone go in `docs/appstore/raw-device/` and override the web ones.
+- **Release workflow (user's rule, 2026-10-12): test on a real iPhone before anything ships.** Every change goes into a PR that is
+  NOT merged to main yet. A testing-only build (own branch, higher CURRENT_PROJECT_VERSION each time) is uploaded to TestFlight
+  (internal only - never attached to an App Store version, never submitted), David checks it on his iPhone, and only what he
+  confirms works is merged. The final App Store build is a clean one from main; David alone presses Submit for Review. Every
+  upload needs his typed approval in the terminal. Never print ASC key id / issuer / key path / team id.
 - **Release status (2026-10-12):** 2.0 (build 6) is Waiting for Review - never touch that submission from a session.
   Everything for **2.0.1** is prepared in the repo (David uploads it himself after 2.0 is approved): search fix, native push,
   Library RTL, Rambam-widget nikud, French App Store listing (`fastlane/metadata/fr-FR`), widget screenshots
@@ -531,8 +536,23 @@ in English as usual.
   `com.beitel.tehilim` (GCP project bet-el-e6812; gcloud was not installed). Don't touch the web key in index.html. Close the
   GitHub secret-scanning alert only after the restriction is verified.
 - **Native review leftovers (not fixed, need a decision or device testing):** a 44pt gap can
+- **Native review leftovers (not fixed, need a decision or device testing):** the Live Activity uses
+  `Solar` instead of the snapshot zmanim, a 44pt gap can
+  remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize.
+  (Dynamic Type heights and the FAB's English-only labels were fixed in the accessibility pass below.)
   remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize, fixed native heights don't
   follow Dynamic Type, and the FAB has English-only accessibility labels.
+- **Spotlight + Siri (NativeSpotlightBridge.swift, TamidIntents.swift):** `spotlightSync()` in index.html indexes every ready prayer
+  (`prayer:<key>`), Tehillim 1-150 (`psalm:<n>`) and the main sections (`go:<tab>`) in Core Spotlight (Hebrew title, keywords in
+  he/en/fr/ru/ka); it replaces the whole domain, so it runs 6s after boot and again after a language change. A tap arrives in
+  `SceneDelegate` (`willConnectTo` cold, `continue userActivity` warm) as `CSSearchableItemActionType` -> `NativeSpotlightBridge.handle`
+  -> JS `spotlightOpen(id)` -> `openPrayer()` / `openReader(...)` / `go()`. Cold start: JS calls `NativeSpotlight.consumePending()`
+  after attaching the `open` listener. Plugin registration done in both places (capacitor-native-bridge.js + MainViewController).
+  Siri/Shortcuts: four App Intents (next zman, sunset today, Hebrew date today, Omer count) + `TamidShortcuts` provider, all
+  `@available(iOS 16.0, *)` (deployment target stays 15.0). They only READ the App Group snapshot (`BetElSharedData`: zmanimJSON,
+  omerJSON, lang), so the answer is exact only for the ~60 days the app last synced, otherwise it says to open the app. Answers are in
+  the app language; the spoken PHRASES are English only (no he.lproj / AppShortcuts.strings - Siri language support for Hebrew was
+  not verified, don't claim it). **Not tested on a device yet:** Spotlight tap-through, Shortcuts, Siri. Simulator build only.
 - **Live Activity (always on, 2.0.1):** `NativeLiveActivityBridge.refreshActivity()` runs on every launch and every
   `willEnterForeground` (plus the JS `syncWidgetData()` chain). It keeps exactly one active Activity: starts one if none
   (also after a swipe-away), ends + restarts it once its zman passed (dawn/sunrise/sunset boundary), and replaces it when the
@@ -542,3 +562,19 @@ in English as usual.
   than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. It counts down to dawn, sunrise,
   midday, sunset, nightfall (only once `WIDGET_TZEIT_ROLLOVER` syncs it) and midnight (midday + 12h), read from the
   snapshot's exact `zmanimJSON` (Solar only as a fallback). Hebrew lays out RTL (`attributes.rtl`).
+  than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. Hebrew lays out RTL (`attributes.rtl`).
+
+- **Accessibility pass (native + web):** `enum A11y` (DynamicType.swift) holds the language-aware VoiceOver string table
+  (`A11y.t(key)`, he/en/fr/ru/ka) and the shared scale (`A11y.k` = body size / 17, capped 1.6; `A11y.scaled(v)`). The language comes
+  from JS: `syncNativeTabBar` passes `lang` in `NativeTabBar.configure`, which sets `A11y.lang` and calls `refreshA11yLabels()`.
+  Fixed heights now scale: NativeTopBar (bar/buttons, `onScaleChanged` -> `MainViewController.applyDynamicTypeScale()`), tools FAB
+  (panel + buttons, `rebuildForContentSize()`), mini tab button, NativeLibrary (1 column at accessibility sizes, scaled card height),
+  NativeHome label fonts (same 1.6x ceiling as its cell heights). The FAB panel's `accessibilityElements` is reversed in RTL.
+  Web: icon-only buttons get `aria-label` from `a11yIcons()` (runs at the start of `tr()`), with the strings in the separate
+  `ARIA_I18N` table - NOT `I18N`, because `tr()` partial-matches I18N keys inside visible text and short words like "חזרה" would
+  corrupt existing strings. Global `prefers-reduced-motion` rule in the boot `<style>`; light `--verse-num` darkened to #82611a (4.6:1).
+  **Reading settings** (Settings > General > "הגדרות קריאה"): `S.nikud` (strips nikud+teamim from `READER_TEXT_SEL` containers in
+  `applyReadingPrefs()`, called from `tr()` after every render; maqaf/paseq/sof pasuk stay), `S.lineSp` (`--lh-scale` .9/1/1.2,
+  every reader line-height is `calc(N * var(--lh-scale,1))`), `S.readFont` (`html[data-rfont]` overrides `--font-sacred/--font-reading`);
+  `fontScale` is untouched. Mirrored in the native settings spec/`NativeSettingsHost.onAction`. Simulator build succeeds; VoiceOver
+  itself, real-device Dynamic Type and the tab-bar/search-dock/toast (76pt) scaling were NOT tested.
