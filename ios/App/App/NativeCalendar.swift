@@ -208,6 +208,30 @@ final class NCDayPage: UIView {
         return s
     }
 
+    /// Name on top, the note underneath (long names + notes used to squeeze the name into one letter per line).
+    private func stackedRow(_ title: String, sub: String?, icon: String) -> UIView {
+        let name = label(title, style: .body)
+        var texts: [UIView] = [name]
+        if let sub = sub, !sub.isEmpty { texts.append(label(sub, style: .footnote, color: .secondaryLabel)) }
+        let col = UIStackView(arrangedSubviews: texts)
+        col.axis = .vertical; col.spacing = 2; col.alignment = .fill
+        col.semanticContentAttribute = semanticContentAttribute
+        var parts: [UIView] = []
+        if let img = UIImage(systemName: icon) {
+            let iv = UIImageView(image: img); iv.tintColor = tint; iv.contentMode = .scaleAspectFit
+            iv.setContentHuggingPriority(.required, for: .horizontal)
+            iv.setContentCompressionResistancePriority(.required, for: .horizontal)
+            parts.append(iv)
+        }
+        parts.append(col)
+        let s = UIStackView(arrangedSubviews: parts)
+        s.axis = .horizontal; s.spacing = 12; s.alignment = .center
+        s.isLayoutMarginsRelativeArrangement = true
+        s.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 11, leading: 16, bottom: 11, trailing: 16)
+        s.semanticContentAttribute = semanticContentAttribute
+        return s
+    }
+
     private final class TapAction: UITapGestureRecognizer {
         private let handler: () -> Void
         init(_ h: @escaping () -> Void) { handler = h; super.init(target: nil, action: nil); addTarget(self, action: #selector(fire)) }
@@ -273,7 +297,7 @@ final class NCDayPage: UIView {
         }
         if !info.hillulot.isEmpty {
             let g = group(info.hillulotTitle, footer: info.hillulotFooter)
-            for h in info.hillulot { g.addRow(listRow(h.name, value: h.sub, icon: "flame")) }
+            for h in info.hillulot { g.addRow(stackedRow(h.name, sub: h.sub, icon: "flame")) }
             stack.addArrangedSubview(g)
         }
         stack.addArrangedSubview(shareButton(title: shareTitle))
