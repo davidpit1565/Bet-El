@@ -11,6 +11,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = MainViewController()
         window?.makeKeyAndVisible()
 
+        // Cold start from a Spotlight result: remember it until the web app asks (NativeSpotlight.consumePending).
+        connectionOptions.userActivities.forEach { NativeSpotlightBridge.handle($0) }
+
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }
 
@@ -19,6 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        if NativeSpotlightBridge.handle(userActivity) { return }
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
     }
 }

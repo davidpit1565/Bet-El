@@ -59,6 +59,9 @@
 		7EEB8A1EC9332A30A983694D /* NativeModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */; };
 		5310F88053FC3FCDCEAB11B9 /* NativeModalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */; };
 		9E1D4BC5FFC163B08E7D88C6 /* NativeFeedbackFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD982A6820578D37E334E0A8 /* NativeFeedbackFormView.swift */; };
+		A1B2C3D4E5F60718293A5002 /* NativeSpotlightBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A5001 /* NativeSpotlightBridge.swift */; };
+		A1B2C3D4E5F60718293A5004 /* TamidIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A5003 /* TamidIntents.swift */; };
+		A1B2C3D4E5F60718293A5005 /* HebrewDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3DE7F09F11BFC86E15552C /* HebrewDay.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -140,6 +143,8 @@
 		1B428F3E50E86C2C5F2CA963 /* NativeModalView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeModalView.swift; sourceTree = "<group>"; };
 		D49FC08FBF54A2989D5E52E2 /* NativeModalBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeModalBridge.swift; sourceTree = "<group>"; };
 		AD982A6820578D37E334E0A8 /* NativeFeedbackFormView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeFeedbackFormView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A5001 /* NativeSpotlightBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeSpotlightBridge.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A5003 /* TamidIntents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TamidIntents.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +211,8 @@
 				846A32C3BB81E3C29B621792 /* NativeTopBarView.swift */,
 				C826A6FCE48478DCB74F2134 /* NativeTopBarBridge.swift */,
 				E2CB513BB9D040126A1E4171 /* NativeHapticsBridge.swift */,
+				A1B2C3D4E5F60718293A5003 /* TamidIntents.swift */,
+				A1B2C3D4E5F60718293A5001 /* NativeSpotlightBridge.swift */,
 				8C0819265AB1B472A13A2BA0 /* ReduceMotion.swift */,
 				52276BF61DAE1510C07348CC /* DynamicType.swift */,
 				C2C31AABF568510A2DCDD82E /* NativeToastView.swift */,
@@ -403,6 +410,8 @@
 				30877432D1026706D7E805DA /* NativeTopBarView.swift in Sources */,
 				73C8EB5BB682575EC87A171A /* NativeTopBarBridge.swift in Sources */,
 				358B0438C8F4F446F64D9FE9 /* NativeHapticsBridge.swift in Sources */,
+				A1B2C3D4E5F60718293A5004 /* TamidIntents.swift in Sources */,
+				A1B2C3D4E5F60718293A5002 /* NativeSpotlightBridge.swift in Sources */,
 				E65EEC85465EDFF002888C93 /* ReduceMotion.swift in Sources */,
 				A200CE886CD1AD5CD6311403 /* DynamicType.swift in Sources */,
 				3FD4E3BBFF6906BCB14C7B69 /* NativeToastView.swift in Sources */,
@@ -421,6 +430,7 @@
 				3704B246A788E3EDE2D23423 /* NativeLiveActivityBridge.swift in Sources */,
 				248104E148D729AB8E762FC0 /* Solar.swift in Sources */,
 				3FA22A6CC01FDBE4BEB5E255 /* Localization.swift in Sources */,
+				A1B2C3D4E5F60718293A5005 /* HebrewDay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
