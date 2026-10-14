@@ -26,6 +26,7 @@ struct NCDayInfo: Decodable {
     let events: [String]
     let parashaLabel: String?
     let parasha: String?
+    let parashaKey: String?
     let portions: [Portion]
     let loc: String?
     let zmanim: [Row]
@@ -70,6 +71,7 @@ final class NCGroup: UIStackView {
             let l = UILabel()
             l.text = h.uppercased(with: .current)
             l.numberOfLines = 0
+            l.textAlignment = rtl ? .right : .left
             l.textColor = tint
             l.font = UIFont.preferredFont(forTextStyle: .footnote)
             l.adjustsFontForContentSizeCategory = true
@@ -94,7 +96,7 @@ final class NCGroup: UIStackView {
         addArrangedSubview(box)
         if let f = footer, !f.isEmpty {
             let l = UILabel()
-            l.text = f; l.numberOfLines = 0; l.textColor = .secondaryLabel
+            l.text = f; l.numberOfLines = 0; l.textColor = .secondaryLabel; l.textAlignment = rtl ? .right : .left
             l.font = UIFont.preferredFont(forTextStyle: .footnote); l.adjustsFontForContentSizeCategory = true
             let wrap = UIView(); l.translatesAutoresizingMaskIntoConstraints = false; wrap.addSubview(l)
             NSLayoutConstraint.activate([
@@ -134,10 +136,12 @@ private extension UIView {
 final class NCDayPage: UIView {
     var onPortion: ((Int, Int) -> Void)?
     var onShare: (() -> Void)?
+    var onParasha: ((String) -> Void)?
     var tint: UIColor = .systemYellow { didSet { tintColor = tint } }
     var isDark = true
 
     private let stack = UIStackView()
+    private var isRTL = true
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -161,7 +165,8 @@ final class NCDayPage: UIView {
         let l = UILabel()
         l.text = text
         l.numberOfLines = 0
-        l.textAlignment = align
+        l.textAlignment = align == .natural ? (isRTL ? .right : .left) : align   // never absolute-left in Hebrew (user rule)
+        l.semanticContentAttribute = semanticContentAttribute
         l.textColor = color
         let base = UIFont.preferredFont(forTextStyle: style)
         l.font = UIFont.systemFont(ofSize: base.pointSize, weight: weight)
@@ -183,7 +188,7 @@ final class NCDayPage: UIView {
         if let v = value {
             let t = label(v, style: .body, weight: highlight ? .semibold : .regular, color: highlight ? tint : .secondaryLabel, align: .right)
             t.font = UIFont.monospacedDigitSystemFont(ofSize: t.font.pointSize, weight: highlight ? .semibold : .regular)
-            t.textAlignment = .natural
+            t.textAlignment = isRTL ? .left : .right
             t.setContentHuggingPriority(.required, for: .horizontal)
             t.setContentCompressionResistancePriority(.required, for: .horizontal)
             let spacer = UIView(); spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
@@ -210,9 +215,9 @@ final class NCDayPage: UIView {
 
     /// Name on top, the note underneath (long names + notes used to squeeze the name into one letter per line).
     private func stackedRow(_ title: String, sub: String?, icon: String) -> UIView {
-        let name = label(title, style: .body)
+        let name = label(title, style: .body, align: .center)
         var texts: [UIView] = [name]
-        if let sub = sub, !sub.isEmpty { texts.append(label(sub, style: .footnote, color: .secondaryLabel)) }
+        if let sub = sub, !sub.isEmpty { texts.append(label(sub, style: .footnote, color: .secondaryLabel, align: .center)) }
         let col = UIStackView(arrangedSubviews: texts)
         col.axis = .vertical; col.spacing = 2; col.alignment = .fill
         col.semanticContentAttribute = semanticContentAttribute
@@ -254,6 +259,7 @@ final class NCDayPage: UIView {
 
     func configure(_ info: NCDayInfo?, shareTitle: String, rtl: Bool) {
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        isRTL = rtl
         semanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
         stack.semanticContentAttribute = semanticContentAttribute
         guard let info = info else { return }
@@ -288,7 +294,11 @@ final class NCDayPage: UIView {
         }
         if (info.parasha != nil && info.parashaLabel != nil) || !info.portions.isEmpty {
             let g = group(nil)
-            if let pl = info.parashaLabel, let pv = info.parasha { g.addRow(listRow(pl, value: pv, icon: "book.closed")) }
+            if let pl = info.parashaLabel, let pv = info.parasha {
+                if let key = info.parashaKey {
+                    g.addRow(listRow(pl, value: pv, chevron: true, icon: "book.closed") { [weak self] in self?.onParasha?(key) })
+                } else { g.addRow(listRow(pl, value: pv, icon: "book.closed")) }
+            }
             for p in info.portions {
                 let a = p.a, b = p.b
                 g.addRow(listRow(p.label, value: p.val, chevron: true, icon: "text.book.closed") { [weak self] in self?.onPortion?(a, b) })
@@ -455,6 +465,8 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         semanticContentAttribute = attr
         content.semanticContentAttribute = attr
         calendarView.semanticContentAttribute = attr
+        // UICalendarView follows the TRAIT layout direction, not semanticContentAttribute: without this Sunday sat on the left in Hebrew.
+        if #available(iOS 17.0, *) { calendarView.traitOverrides.layoutDirection = config.rtl ? .rightToLeft : .leftToRight }
         segmented.semanticContentAttribute = attr
 
         segmented.setTitle(config.hebrewLabel, forSegmentAt: 0)
@@ -469,6 +481,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
             p.tint = gold
             p.isDark = config.isDark
             p.onPortion = { [weak self] a, b in self?.fire?("window.NativeCalendarHost.openPortion(\(a),\(b))") }
+            p.onParasha = { [weak self] key in self?.fire?("window.NativeCalendarHost.openParasha('\(key)')") }
             p.onShare = { [weak self] in
                 guard let self = self else { return }
                 self.fire?("window.NativeCalendarHost.share('\(self.ymd(self.selected))')")

@@ -8438,7 +8438,7 @@ function nameVersePickersHTML(){
   }));
   return rows.length?`<div class="si-d" style="margin:10px 0 4px">${ckChrome('בחרו את הפסוק לכל שם')}</div>${rows.join('')}`:'';
 }
-function nameVerseLabel(m){ const w=stripNik(m.text).split(/\s+/).slice(0,5).join(' '); return `${m.ch}:${m.vi+1} \u00b7 ${w}\u2026`; }
+function nameVerseLabel(m){ const he=!S.lang||S.lang==='he'; const ref=he?heNum(m.ch)+':'+heNum(m.vi+1):m.ch+':'+(m.vi+1); return ref+' \u00b7 '+m.text; }   // full verse, chapter:verse as Hebrew letters (כ״ג:א׳) in Hebrew
 function setNameVerse(word,key){ if(!S.nameVerse||typeof S.nameVerse!=='object') S.nameVerse={}; S.nameVerse[word]=key; saveS(); }
 function renderTehillim(){
   app.innerHTML = `
@@ -9492,7 +9492,7 @@ window.NativeCalendarHost={
     return {
       ymd, title:T(dowName(hd)+' · '+heNum(hd.getDate())+' '+monthName(hd)),
       greg:g.toLocaleDateString(civilDateLocale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
-      events, parashaLabel:weekKey?T('פָּרָשַׁת הַשָּׁבוּעַ'):null, parasha:weekKey?parshaName(weekKey):null,
+      events, parashaLabel:weekKey?T('פָּרָשַׁת הַשָּׁבוּעַ'):null, parasha:weekKey?parshaName(weekKey):null, parashaKey:weekKey||null,
       portions:[{label:T('קְרִיאָה חָדְשִׁית'),val:heNum(mRange[0])+'–'+heNum(mRange[1]),a:mRange[0],b:mRange[1]},
                 {label:T('קְרִיאָה שְׁבוּעִית'),val:heNum(wRange[0])+'–'+heNum(wRange[1]),a:wRange[0],b:wRange[1]}],
       loc:T(LOC.name),
@@ -9510,6 +9510,7 @@ window.NativeCalendarHost={
   onSelect(ymd){ try{ calSetSelected(hdOfYmd(ymd)); }catch(e){} },
   onMode(civil){ CAL.civil=!!civil; },
   openPortion(a,b){ openReader(chaptersOf([a,b]),{daily:false}); },
+  openParasha(key){ try{ ensureShnayimData().then(()=>openShnayim(key)).catch(()=>{}); }catch(e){} },
   share(ymd){
     const hd=hdOfYmd(ymd), g=hd.greg();
     shareDayDetail(hd,(calMonthEvents(g,g)[hd.abs()]||[]),currentWeekParshaKey(g));
@@ -9588,7 +9589,7 @@ function renderDayDetail(hd, events){
       <button class="ical-round" id="ddNext" aria-label="יום הבא">${I.next}</button>
     </div>
     ${events.length?`<div class="dd-events">${events.map(e=>`<span class="dd-event">${e}</span>`).join('')}</div>`:''}
-    ${weekKey?`<div class="dd-portion" style="margin-bottom:10px"><div class="lbl">${ckChrome('פָּרָשַׁת הַשָּׁבוּעַ')}</div><div class="val">${parshaName(weekKey)}</div></div>`:''}
+    ${weekKey?`<div class="dd-portion" style="margin-bottom:10px" data-parasha="${weekKey}"><div class="lbl">${ckChrome('פָּרָשַׁת הַשָּׁבוּעַ')}</div><div class="val">${parshaName(weekKey)}</div></div>`:''}
     <div style="display:flex;gap:10px">
       <div class="dd-portion" style="flex:1" data-open="${mRange[0]},${mRange[1]}"><div class="lbl">${ckChrome('קְרִיאָה חָדְשִׁית')}</div><div class="val">${heNum(mRange[0])}–${heNum(mRange[1])}</div></div>
       <div class="dd-portion" style="flex:1" data-open="${wRange[0]},${wRange[1]}"><div class="lbl">${ckChrome('קְרִיאָה שְׁבוּעִית')}</div><div class="val">${heNum(wRange[0])}–${heNum(wRange[1])}</div></div>
@@ -9609,6 +9610,7 @@ function renderDayDetail(hd, events){
     <button class="dd-share-btn" id="ddShare">${I.share}<span>${ckChrome('שתף את פרטי היום')}</span></button>
   </div>`;
   el.querySelectorAll('[data-open]').forEach(d=>d.onclick=()=>{ const [a,b]=d.dataset.open.split(',').map(Number); openReader(chaptersOf([a,b]),{daily:false}); });
+  el.querySelectorAll('[data-parasha]').forEach(d=>d.onclick=()=>{ ensureShnayimData().then(()=>openShnayim(d.dataset.parasha)).catch(()=>{}); });
   const shareBtn=document.getElementById('ddShare'); if(shareBtn) shareBtn.onclick=()=>shareDayDetail(hd,events,weekKey);
   document.getElementById('ddPrev').onclick=()=>calStepDay(-1);
   document.getElementById('ddNext').onclick=()=>calStepDay(1);
