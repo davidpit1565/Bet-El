@@ -535,6 +535,7 @@ in English as usual.
 - **Firebase iOS API key** (the one in `ios/App/App/GoogleService-Info.plist`) still needs restricting to bundle id
   `com.beitel.tehilim` (GCP project bet-el-e6812; gcloud was not installed). Don't touch the web key in index.html. Close the
   GitHub secret-scanning alert only after the restriction is verified.
+- **Native review leftovers (not fixed, need a decision or device testing):** a 44pt gap can
 - **Native review leftovers (not fixed, need a decision or device testing):** the Live Activity uses
   `Solar` instead of the snapshot zmanim, a 44pt gap can
   remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize.
@@ -558,6 +559,9 @@ in English as usual.
   language changes. Countdowns use `Text(timerInterval:countsDown:)` only; the content also carries the following zman, so
   the views roll over by themselves (`currentSegment()`) and never show elapsed time. **iOS ends any Live Activity after
   about 8 hours** (and an app can't restart it from the background without push-to-start) - the bridge replaces one older
+  than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. It counts down to dawn, sunrise,
+  midday, sunset, nightfall (only once `WIDGET_TZEIT_ROLLOVER` syncs it) and midnight (midday + 12h), read from the
+  snapshot's exact `zmanimJSON` (Solar only as a fallback). Hebrew lays out RTL (`attributes.rtl`).
   than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. Hebrew lays out RTL (`attributes.rtl`).
 
 - **Accessibility pass (native + web):** `enum A11y` (DynamicType.swift) holds the language-aware VoiceOver string table
