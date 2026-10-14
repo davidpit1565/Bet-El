@@ -54,6 +54,19 @@ platform :ios do
     staged
   end
 
+  # TestFlight ONLY, internal testing: uploads the binary and never touches an App Store version or submits for review.
+  # The "Internal" beta group (isInternalGroup, hasAccessToAllBuilds = automatic distribution) receives every processed build.
+  lane :upload_testflight do |options|
+    upload_to_testflight(
+      api_key: asc_key,
+      ipa: options[:ipa] || "build/export/App.ipa",
+      groups: ["Internal"],
+      distribute_external: false,
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+  end
+
   lane :upload_build do |options|
     upload_to_app_store(
       api_key: asc_key,
