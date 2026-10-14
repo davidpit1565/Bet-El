@@ -4009,7 +4009,7 @@ function go(tab){
   else if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   else if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setActive({tab:navActiveTab(tab)}).catch(()=>{});
   render();
-  if(NATIVE_SETTINGS){ if(tab==='settings') showNativeSettings(); else hideNativeSettings(); }
+  if(NATIVE_SETTINGS){ if(tab==='settings' && settingsViewNow()!=='list') showNativeSettings(); else hideNativeSettings(); }
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.tab===navActiveTab(tab)));
   requestAnimationFrame(placeNavPill);
   forceScrollTop();
@@ -7801,7 +7801,7 @@ function homeNativeHide(force){ if(!HOME_NG_ON && !force) return; HOME_NG_ON=fal
 const NSCR_ROWS='.q-tile,.prayer-row,.sm-week-card,.set-item';   // (the .search-box is NOT a row: search lives in the native tab bar)
 const NSCR_BLOCK='[data-web-only],input,select,textarea,button,.reader-top,.reader-head,.ck-track-btn,.ck-yr-btn,.sm-aliyah-chip,.empty-note,.card,.home-grid,canvas,video,iframe,.reader';
 function nativeScreenSpec(){
-  if(TAB==='settings' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeSettings) return null;   // Settings has its own native table (NativeSettings); a second native list on top ghosted it
+  if(TAB==='settings' && settingsViewNow()!=='list' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeSettings) return null;   // Settings has its own native table (NativeSettings); a second native list on top ghosted it
   const view=document.querySelector('#app > .view'); if(!view) return null;
   const rows=[...view.querySelectorAll(NSCR_ROWS)]; if(!rows.length) return null;
   if(view.matches('[data-web-only]') || [...view.querySelectorAll(NSCR_BLOCK)].some(n=>!n.closest('.search-box'))) return null;
@@ -13632,6 +13632,7 @@ function renderTefillinMirror(){
    just a dispatcher so every other call site that already calls it
    (toggle handlers, go('settings'), etc.) keeps working unchanged. */
 let SETTINGS_VIEW='list';
+function settingsViewNow(){ try{ return SETTINGS_VIEW; }catch(e){ return 'list'; } }   // safe before the let initialises
 function settingsCategoriesMeta(){
   return [
     {id:'general', icon:I.moon, sf:'paintbrush.fill', color:'#8E8E93', label:ckChrome('כללי'), sub:ckChrome('תצוגה, גדל גופן, שפה')},
@@ -13666,7 +13667,7 @@ function renderSettingsList(){
   </div>`;
   app.querySelectorAll('[data-cat]').forEach(el=>el.onclick=()=>{ SETTINGS_VIEW=el.dataset.cat; renderSettings(); tr(app); });
   tr(app);
-  syncNativeSettings();
+  hideNativeSettings();   // the category LIST is the separate-cards native list (NativeHome); only a category's rows use the native table
 }
 /* Each category's body is the EXACT same markup/row-ids/wiring the old
    single flat list used for that group - only the grouping/navigation
@@ -13948,7 +13949,7 @@ function renderSettingsCategory(catId){
   wireSettingsCategory(catId);
   tr(app);
   settingsRowsTappable(app);
-  syncNativeSettings();
+  syncNativeSettings(); showNativeSettings();
 }
 function toggleTheme(){ S.theme=S.theme==='dark'?'light':'dark'; saveS(); applySettings(); }
 /* Like iOS Settings: the whole row is the touch target, not just its small
