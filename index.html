@@ -510,6 +510,37 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .zman-row.next .ztime{color:var(--gold)}
 .loc-line{text-align:center;font-size:14px;color:var(--muted);margin:10px 0 2px;display:flex;align-items:center;justify-content:center;gap:6px}
 .loc-line svg{width:13px;height:13px;color:var(--gold)}
+/* ===== CALENDAR: iOS grouped / Liquid-Glass-style surfaces =====
+   The old calendar stacked navy card -> navy card -> navy tiles, all with gold borders on a navy page (too much blue, user feedback).
+   Now one translucent NEUTRAL surface per group (iOS inset-grouped), hairline separators, a gray iOS segmented control; gold stays
+   the accent only (today / selected day / next zman). Flat fills + hairlines only - NO backdrop-filter (see the Liquid Glass note). */
+.cal-ios{--cs:rgba(255,255,255,.06);--ch:rgba(255,255,255,.11);--cseg:rgba(118,118,135,.26);--cthumb:rgba(255,255,255,.2)}
+[data-theme="light"] .cal-ios{--cs:rgba(255,255,255,.68);--ch:rgba(110,85,30,.16);--cseg:rgba(120,100,60,.13);--cthumb:#fffdf7}
+.cal-ios .card{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .ical-seg{background:var(--cseg);border:0;padding:2px}
+.cal-ios .ical-seg button{color:var(--ink-soft);padding:7px 6px}
+.cal-ios .ical-seg button.on{background:var(--cthumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 .5px 0 rgba(255,255,255,.2)}
+.cal-ios .ical-round,.cal-ios .ical-pill{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .ical-card{background:var(--cs);border:0;border-radius:22px;box-shadow:inset 0 0 0 .5px var(--ch),inset 0 1px 0 rgba(255,255,255,.06)}
+.cal-ios .day-detail.card{background:none;background-image:none;box-shadow:none;padding:0;margin-top:20px}
+.cal-ios .day-detail.card::after,.cal-ios .day-detail.card::before{display:none}
+.cal-ios .dd-portion{background:var(--cs);border:0;border-radius:16px;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .zmanim-list,.cal-ios .shabbat-times{background:var(--cs);border:0;border-radius:16px;box-shadow:inset 0 0 0 .5px var(--ch);padding:2px 14px;margin:12px 0}
+.cal-ios .zman-row{padding:12px 0;border-bottom:1px solid var(--ch)}
+.cal-ios .zman-row:last-child{border-bottom:0}
+.cal-ios .zman-row.next{background:none;border-radius:0;padding-inline:0}
+.cal-ios .zman-row.next .zname{color:var(--gold);font-weight:700}
+.cal-ios .shabbat-times{gap:0}
+.cal-ios .sb-row{padding:11px 0;border-bottom:1px solid var(--ch)}
+.cal-ios .sb-row:last-child{border-bottom:0}
+.cal-ios .dd-hill{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .dd-hill li{border-top-color:var(--ch)}
+.cal-ios .dd-share-btn{background:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .conv-card{margin-top:18px}
+.cal-ios .zmanim-soon{background:none;border:1px dashed var(--ch)}
+.cal-ios .fld-select,.cal-ios .fld-input{background-color:var(--cs);border:0;box-shadow:inset 0 0 0 .5px var(--ch)}
+.cal-ios .conv-dir .chip{background:var(--cseg);border:0;color:var(--ink-soft)}
+.cal-ios .conv-dir .chip.on{background:var(--cthumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 .5px 0 rgba(255,255,255,.2)}
 
 /* ================= SETTINGS ================= */
 .set-group{margin-top:18px}
@@ -3747,6 +3778,56 @@ function shotNavigate(screen,scrollMode){
   sessionStorage.removeItem('betel_shot_screen'); sessionStorage.removeItem('betel_shot_scroll');
   setTimeout(()=>shotNavigate(sc,scrollMode),2500);
 }catch(e){} })();
+/* ---------- Spotlight (Core Spotlight) ----------
+   Native plugin NativeSpotlight indexes prayers, Tehillim chapters and the main sections (Hebrew title + keywords in all five
+   languages). A tap arrives in Swift (SceneDelegate) as CSSearchableItemActionType; NativeSpotlightBridge hands the id over (a listener when
+   warm, consumePending() on cold start) and it ends here. ids: prayer:<key> | psalm:<n> | go:<tab>. Re-indexed on boot and on language change. */
+function spotlightOpen(id){
+  try{
+    const i=id.indexOf(':'), kind=id.slice(0,i), v=id.slice(i+1);
+    if(kind==='prayer') openPrayer(v);
+    else if(kind==='psalm'){ const n=+v; if(n>=1&&n<=150) openReader(Array.from({length:150},(_,k)=>k+1),{daily:false,start:n}); }
+    else if(kind==='go' && ['home','library','calendar','settings','tracker','tehillim','search'].includes(v)) go(v);
+  }catch(e){}
+}
+const SPOT_SECTIONS=[
+  ['home','דף הבית',{en:'Home',fr:'Accueil',ru:'Главная',ka:'მთავარი'}],
+  ['library','ספרייה',{en:'Library',fr:'Bibliothèque',ru:'Библиотека',ka:'ბიბლიოთეკა'}],
+  ['calendar','לוח שנה',{en:'Calendar',fr:'Calendrier',ru:'Календарь',ka:'კალენდარი'}],
+  ['tehillim','תהילים',{en:'Tehillim Psalms',fr:'Tehillim Psaumes',ru:'Теѓилим Псалмы',ka:'თეჰილიმი ფსალმუნები'}],
+  ['tracker','מעקב',{en:'Tracker',fr:'Suivi',ru:'Трекер',ka:'ტრეკერი'}],
+  ['settings','הגדרות',{en:'Settings',fr:'Réglages',ru:'Настройки',ka:'პარამეტრები'}],
+];
+const SPOT_PSALM_KW={en:'Psalms Tehillim',fr:'Psaumes Tehillim',ru:'Псалом Теѓилим',ka:'ფსალმუნი თეჰილიმი',he:'תהילים תהלים'};
+function spotlightSync(){
+  try{
+    const P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeSpotlight;
+    if(!P||!(window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())) return;
+    const strip=t=>String(t||'').replace(/[֑-ׇ]/g,'');
+    const LANGS=['en','fr','ru','ka'], items=[];
+    const kwOf=he=>{ const k=[strip(he)]; LANGS.forEach(l=>{ const d=I18N[l]; if(d&&d[strip(he)]) k.push(d[strip(he)]); }); return k; };
+    Object.keys(PRAYERS_EXTRA).forEach(k=>{
+      const pr=PRAYERS_EXTRA[k]; if(!pr.ready||PRAYER_KEYS_HIDDEN.includes(k)) return;
+      items.push({id:'prayer:'+k,title:strip(pr.title),desc:ckChrome('תפילות'),keywords:kwOf(pr.title)});
+    });
+    for(let n=1;n<=150;n++){
+      const hn=heNum(n);
+      items.push({id:'psalm:'+n,title:'תהילים '+hn,desc:ckChrome('תְּהִלִּים')+' '+n,
+        keywords:[...Object.values(SPOT_PSALM_KW).map(w=>w+' '+n),'תהילים '+hn,'תהלים '+hn]});
+    }
+    SPOT_SECTIONS.forEach(([t,he,tr0])=>items.push({id:'go:'+t,title:he,desc:'Tamid',keywords:[he,...Object.values(tr0)]}));
+    P.index({items,lang:S.lang||'he'}).catch(()=>{});
+  }catch(e){}
+}
+(function spotlightWire(){
+  try{
+    const P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeSpotlight;
+    if(!P||!(window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())) return;
+    P.addListener('open',e=>{ if(e&&e.id) spotlightOpen(e.id); });
+    setTimeout(()=>P.consumePending().then(r=>{ if(r&&r.id) spotlightOpen(r.id); }).catch(()=>{}),1500);
+  }catch(e){}
+})();
+setTimeout(spotlightSync,6000);
 window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
 (function initWidgetLinks(){
   try{
@@ -7908,8 +7989,9 @@ function bookletSave(){ BOOKLET_LIST=BOOKLET_LIST.filter(b=>!bookletExpired(b));
 function currentBooklet(){ return BOOKLET_LIST.find(bookletActive)||null; }
 let bookletLoadPromise=null, bookletShownId=null;
 /* The weekly booklet is published ONLY to GitHub Pages: vercel.json's ignoreCommand skips Vercel builds for data/booklet-only commits, so the Vercel-hosted
-   web app never gets current.json or the PDF (404 -> no tile on the web). Always read the booklet from Pages (CORS-open); local dev keeps same-origin. */
-const BOOKLET_BASE = (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname) ? '' : 'https://davidpit1565.github.io/Bet-El/');
+   web app never gets current.json or the PDF (404 -> no tile on the web). Always read the booklet from Pages (CORS-open); local dev keeps same-origin.
+   The native app's own host is capacitor://localhost, so it must be recognised by DATA_BASE (non-empty on native), NOT by hostname, or it would look for the booklet inside the bundle (never there). */
+const BOOKLET_BASE = DATA_BASE || (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname) ? '' : 'https://davidpit1565.github.io/Bet-El/');
 function bookletURL(path){ return BOOKLET_BASE + String(path).replace(/^\.?\//,''); }
 function bookletTitle(){
   const b=currentBooklet(), t=b&&b.title; if(!t) return '';
@@ -9234,7 +9316,7 @@ function renderCalendar(){
   // own events list below the grid already lists them)
   app.innerHTML=`
   ${topbar('לוח עברי')}
-  <div class="view">
+  <div class="view cal-ios">
     <div class="ical-seg cal-mode-toggle">
       <button data-mode="heb" class="${!CAL.civil?'on':''}">לוח עברי</button>
       <button data-mode="civil" class="${CAL.civil?'on':''}">לוח לועזי</button>
@@ -13679,7 +13761,7 @@ function wireSettingsCategory(catId){
       document.getElementById('tgWake').onclick=()=>{ S.keepAwake=!S.keepAwake; saveS(); applyWakeLock(); renderSettings(); };
       document.getElementById('fsMinus').onclick=()=>{ changeFont(-0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
       document.getElementById('fsPlus').onclick=()=>{ changeFont(0.1); document.getElementById('fsVal').textContent=Math.round(S.fontScale*100)+'%'; };
-      { const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); }; } }
+      { const sl=document.getElementById('selLang'); if(sl){ sl.value=S.lang||'he'; sl.onchange=()=>{ S.lang=sl.value; saveS(); applyLang(); buildNav(); render(); toast('השפה עדכנה'); setTimeout(spotlightSync,800); }; } }
       break;
     case 'notifications': {
       const pdg=document.getElementById('pushDiag');
