@@ -251,6 +251,17 @@ final class NCDayPage: UIView {
             for e in info.events { g.addRow(listRow(e, value: nil, highlight: true, icon: "star.fill")) }
             stack.addArrangedSubview(g)
         }
+        // Zmanim sit right under the calendar (user request); parasha / portions / hillulot follow.
+        if !info.shabbat.isEmpty {
+            let g = group(nil)
+            for z in info.shabbat { g.addRow(listRow(z.label, value: z.time, highlight: true, icon: "flame.fill")) }
+            stack.addArrangedSubview(g)
+        }
+        if !info.zmanim.isEmpty {
+            let g = group(info.loc.map { "📍 " + $0 })
+            for z in info.zmanim { g.addRow(listRow(z.label, value: z.time, highlight: z.next ?? false)) }
+            stack.addArrangedSubview(g)
+        }
         if (info.parasha != nil && info.parashaLabel != nil) || !info.portions.isEmpty {
             let g = group(nil)
             if let pl = info.parashaLabel, let pv = info.parasha { g.addRow(listRow(pl, value: pv, icon: "book.closed")) }
@@ -263,16 +274,6 @@ final class NCDayPage: UIView {
         if !info.hillulot.isEmpty {
             let g = group(info.hillulotTitle, footer: info.hillulotFooter)
             for h in info.hillulot { g.addRow(listRow(h.name, value: h.sub, icon: "flame")) }
-            stack.addArrangedSubview(g)
-        }
-        if !info.shabbat.isEmpty {
-            let g = group(nil)
-            for z in info.shabbat { g.addRow(listRow(z.label, value: z.time, highlight: true, icon: "flame.fill")) }
-            stack.addArrangedSubview(g)
-        }
-        if !info.zmanim.isEmpty {
-            let g = group(info.loc.map { "📍 " + $0 })
-            for z in info.zmanim { g.addRow(listRow(z.label, value: z.time, highlight: z.next ?? false)) }
             stack.addArrangedSubview(g)
         }
         stack.addArrangedSubview(shareButton(title: shareTitle))
@@ -451,7 +452,8 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         }
 
         selected = date(fromYMD: config.ymd) ?? Date()
-        calendarView.locale = Locale(identifier: config.lang == "he" ? "he_IL" : config.lang)
+        // Hebrew UI + Hebrew calendar: ask for Hebrew-letter numerals (א׳ ב׳ ...) instead of digits.
+        applyLocale()
         calendarView.tintColor = gold
         applyCalendar()
         loadEvents()
@@ -506,7 +508,28 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
 
     // MARK: Calendar view wiring
 
+    /// Hebrew day-of-month as letters (א׳ ... ט״ו ... ל׳), 15/16 written ט״ו / ט״ז.
+    private func hebrewDayLetters(_ n: Int) -> String {
+        let ones = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"]
+        let tens = ["", "י", "כ", "ל"]
+        var out: String
+        if n == 15 { out = "טו" } else if n == 16 { out = "טז" } else { out = tens[n / 10] + ones[n % 10] }
+        if out.count == 1 { return out + "׳" }
+        return String(out.dropLast()) + "״" + String(out.last!)
+    }
+
+    private func secondaryDayText(_ d: Date) -> String {
+        if isHebrew { return String(gregorian.component(.day, from: d)) }
+        let hd = hebrewCal.component(.day, from: d)
+        return cfg.lang == "he" ? hebrewDayLetters(hd) : String(hd)
+    }
+
+    private func applyLocale() {
+        calendarView.locale = Locale(identifier: cfg.lang == "he" ? (isHebrew ? "he_IL@numbers=hebr" : "he_IL") : cfg.lang)
+    }
+
     private func applyCalendar() {
+        applyLocale()
         calendarView.calendar = activeCal
         selectionBehavior = UICalendarSelectionSingleDate(delegate: self)
         calendarView.selectionBehavior = selectionBehavior
@@ -527,8 +550,20 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
 
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
         guard let d = activeCal.date(from: dateComponents) else { return nil }
-        if eventDays.contains(ymd(d)) { return UICalendarView.Decoration.default(color: gold, size: .small) }
-        return nil
+        let hasEvent = eventDays.contains(ymd(d))
+        // The OTHER calendar's day under each number (Hebrew letters under Gregorian days, Gregorian numbers under Hebrew days).
+        let other = secondaryDayText(d)
+        let gold = self.gold, dark = cfg.isDark
+        return UICalendarView.Decoration.customView {
+            let l = UILabel()
+            l.text = other
+            l.font = UIFont.systemFont(ofSize: 10, weight: hasEvent ? .bold : .regular)
+            l.textColor = hasEvent ? gold : (dark ? UIColor(white: 1, alpha: 0.55) : UIColor(white: 0, alpha: 0.5))
+            l.textAlignment = .center
+            l.adjustsFontSizeToFitWidth = true
+            l.minimumScaleFactor = 0.7
+            return l
+        }
     }
 
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
