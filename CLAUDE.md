@@ -522,6 +522,11 @@ in English as usual.
 - **App Store assets** live in `docs/appstore/` (`GUIDE.md` step-by-step submission guide in Hebrew, `LISTING.md` per-language texts within Apple's
   length limits, `screenshots/<lang>/{iphone-6.9,ipad-13}/NN.png`). Rebuild with `node scripts/appstore-capture.mjs [langs] [phone|ipad]` (needs
   `npm run serve:local`) then `node scripts/appstore-compose.mjs`; screenshots taken on the real iPhone go in `docs/appstore/raw-device/` and override the web ones.
+- **Release workflow (user's rule, 2026-10-12): test on a real iPhone before anything ships.** Every change goes into a PR that is
+  NOT merged to main yet. A testing-only build (own branch, higher CURRENT_PROJECT_VERSION each time) is uploaded to TestFlight
+  (internal only - never attached to an App Store version, never submitted), David checks it on his iPhone, and only what he
+  confirms works is merged. The final App Store build is a clean one from main; David alone presses Submit for Review. Every
+  upload needs his typed approval in the terminal. Never print ASC key id / issuer / key path / team id.
 - **Release status (2026-10-12):** 2.0 (build 6) is Waiting for Review - never touch that submission from a session.
   Everything for **2.0.1** is prepared in the repo (David uploads it himself after 2.0 is approved): search fix, native push,
   Library RTL, Rambam-widget nikud, French App Store listing (`fastlane/metadata/fr-FR`), widget screenshots
