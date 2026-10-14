@@ -8548,7 +8548,8 @@ function openReader(chapters, opt){
   opt=opt||{};
   let idx=0; if(opt.start){ const p=chapters.indexOf(opt.start); if(p>=0) idx=p; }
   RD={ chapters:chapters.slice(), idx, daily:!!opt.daily, hd:opt.hd||currentHDate(), verse:(opt.verse!=null?opt.verse:null) };
-  TAB='reader'; renderReader(); forceScrollTop();
+  TAB='reader'; try{ nativeCalHide(); }catch(e){}   // opened from the native calendar: it must step aside (render() isn't run on this path)
+  renderReader(); forceScrollTop();
 }
 function prayerBlock(which){
   const pr=P[which]; if(!pr) return '';
@@ -11041,14 +11042,15 @@ function renderPrayerReader(){
   }).join('');
   
   syncNativeTopBar(p.title, PR.group?'prayersGroup':'prayers', {
-    actions:[{id:'share',icon:'square.and.arrow.up',label:ckChrome('שתף')},{id:'shareQR',icon:'qrcode',label:ckChrome('קוד QR')}],
-    handlers:{ share:()=>sharePrayer(PR.prayer), shareQR:()=>shareQR() },
+    actions:[{id:'compass',icon:'location.north.circle',label:ckChrome('כוון תפלה')},{id:'share',icon:'square.and.arrow.up',label:ckChrome('שתף')},{id:'shareQR',icon:'qrcode',label:ckChrome('קוד QR')}],
+    handlers:{ compass:()=>openKotel('prayerReader'), share:()=>sharePrayer(PR.prayer), shareQR:()=>shareQR() },
   });
   app.innerHTML=`
   <div class="topbar" style="justify-content:space-between">
     <button class="icon-btn" onclick="go('${PR.group?'prayersGroup':'prayers'}')">${I.prev}<span style="display:none">חזור</span></button>
     <div class="tb-title gold-text">${p.title}</div>
     <div style="display:flex;gap:6px">
+      <button class="icon-btn" onclick="openKotel('prayerReader')" aria-label="כוון תפלה">${I.compass}</button>
       <button class="icon-btn" onclick="sharePrayer('${PR.prayer}')">${I.share}<span style="display:none">שתף</span></button>
       <button class="icon-btn" onclick="shareQR()">${I.qr}<span style="display:none">קוד QR</span></button>
     </div>
@@ -12784,7 +12786,15 @@ function drawSiddurReader(){
     SID_RETURN_SCROLL=Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0);
     openTefillinMirror('siddurReader');
   };
-  const mirrorAction = p==='shacharit' ? {actions:[{id:'tefillinMirror',icon:'camera.viewfinder',label:ckChrome('מראה לתפלין')}], handlers:{tefillinMirror:openMirrorFromReader}} : null;
+  /* The Kotel compass sits next to the "..." tools button in EVERY siddur prayer (user request); Shacharit additionally gets the Tefillin Mirror. */
+  const openCompassFromReader=()=>{
+    SID_RETURN_SCROLL=Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0);
+    openKotel('siddurReader');
+  };
+  const mirrorAction = {
+    actions:[{id:'compass',icon:'location.north.circle',label:ckChrome('כוון תפלה')}].concat(p==='shacharit'?[{id:'tefillinMirror',icon:'camera.viewfinder',label:ckChrome('מראה לתפלין')}]:[]),
+    handlers:{compass:openCompassFromReader, tefillinMirror:openMirrorFromReader}
+  };
   // Matches the HTML back button's own wiring below (sidTrackPosition()
   // saves the resume/scroll position before leaving) - a plain 'siddurHome'
   // string here would have skipped that on the native back button.
@@ -12794,6 +12804,7 @@ function drawSiddurReader(){
   <button class="icon-btn tb-back" onclick="go('siddurHome')">${I.prev}</button>
   <div class="tb-title gold-text">${SIDDUR_PRAYER_NAMES[p]}</div>
   <div style="display:flex;align-items:center;gap:4px">
+  <button class="icon-btn" id="sidCompass" aria-label="כוון תפלה">${I.compass}</button>
   ${p==='shacharit'?`<button class="icon-btn" id="sidTefillinMirror" aria-label="מראה לתפלין">${I.tefillinMono}</button>`:''}
   ${toolsFab({scroll:true})}
   </div></div>
@@ -12819,6 +12830,7 @@ function drawSiddurReader(){
   const sel = app.querySelector('[data-sidgo="selichot"]'); if(sel) sel.onclick=()=>openSiddurPrayer('selichot');
   document.querySelector('.tb-back').onclick=()=>{ try{sidTrackPosition();}catch(e){} go('siddurHome'); };
   const tm=document.getElementById('sidTefillinMirror'); if(tm) tm.onclick=openMirrorFromReader;
+  const cpb=document.getElementById('sidCompass'); if(cpb) cpb.onclick=openCompassFromReader;
   const rg=document.getElementById('sidResumeGo'); if(rg) rg.onclick=sidResume;
   const rn=document.getElementById('sidResumeNew'); if(rn) rn.onclick=sidRestart;
   document.addEventListener('scroll', sidTrackScroll, {passive:true, capture:true});
@@ -13212,8 +13224,10 @@ function renderZoharReader(){
 
 /* ================= SETTINGS ================= */
 const COMPASS_RING=[[0,'N'],[45,'NE'],[90,'E'],[135,'SE'],[180,'S'],[225,'SW'],[270,'W'],[315,'NW']];
+let KOTEL_FROM='settings';
+function openKotel(from){ KOTEL_FROM=from||'settings'; go('kotelCompass'); }
 function renderKotelCompass(){
-  syncNativeTopBar(ckChrome('כוון תפלה'), 'settings');
+  syncNativeTopBar(ckChrome('כוון תפלה'), KOTEL_FROM);
   const hasLoc=LOC && LOC.lat!=null;
   if(hasLoc) startCompass();
   const knowsHeading=hasLoc && CompassState.heading!=null;
@@ -13255,7 +13269,7 @@ function renderKotelCompass(){
     </div>
   </div>`;
   updateCompassNeedle();
-  document.getElementById('compassClose').onclick=()=>go('settings');
+  document.getElementById('compassClose').onclick=()=>go(KOTEL_FROM);
   const locBtn=document.getElementById('compassLocBtn');
   if(locBtn) locBtn.onclick=()=>{ toast('מאתר מקום…'); requestGPS(ok=>{ toast(ok?'המקום עדכן':'לא התקבלה הרשאת מקום'); renderKotelCompass(); }); };
   const orientBtn=document.getElementById('compassOrientBtn');
@@ -14044,6 +14058,9 @@ async function shareQR(){
   toast(ckChrome('מכין תמונה…'));
   let cv; try{ cv=await appQrImage(); }catch(e){ toast(ckChrome('שגיאה ביצירת תמונה')); return; }
   const dataUrl=cv.toDataURL('image/png');
+  /* In the iOS app the HTML overlay below would sit UNDER the native Settings table (invisible until you left Settings),
+     so go straight to the system share sheet, which already offers Save Image / Copy. */
+  { const nn=nativeSys(); if(nn && TAB==='settings'){ nn.shareImage({data:dataUrl,text:APP_STORE_URL}).catch(()=>{}); return; } }
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal">
     <button class="close-x" data-close>${I.x}</button>
@@ -15183,6 +15200,7 @@ function sharePrayer(key){
   shareDirect(p.title, prayerShareText(key));
 }
 window.sharePrayer = sharePrayer;
+window.openKotel = openKotel;
 window.shareQR = shareQR;
 
 })();

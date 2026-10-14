@@ -302,19 +302,30 @@ final class NativeSettingsView: UIView, UITableViewDataSource, UITableViewDelega
         value.font = UIFont.monospacedDigitSystemFont(ofSize: UIFont.preferredFont(forTextStyle: .body).pointSize, weight: .semibold)
         value.adjustsFontForContentSizeCategory = true
         value.textColor = .secondaryLabel
-        let stepper = UIStepper()
-        stepper.minimumValue = 0
-        stepper.maximumValue = 2
-        stepper.value = 1
-        stepper.stepValue = 1
-        stepper.autorepeat = false
-        stepper.addAction(UIAction { [weak self, weak stepper] _ in
-            guard let stepper = stepper else { return }
-            let plus = stepper.value > 1
-            stepper.value = 1
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            self?.onAction?(row.id + (plus ? "Plus" : "Minus"), nil)
-        }, for: .valueChanged)
+        // Two plain buttons (UIStepper's value-reset trick proved unreliable on device: taps did nothing).
+        func stepButton(_ symbol: String, _ suffix: String, _ label: String) -> UIButton {
+            let b = UIButton(type: .system)
+            b.setImage(UIImage(systemName: symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)), for: .normal)
+            b.tintColor = goldColor
+            b.accessibilityLabel = label
+            b.widthAnchor.constraint(equalToConstant: 46).isActive = true
+            b.heightAnchor.constraint(equalToConstant: 34).isActive = true
+            b.addAction(UIAction { [weak self] _ in
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                self?.onAction?(row.id + suffix, nil)
+            }, for: .touchUpInside)
+            return b
+        }
+        let divider = UIView()
+        divider.backgroundColor = UIColor.separator
+        divider.widthAnchor.constraint(equalToConstant: 1).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 18).isActive = true
+        let stepper = UIStackView(arrangedSubviews: [stepButton("minus", "Minus", "−"), divider, stepButton("plus", "Plus", "+")])
+        stepper.axis = .horizontal
+        stepper.alignment = .center
+        stepper.backgroundColor = UIColor.tertiarySystemFill
+        stepper.layer.cornerRadius = 9
+        stepper.semanticContentAttribute = .forceLeftToRight
         let stack = UIStackView(arrangedSubviews: [value, stepper])
         stack.axis = .horizontal
         stack.alignment = .center

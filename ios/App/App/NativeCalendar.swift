@@ -215,9 +215,9 @@ final class NCDayPage: UIView {
 
     /// Name on top, the note underneath (long names + notes used to squeeze the name into one letter per line).
     private func stackedRow(_ title: String, sub: String?, icon: String) -> UIView {
-        let name = label(title, style: .body, align: .center)
+        let name = label(title, style: .body)
         var texts: [UIView] = [name]
-        if let sub = sub, !sub.isEmpty { texts.append(label(sub, style: .footnote, color: .secondaryLabel, align: .center)) }
+        if let sub = sub, !sub.isEmpty { texts.append(label(sub, style: .footnote, color: .secondaryLabel)) }
         let col = UIStackView(arrangedSubviews: texts)
         col.axis = .vertical; col.spacing = 2; col.alignment = .fill
         col.semanticContentAttribute = semanticContentAttribute
