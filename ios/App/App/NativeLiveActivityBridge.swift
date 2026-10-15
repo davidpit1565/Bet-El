@@ -83,7 +83,11 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
         let state = BetElActivityAttributes.ContentState(
             zmanLabel: WidgetL10n.t(next.label, lang: snapshot.lang), endDate: next.date,
             startDate: now,
-            nextLabel: following.map { WidgetL10n.t($0.label, lang: snapshot.lang) }, nextDate: following?.date)
+            nextLabel: following.map { WidgetL10n.t($0.label, lang: snapshot.lang) }, nextDate: following?.date,
+            zmanKey: next.label,
+            upcoming: upcoming.dropFirst().map {
+                BetElActivityAttributes.Upcoming(key: $0.label, label: WidgetL10n.t($0.label, lang: snapshot.lang), date: $0.date)
+            })
         let title = WidgetL10n.t("nextZman", lang: snapshot.lang)
         let rtl = snapshot.lang == "he"
 
@@ -121,7 +125,7 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
 
     private struct ZRow: Decodable { let d: String; let a: String?; let r: String?; let c: String?; let s: String?; let t: String? }
 
-    /// The next two zmanim after `now`: dawn, sunrise, midday (chatzot), sunset, nightfall
+    /// The next five zmanim after `now`: dawn, sunrise, midday (chatzot), sunset, nightfall
     /// (only when the app syncs it) and midnight (chatzot halayla = midday + 12h, accurate to
     /// about a minute). Uses the app's own exact times from the synced snapshot (the same
     /// table the widgets read) and only falls back to Solar.swift's approximation for days
@@ -155,7 +159,7 @@ public class NativeLiveActivityBridge: CAPPlugin, CAPBridgedPlugin {
             }
             if let n = noon { all.append(("chatzotNight", n.addingTimeInterval(12 * 60 * 60))) }
         }
-        return Array(all.filter { $0.date > now }.sorted { $0.date < $1.date }.prefix(2))
+        return Array(all.filter { $0.date > now }.sorted { $0.date < $1.date }.prefix(5))
     }
     #endif
 }
