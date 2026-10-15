@@ -14966,12 +14966,18 @@ maybeShowRatePrompt();
 // Start the full-data prefetch only once the first screen is up and the app is in the
 // foreground: hundreds of parallel downloads/cache writes right at launch can starve the
 // WebView on a real device, and the gold progress bar alone must never be all there is to see.
+/* On the iOS app the real native home/lists replace the HTML screens (html.native-home hides #app > .view), so "#app has
+   no visible text" is NORMAL there - the boot watchdog and the prefetch gate below must not treat it as a failed load
+   (it popped the "The app did not load correctly" screen over the native home). */
+function nativeUiOwnsScreen(){
+  try{ const C=window.Capacitor; return !!(C && C.getPlatform && C.getPlatform()==='ios' && C.Plugins && C.Plugins.NativeHome); }catch(e){ return false; }
+}
 (function schedulePrefetch(){
   let waited=0;
   const t=setInterval(()=>{
     waited+=1000;
     const a=document.getElementById('app');
-    const up=!!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20);
+    const up=nativeUiOwnsScreen() || !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20);
     if((up && !document.hidden && waited>=4000) || waited>=20000){ clearInterval(t); startBackgroundDataPrefetch(); }
   },1000);
 })();
@@ -14979,7 +14985,7 @@ maybeShowRatePrompt();
    devices showed only the parchment background and the gold progress bar), retry the render
    once, then offer a visible recovery screen instead of a blank page. */
 (function bootWatchdog(){
-  function up(){ const a=document.getElementById('app'); return !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20); }
+  function up(){ if(nativeUiOwnsScreen()) return true; const a=document.getElementById('app'); return !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20); }
   let tries=0;
   const t=setInterval(()=>{
     if(up()){ clearInterval(t); const f=document.getElementById('bootFallback'); if(f) f.remove(); return; }
