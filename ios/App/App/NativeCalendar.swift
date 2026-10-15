@@ -152,7 +152,10 @@ final class NCDayPage: UIView {
         addSubview(stack)
         NSLayoutConstraint.activate([
             stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            // <= not ==: every page is as tall as the TALLEST of the three neighbouring days, and an
+            // equal bottom pin made the vertical stack stretch its first group to fill the extra height
+            // (huge empty gap under the first row on some days).
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
