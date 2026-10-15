@@ -14963,7 +14963,41 @@ buildNav();
 render();
 syncWidgetData();
 maybeShowRatePrompt();
-setTimeout(startBackgroundDataPrefetch, 1500); // after the initial screen's own fetches get priority
+// Start the full-data prefetch only once the first screen is up and the app is in the
+// foreground: hundreds of parallel downloads/cache writes right at launch can starve the
+// WebView on a real device, and the gold progress bar alone must never be all there is to see.
+(function schedulePrefetch(){
+  let waited=0;
+  const t=setInterval(()=>{
+    waited+=1000;
+    const a=document.getElementById('app');
+    const up=!!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20);
+    if((up && !document.hidden && waited>=4000) || waited>=20000){ clearInterval(t); startBackgroundDataPrefetch(); }
+  },1000);
+})();
+/* Boot watchdog: if the first render left #app empty/invisible (a rendering hiccup on some
+   devices showed only the parchment background and the gold progress bar), retry the render
+   once, then offer a visible recovery screen instead of a blank page. */
+(function bootWatchdog(){
+  function up(){ const a=document.getElementById('app'); return !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20); }
+  let tries=0;
+  const t=setInterval(()=>{
+    if(up()){ clearInterval(t); const f=document.getElementById('bootFallback'); if(f) f.remove(); return; }
+    tries++;
+    if(tries===1){ try{ render(); }catch(e){} return; }
+    if(tries>=3 && !document.getElementById('bootFallback')){
+      const d=document.createElement('div'); d.id='bootFallback';
+      d.style.cssText='position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center;background:#efe6d2;color:#1b2432;font:600 17px system-ui,sans-serif';
+      d.innerHTML='<div>האפליקציה לא נטענה כראוי<br><span style="font-weight:500;font-size:14px;opacity:.75">The app did not load correctly</span></div>'
+        +'<button id="bootRetry" style="padding:12px 26px;border:0;border-radius:999px;background:#d4af5f;color:#2a1e05;font:700 16px system-ui,sans-serif">נסה שוב · Try again</button>';
+      document.body.appendChild(d);
+      document.getElementById('bootRetry').onclick=async()=>{
+        try{ if(window.caches) await caches.delete(NATIVE_DATA_CACHE); }catch(e){}
+        location.reload();
+      };
+    }
+  },2500);
+})();
 /* Drag along the bottom nav itself to scrub between tabs, like sliding a
    finger across a segmented control: the pill follows the finger live
    (no transition lag) while dragging, and lifting the finger navigates to
