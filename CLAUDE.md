@@ -586,3 +586,13 @@ in English as usual.
   `androidBackWire()` (appBack -> Home -> exit). The offline-prefetch pill shows MB using `data/manifest-sizes.json`
   (generated together with `manifest.json`; re-run `node scripts/generate-data-manifest.mjs` after any data change).
   Emulate Android in Playwright with `window.androidBridge` stub. Prompt for other apps: `docs/play/ANDROID-READINESS-PROMPT.md`.
+
+- **Android widgets + ongoing countdown notification (Java, not compile-verified in this repo's cloud session):**
+  `android/app/src/main/java/com/beitel/tehilim/` - `BetElWidgetBridge`/`NativeLiveActivityBridge` (same JS names as iOS, registered in
+  `MainActivity` and, on Android only, in capacitor-native-bridge.js) store the app's `updateSharedData` snapshot (`BetElStore`, SharedPreferences)
+  and call `BetElRefresh.run()` = re-render 4 RemoteViews widgets (`BetElWidgets`: main date+next zman, zmanim list, candle lighting, streak;
+  light/dark via values/values-night `widget_*` colors, Chronometer countdowns tick without the app) + `LiveZmanNotifier` (ongoing silent
+  notification with a countdown chronometer = Android's Live Activity; toggle `S.liveZmanNotif`, Settings row Android-only) + an inexact
+  AlarmManager tick at each zman/midnight (`ZmanRefreshReceiver`, also boot/time change). The Hebrew date comes pre-formatted from JS
+  (`widgetHebTable()` -> `hebDays`) since Android has no Hebrew-letter calendar. Taps open `betel://calendar|tracker` (manifest intent-filter ->
+  `openWidgetLink`). Not done yet: Tehillim-chapters widget, lock-screen widgets, exact alarms (would need SCHEDULE_EXACT_ALARM + Play declaration).

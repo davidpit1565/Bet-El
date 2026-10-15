@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light (mirrors BetElTheme.palette("light") of the iOS widgets) -->
+    <color name="widget_bg_top">#FBF5E6</color>
+    <color name="widget_bg_bottom">#E7DCC2</color>
+    <color name="widget_ink">#22314E</color>
+    <color name="widget_ink_soft">#3C4A66</color>
+    <color name="widget_gold">#9A7526</color>
+    <color name="widget_gold_bright">#C69A3C</color>
+    <color name="widget_line">#52967527</color>
+</resources>
