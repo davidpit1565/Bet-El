@@ -7107,6 +7107,7 @@ function appUpdateVerGt(a,b){
 function appUpdateDismissed(){ return APP_UPDATE_INFO && localStorage.getItem('betel_update_dismissed_v')===APP_UPDATE_INFO.version; }
 function dismissAppUpdate(){ if(APP_UPDATE_INFO) localStorage.setItem('betel_update_dismissed_v',APP_UPDATE_INFO.version); if(TAB==='home') render(); }
 function checkAppUpdate(){
+  if(!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()==='ios')) return; // App Store lookup is iOS-only
   if(!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.App)) return;
   const todayStr=new Date().toISOString().slice(0,10);
   if(localStorage.getItem('betel_update_check_date')===todayStr) return;
