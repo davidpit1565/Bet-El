@@ -2691,15 +2691,23 @@ function animateCountUp(el, from, to, duration){
   if(!el) return;
   to = Number(to)||0;
   from = Number(from)||0;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches || from===to){ el.textContent = to.toLocaleString(civilDateLocale()); return; }
+  const finalTxt = to.toLocaleString(civilDateLocale());
+  el.__cuTo = to;
+  /* On the iOS app the native home covers the WebView, which WebKit then throttles: requestAnimationFrame barely runs, so the
+     animation's first frame (the START value, 0) stayed on screen and the live counter showed 0 until the page happened to
+     become visible. Never rely on rAF for the final number: paint the end value directly when the native home is on, and always
+     force it once the animation time is up. */
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || from===to || document.documentElement.classList.contains('native-home') || document.hidden){ el.textContent = finalTxt; return; }
   duration = duration||700;
   const start = performance.now();
   const ease = t => 1-Math.pow(1-t,3);
   (function step(now){
+    if(el.__cuTo !== to) return;   // a newer value took over
     const t = Math.min(1, (now-start)/duration);
     el.textContent = Math.round(from + (to-from)*ease(t)).toLocaleString(civilDateLocale());
     if(t<1) requestAnimationFrame(step);
   })(start);
+  setTimeout(()=>{ if(el.__cuTo === to) el.textContent = finalTxt; }, duration + 120);
 }
 window.animateCountUp = animateCountUp;
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
