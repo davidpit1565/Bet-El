@@ -14441,7 +14441,7 @@ function confetti(n){
    Delivered purely as an OS notification (fireNotif), same as the other
    checkXNotification() reminders below - never an in-app modal, per
    explicit user request. Only fires while the live count is still within
-   the first 10 users of that hundred (e.g. 300-309, 400-409): a device
+   the first 60 users of that hundred (e.g. 300-359, 400-459): a device
    that only opens the app once the count has already moved well past a
    tier (e.g. opens at 350) would otherwise see a stale "300!" alert for a
    milestone that's no longer current. Guarded per device
@@ -14463,13 +14463,14 @@ const MILESTONE_UI={
       grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
-  if(!notifReady()) return;
+  if(!notifReady()) return false;   // caller must NOT mark the tier as celebrated - the device may still get the permission/toggle later
   const grand = tier>=1000;
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
   const tierStr=tier.toLocaleString(civilDateLocale());
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
   const body = (grand?t.grandBody:t.body).replace('{n}',tierStr);
   fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  return true;
 }
 /* the highest hundred-tier (300,400,500,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
@@ -14481,11 +14482,16 @@ function celebrateMilestone(count, tier){
    ever firing a stale milestone. */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
-  if(tier<300 || count>=tier+10) return;
+  /* 60-user window (was 10): at ~1-2 new installs an hour almost nobody opened the app inside a 10-user window, so the
+     500 milestone reached no device at all. */
+  if(tier<300 || count>=tier+60) return;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
   if(tier>last){
-    localStorage.setItem('betel_milestone_last', String(tier));
-    try{ window.celebrateMilestone(count, tier); }catch(e){}
+    let fired=false;
+    try{ fired=!!window.celebrateMilestone(count, tier); }catch(e){}
+    /* only remember the tier once the notification really went out: before, a device with notifications off/denied at that
+       moment burned the milestone forever without ever showing it */
+    if(fired) localStorage.setItem('betel_milestone_last', String(tier));
   }
 }
 
