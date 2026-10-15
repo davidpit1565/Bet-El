@@ -15380,21 +15380,68 @@ window.shareQR = shareQR;
         if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
       }
     };
-    onValue(presenceListRef, (snap) => {
-      try {
-        window.__liveCount = typeof snap.numChildren === 'function' ? snap.numChildren() : Object.keys(snap.val() || {}).length;
-      } catch (err) {
-        console.error('[betel presence] could not read snapshot:', err);
-        window.__liveCount = 0;
+    /* "Online now" used to be the raw number of children under /presence: one pushed entry per connection, removed by
+       onDisconnect. Any entry whose removal request never reached the server (app killed in the background, network
+       lost, reconnect races, old dev installs) stayed forever, so the count only ever grew (24 "online" at midnight).
+       Now every install has ONE stable key written with a heartbeat timestamp (server-clock based) and an entry only
+       counts while its heartbeat is fresh; the count is recomputed every 20s so stale entries drop out on their own
+       even with no database event. Backgrounded app = not online. Legacy entries (value true, written by app versions
+       before this) count only while their push-id timestamp is under 30 min old; clients also null out old leftovers. */
+    const PRES_TTL = 150000, PRES_BEAT = 45000, LEGACY_MS = 30 * 60 * 1000;
+    let presId = '';
+    try{ presId = localStorage.getItem('betel_pres_id') || ''; }catch(e){}
+    if(!presId){ presId = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); try{ localStorage.setItem('betel_pres_id', presId); }catch(e){} }
+    const myRef = ref(rtdb, 'presence/' + presId);
+    let srvOffset = 0, presVal = {};
+    const nowS = () => Date.now() + srvOffset;
+    const PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+    const pushTime = (key) => { let t = 0; for(let i = 0; i < 8; i++){ const c = PUSH_CHARS.indexOf(key.charAt(i)); if(c < 0) return 0; t = t * 64 + c; } return t; };
+    function recount(){
+      const now = nowS(); let n = 0;
+      for(const k in presVal){
+        const v = presVal[k];
+        if(v && typeof v === 'object' && typeof v.t === 'number'){ if(now - v.t < PRES_TTL) n++; }
+        else if(v === true){ const c = pushTime(k); if(c && now - c < LEGACY_MS) n++; }
       }
+      window.__liveCount = n;
       window.__paintLiveCount();
-    }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
-    onValue(ref(rtdb, '.info/connected'), (snap) => {
-      if(snap.val() === true && !IS_DEV_BUILD){
-        const myRef = push(presenceListRef);
-        onDisconnect(myRef).remove();
-        set(myRef, true).catch((err) => { console.error('[betel presence] write blocked, check Realtime Database rules:', err); });
+    }
+    let cleaned = 0;
+    function cleanup(){
+      const now = nowS();
+      for(const k in presVal){
+        if(cleaned >= 20) return;
+        const v = presVal[k]; let old = false;
+        if(v && typeof v === 'object' && typeof v.t === 'number') old = now - v.t > 3600000;
+        else if(v === true){ const c = pushTime(k); old = !!c && now - c > 6 * 3600000; }
+        if(old){ cleaned++; set(ref(rtdb, 'presence/' + k), null).catch(() => {}); }
       }
+    }
+    onValue(ref(rtdb, '.info/serverTimeOffset'), (snap) => { srvOffset = Number(snap.val()) || 0; });
+    onValue(presenceListRef, (snap) => {
+      try { presVal = snap.val() || {}; }
+      catch (err){ console.error('[betel presence] could not read snapshot:', err); presVal = {}; }
+      recount();
+      cleanup();
+    }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
+    setInterval(recount, 20000);
+    let connected = false;
+    function beat(){
+      if(IS_DEV_BUILD || !connected || document.hidden) return;
+      set(myRef, { t: nowS() }).catch((err) => { console.error('[betel presence] write blocked, check Realtime Database rules:', err); });
+    }
+    onValue(ref(rtdb, '.info/connected'), (snap) => {
+      connected = snap.val() === true;
+      if(connected && !IS_DEV_BUILD){
+        onDisconnect(myRef).remove();
+        beat();
+      }
+    });
+    setInterval(beat, PRES_BEAT);
+    document.addEventListener('visibilitychange', () => {
+      if(IS_DEV_BUILD || !connected) return;
+      if(document.hidden) set(myRef, null).catch(() => {});
+      else beat();
     });
   } catch (e) {}
 
