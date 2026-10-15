@@ -4,4 +4,12 @@
     <string name="title_activity_main">תמיד</string>
     <string name="package_name">com.beitel.tehilim</string>
     <string name="custom_url_scheme">com.beitel.tehilim</string>
+    <string name="widget_main_name">תמיד · תאריך וזמן הבא</string>
+    <string name="widget_main_desc">התאריך העברי, פרשת השבוע, והספירה לאחור לזמן הבא</string>
+    <string name="widget_zmanim_name">תמיד · זמני היום</string>
+    <string name="widget_zmanim_desc">זמני היום המדויקים למיקום שלך</string>
+    <string name="widget_candle_name">תמיד · הדלקת נרות</string>
+    <string name="widget_candle_desc">ספירה לאחור להדלקת הנרות הקרובה</string>
+    <string name="widget_streak_name">תמיד · רצף לימוד</string>
+    <string name="widget_streak_desc">הימים הרצופים של הלימוד שלך</string>
 </resources>
