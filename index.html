@@ -15081,23 +15081,29 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
      jitter (inertial deceleration, a bounce at the top) can't flicker the
      header open/closed - direction has to actually change or continue for
      a real, deliberate scroll before anything toggles. */
+  /* The SMALL header (back / title / "..." / compass) is permanent on every screen - siddur, food blessings, Tehillim and the
+     other books, lists. Only the two big-header screens - Chok LeYisrael and Ben Ish Chai - tuck their header away on scroll-down
+     (user rule). In every screen the reader's own lower header block (.bic-collapse: chapter picker, day nav...) still collapses,
+     so the sticky header just gets shorter while the small bar stays. */
+  const BIG_HEADER_TABS = ['chokReader','chokUnit','chokList','chokBooks','chokParshiot','chokSearch','bicReader','bicHome','bicParshiot'];
   function set(hide){
+    const hideBar = hide && BIG_HEADER_TABS.indexOf(TAB) >= 0;
     if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setHidden({hidden:hide}).catch(()=>{});
-    /* the header tucks away on scroll-down and returns on scroll-up too (native bar via NativeTopBar.setCollapsed; the HTML .topbar gets a class) */
-    if(NATIVE_TOPBAR && TB_LAST!==hide){
-      TB_LAST=hide;
+    /* the big-header screens' bar tucks away on scroll-down and returns on scroll-up (native bar via NativeTopBar.setCollapsed; the HTML .topbar gets a class) */
+    if(NATIVE_TOPBAR && TB_LAST!==hideBar){
+      TB_LAST=hideBar;
       /* setCollapsed compensates for the header's own height change with a native window.scrollBy,
          which fires a real scroll event large enough to blow past COMMIT in the opposite direction
          and immediately re-flip the state it just set - suppress onScroll's reaction to it */
       suppressUntil = Date.now()+400;
-      try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hide}).catch(()=>{}); }catch(e){}
+      try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hideBar}).catch(()=>{}); }catch(e){}
     }
-    document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hide));
+    document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hideBar));
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
     const bicHead=document.querySelector('.bic-collapse');
     nav.classList.toggle('nav-hidden', hide);
-    if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
+    if(tools){ tools.classList.toggle('nav-hidden', hideBar); if(hideBar) tools.classList.add('collapsed'); }
     if(bicHead){
       /* .bic-collapse's CSS transitions max-height over a fixed .3s, but a
          reader whose header content is much shorter than the old fixed
