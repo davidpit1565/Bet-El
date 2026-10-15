@@ -1,6 +1,6 @@
 # Google Play - store listing (he default, en-US)
 Package: `com.beitel.tehilim` - App name: `תמיד` (≤30) - Free - Category: Books & Reference (or Lifestyle) - Contact e-mail: the one used for the App Store.
-Privacy Policy URL: https://davidpitt1565.github.io/Bet-El/privacy.html   (NOTE: the repo is davidpit1565, one "t" - use https://davidpit1565.github.io/Bet-El/privacy.html)
+Privacy Policy URL: https://davidpit1565.github.io/Bet-El/privacy.html
 Graphics: `icon-512.png` (512x512), `feature-graphic-1024x500.png`, phone screenshots `screenshots/he|en/01..07.png` (1080x1920, 2-8 allowed; upload 01-05 at least).
 Android honesty note: the Android app is the same web app inside a shell. It does NOT have the iOS widgets, Live Activity, Spotlight/Siri, Liquid Glass or the native Settings/Calendar - the text below only claims what Android really has.
 
