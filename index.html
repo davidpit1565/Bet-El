@@ -14064,7 +14064,7 @@ function shareDirect(title, text){
 function chapterShareText(ch){ return 'תהילים · פרק '+heNum(ch)+'\n\n'+(T[ch]||[]).join('\n'); }
 function shareChapter(ch){ shareDirect(ckChrome('שִׁתּוּף פֶּרֶק ')+heNum(ch), chapterShareText(ch)); }
 function shareApp(){
-  const text='📖 תמיד — אפליקציית הלימוד היומי\nחוק לישראל · תהילים יומי · זוהר יומי · לוח עברי וזמני היום:\n'+APP_STORE_URL;
+  const text='📖 תמיד — אפליקציית הלימוד היומי\nחוק לישראל · תהילים יומי · זוהר יומי · לוח עברי וזמני היום:\n'+APP_SMART_URL;
   shareDirect(ckChrome('שִׁתּוּף הָאַפְּלִיקַצְיָה'), text);
 }
 /* ---- real iOS system helpers (NativeSystemBridge.swift): in-app Safari sheet, share sheet with image,
@@ -14096,7 +14096,7 @@ async function shareQR(){
   const dataUrl=cv.toDataURL('image/png');
   /* In the iOS app the HTML overlay below would sit UNDER the native Settings table (invisible until you left Settings),
      so go straight to the system share sheet, which already offers Save Image / Copy. */
-  { const nn=nativeSys(); if(nn && TAB==='settings'){ nn.shareImage({data:dataUrl,text:APP_STORE_URL}).catch(()=>{}); return; } }
+  { const nn=nativeSys(); if(nn && TAB==='settings'){ nn.shareImage({data:dataUrl,text:APP_SMART_URL}).catch(()=>{}); return; } }
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="modal">
     <button class="close-x" data-close>${I.x}</button>
@@ -14108,8 +14108,8 @@ async function shareQR(){
   document.body.appendChild(ov);
   const n=nativeSys();
   ov.querySelector('#qrShare').onclick=()=>{
-    if(n){ n.shareImage({data:dataUrl,text:APP_STORE_URL}).catch(()=>{}); return; }   // the iOS share sheet also has "Save Image"
-    shareGeneratedImage(async()=>cv,'tamid-app-qr.png',APP_STORE_URL);
+    if(n){ n.shareImage({data:dataUrl,text:APP_SMART_URL}).catch(()=>{}); return; }   // the iOS share sheet also has "Save Image"
+    shareGeneratedImage(async()=>cv,'tamid-app-qr.png',APP_SMART_URL);
   };
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
@@ -14117,6 +14117,8 @@ async function shareQR(){
 /* Now that the app is live on the App Store, the share QR should send
    people straight there (a real install) rather than to the PWA's own
    URL - see the CLAUDE.md note this fulfills. */
+/* One link for everyone: get.html sends iPhone/iPad to the App Store and Android to Google Play (desktop sees both buttons). */
+const APP_SMART_URL = 'https://davidpit1565.github.io/Bet-El/get.html';
 const APP_STORE_URL = 'https://apps.apple.com/app/%D7%AA%D7%9E%D7%99%D7%93/id6807186847';
 const APP_REVIEW_URL = APP_STORE_URL+'?action=write-review';
 
@@ -14297,7 +14299,7 @@ async function appQrImage(){
   const th = lightTheme
     ? { bg1:'#fbf5e6', bg2:'#e7dcc2', gold:'#8a6414', goldDeep:'#7a5a14', cream:'#22314e', line:'rgba(150,116,44,.5)' }
     : { bg1:'#0d1730', bg2:'#070b16', gold:'#e6c874', goldDeep:'#c9a24b', cream:'#f6f1e4', line:'rgba(230,200,116,.35)' };
-  const url = APP_STORE_URL;
+  const url = APP_SMART_URL;
   const W=1080, H=1400;
   const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
