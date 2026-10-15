@@ -878,7 +878,9 @@ a.set-item{text-decoration:none;color:inherit}
 #dataPrefetchBar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:transparent;pointer-events:none;opacity:1;transition:opacity .6s ease}
 #dataPrefetchBar i{display:block;height:100%;width:0%;background:var(--gold-grad);box-shadow:0 0 8px rgba(212,175,95,.6);transition:width .3s ease}
 #dataPrefetchBar.done{opacity:0}
-#dataPrefetchBar .dpb-t{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:600;color:#fff;background:rgba(20,26,48,.82);border:1px solid rgba(212,175,95,.5);padding:3px 10px;border-radius:999px}
+#dataPrefetchBar .dpb-t{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:600;color:#fff;background:rgba(20,26,48,.82);border:1px solid rgba(212,175,95,.5);padding:5px 12px 6px;border-radius:14px;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:190px}
+#dataPrefetchBar .dpb-b{display:block;height:3px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
+#dataPrefetchBar .dpb-b i{display:block;height:100%;width:0;background:#d4af5f;border-radius:3px;transition:width .3s ease}
 
 .hidden{display:none!important}
 
@@ -2124,7 +2126,7 @@ function dataPrefetchUI(done,total,doneBytes,totalBytes){
   const nums = totalBytes ? `${mb(doneBytes)} / ${mb(totalBytes)} MB` : `${done} / ${total}`;
   const t=bar.querySelector('.dpb-t');
   t.style.direction = lang==='he' ? 'rtl' : 'ltr';
-  t.innerHTML = `${label} · <bdi dir="ltr">${nums}</bdi>`;
+  t.innerHTML = `<span class="dpb-l">${label} · <bdi dir="ltr">${nums}</bdi></span><span class="dpb-b"><i style="width:${Math.round(pct*100)}%"></i></span>`;
 }
 
 /* ---------- icons ---------- */
@@ -15399,10 +15401,13 @@ window.shareQR = shareQR;
     function recount(){
       const now = nowS(); let n = 0;
       for(const k in presVal){
+        if(k === presId) continue;   // this device is counted below
         const v = presVal[k];
         if(v && typeof v === 'object' && typeof v.t === 'number'){ if(now - v.t < PRES_TTL) n++; }
         else if(v === true){ const c = pushTime(k); if(c && now - c < LEGACY_MS) n++; }
       }
+      /* This device counts as online right away (the first snapshot + .info/connected take a second or two) */
+      if(!IS_DEV_BUILD && !document.hidden && navigator.onLine !== false) n++;
       window.__liveCount = n;
       window.__paintLiveCount();
     }
@@ -15425,6 +15430,7 @@ window.shareQR = shareQR;
       cleanup();
     }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
     setInterval(recount, 20000);
+    recount();   // paint immediately instead of waiting for the network
     let connected = false;
     function beat(){
       if(IS_DEV_BUILD || !connected || document.hidden) return;
