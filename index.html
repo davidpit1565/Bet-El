@@ -15418,8 +15418,10 @@ window.shareQR = shareQR;
         if(k === presId) continue;   // this device is counted below
         const v = presVal[k];
         if(v && typeof v === 'object' && typeof v.t === 'number'){ if(now - v.t < PRES_TTL) n++; }
-        /* legacy entries (plain true, written by app versions before the heartbeat) are NOT counted: they can't be told apart
-           from ghosts, and counting them is what made the number lie. They get cleaned up below. */
+        /* Legacy entries (plain `true`, written by app versions before the heartbeat - the App Store build). They carry no heartbeat, but
+           their push id encodes when the session started: count them for 20 min (a typical session) so the number stays honest
+           while most people are still on the old version; older ones are treated as ghosts and cleaned up below. */
+        else if(v === true){ const c = pushTime(k); if(c && now - c < 20 * 60000) n++; }
       }
       /* This device counts as online right away (the first snapshot + .info/connected take a second or two) */
       if(!IS_DEV_BUILD && !document.hidden && navigator.onLine !== false) n++;
@@ -15433,7 +15435,7 @@ window.shareQR = shareQR;
         if(cleaned >= 20) return;
         const v = presVal[k]; let old = false;
         if(v && typeof v === 'object' && typeof v.t === 'number') old = now - v.t > 10 * 60000;
-        else old = true;   // legacy / malformed entry
+        else { const c = pushTime(k); old = !c || now - c > 90 * 60000; }   // legacy / malformed entry: ghost after 90 min
         if(old){ cleaned++; set(ref(rtdb, 'presence/' + k), null).catch(() => {}); }
       }
     }
