@@ -15250,8 +15250,11 @@ window.shareQR = shareQR;
      The localhost check must NOT apply inside the native app: Capacitor serves the bundled app from
      capacitor://localhost, so a plain hostname test made EVERY App Store user look like a dev build (no visit,
      no presence, no Analytics). In the app only the shell's own __BETEL_DEV_BUILD flag decides. */
+  /* Android's Capacitor shell serves the app from https://localhost, which the hostname test below mistook for a dev
+     machine (no visit, presence or Analytics for any Android user) - a native shell is never treated as localhost dev. */
+  const IS_NATIVE_SHELL = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform==='function' && window.Capacitor.isNativePlatform());
   const IS_DEV_BUILD = window.__BETEL_DEV_BUILD === true
-    || (/^https?:$/.test(location.protocol) && ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname));
+    || (!IS_NATIVE_SHELL && /^https?:$/.test(location.protocol) && ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname));
   if(!IS_DEV_BUILD) getAnalytics(firebaseApp);
 
   // Public visit counter (Firestore stats/visits), shown on the home page
