@@ -878,6 +878,7 @@ a.set-item{text-decoration:none;color:inherit}
 #dataPrefetchBar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:transparent;pointer-events:none;opacity:1;transition:opacity .6s ease}
 #dataPrefetchBar i{display:block;height:100%;width:0%;background:var(--gold-grad);box-shadow:0 0 8px rgba(212,175,95,.6);transition:width .3s ease}
 #dataPrefetchBar.done{opacity:0}
+#dataPrefetchBar .dpb-t{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:600;color:#fff;background:rgba(20,26,48,.82);border:1px solid rgba(212,175,95,.5);padding:3px 10px;border-radius:999px}
 
 .hidden{display:none!important}
 
@@ -2067,44 +2068,63 @@ async function startBackgroundDataPrefetch(){
   if(!DATA_BASE || !window.caches) return;
   try{
     const manifest = await cachedFetch(dataURL('data/manifest.json')).then(r=>r.json());
+    let sizes = null;
+    try{ sizes = await cachedFetch(dataURL('data/manifest-sizes.json')).then(r=>r.json()); }catch(e){}
+    if(!Array.isArray(sizes) || sizes.length!==manifest.length) sizes = null;
     const total = manifest.length;
     const cache = await caches.open(NATIVE_DATA_CACHE);
-    const remaining = [];
-    for(const path of manifest){
-      const url = dataURL(path);
-      if(await cache.match(url)) continue;
-      remaining.push(url);
+    const remaining = [], remSizes = [];
+    let totalBytes = 0, doneBytes = 0;
+    /* check the cache in parallel chunks - thousands of sequential awaits made the first minutes sluggish on Android */
+    for(let i=0;i<total;i+=64){
+      const chunk = manifest.slice(i,i+64);
+      const hits = await Promise.all(chunk.map(path=>cache.match(dataURL(path)).then(h=>!!h,()=>false)));
+      chunk.forEach((path,j)=>{
+        const sz = sizes ? sizes[i+j] : 0;
+        totalBytes += sz;
+        if(hits[j]) doneBytes += sz; else { remaining.push(dataURL(path)); remSizes.push(sz); }
+      });
     }
     let done = total - remaining.length;
-    dataPrefetchUI(done, total);
+    dataPrefetchUI(done, total, doneBytes, totalBytes);
     if(!remaining.length) return;
-    const CONCURRENCY = 4;
+    const CONCURRENCY = 3;
     let idx = 0;
     async function worker(){
       while(idx < remaining.length){
-        const url = remaining[idx++];
-        try{ await cachedFetch(url); }catch(e){}
-        done++;
-        dataPrefetchUI(done, total);
+        const k = idx++;
+        try{ await cachedFetch(remaining[k]); }catch(e){}
+        done++; doneBytes += remSizes[k];
+        dataPrefetchUI(done, total, doneBytes, totalBytes);
       }
     }
     await Promise.all(Array.from({length:CONCURRENCY}, worker));
   }catch(e){}
 }
-/* Minimal slim top-of-screen progress bar, shown only while the
-   background prefetch above still has files left to fetch - a
-   placeholder default (gold, matches the app's own accent color) until
-   the user's own reference design (Halacha Yomit's own equivalent bar)
-   is matched more closely. */
-function dataPrefetchUI(done,total){
+/* Slim gold progress bar + a small pill ("Downloading for offline use · 45 / 325 MB") at the top of the screen,
+   shown only while the background prefetch above still has files left. The app is fully usable meanwhile
+   (online, fetching what it needs on demand). */
+const PREFETCH_TXT = {
+  he:'מוריד לשימוש ללא אינטרנט', en:'Downloading for offline use', fr:'Téléchargement hors ligne',
+  ru:'Загрузка для офлайн-режима', ka:'ჩამოტვირთვა ოფლაინ გამოსაყენებლად'
+};
+function dataPrefetchUI(done,total,doneBytes,totalBytes){
   let bar=document.getElementById('dataPrefetchBar');
   if(done>=total){ if(bar){ bar.classList.add('done'); setTimeout(()=>bar&&bar.remove(),1200); } return; }
   if(!bar){
     bar=document.createElement('div'); bar.id='dataPrefetchBar';
-    bar.innerHTML='<i></i>';
+    bar.innerHTML='<i></i><span class="dpb-t"></span>';
     document.body.appendChild(bar);
   }
-  bar.querySelector('i').style.width=(total?Math.round(done/total*100):100)+'%';
+  const pct = (totalBytes ? doneBytes/totalBytes : (total?done/total:0));
+  bar.querySelector('i').style.width=Math.round(pct*100)+'%';
+  const mb=n=>(n/1048576).toFixed(n>=104857600?0:1);
+  const lang=(typeof S!=='undefined'&&S&&S.lang)||'he';
+  const label=PREFETCH_TXT[lang]||PREFETCH_TXT.he;
+  const nums = totalBytes ? `${mb(doneBytes)} / ${mb(totalBytes)} MB` : `${done} / ${total}`;
+  const t=bar.querySelector('.dpb-t');
+  t.style.direction = lang==='he' ? 'rtl' : 'ltr';
+  t.innerHTML = `${label} · <bdi dir="ltr">${nums}</bdi>`;
 }
 
 /* ---------- icons ---------- */
@@ -3865,6 +3885,21 @@ function spotlightSync(){
   }catch(e){}
 })();
 setTimeout(spotlightSync,6000);
+/* Android system Back (button or gesture): close overlays / go back one screen, then to Home, and only exit from Home. */
+(function androidBackWire(){
+  try{
+    const C=window.Capacitor;
+    if(!C||!C.isNativePlatform||!C.isNativePlatform()||C.getPlatform()!=='android') return;
+    const A=C.Plugins&&C.Plugins.App; if(!A||!A.addListener) return;
+    A.addListener('backButton',()=>{
+      try{
+        if(appBack()) return;
+        if(TAB!=='home'){ go('home'); return; }
+        if(A.exitApp) A.exitApp();
+      }catch(e){ try{ A.exitApp(); }catch(_){} }
+    });
+  }catch(e){}
+})();
 window.betelOpenWidgetLink=openWidgetLink;   // also lets the sweep/tests drive it
 (function initWidgetLinks(){
   try{

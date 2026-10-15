@@ -579,3 +579,10 @@ in English as usual.
   every reader line-height is `calc(N * var(--lh-scale,1))`), `S.readFont` (`html[data-rfont]` overrides `--font-sacred/--font-reading`);
   `fontScale` is untouched. Mirrored in the native settings spec/`NativeSettingsHost.onAction`. Simulator build succeeds; VoiceOver
   itself, real-device Dynamic Type and the tab-bar/search-dock/toast (76pt) scaling were NOT tested.
+
+- **Android (Play) rules:** custom Swift-only plugin proxies are registered ONLY when `getPlatform()==='ios'`
+  (capacitor-native-bridge.js) - registering them on Android made index.html hide its HTML UI (blank beige screen).
+  Any new iOS-only check must use `getPlatform()==='ios'`, not `isNativePlatform()`. Android Back is handled by
+  `androidBackWire()` (appBack -> Home -> exit). The offline-prefetch pill shows MB using `data/manifest-sizes.json`
+  (generated together with `manifest.json`; re-run `node scripts/generate-data-manifest.mjs` after any data change).
+  Emulate Android in Playwright with `window.androidBridge` stub. Prompt for other apps: `docs/play/ANDROID-READINESS-PROMPT.md`.
