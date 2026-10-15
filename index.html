@@ -15389,7 +15389,7 @@ window.shareQR = shareQR;
        counts while its heartbeat is fresh; the count is recomputed every 20s so stale entries drop out on their own
        even with no database event. Backgrounded app = not online. Legacy entries (value true, written by app versions
        before this) count only while their push-id timestamp is under 30 min old; clients also null out old leftovers. */
-    const PRES_TTL = 150000, PRES_BEAT = 45000, LEGACY_MS = 30 * 60 * 1000;
+    const PRES_TTL = 90000, PRES_BEAT = 30000;   // heartbeat every 30s; an entry counts for 90s after its last beat
     let presId = '';
     try{ presId = localStorage.getItem('betel_pres_id') || ''; }catch(e){}
     if(!presId){ presId = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); try{ localStorage.setItem('betel_pres_id', presId); }catch(e){} }
@@ -15404,7 +15404,8 @@ window.shareQR = shareQR;
         if(k === presId) continue;   // this device is counted below
         const v = presVal[k];
         if(v && typeof v === 'object' && typeof v.t === 'number'){ if(now - v.t < PRES_TTL) n++; }
-        else if(v === true){ const c = pushTime(k); if(c && now - c < LEGACY_MS) n++; }
+        /* legacy entries (plain true, written by app versions before the heartbeat) are NOT counted: they can't be told apart
+           from ghosts, and counting them is what made the number lie. They get cleaned up below. */
       }
       /* This device counts as online right away (the first snapshot + .info/connected take a second or two) */
       if(!IS_DEV_BUILD && !document.hidden && navigator.onLine !== false) n++;
@@ -15417,8 +15418,8 @@ window.shareQR = shareQR;
       for(const k in presVal){
         if(cleaned >= 20) return;
         const v = presVal[k]; let old = false;
-        if(v && typeof v === 'object' && typeof v.t === 'number') old = now - v.t > 3600000;
-        else if(v === true){ const c = pushTime(k); old = !!c && now - c > 6 * 3600000; }
+        if(v && typeof v === 'object' && typeof v.t === 'number') old = now - v.t > 10 * 60000;
+        else old = true;   // legacy / malformed entry
         if(old){ cleaned++; set(ref(rtdb, 'presence/' + k), null).catch(() => {}); }
       }
     }
@@ -15429,7 +15430,7 @@ window.shareQR = shareQR;
       recount();
       cleanup();
     }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
-    setInterval(recount, 20000);
+    setInterval(recount, 10000);
     recount();   // paint immediately instead of waiting for the network
     let connected = false;
     function beat(){
