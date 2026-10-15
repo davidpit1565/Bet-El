@@ -1,4 +1,9 @@
-What's new in 2.0.2:
-• A new search bar at the top of the Search screen, quicker and easier to use
-• Notification diagnostics in Settings: see the notification status at a glance and re-register with a tap
+What's new in 2.0.3:
+• Settings in native iOS design: clear separate categories with system switches and pickers
+• New calendar: days in Hebrew letters with the Gregorian date underneath, daily times right below the calendar, and the weekly parasha opens in Shnayim Mikra
+• Verse by name: one verse per name, with the option to pick a different one
+• A compass to face Jerusalem in every prayer of the siddur, next to the Tefillin Mirror in Shacharit
+• Reading settings: nikud and cantillation, line spacing and reading font
+• Fix: the weekly booklet now opens correctly in the app
+• Share the QR code straight from the system share sheet
 • Stability improvements

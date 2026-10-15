@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>תמיד · Tamid</title>
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0d1730;color:#f6f1e4;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Heebo,sans-serif;text-align:center}
+main{padding:24px;max-width:360px}
+h1{color:#e6c874;font-size:44px;margin:0 0 6px}
+p{opacity:.85;margin:0 0 26px}
+a{display:block;margin:12px 0;padding:15px 18px;border-radius:14px;background:#e6c874;color:#0d1730;font-weight:700;text-decoration:none;font-size:18px}
+a.alt{background:transparent;color:#e6c874;border:1.5px solid #e6c874}
+</style></head><body><main>
+<h1>תמיד</h1><p>אפליקציית הלימוד היומי · Daily learning app</p>
+<a id="ios" href="https://apps.apple.com/app/%D7%AA%D7%9E%D7%99%D7%93/id6807186847">App Store · iPhone / iPad</a>
+<a id="and" class="alt" href="https://play.google.com/store/apps/details?id=com.beitel.tehilim">Google Play · Android</a>
+</main>
+<script>
+/* Smart link: one QR / one URL for everyone - sends iPhone/iPad to the App Store and Android to Google Play;
+   anything else (desktop) just sees both buttons. */
+(function(){
+  var ua=navigator.userAgent||'';
+  var ios=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  var and=/Android/i.test(ua);
+  if(ios) location.replace(document.getElementById('ios').href);
+  else if(and) location.replace(document.getElementById('and').href);
+})();
+</script></body></html>

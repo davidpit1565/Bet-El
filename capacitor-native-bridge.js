@@ -22,7 +22,9 @@ var capacitorNativeBridge = (function (core) {
     // so `window.Capacitor.Plugins.X` stays exactly as undefined on the
     // web/PWA build as it always was - the existing `!!Capacitor.Plugins.X`
     // truthy checks throughout index.html depend on that.
-    if (core.Capacitor.isNativePlatform()) {
+    // iOS ONLY: Android has none of these Swift plugins, and registering the JS proxies there makes
+    // index.html believe a native UI exists, so it hides its own HTML home/nav/tools -> blank screen.
+    if (core.Capacitor.isNativePlatform() && core.Capacitor.getPlatform() === 'ios') {
         core.registerPlugin('NativeTopBar');
         core.registerPlugin('NativeToolsFab');
         core.registerPlugin('NativeModal');
@@ -41,11 +43,13 @@ var capacitorNativeBridge = (function (core) {
         // @capacitor/splash-screen ships no vendored UMD bundle either (see the
         // note above): index.html's launch screen calls SplashScreen.hide() as
         // soon as it has painted, so the static native image doesn't linger.
-        if (!core.Capacitor.Plugins.SplashScreen) core.registerPlugin('SplashScreen');
         // @capacitor-firebase/messaging (native APNs/FCM push) ships an ES module
         // only, so it gets the same treatment.
         if (!core.Capacitor.Plugins.FirebaseMessaging) core.registerPlugin('FirebaseMessaging');
     }
+
+    // SplashScreen is a real plugin on both iOS and Android.
+    if (core.Capacitor.isNativePlatform() && !core.Capacitor.Plugins.SplashScreen) core.registerPlugin('SplashScreen');
 
     return core;
 

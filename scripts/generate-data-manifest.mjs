@@ -22,16 +22,18 @@ import { fileURLToPath } from 'url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dataDir = join(root, 'data');
 const out = [];
+const sizes = [];   // parallel to `out` (same order) - bytes, for the app's 'downloading X of Y MB' indicator
 
 function walk(dir) {
   for (const name of readdirSync(dir).sort()) {
     const full = join(dir, name);
     const st = statSync(full);
     if (st.isDirectory()) { if (full !== join(dataDir, 'booklet')) walk(full); }   // the weekly booklet is replaced every week - never prefetched/cached
-    else if (name !== 'manifest.json') out.push('data/' + relative(dataDir, full).split(/\\|\//).join('/'));
+    else if (name !== 'manifest.json' && name !== 'manifest-sizes.json') { out.push('data/' + relative(dataDir, full).split(/\\|\//).join('/')); sizes.push(st.size); }
   }
 }
 walk(dataDir);
 
 writeFileSync(join(dataDir, 'manifest.json'), JSON.stringify(out));
+writeFileSync(join(dataDir, 'manifest-sizes.json'), JSON.stringify(sizes));
 console.log(`data/manifest.json: ${out.length} files listed`);

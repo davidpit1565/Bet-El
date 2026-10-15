@@ -1104,9 +1104,31 @@ class MainViewController: CAPBridgeViewController {
     }
 
     private func relaySettingsAction(id: String, value: String?) {
+        if id == "bkExport" { exportBackupNatively(); return }
+        if id == "bkImport" { importBackupNatively(); return }
         let valueJS = value.map(jsStringLiteral) ?? "null"
         let js = "window.NativeSettingsHost && window.NativeSettingsHost.onAction(\(jsStringLiteral(id)), \(valueJS))"
         webView?.evaluateJavaScript(js, completionHandler: nil)
+    }
+
+    /// Backup export: JS builds the JSON, the share sheet saves/sends the file
+    /// (the web download path needs a real browser gesture).
+    private func exportBackupNatively() {
+        webView?.evaluateJavaScript("window.NativeSettingsHost.backupJSON()") { [weak self] result, _ in
+            guard let self = self, let json = result as? String else { return }
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("tehillim-betel-backup.json")
+            do { try json.write(to: url, atomically: true, encoding: .utf8) } catch { return }
+            let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+            vc.popoverPresentationController?.sourceView = self.view
+            vc.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 1, height: 1)
+            self.present(vc, animated: true)
+        }
+    }
+
+    private func importBackupNatively() {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.json], asCopy: true)
+        picker.delegate = self
+        present(picker, animated: true)
     }
 
     /// Hands the typed fields to window.NativeFeedbackHost.send(...) in JS
@@ -1416,5 +1438,16 @@ extension MainViewController: UISearchBarDelegate {
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
+    }
+}
+
+
+extension MainViewController: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first, let text = try? String(contentsOf: url, encoding: .utf8),
+              let data = try? JSONSerialization.data(withJSONObject: [text]),
+              let encoded = String(data: data, encoding: .utf8) else { return }
+        let literal = String(encoded.dropFirst().dropLast())
+        webView?.evaluateJavaScript("window.NativeSettingsHost.importBackup(\(literal))", completionHandler: nil)
     }
 }

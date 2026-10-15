@@ -173,10 +173,14 @@ in English as usual.
   once-per-day `betel_bic_notif_sent` flag - there's no separate opt-in
   for it specifically, enabling the general reminder toggle enables both.
 
-- **Native iOS shell decisions (by user request)**: Settings always uses the
-  app's own HTML design (`NATIVE_SETTINGS = false` in index.html - the
-  native glass-card `NativeSettingsView` is kept but unused), with
-  `settingsRowsTappable()` making whole rows the touch target like iOS.
+- **Native iOS shell decisions (by user request)**: Settings category screens are REAL
+  native UIKit when the `NativeSettings` plugin exists (`NATIVE_SETTINGS` = plugin presence in index.html): an inset-grouped
+  `UITableView` in `NativeSettingsView.swift` (UISwitch/UIStepper/UISegmentedControl/UIMenu/text fields; iOS 26 glass buttons)
+  driven by the JS spec `nativeSettingsCategorySpec()`; JS stays the source of truth (`NativeSettingsHost.onAction`, the whole
+  spec is re-sent after each action). Row types: toggle, stepper, segmented, select, button, disclosure, link, item (deletable
+  entry), form (text/menu fields + add button; yahrzeit/dedication/names). Backup export/import run natively
+  (`exportBackupNatively`/`importBackupNatively`). The HTML settings (`renderSettings*`, `settingsRowsTappable()`) remain the
+  web/PWA/old-iOS fallback.
   Search is its own tab, App Store style (`TAB==='search'`, `renderSearch()`: suggestions + recent searches, then
   live results; native: like Halacha Yomit - a real `.minimal` UISearchBar docked at the TOP under the header (`searchDock` in
   MainViewController, Search tab only), the FULL tab bar always stays (user rule) with Search selected; `--native-header-h`
@@ -313,8 +317,9 @@ in English as usual.
   for "jump", and a paging UIScrollView day pager: swipe sideways = next/previous day). Day data comes from
   `window.NativeCalendarHost.day(ymd)` / `.events(a,b)` in index.html (`renderCalendarNative`; needs iOS 16+,
   `NATIVE_CAL_OK`). The web calendar (`renderCalendar`, `.ical-*` CSS, `calStepDay`) remains the fallback.
-  UPDATE: the user then chose the web calendar look (seg control row + month title with today/jump/chevrons), so
-  `NATIVE_CAL_ENABLED=false` in index.html - the native calendar code is kept but off.
+  UPDATE 2: `NATIVE_CAL_ENABLED=true` again (native calendar on iOS 16+ with the plugin; web calendar is the fallback). The day
+  details are now an inset-grouped list (`NCGroup` rows: events, parasha + portions, hillulot, candle lighting, zmanim, share)
+  under the UICalendarView card; `NativeCalendarHost.day()` also returns `hillulot`.
   Pull-to-refresh is native too (`MainViewController.refreshPanned`: UIPanGestureRecognizer + glass UIActivityIndicatorView, gated by JS `betelCanPull()`; the JS pull is web-only). Still HTML: most list/tile screens.
 
 - **Library category grid is native** (`NativeLibrary.swift`: UICollectionView + compositional layout + glass cards;
@@ -536,12 +541,9 @@ in English as usual.
   `com.beitel.tehilim` (GCP project bet-el-e6812; gcloud was not installed). Don't touch the web key in index.html. Close the
   GitHub secret-scanning alert only after the restriction is verified.
 - **Native review leftovers (not fixed, need a decision or device testing):** a 44pt gap can
-- **Native review leftovers (not fixed, need a decision or device testing):** the Live Activity uses
-  `Solar` instead of the snapshot zmanim, a 44pt gap can
   remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize.
-  (Dynamic Type heights and the FAB's English-only labels were fixed in the accessibility pass below.)
-  remain under the collapsed header, the minimized tab-bar transform isn't recomputed on resize, fixed native heights don't
-  follow Dynamic Type, and the FAB has English-only accessibility labels.
+  (Dynamic Type heights and the FAB's English-only labels were fixed in the accessibility pass below; the Live Activity
+  now reads the snapshot zmanim.)
 - **Spotlight + Siri (NativeSpotlightBridge.swift, TamidIntents.swift):** `spotlightSync()` in index.html indexes every ready prayer
   (`prayer:<key>`), Tehillim 1-150 (`psalm:<n>`) and the main sections (`go:<tab>`) in Core Spotlight (Hebrew title, keywords in
   he/en/fr/ru/ka); it replaces the whole domain, so it runs 6s after boot and again after a language change. A tap arrives in
@@ -562,7 +564,6 @@ in English as usual.
   than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. It counts down to dawn, sunrise,
   midday, sunset, nightfall (only once `WIDGET_TZEIT_ROLLOVER` syncs it) and midnight (midday + 12h), read from the
   snapshot's exact `zmanimJSON` (Solar only as a fallback). Hebrew lays out RTL (`attributes.rtl`).
-  than 7.5h (`attributes.startedAt`) and otherwise restarts it on the next foreground. Hebrew lays out RTL (`attributes.rtl`).
 
 - **Accessibility pass (native + web):** `enum A11y` (DynamicType.swift) holds the language-aware VoiceOver string table
   (`A11y.t(key)`, he/en/fr/ru/ka) and the shared scale (`A11y.k` = body size / 17, capped 1.6; `A11y.scaled(v)`). The language comes
@@ -578,3 +579,10 @@ in English as usual.
   every reader line-height is `calc(N * var(--lh-scale,1))`), `S.readFont` (`html[data-rfont]` overrides `--font-sacred/--font-reading`);
   `fontScale` is untouched. Mirrored in the native settings spec/`NativeSettingsHost.onAction`. Simulator build succeeds; VoiceOver
   itself, real-device Dynamic Type and the tab-bar/search-dock/toast (76pt) scaling were NOT tested.
+
+- **Android (Play) rules:** custom Swift-only plugin proxies are registered ONLY when `getPlatform()==='ios'`
+  (capacitor-native-bridge.js) - registering them on Android made index.html hide its HTML UI (blank beige screen).
+  Any new iOS-only check must use `getPlatform()==='ios'`, not `isNativePlatform()`. Android Back is handled by
+  `androidBackWire()` (appBack -> Home -> exit). The offline-prefetch pill shows MB using `data/manifest-sizes.json`
+  (generated together with `manifest.json`; re-run `node scripts/generate-data-manifest.mjs` after any data change).
+  Emulate Android in Playwright with `window.androidBridge` stub. Prompt for other apps: `docs/play/ANDROID-READINESS-PROMPT.md`.
