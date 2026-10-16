@@ -145,6 +145,7 @@ function parashaHtml(p, i) {
   return h + '</section>';
 }
 
+let TOC_PAGES = 1;
 /* ---------- front matter (cover, copyright, blank page, table of contents) ---------- */
 const GRAD = 'linear-gradient(180deg,#8d8d8d 0%,#2e2e2e 46%,#111 58%,#5b5b5b 100%)';
 function frontHtml(toc) {
@@ -170,12 +171,16 @@ function frontHtml(toc) {
 </section>`;
   const blank = '<section class="plain"></section>';
   const groups = BOOKS.map(b => ({b, items: DATA.filter(p => p.book === b)})).filter(g => g.items.length);
-  const tocHtml = `
-<section class="plain toc"><img class="tf" src="${asset('flourish.png')}"><h3>Table des matières</h3>
-  <div class="cols ${DATA.length > 20 ? 'two' : ''}">
-  ${groups.map(g => `<div class="grp"><div class="gh">${BOOK_FR[g.b][0]} <span>${BOOK_FR[g.b][1]}</span></div>
+  /* one page holds ~30 rows (a book heading counts as 2); books are never split across pages unless one alone is too long */
+  const pagesOfGroups = []; let cur = [], rows = 0;
+  for (const g of groups) { const n = g.items.length + 2; if (cur.length && rows + n > 30) { pagesOfGroups.push(cur); cur = []; rows = 0; } cur.push(g); rows += n; }
+  if (cur.length) pagesOfGroups.push(cur);
+  TOC_PAGES = pagesOfGroups.length;
+  const tocHtml = pagesOfGroups.map((gs, k) => `
+<section class="plain toc"><img class="tf" src="${asset('flourish.png')}"><h3>Table des matières${k ? ' <small>(suite)</small>' : ''}</h3>
+  ${gs.map(g => `<div class="grp"><div class="gh">${BOOK_FR[g.b][0]} <span>${BOOK_FR[g.b][1]}</span></div>
     ${g.items.map(p => `<div class="row"><span class="nm">${esc(p.fr)}</span><i></i><span class="pg">${toc[p.key] ?? 0}</span></div>`).join('')}</div>`).join('')}
-  </div></section>`;
+  </section>`).join('');
   const css = `
 @page front{margin:0}
 .cover,.plain{position:relative;width:420pt;height:595pt;overflow:hidden;page-break-after:always;break-after:page}
@@ -207,14 +212,15 @@ function frontHtml(toc) {
 .copy .note{position:absolute;left:34pt;right:34pt;top:262pt;font:400 10pt/1.45 'EB Garamond'}
 .copy .q{position:absolute;left:30pt;right:30pt;top:322pt;font:400 10.5pt/1.55 'EB Garamond'}
 .copy .q b{display:block;font:700 11pt 'EB Garamond';margin-bottom:3pt}
-.toc{padding:54pt 44pt 0}
+.toc{padding:54pt 60pt 0}
+.toc h3 small{font:italic 400 11pt 'EB Garamond'}
 .toc .tf{display:block;width:84pt;margin:0 auto 6pt}
 .toc h3{font:700 25pt 'Cormorant Garamond';text-align:center;margin-bottom:16pt}
 .cols.two{column-count:2;column-gap:30pt}
-.grp{break-inside:auto;margin-bottom:9pt}
+.grp{margin-bottom:14pt}
 .gh{font:700 11.5pt 'Cormorant Garamond';letter-spacing:.8pt;text-transform:uppercase;border-bottom:.8pt solid #444;padding-bottom:1.5pt;margin-bottom:3pt;break-after:avoid}
 .gh span{font:italic 400 9pt 'EB Garamond';text-transform:none;letter-spacing:0;color:#555;margin-left:3pt}
-.row{display:flex;align-items:baseline;gap:4pt;font:400 10.4pt/1.55 'EB Garamond';break-inside:avoid}
+.row{display:flex;align-items:baseline;gap:4pt;font:400 11pt/1.75 'EB Garamond';break-inside:avoid}
 .row i{flex:1;border-bottom:.8pt dotted #888;transform:translateY(-2.5pt)}
 .row .pg{font-weight:600}
 `;
@@ -244,7 +250,7 @@ let toc = {};
 await render(docHtml(toc), pdf);
 const nPages = pages(pdf);
 const pageTexts = execFileSync('pdftotext', ['-layout', pdf, '-'], {maxBuffer: 1 << 30}).toString().split('\f').map(t => t.replace(/\s+/g, ' '));
-let cursor = 4;                                             // body pages start after cover, copyright, blank page, table of contents
+let cursor = 3 + TOC_PAGES;                                             // body pages start after cover, copyright, blank page, table of contents
 for (const p of DATA) {
   const re = new RegExp('Parachat ' + p.fr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}’-])', 'u');
   for (let n = cursor; n < nPages; n++) if (re.test(pageTexts[n])) { toc[p.key] = n + 1; cursor = n; break; }
