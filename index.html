@@ -11030,28 +11030,48 @@ function renderLibraryNKBooks(){
     tr(app);
   });
 }
-/* Books reader header (user request): while scrolling down the book title in the small header is replaced by the chapter
-   picker, so the header stays exactly the siddur-sized bar. Web/PWA: the .rt-pick select takes the title's slot
-   (.reader-head.compact). iOS: the title lives in the native bar, so it becomes "book · chapter" and a native list button
-   opens the system action sheet of chapters. Called from initNavScrollHide.set(). */
-let NK_HDR=null, NK_COMPACT=false;
-function nkHeaderCompact(hide){
-  if(TAB!=='libraryNKReader' || !NK_HDR || NK_COMPACT===hide) return;
-  NK_COMPACT=hide;
-  const hd=document.querySelector('.reader-head'); if(hd) hd.classList.toggle('compact',hide);
-  if(!NATIVE_TOPBAR) return;
-  const {cat,book,ch,nCh}=NK_HDR, name=nkBookName(cat,book);
-  if(!hide){ syncNativeTopBar(name,'libraryNKBooks'); return; }
-  syncNativeTopBar(name,'libraryNKBooks',{
-    title:name+' · '+ckChrome('פֶּרֶק')+' '+heNum(ch),
-    actions:[{id:'nkChapters',icon:'list.number',label:ckChrome('פֶּרֶק')}],
-    handlers:{nkChapters:()=>{
-      const NM=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeModal;
-      if(!NM||!NM.presentActionSheet) return;
-      NM.presentActionSheet({title:name,actions:Array.from({length:nCh},(_,i)=>({id:String(i+1),title:ckChrome('פֶּרֶק')+' '+heNum(i+1)})),cancelTitle:ckChrome('בִּטּוּל')})
-        .then(r=>{ const n=r&&+r.id; if(n>=1&&n<=nCh){ LIB.nkChapter=n; renderLibraryNKReader(); forceScrollTop(); } }).catch(()=>{});
-    }}
-  });
+/* Books reader header (user request): while scrolling down, the book title in the SMALL header is replaced by that reader's
+   own picker (chapter / daf / parasha...), so the header stays exactly the siddur-sized bar. Works for every reader whose
+   .reader-head has a .bic-collapse block with a select (all books except Chok LeYisrael / Ben Ish Chai, which have the big
+   header and tuck it away instead). Web/PWA/Android: a .rt-pick select cloned from that picker takes the title's slot
+   (.reader-head.compact). iOS: the title lives in the native bar, so it becomes "title · current choice" and a native
+   list button opens the system action sheet of the options. Called from initNavScrollHide.set(). */
+const BIG_HEADER_TABS_LIST=['chokReader','chokUnit','chokList','chokBooks','chokParshiot','chokSearch','bicReader','bicHome','bicParshiot'];
+let RH_BASE=null, RH_COMPACT=false, RH_INTERNAL=false;
+function readerHeadCompact(hide){
+  if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
+  const hd=document.querySelector('.reader-head'); if(!hd) return;
+  const sel=hd.querySelector('.bic-collapse select.fld-select'); if(!sel) return;
+  if(!NATIVE_TOPBAR){
+    if(hd.classList.contains('compact')===hide) return;
+    const t=hd.querySelector('.reader-title');
+    if(hide && t){
+      let pk=hd.querySelector('.rt-pick');
+      if(!pk){ pk=document.createElement('select'); pk.className='fld-select rt-pick'; t.after(pk);
+        pk.onchange=()=>{ const s=hd.querySelector('.bic-collapse select.fld-select'); if(s){ s.value=pk.value; s.dispatchEvent(new Event('change')); } }; }
+      pk.innerHTML=sel.innerHTML; pk.value=sel.value;
+    }
+    hd.classList.toggle('compact',hide);
+    return;
+  }
+  if(RH_COMPACT===hide || !RH_BASE) return;
+  RH_COMPACT=hide; RH_INTERNAL=true;
+  try{
+    const B=RH_BASE;
+    if(!hide){ syncNativeTopBar(B.title,B.backTo,B.opts); return; }
+    const cur=sel.options[sel.selectedIndex], base=String((B.opts&&B.opts.title!=null)?B.opts.title:(B.title||'')).replace(/<[^>]*>/g,'');
+    syncNativeTopBar(B.title,B.backTo,{
+      title:(base?base+' · ':'')+(cur?cur.textContent.trim():''),
+      actions:[{id:'rhPick',icon:'list.number',label:ckChrome('בְּחִירָה')}],
+      handlers:{rhPick:()=>{
+        const NM=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeModal;
+        const s=document.querySelector('.reader-head .bic-collapse select.fld-select');
+        if(!NM||!NM.presentActionSheet||!s) return;
+        NM.presentActionSheet({title:base,actions:Array.from(s.options).map(o=>({id:o.value,title:o.textContent.trim()})),cancelTitle:ckChrome('בִּטּוּל')})
+          .then(r=>{ const s2=document.querySelector('.reader-head .bic-collapse select.fld-select'); if(r&&r.id!=null&&s2){ s2.value=r.id; s2.dispatchEvent(new Event('change')); } }).catch(()=>{});
+      }}
+    });
+  } finally { RH_INTERNAL=false; }
 }
 function renderLibraryNKReader(){
   const cat=LIB.nkCat==='ketuvim'?'ketuvim':'neviim';
@@ -11070,9 +11090,6 @@ function renderLibraryNKReader(){
         <div class="reader-top">
           <button class="icon-btn" id="libnBack">${I.prev}</button>
           <div class="reader-title">${nkBookName(cat,book)}</div>
-          <select class="fld-select rt-pick" id="libnChPick2" aria-label="${ckChrome('פֶּרֶק')}">
-            ${Array.from({length:nCh},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===ch?'selected':''}>${ckChrome('פֶּרֶק')} ${heNum(c)}</option>`).join('')}
-          </select>
         </div>
         <div class="bic-collapse">
           <div class="ck-daynav-wrap">
@@ -11093,8 +11110,7 @@ function renderLibraryNKReader(){
     const prevBtn=document.getElementById('libnPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); };
     const nextBtn=document.getElementById('libnNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); };
     document.getElementById('libnChPick').onchange=function(){ LIB.nkChapter=+this.value; renderLibraryNKReader(); forceScrollTop(); };
-    document.getElementById('libnChPick2').onchange=function(){ LIB.nkChapter=+this.value; renderLibraryNKReader(); forceScrollTop(); };
-    NK_HDR={cat,book,ch,nCh}; NK_COMPACT=false;
+
     wireSwipeNav(app.querySelector('.sm-verses'),
       ()=>{ if(ch<nCh){ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); } },
       ()=>{ if(ch>1){ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); } });
@@ -14993,6 +15009,7 @@ let TOPBAR_ACTION_HANDLERS = {};
 function syncNativeTopBar(title, backTo, opts){
   if(!NATIVE_TOPBAR) return;
   opts = opts || {};
+  if(!RH_INTERNAL){ RH_BASE={title,backTo,opts}; RH_COMPACT=false; }
   TOPBAR_BACK_ACTION = (typeof backTo==='function') ? backTo : (backTo ? ()=>go(backTo) : null);
   TOPBAR_ACTION_HANDLERS = opts.handlers || {};
   try{
@@ -15148,7 +15165,7 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
      other books, lists. Only the two big-header screens - Chok LeYisrael and Ben Ish Chai - tuck their header away on scroll-down
      (user rule). In every screen the reader's own lower header block (.bic-collapse: chapter picker, day nav...) still collapses,
      so the sticky header just gets shorter while the small bar stays. */
-  const BIG_HEADER_TABS = ['chokReader','chokUnit','chokList','chokBooks','chokParshiot','chokSearch','bicReader','bicHome','bicParshiot'];
+  const BIG_HEADER_TABS = BIG_HEADER_TABS_LIST;
   function set(hide){
     const hideBar = hide && BIG_HEADER_TABS.indexOf(TAB) >= 0;
     if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setHidden({hidden:hide}).catch(()=>{});
@@ -15167,7 +15184,7 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
     const bicHead=document.querySelector('.bic-collapse');
     nav.classList.toggle('nav-hidden', hide);
     if(tools){ tools.classList.toggle('nav-hidden', hideBar); if(hideBar) tools.classList.add('collapsed'); }
-    try{ nkHeaderCompact(hide); }catch(e){}
+    try{ readerHeadCompact(hide); }catch(e){}
     if(bicHead){
       /* .bic-collapse's CSS transitions max-height over a fixed .3s, but a
          reader whose header content is much shorter than the old fixed
