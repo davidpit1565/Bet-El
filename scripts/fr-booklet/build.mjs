@@ -173,7 +173,7 @@ function frontHtml(toc) {
   const groups = BOOKS.map(b => ({b, items: DATA.filter(p => p.book === b)})).filter(g => g.items.length);
   /* one page holds ~30 rows (a book heading counts as 2); books are never split across pages unless one alone is too long */
   const pagesOfGroups = []; let cur = [], rows = 0;
-  for (const g of groups) { const n = g.items.length + 2; if (cur.length && rows + n > 30) { pagesOfGroups.push(cur); cur = []; rows = 0; } cur.push(g); rows += n; }
+  for (const g of groups) { const n = g.items.length + 2; if (cur.length && rows + n > 28) { pagesOfGroups.push(cur); cur = []; rows = 0; } cur.push(g); rows += n; }
   if (cur.length) pagesOfGroups.push(cur);
   TOC_PAGES = pagesOfGroups.length;
   const tocHtml = pagesOfGroups.map((gs, k) => `
@@ -212,15 +212,15 @@ function frontHtml(toc) {
 .copy .note{position:absolute;left:34pt;right:34pt;top:262pt;font:400 10pt/1.45 'EB Garamond'}
 .copy .q{position:absolute;left:30pt;right:30pt;top:322pt;font:400 10.5pt/1.55 'EB Garamond'}
 .copy .q b{display:block;font:700 11pt 'EB Garamond';margin-bottom:3pt}
-.toc{padding:54pt 60pt 0}
+.toc{padding:40pt 60pt 0}
 .toc h3 small{font:italic 400 11pt 'EB Garamond'}
 .toc .tf{display:block;width:84pt;margin:0 auto 6pt}
 .toc h3{font:700 25pt 'Cormorant Garamond';text-align:center;margin-bottom:16pt}
 .cols.two{column-count:2;column-gap:30pt}
-.grp{margin-bottom:14pt}
+.grp{margin-bottom:10pt}
 .gh{font:700 11.5pt 'Cormorant Garamond';letter-spacing:.8pt;text-transform:uppercase;border-bottom:.8pt solid #444;padding-bottom:1.5pt;margin-bottom:3pt;break-after:avoid}
 .gh span{font:italic 400 9pt 'EB Garamond';text-transform:none;letter-spacing:0;color:#555;margin-left:3pt}
-.row{display:flex;align-items:baseline;gap:4pt;font:400 11pt/1.75 'EB Garamond';break-inside:avoid}
+.row{display:flex;align-items:baseline;gap:4pt;font:400 10.6pt/1.6 'EB Garamond';break-inside:avoid}
 .row i{flex:1;border-bottom:.8pt dotted #888;transform:translateY(-2.5pt)}
 .row .pg{font-weight:600}
 `;
