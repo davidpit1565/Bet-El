@@ -93,36 +93,36 @@ const CHROME_SVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://
 <image x="179" y="22.5" width="62" height="12.3" xlink:href="data:image/png;base64,${flourishB64}"/>
 <image x="179" y="54.2" width="62" height="12.3" transform="translate(0 120.7) scale(1 -1)" xlink:href="data:image/png;base64,${flourishB64}"/>
 </svg>`;
-const PAGE_BG = `url("data:image/svg+xml;base64,${Buffer.from(CHROME_SVG).toString('base64')}") no-repeat -40pt -78pt/420pt 595pt`;
+const PAGE_BG = `url("data:image/svg+xml;base64,${Buffer.from(CHROME_SVG).toString('base64')}") no-repeat -34pt -72pt/420pt 595pt`;
 
 const bodyCss = `
 @page{size:420pt 595pt}
-${DATA.map((p, i) => `@page p${i}{margin:78pt 40pt 58pt 40pt;background:${PAGE_BG};
-  @top-left{content:"Parachat ${p.fr.replace(/"/g, '')}";font:600 9.5pt 'EB Garamond';color:#333;vertical-align:top;padding-top:39.5pt;width:120pt;text-align:left}
+${DATA.map((p, i) => `@page p${i}{margin:72pt 34pt 46pt 34pt;background:${PAGE_BG};
+  @top-left{content:"Parachat ${p.fr.replace(/"/g, '')}";font:600 9.5pt 'EB Garamond';color:#333;vertical-align:top;padding-top:39.5pt;width:120pt;text-align:left;padding-left:9pt}
   @top-center{content:"Chnayim Mikra";font:700 15pt 'Cormorant Garamond';letter-spacing:.9pt;color:#2b2b2b;vertical-align:top;padding-top:36.5pt;text-align:center;white-space:nowrap;overflow:visible}
-  @top-right{content:"${BOOK_FR[p.book][0]}";font:600 9.5pt 'EB Garamond';color:#333;vertical-align:top;padding-top:39.5pt;width:120pt;text-align:right}
+  @top-right{content:"${BOOK_FR[p.book][0]}";font:600 9.5pt 'EB Garamond';color:#333;vertical-align:top;padding-top:39.5pt;width:120pt;text-align:right;padding-right:9pt}
   @bottom-center{content:"— " counter(page) " —";font:500 10pt 'EB Garamond';color:#777;vertical-align:top;padding-top:6pt}
 }`).join('\n')}
 .parasha{page-break-before:always}
-.ptitle{text-align:center;padding-top:20pt;break-after:avoid}
-.ptitle img{width:112pt;display:block;margin:0 auto 8pt}
+.ptitle{text-align:center;padding-top:6pt;break-after:avoid}
+.ptitle img{width:84pt;display:block;margin:0 auto 8pt}
 .ptitle .k{font:600 10pt 'EB Garamond';letter-spacing:3.4pt;text-transform:uppercase;color:#555}
-.ptitle .n{font:700 33pt/1.08 'Cormorant Garamond';color:#222;margin:2pt 0 3pt}
+.ptitle .n{font:700 26pt/1.05 'Cormorant Garamond';color:#222;margin:1pt 0 2pt}
 .ptitle .m{font:italic 400 10.5pt 'EB Garamond';color:#555;margin-top:4pt}
-.ptitle hr{border:0;border-top:.7pt solid #999;margin:12pt 30pt 8pt}
-.day{display:flex;align-items:center;gap:8pt;margin:15pt 0 9pt;break-after:avoid;break-inside:avoid}
+.ptitle hr{border:0;border-top:.7pt solid #999;margin:7pt 30pt 2pt}
+.day{display:flex;align-items:center;gap:8pt;margin:9pt 0 6pt;break-after:avoid;break-inside:avoid}
 .day:before,.day:after{content:"";flex:1;height:1.6pt;background:linear-gradient(90deg,transparent,#555)}
 .day:after{background:linear-gradient(270deg,transparent,#555)}
-.day .lab{border:.7pt solid #444;border-radius:6pt;padding:3pt 14pt 2pt;text-align:center;box-shadow:0 0 0 1.6pt #fff,0 0 0 2.2pt #aaa;background:linear-gradient(#fff,#ededed)}
-.day .lab b{display:block;font:700 12.5pt/1.2 'EB Garamond';letter-spacing:.4pt}
-.day .lab span{display:block;font:italic 400 8.5pt/1.2 'EB Garamond';color:#555}
-.chap{text-align:center;font:600 8.5pt 'EB Garamond';letter-spacing:2.2pt;text-transform:uppercase;color:#666;margin:10pt 0 6pt;break-after:avoid}
-.v{position:relative;margin:0 0 9pt;padding-left:22pt;break-inside:avoid}
-.vn{position:absolute;left:0;top:3pt;font:700 9.5pt 'EB Garamond';color:#555}
+.day .lab{border:.7pt solid #444;border-radius:6pt;padding:1.5pt 12pt 1pt;text-align:center;box-shadow:0 0 0 1.6pt #fff,0 0 0 2.2pt #aaa;background:linear-gradient(#fff,#ededed)}
+.day .lab b{display:block;font:700 10.5pt/1.2 'EB Garamond';letter-spacing:.4pt}
+.day .lab span{display:block;font:italic 400 7.5pt/1.2 'EB Garamond';color:#555}
+.chap{text-align:center;font:600 7.5pt 'EB Garamond';letter-spacing:2pt;text-transform:uppercase;color:#666;margin:6pt 0 3pt;break-after:avoid}
+.v{position:relative;margin:0 0 5pt;padding-left:17pt}
+.vn{position:absolute;left:0;top:1.5pt;font:700 8pt 'EB Garamond';color:#555}
 .m1,.m2{direction:ltr;text-align:left;hyphens:manual}
-.m1{font:700 ${SAME_SIZE ? 14 : 15.5}pt/1.34 'EB Garamond';color:#111}
-.m2{font:500 ${SAME_SIZE ? 14 : 13.5}pt/1.34 'EB Garamond';color:#2a2a2a;margin-top:2pt}
-.tg{font:italic 400 11pt/1.32 'EB Garamond';color:#3a3a3a;margin-top:4pt;border-left:1.2pt solid #bbb;padding-left:7pt}
+.m1{font:700 ${SAME_SIZE ? 11.5 : 12}pt/1.24 'EB Garamond';color:#111}
+.m2{font:500 ${SAME_SIZE ? 11.5 : 11}pt/1.24 'EB Garamond';color:#2a2a2a;margin-top:0}
+.tg{font:italic 400 9.6pt/1.25 'EB Garamond';color:#3a3a3a;margin-top:1.5pt;orphans:2;widows:2;border-left:1.2pt solid #bbb;padding-left:7pt}
 `;
 
 const dayLabel = (d, p) => !SHOW_DAYS ? '' :
