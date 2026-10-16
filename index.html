@@ -14445,10 +14445,10 @@ function confetti(n){
    that live moment (via Firestore's realtime listener), AND for anyone
    who simply opens the app afterwards and hasn't seen that tier yet, so
    nobody who deserves the moment misses it just for not watching live.
-   Delivered purely as an OS notification (fireNotif), same as the other
-   checkXNotification() reminders below - never an in-app modal, per
-   explicit user request. Only fires while the live count is still within
-   the first 60 users of that hundred (e.g. 300-359, 400-459): a device
+   Delivered BOTH as an OS notification (fireNotif; the real system one on
+   iOS) and as an in-app celebration (NativeModal.presentCelebration on iOS,
+   an HTML modal elsewhere), per the user's latest request. Only fires while
+   the live count is still within the first 10 users of that hundred (e.g. 300-359, 400-459): a device
    that only opens the app once the count has already moved well past a
    tier (e.g. opens at 350) would otherwise see a stale "300!" alert for a
    milestone that's no longer current. Guarded per device
@@ -14470,13 +14470,33 @@ const MILESTONE_UI={
       grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
-  if(!notifReady()) return false;   // caller must NOT mark the tier as celebrated - the device may still get the permission/toggle later
   const grand = tier>=1000;
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
   const tierStr=tier.toLocaleString(civilDateLocale());
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
   const body = (grand?t.grandBody:t.body).replace('{n}',tierStr);
-  fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  /* Both at once (user request): the OS notification (on iOS the real system one via LocalNotifications/APNs, on
+     Android the notification-shade one) AND an in-app celebration. The in-app part needs no permission, so a device
+     with notifications off still sees the milestone; it is what marks the tier as celebrated. */
+  if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  try{
+    haptic(25);
+    if(NATIVE_MODAL){
+      /* real iOS component (NativeModalView), not a web look-alike */
+      window.Capacitor.Plugins.NativeModal.presentCelebration({
+        title, body, buttonText:'♥ '+(t.btn||'OK'), iconSymbol:'star.fill', isRTL:document.documentElement.dir!=='ltr',
+      }).catch(()=>{});
+    }else{
+      confetti(60);
+      const ov=document.createElement('div'); ov.className='overlay';
+      ov.innerHTML=`<div class="modal"><button class="close-x" data-close>${I.x}</button><div class="m-crown">${I.star}</div>
+        <h3 class="gold-text"></h3><p></p><button class="btn btn-gold" data-close><span>${I.heart}</span><span class="ms-btn"></span></button></div>`;
+      ov.querySelector('h3').textContent=title; ov.querySelector('p').textContent=body; ov.querySelector('.ms-btn').textContent=t.btn||'OK';
+      document.body.appendChild(ov);
+      ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
+      ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+    }
+  }catch(e){}
   return true;
 }
 /* the highest hundred-tier (300,400,500,...) this device has already
@@ -14489,15 +14509,14 @@ function celebrateMilestone(count, tier){
    ever firing a stale milestone. */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
-  /* 60-user window (was 10): at ~1-2 new installs an hour almost nobody opened the app inside a 10-user window, so the
-     500 milestone reached no device at all. */
-  if(tier<300 || count>=tier+60) return;
+  /* 10-user window (user's rule: e.g. 500 -> 510). Devices that are not open in that window are covered by the server
+     push (functions/index.js milestonePush), not by this local check. */
+  if(tier<300 || count>=tier+10) return;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
   if(tier>last){
     let fired=false;
     try{ fired=!!window.celebrateMilestone(count, tier); }catch(e){}
-    /* only remember the tier once the notification really went out: before, a device with notifications off/denied at that
-       moment burned the milestone forever without ever showing it */
+    /* remember the tier only once something was really shown to the user */
     if(fired) localStorage.setItem('betel_milestone_last', String(tier));
   }
 }
