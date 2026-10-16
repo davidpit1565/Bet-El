@@ -9554,6 +9554,13 @@ window.NativeCalendarHost={
     const map=calMonthEvents(new Date(y1,m1-1,d1),new Date(y2,m2-1,d2));
     return Object.keys(map).map(k=>ymdOf(new HDate(+k).greg()));
   },
+  /* Date converter sheet (native): ymd of the picked day in -> both spellings out. */
+  convLabels(){ const T=ckChrome; return {title:T('ממיר תאריכים'), h2g:T('עברי ← לועזי'), g2h:T('לועזי ← עברי'), ok:T('אישור'), bad:T('תאריך לא תקין')}; },
+  convert(ymd){
+    try{ const hd=hdOfYmd(ymd), g=hd.greg();
+      return {heb:ckChrome(dowName(hd))+' · '+hebDateStr(hd), greg:g.toLocaleDateString(civilDateLocale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'})};
+    }catch(e){ return {heb:ckChrome('תַּאֲרִיךְ לֹא תַּקִּין'), greg:''}; }
+  },
   onSelect(ymd){ try{ calSetSelected(hdOfYmd(ymd)); }catch(e){} },
   onMode(civil){ CAL.civil=!!civil; },
   openPortion(a,b){ openReader(chaptersOf([a,b]),{daily:false}); },

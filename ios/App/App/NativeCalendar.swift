@@ -346,6 +346,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
     private let segmented = UISegmentedControl(items: ["", ""])
     private let jumpButton = UIButton(type: .system)
     private let todayButton = UIButton(type: .system)
+    private let converterButton = UIButton(type: .system)
     private let calendarCard = NCCard()
     private let calendarView = UICalendarView()
     private var selectionBehavior: UICalendarSelectionSingleDate!
@@ -415,6 +416,8 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         row.spacing = 8
         row.alignment = .center
         content.addArrangedSubview(row)
+        converterButton.addTarget(self, action: #selector(converterTapped), for: .touchUpInside)
+        content.addArrangedSubview(converterButton)
         jumpButton.addTarget(self, action: #selector(jumpTapped), for: .touchUpInside)
         todayButton.addTarget(self, action: #selector(todayTapped), for: .touchUpInside)
 
@@ -480,6 +483,12 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         segmented.setTitleTextAttributes([.foregroundColor: UIColor(white: 0.12, alpha: 1)], for: .selected)
         styleButton(jumpButton, title: config.jumpLabel, symbol: "calendar.badge.clock")
         styleButton(todayButton, title: config.todayLabel, symbol: nil)
+        styleButton(converterButton, title: "", symbol: "arrow.left.arrow.right")
+        runJS?("JSON.stringify(window.NativeCalendarHost.convLabels())") { [weak self] r in
+            guard let self = self, let s = r as? String, let d = s.data(using: .utf8),
+                  let o = try? JSONSerialization.jsonObject(with: d) as? [String: String], let t = o["title"] else { return }
+            self.styleButton(self.converterButton, title: t, symbol: "arrow.left.arrow.right")
+        }
         for p in pages {
             p.tint = gold
             p.isDark = config.isDark
@@ -677,6 +686,71 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
     }
 
     @objc private func todayTapped() { select(gregorian.date(bySettingHour: 12, minute: 0, second: 0, of: Date()) ?? Date(), syncCalendar: true) }
+
+    /// Date converter: pick a date in Hebrew or Gregorian (real UIDatePicker), see the other one live.
+    @objc private func converterTapped() {
+        runJS?("JSON.stringify(window.NativeCalendarHost.convLabels())") { [weak self] r in
+            guard let self = self, let s = r as? String, let d = s.data(using: .utf8),
+                  let L = try? JSONSerialization.jsonObject(with: d) as? [String: String] else { return }
+            self.presentConverter(L)
+        }
+    }
+
+    private func presentConverter(_ L: [String: String]) {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .systemBackground
+        vc.overrideUserInterfaceStyle = cfg.isDark ? .dark : .light
+        vc.view.semanticContentAttribute = cfg.rtl ? .forceRightToLeft : .forceLeftToRight
+        let seg = UISegmentedControl(items: [L["h2g"] ?? "", L["g2h"] ?? ""])
+        seg.selectedSegmentIndex = 0
+        seg.selectedSegmentTintColor = gold
+        seg.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .normal)
+        seg.setTitleTextAttributes([.foregroundColor: UIColor(white: 0.12, alpha: 1)], for: .selected)
+        let picker = UIDatePicker()
+        picker.datePickerMode = .date
+        picker.preferredDatePickerStyle = .wheels
+        picker.calendar = hebrewCal
+        picker.locale = calendarView.locale
+        picker.date = selected
+        let out = UILabel()
+        out.numberOfLines = 0
+        out.textAlignment = .center
+        out.font = UIFont.preferredFont(forTextStyle: .title3)
+        out.adjustsFontForContentSizeCategory = true
+        let stack = UIStackView(arrangedSubviews: [seg, picker, out])
+        stack.axis = .vertical; stack.spacing = 14; stack.alignment = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: vc.view.topAnchor, constant: 24),
+            stack.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -16),
+        ])
+        let update: () -> Void = { [weak self, weak picker, weak out, weak seg] in
+            guard let self = self, let picker = picker, let out = out, let seg = seg else { return }
+            let y = self.ymd(picker.date)
+            self.runJS?("JSON.stringify(window.NativeCalendarHost.convert('\(y)'))") { r in
+                guard let s = r as? String, let d = s.data(using: .utf8),
+                      let o = try? JSONSerialization.jsonObject(with: d) as? [String: String] else { return }
+                // The result is the OTHER calendar: Hebrew picked -> show Gregorian big, Hebrew small, and vice versa.
+                let main = seg.selectedSegmentIndex == 0 ? (o["greg"] ?? "") : (o["heb"] ?? "")
+                let other = seg.selectedSegmentIndex == 0 ? (o["heb"] ?? "") : (o["greg"] ?? "")
+                out.text = main + "\n" + other
+            }
+        }
+        picker.addAction(UIAction { _ in update() }, for: .valueChanged)
+        seg.addAction(UIAction { [weak self, weak picker] _ in
+            guard let self = self, let picker = picker else { return }
+            let keep = picker.date
+            picker.calendar = seg.selectedSegmentIndex == 0 ? self.hebrewCal : self.gregorian
+            picker.date = keep
+            update()
+        }, for: .valueChanged)
+        update()
+        vc.modalPresentationStyle = .pageSheet
+        if let sheet = vc.sheetPresentationController { sheet.detents = [.medium()]; sheet.prefersGrabberVisible = true }
+        present?(vc)
+    }
 
     @objc private func jumpTapped() {
         let vc = UIViewController()
