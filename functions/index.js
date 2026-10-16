@@ -1,6 +1,11 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const admin = require("firebase-admin");
 const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
+
+admin.initializeApp();
 
 // Set once with: firebase functions:secrets:set RESEND_API_KEY
 // (get the key from https://resend.com after verifying a sending domain -
@@ -81,3 +86,122 @@ exports.sendFeedback = onRequest(
     }
   }
 );
+
+
+/* ======================================================================
+   Automatic push announcements (no Firebase Console campaign needed).
+   Both functions send straight to the FCM tokens the apps store in the
+   Firestore `pushTokens` collection (iOS + web), in each token's own
+   language, and delete tokens FCM reports as dead.
+   ====================================================================== */
+const LANGS = ["he", "en", "fr", "ru", "ka"];
+const langOf = (t) => {
+  const l = String((t && t.lang) || "he").toLowerCase().slice(0, 2);
+  return LANGS.includes(l) ? l : (l === "iw" ? "he" : "en");
+};
+
+/** Sends {he,en,fr,ru,ka}-> {title, body} texts to every stored token, grouped by language. */
+async function broadcast(texts, data) {
+  const db = admin.firestore();
+  const snap = await db.collection("pushTokens").get();
+  const groups = {};
+  snap.forEach((d) => {
+    const lang = langOf(d.data());
+    (groups[lang] = groups[lang] || []).push(d.id);
+  });
+  let sent = 0, failed = 0;
+  const dead = [];
+  for (const lang of Object.keys(groups)) {
+    const text = texts[lang] || texts.en || texts.he;
+    const tokens = groups[lang];
+    for (let i = 0; i < tokens.length; i += 500) {
+      const chunk = tokens.slice(i, i + 500);
+      const res = await admin.messaging().sendEachForMulticast({
+        tokens: chunk,
+        notification: { title: text.title, body: text.body },
+        data: data || {},
+        apns: { payload: { aps: { sound: "default" } } },
+      });
+      res.responses.forEach((r, idx) => {
+        if (r.success) { sent++; return; }
+        failed++;
+        const code = r.error && r.error.code;
+        if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") dead.push(chunk[idx]);
+      });
+    }
+  }
+  await Promise.all(dead.map((t) => db.collection("pushTokens").doc(t).delete().catch(() => {})));
+  logger.info("broadcast done", { sent, failed, removedDead: dead.length, tokens: snap.size });
+  return { sent, failed };
+}
+
+const MILESTONE_TEXT = {
+  he: (n) => ({ title: `ברוך השם — ${n} משתמשים!`, body: `ברוך השם עברנו את ה-${n} משתמשים! תודה שאתה חלק מהקהילה. 🙏` }),
+  en: (n) => ({ title: `Thank G-d — ${n} Users!`, body: `Thank G-d, we’ve passed ${n} users! Thank you for being part of the community. 🙏` }),
+  fr: (n) => ({ title: `Grâce à D.ieu — ${n} utilisateurs !`, body: `Grâce à D.ieu, nous avons dépassé ${n} utilisateurs ! Merci de faire partie de la communauté. 🙏` }),
+  ru: (n) => ({ title: `Слава Богу — ${n} пользователей!`, body: `Слава Богу, мы превысили ${n} пользователей! Спасибо, что вы часть этой общины. 🙏` }),
+  ka: (n) => ({ title: `მადლობა ღმერთს — ${n} მომხმარებელი!`, body: `მადლობა ღმერთს, გადავაბიჯეთ ${n} მომხმარებელს! გმადლობთ, რომ ჩვენი საზოგადოების ნაწილი ხართ. 🙏` }),
+};
+
+/**
+ * Fires when the public user counter (stats/visits.count) crosses a multiple of 100 (300, 400, 500, ...), once per
+ * milestone for everyone - tracked in stats/announced so retries / duplicate triggers never send it twice.
+ */
+exports.milestonePush = onDocumentUpdated({ document: "stats/visits", region: "us-central1" }, async (event) => {
+  const before = (event.data.before.data() || {}).count || 0;
+  const after = (event.data.after.data() || {}).count || 0;
+  const tier = Math.floor(after / 100) * 100;
+  if (tier < 300 || Math.floor(before / 100) * 100 >= tier) return;
+  const ref = admin.firestore().doc("stats/announced");
+  const first = await admin.firestore().runTransaction(async (tx) => {
+    const cur = ((await tx.get(ref)).data() || {}).milestone || 0;
+    if (cur >= tier) return false;
+    tx.set(ref, { milestone: tier }, { merge: true });
+    return true;
+  });
+  if (!first) return;
+  const n = tier.toLocaleString("en-US");
+  const texts = {};
+  LANGS.forEach((l) => { texts[l] = MILESTONE_TEXT[l](n); });
+  await broadcast(texts, { kind: "milestone", count: String(tier) });
+});
+
+const BOOKLET_URL = "https://davidpit1565.github.io/Bet-El/data/booklet/current.json";
+const BOOKLET_TEXT = {
+  he: (t) => ({ title: "חוברת השבוע", body: `${t} — החוברת החדשה מחכה לך באפליקציה 📖` }),
+  en: (t) => ({ title: "This week's booklet", body: `${t} — the new booklet is waiting in the app 📖` }),
+  fr: (t) => ({ title: "Le livret de la semaine", body: `${t} — le nouveau livret vous attend dans l’application 📖` }),
+  ru: (t) => ({ title: "Брошюра недели", body: `${t} — новая брошюра ждёт вас в приложении 📖` }),
+  ka: (t) => ({ title: "კვირის ბროშურა", body: `${t} — ახალი ბროშურა აპლიკაციაში გელოდებათ 📖` }),
+};
+
+/**
+ * Every Sunday 07:00 (Jerusalem) - right after netz, when the app starts showing the new weekly booklet - reads the live
+ * data/booklet/current.json from GitHub Pages and announces it once (id remembered in stats/announced). If you publish the
+ * booklet later in the week it is announced at the next run (the schedule also runs Mon-Fri at 07:00 and only sends when
+ * the booklet id is new and its Shabbat is within the coming 7 days).
+ */
+exports.bookletPush = onSchedule({ schedule: "0 7 * * 0-5", timeZone: "Asia/Jerusalem", region: "us-central1" }, async () => {
+  const res = await fetch(BOOKLET_URL + "?t=" + Date.now(), { headers: { "cache-control": "no-cache" } });
+  if (!res.ok) { logger.info("no current booklet", { status: res.status }); return; }
+  let list = await res.json();
+  if (!Array.isArray(list)) list = [list];
+  const now = Date.now();
+  const cur = list.find((b) => {
+    if (!b || !b.id || !b.shabbat) return false;
+    const days = (Date.parse(b.shabbat + "T12:00:00Z") - now) / 86400000;
+    return days >= -0.5 && days <= 7;
+  });
+  if (!cur) return;
+  const ref = admin.firestore().doc("stats/announced");
+  const first = await admin.firestore().runTransaction(async (tx) => {
+    if (((await tx.get(ref)).data() || {}).booklet === cur.id) return false;
+    tx.set(ref, { booklet: cur.id }, { merge: true });
+    return true;
+  });
+  if (!first) return;
+  const title = typeof cur.title === "string" ? { he: cur.title, en: cur.title } : (cur.title || {});
+  const texts = {};
+  LANGS.forEach((l) => { texts[l] = BOOKLET_TEXT[l](title[l] || title.en || title.he || ""); });
+  await broadcast(texts, { kind: "booklet", id: String(cur.id) });
+});

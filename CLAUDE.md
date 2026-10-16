@@ -586,3 +586,10 @@ in English as usual.
   `androidBackWire()` (appBack -> Home -> exit). The offline-prefetch pill shows MB using `data/manifest-sizes.json`
   (generated together with `manifest.json`; re-run `node scripts/generate-data-manifest.mjs` after any data change).
   Emulate Android in Playwright with `window.androidBridge` stub. Prompt for other apps: `docs/play/ANDROID-READINESS-PROMPT.md`.
+
+- **Small-header picker swap + web Search tab (user request):** in every book reader except Chok LeYisrael / Ben Ish Chai, scrolling down
+  swaps the book title in the SMALL header for that reader's own picker (`readerHeadCompact()`, generic: first `select.fld-select` in
+  `.bic-collapse`); on iOS the native title becomes "title · choice" plus a list button opening `NativeModal.presentActionSheet`. Web/PWA/Android
+  now have their own Search nav item (`['search','חיפוש']` in `buildNav`) and the Library page has no search box; iOS keeps the native search tab.
+  Live-count milestone: BOTH an OS notification and an in-app celebration (native modal on iOS), 10-user window; the regression sweep presets
+  `betel_milestone_last` so the modal never blocks it. iOS parts are not compile-verified.

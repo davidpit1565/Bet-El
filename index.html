@@ -376,6 +376,9 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
   margin:0 -16px;padding:8px 16px 12px;padding-top:calc(8px + env(safe-area-inset-top))}
 .reader-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .reader-title{font-family:var(--font-sacred);font-size:20px;font-weight:700;text-align:center;flex:1}
+.reader-head .rt-pick{display:none;flex:1;min-width:0;max-width:260px;margin:0 auto}
+.reader-head.compact .reader-title{display:none}
+.reader-head.compact .rt-pick{display:block}
 .reader-progress{height:3px;background:var(--line);border-radius:3px;margin-top:10px;overflow:hidden}
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
 .zh-pdf-embed{margin:12px 0 0}
@@ -789,7 +792,7 @@ a.set-item{text-decoration:none;color:inherit}
 .nav-item svg{width:24px;height:24px;flex:none;transition:.2s var(--ease)}
 .nav-item:active svg{transform:scale(.88)}
 @media (hover:hover){.nav-item:not(.on):hover{color:var(--ink)}}
-.nav-item span{font-size:11.5px;font-weight:700;white-space:nowrap;letter-spacing:.1px;line-height:1;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block}
+.nav-item span{font-size:10.5px;font-weight:700;white-space:nowrap;letter-spacing:.1px;line-height:1;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block}
 .nav-item.on{color:var(--gold)}
 .nav-item.on svg{filter:drop-shadow(0 3px 6px rgba(212,175,95,.5))}
 .nav-item.on::before{content:"";position:absolute;top:2px;width:38px;height:38px;border-radius:12px;
@@ -878,7 +881,9 @@ a.set-item{text-decoration:none;color:inherit}
 #dataPrefetchBar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:transparent;pointer-events:none;opacity:1;transition:opacity .6s ease}
 #dataPrefetchBar i{display:block;height:100%;width:0%;background:var(--gold-grad);box-shadow:0 0 8px rgba(212,175,95,.6);transition:width .3s ease}
 #dataPrefetchBar.done{opacity:0}
-#dataPrefetchBar .dpb-t{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:600;color:#fff;background:rgba(20,26,48,.82);border:1px solid rgba(212,175,95,.5);padding:3px 10px;border-radius:999px}
+#dataPrefetchBar .dpb-t{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:600;color:#fff;background:rgba(20,26,48,.82);border:1px solid rgba(212,175,95,.5);padding:5px 12px 6px;border-radius:14px;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:190px}
+#dataPrefetchBar .dpb-b{display:block;height:3px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
+#dataPrefetchBar .dpb-b i{display:block;height:100%;width:0;background:#d4af5f;border-radius:3px;transition:width .3s ease}
 
 .hidden{display:none!important}
 
@@ -2124,7 +2129,7 @@ function dataPrefetchUI(done,total,doneBytes,totalBytes){
   const nums = totalBytes ? `${mb(doneBytes)} / ${mb(totalBytes)} MB` : `${done} / ${total}`;
   const t=bar.querySelector('.dpb-t');
   t.style.direction = lang==='he' ? 'rtl' : 'ltr';
-  t.innerHTML = `${label} · <bdi dir="ltr">${nums}</bdi>`;
+  t.innerHTML = `<span class="dpb-l">${label} · <bdi dir="ltr">${nums}</bdi></span><span class="dpb-b"><i style="width:${Math.round(pct*100)}%"></i></span>`;
 }
 
 /* ---------- icons ---------- */
@@ -2689,15 +2694,23 @@ function animateCountUp(el, from, to, duration){
   if(!el) return;
   to = Number(to)||0;
   from = Number(from)||0;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches || from===to){ el.textContent = to.toLocaleString(civilDateLocale()); return; }
+  const finalTxt = to.toLocaleString(civilDateLocale());
+  el.__cuTo = to;
+  /* On the iOS app the native home covers the WebView, which WebKit then throttles: requestAnimationFrame barely runs, so the
+     animation's first frame (the START value, 0) stayed on screen and the live counter showed 0 until the page happened to
+     become visible. Never rely on rAF for the final number: paint the end value directly when the native home is on, and always
+     force it once the animation time is up. */
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || from===to || document.documentElement.classList.contains('native-home') || document.hidden){ el.textContent = finalTxt; return; }
   duration = duration||700;
   const start = performance.now();
   const ease = t => 1-Math.pow(1-t,3);
   (function step(now){
+    if(el.__cuTo !== to) return;   // a newer value took over
     const t = Math.min(1, (now-start)/duration);
     el.textContent = Math.round(from + (to-from)*ease(t)).toLocaleString(civilDateLocale());
     if(t<1) requestAnimationFrame(step);
   })(start);
+  setTimeout(()=>{ if(el.__cuTo === to) el.textContent = finalTxt; }, duration + 120);
 }
 window.animateCountUp = animateCountUp;
 let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
@@ -9544,6 +9557,13 @@ window.NativeCalendarHost={
     const map=calMonthEvents(new Date(y1,m1-1,d1),new Date(y2,m2-1,d2));
     return Object.keys(map).map(k=>ymdOf(new HDate(+k).greg()));
   },
+  /* Date converter sheet (native): ymd of the picked day in -> both spellings out. */
+  convLabels(){ const T=ckChrome; return {title:T('ממיר תאריכים'), h2g:T('עברי ← לועזי'), g2h:T('לועזי ← עברי'), ok:T('אישור'), bad:T('תאריך לא תקין')}; },
+  convert(ymd){
+    try{ const hd=hdOfYmd(ymd), g=hd.greg();
+      return {heb:ckChrome(dowName(hd))+' · '+hebDateStr(hd), greg:g.toLocaleDateString(civilDateLocale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'})};
+    }catch(e){ return {heb:ckChrome('תַּאֲרִיךְ לֹא תַּקִּין'), greg:''}; }
+  },
   onSelect(ymd){ try{ calSetSelected(hdOfYmd(ymd)); }catch(e){} },
   onMode(civil){ CAL.civil=!!civil; },
   openPortion(a,b){ openReader(chaptersOf([a,b]),{daily:false}); },
@@ -9718,10 +9738,8 @@ function menorahSVG(){
 
 function renderPrayersList(){
   app.innerHTML = `
-  ${topbar('תפלות')}
+  ${topbar('ספרייה')}
   <div class="view">
-    <div class="search-box">${I.search}<input id="libSearchQ" placeholder="פרשה · מסכת ופרק · רמב״ם · דף זהר · תהלים · תפלה"/></div>
-    <div id="libResults"></div>
     <div id="libBrowse">
       <div class="prayers-list">
         <div class="prayer-row round-card prayer-row-feature prayer-row-lib" data-cat="library" onclick="go('library')">
@@ -9740,8 +9758,6 @@ function renderPrayersList(){
     if(t.dataset.praygroup==='siddur') return go('siddurHome');
     PR.group=t.dataset.praygroup; go('prayersGroup');
   });
-  document.getElementById('libSearchQ').oninput=libDrawSearch;
-  libPrefetchSearchData();
   tr(app);
 }
 function renderPrayersGroup(){
@@ -11010,6 +11026,49 @@ function renderLibraryNKBooks(){
     tr(app);
   });
 }
+/* Books reader header (user request): while scrolling down, the book title in the SMALL header is replaced by that reader's
+   own picker (chapter / daf / parasha...), so the header stays exactly the siddur-sized bar. Works for every reader whose
+   .reader-head has a .bic-collapse block with a select (all books except Chok LeYisrael / Ben Ish Chai, which have the big
+   header and tuck it away instead). Web/PWA/Android: a .rt-pick select cloned from that picker takes the title's slot
+   (.reader-head.compact). iOS: the title lives in the native bar, so it becomes "title · current choice" and a native
+   list button opens the system action sheet of the options. Called from initNavScrollHide.set(). */
+const BIG_HEADER_TABS_LIST=['chokReader','chokUnit','chokList','chokBooks','chokParshiot','chokSearch','bicReader','bicHome','bicParshiot'];
+let RH_BASE=null, RH_COMPACT=false, RH_INTERNAL=false;
+function readerHeadCompact(hide){
+  if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
+  const hd=document.querySelector('.reader-head'); if(!hd) return;
+  const sel=hd.querySelector('.bic-collapse select.fld-select'); if(!sel) return;
+  if(!NATIVE_TOPBAR){
+    if(hd.classList.contains('compact')===hide) return;
+    const t=hd.querySelector('.reader-title');
+    if(hide && t){
+      let pk=hd.querySelector('.rt-pick');
+      if(!pk){ pk=document.createElement('select'); pk.className='fld-select rt-pick'; t.after(pk);
+        pk.onchange=()=>{ const s=hd.querySelector('.bic-collapse select.fld-select'); if(s){ s.value=pk.value; s.dispatchEvent(new Event('change')); } }; }
+      pk.innerHTML=sel.innerHTML; pk.value=sel.value;
+    }
+    hd.classList.toggle('compact',hide);
+    return;
+  }
+  if(RH_COMPACT===hide || !RH_BASE) return;
+  RH_COMPACT=hide; RH_INTERNAL=true;
+  try{
+    const B=RH_BASE;
+    if(!hide){ syncNativeTopBar(B.title,B.backTo,B.opts); return; }
+    const cur=sel.options[sel.selectedIndex], base=String((B.opts&&B.opts.title!=null)?B.opts.title:(B.title||'')).replace(/<[^>]*>/g,'');
+    syncNativeTopBar(B.title,B.backTo,{
+      title:(base?base+' · ':'')+(cur?cur.textContent.trim():''),
+      actions:[{id:'rhPick',icon:'list.number',label:ckChrome('בְּחִירָה')}],
+      handlers:{rhPick:()=>{
+        const NM=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeModal;
+        const s=document.querySelector('.reader-head .bic-collapse select.fld-select');
+        if(!NM||!NM.presentActionSheet||!s) return;
+        NM.presentActionSheet({title:base,actions:Array.from(s.options).map(o=>({id:o.value,title:o.textContent.trim()})),cancelTitle:ckChrome('בִּטּוּל')})
+          .then(r=>{ const s2=document.querySelector('.reader-head .bic-collapse select.fld-select'); if(r&&r.id!=null&&s2){ s2.value=r.id; s2.dispatchEvent(new Event('change')); } }).catch(()=>{});
+      }}
+    });
+  } finally { RH_INTERNAL=false; }
+}
 function renderLibraryNKReader(){
   const cat=LIB.nkCat==='ketuvim'?'ketuvim':'neviim';
   if(!LIB.nkBook){ return renderLibraryNKBooks(); }
@@ -11047,6 +11106,7 @@ function renderLibraryNKReader(){
     const prevBtn=document.getElementById('libnPrev'); if(!prevBtn.disabled) prevBtn.onclick=()=>{ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); };
     const nextBtn=document.getElementById('libnNext'); if(!nextBtn.disabled) nextBtn.onclick=()=>{ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); };
     document.getElementById('libnChPick').onchange=function(){ LIB.nkChapter=+this.value; renderLibraryNKReader(); forceScrollTop(); };
+
     wireSwipeNav(app.querySelector('.sm-verses'),
       ()=>{ if(ch<nCh){ LIB.nkChapter=ch+1; renderLibraryNKReader(); forceScrollTop(); } },
       ()=>{ if(ch>1){ LIB.nkChapter=ch-1; renderLibraryNKReader(); forceScrollTop(); } });
@@ -14428,10 +14488,10 @@ function confetti(n){
    that live moment (via Firestore's realtime listener), AND for anyone
    who simply opens the app afterwards and hasn't seen that tier yet, so
    nobody who deserves the moment misses it just for not watching live.
-   Delivered purely as an OS notification (fireNotif), same as the other
-   checkXNotification() reminders below - never an in-app modal, per
-   explicit user request. Only fires while the live count is still within
-   the first 10 users of that hundred (e.g. 300-309, 400-409): a device
+   Delivered BOTH as an OS notification (fireNotif; the real system one on
+   iOS) and as an in-app celebration (NativeModal.presentCelebration on iOS,
+   an HTML modal elsewhere), per the user's latest request. Only fires while
+   the live count is still within the first 10 users of that hundred (e.g. 300-359, 400-459): a device
    that only opens the app once the count has already moved well past a
    tier (e.g. opens at 350) would otherwise see a stale "300!" alert for a
    milestone that's no longer current. Guarded per device
@@ -14453,13 +14513,34 @@ const MILESTONE_UI={
       grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
-  if(!notifReady()) return;
   const grand = tier>=1000;
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
   const tierStr=tier.toLocaleString(civilDateLocale());
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
   const body = (grand?t.grandBody:t.body).replace('{n}',tierStr);
-  fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  /* Both at once (user request): the OS notification (on iOS the real system one via LocalNotifications/APNs, on
+     Android the notification-shade one) AND an in-app celebration. The in-app part needs no permission, so a device
+     with notifications off still sees the milestone; it is what marks the tier as celebrated. */
+  if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
+  try{
+    haptic(25);
+    if(NATIVE_MODAL){
+      /* real iOS component (NativeModalView), not a web look-alike */
+      window.Capacitor.Plugins.NativeModal.presentCelebration({
+        title, body, buttonText:'♥ '+(t.btn||'OK'), iconSymbol:'star.fill', isRTL:document.documentElement.dir!=='ltr',
+      }).catch(()=>{});
+    }else{
+      confetti(60);
+      const ov=document.createElement('div'); ov.className='overlay';
+      ov.innerHTML=`<div class="modal"><button class="close-x" data-close>${I.x}</button><div class="m-crown">${I.star}</div>
+        <h3 class="gold-text"></h3><p></p><button class="btn btn-gold" data-close><span>${I.heart}</span><span class="ms-btn"></span></button></div>`;
+      ov.querySelector('h3').textContent=title; ov.querySelector('p').textContent=body; ov.querySelector('.ms-btn').textContent=t.btn||'OK';
+      document.body.appendChild(ov);
+      ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
+      ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+    }
+  }catch(e){}
+  return true;
 }
 /* the highest hundred-tier (300,400,500,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
@@ -14471,11 +14552,15 @@ function celebrateMilestone(count, tier){
    ever firing a stale milestone. */
 function ckMilestoneCheck(count){
   const tier=Math.floor(count/100)*100;
+  /* 10-user window (user's rule: e.g. 500 -> 510). Devices that are not open in that window are covered by the server
+     push (functions/index.js milestonePush), not by this local check. */
   if(tier<300 || count>=tier+10) return;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
   if(tier>last){
-    localStorage.setItem('betel_milestone_last', String(tier));
-    try{ window.celebrateMilestone(count, tier); }catch(e){}
+    let fired=false;
+    try{ fired=!!window.celebrateMilestone(count, tier); }catch(e){}
+    /* remember the tier only once something was really shown to the user */
+    if(fired) localStorage.setItem('betel_milestone_last', String(tier));
   }
 }
 
@@ -14741,7 +14826,6 @@ const LIBRARY_NESTED_TABS=new Set(['library','tehillim',
 function navActiveTab(tab){
   tab=tab||'home';
   if(SEARCH_NAV && NATIVE_TABBAR) return 'search';   // a result opened from the Search tab stays "inside" it, like the App Store
-  if(tab==='search' && !NATIVE_TABBAR) return 'prayers';   // the web/PWA nav has no Search item: search belongs to the Library there
   if(tab==='reader' && RD && !RD.daily) return 'prayers';   // Tehillim's own chapter reader now lives under Library
   if(LIBRARY_NESTED_TABS.has(tab)) return 'prayers';
   return tab;
@@ -14751,7 +14835,7 @@ function buildNav(){
   if(TAB==='chokPace'||TAB==='kotelCompass'||TAB==='tefillinMirror'){ const fade=document.querySelector('.nav-fade'); if(fade) fade.remove(); syncNativeTabBar(); return; }
   if(!document.querySelector('.nav-fade')){ const fade=document.createElement('div'); fade.className='nav-fade'; document.body.appendChild(fade); }
   const nav=document.createElement('div'); nav.className='bottom-nav';
-  const items=[['home','דף הבית',I.home],['calendar','לוח שנה',I.cal],['prayers','ספרייה',I.library],['settings','הגדרות',I.gear]];
+  const items=[['home','דף הבית',I.home],['calendar','לוח שנה',I.cal],['prayers','ספרייה',I.library],['settings','הגדרות',I.gear],['search','חיפוש',I.search]];   // web/PWA/Android: Search is its own nav item (like the iOS tab bar); the Library page has no search box
   nav.innerHTML=items.map(([t,l,ic])=>`<div class="nav-item ${t===navActiveTab(TAB)?'on':''}" data-tab="${t}">${ic}<span>${l}</span></div>`).join('');
   document.body.appendChild(nav);
   nav.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>go(n.dataset.tab));
@@ -14920,6 +15004,7 @@ let TOPBAR_ACTION_HANDLERS = {};
 function syncNativeTopBar(title, backTo, opts){
   if(!NATIVE_TOPBAR) return;
   opts = opts || {};
+  if(!RH_INTERNAL){ RH_BASE={title,backTo,opts}; RH_COMPACT=false; }
   TOPBAR_BACK_ACTION = (typeof backTo==='function') ? backTo : (backTo ? ()=>go(backTo) : null);
   TOPBAR_ACTION_HANDLERS = opts.handlers || {};
   try{
@@ -14966,12 +15051,18 @@ maybeShowRatePrompt();
 // Start the full-data prefetch only once the first screen is up and the app is in the
 // foreground: hundreds of parallel downloads/cache writes right at launch can starve the
 // WebView on a real device, and the gold progress bar alone must never be all there is to see.
+/* On the iOS app the real native home/lists replace the HTML screens (html.native-home hides #app > .view), so "#app has
+   no visible text" is NORMAL there - the boot watchdog and the prefetch gate below must not treat it as a failed load
+   (it popped the "The app did not load correctly" screen over the native home). */
+function nativeUiOwnsScreen(){
+  try{ const C=window.Capacitor; return !!(C && C.getPlatform && C.getPlatform()==='ios' && C.Plugins && C.Plugins.NativeHome); }catch(e){ return false; }
+}
 (function schedulePrefetch(){
   let waited=0;
   const t=setInterval(()=>{
     waited+=1000;
     const a=document.getElementById('app');
-    const up=!!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20);
+    const up=nativeUiOwnsScreen() || !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20);
     if((up && !document.hidden && waited>=4000) || waited>=20000){ clearInterval(t); startBackgroundDataPrefetch(); }
   },1000);
 })();
@@ -14979,7 +15070,7 @@ maybeShowRatePrompt();
    devices showed only the parchment background and the gold progress bar), retry the render
    once, then offer a visible recovery screen instead of a blank page. */
 (function bootWatchdog(){
-  function up(){ const a=document.getElementById('app'); return !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20); }
+  function up(){ if(nativeUiOwnsScreen()) return true; const a=document.getElementById('app'); return !!(a && a.offsetHeight>80 && a.innerText && a.innerText.trim().length>20); }
   let tries=0;
   const t=setInterval(()=>{
     if(up()){ clearInterval(t); const f=document.getElementById('bootFallback'); if(f) f.remove(); return; }
@@ -15065,23 +15156,30 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
      jitter (inertial deceleration, a bounce at the top) can't flicker the
      header open/closed - direction has to actually change or continue for
      a real, deliberate scroll before anything toggles. */
+  /* The SMALL header (back / title / "..." / compass) is permanent on every screen - siddur, food blessings, Tehillim and the
+     other books, lists. Only the two big-header screens - Chok LeYisrael and Ben Ish Chai - tuck their header away on scroll-down
+     (user rule). In every screen the reader's own lower header block (.bic-collapse: chapter picker, day nav...) still collapses,
+     so the sticky header just gets shorter while the small bar stays. */
+  const BIG_HEADER_TABS = BIG_HEADER_TABS_LIST;
   function set(hide){
+    const hideBar = hide && BIG_HEADER_TABS.indexOf(TAB) >= 0;
     if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setHidden({hidden:hide}).catch(()=>{});
-    /* the header tucks away on scroll-down and returns on scroll-up too (native bar via NativeTopBar.setCollapsed; the HTML .topbar gets a class) */
-    if(NATIVE_TOPBAR && TB_LAST!==hide){
-      TB_LAST=hide;
+    /* the big-header screens' bar tucks away on scroll-down and returns on scroll-up (native bar via NativeTopBar.setCollapsed; the HTML .topbar gets a class) */
+    if(NATIVE_TOPBAR && TB_LAST!==hideBar){
+      TB_LAST=hideBar;
       /* setCollapsed compensates for the header's own height change with a native window.scrollBy,
          which fires a real scroll event large enough to blow past COMMIT in the opposite direction
          and immediately re-flip the state it just set - suppress onScroll's reaction to it */
       suppressUntil = Date.now()+400;
-      try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hide}).catch(()=>{}); }catch(e){}
+      try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hideBar}).catch(()=>{}); }catch(e){}
     }
-    document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hide));
+    document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hideBar));
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
     const bicHead=document.querySelector('.bic-collapse');
     nav.classList.toggle('nav-hidden', hide);
-    if(tools){ tools.classList.toggle('nav-hidden', hide); if(hide) tools.classList.add('collapsed'); }
+    if(tools){ tools.classList.toggle('nav-hidden', hideBar); if(hideBar) tools.classList.add('collapsed'); }
+    try{ readerHeadCompact(hide); }catch(e){}
     if(bicHead){
       /* .bic-collapse's CSS transitions max-height over a fixed .3s, but a
          reader whose header content is much shorter than the old fixed
@@ -15374,21 +15472,75 @@ window.shareQR = shareQR;
         if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
       }
     };
-    onValue(presenceListRef, (snap) => {
-      try {
-        window.__liveCount = typeof snap.numChildren === 'function' ? snap.numChildren() : Object.keys(snap.val() || {}).length;
-      } catch (err) {
-        console.error('[betel presence] could not read snapshot:', err);
-        window.__liveCount = 0;
+    /* "Online now" used to be the raw number of children under /presence: one pushed entry per connection, removed by
+       onDisconnect. Any entry whose removal request never reached the server (app killed in the background, network
+       lost, reconnect races, old dev installs) stayed forever, so the count only ever grew (24 "online" at midnight).
+       Now every install has ONE stable key written with a heartbeat timestamp (server-clock based) and an entry only
+       counts while its heartbeat is fresh; the count is recomputed every 20s so stale entries drop out on their own
+       even with no database event. Backgrounded app = not online. Legacy entries (value true, written by app versions
+       before this) count only while their push-id timestamp is under 30 min old; clients also null out old leftovers. */
+    const PRES_TTL = 90000, PRES_BEAT = 30000;   // heartbeat every 30s; an entry counts for 90s after its last beat
+    let presId = '';
+    try{ presId = localStorage.getItem('betel_pres_id') || ''; }catch(e){}
+    if(!presId){ presId = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); try{ localStorage.setItem('betel_pres_id', presId); }catch(e){} }
+    const myRef = ref(rtdb, 'presence/' + presId);
+    let srvOffset = 0, presVal = {};
+    const nowS = () => Date.now() + srvOffset;
+    const PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+    const pushTime = (key) => { let t = 0; for(let i = 0; i < 8; i++){ const c = PUSH_CHARS.indexOf(key.charAt(i)); if(c < 0) return 0; t = t * 64 + c; } return t; };
+    function recount(){
+      const now = nowS(); let n = 0;
+      for(const k in presVal){
+        if(k === presId) continue;   // this device is counted below
+        const v = presVal[k];
+        if(v && typeof v === 'object' && typeof v.t === 'number'){ if(now - v.t < PRES_TTL) n++; }
+        /* Legacy entries (plain `true`, written by app versions before the heartbeat - the App Store build). They carry no heartbeat, but
+           their push id encodes when the session started: count them for 20 min (a typical session) so the number stays honest
+           while most people are still on the old version; older ones are treated as ghosts and cleaned up below. */
+        else if(v === true){ const c = pushTime(k); if(c && now - c < 20 * 60000) n++; }
       }
+      /* This device counts as online right away (the first snapshot + .info/connected take a second or two) */
+      if(!IS_DEV_BUILD && !document.hidden && navigator.onLine !== false) n++;
+      window.__liveCount = n;
       window.__paintLiveCount();
-    }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
-    onValue(ref(rtdb, '.info/connected'), (snap) => {
-      if(snap.val() === true && !IS_DEV_BUILD){
-        const myRef = push(presenceListRef);
-        onDisconnect(myRef).remove();
-        set(myRef, true).catch((err) => { console.error('[betel presence] write blocked, check Realtime Database rules:', err); });
+    }
+    let cleaned = 0;
+    function cleanup(){
+      const now = nowS();
+      for(const k in presVal){
+        if(cleaned >= 20) return;
+        const v = presVal[k]; let old = false;
+        if(v && typeof v === 'object' && typeof v.t === 'number') old = now - v.t > 10 * 60000;
+        else { const c = pushTime(k); old = !c || now - c > 90 * 60000; }   // legacy / malformed entry: ghost after 90 min
+        if(old){ cleaned++; set(ref(rtdb, 'presence/' + k), null).catch(() => {}); }
       }
+    }
+    onValue(ref(rtdb, '.info/serverTimeOffset'), (snap) => { srvOffset = Number(snap.val()) || 0; });
+    onValue(presenceListRef, (snap) => {
+      try { presVal = snap.val() || {}; }
+      catch (err){ console.error('[betel presence] could not read snapshot:', err); presVal = {}; }
+      recount();
+      cleanup();
+    }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
+    setInterval(recount, 10000);
+    recount();   // paint immediately instead of waiting for the network
+    let connected = false;
+    function beat(){
+      if(IS_DEV_BUILD || !connected || document.hidden) return;
+      set(myRef, { t: nowS() }).catch((err) => { console.error('[betel presence] write blocked, check Realtime Database rules:', err); });
+    }
+    onValue(ref(rtdb, '.info/connected'), (snap) => {
+      connected = snap.val() === true;
+      if(connected && !IS_DEV_BUILD){
+        onDisconnect(myRef).remove();
+        beat();
+      }
+    });
+    setInterval(beat, PRES_BEAT);
+    document.addEventListener('visibilitychange', () => {
+      if(IS_DEV_BUILD || !connected) return;
+      if(document.hidden) set(myRef, null).catch(() => {});
+      else beat();
     });
   } catch (e) {}
 
