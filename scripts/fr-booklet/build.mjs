@@ -146,6 +146,7 @@ function parashaHtml(p, i) {
 }
 
 let TOC_PAGES = 1;
+const oneBook = DATA.every(p => p.book === DATA[0].book) && DATA.length > 1 ? DATA[0].book : null;   // a one-book volume names the book on its cover
 /* ---------- front matter (cover, copyright, blank page, table of contents) ---------- */
 const GRAD = 'linear-gradient(180deg,#8d8d8d 0%,#2e2e2e 46%,#111 58%,#5b5b5b 100%)';
 function frontHtml(toc) {
@@ -156,7 +157,7 @@ function frontHtml(toc) {
   <img class="co bl" src="${asset('corner-bl.png')}"><img class="co br" src="${asset('corner-br.png')}">
   <div class="ctitle"><h1>Chnayim Mikra</h1><h2>vé’E’had Targoum</h2></div>
   <div class="csub">Deux fois le texte · Une fois la traduction</div>
-  <div class="cmain"><div class="a">La Torah complète</div><div class="b">Les cinq livres · ${DATA.length} parachiot</div>
+  <div class="cmain">${oneBook ? `<div class="a">${BOOK_FR[oneBook][0]}</div><div class="b">${BOOK_FR[oneBook][1]} · ${DATA.length} parachiot</div>` : `<div class="a">La Torah complète</div><div class="b">Les cinq livres · ${DATA.length} parachiot</div>`}
     <div class="c">Texte en phonétique française · Targoum Onkelos</div></div>
   <div class="cqr"><div class="qr"><img src="${asset('qr-app.svg')}"></div><div class="cap">Télécharger l’application Tamid</div></div>
 </section>`;
