@@ -611,3 +611,6 @@ in English as usual.
   heartbeat/poll fallback (the realtime DB rules allow it). New `BetElCompassWidget` (fixed bearing to Jerusalem - WidgetKit cannot read the live
   heading; tap opens `betel://compass` -> `kotelCompass`), added to the widget target in project.pbxproj. All buttons are capsules/circles (CSS block
   "iOS shapes"); the Tehillim prayer card is one big tap target with an iOS-blue capsule.
+
+- **Build 28 notes:** reading text (`.sm-verses`, `.chapter`, `.prayer-reader-text`) sits on a rounded iOS-style card (`--rd-card`/`--rd-line`,
+  flat tint, no blur). The compass widget also ships Lock Screen families (circular / rectangular / inline).

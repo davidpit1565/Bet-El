@@ -83,9 +83,15 @@ private struct CompassDial: View {
                         .offset(y: -s * 0.5 + s * (i % 6 == 0 ? 0.06 : 0.04))
                         .rotationEffect(.degrees(Double(i) * 15))
                 }
+                Circle().strokeBorder(palette.goldBright.opacity(0.55), lineWidth: 1).padding(s * 0.035)
                 if showLetters {
-                    Text("N").font(.system(size: s * 0.12, weight: .heavy, design: .rounded)).foregroundColor(palette.goldBright)
-                        .offset(y: -s * 0.30)
+                    ForEach(Array(["N", "E", "S", "W"].enumerated()), id: \.offset) { i, l in
+                        Text(l).font(.system(size: s * (i == 0 ? 0.12 : 0.095), weight: .heavy, design: .rounded))
+                            .foregroundColor(i == 0 ? palette.goldBright : palette.inkSoft.opacity(0.85))
+                            .rotationEffect(.degrees(-Double(i) * 90))
+                            .offset(y: -s * 0.30)
+                            .rotationEffect(.degrees(Double(i) * 90))
+                    }
                 }
                 // the needle: points to Jerusalem
                 ZStack {
@@ -121,6 +127,18 @@ private struct CompassWidgetView: View {
         Group {
             if #available(iOS 16.0, *), family == .accessoryCircular {
                 CompassDial(bearing: bearing, palette: palette, showLetters: false).padding(2)
+            } else if #available(iOS 16.0, *), family == .accessoryRectangular {
+                HStack(spacing: 8) {
+                    CompassDial(bearing: bearing, palette: palette, showLetters: false).frame(width: 44, height: 44)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(JerusalemBearing.jerusalem(lang: entry.lang)).font(.system(size: 14, weight: .bold)).lineLimit(1).minimumScaleFactor(0.6)
+                        Text("\(deg)° · \(dir)").font(.system(size: 12, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.6)
+                        Text("\(km.formatted()) km").font(.system(size: 11)).opacity(0.8)
+                    }
+                    Spacer(minLength: 0)
+                }
+            } else if #available(iOS 16.0, *), family == .accessoryInline {
+                Text("\(JerusalemBearing.jerusalem(lang: entry.lang)) \(deg)° \(dir)")
             } else if family == .systemMedium {
                 HStack(spacing: 14) {
                     CompassDial(bearing: bearing, palette: palette).frame(maxWidth: 132)
@@ -164,7 +182,7 @@ struct BetElCompassWidget: Widget {
     }
     private static var families: [WidgetFamily] {
         var f: [WidgetFamily] = [.systemSmall, .systemMedium]
-        if #available(iOS 16.0, *) { f.append(.accessoryCircular) }
+        if #available(iOS 16.0, *) { f.append(contentsOf: [.accessoryCircular, .accessoryRectangular, .accessoryInline]) }
         return f
     }
 }

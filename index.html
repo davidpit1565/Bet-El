@@ -1545,6 +1545,10 @@ html.has-native-tabbar .search-box-tab{display:none}
 .ck-today{ transition:transform .2s var(--ease); }
 .zh-mark-btn:active,.sm-mark-btn:active,.ded-del:active{ transform:scale(.88); transition-duration:.1s; }
 .ck-track-btn:active,.ck-resume-btn:active,.ck-comm-btn:active,.ck-today:active{ transform:scale(.96); transition-duration:.1s; }
+/* Reading text sits on one soft rounded iOS-style card (flat tint + hairline, no blur - see the backdrop-filter lesson) */
+:root{--rd-card:rgba(255,255,255,.055);--rd-line:rgba(255,255,255,.10)}
+[data-theme="light"]{--rd-card:rgba(255,255,255,.66);--rd-line:rgba(110,85,30,.16)}
+.sm-verses,.chapter,.prayer-reader-text{background:var(--rd-card);border-radius:22px;box-shadow:inset 0 0 0 .5px var(--rd-line);padding:16px 15px;margin-top:10px}
 /* iOS shapes (user request): no square buttons anywhere - capsules for text buttons / chips / search, circles for icon buttons,
    continuous-corner cards for result rows. Flat gradients only (no backdrop-filter, see the Liquid Glass note above). */
 .btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.autoscroll-btn{border-radius:999px}
