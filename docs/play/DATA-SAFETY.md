@@ -13,3 +13,7 @@ Suggested form answers:
 - Is all of the user data encrypted in transit? **Yes**.
 - Can users request that data be deleted? **Yes** - by e-mailing the support address (state that in privacy.html as well).
 If you want the simplest accurate form, ask me to switch Analytics off on Android; then the only item left is the optional feedback text.
+
+
+## Camera (Tefillin mirror, versionCode 6+)
+The CAMERA permission is used only for a live on-device preview in the Tefillin mirror guide. Frames are analysed locally by MediaPipe and are never recorded, stored or sent anywhere - nothing to declare under "Data collected".
