@@ -603,3 +603,11 @@ in English as usual.
   Firestore with long-polling auto-detect + a REST fallback (it stayed 0 in the native shells). The tefillin guide loads the face model first (hair
   model in the background), has a GPU timeout -> CPU fallback, and a run token so toggling can't start two loops. Reopening the native Calendar tab
   resets its scroll to the top.
+
+- **Build 27 notes (2026-10-17):** reader pickers on iOS are REAL native UIMenus on the round header buttons (`NativeTopBar.configure` actions accept
+  `menu:[{id,title,on}]`; picks come back through `NativeTopBarHost.onMenu` / `opts.menuHandlers`), Torah has a second `books.vertical` button for the
+  parasha, and `.reader-head.rh-empty` hides the leftover coloured strip under the native header. The calendar converter button is text-only and stays
+  hidden until its title is known; `hideNativeCalendar()` resets the scroll. Live presence uses `forceLongPolling()` in native shells + a REST
+  heartbeat/poll fallback (the realtime DB rules allow it). New `BetElCompassWidget` (fixed bearing to Jerusalem - WidgetKit cannot read the live
+  heading; tap opens `betel://compass` -> `kotelCompass`), added to the widget target in project.pbxproj. All buttons are capsules/circles (CSS block
+  "iOS shapes"); the Tehillim prayer card is one big tap target with an iOS-blue capsule.

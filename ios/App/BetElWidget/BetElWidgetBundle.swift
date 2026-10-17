@@ -9,6 +9,7 @@ struct BetElWidgetBundle: WidgetBundle {
         BetElZmanimWidget()
         BetElTehillimWidget()
         BetElStreakWidget()
+        BetElCompassWidget()
         if #available(iOS 17.0, *) {
             BetElStandByWidget()
         }

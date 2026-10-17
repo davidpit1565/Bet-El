@@ -347,6 +347,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
     private let jumpButton = UIButton(type: .system)
     private let todayButton = UIButton(type: .system)
     private let converterButton = UIButton(type: .system)
+    private var converterTitle = ""
     private let calendarCard = NCCard()
     private let calendarView = UICalendarView()
     private var selectionBehavior: UICalendarSelectionSingleDate!
@@ -483,11 +484,15 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         segmented.setTitleTextAttributes([.foregroundColor: UIColor(white: 0.12, alpha: 1)], for: .selected)
         styleButton(jumpButton, title: config.jumpLabel, symbol: "calendar.badge.clock")
         styleButton(todayButton, title: config.todayLabel, symbol: nil)
-        styleButton(converterButton, title: "", symbol: "arrow.left.arrow.right")
+        // Text only, and hidden until its title is known (it used to flash as a bare "two arrows" icon and then jump wider).
+        styleButton(converterButton, title: converterTitle, symbol: nil)
+        converterButton.isHidden = converterTitle.isEmpty
         runJS?("JSON.stringify(window.NativeCalendarHost.convLabels())") { [weak self] r in
             guard let self = self, let s = r as? String, let d = s.data(using: .utf8),
                   let o = try? JSONSerialization.jsonObject(with: d) as? [String: String], let t = o["title"] else { return }
-            self.styleButton(self.converterButton, title: t, symbol: "arrow.left.arrow.right")
+            self.converterTitle = t
+            self.styleButton(self.converterButton, title: t, symbol: nil)
+            self.converterButton.isHidden = false
         }
         for p in pages {
             p.tint = gold

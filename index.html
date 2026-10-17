@@ -380,6 +380,7 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .reader-head.compact .reader-title{display:none}
 .reader-head.compact .rt-pick{display:block}
 .reader-head.rh-auto .bic-collapse.rh-gone{display:none}
+html.has-native-topbar .reader-head.rh-empty{display:none}
 .reader-head.rh-auto .bic-collapse .rh-hide{display:none}
 .reader-progress{height:3px;background:var(--line);border-radius:3px;margin-top:10px;overflow:hidden}
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
@@ -1544,6 +1545,18 @@ html.has-native-tabbar .search-box-tab{display:none}
 .ck-today{ transition:transform .2s var(--ease); }
 .zh-mark-btn:active,.sm-mark-btn:active,.ded-del:active{ transform:scale(.88); transition-duration:.1s; }
 .ck-track-btn:active,.ck-resume-btn:active,.ck-comm-btn:active,.ck-today:active{ transform:scale(.96); transition-duration:.1s; }
+/* iOS shapes (user request): no square buttons anywhere - capsules for text buttons / chips / search, circles for icon buttons,
+   continuous-corner cards for result rows. Flat gradients only (no backdrop-filter, see the Liquid Glass note above). */
+.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.autoscroll-btn{border-radius:999px}
+.icon-btn{border-radius:50%}
+.search-box{border-radius:999px}
+.seg{border-radius:999px}.seg button{border-radius:999px}
+.res-item,.dd-portion{border-radius:20px}
+.prayer{border-radius:22px}
+/* the show/hide prayer control is one big iOS-blue capsule; the whole prayer card is the tap target */
+.prayer{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.prayer-toggle{width:fit-content;margin:10px auto 0;padding:9px 18px;border-radius:999px;background:rgba(10,132,255,.14);color:#0a84ff;font-weight:600}
+[data-theme="dark"] .prayer-toggle{background:rgba(10,132,255,.22);color:#4da3ff}
 .ck-yr-btn:active{ transform:scale(.88); transition-duration:.1s; }
 @media (prefers-reduced-motion: reduce){
   .card,.q-tile,.set-item,.pace-opt,.ob-row,.btn,.icon-btn,.cal-nav,.ps-cell,
@@ -3772,6 +3785,7 @@ function openWidgetLink(url){
       try{ const hd=currentHDate(); const chs=chaptersOf(portionFor(hd)); renderContinuous(chs,hd); }catch(e){ go('tehillim'); }
     } else if(kind==='calendar') go('calendar');
     else if(kind==='tracker') go('tracker');
+    else if(kind==='compass') go('kotelCompass');
     else if(kind==='shot') shotLink(url);
     else go('home');
   }catch(e){}
@@ -8620,7 +8634,7 @@ function prayerBlock(which){
   return `<div class="prayer collapsed" data-prayer>
     <div class="prayer-title">${ckChrome(pr.title)}</div>
     <div class="pbody notranslate">${body}</div>
-    <div class="prayer-toggle" data-ptoggle>${I.chev}<span>הַצֵּג / הַסְתֵּר</span></div>
+    <div class="prayer-toggle" data-ptoggle>${I.chev}<span>${(S.lang&&S.lang!=='he')?ckChrome('הצג / הסתר'):'הַצֵּג / הַסְתֵּר'}</span></div>
   </div>`;
 }
 function langText(ch){
@@ -8662,7 +8676,7 @@ function renderContinuous(chs,hd){
   forceScrollTop();
   wireToolsFab();
   app.querySelectorAll('[data-prayer]').forEach(pb=>{
-    pb.querySelector('[data-ptoggle]').onclick=()=>pb.classList.toggle('collapsed');
+    pb.onclick=()=>pb.classList.toggle('collapsed');   // the whole card is the button
   });
   document.getElementById('flowDone').onclick=()=>{ haptic(); stopAutoScroll(); chs.forEach(markRead); go('home'); celebrate(chs.includes(150)?'grand':'daily'); };
   tr(app);
@@ -8755,7 +8769,7 @@ function wireReader(){
   const fv=document.getElementById('rFav'); if(fv) fv.onclick=()=>{ toggleFav(RD.chapters[RD.idx]); const on=isFav(RD.chapters[RD.idx]); fv.classList.toggle('fav-on',on); fv.innerHTML=on?I.bookmarkOn:I.bookmark; toast(on?'נוֹסַף לַמּוּעֲדָפִים':'הוּסַר מֵהַמּוּעֲדָפִים'); };
   // prayer toggles
   app.querySelectorAll('[data-prayer]').forEach(pb=>{
-    pb.querySelector('[data-ptoggle]').onclick=()=>pb.classList.toggle('collapsed');
+    pb.onclick=()=>pb.classList.toggle('collapsed');   // the whole card is the button
   });
   const prev=document.getElementById('rPrev'); if(prev) prev.onclick=()=>{ if(RD.idx>0){ CK_NAV_DIR=-1; RD.idx--; renderReader(); forceScrollTop(); } };
   const next=document.getElementById('rNext'); if(next) next.onclick=()=>{
@@ -11101,8 +11115,9 @@ function readerHeadAuto(){
   hd.dataset.rhAuto='1';
   const useChips=chips.length>0;
   /* aliyot chips -> picker; if the reader also has its own select (Torah: parasha) that row stays visible under the header */
-  if(useChips && sel){ Array.from(col.children).forEach(ch=>{ if(!ch.contains(sel)) ch.classList.add('rh-hide'); }); }
-  else col.classList.add('rh-gone');
+  const secondary=(useChips && sel)?sel:null;   // Torah: aliyot are the primary picker, the parasha select becomes a second one
+  if(secondary && !NATIVE_TOPBAR){ Array.from(col.children).forEach(ch=>{ if(!ch.contains(sel)) ch.classList.add('rh-hide'); }); }
+  else { col.classList.add('rh-gone'); hd.classList.add('rh-empty'); }   // rh-empty: on iOS the whole sticky head (a bare coloured strip) disappears
   hd.classList.add('rh-auto');
   const list=()=>{
     if(useChips) return Array.from(hd.querySelectorAll('.sm-aliyah-chip[data-n]')).map(c=>{
@@ -11131,17 +11146,15 @@ function readerHeadAuto(){
   try{
     const B=RH_BASE, L=list(), cur=L.find(o=>o.on);
     const base=String((B.opts&&B.opts.title!=null)?B.opts.title:(B.title||'')).replace(/<[^>]*>/g,'');
-    syncNativeTopBar(B.title,B.backTo,{
-      title:(base?base+' · ':'')+(cur?cur.label:''),
-      actions:[{id:'rhPick',icon:'list.number',label:ckChrome('בְּחִירָה')}],
-      handlers:{rhPick:()=>{
-        const NM=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeModal;
-        if(!NM||!NM.presentActionSheet) return;
-        const L2=list();
-        NM.presentActionSheet({title:base,actions:L2.map(o=>({id:String(o.id),title:o.label})),cancelTitle:ckChrome('בִּטּוּל')})
-          .then(r=>{ if(r&&r.id!=null) pick(r.id); }).catch(()=>{});
-      }}
-    });
+    /* real native menus (UIMenu: system / Liquid Glass, scrolls) on the round header buttons - not an action sheet */
+    const actions=[{id:'rhPick',icon:'list.number',label:ckChrome('בְּחִירָה'),menu:L.map(o=>({id:String(o.id),title:o.label,on:!!o.on}))}];
+    const menuHandlers={rhPick:id=>pick(id)};
+    if(secondary){
+      actions.push({id:'rhPick2',icon:'books.vertical',label:ckChrome('פָּרָשָׁה'),
+        menu:Array.from(secondary.options).map((o,i)=>({id:o.value,title:o.textContent.trim(),on:i===secondary.selectedIndex}))});
+      menuHandlers.rhPick2=id=>{ const s2=hd.querySelector('.bic-collapse select.fld-select')||document.querySelector('.reader-head select.fld-select'); const t=s2||secondary; t.value=id; t.dispatchEvent(new Event('change')); };
+    }
+    syncNativeTopBar(B.title,B.backTo,{ title:(base?base+' · ':'')+(cur?cur.label:''), actions, handlers:{}, menuHandlers });
   } finally { RH_INTERNAL=false; }
 }
 function renderLibraryNKReader(){
@@ -15084,12 +15097,14 @@ let TOPBAR_BACK_ACTION = null;
    call that passes `actions` also passes the handlers for exactly those
    ids, and old handlers are discarded on the next call (no stacking). */
 let TOPBAR_ACTION_HANDLERS = {};
+let TOPBAR_MENU_HANDLERS = {};
 function syncNativeTopBar(title, backTo, opts){
   if(!NATIVE_TOPBAR) return;
   opts = opts || {};
   if(!RH_INTERNAL){ RH_BASE={title,backTo,opts}; RH_COMPACT=false; }
   TOPBAR_BACK_ACTION = (typeof backTo==='function') ? backTo : (backTo ? ()=>go(backTo) : null);
   TOPBAR_ACTION_HANDLERS = opts.handlers || {};
+  TOPBAR_MENU_HANDLERS = opts.menuHandlers || {};
   try{
     window.Capacitor.Plugins.NativeTopBar.configure({
       // Top-level tab screens (no back action) show no title: the tab bar
@@ -15117,11 +15132,13 @@ function hideNativeTopBar(){
   if(!NATIVE_TOPBAR) return;
   TOPBAR_BACK_ACTION = null;
   TOPBAR_ACTION_HANDLERS = {};
+  TOPBAR_MENU_HANDLERS = {};
   try{ window.Capacitor.Plugins.NativeTopBar.hide().catch(()=>{}); }catch(e){}
 }
 window.NativeTopBarHost = {
   onBack(){ if(SEARCH_NAV && TAB===SEARCH_RESULT_TAB && TAB!=='search'){ SEARCH_RESULT_TAB=''; go('search'); return; } if(TOPBAR_BACK_ACTION) TOPBAR_BACK_ACTION(); },
   onAction(id){ const h=TOPBAR_ACTION_HANDLERS[id]; if(h) h(); },
+  onMenu(actionId,itemId){ const h=TOPBAR_MENU_HANDLERS[actionId]; if(h) h(itemId); },
 };
 applySettings();
 applyWakeLock();
@@ -15480,7 +15497,7 @@ window.shareQR = shareQR;
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
   import { getFirestore, initializeFirestore, doc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getDatabase, ref, push, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getDatabase, forceLongPolling, ref, push, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
   import { getMessaging, getToken, deleteToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
   const firebaseConfig = {
     apiKey: "AIzaSyC-_4GaF_IMR_Xy5d6LEFAT_1lvygCcfRQ",
@@ -15563,6 +15580,8 @@ window.shareQR = shareQR;
 
   // Live "currently online" presence (Realtime Database)
   try {
+    /* WebSockets are unreliable inside the native WebViews (the live counter never moved on TestFlight/Play builds): long polling there. */
+    if(IS_NATIVE_SHELL){ try{ forceLongPolling(); }catch(e){} }
     const rtdb = getDatabase(firebaseApp);
     const presenceListRef = ref(rtdb, 'presence');
     window.__paintLiveCount = function(){
@@ -15620,7 +15639,9 @@ window.shareQR = shareQR;
       }
     }
     onValue(ref(rtdb, '.info/serverTimeOffset'), (snap) => { srvOffset = Number(snap.val()) || 0; });
+    let gotPresSnap = false;
     onValue(presenceListRef, (snap) => {
+      gotPresSnap = true;
       try { presVal = snap.val() || {}; }
       catch (err){ console.error('[betel presence] could not read snapshot:', err); presVal = {}; }
       recount();
@@ -15645,6 +15666,25 @@ window.shareQR = shareQR;
       if(IS_DEV_BUILD || !connected) return;
       if(document.hidden) set(myRef, null).catch(() => {});
       else beat();
+    });
+    /* REST safety net: if the realtime connection never delivers (no live snapshot / never "connected"), read and write the same
+       presence node over plain HTTPS so the live counter works anyway (heartbeat PUT, list GET, removal when backgrounded). */
+    const RTDB_REST = firebaseConfig.databaseURL + '/presence';
+    const restPoll = async () => {
+      if(gotPresSnap) return;
+      try{ const r = await fetch(RTDB_REST + '.json', { cache: 'no-store' }); if(r.ok){ presVal = (await r.json()) || {}; recount(); cleanup(); } }catch(e){}
+    };
+    const restBeat = async () => {
+      if(IS_DEV_BUILD || connected || document.hidden || navigator.onLine === false) return;
+      try{ await fetch(RTDB_REST + '/' + presId + '.json', { method: 'PUT', body: JSON.stringify({ t: Date.now() }) }); }catch(e){}
+    };
+    setTimeout(() => { restPoll(); restBeat(); }, 4000);
+    setInterval(restPoll, 20000);
+    setInterval(restBeat, PRES_BEAT);
+    document.addEventListener('visibilitychange', () => {
+      if(IS_DEV_BUILD || connected) return;
+      if(document.hidden){ try{ fetch(RTDB_REST + '/' + presId + '.json', { method: 'DELETE', keepalive: true }); }catch(e){} }
+      else restBeat();
     });
   } catch (e) {}
 

@@ -41,7 +41,18 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
                   let id = dict["id"] as? String, let icon = dict["icon"] as? String else { return nil }
             return (id, icon, dict["label"] as? String ?? "")
         }
+        // Optional native menu per action (`menu: [{id,title,on}]`): the round button then opens a real UIMenu (system / Liquid
+        // Glass on iOS 26, scrolls for long lists) instead of sending a tap to JS - used by the readers' chapter/aliyah pickers.
+        var menus: [String: [(id: String, title: String, on: Bool)]] = [:]
+        for case let dict as [String: Any] in actionsRaw {
+            guard let aid = dict["id"] as? String, let items = dict["menu"] as? [[String: Any]] else { continue }
+            menus[aid] = items.compactMap {
+                guard let iid = $0["id"] as? String, let t = $0["title"] as? String else { return nil }
+                return (iid, t, ($0["on"] as? Bool) ?? false)
+            }
+        }
         DispatchQueue.main.async {
+            NativeTopBarView.menus = menus
             NativeTopBarBridge.activeController?.configureTopBar(
                 title: title, hasBack: !backTo.isEmpty, isRTL: isRTL, isDark: isDark,
                 homeLabel: homeLabel, settingsLabel: settingsLabel, shareLabel: shareLabel,
