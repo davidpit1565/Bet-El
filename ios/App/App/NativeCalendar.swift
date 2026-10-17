@@ -510,6 +510,8 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
     }
 
     func scrollToTop() { scrollView.setContentOffset(CGPoint(x: 0, y: -scrollView.adjustedContentInset.top), animated: true) }
+    /// Leaving the Calendar tab and coming back must always start at the top (no animation).
+    func resetScrollInstantly() { scrollView.setContentOffset(CGPoint(x: 0, y: -scrollView.adjustedContentInset.top), animated: false) }
 
     // MARK: Styling helpers
 

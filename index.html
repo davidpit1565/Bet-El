@@ -379,6 +379,8 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .reader-head .rt-pick{display:none;flex:1;min-width:0;max-width:260px;margin:0 auto}
 .reader-head.compact .reader-title{display:none}
 .reader-head.compact .rt-pick{display:block}
+.reader-head.rh-auto .bic-collapse.rh-gone{display:none}
+.reader-head.rh-auto .bic-collapse .rh-hide{display:none}
 .reader-progress{height:3px;background:var(--line);border-radius:3px;margin-top:10px;overflow:hidden}
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
 .zh-pdf-embed{margin:12px 0 0}
@@ -3045,6 +3047,7 @@ function applyReadingPrefs(root){
 function tr(node){
   a11yIcons(node);
   applyReadingPrefs(node);
+  if(node===app) setTimeout(()=>{ try{ readerHeadAuto(); }catch(e){} },0);   // after the translation pass below, so the picker's labels are in the app language
   if(S.lang==='he') return;
   const dict=I18N[S.lang]; if(!dict) return;
   const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
@@ -6147,6 +6150,16 @@ function ckParshiotOf(book){
   if(!CHOK) return [];
   return CHOK.parshiot.filter(k=>ckBookOf(k)===book);
 }
+/* Home tile: today's Chok LeYisrael line; on Shabbat (no portion of its own) the coming Sunday's, shown until it becomes "today". */
+function ckHomeLine(){
+  if(!CHOK) return null;
+  const t=ckTodayLine(); if(t) return t;
+  try{
+    const nx=chokSlotFor(addDays(chokDayDate(),1));
+    if(nx) return {key:nx.key, day:nx.day, text:'פרשת '+parshaName(nx.key)+' · '+chokRowLabel(nx.day,nx.dayIdx), next:true};
+  }catch(e){}
+  return null;
+}
 function ckTodayLine(){
   const slot=chokSlotFor();
   if(!slot) return null;
@@ -8164,13 +8177,16 @@ function renderHome(){
       </div>`;
     })(),
     dedication:()=>dedHTML(''),
+    /* Chok LeYisrael is the most important tile, so it is ALWAYS on the home: on Shabbat (no portion of its own) and while its
+       data is still loading it shows this week's parasha and opens the week list instead of disappearing. */
     chok:(sz)=>{
-      if(!CHOK) return '';
-      const t=ckTodayLine(); if(!t) return '';
-      const done = chokIsDone(t.key,t.day);
+      const t=ckHomeLine();
+      const done = t ? chokIsDone(t.key,t.day) : false;
+      let sub = t ? t.text : '';
+      if(!t && CHOK){ const wk=ckWeekKeyFor(chokDayDate()); if(wk) sub='פרשת '+parshaName(wk); }
       return `<div class="q-tile${TC(sz)}${done?' done':''}" data-cat="chok" id="homeChokCard">
         <div class="qt">${heTitle('חוק לישראל','חוֹק לְיִשְׂרָאֵל')}</div>
-        <div class="qd">${t.text}</div>
+        <div class="qd">${sub}</div>
       </div>`;
     },
     tehillim:(sz)=>`<div class="q-tile${TC(sz)}${tehDoneToday?' done':''}" data-cat="tehillim" id="homeTehillimCard">
@@ -8179,9 +8195,7 @@ function renderHome(){
         ${sz==='l'?`<div class="qd">${readCount} / ${chs.length} ${ckChrome('נקראו')}</div>`:''}
       </div>`,
     zohar:(sz)=>{
-      const t=ckTodayLine(); if(!t) return '';
-      const done = chokIsDone(t.key,t.day);
-      return `<div class="q-tile${TC(sz)}${done?' done':''}" data-cat="zohar" id="homeZoharCard">
+      return `<div class="q-tile${TC(sz)}" data-cat="zohar" id="homeZoharCard">
         <div class="qt">${heTitle('זהר היומי','זֹהַר הַיּוֹמִי')}</div>
         <div class="qd">לפי סדר עמוד ליום</div>
       </div>`;
@@ -8260,7 +8274,7 @@ function renderHome(){
 
   // what tapping each item does
   const openers={
-    chok:()=>{ const t=ckTodayLine(); if(t) openChok(t.key,t.day,null); },
+    chok:()=>{ const t=ckHomeLine(); if(t) openChok(t.key,t.day,null); else { CK={key:null,day:null,sec:0,year:null}; go('chokList'); } },
     tehillim:()=>renderContinuous(chs,hd),
     zohar:()=>openZoharYomi(),
     shnayim:()=>openShnayim(weekParshaKey),
@@ -8286,7 +8300,7 @@ function renderHome(){
   if(hud) hud.onclick=(e)=>{ e.stopPropagation(); dismissAppUpdate(); };
   if(document.getElementById('homeBicCard') && !BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
   if(document.getElementById('homeTikkuneiCard') && !ZOHAR) ensureZoharData().then(()=>{ if(TAB==='home') render(); });
-  /* homeChokCard is legitimately absent whenever ckTodayLine() has nothing
+  /* (the tile itself is now always rendered; this note is about the data load below) It used to be absent whenever ckTodayLine() had nothing
      for today (Shabbat, chokSlotFor's own weekday check, etc.) - not only
      while CHOK is still loading. Only retry the fetch itself if the data
      truly hasn't arrived: retrying on the DOM element alone re-ran this
@@ -11037,6 +11051,7 @@ let RH_BASE=null, RH_COMPACT=false, RH_INTERNAL=false;
 function readerHeadCompact(hide){
   if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
   const hd=document.querySelector('.reader-head'); if(!hd) return;
+  if(hd.dataset.rhAuto) return;   // permanent picker (readerHeadAuto) - nothing to do on scroll
   const sel=hd.querySelector('.bic-collapse select.fld-select'); if(!sel) return;
   if(!NATIVE_TOPBAR){
     if(hd.classList.contains('compact')===hide) return;
@@ -11065,6 +11080,66 @@ function readerHeadCompact(hide){
         if(!NM||!NM.presentActionSheet||!s) return;
         NM.presentActionSheet({title:base,actions:Array.from(s.options).map(o=>({id:o.value,title:o.textContent.trim()})),cancelTitle:ckChrome('בִּטּוּל')})
           .then(r=>{ const s2=document.querySelector('.reader-head .bic-collapse select.fld-select'); if(r&&r.id!=null&&s2){ s2.value=r.id; s2.dispatchEvent(new Event('change')); } }).catch(()=>{});
+      }}
+    });
+  } finally { RH_INTERNAL=false; }
+}
+
+/* PERMANENT picker in the small header (user request): in every book reader except Chok LeYisrael / Ben Ish Chai the chapter /
+   daf / aliyah / haftarah picker no longer sits in a row under the header - the title slot IS the picker (web/PWA/Android),
+   and on iOS the native header shows "book · choice" with a round list button that opens the system sheet. Sources: the
+   aliyot chips (Torah, Shnayim Mikra: "aliyah א ... haftarah") or the reader's own <select> (chapter, daf, part...).
+   Readers whose lower block also carries a "back to today" button keep the old layout. Runs once per rendered header. */
+function readerHeadAuto(){
+  if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
+  const hd=document.querySelector('.reader-head'); if(!hd || hd.dataset.rhAuto) return;
+  const col=hd.querySelector('.bic-collapse'); if(!col) return;
+  if(col.querySelector('.ck-track-btn')) return;
+  const chips=Array.from(col.querySelectorAll('.sm-aliyah-chip[data-n]'));
+  const sel=col.querySelector('select.fld-select');
+  if(!chips.length && !sel) return;
+  hd.dataset.rhAuto='1';
+  const useChips=chips.length>0;
+  /* aliyot chips -> picker; if the reader also has its own select (Torah: parasha) that row stays visible under the header */
+  if(useChips && sel){ Array.from(col.children).forEach(ch=>{ if(!ch.contains(sel)) ch.classList.add('rh-hide'); }); }
+  else col.classList.add('rh-gone');
+  hd.classList.add('rh-auto');
+  const list=()=>{
+    if(useChips) return Array.from(hd.querySelectorAll('.sm-aliyah-chip[data-n]')).map(c=>{
+      const num=c.dataset.n!=='haft', d=(S.lang!=='he'&&I18N[S.lang])||null, tl=k=>(d&&d[k]!=null)?d[k]:k;   // nikud-free dictionary keys ('עלייה ', 'הפטרה')
+      return {id:c.dataset.n, label:num?(tl('עלייה ')+c.textContent.trim()):(S.lang==='he'?c.textContent.trim():tl('הפטרה')), on:c.classList.contains('on')};
+    });
+    const s=hd.querySelector('.bic-collapse select.fld-select');
+    return s?Array.from(s.options).map((o,i)=>({id:o.value,label:o.textContent.trim(),on:i===s.selectedIndex})):[];
+  };
+  const pick=id=>{
+    if(useChips){ const c=hd.querySelector('.sm-aliyah-chip[data-n="'+id+'"]'); if(c) c.click(); return; }
+    const s=hd.querySelector('.bic-collapse select.fld-select'); if(s){ s.value=id; s.dispatchEvent(new Event('change')); }
+  };
+  if(!NATIVE_TOPBAR){
+    const t=hd.querySelector('.reader-title'); if(!t) return;
+    let pk=hd.querySelector('.rt-pick');
+    if(!pk){ pk=document.createElement('select'); pk.className='fld-select rt-pick'; t.after(pk); }
+    const L=list();
+    pk.innerHTML=L.map(o=>'<option value="'+o.id+'"'+(o.on?' selected':'')+'>'+o.label+'</option>').join('');
+    pk.onchange=()=>pick(pk.value);
+    hd.classList.add('compact');
+    return;
+  }
+  if(!RH_BASE) return;
+  RH_COMPACT=true; RH_INTERNAL=true;
+  try{
+    const B=RH_BASE, L=list(), cur=L.find(o=>o.on);
+    const base=String((B.opts&&B.opts.title!=null)?B.opts.title:(B.title||'')).replace(/<[^>]*>/g,'');
+    syncNativeTopBar(B.title,B.backTo,{
+      title:(base?base+' · ':'')+(cur?cur.label:''),
+      actions:[{id:'rhPick',icon:'list.number',label:ckChrome('בְּחִירָה')}],
+      handlers:{rhPick:()=>{
+        const NM=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.NativeModal;
+        if(!NM||!NM.presentActionSheet) return;
+        const L2=list();
+        NM.presentActionSheet({title:base,actions:L2.map(o=>({id:String(o.id),title:o.label})),cancelTitle:ckChrome('בִּטּוּל')})
+          .then(r=>{ if(r&&r.id!=null) pick(r.id); }).catch(()=>{});
       }}
     });
   } finally { RH_INTERNAL=false; }
@@ -13408,14 +13483,17 @@ const MirrorGuide={
     const models='https://storage.googleapis.com/mediapipe-models/';
     this.loading=import(base+'/vision_bundle.mjs').then(async vision=>{
       const files=await vision.FilesetResolver.forVisionTasks(base+'/wasm');
+      const withTimeout=(pr,ms)=>Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
       const make=async(Cls, path, extra)=>{
         const o=d=>Object.assign({baseOptions:{modelAssetPath:models+path,delegate:d},runningMode:'VIDEO'},extra);
-        try{ return await Cls.createFromOptions(files,o('GPU')); }catch(e){ return await Cls.createFromOptions(files,o('CPU')); }
+        // the GPU delegate can hang for a long time inside a WebView: give it a few seconds, then use the CPU
+        try{ return await withTimeout(Cls.createFromOptions(files,o('GPU')),6000); }catch(e){ return await Cls.createFromOptions(files,o('CPU')); }
       };
+      // The face model is all the guide needs to start; the (bigger) hair segmenter loads in the background and is picked
+      // up by the loop as soon as it is ready. If it fails, the guide falls back to the skin-color hairline.
       this.landmarker=await make(vision.FaceLandmarker,'face_landmarker/face_landmarker/float16/1/face_landmarker.task',{numFaces:1});
-      // Hair segmentation is a big accuracy win but not essential - if it
-      // fails to load, the guide falls back to the skin-color hairline.
-      try{ this.segmenter=await make(vision.ImageSegmenter,'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite',{outputCategoryMask:true,outputConfidenceMasks:false}); }catch(e){ this.segmenter=null; }
+      make(vision.ImageSegmenter,'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite',{outputCategoryMask:true,outputConfidenceMasks:false})
+        .then(sg=>{ this.segmenter=sg; }).catch(()=>{ this.segmenter=null; });
     }).catch(e=>{ this.loading=null; throw e; });
     return this.loading;
   },
@@ -13472,18 +13550,19 @@ const MirrorGuide={
     this.video=video; this.smooth=null;
     if(this.running) return;
     this.running=true;
+    const id=this.runId=(this.runId||0)+1;   // toggling the guide off/on while the models load used to start two loops at once
     this.hint(ckChrome('טוען מדריך…'));
-    this.load().then(()=>{ if(this.running) this.loop(); })
-      .catch(()=>{ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); });
+    this.load().then(()=>{ if(this.running && this.runId===id) this.loop(id); })
+      .catch(()=>{ if(this.runId===id){ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); } });
   },
   stop(){
-    this.running=false; this.video=null;
+    this.running=false; this.video=null; this.runId=(this.runId||0)+1;
     const c=document.getElementById('mirrorGuide');
     if(c) c.getContext('2d').clearRect(0,0,c.width,c.height);
     this.hint('');
   },
-  loop(){
-    if(!this.running || TAB!=='tefillinMirror') { this.running=false; return; }
+  loop(id){
+    if(!this.running || this.runId!==id || TAB!=='tefillinMirror') { if(this.runId===id) this.running=false; return; }
     const v=this.video;
     if(v && v.readyState>=2 && v.videoWidth){
       const now=performance.now();
@@ -13502,7 +13581,7 @@ const MirrorGuide={
         }catch(e){}
       }
     }
-    requestAnimationFrame(()=>this.loop());
+    requestAnimationFrame(()=>this.loop(id));
   },
   analyze(v, lm){
     const canvas=document.getElementById('mirrorGuide'); if(!canvas) return;
@@ -13728,6 +13807,7 @@ function renderTefillinMirror(){
     if(TAB!=='tefillinMirror'){ stream.getTracks().forEach(t=>t.stop()); return; }
     TEFILLIN_STREAM=stream;
     video.srcObject=stream;
+    try{ const pp=video.play(); if(pp&&pp.catch) pp.catch(()=>{}); }catch(_){}
     if(MirrorGuide.enabled) MirrorGuide.start(video);
   }).catch(()=>{
     if(TAB==='tefillinMirror') note.textContent=ckChrome('לא ניתנה הרשאה למצלמה');
@@ -14428,6 +14508,9 @@ async function shareGeneratedImage(genFn, filename, shareText){
 }
 
 /* ================= CELEBRATION ================= */
+/* The in-app "well done" pop-ups (finished Tehillim, milestone...) use the original HTML card (gold crown, confetti, sparkles) -
+   the user prefers it to the plain system modal. NativeModal.presentCelebration still exists; flip to true to use it again. */
+const CELEBRATE_NATIVE=false;
 function celebrate(kind, subject){
   haptic(25);
   const grand = kind==='grand';
@@ -14445,7 +14528,7 @@ function celebrate(kind, subject){
   const prP = pr ? ckChrome(pr.p).replace('{subj}', ckChrome(subject||'הַתְּהִלִּים')) : '';
   const grandTitle = ckChrome('חֲזַק חֲזַק וְנִתְחַזֵּק');
   const grandBody = ckChrome('סִיַּמְתָּ אֶת כָּל סֵפֶר הַתְּהִלִּים לְחֹדֶשׁ זֶה!<br>תְּהִי מִשְׁנָתְךָ לְעִלּוּי וּלְבְרָכָה.');
-  if(NATIVE_MODAL){
+  if(CELEBRATE_NATIVE && NATIVE_MODAL){
     try{
       const nativeTitle = special ? `✦✦ ${prT} ✦✦` : (grand?grandTitle:prT);
       const nativeBody = (grand?grandBody:prP).replace(/<br\s*\/?>/g,'\n');
@@ -14524,7 +14607,7 @@ function celebrateMilestone(count, tier){
   if(notifReady()) fireNotif(title,body,ckNotifDir(),S.lang||'he');
   try{
     haptic(25);
-    if(NATIVE_MODAL){
+    if(CELEBRATE_NATIVE && NATIVE_MODAL){
       /* real iOS component (NativeModalView), not a web look-alike */
       window.Capacitor.Plugins.NativeModal.presentCelebration({
         title, body, buttonText:'♥ '+(t.btn||'OK'), iconSymbol:'star.fill', isRTL:document.documentElement.dir!=='ltr',
@@ -15396,7 +15479,7 @@ window.shareQR = shareQR;
 <script type="module" async>
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-  import { getFirestore, doc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, initializeFirestore, doc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getDatabase, ref, push, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
   import { getMessaging, getToken, deleteToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
   const firebaseConfig = {
@@ -15428,7 +15511,12 @@ window.shareQR = shareQR;
   if(!IS_DEV_BUILD) getAnalytics(firebaseApp);
 
   // Public visit counter (Firestore stats/visits), shown on the home page
-  const db = getFirestore(firebaseApp);
+  /* Inside the native shells (WKWebView on capacitor://localhost, Android WebView on https://localhost) Firestore's streaming
+     transport often never connects, so the counter stayed at 0 on every TestFlight/Play build while the web worked.
+     Auto-detect + fall back to long polling there, and below also read the number once over plain REST as a safety net. */
+  let db;
+  try{ db = initializeFirestore(firebaseApp, { experimentalAutoDetectLongPolling: true }); }
+  catch(e){ db = getFirestore(firebaseApp); }
   const visitsRef = doc(db, "stats", "visits");
   // Feedback fallback when the email Cloud Function isn't reachable: store it in Firestore "feedback"
   window.__betelSaveFeedback = (d) => setDoc(doc(db, 'feedback', Date.now()+'-'+Math.random().toString(36).slice(2,8)), { ...d, ua: navigator.userAgent, lang: navigator.language, createdAt: Date.now() });
@@ -15439,13 +15527,29 @@ window.shareQR = shareQR;
     window.animateCountUp(el, lastPaintedVisitCount || 0, lastVisitCount);
     lastPaintedVisitCount = lastVisitCount;
   };
+  let gotLiveSnapshot = false;
+  const applyVisitCount = (n) => {
+    if(typeof n !== 'number' || !(n >= 0)) return;
+    try{ window.ckMilestoneCheck(n); }catch(e){}
+    lastVisitCount = n; window.__paintVisitCount();
+  };
   onSnapshot(visitsRef, (snap) => {
-    if(snap.exists()){
-      const newCount = snap.data().count || 0;
-      try{ window.ckMilestoneCheck(newCount); }catch(e){}
-      lastVisitCount = newCount; window.__paintVisitCount();
-    }
+    if(snap.exists()){ gotLiveSnapshot = true; applyVisitCount(snap.data().count || 0); }
   }, () => {});
+  /* REST safety net: if no live snapshot has arrived a few seconds in (blocked/failed streaming transport), read the same
+     public document over plain fetch and keep refreshing it every minute until a live snapshot does arrive. */
+  const restVisits = async () => {
+    if(gotLiveSnapshot) return;
+    try{
+      const r = await fetch('https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents/stats/visits?key=' + firebaseConfig.apiKey, { cache: 'no-store' });
+      if(!r.ok) return;
+      const j = await r.json();
+      const n = Number(j && j.fields && j.fields.count && j.fields.count.integerValue);
+      if(!gotLiveSnapshot) applyVisitCount(n);
+    }catch(e){}
+  };
+  setTimeout(restVisits, 2500);
+  setInterval(restVisits, 60000);
   (async () => {
     if(IS_DEV_BUILD) return;
     if(localStorage.getItem('betel_visit_counted')) return;

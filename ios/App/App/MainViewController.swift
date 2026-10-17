@@ -739,8 +739,10 @@ class MainViewController: CAPBridgeViewController {
         c.rtl = rtl; c.isDark = isDark; c.lang = lang; c.ymd = ymd; c.civil = civil
         c.hebrewLabel = hebrew; c.civilLabel = civilLabel; c.jumpLabel = jump
         c.todayLabel = today; c.okLabel = ok; c.shareLabel = share
+        let wasHidden = cal.isHidden
         cal.isHidden = false
         cal.show(c)
+        if wasHidden { cal.layoutIfNeeded(); cal.resetScrollInstantly() }   // reopening the tab always starts at the top
     }
 
     func hideNativeCalendar() {

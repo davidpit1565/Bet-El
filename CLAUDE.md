@@ -593,3 +593,13 @@ in English as usual.
   now have their own Search nav item (`['search','חיפוש']` in `buildNav`) and the Library page has no search box; iOS keeps the native search tab.
   Live-count milestone: BOTH an OS notification and an in-app celebration (native modal on iOS), 10-user window; the regression sweep presets
   `betel_milestone_last` so the modal never blocks it. iOS parts are not compile-verified.
+
+- **Permanent header picker + home rules (2026-10-17, build 25):** `readerHeadAuto()` (index.html, hooked from `tr(app)`) makes the small
+  header's title slot the reader's picker in EVERY book reader except Chok LeYisrael / Ben Ish Chai (chapter/daf/part `<select>`, or the aliyot
+  chips -> "Aliyah 1..7 / Haftarah"); on iOS the native header shows "book - choice" + a round list button (action sheet). It supersedes the
+  scroll-based `readerHeadCompact` for those headers (`dataset.rhAuto`). The home ALWAYS shows Chok LeYisrael (`ckHomeLine()`: on Shabbat it shows
+  the coming Sunday's line) and Zohar Yomi (date-based, independent of Chok); order: Chok, Tehillim, Zohar, Shnayim, prayer-now, Musar, Ben Ish Chai,
+  booklet. Celebration pop-ups (finished reading, milestone) use the original HTML card again (`CELEBRATE_NATIVE=false`). The visit counter reads
+  Firestore with long-polling auto-detect + a REST fallback (it stayed 0 in the native shells). The tefillin guide loads the face model first (hair
+  model in the background), has a GPU timeout -> CPU fallback, and a run token so toggling can't start two loops. Reopening the native Calendar tab
+  resets its scroll to the top.
