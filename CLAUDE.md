@@ -614,3 +614,7 @@ in English as usual.
 
 - **Build 28 notes:** reading text (`.sm-verses`, `.chapter`, `.prayer-reader-text`) sits on a rounded iOS-style card (`--rd-card`/`--rd-line`,
   flat tint, no blur). The compass widget also ships Lock Screen families (circular / rectangular / inline).
+
+- **Build 28 fixes (2026-10-18):** `BetElEntry` now carries `latitude`/`longitude` (set from the snapshot in `Provider.swift`) - the compass widget
+  failed to compile without them. Android: `MainActivity.java` pins the WebView `textZoom` to 100 (the system "Font size" used to blow the whole app
+  up on the Play tester's phone); `versionCode` 5. The offline-download pill sits below the header instead of on top of the logo.

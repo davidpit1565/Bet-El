@@ -97,6 +97,9 @@ struct BetElEntry: TimelineEntry {
     let omerDay: Int?
     /// Smart Stack: how much this entry deserves to be on top right now.
     var relevance: TimelineEntryRelevance? = nil
+    /// The user's saved location (from the app's snapshot) - the compass widget needs it for the bearing to Jerusalem.
+    var latitude: Double = 31.7780
+    var longitude: Double = 35.2354
 
     /// "א׳–ו׳" in Hebrew (letters, never digits), "1\u{2013}6" in every other language.
     var tehillimRangeText: String {
@@ -248,6 +251,8 @@ struct BetElProvider: TimelineProvider {
             zmanimToday: Self.zmanimRows(times, lang: lang),
             omerDay: snapshot.omerDay(for: hDate)
         )
+        entry.latitude = snapshot.latitude
+        entry.longitude = snapshot.longitude
         // Smart Stack: rise to the top around dawn, sunrise and sunset (30 min before .. 10 min after)
         if let z = times {
             for t in [z.dawn, z.sunrise, z.sunset] where date >= t.addingTimeInterval(-1800) && date < t.addingTimeInterval(600) {
