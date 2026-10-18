@@ -92,165 +92,27 @@ extension NHItem {
     }
 }
 
-/// Live sky behind the home greeting card (like Apple's Weather): a gradient per phase of day plus drifting
-/// clouds, stars, rain/snow and lightning chosen by the weather string the web layer sends ("night|rain").
-/// Flat layers only (no blur effects stacked); everything stops under Reduce Motion.
+/// Dark-theme hero background: a deep-blue gradient, a touch different from the page (user request).
 final class NHSkyView: UIView {
     private let grad = CAGradientLayer()
-    private let dim = CALayer()
-    private let orb = CAGradientLayer()
-    private let precip = CAEmitterLayer()
-    private let stars = CAEmitterLayer()
-    private var clouds: [CALayer] = []
-    private let flash = CALayer()
-    private var key = ""
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         isUserInteractionEnabled = false
+        grad.colors = [UIColor(red: 13 / 255, green: 18 / 255, blue: 51 / 255, alpha: 1).cgColor,
+                       UIColor(red: 27 / 255, green: 32 / 255, blue: 80 / 255, alpha: 1).cgColor,
+                       UIColor(red: 21 / 255, green: 26 / 255, blue: 68 / 255, alpha: 1).cgColor]
+        grad.locations = [0, 0.58, 1]
         layer.addSublayer(grad)
-        layer.addSublayer(stars)
-        orb.type = .radial
-        orb.startPoint = CGPoint(x: 0.5, y: 0.5)
-        orb.endPoint = CGPoint(x: 1, y: 1)
-        layer.addSublayer(orb)
-        layer.addSublayer(dim)
-        layer.addSublayer(precip)
-        flash.backgroundColor = UIColor.white.cgColor
-        flash.opacity = 0
-        layer.addSublayer(flash)
     }
     required init?(coder: NSCoder) { fatalError() }
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        grad.frame = bounds; dim.frame = bounds; flash.frame = bounds
-        stars.frame = bounds; stars.emitterSize = bounds.size; stars.emitterPosition = CGPoint(x: bounds.midX, y: bounds.midY)
-        precip.frame = bounds; precip.emitterSize = CGSize(width: bounds.width * 1.3, height: 1)
-        precip.emitterPosition = CGPoint(x: bounds.midX, y: -6)
-        let d = min(bounds.width, bounds.height) * 0.34
-        orb.bounds = CGRect(x: 0, y: 0, width: d * 2.4, height: d * 2.4)
+        grad.frame = bounds
     }
 
-    func apply(_ sky: String, rtl: Bool) {
-        guard sky != key || orb.position == .zero else { return }
-        key = sky
-        let parts = sky.split(separator: "|").map(String.init)
-        let phase = parts.first ?? "day", w = parts.count > 1 ? parts[1] : "clear"
-        func c(_ r: Int, _ g: Int, _ b: Int, _ a: CGFloat = 1) -> CGColor {
-            UIColor(red: CGFloat(r) / 255, green: CGFloat(g) / 255, blue: CGFloat(b) / 255, alpha: a).cgColor
-        }
-        switch phase {
-        case "dawn":  grad.colors = [c(58, 74, 142), c(224, 138, 120), c(255, 212, 154)]; grad.locations = [0, 0.7, 1]
-        case "dusk":  grad.colors = [c(42, 53, 120), c(192, 88, 124), c(255, 154, 88)]; grad.locations = [0, 0.7, 1]
-        case "night": grad.colors = [c(9, 12, 42), c(27, 32, 80), c(22, 26, 68)]; grad.locations = [0, 0.55, 1]
-        default:      grad.colors = [c(58, 143, 224), c(155, 208, 248)]; grad.locations = [0, 1]
-        }
-        let night = phase == "night"
-        switch w {
-        case "cloudy", "fog": dim.backgroundColor = night ? c(8, 12, 26, 0.55) : c(120, 130, 145, 0.55)
-        case "rain", "storm": dim.backgroundColor = night ? c(8, 12, 26, 0.6) : c(60, 70, 90, 0.62)
-        case "snow":          dim.backgroundColor = night ? c(8, 12, 26, 0.5) : c(170, 185, 205, 0.45)
-        default:              dim.backgroundColor = UIColor.clear.cgColor
-        }
-        // sun / moon (hidden when overcast)
-        let hideOrb = ["cloudy", "rain", "storm", "snow"].contains(w) || (night && w == "partly")
-        orb.isHidden = hideOrb
-        orb.opacity = w == "fog" ? 0.3 : 1
-        if night { orb.colors = [c(238, 242, 255), c(200, 215, 255, 0.35), c(200, 215, 255, 0)] }
-        else if phase == "day" { orb.colors = [c(255, 246, 200), c(255, 215, 90, 0.55), c(255, 215, 90, 0)] }
-        else { orb.colors = [c(255, 240, 192), c(255, 154, 80, 0.55), c(255, 154, 80, 0)] }
-        orb.locations = [0, 0.38, 1]
-        let ox: CGFloat = rtl ? 0.18 : 0.82   // opposite the logo side, like the web layer's inline-end
-        orb.position = CGPoint(x: bounds.width * ox, y: bounds.height * (phase == "day" || night ? 0.26 : 0.72))
-
-        // stars (night, open sky)
-        stars.emitterCells = nil
-        if night && (w == "clear" || w == "partly") {
-            let cell = CAEmitterCell()
-            cell.contents = NHSkyView.dot(2.4)
-            cell.birthRate = 16; cell.lifetime = 3; cell.lifetimeRange = 1.5
-            cell.alphaSpeed = -0.33; cell.alphaRange = 0.5; cell.scale = 0.7; cell.scaleRange = 0.6
-            stars.emitterShape = .rectangle
-            stars.emitterCells = [cell]
-        }
-
-        // rain / snow
-        precip.emitterCells = nil
-        if w == "rain" || w == "storm" {
-            let cell = CAEmitterCell()
-            cell.contents = NHSkyView.streak()
-            cell.birthRate = 110; cell.lifetime = 1.1
-            cell.velocity = 330; cell.velocityRange = 60
-            cell.emissionLongitude = .pi / 2 + 0.17
-            cell.alphaRange = 0.3; cell.scale = 0.9; cell.scaleRange = 0.3
-            precip.emitterShape = .line
-            precip.emitterCells = [cell]
-        } else if w == "snow" {
-            let cell = CAEmitterCell()
-            cell.contents = NHSkyView.dot(5)
-            cell.birthRate = 28; cell.lifetime = 5
-            cell.velocity = 34; cell.velocityRange = 14
-            cell.emissionLongitude = .pi / 2; cell.emissionRange = 0.4
-            cell.xAcceleration = 4
-            cell.scale = 0.7; cell.scaleRange = 0.5; cell.alphaRange = 0.3
-            precip.emitterShape = .line
-            precip.emitterCells = [cell]
-        }
-
-        // clouds
-        clouds.forEach { $0.removeFromSuperlayer() }
-        clouds = []
-        let n = ["partly": 2, "cloudy": 4, "rain": 4, "storm": 5, "snow": 4, "fog": 3][w] ?? 0
-        let tint: CGColor = w == "rain" || w == "storm" ? c(70, 80, 100, 0.85)
-            : night ? c(112, 114, 168, 0.4) : w == "fog" ? c(220, 225, 232, 0.7) : c(255, 255, 255, 0.8)
-        let W = max(bounds.width, 300), H = max(bounds.height, 150)
-        for i in 0..<n {
-            let l = CALayer()
-            let cw = W * (night ? 0.9 : 0.5), ch = H * (night ? 0.38 : w == "fog" ? 0.34 : 0.24)
-            l.bounds = CGRect(x: 0, y: 0, width: cw, height: ch)
-            l.cornerRadius = ch / 2
-            l.backgroundColor = tint
-            l.shadowColor = tint; l.shadowOpacity = 1; l.shadowRadius = night ? 24 : 14; l.shadowOffset = .zero
-            l.position = CGPoint(x: -cw, y: H * (night ? -0.06 + 0.21 * CGFloat(i) : 0.1 + 0.16 * CGFloat(i)) + ch / 2)
-            layer.insertSublayer(l, below: dim)
-            let a = CABasicAnimation(keyPath: "position.x")
-            a.fromValue = rtl ? W + cw : -cw
-            a.toValue = rtl ? -cw : W + cw
-            a.duration = (night ? 90 : 46) + (night ? 25 : 17) * Double(i)
-            a.timeOffset = 19 * Double(i)
-            a.repeatCount = .infinity
-            l.add(a, forKey: "drift")
-            clouds.append(l)
-        }
-
-        // lightning
-        flash.removeAllAnimations()
-        if w == "storm" {
-            let a = CAKeyframeAnimation(keyPath: "opacity")
-            a.values = [0, 0, 0.7, 0.05, 0.55, 0, 0]
-            a.keyTimes = [0, 0.9, 0.915, 0.93, 0.945, 0.96, 1]
-            a.duration = 7; a.repeatCount = .infinity
-            flash.add(a, forKey: "flash")
-        }
-        if UIAccessibility.isReduceMotionEnabled {
-            precip.birthRate = 0; stars.birthRate = 0
-            clouds.forEach { $0.removeAllAnimations() }
-            flash.removeAllAnimations()
-        } else { precip.birthRate = 1; stars.birthRate = 1 }
-    }
-
-    private static func dot(_ d: CGFloat) -> CGImage? {
-        UIGraphicsImageRenderer(size: CGSize(width: d, height: d)).image { _ in
-            UIColor.white.setFill(); UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: d, height: d)).fill()
-        }.cgImage
-    }
-    private static func streak() -> CGImage? {
-        UIGraphicsImageRenderer(size: CGSize(width: 2, height: 16)).image { _ in
-            UIColor(red: 0.84, green: 0.89, blue: 1, alpha: 0.75).setFill()
-            UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: 2, height: 16), cornerRadius: 1).fill()
-        }.cgImage
-    }
+    func apply(_ sky: String, rtl: Bool) {}
 }
 
 /// The small curved corner grip drawn like the one on an iPhone widget (no arrows).
@@ -523,7 +385,7 @@ final class NHCell: UICollectionViewCell {
                 iv.heightAnchor.constraint(equalToConstant: 118).isActive = true
                 stack.addArrangedSubview(iv)
             }
-            let sk = !it.sky.isEmpty
+            let sk = !it.sky.isEmpty   // dark theme: light text on the blue card
             let hGold = sk ? UIColor(red: 1, green: 0.88, blue: 0.54, alpha: 1) : gold
             let hSoft: UIColor = sk ? UIColor.white.withAlphaComponent(0.92) : .secondaryLabel
             var heroLabels: [UILabel] = []
@@ -532,7 +394,6 @@ final class NHCell: UICollectionViewCell {
             if let g = it.lines.first, !g.isEmpty { heroLabels.append(label(g, .footnote, .regular, hSoft, lines: 2, center: true)) }
             if it.lines.count > 1 { heroLabels.append(label("● " + it.lines[1], .footnote, .medium, hGold, lines: 2, center: true)) }
             for l in heroLabels {
-                if sk { l.layer.shadowColor = UIColor.black.cgColor; l.layer.shadowOpacity = 0.5; l.layer.shadowRadius = 4; l.layer.shadowOffset = .zero }
                 stack.addArrangedSubview(l)
             }
         case "banner":
