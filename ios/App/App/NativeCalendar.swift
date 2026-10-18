@@ -703,6 +703,12 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         }
     }
 
+    /// Hebrew letters (י"ח, ב'כ"ו) only for the Hebrew calendar; the Gregorian wheel must show plain numbers (18, 2026).
+    private func converterLocale(hebrew: Bool) -> Locale {
+        guard cfg.lang == "he" else { return Locale(identifier: cfg.lang) }
+        return Locale(identifier: hebrew ? "he_IL@numbers=hebr" : "he_IL@numbers=latn")
+    }
+
     private func presentConverter(_ L: [String: String]) {
         let vc = UIViewController()
         vc.view.backgroundColor = .systemBackground
@@ -717,7 +723,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .wheels
         picker.calendar = hebrewCal
-        picker.locale = calendarView.locale
+        picker.locale = converterLocale(hebrew: true)
         picker.date = selected
         let out = UILabel()
         out.numberOfLines = 0
@@ -750,6 +756,7 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
             guard let self = self, let picker = picker else { return }
             let keep = picker.date
             picker.calendar = seg.selectedSegmentIndex == 0 ? self.hebrewCal : self.gregorian
+            picker.locale = self.converterLocale(hebrew: seg.selectedSegmentIndex == 0)
             picker.date = keep
             update()
         }, for: .valueChanged)
