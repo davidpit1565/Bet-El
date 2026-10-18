@@ -887,6 +887,8 @@ a.set-item{text-decoration:none;color:inherit}
 #dataPrefetchBar .dpb-t{position:absolute;top:calc(var(--native-header-h, calc(env(safe-area-inset-top,0px) + 56px)) + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:600;color:#fff;background:rgba(20,26,48,.82);border:1px solid rgba(212,175,95,.5);padding:5px 12px 6px;border-radius:14px;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:190px}
 #dataPrefetchBar .dpb-b{display:block;height:3px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
 #dataPrefetchBar .dpb-b i{display:block;height:100%;width:0;background:#d4af5f;border-radius:3px;transition:width .3s ease}
+/* Android/web have no native header: the pill used to sit on top of the hero card. Park it just above the bottom nav, smaller. */
+html:not(.has-native-topbar) #dataPrefetchBar .dpb-t{position:fixed;top:auto;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom));font-size:10.5px;min-width:0;padding:4px 10px 5px;gap:4px;opacity:.9}
 
 .hidden{display:none!important}
 
