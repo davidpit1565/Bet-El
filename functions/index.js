@@ -103,7 +103,7 @@ const langOf = (t) => {
 /** Sends {he,en,fr,ru,ka}-> {title, body} texts to every stored token, grouped by language. */
 async function broadcast(texts, data) {
   const db = admin.firestore();
-  const snap = await db.collection("pushTokens").get();
+  const snap = await db.collection("pushTokens").select("lang").get();
   const groups = {};
   snap.forEach((d) => {
     const lang = langOf(d.data());
@@ -120,18 +120,22 @@ async function broadcast(texts, data) {
         tokens: chunk,
         notification: { title: text.title, body: text.body },
         data: data || {},
-        apns: { payload: { aps: { sound: "default" } } },
+        apns: { headers: { "apns-priority": "10" }, payload: { aps: { sound: "default" } } },
+        webpush: { headers: { TTL: "86400" } },
       });
       res.responses.forEach((r, idx) => {
         if (r.success) { sent++; return; }
         failed++;
         const code = r.error && r.error.code;
-        if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") dead.push(chunk[idx]);
+        const msg = (r.error && r.error.message) || "";
+        if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token" ||
+            (code === "messaging/invalid-argument" && /registration token/i.test(msg))) dead.push(chunk[idx]);
       });
     }
   }
-  await Promise.all(dead.map((t) => db.collection("pushTokens").doc(t).delete().catch(() => {})));
-  logger.info("broadcast done", { sent, failed, removedDead: dead.length, tokens: snap.size });
+  // circuit breaker: if NOTHING was delivered the cause is probably our payload/credentials, not dead tokens - delete nothing
+  if (sent > 0) await Promise.all(dead.map((t) => db.collection("pushTokens").doc(t).delete().catch(() => {})));
+  logger.info("broadcast done", { sent, failed, removedDead: sent > 0 ? dead.length : 0, tokens: snap.size });
   return { sent, failed };
 }
 
@@ -147,23 +151,32 @@ const MILESTONE_TEXT = {
  * Fires when the public user counter (stats/visits.count) crosses a multiple of 100 (300, 400, 500, ...), once per
  * milestone for everyone - tracked in stats/announced so retries / duplicate triggers never send it twice.
  */
-exports.milestonePush = onDocumentUpdated({ document: "stats/visits", region: "us-central1" }, async (event) => {
+exports.milestonePush = onDocumentUpdated({ document: "stats/visits", region: "us-central1", timeoutSeconds: 540, memory: "512MiB", maxInstances: 1 }, async (event) => {
   const before = (event.data.before.data() || {}).count || 0;
   const after = (event.data.after.data() || {}).count || 0;
   const tier = Math.floor(after / 100) * 100;
   if (tier < 300 || Math.floor(before / 100) * 100 >= tier) return;
   const ref = admin.firestore().doc("stats/announced");
   const first = await admin.firestore().runTransaction(async (tx) => {
-    const cur = ((await tx.get(ref)).data() || {}).milestone || 0;
+    const d = (await tx.get(ref)).data() || {};
+    const cur = d.milestone || 0;
     if (cur >= tier) return false;
-    tx.set(ref, { milestone: tier }, { merge: true });
+    if (d.milestoneAt && Date.now() - d.milestoneAt < 24 * 3600 * 1000) return false;   // at most one milestone push per day (spam guard)
+    tx.set(ref, { milestone: tier, milestoneAt: Date.now(), milestonePrev: cur }, { merge: true });
     return true;
   });
   if (!first) return;
   const n = tier.toLocaleString("en-US");
   const texts = {};
   LANGS.forEach((l) => { texts[l] = MILESTONE_TEXT[l](n); });
-  await broadcast(texts, { kind: "milestone", count: String(tier) });
+  try {
+    const r = await broadcast(texts, { kind: "milestone", count: String(tier) });
+    if (r.sent === 0 && r.failed > 0) throw new Error("nothing delivered");
+  } catch (e) {
+    // roll the marker back so a transient failure (APNs key, timeout) is retried by the next increment instead of lost
+    await ref.set({ milestone: (await ref.get()).data().milestonePrev || 0, milestoneAt: 0 }, { merge: true });
+    throw e;
+  }
 });
 
 const BOOKLET_URL = "https://davidpit1565.github.io/Bet-El/data/booklet/current.json";
@@ -178,11 +191,11 @@ const BOOKLET_TEXT = {
 /**
  * Every Sunday 07:00 (Jerusalem) - right after netz, when the app starts showing the new weekly booklet - reads the live
  * data/booklet/current.json from GitHub Pages and announces it once (id remembered in stats/announced). If you publish the
- * booklet later in the week it is announced at the next run (the schedule also runs Mon-Fri at 07:00 and only sends when
+ * booklet later in the week it is announced at the next run (the schedule also runs Sun-Fri at 07:00 and only sends when
  * the booklet id is new and its Shabbat is within the coming 7 days).
  */
-exports.bookletPush = onSchedule({ schedule: "0 7 * * 0-5", timeZone: "Asia/Jerusalem", region: "us-central1" }, async () => {
-  const res = await fetch(BOOKLET_URL + "?t=" + Date.now(), { headers: { "cache-control": "no-cache" } });
+exports.bookletPush = onSchedule({ schedule: "0 7 * * 0-5", timeZone: "Asia/Jerusalem", region: "us-central1", timeoutSeconds: 540, memory: "512MiB", maxInstances: 1 }, async () => {
+  const res = await fetch(BOOKLET_URL + "?t=" + Date.now(), { headers: { "cache-control": "no-cache" }, signal: AbortSignal.timeout(10000) });
   if (!res.ok) { logger.info("no current booklet", { status: res.status }); return; }
   let list = await res.json();
   if (!Array.isArray(list)) list = [list];
@@ -195,13 +208,20 @@ exports.bookletPush = onSchedule({ schedule: "0 7 * * 0-5", timeZone: "Asia/Jeru
   if (!cur) return;
   const ref = admin.firestore().doc("stats/announced");
   const first = await admin.firestore().runTransaction(async (tx) => {
-    if (((await tx.get(ref)).data() || {}).booklet === cur.id) return false;
-    tx.set(ref, { booklet: cur.id }, { merge: true });
+    const d = (await tx.get(ref)).data() || {};
+    if (d.booklet === cur.id) return false;
+    tx.set(ref, { booklet: cur.id, bookletPrev: d.booklet || "" }, { merge: true });
     return true;
   });
   if (!first) return;
   const title = typeof cur.title === "string" ? { he: cur.title, en: cur.title } : (cur.title || {});
   const texts = {};
-  LANGS.forEach((l) => { texts[l] = BOOKLET_TEXT[l](title[l] || title.en || title.he || ""); });
-  await broadcast(texts, { kind: "booklet", id: String(cur.id) });
+  LANGS.forEach((l) => { texts[l] = BOOKLET_TEXT[l](String(title[l] || title.en || title.he || "").slice(0, 100)); });
+  try {
+    const r = await broadcast(texts, { kind: "booklet", id: String(cur.id) });
+    if (r.sent === 0 && r.failed > 0) throw new Error("nothing delivered");
+  } catch (e) {
+    await ref.set({ booklet: (await ref.get()).data().bookletPrev || "" }, { merge: true });   // retry at the next scheduled run
+    throw e;
+  }
 });

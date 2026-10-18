@@ -72,7 +72,7 @@ email arrives at info@bet-el.be instead of opening the Mail app.
 - **milestonePush** - fires when the public counter `stats/visits.count` crosses 300, 400, 500, ... and pushes
   "Thank G-d - N users!" to every stored FCM token (iOS + web) in each token's own language, once per milestone
   (remembered in `stats/announced.milestone`).
-- **bookletPush** - Mon-Sun 07:00 Jerusalem time: reads the live `data/booklet/current.json` from GitHub Pages and, when
+- **bookletPush** - Sun-Fri 07:00 Jerusalem time: reads the live `data/booklet/current.json` from GitHub Pages and, when
   its id is new and its Shabbat is within the next 7 days, pushes "This week's booklet" once (`stats/announced.booklet`).
 
 Both send straight to the tokens in Firestore `pushTokens` and delete tokens FCM reports as dead, so they do not depend on
