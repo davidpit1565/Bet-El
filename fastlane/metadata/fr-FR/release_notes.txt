@@ -1,9 +1,11 @@
-Nouveautés de la version 2.0.3 :
-• Réglages au design iOS natif : catégories distinctes et claires, interrupteurs et sélecteurs du système
-• Nouveau calendrier : jours en lettres hébraïques avec la date grégorienne dessous, horaires du jour juste sous le calendrier, et la paracha de la semaine s’ouvre dans Chnayim Mikra
-• Verset selon le prénom : un seul verset par prénom, avec la possibilité d’en choisir un autre
-• Une boussole pour s’orienter vers Jérusalem dans chaque prière du sidour, à côté du miroir des téfilines dans Cha’harit
-• Réglages de lecture : nikoud et cantillation, interligne et police de lecture
-• Correction : le livret hebdomadaire s’ouvre correctement dans l’application
-• Partage du code QR directement via la feuille de partage du système
-• Améliorations de stabilité
+Nouveautés de la version 2.0.4 :
+• Nouveau widget boussole vers Jérusalem : sur l’écran d’accueil et l’écran verrouillé
+• Activité en direct améliorée : compte à rebours jusqu’au prochain horaire avec icônes, barre de progression et passage automatique d’un horaire à l’autre
+• Convertisseur de dates dans le calendrier : hébraïque vers grégorien et inversement, avec les sélecteurs iOS natifs
+• Choix d’un chapitre, d’un daf, d’une aliya ou d’une paracha dans les livres : menu natif dans l’en-tête, qui reste affiché sur chaque écran
+• L’écran d’accueil affiche toujours Hok LeIsraël et le Zohar quotidien, selon la date
+• Texte de lecture sur une carte arrondie et douce, boutons et recherche arrondis au style iOS
+• Afficher/masquer dans les prières : toute la carte est cliquable
+• Le miroir des téfilines se charge plus vite et fonctionne en un seul toucher
+• La taille de police dans les réglages se met à jour, et le texte des commentaires suit la taille de police
+• Corrections orthographiques et améliorations de stabilité
