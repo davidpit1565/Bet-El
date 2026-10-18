@@ -34,11 +34,17 @@ const yearHe = gem(+year);
 // 1) the live booklet
 const bdir = path.join(root, 'data/booklet');
 fs.mkdirSync(bdir, {recursive:true});
-for(const f of fs.readdirSync(bdir)) if(f.endsWith('.pdf')) fs.unlinkSync(path.join(bdir, f));
+// keep booklets whose Shabbat has not passed yet (e.g. next week's, uploaded early); everything older is removed
+const todayStr = new Date().toISOString().slice(0,10);
+let kept = [];
+try{ const old = JSON.parse(fs.readFileSync(path.join(bdir, 'current.json'), 'utf8')); kept = (Array.isArray(old)?old:[old]).filter(b=>b && b.pdf && b.shabbat && b.shabbat>=todayStr && b.shabbat!==shabbat); }catch(e){}
+const keepFiles = new Set(kept.map(b=>path.basename(b.pdf)));
 const live = `${year}-${slug}.pdf`;
+for(const f of fs.readdirSync(bdir)) if(f.endsWith('.pdf') && !keepFiles.has(f) && f!==live) fs.unlinkSync(path.join(bdir, f));
 fs.copyFileSync(src, path.join(bdir, live));
 const title = titleEn ? {he:'פרשת '+parasha, en:titleEn} : 'פרשת '+parasha;
-fs.writeFileSync(path.join(bdir, 'current.json'), JSON.stringify({id:`${year}-${slug}`, shabbat, title, pdf:`data/booklet/${live}`}, null, 2)+'\n');
+const list = kept.concat([{id:`${year}-${slug}`, shabbat, title, pdf:`data/booklet/${live}`}]).sort((x,y)=>x.shabbat.localeCompare(y.shabbat));
+fs.writeFileSync(path.join(bdir, 'current.json'), JSON.stringify(list.length===1?list[0]:list, null, 2)+'\n');
 git(['add','-A','data/booklet']); git(['commit','-qm',`Weekly booklet: ${slug} ${shabbat}`]);
 
 // 2) the archive branch, through a temporary worktree
