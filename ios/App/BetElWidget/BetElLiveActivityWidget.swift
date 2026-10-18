@@ -94,9 +94,37 @@ private struct SegmentProgress: View {
 private struct LockScreenView: View {
     let context: ActivityViewContext<BetElActivityAttributes>
     var body: some View {
+        /* Picks the first layout that fits the height the system gives us: the full banner on the Lock Screen, and a
+           single compact row when the space is small (CarPlay, StandBy, Watch Smart Stack mirrors, any short banner). */
+        ViewThatFits(in: .vertical) {
+            fullLayout
+            compactLayout
+        }
+    }
+
+    private var compactLayout: some View {
         let palette = BetElTheme.palette(for: "dark")
         let seg = currentSegment(context.state)
-        VStack(spacing: 12) {
+        return HStack(spacing: 8) {
+            ZmanIcon(key: seg.key, size: 18)
+            Text(seg.label)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(palette.ink)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Spacer(minLength: 4)
+            CountdownText(state: context.state)
+                .monospacedDigit()
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(palette.goldBright)
+                .lineLimit(1).minimumScaleFactor(0.5)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+    }
+
+    private var fullLayout: some View {
+        let palette = BetElTheme.palette(for: "dark")
+        let seg = currentSegment(context.state)
+        return VStack(spacing: 12) {
             HStack(spacing: 14) {
                 ZStack {
                     Circle().fill(palette.gold.opacity(0.16))
