@@ -618,3 +618,13 @@ in English as usual.
 - **Build 28 fixes (2026-10-18):** `BetElEntry` now carries `latitude`/`longitude` (set from the snapshot in `Provider.swift`) - the compass widget
   failed to compile without them. Android: `MainActivity.java` pins the WebView `textZoom` to 100 (the system "Font size" used to blow the whole app
   up on the Play tester's phone); `versionCode` 5. The offline-download pill sits below the header instead of on top of the logo.
+
+- **Android widgets + ongoing countdown notification (Java, not compile-verified in this repo's cloud session):**
+  `android/app/src/main/java/com/beitel/tehilim/` - `BetElWidgetBridge`/`NativeLiveActivityBridge` (same JS names as iOS, registered in
+  `MainActivity` and, on Android only, in capacitor-native-bridge.js) store the app's `updateSharedData` snapshot (`BetElStore`, SharedPreferences)
+  and call `BetElRefresh.run()` = re-render 4 RemoteViews widgets (`BetElWidgets`: main date+next zman, zmanim list, candle lighting, streak;
+  light/dark via values/values-night `widget_*` colors, Chronometer countdowns tick without the app) + `LiveZmanNotifier` (ongoing silent
+  notification with a countdown chronometer = Android's Live Activity; toggle `S.liveZmanNotif`, Settings row Android-only) + an inexact
+  AlarmManager tick at each zman/midnight (`ZmanRefreshReceiver`, also boot/time change). The Hebrew date comes pre-formatted from JS
+  (`widgetHebTable()` -> `hebDays`) since Android has no Hebrew-letter calendar. Taps open `betel://calendar|tracker` (manifest intent-filter ->
+  `openWidgetLink`). Not done yet: Tehillim-chapters widget, lock-screen widgets, exact alarms (would need SCHEDULE_EXACT_ALARM + Play declaration).

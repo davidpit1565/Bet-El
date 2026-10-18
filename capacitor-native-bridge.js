@@ -48,6 +48,13 @@ var capacitorNativeBridge = (function (core) {
         if (!core.Capacitor.Plugins.FirebaseMessaging) core.registerPlugin('FirebaseMessaging');
     }
 
+    // Android has its own (Java) implementations of just these two: home-screen widgets + the ongoing
+    // zman countdown notification (the Android counterpart of the iOS Live Activity).
+    if (core.Capacitor.getPlatform() === 'android') {
+        core.registerPlugin('BetElWidgetBridge');
+        core.registerPlugin('NativeLiveActivity');
+    }
+
     // SplashScreen is a real plugin on both iOS and Android.
     if (core.Capacitor.isNativePlatform() && !core.Capacitor.Plugins.SplashScreen) core.registerPlugin('SplashScreen');
 
