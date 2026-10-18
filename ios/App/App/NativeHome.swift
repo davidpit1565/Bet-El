@@ -143,7 +143,7 @@ final class NHSkyView: UIView {
         switch phase {
         case "dawn":  grad.colors = [c(58, 74, 142), c(224, 138, 120), c(255, 212, 154)]; grad.locations = [0, 0.7, 1]
         case "dusk":  grad.colors = [c(42, 53, 120), c(192, 88, 124), c(255, 154, 88)]; grad.locations = [0, 0.7, 1]
-        case "night": grad.colors = [c(4, 10, 34), c(20, 38, 79)]; grad.locations = [0, 1]
+        case "night": grad.colors = [c(9, 12, 42), c(27, 32, 80), c(22, 26, 68)]; grad.locations = [0, 0.55, 1]
         default:      grad.colors = [c(58, 143, 224), c(155, 208, 248)]; grad.locations = [0, 1]
         }
         let night = phase == "night"
@@ -154,7 +154,7 @@ final class NHSkyView: UIView {
         default:              dim.backgroundColor = UIColor.clear.cgColor
         }
         // sun / moon (hidden when overcast)
-        let hideOrb = ["cloudy", "rain", "storm", "snow"].contains(w)
+        let hideOrb = ["cloudy", "rain", "storm", "snow"].contains(w) || (night && w == "partly")
         orb.isHidden = hideOrb
         orb.opacity = w == "fog" ? 0.3 : 1
         if night { orb.colors = [c(238, 242, 255), c(200, 215, 255, 0.35), c(200, 215, 255, 0)] }
@@ -169,7 +169,7 @@ final class NHSkyView: UIView {
         if night && (w == "clear" || w == "partly") {
             let cell = CAEmitterCell()
             cell.contents = NHSkyView.dot(2.4)
-            cell.birthRate = 9; cell.lifetime = 3; cell.lifetimeRange = 1.5
+            cell.birthRate = 16; cell.lifetime = 3; cell.lifetimeRange = 1.5
             cell.alphaSpeed = -0.33; cell.alphaRange = 0.5; cell.scale = 0.7; cell.scaleRange = 0.6
             stars.emitterShape = .rectangle
             stars.emitterCells = [cell]
@@ -203,21 +203,21 @@ final class NHSkyView: UIView {
         clouds = []
         let n = ["partly": 2, "cloudy": 4, "rain": 4, "storm": 5, "snow": 4, "fog": 3][w] ?? 0
         let tint: CGColor = w == "rain" || w == "storm" ? c(70, 80, 100, 0.85)
-            : night ? c(150, 165, 205, 0.4) : w == "fog" ? c(220, 225, 232, 0.7) : c(255, 255, 255, 0.8)
+            : night ? c(112, 114, 168, 0.4) : w == "fog" ? c(220, 225, 232, 0.7) : c(255, 255, 255, 0.8)
         let W = max(bounds.width, 300), H = max(bounds.height, 150)
         for i in 0..<n {
             let l = CALayer()
-            let cw = W * 0.5, ch = H * (w == "fog" ? 0.34 : 0.24)
+            let cw = W * (night ? 0.9 : 0.5), ch = H * (night ? 0.38 : w == "fog" ? 0.34 : 0.24)
             l.bounds = CGRect(x: 0, y: 0, width: cw, height: ch)
             l.cornerRadius = ch / 2
             l.backgroundColor = tint
-            l.shadowColor = tint; l.shadowOpacity = 1; l.shadowRadius = 14; l.shadowOffset = .zero
-            l.position = CGPoint(x: -cw, y: H * (0.1 + 0.16 * CGFloat(i)) + ch / 2)
+            l.shadowColor = tint; l.shadowOpacity = 1; l.shadowRadius = night ? 24 : 14; l.shadowOffset = .zero
+            l.position = CGPoint(x: -cw, y: H * (night ? -0.06 + 0.21 * CGFloat(i) : 0.1 + 0.16 * CGFloat(i)) + ch / 2)
             layer.insertSublayer(l, below: dim)
             let a = CABasicAnimation(keyPath: "position.x")
             a.fromValue = rtl ? W + cw : -cw
             a.toValue = rtl ? -cw : W + cw
-            a.duration = 46 + 17 * Double(i)
+            a.duration = (night ? 90 : 46) + (night ? 25 : 17) * Double(i)
             a.timeOffset = 19 * Double(i)
             a.repeatCount = .infinity
             l.add(a, forKey: "drift")

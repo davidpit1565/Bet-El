@@ -1632,7 +1632,7 @@ html.has-native-tabbar .search-box-tab{display:none}
 .sky{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:inherit;pointer-events:none;background:linear-gradient(#3a8fe0,#9bd0f8)}
 .sky.sk-dawn{background:linear-gradient(#3a4a8e,#e08a78 70%,#ffd49a)}
 .sky.sk-dusk{background:linear-gradient(#2a3578,#c0587c 70%,#ff9a58)}
-.sky.sk-night{background:linear-gradient(#040a22,#14264f)}
+.sky.sk-night{background:linear-gradient(#090c2a,#1b2050 55%,#161a44)}
 .sky::after{content:'';position:absolute;inset:0;background:transparent}
 .sky.skw-cloudy::after,.sky.skw-fog::after{background:rgba(120,130,145,.55)}
 .sky.skw-rain::after,.sky.skw-storm::after{background:rgba(60,70,90,.62)}
@@ -1646,14 +1646,19 @@ html.has-native-tabbar .search-box-tab{display:none}
 .skw-fog .sk-orb{opacity:.3}.skw-partly .sk-orb{opacity:.9}
 .sk-cl{position:absolute;top:calc(6% + var(--i)*15%);inset-inline-start:-55%;width:52%;height:24%;border-radius:50%;
   background:rgba(255,255,255,.8);filter:blur(11px);animation:skyDrift calc(46s + var(--i)*17s) linear infinite;animation-delay:calc(var(--i)*-19s)}
-.sk-night .sk-cl{background:rgba(150,165,205,.4)}
+.sk-night .sk-cl{background:rgba(112,114,168,.4);filter:blur(22px);width:90%;height:38%;top:calc(-6% + var(--i)*21%);animation-duration:calc(90s + var(--i)*25s)}
+.sk-night.skw-partly .sk-orb{opacity:0}
 .skw-rain .sk-cl,.skw-storm .sk-cl{background:rgba(70,80,100,.85)}
 .skw-fog .sk-cl{background:rgba(220,225,232,.7);height:34%}
 .sk-stars{position:absolute;inset:0;background-image:
   radial-gradient(1.4px 1.4px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 30% 60%,#fff,transparent),
   radial-gradient(1.6px 1.6px at 47% 15%,#fff,transparent),radial-gradient(1px 1px at 63% 48%,#fff,transparent),
   radial-gradient(1.4px 1.4px at 78% 28%,#fff,transparent),radial-gradient(1px 1px at 90% 70%,#fff,transparent),
-  radial-gradient(1.2px 1.2px at 22% 82%,#fff,transparent),radial-gradient(1px 1px at 55% 86%,#fff,transparent);
+  radial-gradient(1.2px 1.2px at 22% 82%,#fff,transparent),radial-gradient(1px 1px at 55% 86%,#fff,transparent),
+  radial-gradient(1px 1px at 6% 48%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 38% 38%,rgba(255,255,255,.6),transparent),
+  radial-gradient(1.2px 1.2px at 70% 12%,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 84% 52%,rgba(255,255,255,.6),transparent),
+  radial-gradient(1px 1px at 95% 18%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 16% 8%,rgba(255,255,255,.7),transparent),
+  radial-gradient(1.2px 1.2px at 52% 70%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 74% 90%,rgba(255,255,255,.5),transparent);
   animation:skyTwinkle 4s ease-in-out infinite}
 .sk-rain{position:absolute;inset:0;background-image:linear-gradient(100deg,transparent 47%,rgba(215,228,255,.6) 49% 52%,transparent 54%);
   background-size:22px 48px;animation:skyRain .5s linear infinite}
