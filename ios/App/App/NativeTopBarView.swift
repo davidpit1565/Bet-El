@@ -166,6 +166,10 @@ final class NativeTopBarView: UIView {
         ])
     }
 
+    /// Actions that open a native menu (see NativeTopBarBridge.configure) and the callback for a picked item.
+    static var menus: [String: [(id: String, title: String, on: Bool)]] = [:]
+    var onMenuSelect: ((String, String) -> Void)?
+
     @objc private func tapTrailingAction(_ sender: UIButton) {
         guard let id = sender.accessibilityIdentifier else { return }
         onTrailingAction?(id)
@@ -206,7 +210,15 @@ final class NativeTopBarView: UIView {
             button.widthAnchor.constraint(equalToConstant: buttonSize).isActive = true
             button.heightAnchor.constraint(equalToConstant: buttonSize).isActive = true
             button.accessibilityTraits = .button
-            button.addTarget(self, action: #selector(tapTrailingAction(_:)), for: .touchUpInside)
+            if let items = NativeTopBarView.menus[action.id], !items.isEmpty {
+                let aid = action.id
+                button.menu = UIMenu(children: items.map { item in
+                    UIAction(title: item.title, state: item.on ? .on : .off) { [weak self] _ in self?.onMenuSelect?(aid, item.id) }
+                })
+                button.showsMenuAsPrimaryAction = true
+            } else {
+                button.addTarget(self, action: #selector(tapTrailingAction(_:)), for: .touchUpInside)
+            }
             actionsStack.addArrangedSubview(button)
         }
         actionsLeading(isRTL: isRTL)

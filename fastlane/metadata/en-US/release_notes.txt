@@ -1,9 +1,11 @@
-What's new in 2.0.3:
-• Settings in native iOS design: clear separate categories with system switches and pickers
-• New calendar: days in Hebrew letters with the Gregorian date underneath, daily times right below the calendar, and the weekly parasha opens in Shnayim Mikra
-• Verse by name: one verse per name, with the option to pick a different one
-• A compass to face Jerusalem in every prayer of the siddur, next to the Tefillin Mirror in Shacharit
-• Reading settings: nikud and cantillation, line spacing and reading font
-• Fix: the weekly booklet now opens correctly in the app
-• Share the QR code straight from the system share sheet
-• Stability improvements
+What's new in 2.0.4:
+• New compass widget pointing to Jerusalem: on the Home Screen and the Lock Screen
+• Upgraded Live Activity: countdown to the next time of day with icons, a progress bar, and automatic roll-over between times
+• Date converter in the calendar: Hebrew to Gregorian and back, with native iOS pickers
+• Choosing a chapter, daf, aliyah or parasha in the books: a native menu in the header, and the header stays on every screen
+• The Home screen always shows Chok LeYisrael and the Daily Zohar, by date
+• Reading text on a soft rounded card, plus round iOS-style buttons and search
+• Show/hide in the prayers: the whole card is tappable
+• The Tefillin Mirror loads faster and works with a single tap
+• The font size in Settings now updates, and commentary text follows the font size too
+• Spelling fixes and stability improvements

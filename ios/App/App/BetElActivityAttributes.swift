@@ -31,6 +31,18 @@ struct BetElActivityAttributes: ActivityAttributes {
         /// the system re-renders after the boundary, before the app gets to refresh.
         var nextLabel: String?
         var nextDate: Date?
+        /// Raw zman keys ("dawn", "sunrise", "chatzot", "sunset", "tzeit", "chatzotNight") - pick the icon.
+        var zmanKey: String?
+        /// The next few zmanim AFTER `endDate` (in order). The views roll through these on their
+        /// own whenever the system re-renders (stale date / foreground), so a passed zman never
+        /// leaves a frozen 0:00 behind even if the app didn't get to refresh the Activity.
+        var upcoming: [Upcoming]?
+    }
+
+    public struct Upcoming: Codable, Hashable {
+        var key: String
+        var label: String
+        var date: Date
     }
 
     /// Static for the Activity's lifetime, shown in the Dynamic Island/Lock Screen

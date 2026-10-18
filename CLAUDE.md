@@ -515,7 +515,7 @@ in English as usual.
   Chatzot; alot -> chatzot hayom = Shacharit; chatzot hayom -> tzeit = Mincha; tzeit -> chatzot halayla = Arvit.
 - **Weekly booklet slot (user's rule):** the home slot right beside Ben Ish Chai is reserved for the weekly booklet
   (`booklet` home item, `ensureBooklet()`/`openBooklet()`). It reads `data/booklet/current.json` fresh (no-store) and
-  opens the PDF in the in-app browser; no current.json = slot stays empty. A booklet's week is netz on the Sunday before its `shabbat` to netz on the Sunday after (`bookletWindow`); at that Sunday netz the new one appears or, if none, the old one is removed - an old booklet is never shown. Never put another tile there. Each week the old
+  opens the PDF in the in-app browser; the tile is ALWAYS shown (user rule, 2026-10-18): with no active booklet it reads "החוברת תעלה בקרוב". A booklet's week is ALOT HASHACHAR (the app's own dawn) on the Sunday before its `shabbat` to dawn on the Sunday after (`bookletWindow`); at that Sunday dawn the new one appears or, if none, the old one is removed - an old booklet is never shown. `current.json` may hold several upcoming booklets (booklet-publish.mjs keeps them). Never put another tile there. Each week the old
   PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
 - **Hillulot (yahrzeits of tzaddikim)**: `data/hillulot.json` (1,038 names, every Hebrew date; transcribed from Yeshivat Nahar
   Shalom's weekly zmanim sheets - names/dates only, never their photos; raw draft + per-date sources in `docs/hillulot-*`).
@@ -586,3 +586,35 @@ in English as usual.
   `androidBackWire()` (appBack -> Home -> exit). The offline-prefetch pill shows MB using `data/manifest-sizes.json`
   (generated together with `manifest.json`; re-run `node scripts/generate-data-manifest.mjs` after any data change).
   Emulate Android in Playwright with `window.androidBridge` stub. Prompt for other apps: `docs/play/ANDROID-READINESS-PROMPT.md`.
+
+- **Small-header picker swap + web Search tab (user request):** in every book reader except Chok LeYisrael / Ben Ish Chai, scrolling down
+  swaps the book title in the SMALL header for that reader's own picker (`readerHeadCompact()`, generic: first `select.fld-select` in
+  `.bic-collapse`); on iOS the native title becomes "title · choice" plus a list button opening `NativeModal.presentActionSheet`. Web/PWA/Android
+  now have their own Search nav item (`['search','חיפוש']` in `buildNav`) and the Library page has no search box; iOS keeps the native search tab.
+  Live-count milestone: BOTH an OS notification and an in-app celebration (native modal on iOS), 10-user window; the regression sweep presets
+  `betel_milestone_last` so the modal never blocks it. iOS parts are not compile-verified.
+
+- **Permanent header picker + home rules (2026-10-17, build 25):** `readerHeadAuto()` (index.html, hooked from `tr(app)`) makes the small
+  header's title slot the reader's picker in EVERY book reader except Chok LeYisrael / Ben Ish Chai (chapter/daf/part `<select>`, or the aliyot
+  chips -> "Aliyah 1..7 / Haftarah"); on iOS the native header shows "book - choice" + a round list button (action sheet). It supersedes the
+  scroll-based `readerHeadCompact` for those headers (`dataset.rhAuto`). The home ALWAYS shows Chok LeYisrael (`ckHomeLine()`: on Shabbat it shows
+  the coming Sunday's line) and Zohar Yomi (date-based, independent of Chok); order: Chok, Tehillim, Zohar, Shnayim, prayer-now, Musar, Ben Ish Chai,
+  booklet. Celebration pop-ups (finished reading, milestone) use the original HTML card again (`CELEBRATE_NATIVE=false`). The visit counter reads
+  Firestore with long-polling auto-detect + a REST fallback (it stayed 0 in the native shells). The tefillin guide loads the face model first (hair
+  model in the background), has a GPU timeout -> CPU fallback, and a run token so toggling can't start two loops. Reopening the native Calendar tab
+  resets its scroll to the top.
+
+- **Build 27 notes (2026-10-17):** reader pickers on iOS are REAL native UIMenus on the round header buttons (`NativeTopBar.configure` actions accept
+  `menu:[{id,title,on}]`; picks come back through `NativeTopBarHost.onMenu` / `opts.menuHandlers`), Torah has a second `books.vertical` button for the
+  parasha, and `.reader-head.rh-empty` hides the leftover coloured strip under the native header. The calendar converter button is text-only and stays
+  hidden until its title is known; `hideNativeCalendar()` resets the scroll. Live presence uses `forceLongPolling()` in native shells + a REST
+  heartbeat/poll fallback (the realtime DB rules allow it). New `BetElCompassWidget` (fixed bearing to Jerusalem - WidgetKit cannot read the live
+  heading; tap opens `betel://compass` -> `kotelCompass`), added to the widget target in project.pbxproj. All buttons are capsules/circles (CSS block
+  "iOS shapes"); the Tehillim prayer card is one big tap target with an iOS-blue capsule.
+
+- **Build 28 notes:** reading text (`.sm-verses`, `.chapter`, `.prayer-reader-text`) sits on a rounded iOS-style card (`--rd-card`/`--rd-line`,
+  flat tint, no blur). The compass widget also ships Lock Screen families (circular / rectangular / inline).
+
+- **Build 28 fixes (2026-10-18):** `BetElEntry` now carries `latitude`/`longitude` (set from the snapshot in `Provider.swift`) - the compass widget
+  failed to compile without them. Android: `MainActivity.java` pins the WebView `textZoom` to 100 (the system "Font size" used to blow the whole app
+  up on the Play tester's phone); `versionCode` 5. The offline-download pill sits below the header instead of on top of the logo.

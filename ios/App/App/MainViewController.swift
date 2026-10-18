@@ -438,6 +438,9 @@ class MainViewController: CAPBridgeViewController {
         topBar.onTrailingAction = { [weak self] id in
             self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onAction(\(self?.jsStringLiteral(id) ?? "null"))", completionHandler: nil)
         }
+        topBar.onMenuSelect = { [weak self] actionId, itemId in
+            self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onMenu && window.NativeTopBarHost.onMenu(\(self?.jsStringLiteral(actionId) ?? "null"), \(self?.jsStringLiteral(itemId) ?? "null"))", completionHandler: nil)
+        }
         topBar.onQuickAction = { [weak self] action in
             guard let self = self else { return }
             let js: String
@@ -739,12 +742,16 @@ class MainViewController: CAPBridgeViewController {
         c.rtl = rtl; c.isDark = isDark; c.lang = lang; c.ymd = ymd; c.civil = civil
         c.hebrewLabel = hebrew; c.civilLabel = civilLabel; c.jumpLabel = jump
         c.todayLabel = today; c.okLabel = ok; c.shareLabel = share
+        let wasHidden = cal.isHidden
         cal.isHidden = false
         cal.show(c)
+        if wasHidden { cal.layoutIfNeeded(); cal.resetScrollInstantly() }   // reopening the tab always starts at the top
     }
 
     func hideNativeCalendar() {
         nativeCalendarView?.isHidden = true
+        // Always start at the top the next time the Calendar tab opens.
+        if #available(iOS 16.0, *) { (nativeCalendarView as? NativeCalendarView)?.resetScrollInstantly() }
     }
 
     // MARK: - Search tab

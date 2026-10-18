@@ -37,6 +37,7 @@ struct NHItem {
     var removable: Bool
     var movable: Bool
     var resizable: Bool
+    var sky: String = ""      // hero only: "<phase>|<weather>" from the web layer (live sky background)
 
     var isSpacer: Bool { kind == "spacer" }
 
@@ -63,6 +64,11 @@ extension UIColor {
 
 extension NHItem {
     init(dict d: [String: Any]) {
+        self.init(dictBase: d)
+        self.sky = d["sky"] as? String ?? ""
+    }
+
+    private init(dictBase d: [String: Any]) {
         let rowsRaw = (d["rows"] as? [[String: Any]]) ?? []
         self.init(
             id: d["id"] as? String ?? "",
@@ -84,6 +90,29 @@ extension NHItem {
             resizable: d["resizable"] as? Bool ?? false
         )
     }
+}
+
+/// Dark-theme hero background: a deep-blue gradient, a touch different from the page (user request).
+final class NHSkyView: UIView {
+    private let grad = CAGradientLayer()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        grad.colors = [UIColor(red: 13 / 255, green: 18 / 255, blue: 51 / 255, alpha: 1).cgColor,
+                       UIColor(red: 27 / 255, green: 32 / 255, blue: 80 / 255, alpha: 1).cgColor,
+                       UIColor(red: 21 / 255, green: 26 / 255, blue: 68 / 255, alpha: 1).cgColor]
+        grad.locations = [0, 0.58, 1]
+        layer.addSublayer(grad)
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        grad.frame = bounds
+    }
+
+    func apply(_ sky: String, rtl: Bool) {}
 }
 
 /// The small curved corner grip drawn like the one on an iPhone widget (no arrows).
@@ -142,6 +171,7 @@ final class NHCell: UICollectionViewCell {
 
     private let glass: UIVisualEffectView
     private let tintView = NHGradientView()
+    private let skyView = NHSkyView()
     private let accentView = UIView()
     private let dashLayer = CAShapeLayer()
     private let stack = UIStackView()
@@ -177,6 +207,9 @@ final class NHCell: UICollectionViewCell {
         tintView.translatesAutoresizingMaskIntoConstraints = false
         accentView.translatesAutoresizingMaskIntoConstraints = false
         accentView.isUserInteractionEnabled = false
+        skyView.translatesAutoresizingMaskIntoConstraints = false
+        skyView.isHidden = true
+        glass.contentView.addSubview(skyView)
         glass.contentView.addSubview(tintView)
         glass.contentView.addSubview(accentView)
         NSLayoutConstraint.activate([
@@ -184,6 +217,10 @@ final class NHCell: UICollectionViewCell {
             tintView.bottomAnchor.constraint(equalTo: glass.contentView.bottomAnchor),
             tintView.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor),
             tintView.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor),
+            skyView.topAnchor.constraint(equalTo: glass.contentView.topAnchor),
+            skyView.bottomAnchor.constraint(equalTo: glass.contentView.bottomAnchor),
+            skyView.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor),
+            skyView.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor),
             accentView.topAnchor.constraint(equalTo: glass.contentView.topAnchor),
             accentView.leadingAnchor.constraint(equalTo: glass.contentView.leadingAnchor),
             accentView.trailingAnchor.constraint(equalTo: glass.contentView.trailingAnchor),
@@ -290,6 +327,10 @@ final class NHCell: UICollectionViewCell {
         glass.isHidden = isSpacer || plain
         tintView.gradient.colors = [it.color.withAlphaComponent(0.42).cgColor, it.color.withAlphaComponent(0.12).cgColor]
         accentView.backgroundColor = it.color.withAlphaComponent(0.9)
+        let hasSky = it.kind == "hero" && !it.sky.isEmpty
+        skyView.isHidden = !hasSky
+        tintView.isHidden = hasSky
+        if hasSky { skyView.apply(it.sky, rtl: rtl) }
         accentView.isHidden = !(it.kind == "tile" || it.kind == "stat" || it.kind == "row")
         minusButton.isHidden = !(editing && it.removable)
         grip.isHidden = !(editing && it.resizable)
@@ -344,10 +385,17 @@ final class NHCell: UICollectionViewCell {
                 iv.heightAnchor.constraint(equalToConstant: 118).isActive = true
                 stack.addArrangedSubview(iv)
             }
-            if !it.title.isEmpty { stack.addArrangedSubview(label(it.title, .subheadline, .regular, .secondaryLabel, center: true)) }
-            if !it.subtitle.isEmpty { stack.addArrangedSubview(label(it.subtitle, .title2, .bold, gold, lines: 2, center: true)) }
-            if let g = it.lines.first, !g.isEmpty { stack.addArrangedSubview(label(g, .footnote, .regular, .secondaryLabel, lines: 2, center: true)) }
-            if it.lines.count > 1 { stack.addArrangedSubview(label("● " + it.lines[1], .footnote, .medium, gold, lines: 2, center: true)) }
+            let sk = !it.sky.isEmpty   // dark theme: light text on the blue card
+            let hGold = sk ? UIColor(red: 1, green: 0.88, blue: 0.54, alpha: 1) : gold
+            let hSoft: UIColor = sk ? UIColor.white.withAlphaComponent(0.92) : .secondaryLabel
+            var heroLabels: [UILabel] = []
+            if !it.title.isEmpty { heroLabels.append(label(it.title, .subheadline, .regular, hSoft, center: true)) }
+            if !it.subtitle.isEmpty { heroLabels.append(label(it.subtitle, .title2, .bold, hGold, lines: 2, center: true)) }
+            if let g = it.lines.first, !g.isEmpty { heroLabels.append(label(g, .footnote, .regular, hSoft, lines: 2, center: true)) }
+            if it.lines.count > 1 { heroLabels.append(label("● " + it.lines[1], .footnote, .medium, hGold, lines: 2, center: true)) }
+            for l in heroLabels {
+                stack.addArrangedSubview(l)
+            }
         case "banner":
             stack.spacing = 8
             for (i, line) in it.lines.enumerated() {

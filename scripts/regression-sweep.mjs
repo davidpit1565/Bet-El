@@ -23,6 +23,7 @@ const errs = [];
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
 await ctx.addInitScript(() => {
   localStorage.setItem('betel_onboard_v1', '1');
+  localStorage.setItem('betel_milestone_last', '100000'); // keep the live-count milestone celebration out of the way
   localStorage.setItem('betel_chok_pace_v1', '1');
 });
 const p = await ctx.newPage();
@@ -94,7 +95,7 @@ console.log('sw registered:', await p.evaluate(async () => (await navigator.serv
 // as a general fresh-user-wizard smoke test now that Ben Ish Chai is its
 // own standalone reader, not a Halacha-step option.
 const ctx2 = await b.newContext({ viewport: { width: 390, height: 844 } });
-await ctx2.addInitScript(() => localStorage.setItem('betel_onboard_v1', '1'));
+await ctx2.addInitScript(() => { localStorage.setItem('betel_onboard_v1', '1'); localStorage.setItem('betel_milestone_last', '100000'); });
 const p2 = await ctx2.newPage();
 p2.on('pageerror', e => errs.push('WIZARD PAGEERROR: ' + String(e).slice(0, 500)));
 await p2.goto('http://localhost:8899/index.html', { waitUntil: 'domcontentloaded', timeout: 20000 });

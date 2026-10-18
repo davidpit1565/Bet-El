@@ -20,7 +20,9 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const n = payload.notification || {};
+  // a `notification` payload is already displayed by the browser/FCM SDK itself; only data-only messages need a manual one (avoids duplicates)
+  if (payload.notification) return;
+  const n = payload.data || {};
   self.registration.showNotification(n.title || 'תמיד', {
     body: n.body || '',
     icon: './icon-192.png',
