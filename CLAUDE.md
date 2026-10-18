@@ -515,7 +515,7 @@ in English as usual.
   Chatzot; alot -> chatzot hayom = Shacharit; chatzot hayom -> tzeit = Mincha; tzeit -> chatzot halayla = Arvit.
 - **Weekly booklet slot (user's rule):** the home slot right beside Ben Ish Chai is reserved for the weekly booklet
   (`booklet` home item, `ensureBooklet()`/`openBooklet()`). It reads `data/booklet/current.json` fresh (no-store) and
-  opens the PDF in the in-app browser; no current.json = slot stays empty. A booklet's week is netz on the Sunday before its `shabbat` to netz on the Sunday after (`bookletWindow`); at that Sunday netz the new one appears or, if none, the old one is removed - an old booklet is never shown. Never put another tile there. Each week the old
+  opens the PDF in the in-app browser; the tile is ALWAYS shown (user rule, 2026-10-18): with no active booklet it reads "החוברת תעלה בקרוב". A booklet's week is ALOT HASHACHAR (the app's own dawn) on the Sunday before its `shabbat` to dawn on the Sunday after (`bookletWindow`); at that Sunday dawn the new one appears or, if none, the old one is removed - an old booklet is never shown. `current.json` may hold several upcoming booklets (booklet-publish.mjs keeps them). Never put another tile there. Each week the old
   PDF is deleted from `data/booklet/` (see its README); the folder is excluded from the manifest and purged from caches.
 - **Hillulot (yahrzeits of tzaddikim)**: `data/hillulot.json` (1,038 names, every Hebrew date; transcribed from Yeshivat Nahar
   Shalom's weekly zmanim sheets - names/dates only, never their photos; raw draft + per-date sources in `docs/hillulot-*`).
