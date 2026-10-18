@@ -1627,9 +1627,6 @@ html.has-native-tabbar .search-box-tab{display:none}
 .hhf-bl{bottom:12px;right:12px}.hhf-br{bottom:12px;left:12px}
 
 
-/* dark theme: the hero card is a deep-blue gradient (a touch different from the page, user request); light keeps the plain frame */
-[data-theme="dark"] .home-hero-frame{background:linear-gradient(#0d1233,#1b2050 58%,#151a44);border-color:rgba(212,175,95,.55)}
-[data-theme="dark"] .home-hero-frame::before{border-color:rgba(255,255,255,.14)}
 .q-tile[data-cat]{position:relative;overflow:hidden}
 .q-tile[data-cat]::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;opacity:.9;
   background:var(--cat-color)}
@@ -7826,7 +7823,7 @@ function homeNativeSpec(){
     }else if(stat){
       out.push({...base,kind:'stat',title:T(stat,'.sc-label'),number:T(stat,'.sc-num'),badge:id==='live'?'dot.radiowaves.left.and.right':'person.2.fill',color:'#d4af5f'});
     }else if(el.querySelector('.home-hero-frame')){
-      out.push({...base,kind:'hero',sky:S.theme==='dark'?'dark':'',title:T(el,'.greeting'),subtitle:T(el,'.date-heb'),lines:[T(el,'.date-greg'),T(el,'.zman-strip')]});
+      out.push({...base,kind:'hero',title:T(el,'.greeting'),subtitle:T(el,'.date-heb'),lines:[T(el,'.date-greg'),T(el,'.zman-strip')]});
     }else if(id==='banners'){
       const lines=[...el.querySelectorAll('.yahrzeit-strip')].map(n=>n.textContent.replace(/\s+/g,' ').trim());
       if(lines.length) out.push({...base,kind:'banner',lines,color:'#d4af5f'});
