@@ -1621,6 +1621,54 @@ html.has-native-tabbar .search-box-tab{display:none}
 .hhf-tl{top:12px;right:12px}.hhf-tr{top:12px;left:12px}
 .hhf-bl{bottom:12px;right:12px}.hhf-br{bottom:12px;left:12px}
 
+
+/* ---- live sky in the home hero card: flat gradients + a few drifting elements, NO backdrop-filter ---- */
+.home-hero-frame.has-sky{overflow:hidden;border-color:rgba(255,224,138,.85)}
+.home-hero-frame.has-sky::before{z-index:2;border-color:rgba(255,255,255,.28)}
+.home-hero-frame.has-sky>.hero,.home-hero-frame.has-sky>.date-band,.home-hero-frame.has-sky>.zman-strip,.home-hero-frame.has-sky .hhf-corner{position:relative;z-index:2}
+.home-hero-frame.has-sky .hhf-corner{position:absolute;color:#ffe08a}
+.home-hero-frame.has-sky .greeting,.home-hero-frame.has-sky .date-heb,.home-hero-frame.has-sky .date-greg,.home-hero-frame.has-sky .zman-strip{color:#fff;text-shadow:0 1px 7px rgba(0,0,0,.5)}
+.home-hero-frame.has-sky .zman-strip b{color:#ffe08a}
+.sky{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:inherit;pointer-events:none;background:linear-gradient(#3a8fe0,#9bd0f8)}
+.sky.sk-dawn{background:linear-gradient(#3a4a8e,#e08a78 70%,#ffd49a)}
+.sky.sk-dusk{background:linear-gradient(#2a3578,#c0587c 70%,#ff9a58)}
+.sky.sk-night{background:linear-gradient(#040a22,#14264f)}
+.sky::after{content:'';position:absolute;inset:0;background:transparent}
+.sky.skw-cloudy::after,.sky.skw-fog::after{background:rgba(120,130,145,.55)}
+.sky.skw-rain::after,.sky.skw-storm::after{background:rgba(60,70,90,.62)}
+.sky.skw-snow::after{background:rgba(170,185,205,.45)}
+.sky.sk-night.skw-cloudy::after,.sky.sk-night.skw-fog::after,.sky.sk-night.skw-rain::after,.sky.sk-night.skw-storm::after,.sky.sk-night.skw-snow::after{background:rgba(8,12,26,.55)}
+.sk-orb{position:absolute;width:44px;height:44px;border-radius:50%;top:12%;inset-inline-end:14%;
+  background:radial-gradient(circle,#fff6c8 0 38%,#ffd75a 62%,rgba(255,215,90,0) 72%);box-shadow:0 0 34px 12px rgba(255,220,120,.55)}
+.sk-dawn .sk-orb,.sk-dusk .sk-orb{top:auto;bottom:22%;background:radial-gradient(circle,#fff0c0 0 35%,#ff9a50 64%,rgba(255,154,80,0) 72%);box-shadow:0 0 40px 16px rgba(255,150,80,.5)}
+.sk-night .sk-orb{width:30px;height:30px;background:#eef2ff;box-shadow:0 0 22px 6px rgba(200,215,255,.45),inset -9px -3px 0 0 #c9d2ee}
+.skw-cloudy .sk-orb,.skw-rain .sk-orb,.skw-storm .sk-orb,.skw-snow .sk-orb{opacity:0}
+.skw-fog .sk-orb{opacity:.3}.skw-partly .sk-orb{opacity:.9}
+.sk-cl{position:absolute;top:calc(6% + var(--i)*15%);inset-inline-start:-55%;width:52%;height:24%;border-radius:50%;
+  background:rgba(255,255,255,.8);filter:blur(11px);animation:skyDrift calc(46s + var(--i)*17s) linear infinite;animation-delay:calc(var(--i)*-19s)}
+.sk-night .sk-cl{background:rgba(150,165,205,.4)}
+.skw-rain .sk-cl,.skw-storm .sk-cl{background:rgba(70,80,100,.85)}
+.skw-fog .sk-cl{background:rgba(220,225,232,.7);height:34%}
+.sk-stars{position:absolute;inset:0;background-image:
+  radial-gradient(1.4px 1.4px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 30% 60%,#fff,transparent),
+  radial-gradient(1.6px 1.6px at 47% 15%,#fff,transparent),radial-gradient(1px 1px at 63% 48%,#fff,transparent),
+  radial-gradient(1.4px 1.4px at 78% 28%,#fff,transparent),radial-gradient(1px 1px at 90% 70%,#fff,transparent),
+  radial-gradient(1.2px 1.2px at 22% 82%,#fff,transparent),radial-gradient(1px 1px at 55% 86%,#fff,transparent);
+  animation:skyTwinkle 4s ease-in-out infinite}
+.sk-rain{position:absolute;inset:0;background-image:linear-gradient(100deg,transparent 47%,rgba(215,228,255,.6) 49% 52%,transparent 54%);
+  background-size:22px 48px;animation:skyRain .5s linear infinite}
+.sk-snow{position:absolute;inset:-60px 0 0 0;background-image:
+  radial-gradient(2.4px 2.4px at 20px 30px,#fff,transparent),radial-gradient(2px 2px at 70px 90px,#fff,transparent),
+  radial-gradient(3px 3px at 120px 50px,#fff,transparent),radial-gradient(2px 2px at 160px 120px,#fff,transparent);
+  background-size:180px 150px;animation:skySnow 7s linear infinite}
+.sk-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:skyFlash 7s infinite}
+@keyframes skyDrift{to{transform:translateX(calc(250% * var(--dir,1)))}}
+[dir=rtl] .sk-cl{--dir:-1}
+@keyframes skyRain{to{background-position:-22px 48px}}
+@keyframes skySnow{to{background-position:30px 150px}}
+@keyframes skyTwinkle{50%{opacity:.45}}
+@keyframes skyFlash{0%,92%,96%,100%{opacity:0}93%{opacity:.7}94%{opacity:.05}95%{opacity:.55}}
+
 .q-tile[data-cat]{position:relative;overflow:hidden}
 .q-tile[data-cat]::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;opacity:.9;
   background:var(--cat-color)}
@@ -7327,6 +7375,67 @@ try{
 /* ================= HOME ================= */
 function greeting(){ const h=new Date().getHours();
   if(h<5) return 'לילה טוב'; if(h<12) return 'בקר טוב'; if(h<17) return 'צהרים טובים'; if(h<21) return 'ערב טוב'; return 'לילה טוב'; }
+/* ---- LIVE SKY behind the home greeting card (user request, like Apple's Weather app) ----
+   phase comes from the app's own sunrise/sunset (zmanimFor); the weather is Open-Meteo's free
+   keyless "current" endpoint for LOC (cached 20 min in localStorage, fetched lazily after the
+   home first paints - never at boot). Nothing here may throw or block: no weather = a clear sky. */
+const WX_KEY='betel_wx', WX_TTL=20*60*1000;
+let WX=null, wxBusy=false;
+try{ WX=JSON.parse(localStorage.getItem(WX_KEY)||'null'); }catch(e){}
+function wxClass(code,cloud){
+  if(code==null) return 'clear';
+  if(code>=95) return 'storm';
+  if((code>=71&&code<=77)||code===85||code===86) return 'snow';
+  if((code>=51&&code<=67)||(code>=80&&code<=82)) return 'rain';
+  if(code===45||code===48) return 'fog';
+  if(code===3||cloud>=85) return 'cloudy';
+  if(code===2||cloud>=40) return 'partly';
+  return 'clear';
+}
+function wxRefresh(){
+  try{
+    if(wxBusy || !LOC || LOC.lat==null) return;
+    if(WX && Date.now()-WX.at<WX_TTL && Math.abs(WX.lat-LOC.lat)<.2 && Math.abs(WX.lon-LOC.lon)<.2) return;
+    wxBusy=true;
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+LOC.lat+'&longitude='+LOC.lon+'&current=weather_code,cloud_cover,is_day&timezone=auto')
+      .then(r=>{ if(!r.ok) throw new Error('wx'); return r.json(); })
+      .then(j=>{
+        const c=j&&j.current; if(!c) throw new Error('wx');
+        const before=skyKey();
+        WX={at:Date.now(),lat:LOC.lat,lon:LOC.lon,code:c.weather_code,cloud:c.cloud_cover,day:c.is_day};
+        try{ localStorage.setItem(WX_KEY,JSON.stringify(WX)); }catch(e){}
+        wxBusy=false;
+        if(TAB==='home' && skyKey()!==before) render();
+      })
+      .catch(()=>{ wxBusy=false; });
+  }catch(e){ wxBusy=false; }
+}
+function skyState(){
+  const now=new Date(); let phase;
+  try{
+    const z=zmanimFor(now), sr=z.sunrise(), ss=z.sunset(), m=60000;
+    if(now>=new Date(sr-45*m) && now<new Date(+sr+30*m)) phase='dawn';
+    else if(now>=new Date(+sr+30*m) && now<new Date(ss-30*m)) phase='day';
+    else if(now>=new Date(ss-30*m) && now<new Date(+ss+45*m)) phase='dusk';
+    else phase='night';
+  }catch(e){ const h=now.getHours(); phase=h<5?'night':h<7?'dawn':h<17?'day':h<19?'dusk':'night'; }
+  const fresh=WX && Date.now()-WX.at<3*60*60*1000;
+  return {phase, w: fresh?wxClass(WX.code,WX.cloud):'clear'};
+}
+function skyKey(){ const s=skyState(); return s.phase+'|'+s.w; }
+function skyHTML(s){
+  const night=s.phase==='night', open=(s.w==='clear'||s.w==='partly');
+  const cl={partly:2,cloudy:4,rain:4,storm:5,snow:4,fog:3}[s.w]||0;
+  let h=`<div class="sky sk-${s.phase} skw-${s.w}" aria-hidden="true">`;
+  if(night&&open) h+='<i class="sk-stars"></i>';
+  h+='<i class="sk-orb"></i>';
+  for(let i=0;i<cl;i++) h+=`<i class="sk-cl" style="--i:${i}"></i>`;
+  if(s.w==='rain'||s.w==='storm') h+='<i class="sk-rain"></i>';
+  if(s.w==='snow') h+='<i class="sk-snow"></i>';
+  if(s.w==='storm') h+='<i class="sk-flash"></i>';
+  return h+'</div>';
+}
+setInterval(()=>{ try{ if(TAB==='home'){ wxRefresh(); if(skyKey()!==(window.__skyShown||'')) render(); } }catch(e){} }, 5*60*1000);
 /* the hour/minute abbreviations after a countdown number are too short
    (2 chars) for tr()'s substring pass, which only matches keys over 2
    chars to avoid false hits on common short strings - so they need their
@@ -7817,7 +7926,7 @@ function homeNativeSpec(){
     }else if(stat){
       out.push({...base,kind:'stat',title:T(stat,'.sc-label'),number:T(stat,'.sc-num'),badge:id==='live'?'dot.radiowaves.left.and.right':'person.2.fill',color:'#d4af5f'});
     }else if(el.querySelector('.home-hero-frame')){
-      out.push({...base,kind:'hero',title:T(el,'.greeting'),subtitle:T(el,'.date-heb'),lines:[T(el,'.date-greg'),T(el,'.zman-strip')]});
+      out.push({...base,kind:'hero',sky:skyKey(),title:T(el,'.greeting'),subtitle:T(el,'.date-heb'),lines:[T(el,'.date-greg'),T(el,'.zman-strip')]});
     }else if(id==='banners'){
       const lines=[...el.querySelectorAll('.yahrzeit-strip')].map(n=>n.textContent.replace(/\s+/g,' ').trim());
       if(lines.length) out.push({...base,kind:'banner',lines,color:'#d4af5f'});
@@ -8161,7 +8270,8 @@ function renderHome(){
   const TC=sz=>sz==='s'?'':(' primary'+(sz==='l'?' hi-l':''));
   const readCount=chs.filter(c=>read.has(c)).length;
   const mods={
-    hero:()=>`<div class="home-hero-frame">
+    hero:()=>{ const sky=skyState(); window.__skyShown=sky.phase+'|'+sky.w; wxRefresh(); return `<div class="home-hero-frame has-sky">
+      ${skyHTML(sky)}
       <span class="hhf-corner hhf-tl">${ORN}</span><span class="hhf-corner hhf-tr">${ORN}</span>
       <span class="hhf-corner hhf-bl">${ORN}</span><span class="hhf-corner hhf-br">${ORN}</span>
       <div class="hero">
@@ -8173,7 +8283,7 @@ function renderHome(){
         <div class="date-greg">${dowName(hd)} · ${new Date().toLocaleDateString(civilDateLocale())}</div>
       </div>
       ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
-    </div>`,
+    </div>`; },
     banners:()=>`
     ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>${ckChrome('יום היאהרצייט')} · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
     ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.moon2}<span>${ckChrome('ראש חדש')} · <b>אל תשכח להזכיר יעלה ויבא</b></span></div>`:''}
