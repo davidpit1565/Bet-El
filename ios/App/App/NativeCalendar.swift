@@ -752,8 +752,8 @@ final class NativeCalendarView: UIView, UICalendarViewDelegate, UICalendarSelect
             }
         }
         picker.addAction(UIAction { _ in update() }, for: .valueChanged)
-        seg.addAction(UIAction { [weak self, weak picker] _ in
-            guard let self = self, let picker = picker else { return }
+        seg.addAction(UIAction { [weak self, weak picker, weak seg] _ in
+            guard let self = self, let picker = picker, let seg = seg else { return }
             let keep = picker.date
             picker.calendar = seg.selectedSegmentIndex == 0 ? self.hebrewCal : self.gregorian
             picker.locale = self.converterLocale(hebrew: seg.selectedSegmentIndex == 0)
