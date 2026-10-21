@@ -316,25 +316,41 @@ in English as usual.
   (html2canvas can't use web fonts inside an SVG image), including the
   medallion's ring text (`ornRingText`, one rotated span per letter, the
   Bet El verses Bereshit 28:17/19 in `BK_UI.ring`, no longer printed on the
-  cover). Cover (the owner's approved direction, from a Canva reference:
-  THE FRAME ONLY - no logo, no medallion, nothing in the centre):
-  `ornCoverSvg` = ivory paper, a double gold border (heavy outer line, thin
-  inner line that stops at each corner in a bead finial - the ornament IS
-  the corner, as in the reference) and an openwork acanthus corner
-  (`ornFrameCorner`, built from `ornLeaf` - lobed leaves generated along a
-  curve - plus thin scrolls: a fleur-de-lis on the corner point, a slim
-  leaf curling out along each arm, an inner C-scroll, a bud pointing into
-  the page; mirrored to all four corners at scale 1.3) - matched
-  side-by-side against the owner's approved Canva reference
+  cover). Cover (the owner's approved direction, from a Canva reference,
+  **UPDATED 2026-10 - supersedes the "frame only" note below**: the cover
+  used to carry two nested frames - a single outer gold-line rectangle, and
+  a second inner frame (a thinner interrupted line plus an openwork
+  acanthus scrollwork at each corner, `ornFrameCorner`). The owner asked to
+  drop the inner one as too busy; `ornCoverSvg` now draws ONLY the plain
+  outer rectangle (the single delicate double-stroke gold line near the
+  page edge) - `ornFrameCorner` and the corner scrollwork are gone from the
+  cover (the function itself is still defined, just unused - a future
+  "add richer scrollwork back" ask would reuse it). The title also dropped
+  its own drop-shadow/highlight duplicate copies on the cover
+  (`ornTitleSvg(...,soft)` with `soft` now true there too, same as the
+  band's title) - those two copies sit at asymmetric offsets (a one-sided
+  shadow effect, not a mirrored pair), which in the booklet's black & white
+  print reads as a visible rightward drift of the whole word - that's what
+  looked like a title-centering bug; the text-anchor/viewBox math itself
+  was always exactly centered. The subtitle under the title ("חוֹבֶרֶת
+  לִמּוּד") and the civil/Gregorian date line were both removed from the
+  cover outright (owner's call - keep only the Hebrew date). A blank page
+  (`bkBlankHtml()`) now sits between the cover and the rights page (`bkBuildPrint`:
+  `bkCoverHtml(...)+bkBlankHtml()+bkRightsHtml()+...`) - "the inside of the
+  cover," like a real bound book.
+  The original "frame only" direction (still true for the single remaining
+  frame): `ornCoverSvg` = ivory paper, a double gold border (heavy outer
+  line, a lighter shadow copy right behind it) with nothing in the centre,
+  matched side-by-side against the owner's approved Canva reference
   (scratchpad canva-cover-ornament-v2.png, minus its medallion), with the title
   "בית אל" (`BK_UI.brandStam`, no nikud) standing in the open centre in the
   scribal Culmus Stam Ashkenaz face (fonts/, GPL + font exception, like
   Taamey Frank) with a gold metallic fill - `ornTitleSvg`, the font
   embedded as a data: URL by `ensureBkFont()` (also a document FontFace
-  for print; print/PDF wait for it via `bkMatterPending`); then
-  "חוֹבֶרֶת לִמּוּד", the parasha, dates, QR - supporting lines in Taamey
-  Frank Bold. The dedication and back pages were NOT changed with it - ask
-  the owner before restyling them to match.
+  for print; print/PDF wait for it via `bkMatterPending`); then the
+  parasha and Hebrew date, QR - supporting lines in Taamey Frank Bold. The
+  dedication and back pages were NOT changed with any of this - ask the
+  owner before restyling them to match.
   Dedication (after the owner's memorial-page reference "לְזִכְרוֹן עוֹלָם
   בְּהֵיכַל ה׳"): a top band rising to a scroll crest, a hanging oil lamp
   (`ornLamp`) between the two halves of the header (`BK_UI.dedHdr`), and
@@ -435,6 +451,56 @@ in English as usual.
   TOC lists the two years with real pages (the "בְּהֲכָנָה" placeholders
   remain only when no Ben Ish Chai content was built). Vayera = ~42 A5
   pages of it.
+  **Body text size (2026-10, owner's print review of the Noach booklet):**
+  the day-page body text (`.bk-page .bk-text`, every Torah/Neviim/Rambam/
+  Musar/Ben Ish Chai section's actual reading text, Mishnah/Zohar/Tanya
+  included - NOT the cover, which keeps its own sizing) went from 14px
+  (10.5pt) to 17.5px (~13pt, ~+25%) - a flat ~10% bump read as too timid
+  once actual A5-sefer-typography research came back (9-11pt is the normal
+  comfortable range at real A5 trim; nikud-vocalized text wants the top of
+  that range). The per-text line-height was tightened at the same time
+  (1.7 -> 1.36, `.bk-comm` 1.6 -> 1.35) so the actual line PITCH barely
+  moves (14*1.7 ≈ 17.5*1.36) - bigger, clearer letters and nikud at close
+  to the same lines-per-page, instead of a size bump that also blows up
+  the page count. Rashi/Metzudot-style commentary (`.bk-comm`) scaled the
+  same way, 11.5px -> 15px. The running header band (`.bk-band .bk-ph-side`,
+  the parasha/day·subject labels) grew to ~19px (~1.1x the new body size,
+  the band itself grew 13mm -> 15mm tall to go with it - it used to carry a
+  lot of dead space) and the printed page numbers (`.bk-pf`) grew from
+  10px to 17px (roughly body size, per the reference booklet - they used to
+  read as an afterthought). The small decorative crest that used to sit
+  right above every day's heading (`.bk-day-crest`, drawn by `ornCrest()`)
+  was removed outright (owner's call - unnecessary everywhere); `ornCrest()`
+  itself is still defined (unused) in case it's wanted again elsewhere. The
+  civil/Gregorian date was dropped from both the cover AND every day's own
+  header line inside the book (`.bk-day-d`, `bkBlocks`) - only the Hebrew
+  date (plus "(בָּעֶרֶב)" for Leil Shishi) prints now. A text-size change this
+  large risks the keep-with-text/pullBack pagination logic (`bkPaginate`) -
+  re-verify with real screenshots across several days (including a day that
+  crosses a chapter boundary) and a page-overflow sweep across a whole
+  built week after touching any of these sizes again, not just one day.
+  **Rav honour page nikud (2026-10, owner's review):** the owner flagged the
+  קמץ under the ה and ח in "הָרַב יִצְחָק פִּישְׁחַדְזִי" (`bkRavName`,
+  `.bk-rv-name`) as looking misaligned. That text renders in "Frank Ruhl
+  Libre" (a Google Font, weight 900), NOT Taamey Frank CLM (that font is
+  only loaded for the cover/band brand title via `ornTitleSvg`/`BK_FONT`) -
+  worth remembering before assuming which font is at fault next time this
+  comes up. Investigated and NOT reproduced as an encoding bug: per-
+  character `Range.getBoundingClientRect()` on the live string confirms a
+  single, correctly-ordered combining mark (one קמץ, U+05B8) directly after
+  each of ה and ח, identical in structure to every other letter+nikud pair
+  in the name - there is nothing to "retype." A true high-resolution
+  screenshot of the name (not a PNG re-scaled afterwards - that introduces
+  its own interpolation artifacts that can look like a shifted mark) shows
+  the קמץ glyph attached under the right letter in both cases; the font's
+  own קמץ is a plain flat bar with no descending tail, which reads
+  ambiguously at small sizes and gets harder to read clearly combined with
+  `.bk-rv-name`'s own two-copy drop-shadow (the same asymmetric-shadow
+  effect called out above for the cover title) - plausibly what the owner
+  is actually seeing, not a wrong-position glyph. Left as-is pending the
+  owner's own look at a zoomed screenshot; if it still reads as wrong,
+  dropping `.bk-rv-name`'s text-shadow (like the cover title's fix above)
+  is the next thing to try before touching the font.
   Owner decisions (settled, don't re-ask): Rashi on Yehoshua / Melachim
   stays absent (the Sefaria edition is CC-BY; not added); the Gemara stays
   on the world Daf Yomi cycle (not the parasha-linked Chok LeYisrael
