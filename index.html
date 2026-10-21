@@ -1730,26 +1730,6 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-legal{margin-top:4mm;padding-top:2.5mm;border-top:1px solid var(--bk-line);align-self:stretch}
 .bk-legal-h{font-family:var(--font-sacred);font-weight:700;font-size:9.5px;color:var(--bk-gold-deep);margin-bottom:1mm}
 .bk-legal p{margin:0 0 1.2mm;font-family:Georgia,"Times New Roman",serif;font-size:6.4px;line-height:1.42;color:var(--bk-muted);text-align:justify}
-/* The owner found every TaameyFrankCLM-Bold heading/label in the booklet
-   (day heading, section titles, verse numbers, commentary labels, the
-   header band's side labels, the cover plaque/heading, the dedication and
-   Rav honour pages, the TOC, the legal heading - every .bk-* rule that uses
-   font-weight 700/900 with var(--font-sacred)) too thick/heavy once he saw
-   it printed. He still wants real emphasis, not plain Regular weight (that
-   was tested and rejected as "too far the other way", and it also shifted
-   pagination by a page). The fix keeps font-weight:700 (the real Bold
-   glyphs, so layout/pagination don't change) and shaves a thin rim off each
-   glyph's outer edge with a stroke painted in the page's own paper color -
-   text-stroke paints fill then stroke, so a paper-colored stroke optically
-   thins a bold glyph without ever touching its weight class. Verified this
-   doesn't reintroduce the Type3/nikud-drift bug (still zero Type3 fallback
-   on any nikud character in the exported PDF) and doesn't blur/distort at
-   print resolution - confirmed in the real exported PDF, not just on
-   screen. One shared rule rather than editing all 33 selectors individually. */
-:is(.bk-day-t,.bk-sec-t,.bk-sub,.bk-bdiv span,.bk-mn,.bk-ml,.bk-vn,.bk-comm-l,.bk-cn,.bk-comm b,.bk-band .bk-ph-side,.bk-medal b,.bk-ow,.bk-rt-h,.bk-rt-s,.bk-cv-plq,.bk-cv-hd,.bk-dd-hdr,.bk-dd-h,.bk-dd-name,.bk-dd-tnz,.bk-dd-amen,.bk-hill-h,.bk-hill-n,.bk-shabbat-t,.bk-rv-hdr,.bk-rv-to,.bk-rv-name,.bk-rv-role,.bk-rv-verse,.bk-toc-h,.bk-toc-day span,.bk-toc-row b,.bk-legal-h){
-  -webkit-text-stroke-width:.45px;
-  -webkit-text-stroke-color:var(--bk-paper);
-}
 @media print{
   @page{size:A5;margin:0}
   html,body{height:auto!important;overflow:visible!important;background:#fff!important;background-image:none!important}
