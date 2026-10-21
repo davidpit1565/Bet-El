@@ -1678,7 +1678,11 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-rv-box{top:45mm;height:146mm;left:19mm;right:19mm;justify-content:center;gap:3mm}
 .bk-rv-box .bk-dd-lead{font-size:13px}
 .bk-rv-to{font-family:var(--font-sacred);font-weight:700;font-size:16.5px;color:var(--bk-gold-deep);margin-top:1mm}
-.bk-rv-name{font-family:var(--font-sacred);font-weight:900;font-size:31px;line-height:1.2;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
+/* Bumped from 31px: once the bold-thinning stroke above was applied, the
+   owner found the Rav's name read as "small and bold" together, which
+   looked off - a bigger size (~23% here) restores the sense of a real
+   honorific heading instead of just a thinned bold line. */
+.bk-rv-name{font-family:var(--font-sacred);font-weight:900;font-size:38px;line-height:1.2;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-rv-name span{display:block;font-size:16px;letter-spacing:.12em;margin-top:1mm}
 .bk-rv-role{font-family:var(--font-sacred);font-weight:700;font-size:13.5px;line-height:1.7;max-width:100mm;text-wrap:balance;color:var(--bk-ink)}
 .bk-rv-orn{width:62mm;margin:1mm 0}
