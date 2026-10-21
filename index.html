@@ -1426,12 +1426,40 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-sheet{background:var(--bk-paper);color:var(--bk-ink);border:1px solid var(--bk-line);border-radius:14px;
   padding:16px 16px 20px;margin-top:12px;box-shadow:0 10px 28px -18px rgba(0,0,0,.6);direction:rtl}
 .bk-day{text-align:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--bk-line)}
-.bk-day-t{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:23px;color:var(--bk-gold-deep)}
+/* every bold heading/label in the booklet used to list "Frank Ruhl Libre"
+   first (a Google Font, loaded externally) ahead of var(--font-sacred). On
+   screen that's fine, but Chromium's print-to-PDF pipeline can't always
+   embed an externally-loaded webfont as a real font resource - for this
+   one it silently fell back to drawing each used glyph as its own tiny
+   Type3 "font" instead (confirmed via PyMuPDF's page.get_fonts()/get_text
+   on an actual exported PDF: every Frank-Ruhl-Libre-styled span showed up
+   as Type3, while the body text in var(--font-sacred) on the SAME page
+   embedded correctly as real TaameyFrankCLM-Medium/Bold). Per-glyph Type3
+   fallback does not reproduce the font's own nikud (mark-to-base GPOS)
+   positioning correctly - that's what let the Rav honour page's "פִּישְׁחַדְזִי"
+   print with a visibly drifted קמץ even though every live-DOM screenshot
+   of the same element looked fine (screen rendering never used that
+   broken fallback path - only the print/PDF export did). Dropped "Frank
+   Ruhl Libre" from every .bk-* heading's font-family stack across the
+   whole booklet (day headings, section cartouches, verse numbers, the
+   dedication and Rav pages, the TOC, everywhere) - they now render in
+   var(--font-sacred) (Taamey Frank CLM), the same font the body text
+   already uses and already embeds correctly. Never add "Frank Ruhl Libre"
+   back to a .bk-* rule; if a heading needs to look bolder than Taamey
+   Frank CLM's own 700 weight, that's a font-weight bump, not a different
+   font-family. */
+.bk-day-t{font-family:var(--font-sacred);font-weight:700;font-size:23px;color:var(--bk-gold-deep)}
 .bk-day-s{font-family:var(--font-sacred);font-size:16px;margin-top:2px}
-.bk-day-d{font-family:var(--font-ui);font-size:12.5px;color:var(--bk-muted);margin-top:2px}
+/* .bk-day-d/.bk-sec-src/.bk-cn used var(--font-ui) (Heebo/Assistant, also
+   externally-loaded Google Fonts) - same print-embedding failure as "Frank
+   Ruhl Libre" above (confirmed the same way: Type3 fallback in the actual
+   exported PDF, specifically on the nikud-bearing source citations this
+   renders, e.g. "בְּרֵאשִׁית", "מַסֶּכֶת בְּכוֹרוֹת"). Switched to
+   var(--font-sacred) for the same reason. */
+.bk-day-d{font-family:var(--font-sacred);font-size:12.5px;color:var(--bk-muted);margin-top:2px}
 .bk-sec{margin:4px 0 8px;text-align:center}
-.bk-sec-t{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:19px;color:var(--bk-gold-deep);letter-spacing:.02em}
-.bk-sec-src{font-family:var(--font-ui);font-size:12px;color:var(--bk-muted);margin-top:1px}
+.bk-sec-t{font-family:var(--font-sacred);font-weight:700;font-size:19px;color:var(--bk-gold-deep);letter-spacing:.02em}
+.bk-sec-src{font-family:var(--font-sacred);font-size:12px;color:var(--bk-muted);margin-top:1px}
 .bk-sub{font-family:var(--font-sacred);font-weight:700;font-size:15px;color:var(--bk-gold-deep);text-align:center;margin:8px 0 4px}
 .bk-rule{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--bk-gold)}
 .bk-rule::before,.bk-rule::after{content:'';flex:1;height:1px;background:var(--bk-line)}
@@ -1452,22 +1480,22 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-bdiv::before{background:linear-gradient(to left,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0));margin-inline-end:5px}
 .bk-bdiv::after{background:linear-gradient(to right,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0));margin-inline-start:5px}
 .bk-bdiv i{display:none}
-.bk-bdiv span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--bk-gold-deep);
+.bk-bdiv span{font-family:var(--font-sacred);font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--bk-gold-deep);
   padding:0 12px 1px;border:1px solid var(--bk-gold);border-radius:5px;background:linear-gradient(#fffdf7,#f3e7cb);box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line)}
 .bk-page .bk-bic-b{font-size:15px;line-height:1.35;color:#3e3322}
 .bk-bic-b .bk-p+.bk-p{margin-top:3px}
 .bk-bic-b .bk-biur-t::before{content:'◆';color:var(--bk-gold);font-size:.7em;margin-inline-end:.45em;vertical-align:.12em}
-.bk-mn{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--bk-gold-deep);margin:7px 0 1px}
+.bk-mn{font-family:var(--font-sacred);font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--bk-gold-deep);margin:7px 0 1px}
 .bk-sub+.bk-mn{margin-top:2px}
 .bk-page .bk-mn{font-size:13.5px;margin:5px 0 0}
 .bk-page .bk-sub+.bk-mn{margin-top:1px}
-.bk-ml{display:flex;align-items:center;gap:.5em;margin:.55em 0 .2em;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;
+.bk-ml{display:flex;align-items:center;gap:.5em;margin:.55em 0 .2em;font-family:var(--font-sacred);font-weight:700;
   font-size:1em;line-height:1.35;letter-spacing:.04em;color:var(--bk-gold-deep);break-after:avoid}
 .bk-ml::after{content:'';flex:1;height:1px;background:linear-gradient(to left,var(--bk-line),rgba(162,128,63,0))}
 .bk-p:first-child>.bk-ml{margin-top:0}
 /* verse / halacha markers: a bold gold numeral near body size, sitting on
    the baseline of the line it opens (not a raised superscript) */
-.bk-vn{font-family:"Frank Ruhl Libre",var(--font-sacred);font-size:.82em;font-weight:700;color:var(--bk-gold-deep);vertical-align:baseline;margin-inline-end:.28em}
+.bk-vn{font-family:var(--font-sacred);font-size:.82em;font-weight:700;color:var(--bk-gold-deep);vertical-align:baseline;margin-inline-end:.28em}
 .bk-tg{font-size:.8em;color:var(--bk-muted)}
 /* verse-per-line (Torah/Neviim/Ketuvim): the number hangs in its own column;
    a verse continued onto the next page resumes flush with the text */
@@ -1477,8 +1505,8 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-vline.bk-cont{text-indent:0}
 .bk-comm{font-family:var(--font-sacred);font-size:calc(15px*var(--fs-scale,1));line-height:1.75;text-align:justify;
   margin-top:8px;padding-top:6px;border-top:1px dashed var(--bk-line)}
-.bk-comm-l{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;color:var(--bk-gold-deep);margin-inline-end:4px}
-.bk-cn{font-family:var(--font-ui);font-size:.7em;font-weight:700;color:var(--bk-gold-deep);margin-inline-end:3px}
+.bk-comm-l{font-family:var(--font-sacred);font-weight:700;color:var(--bk-gold-deep);margin-inline-end:4px}
+.bk-cn{font-family:var(--font-sacred);font-size:.7em;font-weight:700;color:var(--bk-gold-deep);margin-inline-end:3px}
 .bk-comm b{font-weight:700}
 .bk-cite{font-family:var(--font-sacred);font-size:16px;text-align:center;padding:8px 0}
 .bk-cite.bk-loading{color:var(--bk-muted)}
@@ -1525,7 +1553,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-band-t svg{width:100%;height:100%;display:block}
 .bk-medal{flex:none;display:inline-flex;align-items:center;gap:5px;padding:2px 11px;border:1px solid var(--bk-gold);
   border-radius:999px;box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line);color:var(--bk-gold-deep)}
-.bk-medal b{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:12.5px;letter-spacing:.04em}
+.bk-medal b{font-family:var(--font-sacred);font-weight:700;font-size:12.5px;letter-spacing:.04em}
 .bk-medal i svg{width:8px;height:8px;display:block}
 .bk-pbody{flex:1;min-height:0;overflow:hidden;position:relative}
 .bk-pf{flex:none;text-align:center;font-family:var(--font-sacred);font-size:17px;color:var(--bk-muted);padding-top:1.5mm}
@@ -1543,7 +1571,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page .bk-sec-t::before{right:calc(100% + 5px);background:linear-gradient(to left,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
 .bk-page .bk-sec-t::after{left:calc(100% + 5px);background:linear-gradient(to right,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
 .bk-page .bk-sec-src{margin-top:3px}
-.bk-ow{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:1.22em;color:var(--bk-gold-deep);letter-spacing:.01em}
+.bk-ow{font-family:var(--font-sacred);font-weight:900;font-size:1.22em;color:var(--bk-gold-deep);letter-spacing:.01em}
 .bk-page .bk-sec-t{font-size:15.5px}
 .bk-page .bk-sec-src{font-size:9.5px}
 .bk-page .bk-sub{font-size:12.5px;margin:5px 0 2px}
@@ -1595,7 +1623,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page.bk-ornp::after{display:none}
 /* page 2: rights & contact */
 .bk-rt-band{top:56mm;height:25mm;justify-content:center;gap:.8mm}
-.bk-rt-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:21px;color:#6e5426;text-shadow:-.6px -.6px 0 #fffdf7,.8px 1px 0 rgba(98,74,34,.3)}
+.bk-rt-h{font-family:var(--font-sacred);font-weight:900;font-size:21px;color:#6e5426;text-shadow:-.6px -.6px 0 #fffdf7,.8px 1px 0 rgba(98,74,34,.3)}
 .bk-rt-s{font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:13.5px;color:#3a2e1a}
 .bk-rt-s2{font-family:var(--font-sacred);font-size:11.5px;color:var(--bk-muted)}
 /* .bk-ol (declared later) sets left/right:0 - the panel's own margins need the extra class */
@@ -1603,7 +1631,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-rt-body>*{max-width:100%}
 .bk-rt-p{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:#3a2e1a;text-wrap:balance}
 .bk-rt-c{display:flex;flex-direction:column;align-items:center;gap:.6mm;font-family:var(--font-sacred);font-size:12.5px;line-height:1.5;color:#3a2e1a}
-.bk-rt-c b{font-family:"Frank Ruhl Libre",var(--font-sacred);font-size:13.5px;color:#6e5426;margin-bottom:.8mm}
+.bk-rt-c b{font-family:var(--font-sacred);font-size:13.5px;color:#6e5426;margin-bottom:.8mm}
 .bk-rt-c [dir=ltr]{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.03em}
 .bk-orn-page{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bk-ol{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
@@ -1619,21 +1647,21 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-cv-qr div{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);letter-spacing:.04em}
 /* dedication */
 .bk-dd-bsd{top:6mm;right:10mm;left:auto;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
-.bk-dd-hdr{top:25.5mm;flex-direction:row;justify-content:center;gap:24mm;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:26px;color:#6e5426;
+.bk-dd-hdr{top:25.5mm;flex-direction:row;justify-content:center;gap:24mm;font-family:var(--font-sacred);font-weight:900;font-size:26px;color:#6e5426;
   text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-dd-box{left:20mm;right:20mm;justify-content:center;gap:1.8mm}
 .bk-dd-box1{top:48mm;height:65mm}
 .bk-dd-box2{top:121mm;height:55mm}
 .bk-dd-lead{font-family:var(--font-sacred);font-size:12px;letter-spacing:.24em;color:var(--bk-muted);padding-inline-start:.24em}
-.bk-dd-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:24px;line-height:1.15;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
-.bk-dd-name{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:19px;line-height:1.45;max-width:98mm;text-wrap:balance}
+.bk-dd-h{font-family:var(--font-sacred);font-weight:900;font-size:24px;line-height:1.15;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
+.bk-dd-name{font-family:var(--font-sacred);font-weight:900;font-size:19px;line-height:1.45;max-width:98mm;text-wrap:balance}
 .bk-dd-txt{font-family:var(--font-sacred);font-size:12.5px;line-height:1.65;max-width:96mm;text-wrap:balance}
-.bk-dd-tnz{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
-.bk-dd-amen{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
+.bk-dd-tnz{font-family:var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
+.bk-dd-amen{font-family:var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
 .bk-dd-foot{top:182mm;font-family:var(--font-sacred);font-size:10px;line-height:1.45;color:var(--bk-muted)}
 .bk-dd-foot small{display:block;font-size:8.5px}
 .bk-hill{margin:2mm auto 1mm;padding:1.6mm 4mm 1.4mm;border:1px solid var(--bk-line);border-radius:2mm;text-align:center;max-width:118mm}
-.bk-hill-h{display:flex;align-items:center;justify-content:center;gap:1.4mm;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13px;color:var(--bk-gold-deep)}
+.bk-hill-h{display:flex;align-items:center;justify-content:center;gap:1.4mm;font-family:var(--font-sacred);font-weight:700;font-size:13px;color:var(--bk-gold-deep)}
 .bk-hill-h i{display:inline-flex;width:13px;height:13px}
 .bk-hill-h svg{width:100%;height:100%}
 .bk-hill ul{list-style:none;margin:1mm 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:.4mm 5mm}
@@ -1644,19 +1672,19 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-hill-s::after{content:')';}
 .bk-hill-f{margin-top:.8mm;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
 .bk-shabbat{margin:6mm 0 2mm;text-align:center}
-.bk-shabbat-t{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:24px;line-height:1.3;color:#6e5426;margin-top:2mm}
+.bk-shabbat-t{font-family:var(--font-sacred);font-weight:900;font-size:24px;line-height:1.3;color:#6e5426;margin-top:2mm}
 .bk-bic-h .bk-bic-intro{margin:0 0 2mm}
-.bk-rv-hdr{top:24mm;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:28px;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
+.bk-rv-hdr{top:24mm;font-family:var(--font-sacred);font-weight:900;font-size:28px;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-rv-box{top:45mm;height:146mm;left:19mm;right:19mm;justify-content:center;gap:3mm}
 .bk-rv-box .bk-dd-lead{font-size:13px}
-.bk-rv-to{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:16.5px;color:var(--bk-gold-deep);margin-top:1mm}
-.bk-rv-name{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:31px;line-height:1.2;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
+.bk-rv-to{font-family:var(--font-sacred);font-weight:700;font-size:16.5px;color:var(--bk-gold-deep);margin-top:1mm}
+.bk-rv-name{font-family:var(--font-sacred);font-weight:900;font-size:31px;line-height:1.2;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-rv-name span{display:block;font-size:16px;letter-spacing:.12em;margin-top:1mm}
 .bk-rv-role{font-family:var(--font-sacred);font-weight:700;font-size:13.5px;line-height:1.7;max-width:100mm;text-wrap:balance;color:var(--bk-ink)}
 .bk-rv-orn{width:62mm;margin:1mm 0}
 .bk-rv-orn .bk-rule{margin:0}
 .bk-rv-p{margin:0;font-family:var(--font-sacred);font-size:13.5px;line-height:1.8;max-width:102mm;text-wrap:balance;text-align:center;color:var(--bk-ink)}
-.bk-rv-verse{margin-top:3mm;font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:19px;line-height:1.35;color:#6e5426}
+.bk-rv-verse{margin-top:3mm;font-family:var(--font-sacred);font-weight:900;font-size:19px;line-height:1.35;color:#6e5426}
 .bk-rv-src{font-family:var(--font-sacred);font-size:11px;color:var(--bk-muted);margin-top:-1.5mm}
 .bk-ded-blank{display:inline-block;min-width:50mm;border-bottom:1px solid var(--bk-gold);height:1.3em}
 
@@ -1666,14 +1694,14 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-qr-url{font-family:var(--font-ui);font-size:9px;color:var(--bk-muted);direction:ltr}
 .bk-page.bk-blank::after{display:none}
 .bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:2.5mm 4mm 0}
-.bk-toc-h{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:26px;color:var(--bk-gold-deep)}
+.bk-toc-h{font-family:var(--font-sacred);font-weight:900;font-size:26px;color:var(--bk-gold-deep)}
 .bk-toc .bk-rule{width:46mm;margin:2mm auto 2.5mm}
 .bk-toc-list{align-self:stretch}
 .bk-toc-list.bk-toc-2col{column-count:2;column-gap:8mm}
 .bk-toc-list.bk-toc-3col{column-count:3;column-gap:6mm}
 .bk-toc-dblk{break-inside:avoid;margin:0 0 2.2mm}
 .bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;margin:0 0 .6mm}
-.bk-toc-day span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:13.5px;color:var(--bk-gold-deep)}
+.bk-toc-day span{font-family:var(--font-sacred);font-weight:700;font-size:13.5px;color:var(--bk-gold-deep)}
 .bk-toc-day small{font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
 .bk-toc-row span{white-space:nowrap}
 .bk-toc-row{display:flex;align-items:baseline;gap:1.5mm;padding-inline-start:2.5mm;font-family:var(--font-sacred);font-size:12px;line-height:1.5}
