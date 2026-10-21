@@ -113,12 +113,13 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   if (!info.dafImgs) errs.push('no daf image rendered with the proxy in place');
   if (info.overflow) errs.push(info.overflow + ' page(s) overflow their body');
   if (!info.cover || !info.dedication || !info.back) errs.push('missing cover/dedication/back page');
-  const badCols = info.cols.filter(c => c.n !== '2' || c.fs !== '14px');
+  const badCols = info.cols.filter(c => c.n !== '2' || c.fs !== '17.5px');
   if (!info.cols.length || badCols.length) errs.push('two-column flows wrong: ' + JSON.stringify(badCols.slice(0, 3)));
   if (!info.cols.some(c => /מוּסָר/.test(c.lbl))) errs.push('no two-column Musar flow found');
   // printed-booklet order: cover, rights & contact page, dedication, contents, ... back page, closing blank
-  const o = info.order, want = ['bk-cover', 'bk-rights', 'bk-rav', 'bk-dedic', 'bk-tocpage'];
-  if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(5, -2).some(c => c !== 'content'))
+  // a blank page (the inside of the cover) sits between the cover and the rights page
+  const o = info.order, want = ['bk-cover', 'bk-blank', 'bk-rights', 'bk-rav', 'bk-dedic', 'bk-tocpage'];
+  if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(6, -2).some(c => c !== 'content'))
     errs.push('page order is ' + o.join(','));
   if (info.qrImgs !== 2) errs.push('expected the QR on the cover and the back page, got ' + info.qrImgs);
   if (!info.dafPages.length || info.dafPages.length !== info.printDafImgs) errs.push('each scanned amud should get its own page');

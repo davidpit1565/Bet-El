@@ -1454,7 +1454,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-bdiv i{display:none}
 .bk-bdiv span{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--bk-gold-deep);
   padding:0 12px 1px;border:1px solid var(--bk-gold);border-radius:5px;background:linear-gradient(#fffdf7,#f3e7cb);box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line)}
-.bk-page .bk-bic-b{font-size:12px;line-height:1.62;color:#3e3322}
+.bk-page .bk-bic-b{font-size:15px;line-height:1.35;color:#3e3322}
 .bk-bic-b .bk-p+.bk-p{margin-top:3px}
 .bk-bic-b .bk-biur-t::before{content:'◆';color:var(--bk-gold);font-size:.7em;margin-inline-end:.45em;vertical-align:.12em}
 .bk-mn{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--bk-gold-deep);margin:7px 0 1px}
@@ -1491,10 +1491,15 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 /* the page boxes: laid out at real A5 size (148x210mm - the printed
    booklet's own page, not a shrunk A4) but invisible on screen (they exist
    for print and the PDF export; .bk-capture shows them for capture).
-   A5 type is set for the page, not scaled down from A4: body 14px (10.5pt)
-   on a ~128mm measure is ~60 letters a line - the comfortable range for
-   vocalized Hebrew - with Rashi/Metzudot at 11.5px (8.6pt, the usual
-   commentary-under-text ratio of a printed chumash). */
+   A5 type is set for the page, not scaled down from A4: body was originally
+   14px (10.5pt), but the owner found it too small in the real printed
+   booklet - raised ~25% to 17.5px (~13pt) (CLAUDE.md's "Study booklet"
+   note has the reference-booklet research behind this number). The
+   line-height comes down from 1.7 to ~1.36 at the same time so the actual
+   line PITCH barely moves (14*1.7 ≈ 17.5*1.36 ≈ 23.8px) - bigger letters
+   and clearer nikud at essentially the same lines-per-page, instead of a
+   size bump that also blows up the page count. Rashi/Metzudot-style
+   commentary scales the same way: 11.5px/1.6 -> 15px/1.35. */
 .bk-print{position:fixed;top:0;left:0;width:148mm;opacity:0;pointer-events:none;z-index:-1}
 .bk-print.bk-capture{position:absolute;opacity:1;z-index:auto}
 .bk-page{width:148mm;height:210mm;padding:8mm 10mm 6mm;background:var(--bk-paper) radial-gradient(ellipse 85% 75% at 50% 45%,#fdfaf2 0%,#fbf7ee 55%,#f4ead3 100%);color:var(--bk-ink);
@@ -1506,22 +1511,24 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-ph-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .bk-ph-side{flex:1;font-family:var(--font-sacred);font-size:10px;color:var(--bk-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bk-ph-lbl{text-align:left}
-.bk-ph.bk-band{position:relative;height:13mm;margin-bottom:2.5mm}
+.bk-ph.bk-band{position:relative;height:15mm;margin-bottom:2.5mm}
 .bk-band-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* the row spans exactly the band's light strip (38.5-91.5 of the 130-unit
-   band = 3.85-9.15mm); the side labels' letter bodies are optically centred
-   on it (nikud hangs below, so the line box is nudged down), the title's
-   ascender tag rises above, so the title is nudged up */
-.bk-band .bk-ph-row{position:absolute;left:0;right:0;top:3.85mm;height:5.3mm;padding:0 3mm}
-.bk-band .bk-ph-side{font-weight:700;font-size:10.5px;color:#5b4a2a;line-height:1;padding-top:.75mm}
-.bk-band-t{flex:none;width:25mm;height:6.4mm;display:block;transform:translateY(-.3mm)}
+/* the row spans the band's light strip (same 29.6%-70.4% band of the
+   130-unit svg as before, just taller now: 4.4-10.5mm of the 15mm band);
+   the side labels' letter bodies are optically centred on it (nikud hangs
+   below, so the line box is nudged down), the title's ascender tag rises
+   above, so the title is nudged up. Text enlarged (~1.1x the body size) to
+   fill the band's own width/height, which used to sit mostly empty. */
+.bk-band .bk-ph-row{position:absolute;left:0;right:0;top:4.4mm;height:6.1mm;padding:0 3mm}
+.bk-band .bk-ph-side{font-weight:700;font-size:19px;color:#5b4a2a;line-height:1;padding-top:.75mm}
+.bk-band-t{flex:none;width:29mm;height:7.4mm;display:block;transform:translateY(-.3mm)}
 .bk-band-t svg{width:100%;height:100%;display:block}
 .bk-medal{flex:none;display:inline-flex;align-items:center;gap:5px;padding:2px 11px;border:1px solid var(--bk-gold);
   border-radius:999px;box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line);color:var(--bk-gold-deep)}
 .bk-medal b{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:700;font-size:12.5px;letter-spacing:.04em}
 .bk-medal i svg{width:8px;height:8px;display:block}
 .bk-pbody{flex:1;min-height:0;overflow:hidden;position:relative}
-.bk-pf{flex:none;text-align:center;font-family:var(--font-sacred);font-size:10px;color:var(--bk-muted);padding-top:1.5mm}
+.bk-pf{flex:none;text-align:center;font-family:var(--font-sacred);font-size:17px;color:var(--bk-muted);padding-top:1.5mm}
 .bk-pf span::before,.bk-pf span::after{content:'—';margin:0 6px;color:var(--bk-line)}
 .bk-page .bk-day{padding-bottom:5px;margin-bottom:7px}
 .bk-page .bk-day-t{font-size:20px}
@@ -1537,18 +1544,16 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page .bk-sec-t::after{left:calc(100% + 5px);background:linear-gradient(to right,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
 .bk-page .bk-sec-src{margin-top:3px}
 .bk-ow{font-family:"Frank Ruhl Libre",var(--font-sacred);font-weight:900;font-size:1.22em;color:var(--bk-gold-deep);letter-spacing:.01em}
-.bk-day-crest{display:block;width:30mm;height:6.3mm;margin:0 auto 1mm}
-.bk-day-crest svg{width:100%;height:100%;display:block}
 .bk-page .bk-sec-t{font-size:15.5px}
 .bk-page .bk-sec-src{font-size:9.5px}
 .bk-page .bk-sub{font-size:12.5px;margin:5px 0 2px}
 .bk-page .bk-rule{margin:7px 0 5px}
-.bk-page .bk-text{font-size:14px;line-height:1.7}
-.bk-page.bk-tight .bk-text{line-height:1.6}
-.bk-page.bk-tight .bk-comm{line-height:1.5}
-.bk-page.bk-tighter .bk-text{line-height:1.55}
-.bk-page.bk-tighter .bk-comm{line-height:1.45}
-.bk-page .bk-comm{font-size:11.5px;line-height:1.6;margin-top:5px;padding-top:4px}
+.bk-page .bk-text{font-size:17.5px;line-height:1.36}
+.bk-page.bk-tight .bk-text{line-height:1.28}
+.bk-page.bk-tight .bk-comm{line-height:1.26}
+.bk-page.bk-tighter .bk-text{line-height:1.24}
+.bk-page.bk-tighter .bk-comm{line-height:1.2}
+.bk-page .bk-comm{font-size:15px;line-height:1.35;margin-top:5px;padding-top:4px}
 .bk-page .bk-cont{margin-top:0;padding-top:0;border-top:none}
 /* Halacha, Musar and Zohar print in two columns, as a sefer page does (~30
    letters a line instead of ~60) - separated by the gap alone, no rule
@@ -1605,13 +1610,10 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 /* cover */
 .bk-cv-title{top:48mm}
 .bk-cv-name{width:104mm;height:26mm;display:block}
-.bk-cv-sub{top:80mm;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:16px;letter-spacing:.36em;color:#8a6d38;padding-inline-start:.36em;
-  text-shadow:-.5px -.5px 0 #fffdf7,.6px .8px 0 rgba(98,74,34,.28)}
 .bk-cv-plq{top:118mm;font-family:"Taamey Frank CLM",var(--font-sacred);font-weight:700;font-size:28px;color:#3a2e1a;
   text-shadow:-.6px -.6px 0 #fff,.8px 1px 0 rgba(98,74,34,.22)}
 .bk-cv-dates{top:134mm;font-family:"Taamey Frank CLM",var(--font-sacred)}
 .bk-cv-hd{font-weight:700;font-size:15.5px;color:#3a2e1a}
-.bk-cv-gd{font-family:var(--font-ui);font-size:10.5px;color:var(--bk-muted);letter-spacing:.08em;margin-top:.6mm}
 .bk-cv-qr{top:166mm;gap:1mm}
 .bk-cv-qr img{width:19mm;height:19mm;padding:1.4mm;background:#fffdf8;border:1px solid rgba(162,128,63,.6);border-radius:1.8mm;display:block}
 .bk-cv-qr div{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);letter-spacing:.04em}
@@ -6026,9 +6028,9 @@ function bkBlocks(date,opt){
   const hdShown=night?new HDate(addDays(date,1)):hd;
   let musarDone=night;
   const hillHtml=night?'':bkHillulotHtml(hd);
-  B.push({t:'day', brk:opt.brk?1:0, label:dayLabel, tocSub:opt.week?localizeHebDateStr(hdShown.renderGematriya(true)).split(' ').slice(0,-1).join(' '):undefined, html:`<div class="bk-day"><i class="bk-day-crest">${ornCrest()}</i><div class="bk-day-t">${dayLabel}</div>
+  B.push({t:'day', brk:opt.brk?1:0, label:dayLabel, tocSub:opt.week?localizeHebDateStr(hdShown.renderGematriya(true)).split(' ').slice(0,-1).join(' '):undefined, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
     <div class="bk-day-s">${bkParashaLine(slot)}</div>
-    <div class="bk-day-d">${localizeHebDateStr(hdShown.renderGematriya(true))} · ${date.toLocaleDateString(civilDateLocale())}${night?' '+bkUI().evening:''}</div></div>`});
+    <div class="bk-day-d">${localizeHebDateStr(hdShown.renderGematriya(true))}${night?' '+bkUI().evening:''}</div></div>`});
   /* part of the day's opening: it moves with the day and first subject
      headings and doesn't stop the header label from following them */
   if(hillHtml) B.push({t:'atom', head:1, html:hillHtml});
@@ -6714,26 +6716,20 @@ function ornFrameCorner(o){
   return `${one(halfF,halfS)}<g transform="matrix(0 1 1 0 0 0)">${one(halfF,halfS)}</g>${ornEmboss('',fleur+bud,3,o)}
     <g fill="none" stroke="${vein}" stroke-width="1.1" stroke-linecap="round" opacity=".75">${halfV}<g transform="matrix(0 1 1 0 0 0)">${halfV}</g></g>`;
 }
-/* The cover: ivory paper and a double gold frame with restrained corner
-   scrollwork - nothing in the centre (the owner's approved direction: the
-   frame only, no medallion), so the title and its lines stand in open space. */
+/* The cover: ivory paper and a single plain gold frame - nothing in the
+   centre (the owner's approved direction: the frame only, no medallion), so
+   the title and its lines stand in open space.
+   The cover used to carry two nested frames: this outer rectangle (a single
+   delicate gold line, kept) and an inner one - a second thin line plus an
+   openwork acanthus scrollwork at each corner (`ornFrameCorner`) - which the
+   owner asked to drop entirely as too busy; only the outer line remains. */
 function ornCoverSvg(){
-  const W=1480, H=2100, id='cv'+(++ORN_ID), o1=48, o2=80, gold='#b8923f', sc=1.3, arm=240*sc;
-  const O={mid:'#c9a24a', shade:'rgba(110,80,22,.55)', hi:'#fff4d2', d:1.4};
-  const c=ornFrameCorner(O);
-  /* the inner line stops at each corner's bead finial - the ornament is the corner */
-  const a=o2+arm, iL=`M${a} ${o2} H${W-a} M${a} ${H-o2} H${W-a} M${o2} ${a} V${H-a} M${W-o2} ${a} V${H-a}`;
+  const W=1480, H=2100, id='cv'+(++ORN_ID), o1=48, gold='#b8923f';
   return `<svg class="bk-orn-page" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
   <defs><radialGradient id="${id}v" cx=".5" cy=".45" r=".75"><stop offset="0" stop-color="#fdf8ec"/><stop offset=".75" stop-color="#f9f1df"/><stop offset="1" stop-color="#f1e4c6"/></radialGradient></defs>
   <rect width="${W}" height="${H}" fill="url(#${id}v)"/>
   <rect x="${o1+2}" y="${o1+3}" width="${W-2*o1}" height="${H-2*o1}" fill="none" stroke="rgba(110,80,22,.22)" stroke-width="7"/>
   <rect x="${o1}" y="${o1}" width="${W-2*o1}" height="${H-2*o1}" fill="none" stroke="${gold}" stroke-width="7"/>
-  <path d="${iL}" transform="translate(1 1.5)" stroke="rgba(110,80,22,.2)" stroke-width="3"/>
-  <path d="${iL}" stroke="${gold}" stroke-width="3"/>
-  <g transform="translate(${o2} ${o2}) scale(${sc})">${c}</g>
-  <g transform="translate(${W-o2} ${o2}) scale(${-sc} ${sc})">${c}</g>
-  <g transform="translate(${o2} ${H-o2}) scale(${sc} ${-sc})">${c}</g>
-  <g transform="translate(${W-o2} ${H-o2}) scale(${-sc})">${c}</g>
   </svg>`;
 }
 /* the title: SVG text in the scribal Stam face with a gold metallic fill and
@@ -7013,11 +7009,18 @@ function bkHebRange(a,b){
 }
 function bkCoverHtml(date,slot,end){
   const t=bkUI(), hd=new HDate(date), q=bkImgSrc(BK_QR_KEY);
+  /* the title's own double shadow/highlight copies (the `soft` arg off) sit at
+     asymmetric offsets (a drop-shadow effect, not a mirrored pair) - fine for
+     a colour cover, but in the booklet's black & white print that uneven
+     ink reads as a visible rightward drift of the whole word, which is what
+     looked like a centering bug: the glyph layout itself (text-anchor:middle
+     at the exact viewBox centre) measures dead centre with no shadow copies.
+     The band's own title already dropped the shadow for a similar reason
+     (no glow/shadow on it at all, see ornTitleSvg) - the cover now matches it. */
   return `<div class="bk-page bk-matter bk-ornp bk-cover">${ornCoverSvg()}
-    <div class="bk-ol bk-cv-title"><i class="bk-cv-name" role="img" aria-label="${t.brand}">${ornTitleSvg(t.brandStam,BK_FONT.url)}</i></div>
-    <div class="bk-ol bk-cv-sub">${t.title}</div>
+    <div class="bk-ol bk-cv-title"><i class="bk-cv-name" role="img" aria-label="${t.brand}">${ornTitleSvg(t.brandStam,BK_FONT.url,1)}</i></div>
     <div class="bk-ol bk-cv-plq">${bkParashaLine(slot)}</div>
-    <div class="bk-ol bk-cv-dates"><div class="bk-cv-hd">${end&&+end!==+date?bkHebRange(hd,new HDate(end)):localizeHebDateStr(hd.renderGematriya(true))}</div><div class="bk-cv-gd">${date.toLocaleDateString(civilDateLocale())}${end&&+end!==+date?' – '+end.toLocaleDateString(civilDateLocale()):''}</div></div>
+    <div class="bk-ol bk-cv-dates"><div class="bk-cv-hd">${end&&+end!==+date?bkHebRange(hd,new HDate(end)):localizeHebDateStr(hd.renderGematriya(true))}</div></div>
     <div class="bk-ol bk-cv-qr">${q?`<img src="${q}" alt=""/><div>${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>
   </div>`;
 }
@@ -7148,7 +7151,7 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
+  host.innerHTML=bkCoverHtml(first,slot,last)+bkBlankHtml()+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */
