@@ -18,7 +18,41 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Widget / notification taps: betel://calendar | tracker | tehillim (handled by openWidgetLink in the app) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="betel" />
+            </intent-filter>
         </activity>
+
+        <receiver android:name=".ZmanRefreshReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.beitel.tehilim.REFRESH" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".BetElMainWidget" android:exported="false" android:label="@string/widget_main_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_main_info" />
+        </receiver>
+        <receiver android:name=".BetElZmanimWidget" android:exported="false" android:label="@string/widget_zmanim_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_zmanim_info" />
+        </receiver>
+        <receiver android:name=".BetElCandleWidget" android:exported="false" android:label="@string/widget_candle_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_candle_info" />
+        </receiver>
+        <receiver android:name=".BetElStreakWidget" android:exported="false" android:label="@string/widget_streak_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_streak_info" />
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -32,6 +66,7 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Tefillin mirror: the live front-camera preview (processed on the device only, nothing is recorded or sent).

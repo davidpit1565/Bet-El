@@ -7,6 +7,8 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(BetElWidgetBridge.class);
+        registerPlugin(NativeLiveActivityBridge.class);
         super.onCreate(savedInstanceState);
         applyFixedTextZoom();
     }

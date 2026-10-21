@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_main_name">Tamid · Date and next zman</string>
+    <string name="widget_main_desc">The Hebrew date, the weekly parasha and a countdown to the next zman</string>
+    <string name="widget_zmanim_name">Tamid · Today\'s times</string>
+    <string name="widget_zmanim_desc">Exact zmanim for your location</string>
+    <string name="widget_candle_name">Tamid · Candle lighting</string>
+    <string name="widget_candle_desc">Countdown to the next candle lighting</string>
+    <string name="widget_streak_name">Tamid · Study streak</string>
+    <string name="widget_streak_desc">Your consecutive days of learning</string>
+</resources>
