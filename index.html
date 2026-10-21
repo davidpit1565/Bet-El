@@ -6736,9 +6736,24 @@ function ornCoverSvg(){
    the ornaments' emboss (the font is embedded as a data: URL, since an SVG
    rendered as an image - html2canvas - can't reach the page's fonts) */
 /* `soft` (the header band): the title alone - no highlight or shadow copy */
+/* Centering: text-anchor="middle" centers the glyphs' ADVANCE width on x=600
+   (the viewBox's true centre) - but this font's actual ink for this fixed
+   word ("התמיד", BK_UI.brandStam - identical in every language block, never
+   user text) isn't symmetric around that advance midpoint: a real getBBox()
+   measurement (not a screenshot pixel-threshold guess, which over-read the
+   drift badly) puts the glyph ink's own centre ~12 viewBox units right of
+   600. Confirmed NOT a late-webfont-swap bug either (font-family on the
+   live <text> is correctly "BkStamT", not the serif fallback, by the time
+   it renders - checked via DOM dump mid-build). So this is simply how the
+   font's side bearings fall for this exact word; TITLE_X_FIX nudges the
+   anchor left by that measured amount so the visible ink - not just the
+   advance box - sits on the true centre line. Only valid for this fixed
+   string; re-measure (getBBox on the live `<text>`) before reusing this
+   function for any other word. */
+const TITLE_X_FIX=12;
 function ornTitleSvg(txt,fontUrl,soft){
-  const id='tt'+(++ORN_ID), fam=fontUrl?'BkStamT':"'Taamey Frank CLM'";
-  const t=(fill,tr,extra)=>`<text x="600" y="246" text-anchor="middle" direction="rtl" font-family="${fam},serif" font-size="262" fill="${fill}" transform="translate(${tr})" ${extra||''}>${txt}</text>`;
+  const id='tt'+(++ORN_ID), fam=fontUrl?'BkStamT':"'Taamey Frank CLM'", cx=600-TITLE_X_FIX;
+  const t=(fill,tr,extra)=>`<text x="${cx}" y="246" text-anchor="middle" direction="rtl" font-family="${fam},serif" font-size="262" fill="${fill}" transform="translate(${tr})" ${extra||''}>${txt}</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" class="orn" viewBox="0 0 1200 300">
     <defs>${fontUrl?`<style>@font-face{font-family:BkStamT;src:url(${fontUrl}) format('truetype')}</style>`:''}
     <linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9c7b3c"/><stop offset=".32" stop-color="#d9bd7a"/><stop offset=".5" stop-color="#f4e4b8"/><stop offset=".68" stop-color="#c6a45e"/><stop offset="1" stop-color="#6e5426"/></linearGradient></defs>
