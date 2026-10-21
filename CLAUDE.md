@@ -479,28 +479,53 @@ in English as usual.
   re-verify with real screenshots across several days (including a day that
   crosses a chapter boundary) and a page-overflow sweep across a whole
   built week after touching any of these sizes again, not just one day.
-  **Rav honour page nikud (2026-10, owner's review):** the owner flagged the
-  קמץ under the ה and ח in "הָרַב יִצְחָק פִּישְׁחַדְזִי" (`bkRavName`,
-  `.bk-rv-name`) as looking misaligned. That text renders in "Frank Ruhl
-  Libre" (a Google Font, weight 900), NOT Taamey Frank CLM (that font is
-  only loaded for the cover/band brand title via `ornTitleSvg`/`BK_FONT`) -
-  worth remembering before assuming which font is at fault next time this
-  comes up. Investigated and NOT reproduced as an encoding bug: per-
-  character `Range.getBoundingClientRect()` on the live string confirms a
-  single, correctly-ordered combining mark (one קמץ, U+05B8) directly after
-  each of ה and ח, identical in structure to every other letter+nikud pair
-  in the name - there is nothing to "retype." A true high-resolution
-  screenshot of the name (not a PNG re-scaled afterwards - that introduces
-  its own interpolation artifacts that can look like a shifted mark) shows
-  the קמץ glyph attached under the right letter in both cases; the font's
-  own קמץ is a plain flat bar with no descending tail, which reads
-  ambiguously at small sizes and gets harder to read clearly combined with
-  `.bk-rv-name`'s own two-copy drop-shadow (the same asymmetric-shadow
-  effect called out above for the cover title) - plausibly what the owner
-  is actually seeing, not a wrong-position glyph. Left as-is pending the
-  owner's own look at a zoomed screenshot; if it still reads as wrong,
-  dropping `.bk-rv-name`'s text-shadow (like the cover title's fix above)
-  is the next thing to try before touching the font.
+  **Rav honour page nikud - real cause found and fixed (2026-10).** The
+  owner first flagged the קמץ under the ה and ח in "הָרַב יִצְחָק
+  פִּישְׁחַדְזִי" (`bkRavName`, `.bk-rv-name`) as looking misaligned; a
+  live-DOM investigation (per-character `Range.getBoundingClientRect()`,
+  a proper high-res screenshot, dropping the text-shadow) found nothing
+  wrong and the issue was provisionally written off as the font's own
+  plain-bar קמץ design reading ambiguously at small size. That was wrong -
+  the owner then sent a photo of an actual **printed** page showing the
+  same drift clearly, which a live-DOM screenshot can never catch because
+  the defect is specific to the print/PDF export path, not on-screen
+  rendering. **Always verify a booklet rendering complaint against the
+  actual exported PDF's own pixels (PyMuPDF `page.get_pixmap()`/
+  `get_text()`/`get_fonts()`), never only a live-DOM screenshot** - this
+  is the second time in one session a real defect was invisible on screen
+  and only showed up in the real print pipeline (see the pagination note
+  above about `bkPaginate` being one synchronous call, a different but
+  related "the live app and the export pipeline don't always match"
+  lesson).
+  Root cause: `.bk-rv-name` (and 23 other `.bk-*` rules - day headings,
+  section cartouches, verse numbers, the dedication/TOC/rights pages,
+  the Shabbat greeting, etc.) listed `"Frank Ruhl Libre"` (an externally
+  loaded Google Font) ahead of `var(--font-sacred)`. On screen that's
+  fine, but Chromium's print-to-PDF pipeline can't always embed an
+  externally-loaded webfont as a real font resource - confirmed directly
+  by inspecting the exported PDF's font list: every Frank-Ruhl-Libre
+  span showed up as a Type3 font (each glyph drawn as its own tiny
+  program) while the SAME page's body text, already in
+  `var(--font-sacred)`, embedded correctly as real TaameyFrankCLM-Medium/
+  Bold. Type3 per-glyph fallback does not reproduce the font's own
+  mark-to-base (GPOS) nikud positioning - that's the drift, and it only
+  ever happens on the print/export path. A few `.bk-*` citation-style
+  labels (`.bk-day-d`, `.bk-sec-src`, `.bk-cn`) had the same problem with
+  `var(--font-ui)` ("Heebo"/"Assistant", also external) - found by
+  scanning the whole exported PDF for Type3-rendered nikud characters (397
+  hits pre-fix, scattered across masechet/chapter citation lines).
+  **Fix: every `.bk-*` rule now uses only `var(--font-sacred)` (Taamey
+  Frank CLM) - never `"Frank Ruhl Libre"` or `var(--font-ui)` for anything
+  printed.** Never reintroduce either into a `.bk-*` rule; a heading that
+  needs more visual weight than Taamey Frank CLM's 700 is a `font-weight`
+  bump on the same family, not a different font-family. Re-verified
+  against a fresh export: zero Type3-rendered nikud characters across all
+  182 pages of a real built week, and the Rav page's קמץ renders centered
+  under the ח, pixel-checked straight from the PDF. A handful of purely
+  decorative/punctuation glyphs (gershayim, geresh, middot, an em dash,
+  the back-of-the-book ◆ divider) still Type3-fallback via a separate,
+  pre-existing font-coverage gap - none of them carry nikud, so none of
+  them can show this symptom; left alone.
   Owner decisions (settled, don't re-ask): Rashi on Yehoshua / Melachim
   stays absent (the Sefaria edition is CC-BY; not added); the Gemara stays
   on the world Daf Yomi cycle (not the parasha-linked Chok LeYisrael
