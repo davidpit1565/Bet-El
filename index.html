@@ -6515,6 +6515,11 @@ function bkPaginate(host,blocks,meta){
     });
     if(!box.childNodes.length) body.removeChild(box);
   });
+  /* the week's last page (Friday's tail + the "שבת שלום" greeting) gets the
+     same near-empty-page protection as every day-to-day brk transition -
+     otherwise a short greeting left alone on its own page before handing
+     off to bkPaginateBic was never covered by this squeeze. */
+  pullBack();
   return no;
 }
 
@@ -6862,9 +6867,11 @@ function bkRavHtml(shabbat){
    Placed right after that honour page and before the combined dedication
    page (see bkBuildPrint). bkNiftarRavFor(first) checks all 7 days of the
    printed week (first..first+6) against every entry's {hDay,hMonth} and
-   returns the first match, or null on an ordinary week (no page added -
-   never a blank page). Add a future Rabbi by appending another entry with
-   its own hDay/hMonth (HMONTHS.<NAME>) and content fields below. */
+   returns EVERY match (there's no reason only one Rabbi's yahrzeit could
+   ever fall in the same 7-day span once this list grows) - an ordinary
+   week returns an empty array (no page added - never a blank page). Add a
+   future Rabbi by appending another entry with its own hDay/hMonth
+   (HMONTHS.<NAME>) and content fields below. */
 const BK_NIFTAR_RAV_LIST=[
   { hDay:20, hMonth:HMONTHS.CHESHVAN, // Rav Mordechai Sharabi zt"l's yahrzeit (כ' חשון)
     hdr:'לְעִלּוּי נִשְׁמַת', lead:'זֵכֶר צַדִּיק לִבְרָכָה',
@@ -6877,17 +6884,20 @@ const BK_NIFTAR_RAV_LIST=[
   }
 ];
 function bkNiftarRavFor(first){
+  const hits=[];
   for(let i=0;i<7;i++){
     const hd=new HDate(addDays(first,i));
-    const hit=BK_NIFTAR_RAV_LIST.find(r=>r.hDay===hd.getDate()&&r.hMonth===hd.getMonth());
-    if(hit) return hit;
+    for(const r of BK_NIFTAR_RAV_LIST) if(r.hDay===hd.getDate()&&r.hMonth===hd.getMonth()&&!hits.includes(r)) hits.push(r);
   }
-  return null;
+  return hits;
 }
+/* one memorial page per match (bkBuildPrint concatenates bkNiftarRavHtml's
+   whole return value - an empty string on an ordinary week, one page for
+   today's single-entry list, and one page per Rabbi should the list ever
+   carry more than one yahrzeit in the same printed week). */
 function bkNiftarRavHtml(first){
-  const R=bkNiftarRavFor(first); if(!R) return '';
   const t=bkUI();
-  return `<div class="bk-page bk-matter bk-ornp bk-rav bk-niftarrav">${ornRavSvg()}
+  return bkNiftarRavFor(first).map(R=>`<div class="bk-page bk-matter bk-ornp bk-rav bk-niftarrav">${ornRavSvg()}
     <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
     <div class="bk-ol bk-rv-hdr">${R.hdr}</div>
     <div class="bk-ol bk-rv-box">
@@ -6900,7 +6910,7 @@ function bkNiftarRavHtml(first){
       <div class="bk-rv-verse">״${R.verse}״</div>
       <div class="bk-rv-src">${R.src}</div>
     </div>
-  </div>`;
+  </div>`).join('');
 }
 
 /* ---------- front and back matter ----------
