@@ -6539,8 +6539,23 @@ function bkPaginate(host,blocks,meta){
         // the most words of this piece that still fit here
         const wc=bkWordCount(node);
         const fits=k=>{ const a=bkKeepWords(node.cloneNode(true),0,k); add(a); const ok=!over(); undo(a); return ok; };
-        let lo=0, hi=wc-1;
-        while(lo<hi){ const mid=(lo+hi+1)>>1; if(fits(mid)) lo=mid; else hi=mid-1; }
+        const binSearch=()=>{ let a=0,b=wc-1; while(a<b){ const mid=(a+b+1)>>1; if(fits(mid)) a=mid; else b=mid-1; } return a; };
+        let lo=binSearch();
+        if(lo===0){
+          /* a short subject (Torah, Nevi'im...) ending near a page's foot
+             used to always push the next subject's whole heading+content to
+             a fresh page even when a one-notch squeeze (the same
+             .bk-tight/.bk-tighter pullBack() already uses for day-to-day
+             transitions) would have fit at least some of it here - leaving
+             the outgoing page needlessly blank at the bottom, since only
+             day boundaries got this squeeze before, never a subject-to-
+             subject one within the same day. */
+          for(const c of ['bk-tight','bk-tighter']){
+            page.classList.add(c); lo=binSearch();
+            if(lo>0) break;
+            page.classList.remove(c);
+          }
+        }
         /* a Musar book label never stays at a page foot without at least a
            few words of its text */
         const lab=node.querySelector&&node.querySelector('.bk-ml');
