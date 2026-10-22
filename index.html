@@ -15702,17 +15702,23 @@ window.shareQR = shareQR;
     const KEY = 'betel_visit_counted';
     const idbGet = () => new Promise(res => { try{ const r = indexedDB.open('betel_flags', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onerror = () => res(false); r.onsuccess = () => { try{ const g = r.result.transaction('f').objectStore('f').get(KEY); g.onsuccess = () => res(!!g.result); g.onerror = () => res(false); }catch(e){ res(false); } }; }catch(e){ res(false); } });
     const idbSet = () => new Promise(res => { try{ const r = indexedDB.open('betel_flags', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onerror = () => res(); r.onsuccess = () => { try{ const t = r.result.transaction('f', 'readwrite'); t.objectStore('f').put(1, KEY); t.oncomplete = () => res(); t.onerror = () => res(); }catch(e){ res(); } }; }catch(e){ res(); } });
+    /* iOS Keychain survives deleting and reinstalling the app (localStorage doesn't), so a reinstall is not a new user. */
+    const kcPlugin = (() => { try{ return (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()==='ios' && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeSystem) || null; }catch(e){ return null; } })();
+    const kcGet = async () => { try{ if(!kcPlugin || !kcPlugin.keychainGet) return false; const r = await kcPlugin.keychainGet({ key: KEY }); return !!(r && r.value); }catch(e){ return false; } };
+    const kcSet = async () => { try{ if(kcPlugin && kcPlugin.keychainSet) await kcPlugin.keychainSet({ key: KEY, value: '1' }); }catch(e){} };
     const counted = async () => {
+      if(await kcGet()) return true;
       try{ if(localStorage.getItem(KEY)) return true; }catch(e){}
       try{ if(document.cookie.split('; ').some(c => c.startsWith(KEY + '='))) return true; }catch(e){}
       return await idbGet();
     };
     const mark = async () => {
+      await kcSet();
       try{ localStorage.setItem(KEY, '1'); }catch(e){}
       try{ document.cookie = KEY + '=1; max-age=31536000; path=/; SameSite=Lax'; }catch(e){}
       await idbSet();
     };
-    if(await counted()){ try{ localStorage.setItem(KEY, '1'); }catch(e){} return; }
+    if(await counted()){ try{ localStorage.setItem(KEY, '1'); }catch(e){} await kcSet(); return; }
     if(!IS_NATIVE_SHELL){
       await new Promise(res => { const done = () => { ['pointerdown','touchstart','keydown','scroll'].forEach(e => window.removeEventListener(e, done, true)); res(); }; ['pointerdown','touchstart','keydown','scroll'].forEach(e => window.addEventListener(e, done, {capture:true, passive:true})); });
       if(await counted()) return;

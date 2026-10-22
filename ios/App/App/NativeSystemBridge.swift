@@ -3,6 +3,7 @@ import Capacitor
 import SafariServices
 import StoreKit
 import CoreImage
+import Security
 
 /// Small system helpers the web layer needs as REAL iOS components:
 /// - `openURL`: an in-app Safari sheet (SFSafariViewController) so links never leave the app
@@ -18,6 +19,8 @@ public class NativeSystemBridge: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "shareImage", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "qrImage", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestReview", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "keychainGet", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "keychainSet", returnType: CAPPluginReturnPromise),
     ]
 
     private func topController() -> UIViewController? {
@@ -90,5 +93,36 @@ public class NativeSystemBridge: CAPPlugin, CAPBridgedPlugin {
             else { SKStoreReviewController.requestReview(in: scene) }
         }
         call.resolve()
+    }
+
+    // MARK: Keychain flag - survives deleting and reinstalling the app (used so the public user counter counts a device once)
+    private func keychainQuery(_ key: String) -> [String: Any] {
+        return [kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: "com.beitel.tehilim.flags",
+                kSecAttrAccount as String: key]
+    }
+
+    @objc func keychainGet(_ call: CAPPluginCall) {
+        guard let key = call.getString("key") else { call.reject("no key"); return }
+        var q = keychainQuery(key)
+        q[kSecReturnData as String] = true
+        q[kSecMatchLimit as String] = kSecMatchLimitOne
+        var out: AnyObject?
+        let status = SecItemCopyMatching(q as CFDictionary, &out)
+        if status == errSecSuccess, let d = out as? Data, let v = String(data: d, encoding: .utf8) {
+            call.resolve(["value": v])
+        } else {
+            call.resolve(["value": NSNull()])
+        }
+    }
+
+    @objc func keychainSet(_ call: CAPPluginCall) {
+        guard let key = call.getString("key"), let value = call.getString("value") else { call.reject("bad args"); return }
+        var q = keychainQuery(key)
+        SecItemDelete(q as CFDictionary)
+        q[kSecValueData as String] = value.data(using: .utf8)
+        q[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        let status = SecItemAdd(q as CFDictionary, nil)
+        if status == errSecSuccess { call.resolve() } else { call.reject("keychain \(status)") }
     }
 }
