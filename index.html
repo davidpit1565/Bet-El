@@ -1503,7 +1503,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-vline+.bk-vline{margin-top:.18em}
 .bk-vline .bk-vn{display:inline-block;min-width:3.0em;text-indent:0;margin-inline-end:.3em;white-space:nowrap;vertical-align:baseline}
 .bk-vline.bk-cont{text-indent:0}
-.bk-comm{font-family:var(--font-sacred);font-size:calc(15px*var(--fs-scale,1));line-height:1.75;text-align:justify;
+.bk-comm{font-family:var(--font-sacred);font-size:calc(14px*var(--fs-scale,1));line-height:1.75;text-align:justify;
   margin-top:8px;padding-top:6px;border-top:1px dashed var(--bk-line)}
 .bk-comm-l{font-family:var(--font-sacred);font-weight:700;color:var(--bk-gold-deep);margin-inline-end:4px}
 .bk-cn{font-family:var(--font-sacred);font-size:.7em;font-weight:700;color:var(--bk-gold-deep);margin-inline-end:3px}
@@ -1581,7 +1581,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page.bk-tight .bk-comm{line-height:1.26}
 .bk-page.bk-tighter .bk-text{line-height:1.24}
 .bk-page.bk-tighter .bk-comm{line-height:1.2}
-.bk-page .bk-comm{font-size:15px;line-height:1.35;margin-top:5px;padding-top:4px}
+/* A little smaller than .bk-text (17.5px) - was 15px (already smaller, but
+   the owner found it read as "the same size" once actually printed; nudged
+   down further so commentary reads as clearly smaller print, the way a
+   printed sefer's Rashi/Metzudat David script does, without dropping so far
+   it's hard to read). */
+.bk-page .bk-comm{font-size:14px;line-height:1.35;margin-top:5px;padding-top:4px}
 .bk-page .bk-cont{margin-top:0;padding-top:0;border-top:none}
 /* Halacha, Musar and Zohar print in two columns, as a sefer page does (~30
    letters a line instead of ~60) - separated by the gap alone, no rule
