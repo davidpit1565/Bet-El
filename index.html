@@ -1532,7 +1532,19 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-print.bk-capture{position:absolute;opacity:1;z-index:auto}
 .bk-page{width:148mm;height:210mm;padding:8mm 10mm 6mm;background:var(--bk-paper) radial-gradient(ellipse 85% 75% at 50% 45%,#fdfaf2 0%,#fbf7ee 55%,#f4ead3 100%);color:var(--bk-ink);
   display:flex;flex-direction:column;overflow:hidden;direction:rtl;position:relative;
-  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  /* layout containment: a .bk-page already has fixed width/height and
+     overflow:hidden, so its own box never depends on its content's size -
+     `contain:layout style` tells the browser that, letting it skip relaying-
+     out every already-finished page (and the rest of the document) whenever
+     bkPaginate() forces a layout read (body.scrollHeight/clientHeight) while
+     building the one page still being filled. Without this, each such read
+     is effectively O(total pages built so far), which compounds badly
+     across a long week (~250 pages) and across this reader's own repeated
+     full rebuilds (settle()'s retry chain) - the actual root cause behind
+     the Vayetze pagination hang, not just the subject-boundary squeeze that
+     first exposed it. */
+  contain:layout style}
 .bk-page::after{content:'';position:absolute;inset:4mm;border:1px solid var(--bk-line);pointer-events:none}
 .bk-ph{flex:none;margin-bottom:3mm}
 .bk-strip{height:4px;border-top:2px solid var(--bk-gold);border-bottom:1px solid var(--bk-line);margin-bottom:2.5mm}
@@ -6431,6 +6443,21 @@ function bkPaginate(host,blocks,meta){
      stranded at the foot of the old one. `filled` = real content already
      on this page (a page holding only moved-over headings is still fresh). */
   let page=null, body=null, no=meta.startNo||0, dayLbl='', secLbl='', filled=false, pend=[], needNew=false, tocDaf='';
+  /* a hard, whole-build time budget for the subject-boundary squeeze below
+     (see its own comment) - reading body.scrollHeight/clientHeight forces a
+     layout flush whose cost grows with how much of the document is already
+     built, so on a long week (Vayetze, ~250 pages) each extra squeeze
+     attempt got dramatically more expensive deep into the document, and
+     compounded further across this reader's own retry-rebuilds (settle()
+     re-running the whole pagination once fonts/images finish loading) -
+     confirmed by instrumentation: the same squeeze call that cost ~1ms early
+     in a fresh build cost 100ms+ by the third full rebuild. Once this budget
+     is spent, the squeeze simply stops trying for the rest of THIS build
+     (silently falling back to the pre-squeeze behavior: the next subject's
+     heading still moves to a fresh page when it doesn't fit, same as every
+     day-to-day transition always has) - a layout algorithm must never be
+     able to cost unbounded time regardless of content shape. */
+  let bkSqueezeBudgetMs=400;
   /* keep-with-text: the current section's heading run (sec/day) and the
      current chapter heading run (sub), each with the last node of its run */
   let secH=null, secHL=null, subH=null, subHL=null;
@@ -6565,7 +6592,7 @@ function bkPaginate(host,blocks,meta){
         const fits=k=>{ const a=bkKeepWords(node.cloneNode(true),0,k); add(a); const ok=!over(); undo(a); return ok; };
         const binSearch=()=>{ let a=0,b=wc-1; while(a<b){ const mid=(a+b+1)>>1; if(fits(mid)) a=mid; else b=mid-1; } return a; };
         let lo=binSearch();
-        if(lo===0){
+        if(lo===0 && bkSqueezeBudgetMs>0){
           /* a short subject (Torah, Nevi'im...) ending near a page's foot
              used to always push the next subject's whole heading+content to
              a fresh page even when a one-notch squeeze (the same
@@ -6573,12 +6600,16 @@ function bkPaginate(host,blocks,meta){
              transitions) would have fit at least some of it here - leaving
              the outgoing page needlessly blank at the bottom, since only
              day boundaries got this squeeze before, never a subject-to-
-             subject one within the same day. */
-          for(const c of ['bk-tight','bk-tighter']){
-            page.classList.add(c); lo=binSearch();
-            if(lo>0) break;
-            page.classList.remove(c);
-          }
+             subject one within the same day. One combined attempt (straight
+             to .bk-tighter, not a lighter .bk-tight probe first) - each
+             attempt here is itself an extra reflow-triggering binary search,
+             and the whole-build time budget above (not just an iteration
+             count) is what actually keeps this safe on a long/degraded
+             build, so halving the attempts here still matters. */
+          const t0=performance.now();
+          page.classList.add('bk-tighter'); lo=binSearch();
+          if(lo===0) page.classList.remove('bk-tighter');
+          bkSqueezeBudgetMs-=(performance.now()-t0);
         }
         /* a Musar book label never stays at a page foot without at least a
            few words of its text */
@@ -6849,10 +6880,18 @@ function ornCoverSvg(){
    function for any other word. */
 const TITLE_X_FIX=12;
 function ornTitleSvg(txt,fontUrl,soft){
+  /* `fontUrl` (BK_FONT.url) is only used here as a ready/not-ready flag -
+     the @font-face rule itself is registered exactly once, globally, by
+     ensureBkFont() (see its own comment), not re-embedded per call: this
+     used to be a `<style>@font-face{...src:url(<base64 TTF>)...}</style>`
+     block inside EVERY single SVG this function returns (one per page
+     header band, so ~230+ times on a long week), which made the browser
+     re-parse/shape that embedded font on every one of them - the actual
+     root cause of the Vayetze pagination hang (see ensureBkFont()). */
   const id='tt'+(++ORN_ID), fam=fontUrl?'BkStamT':"'Taamey Frank CLM'", cx=600-TITLE_X_FIX;
   const t=(fill,tr,extra)=>`<text x="${cx}" y="246" text-anchor="middle" direction="rtl" font-family="${fam},serif" font-size="262" fill="${fill}" transform="translate(${tr})" ${extra||''}>${txt}</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" class="orn" viewBox="0 0 1200 300">
-    <defs>${fontUrl?`<style>@font-face{font-family:BkStamT;src:url(${fontUrl}) format('truetype')}</style>`:''}
+    <defs>
     <linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9c7b3c"/><stop offset=".32" stop-color="#d9bd7a"/><stop offset=".5" stop-color="#f4e4b8"/><stop offset=".68" stop-color="#c6a45e"/><stop offset="1" stop-color="#6e5426"/></linearGradient></defs>
     ${soft?'':t('#fffdf7','-3 -3')+t('rgba(98,74,34,.42)','5 7')}${t(`url(#${id})`,'0 0')}
   </svg>`;
@@ -7054,6 +7093,22 @@ function ensureBkFont(){
     .then(buf=>{
       const u=new Uint8Array(buf); let bin=''; for(let i=0;i<u.length;i+=8192) bin+=String.fromCharCode.apply(null,u.subarray(i,i+8192));
       BK_FONT.url='data:font/ttf;base64,'+btoa(bin);
+      /* register the @font-face ONCE, as a real stylesheet rule (not just
+         via the FontFace API below) so html2canvas's cloned document - which
+         reads CSSOM, not the live FontFaceSet - can still see it when it
+         captures a whole .bk-page (ornTitleSvg's per-SVG <style> used to
+         carry this same rule on every single page-header band's SVG instead
+         - ~230+ copies on a long week - each forcing the layout engine to
+         parse/shape this embedded TrueType font all over again; confirmed by
+         instrumentation to turn a ~5s pagination pass into a 2.5-MINUTE one
+         once the font actually finished loading. One global rule, read by
+         every `font-family:BkStamT` reference (ornTitleSvg no longer embeds
+         its own copy), fixes this at the root. */
+      if(!document.getElementById('bkFontFace')){
+        const st=document.createElement('style'); st.id='bkFontFace';
+        st.textContent=`@font-face{font-family:BkStamT;src:url(${BK_FONT.url}) format('truetype')}`;
+        document.head.appendChild(st);
+      }
       const ff=new FontFace('BkStamT',buf); document.fonts.add(ff); return ff.load();
     })
     .then(()=>{ BK_FONT.state='ok'; })
