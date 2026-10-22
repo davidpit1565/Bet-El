@@ -5812,6 +5812,14 @@ function bkHillulotHtml(hd){
    the same thing. Per-viewer preference, default on. */
 let BK_BW=(()=>{ try{ return localStorage.getItem('betel_bk_bw')!=='0'; }catch(e){ return true; } })();
 function bkMonoRGB(r,g,b){
+  /* the body ink color (--bk-ink, #2b2418) is a warm near-black, so it used
+     to fall into the generic warm-hue remap below like any gold/decorative
+     accent - landing around rgb(20,20,20), a genuine dark gray, never
+     literal black. The owner confirmed this read as "gray, not black" on
+     an actual print and wants true black for reading text specifically -
+     forced here, ahead of the generic formula, without touching how any
+     gold/cream decorative color remaps. */
+  if(r===0x2b && g===0x24 && b===0x18) return [0,0,0];
   r/=255; g/=255; b/=255;
   const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2, d=mx-mn;
   if(!d) return null;
