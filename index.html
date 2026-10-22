@@ -2075,9 +2075,33 @@ const DATA_BASE = (window.Capacitor && window.Capacitor.getPlatform && window.Ca
   ? 'https://davidpit1565.github.io/Bet-El/' : '';
 const NATIVE_DATA_CACHE = 'betel-native-data-v1';
 function dataURL(path){ return DATA_BASE + path.replace(/^\.?\//,''); }
+/* The native cache above never expires on its own, so a data file that is CHANGED after an app was first used would stay stale
+   forever. data/data-version.json lists the changed existing files with a version number; whenever a number differs from what
+   this device last saw, that file is dropped from the cache and re-fetched. (New files need no entry - only edits to existing
+   ones do. Bump the number in that file whenever you edit a data file that is already published.) Every cachedFetch waits for
+   this check (3s cap, never blocks when offline). */
+let DATA_VER_DONE = null;
+function dataVersionSync(){
+  if(DATA_VER_DONE) return DATA_VER_DONE;
+  if(!DATA_BASE || !window.caches) return (DATA_VER_DONE = Promise.resolve());
+  const work = (async ()=>{
+    try{
+      const r = await fetch(dataURL('data/data-version.json'), {cache:'no-cache'});
+      if(!r.ok) return;
+      const j = await r.json();
+      let seen = {}; try{ seen = JSON.parse(localStorage.getItem('betel_data_ver')||'{}')||{}; }catch(e){}
+      const c = await caches.open(NATIVE_DATA_CACHE);
+      for(const [p,v] of Object.entries(j.paths||{})){
+        if(seen[p]!==v){ await c.delete(dataURL(p)); seen[p]=v; }
+      }
+      try{ localStorage.setItem('betel_data_ver', JSON.stringify(seen)); }catch(e){}
+    }catch(e){}
+  })();
+  return (DATA_VER_DONE = Promise.race([work, new Promise(res=>setTimeout(res,3000))]));
+}
 function cachedFetch(url){
   if(!DATA_BASE || !window.caches) return fetch(url);
-  return caches.open(NATIVE_DATA_CACHE).then(c=>c.match(url).then(hit=>{
+  return dataVersionSync().then(()=>caches.open(NATIVE_DATA_CACHE)).then(c=>c.match(url).then(hit=>{
     if(hit) return hit;
     return fetch(url).then(res=>{ if(res && res.ok) c.put(url, res.clone()); return res; });
   })).catch(()=>fetch(url));
