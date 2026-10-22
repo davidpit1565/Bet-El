@@ -7219,9 +7219,15 @@ function notifPermGranted(){
 }
 function notifReady(){ return S.notifEnabled && notifPermGranted(); }
 let NOTIF_ID_SEQ=1;
+let APP_VISIBLE_SINCE=Date.now();
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') APP_VISIBLE_SINCE=Date.now(); });
 function fireNotif(title,body,dir,lang){
   const ln=notifLocalPlugin();
   if(ln){
+    /* A reminder whose time already passed while the app was closed is stale: showing it the instant the app
+       opens is what made several notifications pop up at once. The OS-scheduled ones (notifScheduleAhead) cover
+       the closed-app case, so a "catch-up" fire within the first seconds of opening is dropped. */
+    if(Date.now()-APP_VISIBLE_SINCE<15000) return;
     try{ ln.schedule({notifications:[{id:(NOTIF_ID_SEQ++)%2147483647||1, title, body, schedule:{at:new Date(Date.now()+300)}}]}); }catch(e){}
     return;
   }
@@ -7250,6 +7256,41 @@ function notifScheduleDaily(){
   const t=ckNotifText();
   try{ ln.schedule({notifications:[{id:NOTIF_DAILY_ID, title:t.chokTitle, body:t.chokMorningBody,
     schedule:{on:{hour:NOTIF_DAILY_HOUR,minute:NOTIF_DAILY_MIN}, allowWhileIdle:true}}]}); }catch(e){}
+}
+/* Ben Ish Chai (09:55) and Musar (20:00) reminders as REAL OS-scheduled notifications for the next 14 days
+   (their text only needs the parasha / work name, which is known ahead), re-built on every launch/foreground
+   and whenever the language or work changes. 28 + the daily one stays well under iOS's 64-pending limit. */
+const NOTIF_AHEAD_BASE=700000;
+async function notifScheduleAhead(){
+  const ln=notifLocalPlugin(); if(!ln || !notifReady()) return;
+  try{
+    const ids=[]; for(let i=0;i<40;i++) ids.push({id:NOTIF_AHEAD_BASE+i});
+    await ln.cancel({notifications:ids});
+    await ensureBicIndex().catch(()=>{});
+    await ensureMusarCycles().catch(()=>{});
+    const t=ckNotifText(), now=new Date(), list=[], work=S.musarWork||'reshit';
+    for(let i=0;i<14;i++){
+      const d=addDays(civilToday(),i);
+      const bicAt=new Date(d.getFullYear(),d.getMonth(),d.getDate(),9,55);
+      if(bicAt>now){
+        try{
+          const track=bicTrack(), key=bicNearestAvailableKey(track,currentWeekParshaKey(d));
+          const p=bicParshiot(track).find(x=>x.key===key);
+          if(p) list.push({id:NOTIF_AHEAD_BASE+i*2, title:t.bicTitle, body:t.bicBody+bicParshaName(p), schedule:{at:bicAt, allowWhileIdle:true}});
+        }catch(e){}
+      }
+      const muAt=new Date(d.getFullYear(),d.getMonth(),d.getDate(),20,0);
+      if(muAt>now && MCYC && MCYC[work]){
+        try{ list.push({id:NOTIF_AHEAD_BASE+i*2+1, title:t.musarTitle, body:t.musarBody+ckMusarUI()[work], schedule:{at:muAt, allowWhileIdle:true}}); }catch(e){}
+      }
+    }
+    if(list.length) await ln.schedule({notifications:list});
+  }catch(e){}
+}
+function notifCancelAhead(){
+  const ln=notifLocalPlugin(); if(!ln) return;
+  const ids=[]; for(let i=0;i<40;i++) ids.push({id:NOTIF_AHEAD_BASE+i});
+  try{ ln.cancel({notifications:ids}); }catch(e){}
 }
 function notifCancelDaily(){
   const ln=notifLocalPlugin(); if(!ln) return;
@@ -14170,9 +14211,9 @@ function wireSettingsCategory(catId){
           if(!notifLocalPlugin() && typeof Notification==='undefined'){ toast('הדפדפן אינו תומך בהתראות'); return; }
           const granted=await notifRequestPermission();
           S.notifEnabled=granted; saveS(); renderSettings();
-          if(granted) notifScheduleDaily();
+          if(granted){ notifScheduleDaily(); notifScheduleAhead(); }
           toast(granted?'הודעות הפעלו':'לא נתנה הרשאה');
-        } else { S.notifEnabled=false; saveS(); renderSettings(); notifCancelDaily(); toast('הודעות כבו'); }
+        } else { S.notifEnabled=false; saveS(); renderSettings(); notifCancelDaily(); notifCancelAhead(); toast('הודעות כבו'); }
       };
       break;
     }
@@ -15457,7 +15498,7 @@ function checkNotification(){
    one is async, only marking betel_bic_notif_sent (and actually notifying)
    once that data resolves and a real parasha name is found. */
 function checkBicNotification(){
-  if(!notifReady()) return;
+  if(!notifReady() || notifLocalPlugin()) return; // native: scheduled ahead by notifScheduleAhead()
   const now=new Date();
   if(now.getHours()<9||(now.getHours()===9&&now.getMinutes()<55)) return;
   const todayStr=now.toISOString().slice(0,10);
@@ -15477,7 +15518,7 @@ function checkBicNotification(){
    cycles data) to confirm the user's chosen work actually has data before
    naming it, and its own flag so it doesn't collide with the others. */
 function checkMusarNotification(){
-  if(!notifReady()) return;
+  if(!notifReady() || notifLocalPlugin()) return; // native: scheduled ahead by notifScheduleAhead()
   const now=new Date();
   if(now.getHours()<20) return;
   const todayStr=now.toISOString().slice(0,10);
@@ -15511,7 +15552,7 @@ function notifBootSync(){
         localStorage.setItem('betel_notif_tried','1');
         return notifRequestPermission();
       }
-    }).then(()=>{ if(notifReady()) notifScheduleDaily(); }).catch(()=>{});
+    }).then(()=>{ if(notifReady()){ notifScheduleDaily(); notifScheduleAhead(); } }).catch(()=>{});
   }
   if(typeof Notification!=='undefined' && Notification.permission==='default' && !localStorage.getItem('betel_notif_tried')){
     localStorage.setItem('betel_notif_tried','1');
@@ -15540,7 +15581,7 @@ try{ensureChokIndex().then(()=>{ try{chokCheckReminders();}catch(e){} });}catch(
    re-evaluated every minute (and the moment the app is foregrounded)
    like every other foreground reminder here. */
 setInterval(()=>{ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} }, 60000);
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} try{applyWakeLock();}catch(e){} } });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ try{checkNotification();}catch(e){} try{checkBicNotification();}catch(e){} try{checkMusarNotification();}catch(e){} try{chokCheckReminders();}catch(e){} try{applyWakeLock();}catch(e){} try{notifScheduleAhead();}catch(e){} } });
 /* Location is AUTOMATIC by default: the first launch asks for it (the iOS permission sheet), and a later
    launch asks again if that first try only timed out / had no signal (a real "denied" is never nagged).
    Once granted, every launch and every return to the app refreshes it, so the place, the zmanim and the
