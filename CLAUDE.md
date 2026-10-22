@@ -628,3 +628,21 @@ in English as usual.
   App Store (id6807186847) as of 2026-09-09. `appQrImage()` (index.html)
   now encodes `APP_STORE_URL` (`https://apps.apple.com/app/...`) instead
   of the PWA's own `location.href`.
+- **Every booklet the owner gives final approval on must be archived to
+  the `booklets-archive` branch immediately** (never deployed/merged to
+  main, just kept forever so any session/device can find it - this is
+  what `scripts/booklet-publish.mjs`'s own archive step does for the
+  booklet that actually goes live via `data/booklet/current.json`, but
+  future, not-yet-live weeks need the same archiving even before their
+  publish date, so other sessions aren't stuck with only an ephemeral
+  file in some agent's scratchpad). Layout: `<Hebrew year>/<slug>_<shabbat
+  YYYY-MM-DD>.pdf` + an entry in that branch's `index.json`
+  (`{year, yearHe, parasha, slug, shabbat, file}`, kept sorted by
+  `shabbat`) - same shape the publish script already writes, so a future
+  real publish of that same week finds (and safely overwrites) the exact
+  same archive entry rather than creating a duplicate. **If the owner
+  later approves a CHANGE to an already-archived booklet** (a content fix,
+  a re-export with an updated template), push the corrected PDF to the
+  same archive path/slug (overwriting the old one) and update its
+  `index.json` entry in place - the archive always reflects the latest
+  approved version of that week, not every draft that preceded it.
