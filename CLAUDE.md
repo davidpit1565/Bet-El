@@ -54,6 +54,12 @@ in English as usual.
   `data/`** - a stale manifest either 404s harmlessly on a removed path or
   just fails to proactively prefetch a newly added one (it still works
   normally when the user opens that section).
+- **Editing an already-published `data/` file needs a bump in `data/data-version.json`.** The native Cache Storage layer
+  (`cachedFetch`) never expires, so a changed existing file stays stale on every device that already cached it. List the
+  changed path in `data/data-version.json` (`paths`: path -> number; raise the number to re-publish) - `dataVersionSync()`
+  drops those entries from the cache when a device sees a new number. New files need no entry. Needs an app build the first
+  time (the mechanism itself is JS); after that data fixes reach installed apps without a build. Web/PWA already refresh
+  through the service worker.
 - The Musar system (`MUSAR_WORKS`, `MUSAR_UI`, `ckMusarSourceLabel`) is
   designed to make adding a new work mostly declarative: add `{key:'x'}` to
   `MUSAR_WORKS` and an `x` entry to every language block of `MUSAR_UI`
