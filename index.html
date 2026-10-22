@@ -3094,6 +3094,7 @@ function tr(node){
 }
 function applyLang(){
   const l=S.lang||'he';
+  try{ cycLangSync(); }catch(e){}   // may run before the cycles block below has been declared (boot)
   document.documentElement.lang = {he:'he',ka:'ka',ru:'ru',fr:'fr'}[l]||'en';
   document.documentElement.dir = l==='he'?'rtl':'ltr';
   document.documentElement.setAttribute('data-lang',l);
@@ -5146,10 +5147,27 @@ function ensureCycles(){
     .catch(e=>{ cycLoadPromise=null; throw e; });
   return cycLoadPromise;
 }
+/* Non-Hebrew UI languages read Rambam, Zohar, Tanya and the daf in transliteration (phonetic, not translation):
+   data/chok-<kind>/<b>.<lang>.json mirrors <b>.json with the text written phonetically; it is laid over the Hebrew
+   base, so a block with no sibling file (fr/ru/ka for now) just shows the original. CYC_BLOCK holds what is on screen
+   for the current language and is emptied whenever the language changes (cycLangSync, from applyLang). */
+const CYC_BASE={}; let CYC_BLOCK_LANG=null;
+function cycLangSync(){ const l=S.lang||'he'; if(CYC_BLOCK_LANG!==l){ CYC_BLOCK={}; CYC_BLOCK_LANG=l; } }
+function cycOverlay(b,t){
+  if(t===null||typeof t!=='object'||Array.isArray(t)||b===null||typeof b!=='object'||Array.isArray(b)) return t;
+  const o=Object.assign({},b);
+  Object.keys(t).forEach(k=>{ o[k]=(k in b)?cycOverlay(b[k],t[k]):t[k]; });
+  return o;
+}
 function ensureCycBlock(kind,b){
-  const k=kind+'/'+b;
+  cycLangSync();
+  const lang=S.lang||'he', k=kind+'/'+b;
   if(CYC_BLOCK[k]) return Promise.resolve();
-  return cachedFetch(dataURL('data/chok-'+kind+'/'+b+'.json')).then(r=>r.json()).then(d=>{ CYC_BLOCK[k]=d; });
+  const base=CYC_BASE[k] ? Promise.resolve(CYC_BASE[k])
+    : cachedFetch(dataURL('data/chok-'+kind+'/'+b+'.json')).then(r=>r.json()).then(d=>{ CYC_BASE[k]=d; return d; });
+  const tr=(lang==='he') ? Promise.resolve(null)
+    : cachedFetch(dataURL('data/chok-'+kind+'/'+b+'.'+lang+'.json')).then(r=>r.ok?r.json():null);
+  return Promise.all([base,tr]).then(([bd,td])=>{ if((S.lang||'he')===lang) CYC_BLOCK[k]=td?cycOverlay(bd,td):bd; });
 }
 /* The daf is what the day needs; Steinsaltz and Rashi sit behind a button, so
    they are only fetched once a button is pressed. */
