@@ -8332,9 +8332,20 @@ function renderHome(){
         ${sz==='l'?`<div class="qd">${readCount} / ${chs.length} ${ckChrome('נקראו')}</div>`:''}
       </div>`,
     zohar:(sz)=>{
+      /* Shows today's page (part · daf · amud) like Tehillim shows its chapter range; the cycle file loads lazily, so the
+         first home render shows the generic line and re-renders once it is there. */
+      let sub='לפי סדר עמוד ליום';
+      try{
+        if(CYC && CYC.zohar){
+          const ze=CYC.zohar.order[ckCycleIndex(CYC.zohar,chokDayHDate())];
+          if(ze) sub=ckZoharPartName(ze.part)+' · '+ckChrome('דַּף ')+heNum(ze.daf)+' · '+ze.side;
+        } else {
+          ensureCycles().then(()=>{ if(TAB==='home') render(); }).catch(()=>{});
+        }
+      }catch(e){}
       return `<div class="q-tile${TC(sz)}" data-cat="zohar" id="homeZoharCard">
         <div class="qt">${heTitle('זהר היומי','זֹהַר הַיּוֹמִי')}</div>
-        <div class="qd">לפי סדר עמוד ליום</div>
+        <div class="qd">${sub}</div>
       </div>`;
     },
     shnayim:(sz)=>weekParshaKey?`<div class="q-tile${TC(sz)}${smIsDone(weekParshaKey)?' done':''}" data-cat="shnayim" id="homeParshaCard">
