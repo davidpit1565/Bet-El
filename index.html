@@ -3304,17 +3304,28 @@ function bookName(book){
 let TORAH=null, HAFTARAH=null, LEYNING=null, TORAH_TRANSLIT={};
 let smLoadPromise=null;
 function ensureShnayimData(){
-  if(TORAH) return Promise.resolve();
+  if(TORAH) return ensureTorahTranslit();
   if(smLoadPromise) return smLoadPromise;
   smLoadPromise = Promise.all([
     cachedFetch(dataURL('data/torah-data.json')).then(r=>r.json()),
     cachedFetch(dataURL('data/haftarah-data.json')).then(r=>r.json()),
     cachedFetch(dataURL('data/leyning-data.json')).then(r=>r.json()),
-    cachedFetch(dataURL('data/torah-fr.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/torah-en.json')).then(r=>r.json()).catch(()=>({})),
-  ]).then(([t,h,l,fr,en])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; TORAH_TRANSLIT={fr,en}; })
+  ]).then(([t,h,l])=>{ TORAH=t; HAFTARAH=h; LEYNING=l; })
+    .then(()=>ensureTorahTranslit())
     .catch(e=>{ smLoadPromise=null; throw e; });
   return smLoadPromise;
+}
+/* Torah transliteration (Hebrew + Targum, phonetic) for the active UI language only: en/fr/ru/ka each live in their own
+   data/torah-<lang>.json. A failed fetch leaves the language unset so the next call retries (Hebrew shows meanwhile). */
+const TORAH_TR_PENDING={};
+function ensureTorahTranslit(){
+  const lang=S.lang;
+  if(!lang||lang==='he'||TORAH_TRANSLIT[lang]!==undefined) return Promise.resolve();
+  if(TORAH_TR_PENDING[lang]) return TORAH_TR_PENDING[lang];
+  TORAH_TR_PENDING[lang]=cachedFetch(dataURL('data/torah-'+lang+'.json')).then(r=>r.json()).then(d=>{ TORAH_TRANSLIT[lang]=d; })
+    .catch(e=>{ TORAH_TR_PENDING[lang]=null; })
+    .then(()=>{ TORAH_TR_PENDING[lang]=null; });
+  return TORAH_TR_PENDING[lang];
 }
 let ZOHAR=null, zoharLoadPromise=null;
 function ensureZoharData(){
