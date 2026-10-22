@@ -4708,7 +4708,9 @@ function openZoharYomi(){ ZY_STATE=null; go('zoharYomi'); }
 function renderZoharYomiReader(){
   const isToday=!ZY_STATE;
   const viewDate=ZY_STATE||chokDayDate();
-  const slot=chokSlotFor(viewDate);
+  /* Shabbat has no Chok LeYisrael slot, but the Zohar cycle runs on the calendar date and has its own page every day
+     (Shabbat included), so on Shabbat borrow Friday's slot only to load the data and still show Shabbat's own page. */
+  const slot=chokSlotFor(viewDate)||(viewDate.getDay()===6?chokSlotFor(addDays(viewDate,-1)):null);
   if(!slot) return go('home');
   const cur={key:slot.key,day:slot.day};
   const hd=new HDate(viewDate);
@@ -4725,7 +4727,7 @@ function renderZoharYomiReader(){
     return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${it}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
   }).join('');
   const srcLine=chokSourceLine(s,hd);
-  const stepDate=dir=>{ let d=addDays(viewDate,dir); if(d.getDay()===6) d=addDays(d,dir); return d; };
+  const stepDate=dir=>addDays(viewDate,dir);
   const prevDate=stepDate(-1), nextDate=stepDate(1);
   syncNativeTopBar('זֹהַר הַיּוֹמִי','home');
   app.innerHTML=`
