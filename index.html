@@ -7343,7 +7343,34 @@ function bkBuildPrint(date){
   /* the Gemara scans' credit + HebrewBooks.org license: once, on the back */
   host.insertAdjacentHTML('beforeend',bkBackHtml(blocks.some(b=>b.img))+bkBlankHtml());
   bkBwDom(host);
+  bkFixOverflow(host);
   return n+3;
+}
+/* Last-resort overflow guard, run once after a whole build: the binary-search
+   fit check above (bkPaginate) assumes a box only ever gets taller as more
+   words are added to it, true for a single-column flow but not guaranteed
+   for a column-balanced box (.bk-cols: column-fill:balance, used by Tanya/
+   Zohar/Halacha's two-column layout) - the browser can redistribute lines
+   across columns as content is added/removed, so a slice that measured as
+   fitting during the search can still end up overflowing once every other
+   page/box on the sheet has also been built (observed on a real build: one
+   Tanya page overflowing by about a line, reproducibly, with no fix from
+   retrying the whole build or from a tighter per-piece re-check inside the
+   search itself - so this runs after everything is placed, as a final
+   sweep, rather than trying to out-guess column-balance mid-search). Same
+   .bk-tight/.bk-tighter line-height classes pullBack() already uses for
+   day-boundary squeezing; cheap (one layout read per page, no search) and
+   never touches content, so it is safe to run unconditionally on every
+   build, not just when a bug like this is known to exist. */
+function bkFixOverflow(host){
+  host.querySelectorAll('.bk-pbody').forEach(body=>{
+    const page=body.closest('.bk-page');
+    if(!page||page.classList.contains('bk-dafpage')) return;
+    for(const c of ['bk-tight','bk-tighter']){
+      if(body.scrollHeight<=body.clientHeight+1) return;
+      page.classList.add(c);
+    }
+  });
 }
 /* pagination measures real glyphs, so it waits for the reading font */
 function bkFontsReady(){ try{ return (document.fonts&&document.fonts.ready)||Promise.resolve(); }catch(e){ return Promise.resolve(); } }
