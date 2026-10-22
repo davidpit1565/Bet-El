@@ -1549,6 +1549,10 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    fill the band's own width/height, which used to sit mostly empty. */
 .bk-band .bk-ph-row{position:absolute;left:0;right:0;top:4.4mm;height:6.1mm;padding:0 3mm}
 .bk-band .bk-ph-side{font-weight:700;font-size:19px;color:#5b4a2a;line-height:1;padding-top:.75mm}
+/* Ben Ish Chai's label ("בֶּן אִישׁ חַי · שָׁנָה רִאשׁוֹנָה"/"...שְׁנִיָּה")
+   is longer than every other page's label - a fixed, smaller size here
+   (not a runtime measurement) so it fits in every rendering context. */
+.bk-band .bk-ph-lbl.bk-ph-lbl-bic{font-size:16px}
 .bk-band-t{flex:none;width:29mm;height:7.4mm;display:block;transform:translateY(-.3mm)}
 .bk-band-t svg{width:100%;height:100%;display:block}
 .bk-medal{flex:none;display:inline-flex;align-items:center;gap:5px;padding:2px 11px;border:1px solid var(--bk-gold);
@@ -6236,7 +6240,19 @@ function bkPaginateBic(host,parts,meta,no,toc){
   const mk=cls=>{ const d=document.createElement('div'); d.className=cls; return d; };
   const divHtml=`<div class="bk-bdiv"><i>${ORN}</i><span>${t.biurH}</span><i>${ORN}</i></div>`;
   let page=null, body=null, top=null, div=null, bot=null;
-  const newPage=label=>{ no++; page=el(bkPageHtml(meta,no,label)); page.dataset.no=no; host.appendChild(page); body=page.querySelector('.bk-pbody'); top=div=bot=null; };
+  /* the header band's two side labels (.bk-ph-side) split the row's leftover
+     space 50/50 with the fixed-width brand wordmark between them, regardless
+     of how long either side's text actually is - every other day's label
+     fits at the shared 19px, but "בֶּן אִישׁ חַי · שָׁנָה רִאשׁוֹנָה" (Year
+     1) is two letters longer than Year 2's and overflowed into an ellipsis.
+     A JS scrollWidth/clientWidth measurement to shrink-to-fit looked right
+     on screen but didn't hold once the real page.pdf()/print layout kicked
+     in (a different flex-row width than the live-DOM screen measurement),
+     so this is a fixed, slightly smaller size for Ben Ish Chai's label
+     specifically (bk-ph-lbl-bic) - deterministic in every rendering context,
+     and it doesn't touch any other page's label. */
+  const newPage=label=>{ no++; page=el(bkPageHtml(meta,no,label)); page.dataset.no=no; host.appendChild(page); body=page.querySelector('.bk-pbody'); top=div=bot=null;
+    const l=page.querySelector('.bk-ph-lbl'); if(l) l.classList.add('bk-ph-lbl-bic'); };
   const over=()=>body.scrollHeight>body.clientHeight+1;
   /* lay out the page's pieces: every text on top, every biur below */
   const render=pieces=>{
