@@ -15646,7 +15646,9 @@ window.shareQR = shareQR;
   const IS_NATIVE_SHELL = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform==='function' && window.Capacitor.isNativePlatform());
   const IS_DEV_BUILD = window.__BETEL_DEV_BUILD === true
     || (!IS_NATIVE_SHELL && /^https?:$/.test(location.protocol) && ['localhost','127.0.0.1','0.0.0.0'].includes(location.hostname));
-  if(!IS_DEV_BUILD) getAnalytics(firebaseApp);
+  /* Not inside the native shells: the web Analytics SDK keeps its client id in a cookie, which capacitor://localhost can't
+     store, so every launch looked like a brand-new user and inflated "new users" far beyond the real installs. */
+  if(!IS_DEV_BUILD && !IS_NATIVE_SHELL) getAnalytics(firebaseApp);
 
   // Public visit counter (Firestore stats/visits), shown on the home page
   /* Inside the native shells (WKWebView on capacitor://localhost, Android WebView on https://localhost) Firestore's streaming
@@ -15688,10 +15690,34 @@ window.shareQR = shareQR;
   };
   setTimeout(restVisits, 2500);
   setInterval(restVisits, 60000);
+  /* One count per real person/device, never per open. Guards: no bots/crawlers/headless browsers/link previews; on the web a
+     real interaction (touch/click/scroll/key) is required first; "already counted" is remembered in localStorage AND a
+     1-year cookie AND IndexedDB, so clearing just one of them (Safari's 7-day purge, private tabs of a cleared site) can't
+     count the same device twice. */
   (async () => {
     if(IS_DEV_BUILD) return;
-    if(localStorage.getItem('betel_visit_counted')) return;
-    localStorage.setItem('betel_visit_counted', '1');
+    const ua = String(navigator.userAgent || '');
+    if(navigator.webdriver || /bot|crawl|spider|slurp|preview|headless|lighthouse|facebookexternalhit|whatsapp|telegram|curl|python|node-fetch|monitor|pingdom|uptime/i.test(ua)) return;
+    if(document.prerendering) return;
+    const KEY = 'betel_visit_counted';
+    const idbGet = () => new Promise(res => { try{ const r = indexedDB.open('betel_flags', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onerror = () => res(false); r.onsuccess = () => { try{ const g = r.result.transaction('f').objectStore('f').get(KEY); g.onsuccess = () => res(!!g.result); g.onerror = () => res(false); }catch(e){ res(false); } }; }catch(e){ res(false); } });
+    const idbSet = () => new Promise(res => { try{ const r = indexedDB.open('betel_flags', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onerror = () => res(); r.onsuccess = () => { try{ const t = r.result.transaction('f', 'readwrite'); t.objectStore('f').put(1, KEY); t.oncomplete = () => res(); t.onerror = () => res(); }catch(e){ res(); } }; }catch(e){ res(); } });
+    const counted = async () => {
+      try{ if(localStorage.getItem(KEY)) return true; }catch(e){}
+      try{ if(document.cookie.split('; ').some(c => c.startsWith(KEY + '='))) return true; }catch(e){}
+      return await idbGet();
+    };
+    const mark = async () => {
+      try{ localStorage.setItem(KEY, '1'); }catch(e){}
+      try{ document.cookie = KEY + '=1; max-age=31536000; path=/; SameSite=Lax'; }catch(e){}
+      await idbSet();
+    };
+    if(await counted()){ try{ localStorage.setItem(KEY, '1'); }catch(e){} return; }
+    if(!IS_NATIVE_SHELL){
+      await new Promise(res => { const done = () => { ['pointerdown','touchstart','keydown','scroll'].forEach(e => window.removeEventListener(e, done, true)); res(); }; ['pointerdown','touchstart','keydown','scroll'].forEach(e => window.addEventListener(e, done, {capture:true, passive:true})); });
+      if(await counted()) return;
+    }
+    await mark();
     try {
       await updateDoc(visitsRef, { count: increment(1) });
     } catch (e) {
