@@ -4206,12 +4206,33 @@ function ckKeysOf(key){
   if(CHOK.schedule[key]) return [key];
   return ckSplitPair(key).filter(k=>CHOK.schedule[k]);
 }
-function ckWeekReady(key){ const ks=ckKeysOf(key); return ks.length>0 && ks.every(k=>CHOK_WEEK[k]); }
+function ckWeekReady(key){ const ks=ckKeysOf(key); return ks.length>0 && ks.every(k=>CHOK_WEEK[k] && CHOK_WEEK_LANG[k]===S.lang); }
+/* Non-Hebrew UI languages read the weekly texts in transliteration: data/chok-leyisrael/<slug>.<lang>.json holds the same
+   keys with the Hebrew/Aramaic written phonetically (Reshit Chokhmah and the Metzudot commentaries are not in it and stay as
+   they were). It is laid over the Hebrew base so anything missing from it just shows the original. */
+const CHOK_BASE={}, CHOK_WEEK_LANG={};
+function chokOverlay(b,t){
+  const o=Object.assign({},b);
+  Object.keys(t).forEach(k=>{
+    if(k==='_comm'){
+      const c=Object.assign({},b._comm||{});
+      Object.keys(t._comm).forEach(r=>{ c[r]=Object.assign({},(b._comm||{})[r]||{},t._comm[r]); });
+      o._comm=c;
+    } else if(k==='_labels'){ o._labels=Object.assign({},b._labels||{},t._labels);
+    } else o[k]=t[k];
+  });
+  return o;
+}
 function ensureChokWeek(key){
+  const lang=S.lang;
   return ensureChokIndex().then(()=>Promise.all(ckKeysOf(key).map(k=>{
-    if(CHOK_WEEK[k]) return null;
-    return cachedFetch(dataURL('data/chok-leyisrael/'+chokSlug(k)+'.json')).then(r=>r.json())
-      .then(d=>{ CHOK_WEEK[k]=d; });
+    if(CHOK_WEEK[k] && CHOK_WEEK_LANG[k]===lang) return null;
+    const slug=chokSlug(k);
+    const base=CHOK_BASE[k] ? Promise.resolve(CHOK_BASE[k])
+      : cachedFetch(dataURL('data/chok-leyisrael/'+slug+'.json')).then(r=>r.json()).then(d=>{ CHOK_BASE[k]=d; return d; });
+    const tr=(lang==='he') ? Promise.resolve(null)
+      : cachedFetch(dataURL('data/chok-leyisrael/'+slug+'.'+lang+'.json')).then(r=>r.ok?r.json():null);
+    return Promise.all([base,tr]).then(([b,t])=>{ CHOK_WEEK[k]=t?chokOverlay(b,t):b; CHOK_WEEK_LANG[k]=lang; });
   })));
 }
 /* ---------- Ben Ish Chai ----------
