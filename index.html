@@ -1844,6 +1844,22 @@ window.PRAYERS = {
   (*! @hebcal/hdate v0.22.5, distributed under GPLv2 https://www.gnu.org/licenses/gpl-2.0.txt *)
 */
 </script>
+<!-- Vendored (not bundled - this app has no JS build step), MIT-licensed QR
+     encoder (Kazuhiko Arase's qrcode-generator, kazuhikoarase/qrcode-generator
+     on GitHub - license header is inside the file). appQrSrc() used to build
+     a URL for https://api.qrserver.com/... and fetch the QR as a PNG over the
+     network, with no offline fallback at all: a sandbox/device with no
+     network access to that one external host permanently showed the plain
+     app-store URL text instead of a real QR code everywhere a QR was meant
+     to render (the booklet's cover/back page, the in-app "share app" image) -
+     confirmed this is exactly what happened to a booklet build in a
+     network-restricted sandbox. Generating the QR code's module matrix
+     locally with this vendored encoder (qrDataUrl(), defined right after
+     appQrSrc() below) removes the network dependency entirely - it's now a
+     synchronous, offline Canvas draw, same as the booklet's data/font assets
+     already are. Global `qrcode` function; see qrDataUrl() for the app's own
+     wrapper. -->
+<script src="qrcode-generator.js"></script>
 <!-- Vendored (not bundled - this app has no JS build step) UMD builds of
      @capacitor/core, @capacitor/local-notifications and @capacitor/app,
      copied straight from node_modules/*/dist. They register the native
@@ -12916,10 +12932,30 @@ function maybeShowRatePrompt(){
   if(!firstTs){ firstTs=Date.now(); localStorage.setItem('betel_first_launch_ts', String(firstTs)); return; }
   if(Date.now()-firstTs >= 24*60*60*1000) openRateModal();
 }
-/* The App Store QR code (APP_STORE_URL), in the given colors - shared by the
-   share-card image below and the study booklet's cover/back pages. */
+/* The App Store QR code (APP_STORE_URL), in the given colors (hex, no '#') -
+   generated locally (qrcode-generator.js, vendored above - see its comment)
+   so this never depends on network access. Used to fetch a PNG from
+   api.qrserver.com over the network; a sandbox/device with no access to that
+   one external host permanently fell back to showing the plain URL text
+   instead of a real QR code everywhere a QR renders. Synchronous, offline
+   Canvas draw instead - same error-correction level ('M') as the old
+   service's default, output as a data: URL exactly like before so every
+   caller (bkImgData's <img>-then-redraw-to-canvas pipeline, appQrImage's
+   drawImage) keeps working unchanged. */
+function qrDataUrl(text,size,fg,bg){
+  try{
+    const qr=qrcode(0,'M'); qr.addData(text); qr.make();
+    const n=qr.getModuleCount(), cell=Math.max(1,Math.floor(size/n)), px=cell*n;
+    const cv=document.createElement('canvas'); cv.width=px; cv.height=px;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#'+bg; ctx.fillRect(0,0,px,px);
+    ctx.fillStyle='#'+fg;
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(qr.isDark(r,c)) ctx.fillRect(c*cell,r*cell,cell,cell);
+    return cv.toDataURL('image/png');
+  }catch(e){ console.warn('[qr] local generation failed:',e&&e.message); return ''; }
+}
 function appQrSrc(size,fg,bg){
-  return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&data='+encodeURIComponent(APP_STORE_URL)+'&color='+fg+'&bgcolor='+bg;
+  return qrDataUrl(APP_STORE_URL,size,fg,bg);
 }
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
