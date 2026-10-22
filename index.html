@@ -6830,9 +6830,19 @@ function ornTitleSvg(txt,fontUrl,soft){
   return `<svg xmlns="http://www.w3.org/2000/svg" class="orn" viewBox="0 0 1200 300">
     <defs>${fontUrl?`<style>@font-face{font-family:BkStamT;src:url(${fontUrl}) format('truetype')}</style>`:''}
     <linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9c7b3c"/><stop offset=".32" stop-color="#d9bd7a"/><stop offset=".5" stop-color="#f4e4b8"/><stop offset=".68" stop-color="#c6a45e"/><stop offset="1" stop-color="#6e5426"/></linearGradient></defs>
-    ${soft?'':t('#fffdf7','-3 -3')+t('rgba(98,74,34,.42)','5 7')}${t(`url(#${id})`,'0 0','stroke="#6e5426" stroke-width="2.2" paint-order="stroke"')}
+    ${soft?'':t('#fffdf7','-3 -3')+t('rgba(98,74,34,.42)','5 7')}${t(`url(#${id})`,'0 0')}
   </svg>`;
 }
+/* The SVG `stroke` + `paint-order="stroke"` this title text used to carry
+   (same idea as the booklet's old CSS bold-thinning trick, ce26911, just via
+   SVG's own native stroke instead of -webkit-text-stroke) turned out to be
+   the exact same bug, confirmed with PyMuPDF on the real exported PDF: the
+   cover's whole brand wordmark ("התמיד", all five letters) fell back to
+   Type3 whenever the stroke was present. "התמיד" has no nikud, so this
+   never caused the drifted-mark symptom, but Type3 fallback still distorts
+   a glyph's own shape - which is what the owner saw as malformed letters.
+   Dropping the stroke (the gradient fill alone already gives the title its
+   engraved look) fixed it: re-verified zero Type3 anywhere on the cover. */
 /* ring text: one span per letter, rotated round the medallion (html2canvas
    can't use web fonts inside an SVG image, so this stays HTML) */
 function ornRingText(txt,rmm){
