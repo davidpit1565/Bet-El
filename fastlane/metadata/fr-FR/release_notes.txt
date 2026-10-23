@@ -1,11 +1,8 @@
-Nouveautés de la version 2.0.4 :
-• Nouveau widget boussole vers Jérusalem : sur l’écran d’accueil et l’écran verrouillé
-• Activité en direct améliorée : compte à rebours jusqu’au prochain horaire avec icônes, barre de progression et passage automatique d’un horaire à l’autre
-• Convertisseur de dates dans le calendrier : hébraïque vers grégorien et inversement, avec les sélecteurs iOS natifs
-• Choix d’un chapitre, d’un daf, d’une aliya ou d’une paracha dans les livres : menu natif dans l’en-tête, qui reste affiché sur chaque écran
-• L’écran d’accueil affiche toujours Hok LeIsraël et le Zohar quotidien, selon la date
-• Texte de lecture sur une carte arrondie et douce, boutons et recherche arrondis au style iOS
-• Afficher/masquer dans les prières : toute la carte est cliquable
-• Le miroir des téfilines se charge plus vite et fonctionne en un seul toucher
-• La taille de police dans les réglages se met à jour, et le texte des commentaires suit la taille de police
-• Corrections orthographiques et améliorations de stabilité
+Nouveautés de la version 2.0.5 :
+• Zohar quotidien : la page du jour s’affiche sur l’accueil et est disponible aussi le Chabbat
+• Idra Rabba est replacée à sa juste place dans le cycle du Zohar, sans page sautée
+• Les livrets d’étude hebdomadaires apparaissent automatiquement chaque semaine
+• Rappels programmés de Moussar et de Ben Ich Haï, à l’heure même lorsque l’application est fermée
+• Activité en direct : passage automatique à l’horaire suivant sans rester bloquée
+• Plus de langues pour la translittération de Hok LeIsraël, et Pélé Yoets en français, russe et géorgien
+• Corrections du compteur d’utilisateurs, de l’orthographe et de la stabilité
