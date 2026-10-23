@@ -9,6 +9,15 @@
     "pdf": "data/booklet/5787-lech-lecha.pdf"
   },
   {
+    "id": "5787-vayera",
+    "shabbat": "2026-10-31",
+    "title": {
+      "he": "פרשת וירא",
+      "en": "Parashat Vayera"
+    },
+    "pdf": "data/booklet/5787-vayera.pdf"
+  },
+  {
     "id": "5787-chayei-sara",
     "shabbat": "2026-11-07",
     "title": {
