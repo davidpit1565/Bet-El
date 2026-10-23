@@ -21,31 +21,31 @@ struct BetElLiveActivityWidget: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    ZmanIcon(key: currentSegment(context.state).key, size: 22)
+                    ZmanIcon(key: currentSegment(context.state, stale: context.isStale).key, size: 22)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    CountdownText(state: context.state)
+                    CountdownText(state: context.state, stale: context.isStale)
                         .monospacedDigit()
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(BetElTheme.palette(for: "dark").goldBright)
                 }
                 DynamicIslandExpandedRegion(.center) {
-                    Text(currentSegment(context.state).label)
+                    Text(currentSegment(context.state, stale: context.isStale).label)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(BetElTheme.palette(for: "dark").ink)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    SegmentProgress(state: context.state)
+                    SegmentProgress(state: context.state, stale: context.isStale)
                 }
             } compactLeading: {
-                ZmanIcon(key: currentSegment(context.state).key, size: 15)
+                ZmanIcon(key: currentSegment(context.state, stale: context.isStale).key, size: 15)
             } compactTrailing: {
-                CountdownText(state: context.state)
+                CountdownText(state: context.state, stale: context.isStale)
                     .monospacedDigit()
                     .font(.system(size: 13, weight: .semibold))
                     .frame(maxWidth: 52)
             } minimal: {
-                ZmanIcon(key: currentSegment(context.state).key, size: 14)
+                ZmanIcon(key: currentSegment(context.state, stale: context.isStale).key, size: 14)
             }
         }
     }
@@ -80,8 +80,9 @@ private struct ZmanIcon: View {
 @available(iOS 16.2, *)
 private struct SegmentProgress: View {
     let state: BetElActivityAttributes.ContentState
+    var stale: Bool = false
     var body: some View {
-        let seg = currentSegment(state)
+        let seg = currentSegment(state, stale: stale)
         if let end = seg.end, seg.start < end {
             ProgressView(timerInterval: seg.start...end, countsDown: false, label: { EmptyView() }, currentValueLabel: { EmptyView() })
                 .progressViewStyle(.linear)
@@ -104,7 +105,7 @@ private struct LockScreenView: View {
 
     private var compactLayout: some View {
         let palette = BetElTheme.palette(for: "dark")
-        let seg = currentSegment(context.state)
+        let seg = currentSegment(context.state, stale: context.isStale)
         return HStack(spacing: 8) {
             ZmanIcon(key: seg.key, size: 18)
             Text(seg.label)
@@ -112,7 +113,7 @@ private struct LockScreenView: View {
                 .foregroundColor(palette.ink)
                 .lineLimit(1).minimumScaleFactor(0.6)
             Spacer(minLength: 4)
-            CountdownText(state: context.state)
+            CountdownText(state: context.state, stale: context.isStale)
                 .monospacedDigit()
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(palette.goldBright)
@@ -123,7 +124,7 @@ private struct LockScreenView: View {
 
     private var fullLayout: some View {
         let palette = BetElTheme.palette(for: "dark")
-        let seg = currentSegment(context.state)
+        let seg = currentSegment(context.state, stale: context.isStale)
         return VStack(spacing: 12) {
             HStack(spacing: 14) {
                 ZStack {
@@ -147,13 +148,13 @@ private struct LockScreenView: View {
                     }
                 }
                 Spacer(minLength: 8)
-                CountdownText(state: context.state)
+                CountdownText(state: context.state, stale: context.isStale)
                     .monospacedDigit()
                     .font(.system(size: 30, weight: .bold))
                     .foregroundColor(palette.goldBright)
                     .minimumScaleFactor(0.6).lineLimit(1)
             }
-            SegmentProgress(state: context.state)
+            SegmentProgress(state: context.state, stale: context.isStale)
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
     }
@@ -165,16 +166,22 @@ private struct LockScreenView: View {
 /// range (lowerBound <= upperBound; an inverted range crashes the whole widget extension), and
 /// a passed end date would freeze at 0:00, so neither case ever reaches it.
 @available(iOS 16.2, *)
-func currentSegment(_ state: BetElActivityAttributes.ContentState, now: Date = Date()) -> (label: String, key: String?, start: Date, end: Date?) {
+func currentSegment(_ state: BetElActivityAttributes.ContentState, now: Date = Date(), stale: Bool = false) -> (label: String, key: String?, start: Date, end: Date?) {
     var chain: [(String, String?, Date)] = [(state.zmanLabel, state.zmanKey, state.endDate)]
     if let ups = state.upcoming, !ups.isEmpty {
         chain += ups.map { ($0.label, Optional($0.key), $0.date) }
     } else if let d = state.nextDate {
         chain.append((state.nextLabel ?? state.zmanLabel, nil, d))
     }
+    /* The system re-renders the Activity exactly when its staleDate (= the first zman) passes, but at that instant
+       `now` can still be a hair BEFORE that date - so the first segment was picked again and its countdown sat at
+       0:00:00 until the app was opened. `context.isStale` says the first zman is over, and a 2s margin covers a render
+       that lands just before the boundary: either way the next segment is shown. */
+    let margin: TimeInterval = 2
     var start = min(state.startDate ?? now, now)
-    for (label, key, end) in chain {
-        if end > now { return (label, key, start, end) }
+    for (i, (label, key, end)) in chain.enumerated() {
+        if stale && i == 0 { start = end; continue }
+        if end > now.addingTimeInterval(margin) { return (label, key, start, end) }
         start = end
     }
     return (state.zmanLabel, state.zmanKey, now, nil)
@@ -183,8 +190,9 @@ func currentSegment(_ state: BetElActivityAttributes.ContentState, now: Date = D
 @available(iOS 16.2, *)
 private struct CountdownText: View {
     let state: BetElActivityAttributes.ContentState
+    var stale: Bool = false
     var body: some View {
-        let seg = currentSegment(state)
+        let seg = currentSegment(state, stale: stale)
         if let end = seg.end, seg.start < end {
             Text(timerInterval: seg.start...end, countsDown: true)
         } else {
