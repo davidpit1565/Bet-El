@@ -1683,14 +1683,18 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-dd-lead{font-family:var(--font-sacred);font-size:12px;letter-spacing:.24em;color:var(--bk-muted);padding-inline-start:.24em}
 .bk-dd-h{font-family:var(--font-sacred);font-weight:900;font-size:24px;line-height:1.15;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-dd-name{font-family:var(--font-sacred);font-weight:900;font-size:19px;line-height:1.45;max-width:98mm;text-wrap:balance}
-/* the merged, de-duplicated name list (app + booklet) redesigned as a grid
-   of small individual boxes, one name per box, instead of one stacked
-   column - the list is small today but the grid scales to a much longer
-   one without shrinking the text illegibly (owner's request) */
-.bk-dd-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1.3mm 1.8mm;max-width:108mm}
-.bk-dd-nbox{font-family:var(--font-sacred);font-weight:800;font-size:11.5px;line-height:1.3;white-space:nowrap;
-  padding:.9mm 2.6mm;border:.6px solid var(--bk-gold);border-radius:1.6mm;background:rgba(255,253,247,.55)}
-.bk-dd-nbox.bk-dd-emph{font-size:14px;font-weight:900}
+/* the merged, de-duplicated name list (app + booklet), one name per grid
+   cell - the list is small today but the grid scales to a much longer one
+   without shrinking the text illegibly (owner's request). Originally each
+   name sat in its own bordered box (.bk-dd-nbox kept the class name for
+   continuity); the owner later asked to drop the visible frame/background
+   per name while keeping this exact compact one-page grid arrangement -
+   see the comment above bkDedicationHtml's nameBox. Every name in this
+   list is also now the SAME size/weight (an earlier round made one name,
+   Gavriel Mamosi, bigger/bolder via .bk-dd-emph; the owner reversed that
+   specific request - don't reintroduce a per-name size). */
+.bk-dd-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1.6mm 3mm;max-width:108mm}
+.bk-dd-nbox{font-family:var(--font-sacred);font-weight:800;font-size:11.5px;line-height:1.3;white-space:nowrap}
 .bk-dd-txt{font-family:var(--font-sacred);font-size:12.5px;line-height:1.65;max-width:96mm;text-wrap:balance}
 .bk-dd-tnz{font-family:var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
 .bk-dd-amen{font-family:var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
@@ -1771,10 +1775,26 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-toc-soon b{font-weight:400;color:var(--bk-muted);text-align:center}
 /* the week-at-a-glance summary that fills the TOC page's own leftover
    space (owner's request) - dropped outright by bkBuildPrint when it still
-   doesn't fit even once the page is fully tightened */
-.bk-wk-sum{align-self:stretch;margin-top:3mm;padding-top:2.4mm;border-top:1px solid var(--bk-line)}
-.bk-wk-h{font-family:var(--font-sacred);font-weight:900;font-size:13.5px;color:var(--bk-gold-deep);text-align:center;margin-bottom:1.4mm}
-.bk-wk-row{font-family:var(--font-sacred);font-size:10.5px;line-height:1.5;text-align:center}
+   doesn't fit even once the page is fully tightened (bkPageFits). It was
+   dropped for every week after the previous round's TOC column fix, since
+   it never fit Toldot's own 8-day-group Shabbat-block week even then. After
+   this round's investigation (real builds across ~2 dozen weeks spanning a
+   full year, including double-parsha weeks) the only thing actually
+   missing was headroom in the summary block's OWN spacing - the tier-4
+   TOC body itself never came close to overflowing on its own. Tightened
+   here just enough that Toldot's week (previously 14px over even at the
+   generic bk-tighter escalation, which has no effect here - see bkPageFits'
+   comment) now fits with several px of real margin to spare (measured via
+   the last child's actual bottom, not scrollHeight - .bk-pbody is a fixed-
+   height flex:1 box, so scrollHeight floors at clientHeight the moment
+   content fits and no longer reports true slack). Every real week tested
+   still fits comfortably; bkPageFits' own overflow check (now fed a
+   genuinely oversized summary in a test) still drops the block outright on
+   a week long enough to exceed even this tighter spacing - don't widen
+   these values without re-checking that fallback still fires. */
+.bk-wk-sum{align-self:stretch;margin-top:1mm;padding-top:.8mm;border-top:1px solid var(--bk-line)}
+.bk-wk-h{font-family:var(--font-sacred);font-weight:900;font-size:13.5px;color:var(--bk-gold-deep);text-align:center;margin-bottom:.8mm}
+.bk-wk-row{font-family:var(--font-sacred);font-size:10.5px;line-height:1.2;text-align:center}
 .bk-wk-row b{font-weight:800;color:var(--bk-gold-deep)}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
@@ -7426,9 +7446,11 @@ function bkMoveFront(list,prefix){
 }
 const BK_NIFTAR_BASE=bkMoveFront(bkMergeNames(MEMORIAL,BK_DEDICATION.niftar), bkBareName('גַּבְרִיאֵל מַמּוּסִי'));
 const BK_HATZLACHA_BASE=bkMoveFront(bkMergeNames(HATZLACHA,BK_DEDICATION.hatzlacha), bkBareName('אָלוֹן'));
-/* "גַּבְרִיאֵל מַמּוּסִי" is shown larger/bolder in the name grid (owner's
-   earlier request, kept as a per-name style rather than a layout exception) */
-const BK_NAME_EMPH=bkBareName('גַּבְרִיאֵל מַמּוּסִי');
+/* "גַּבְרִיאֵל מַמּוּסִי" still leads the niftar list (bkMoveFront above - that
+   part of the owner's original request stands); an earlier round also made
+   that one name larger/bolder in the grid (.bk-dd-emph) - the owner has
+   since reversed that specific piece: every name in the grid is now the
+   same size/weight, so nameBox() no longer special-cases it. */
 const BK_NIFTAR_EXTRA=[
   {shabbat:new Date(2026,9,24), name:'יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'}, // Lech Lecha's week (24.10.2026) only - yahrzeit י"ג חשון
   {shabbat:new Date(2026,9,24), name:'נַטֶלָה רָחֵל בַּת יִצְחָק הַנּוֹלְדָה מִשָּׂרָה'}, // Lech Lecha's week only, owner's direct request
@@ -7507,7 +7529,7 @@ function bkDedicationHtml(shabbat){
      as a grid of small individual boxes, one name per box, rather than the
      single stacked column the page used to hold (owner's redesign request) */
   const niftar=bkNiftarList(shabbat), hatz=[].concat(BK_HATZLACHA_BASE);
-  const nameBox=n=>`<div class="bk-dd-nbox${bkBareName(n).indexOf(BK_NAME_EMPH)===0?' bk-dd-emph':''}">${n}</div>`;
+  const nameBox=n=>`<div class="bk-dd-nbox">${n}</div>`;
   return `<div class="bk-page bk-matter bk-ornp bk-dedic">${ornDedicationSvg()}
     <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
     <div class="bk-ol bk-dd-hdr"><span>${t.dedHdr[0]}</span><i></i><span>${t.dedHdr[1]}</span></div>

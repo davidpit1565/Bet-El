@@ -19,7 +19,10 @@ const EXPOSE = `window.__bk={bkWeekRows,bkWeekDafs,chokSlotFor,chokSectionsFor,b
 const PATCHED = SRC.replace(hook, hook + EXPOSE);
 // see booklet-check.mjs for why HTTPS_PROXY is never handed to the browser itself
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Jerusalem' });
+// serviceWorkers:'block' - see booklet-check.mjs's openCtx for why: sw.js's own
+// in-worker fetch() of the emulated /shas-daf/... proxy path doesn't go through
+// Playwright's ctx.route(), so daf images fail without it.
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Jerusalem', serviceWorkers: 'block' });
 await ctx.addInitScript(({ iso }) => {
   localStorage.setItem('betel_onboard_v1', '1'); localStorage.setItem('betel_chok_pace_v1', '1');
   const RealDate = Date, offset = new RealDate(iso).getTime() - RealDate.now();

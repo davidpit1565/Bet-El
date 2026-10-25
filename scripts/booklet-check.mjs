@@ -29,7 +29,16 @@ const b = await chromium.launch({ executablePath: CHROME_PATH });
 const errs = [];
 
 async function openCtx({ withDafProxy }) {
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, timezoneId: 'Asia/Jerusalem', acceptDownloads: true });
+  // serviceWorkers:'block' - sw.js intercepts every same-origin GET (including the
+  // emulated /shas-daf/<masechta>/<daf>/<amud> proxy path) and re-issues it with the
+  // browser's own fetch() from INSIDE the service worker. That fetch never goes
+  // through Playwright's ctx.route() the way a page-initiated request does (observed:
+  // all 12 daf fetches failing with "bw daf http 404" even though the exact same
+  // route(...).fetch({url}) call succeeds, repeatedly, both alone and fired
+  // concurrently, the instant the service worker is kept out of the picture) - a false
+  // "no daf image rendered" failure unrelated to the page's own content. Blocking SW
+  // registration here only affects this check's own isolated context, never real users.
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, timezoneId: 'Asia/Jerusalem', acceptDownloads: true, serviceWorkers: 'block' });
   await ctx.addInitScript(({ iso }) => {
     localStorage.setItem('betel_onboard_v1', '1');
     localStorage.setItem('betel_chok_pace_v1', '1');
