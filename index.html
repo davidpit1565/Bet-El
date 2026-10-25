@@ -3366,11 +3366,17 @@ function chokVerseSegs(key,refs){
   });
   return out;
 }
-/* The app's own daily Tehillim portion, read in its place inside the order. */
-function chokTehillimVerses(hd){
+/* The app's own daily Tehillim portion, read in its place inside the order.
+   divMode optionally overrides the reader's own S.division setting (see
+   portionFor) - the printed weekly booklet always wants the "5 chapters a
+   day" cycle (divMode='monthly') regardless of whatever division the app
+   happens to be set to when it's generated, since a printed booklet can't
+   follow a setting that changes after it's printed; the live Chok LeYisrael
+   reader still passes no override and keeps following S.division as before. */
+function chokTehillimVerses(hd,divMode){
   const T=window.TEHILLIM; if(!T) return [];
   const out=[];
-  chaptersOf(portionFor(hd||chokDayHDate())).forEach(ch=>{
+  chaptersOf(portionFor(hd||chokDayHDate(),divMode)).forEach(ch=>{
     (T[ch]||[]).forEach((he,i)=>out.push({ch, v:i+1, he}));
   });
   return out;
@@ -3380,8 +3386,10 @@ function chokTehillimVerses(hd){
    read as a running page, not as lettered pieces. */
 const CK_NO_NUM={zohar:1, musar:1, tanya:1};
 
-/* the sections shown for a given weekday, in study order */
-function chokSectionsFor(key,day,hdOverride){
+/* the sections shown for a given weekday, in study order. tehillimDivMode
+   optionally forces chokTehillimVerses' division (see there) - used only by
+   the printed booklet, which must always show the 5-a-day Tehillim cycle. */
+function chokSectionsFor(key,day,hdOverride,tehillimDivMode){
   const keys=ckKeysOf(key);
   if(!keys.length) return [];
   const hd=hdOverride||ckViewHDate(), my=chokMishnahYear(hd);
@@ -3398,7 +3406,7 @@ function chokSectionsFor(key,day,hdOverride){
       const t=((CHOK.schedule[k]||{}).night||{}).tzeruf;
       refs=refs.concat(t||[]); items=items.concat(chokTorahVerses(t));
     });
-    const thuList=chokSectionsFor(key,'thu',hdOverride);
+    const thuList=chokSectionsFor(key,'thu',hdOverride,tehillimDivMode);
     if(!items.length) return thuList;
     const tzeruf={key:'tzeruf',he:'תּוֹרָה',items,kind:'torah',refs};
     const ti=thuList.findIndex(x=>x.key==='torah');
@@ -3442,7 +3450,7 @@ function chokSectionsFor(key,day,hdOverride){
       add('ketuvim','כְּתוּבִים', chokVerseSegs(pk,d.ketuvim), 'verse', null, d.ketuvim, pk);
     }
   });
-  add('tehillim','תְּהִלִּים', chokTehillimVerses(hd), 'tehillim', null, [], keys[0]);
+  add('tehillim','תְּהִלִּים', chokTehillimVerses(hd,tehillimDivMode), 'tehillim', null, [], keys[0]);
   keys.forEach(pk=>{
     const d=(CHOK.schedule[pk]||{})[day];
     if(!d) return;
@@ -5704,14 +5712,20 @@ function ensureBookletDay(date){
 function bkSections(date,day){
   const slot0=bkSlot(date); if(!slot0) return {slot:null,hd:null,secs:[]};
   const hd=new HDate(date);
+  /* The printed booklet always uses the "5 chapters a day" Tehillim cycle
+     (portionFor's 'monthly' mode - see chokTehillimVerses), never whichever
+     division S.division happens to hold when the booklet is generated;
+     that setting is a live, user-changeable reading preference and a
+     printed page can't follow it after the fact. */
+  const TEHILLIM_DIV='monthly';
   /* Leil Shishi prints its own extra Torah portion (the tzeruf) only - the
      reader shows Thursday's other subjects again that night, already in the
      booklet under Thursday */
   if(day==='night'){
     const slot={...slot0, day:'night', dayIdx:-1};
-    return {slot, hd, secs:chokSectionsFor(slot.key,'night',hd).filter(s=>s.key==='tzeruf')};
+    return {slot, hd, secs:chokSectionsFor(slot.key,'night',hd,TEHILLIM_DIV).filter(s=>s.key==='tzeruf')};
   }
-  return {slot:slot0, hd, secs:chokSectionsFor(slot0.key,slot0.day,hd).filter(s=>!BK_SKIP[s.key])};
+  return {slot:slot0, hd, secs:chokSectionsFor(slot0.key,slot0.day,hd,TEHILLIM_DIV).filter(s=>!BK_SKIP[s.key])};
 }
 /* The printed booklet is the whole Chok LeYisrael week of `date`, in the
    reader's own row order (CHOK_ROWS: Sunday-Thursday, Leil Shishi,
