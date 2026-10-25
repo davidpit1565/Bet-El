@@ -6469,25 +6469,59 @@ function bkPaginateBic(host,parts,meta,no,toc){
    weekday schedule: Tehillim (portionFor), Rambam/Zohar/Gemara (CYC, by
    ckRambamIndexes/ckCycleIndex - the same cycles ensureCycDay already loads
    for any date), Musar (ckMusarIndexes) and Chassidut/Tanya
-   (ckTanyaDayEntry). Mishnah is deliberately left OUT: unlike those, this
-   app has no independent date-driven Mishnah cycle at all - the only
-   Mishnah data it has is the parasha+weekday `mishnah_cycle` inside
-   CHOK.schedule, which (like Torah) has no Shabbat entry; printing
-   Thursday's or Friday's Mishnah again under "Shabbat" would be wrong, and
-   the real sefer's own traditional Shabbat Mishnah (Seder Taharot, per
-   on-record research - see the session notes) isn't in this app's data
-   files, so it is skipped here rather than guessed. Gemara reuses the
-   plain-citation-only fallback already built into bkSectionBody's 'daf'
-   handling (no scanned image for this one extra slot - "leave Gemara as-is"
-   is the owner's own call anyway). */
-function bkShabbatReady(hd){ return !!CYC && ckCycReady(hd) && ckTanyaReady(hd) && bkMusarReady(hd); }
-function ensureBkShabbat(hd){ return Promise.all([ensureCycDay(hd), ensureTanyaDay(hd), ensureBkMusar(hd)]); }
-function bkShabbatSections(hd){
+   (ckTanyaDayEntry). Gemara reuses the plain-citation-only fallback
+   already built into bkSectionBody's 'daf' handling (no scanned image for
+   this one extra slot - "leave Gemara as-is" is the owner's own call
+   anyway).
+   Mishnah DOES get its own Shabbat slot, but it's a new, purpose-built
+   cycle rather than CHOK.schedule's parasha+weekday mishnah_cycle (which
+   has no Shabbat entry at all, and no authentic external "Shabbat
+   Mishnah" cycle exists to adopt - owner's decision, after research):
+   Masechet Shabbat's 24 chapters (data/mishnah-index.json, already
+   shipped for the Library Mishnah reader - no new text data needed) split
+   into 4 fixed groups of 6 consecutive chapters (1-6/7-12/13-18/19-24),
+   keyed to the Shabbat's own position in the 54-parasha yearly sequence
+   (CHOK.parshiot) - Bereshit (index 0) = group 1, Noach (index 1) =
+   group 2, ... Vayera (index 3) = group 4, Chayei Sara (index 4) = group
+   1 again, and so on (bkShabbatMishnahRange/bkShabbatMishnahItems). The
+   whole tractate completes once every 4 Shabbatot (~monthly) and
+   restarts - deliberately NOT aligned to the Hebrew calendar month, which
+   would need irregular handling for 5-Shabbat months. */
+function bkShabbatReady(hd){ return !!CYC && !!MISHNAH_IDX && ckCycReady(hd) && ckTanyaReady(hd) && bkMusarReady(hd); }
+function ensureBkShabbat(hd){ return Promise.all([ensureCycDay(hd), ensureTanyaDay(hd), ensureBkMusar(hd), ensureMishnahIndex()]); }
+/* shabbatDate's position in the 54-parasha yearly sequence -> which of the
+   4 fixed 6-chapter groups of Masechet Shabbat it studies (0-indexed here;
+   displayed/labeled 1-4). ckWeekKeyFor works for any date incl. a Saturday
+   (chokSlotFor itself returns null for Shabbat, by design - no Chok
+   LeYisrael portion that day - so it can't be reused here). A combined
+   week (e.g. Behar-Bechukotai) is indexed by its first component, same
+   convention as the reader's own week nav (see ckKeysOf(key)[0] at the
+   "i=CHOK.parshiot.indexOf" call near the week nav buttons). */
+function bkShabbatMishnahRange(shabbatDate){
+  if(!CHOK||!CHOK.parshiot) return null;
+  const key=ckWeekKeyFor(shabbatDate); if(!key) return null;
+  const i=CHOK.parshiot.indexOf(ckKeysOf(key)[0]||key); if(i<0) return null;
+  const g=i%4, c1=g*6+1, c2=c1+5;
+  return {parashaKey:key, parashaIndex:i, group:g, c1, c2};
+}
+function bkShabbatMishnahItems(range){
+  if(!MISHNAH_IDX||!range) return null;
+  const t=mishTractateOf('Moed','Shabbat'); if(!t) return null;
+  const chs=t.chapters.filter(c=>c.ch>=range.c1&&c.ch<=range.c2);
+  if(!chs.length) return null;
+  const items=[], tags=[];
+  chs.forEach(c=>c.mishnayot.forEach(m=>{ items.push(m.text); tags.push(m.label); }));
+  const last=chs[chs.length-1].mishnayot.length;
+  return {items, tags, ref:'Mishnah Shabbat '+range.c1+':1-'+range.c2+':'+last};
+}
+function bkShabbatSections(hd,shabbatDate){
   const list=[];
   /* pinned to the booklet's own 5-chapters-a-day cycle, same as every
      weekday's Tehillim (bkSections' TEHILLIM_DIV) - this block was added
      after that fix and had been left reading the live S.division instead */
   const tev=chokTehillimVerses(hd,'monthly'); if(tev.length) list.push({key:'tehillim',he:'תְּהִלִּים',items:tev,kind:'tehillim',refs:[]});
+  const mr=bkShabbatMishnahRange(shabbatDate), mi=mr?bkShabbatMishnahItems(mr):null;
+  if(mi&&mi.items.length) list.push({key:'mishnah',he:'מִשְׁנָה',items:mi.items,kind:'text',refs:[mi.ref],tags:mi.tags,mRange:mr});
   if(CYC&&CYC.daf){ const gi=ckCycleIndex(CYC.daf,hd), items=ckDafItems(gi); if(items.length) list.push({key:'gemara',he:'גְּמָרָא',kind:'daf',items,refs:[],dIdx:gi}); }
   if(CYC){
     const ri=ckRambamIndexes(hd); let rs=[]; ri.forEach(i=>rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))));
@@ -6509,7 +6543,7 @@ function bkShabbatSections(hd){
   return list;
 }
 function bkShabbatBlocks(shabbatDate,B){
-  const hd=new HDate(shabbatDate), secs=bkShabbatSections(hd);
+  const hd=new HDate(shabbatDate), secs=bkShabbatSections(hd,shabbatDate);
   if(!secs.length) return;
   const dayLabel=bkUI().shabbatHead, hillHtml=bkHillulotHtml(hd);
   B.push({t:'day', brk:1, label:dayLabel, tocSub:localizeHebDateStr(hd.renderGematriya(true)).split(' ').slice(0,-1).join(' '),
@@ -6521,6 +6555,13 @@ function bkShabbatBlocks(shabbatDate,B){
     if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
     else if(s.key==='tanya'){ title=title+(src?' · '+src:''); src=''; }
     else if(s.key==='tehillim'){ title=title+' · '+bkTehillimRangeTxt(hd); src=''; }
+    else if(s.key==='mishnah'){
+      /* same pattern as the weekday Mishnah header (bkBlocks): the tractate
+         name alone - the chapter:mishnah range already shows right below,
+         per chapter/per mishnah (bkSectionBody) */
+      const ref=(s.refs||[])[0], w=ref?chokRefLabel(ref,'mishnah',{bare:1}):'';
+      title=title+(w?' · '+w:''); src='';
+    }
     B.push({t:'sec', label, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,{key:null},B);
   });
