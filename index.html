@@ -1676,6 +1676,14 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-dd-lead{font-family:var(--font-sacred);font-size:12px;letter-spacing:.24em;color:var(--bk-muted);padding-inline-start:.24em}
 .bk-dd-h{font-family:var(--font-sacred);font-weight:900;font-size:24px;line-height:1.15;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-dd-name{font-family:var(--font-sacred);font-weight:900;font-size:19px;line-height:1.45;max-width:98mm;text-wrap:balance}
+/* the merged, de-duplicated name list (app + booklet) redesigned as a grid
+   of small individual boxes, one name per box, instead of one stacked
+   column - the list is small today but the grid scales to a much longer
+   one without shrinking the text illegibly (owner's request) */
+.bk-dd-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1.3mm 1.8mm;max-width:108mm}
+.bk-dd-nbox{font-family:var(--font-sacred);font-weight:800;font-size:11.5px;line-height:1.3;white-space:nowrap;
+  padding:.9mm 2.6mm;border:.6px solid var(--bk-gold);border-radius:1.6mm;background:rgba(255,253,247,.55)}
+.bk-dd-nbox.bk-dd-emph{font-size:14px;font-weight:900}
 .bk-dd-txt{font-family:var(--font-sacred);font-size:12.5px;line-height:1.65;max-width:96mm;text-wrap:balance}
 .bk-dd-tnz{font-family:var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
 .bk-dd-amen{font-family:var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
@@ -1724,6 +1732,16 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-toc-list{align-self:stretch}
 .bk-toc-list.bk-toc-2col{column-count:2;column-gap:8mm}
 .bk-toc-list.bk-toc-3col{column-count:3;column-gap:6mm}
+/* a week with the new Shabbat block (an 8th day-group) runs a little past
+   what 3 columns at full size holds on one page - a 4th, slightly smaller
+   column (not a font shrink across the whole page) keeps the owner's
+   one-page-per-week target without touching the 2-/3-column sizes every
+   earlier, already-approved week still uses */
+.bk-toc-list.bk-toc-4col{column-count:4;column-gap:4mm}
+.bk-toc-list.bk-toc-4col .bk-toc-day span{font-size:13px}
+.bk-toc-list.bk-toc-4col .bk-toc-day small{font-size:10px}
+.bk-toc-list.bk-toc-4col .bk-toc-row{font-size:11.5px;gap:1mm}
+.bk-toc-list.bk-toc-4col .bk-toc-row b{width:6mm}
 .bk-toc-dblk{break-inside:avoid;margin:0 0 2.2mm}
 .bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;margin:0 0 .6mm}
 .bk-toc-day span{font-family:var(--font-sacred);font-weight:700;font-size:15px;color:var(--bk-gold-deep)}
@@ -1734,6 +1752,13 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 /* one fixed page-number column for every row, so every leader ends at the same point */
 .bk-toc-row b{order:2;flex:none;width:7.5mm;text-align:left;font-weight:700;color:var(--bk-gold-deep)}
 .bk-toc-soon b{font-weight:400;color:var(--bk-muted);text-align:center}
+/* the week-at-a-glance summary that fills the TOC page's own leftover
+   space (owner's request) - dropped outright by bkBuildPrint when it still
+   doesn't fit even once the page is fully tightened */
+.bk-wk-sum{align-self:stretch;margin-top:3mm;padding-top:2.4mm;border-top:1px solid var(--bk-line)}
+.bk-wk-h{font-family:var(--font-sacred);font-weight:900;font-size:13.5px;color:var(--bk-gold-deep);text-align:center;margin-bottom:1.4mm}
+.bk-wk-row{font-family:var(--font-sacred);font-size:10.5px;line-height:1.5;text-align:center}
+.bk-wk-row b{font-weight:800;color:var(--bk-gold-deep)}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
 .bk-back-t span{display:block}
@@ -5605,7 +5630,7 @@ const BK_UI={
       qrCap:'לְהוֹרָדַת הָאַפְּלִיקַצְיָה', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedBlessPl:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפְּחוֹתָם בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedMeritPl:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתָם', dedTnzbhPl:'תִּהְיֶינָה נִשְׁמוֹתֵיהֶם צְרוּרוֹת בִּצְרוֹר הַחַיִּים',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], hillH:'לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים', hillF:'זְכוּתָם תָּגֵן עָלֵינוּ, אָמֵן', bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], hillH:'לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים', hillF:'זְכוּתָם תָּגֵן עָלֵינוּ, אָמֵן', bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', shabbatHead:'שַׁבָּת קֹדֶשׁ', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['נוצר מתוך אפליקציית תמיד','כל הטקסטים על פי המקורות המובאים באפליקציה','כל הזכויות שמורות © התמיד'],
       backDist:'ניתן להפיץ חוברת זו לזיכוי הרבים, ובלבד שלא ייעשה בה כל שינוי בתוכן או בעריכה.',
       parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
@@ -5616,7 +5641,7 @@ const BK_UI={
       qrCap:'Get the app', dedLead:'חוֹבֶרֶת זוֹ יוֹצֵאת לָאוֹר', dedNiftar:'לְעִלּוּי נִשְׁמַת', dedZl:'ז״ל',
       dedMerit:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתוֹ', dedTnzbh:'תְּהֵא נִשְׁמָתוֹ צְרוּרָה בִּצְרוֹר הַחַיִּים',
       dedHatzlacha:'וּלְהַצְלָחַת', dedBless:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפַּחְתּוֹ בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedBlessPl:'וְהַצְלָחַת כָּל בְּנֵי מִשְׁפְּחוֹתָם בְּכָל מַעֲשֵׂה יְדֵיהֶם, לְאֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת', dedMeritPl:'יְהִי רָצוֹן שֶׁזְּכוּת הַתּוֹרָה הַנִּלְמֶדֶת בָּהּ תַּעֲמֹד לְנִשְׁמָתָם', dedTnzbhPl:'תִּהְיֶינָה נִשְׁמוֹתֵיהֶם צְרוּרוֹת בִּצְרוֹר הַחַיִּים',
-      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], hillH:'לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים', hillF:'זְכוּתָם תָּגֵן עָלֵינוּ, אָמֵן', bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
+      dedAmen:'אָמֵן כֵּן יְהִי רָצוֹן', dedHdr:['לְזִכְרוֹן עוֹלָם','בְּהֵיכַל ה׳'], hillH:'לְעִילּוּי נִשְׁמַת הַצַּדִּיקִים', hillF:'זְכוּתָם תָּגֵן עָלֵינוּ, אָמֵן', bicIntro:'פְּתִיחָה', shabbat:'שַׁבָּת שָׁלוֹם וּמְבוֹרָךְ!', shabbatHead:'שַׁבָּת קֹדֶשׁ', bwOn:'שָׁחֹר־לָבָן', bwOff:'צֶבַע', musar:'מוּסָר', rambam:'רַמְבַּ״ם', evening:'(בָּעֶרֶב)', weekOf:'שְׁבוּעַ', biurH:'בֵּיאוּר', tocTitle:'תֹּכֶן הָעִנְיָנִים', tocBic:'בֶּן אִישׁ חַי', tocBicY:['שָׁנָה רִאשׁוֹנָה','שָׁנָה שְׁנִיָּה'], tocSoon:'בְּהֲכָנָה', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'לִשְׁאֵלוֹת וְתִיקּוּנִים:', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:'כָּל הַמְזַכֶּה אֶת הָרַבִּים, אֵין חֵטְא בָּא עַל יָדוֹ', dedFootSrc:'(אָבוֹת ה, יח)', bsd:'בס״ד',
       backMade:['Created with the Tamid app','All texts follow the sources cited in the app','All rights reserved © HaTamid'],
       backDist:'This booklet may be freely distributed for the merit of the public, provided nothing in its content or editing is changed.',
       parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
@@ -5728,8 +5753,18 @@ function bkWeekDafs(date){
   bkWeekRows(date).forEach(r=>{ if(r.day==='night') return; const d=bkSections(r.date).secs.find(s=>s.kind==='daf'); if(d) out.push(d.dIdx); });
   return out;
 }
-function bkWeekReady(date){ return bkWeekRows(date).every(r=>bkReady(r.date)); }
-function ensureBookletWeek(date){ return Promise.all(bkWeekRows(date).map(r=>ensureBookletDay(r.date))); }
+function bkShabbatDateOf(date){ const slot=bkSlot(date); return slot?addDays(date,-slot.dayIdx+6):null; }
+function bkWeekReady(date){
+  if(!bkWeekRows(date).every(r=>bkReady(r.date))) return false;
+  const sd=bkShabbatDateOf(date);
+  return !sd || bkShabbatReady(new HDate(sd));
+}
+function ensureBookletWeek(date){
+  const tasks=bkWeekRows(date).map(r=>ensureBookletDay(r.date));
+  const sd=bkShabbatDateOf(date);
+  if(sd) tasks.push(ensureBkShabbat(new HDate(sd)));
+  return Promise.all(tasks);
+}
 function bkWeekDafPending(date){ return bkWeekDafs(date).some(i=>bkDafPending(i)); }
 function ensureBkWeekDafs(date){ return Promise.all(bkWeekDafs(date).map(i=>ensureBkDaf(i))); }
 function bkParashaLine(slot){ return slot?bkUI().parasha+' '+parshaName(slot.key):''; }
@@ -6117,13 +6152,22 @@ function bkBlocks(date,opt){
        names the subject there) */
     const dafFull=s.kind==='daf' && bkDafFull(s.dIdx);
     if(si) B.push({t:'rule', noPrint:dafFull, html:`<div class="bk-rule"><span>${ORN}</span></div>`});
-    /* the Mishnah prints without its source line - "מסכת X · פרק:משנה"
-       read as a leftover Gemara citation beside the Gemara's own pages
-       (owner's call); each mishnah keeps its own number tag */
-    let src=s.key==='mishnah'?'':chokSourceLine(s,hd), title=s.he, label=s.he;
-    /* the Halacha is the Rambam: its cartouche names the book, then the
-       hilchot and chapter (owner's call) */
+    let src=chokSourceLine(s,hd), title=s.he, label=s.he;
+    /* The Halacha (Rambam) cartouche names the book, then the hilchot and
+       chapter, right in the heading itself (owner's call) - and so does
+       every other subject whose reference is nameable in one line: Torah/
+       Nevi'im/Ketuvim/Haftarah (book · chapter:verse-range, via the same
+       chokSourceLine/chokRefLabel the reader itself uses), Mishnah
+       (tractate · chapter/mishnah-range - it used to print no source line
+       at all, which read as a bare "משנה"; chokRefLabel's own mishnah
+       branch already gives the exact tractate+range form the owner asked
+       for) and Chassidut/Tanya (its own letter/section label). None of
+       these get a separate `.bk-sec-src` line underneath any more - the
+       reference lives in the title, like Rambam's. Gemara stays as-is
+       (plain reference line, no real Gemara text yet - a separate future
+       project, per the owner). */
     if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
+    else if(['torah','tzeruf','neviim','ketuvim','haftarah','mishnah','tanya'].includes(s.key)){ title=title+(src?' · '+src:''); src=''; }
     B.push({t:'sec', label, dafSec:dafFull, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,slot,B);
     if(s.key==='halacha'){ bkMusarSection(hd,B); musarDone=true; }
@@ -6343,13 +6387,80 @@ function bkPaginateBic(host,parts,meta,no,toc){
 }
 /* (The enlarged opening words - "פתיחת מילים" - were dropped at the owner's
    request: they came out inconsistent, sometimes only part of a word.) */
+/* ---------- Shabbat's own content block ---------- */
+/* Positioned after the week's Friday pages and before Ben Ish Chai closes
+   the booklet (bkPaginateBic runs after bkWeekBlocks, in bkBuildPrint).
+   Torah/Nevi'im/Ketuvim/Haftarah follow the weekday aliyot cycle, which has
+   no "Shabbat day" slot of its own in this app's data (CHOK.schedule has
+   only night/sun/mon/tue/wed/thu/fri) - so Shabbat's block carries only the
+   subjects that are genuinely date-driven, independent of the parasha/
+   weekday schedule: Tehillim (portionFor), Rambam/Zohar/Gemara (CYC, by
+   ckRambamIndexes/ckCycleIndex - the same cycles ensureCycDay already loads
+   for any date), Musar (ckMusarIndexes) and Chassidut/Tanya
+   (ckTanyaDayEntry). Mishnah is deliberately left OUT: unlike those, this
+   app has no independent date-driven Mishnah cycle at all - the only
+   Mishnah data it has is the parasha+weekday `mishnah_cycle` inside
+   CHOK.schedule, which (like Torah) has no Shabbat entry; printing
+   Thursday's or Friday's Mishnah again under "Shabbat" would be wrong, and
+   the real sefer's own traditional Shabbat Mishnah (Seder Taharot, per
+   on-record research - see the session notes) isn't in this app's data
+   files, so it is skipped here rather than guessed. Gemara reuses the
+   plain-citation-only fallback already built into bkSectionBody's 'daf'
+   handling (no scanned image for this one extra slot - "leave Gemara as-is"
+   is the owner's own call anyway). */
+function bkShabbatReady(hd){ return !!CYC && ckCycReady(hd) && ckTanyaReady(hd) && bkMusarReady(hd); }
+function ensureBkShabbat(hd){ return Promise.all([ensureCycDay(hd), ensureTanyaDay(hd), ensureBkMusar(hd)]); }
+function bkShabbatSections(hd){
+  const list=[];
+  const tev=chokTehillimVerses(hd); if(tev.length) list.push({key:'tehillim',he:'תְּהִלִּים',items:tev,kind:'tehillim',refs:[]});
+  if(CYC&&CYC.daf){ const gi=ckCycleIndex(CYC.daf,hd), items=ckDafItems(gi); if(items.length) list.push({key:'gemara',he:'גְּמָרָא',kind:'daf',items,refs:[],dIdx:gi}); }
+  if(CYC){
+    const ri=ckRambamIndexes(hd); let rs=[]; ri.forEach(i=>rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))));
+    if(rs.length) list.push({key:'halacha',he:'הֲלָכָה',kind:'rambam',items:rs,refs:[],rIdx:ri});
+  }
+  const musarWork=S.musarWork||'reshit';
+  if(ckMusarReady(musarWork,hd)){
+    const mIdx=ckMusarIndexes(musarWork,hd), items=[]; mIdx.forEach(i=>items.push(...ckMusarSegs(musarWork,i)));
+    if(items.length) list.push({key:'musar',he:'מוּסָר',items,kind:'musarcyc',refs:[],musarWork,mIdx});
+  }
+  if(CYC){
+    const zi=ckCycleIndex(CYC.zohar,hd), zitems=ckCycleSegs('zohar',zi);
+    if(zitems.length) list.push({key:'zohar',he:'זֹהַר',items:zitems,kind:'text',refs:[]});
+  }
+  if(ckTanyaReady(hd)){
+    const te=ckTanyaDayEntry(hd), items=ckTanyaSegs(te.orderIndex);
+    if(items.length) list.push({key:'tanya',he:'חֲסִידוּת',items,kind:'tanyacyc',refs:[],tIdx:te.orderIndex});
+  }
+  return list;
+}
+function bkShabbatBlocks(shabbatDate,B){
+  const hd=new HDate(shabbatDate), secs=bkShabbatSections(hd);
+  if(!secs.length) return;
+  const dayLabel=bkUI().shabbatHead, hillHtml=bkHillulotHtml(hd);
+  B.push({t:'day', brk:1, label:dayLabel, tocSub:localizeHebDateStr(hd.renderGematriya(true)).split(' ').slice(0,-1).join(' '),
+    html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div><div class="bk-day-d">${localizeHebDateStr(hd.renderGematriya(true))}</div></div>`});
+  if(hillHtml) B.push({t:'atom', head:1, html:hillHtml});
+  secs.forEach((s,si)=>{
+    if(si) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
+    let src=chokSourceLine(s,hd), title=s.he, label=s.he;
+    if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
+    else if(s.key==='tanya'){ title=title+(src?' · '+src:''); src=''; }
+    B.push({t:'sec', label, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
+    bkSectionBody(s,{key:null},B);
+  });
+}
 function bkWeekBlocks(date){
   let B=[];
   const rows=bkWeekRows(date);
   rows.forEach((r,i)=>{ B=B.concat(bkBlocks(r.date,{day:r.day, week:1, brk:i>0})); });
-  /* Shabbat has no study pages: Friday closes with a greeting */
-  if(rows.length && rows[rows.length-1].day==='fri')
+  /* Shabbat has no Torah/Nevi'im/Ketuvim pages, but does get its own page(s)
+     of every other date-driven subject (bkShabbatBlocks) before Friday's
+     closing greeting */
+  if(rows.length && rows[rows.length-1].day==='fri'){
+    const sd=bkShabbatDateOf(date);
+    if(sd) bkShabbatBlocks(sd,B);
     B.push({t:'atom', html:`<div class="bk-shabbat"><div class="bk-rule"><span>${ORN}</span></div><div class="bk-shabbat-t">${bkUI().shabbat}</div></div>`});
+  }
   return B;
 }
 function bkBlockHtml(b){
@@ -7139,14 +7250,37 @@ function bkImgSrc(key){ if(key===BK_QR_KEY) key=bkQrKey(); const st=BK_IMG[key];
    falls in the FOLLOWING week - which turns out to be Shabbat Vayera itself
    (31.10.2026) - so it's its own BK_NIFTAR_EXTRA entry gated to that date. */
 const BK_DEDICATION={niftar:['גַּבְרִיאֵל מַמּוּסִי בֶּן אַבְרָהָם הַנּוֹלָד מֵרַעְיָה מַזָּל טוֹב'], hatzlacha:['אָלוֹן בֶּן חַנָּה נָזִי','דָּוִד מֵאִיר יִשְׂרָאֵל בֶּן שָׂרָה קָרוֹלִין']};
+/* The names shown on this page used to live in two places: the live app's
+   own MEMORIAL/HATZLACHA lists (shown on the home screen) and this file's
+   own BK_DEDICATION, added separately for the booklet and never synced back
+   to the app. Merged here, de-duplicated by the bare (nikud-stripped) name
+   (ckBare already exists for exactly this), into one combined list per
+   category - the base every booklet prints from; BK_NIFTAR_EXTRA stays a
+   separate, date-gated top-up for a specific week's own extra name(s), also
+   de-duplicated against the merged base so a name added to MEMORIAL later
+   doesn't print twice under its own week. */
+function bkBareName(s){ return ckBare(s||'').replace(/\s+/g,' ').trim(); }
+function bkMergeNames(a,b){
+  const out=[].concat(a), seen=new Set(a.map(bkBareName));
+  (b||[]).forEach(n=>{ const k=bkBareName(n); if(!seen.has(k)){ seen.add(k); out.push(n); } });
+  return out;
+}
+const BK_NIFTAR_BASE=bkMergeNames(MEMORIAL,BK_DEDICATION.niftar);
+const BK_HATZLACHA_BASE=bkMergeNames(HATZLACHA,BK_DEDICATION.hatzlacha);
+/* "גַּבְרִיאֵל מַמּוּסִי" is shown larger/bolder in the name grid (owner's
+   earlier request, kept as a per-name style rather than a layout exception) */
+const BK_NAME_EMPH=bkBareName('גַּבְרִיאֵל מַמּוּסִי');
 const BK_NIFTAR_EXTRA=[
   {shabbat:new Date(2026,9,24), name:'יוֹכֶבֶד גּוּגוֹלִי בַּת סִימוֹן'}, // Lech Lecha's week (24.10.2026) only - yahrzeit י"ג חשון
   {shabbat:new Date(2026,9,24), name:'נַטֶלָה רָחֵל בַּת יִצְחָק הַנּוֹלְדָה מִשָּׂרָה'}, // Lech Lecha's week only, owner's direct request
   {shabbat:new Date(2026,9,31), name:'מְנַשֶּׁה בֶּן לֵוִי הַנּוֹלָד מִזִּלְפָּה'} // Vayera's week (31.10.2026) only - yahrzeit כ' חשון, which is Shabbat Vayera itself
 ];
 function bkNiftarList(shabbat){
-  const list=[].concat(BK_DEDICATION.niftar);
-  BK_NIFTAR_EXTRA.forEach(e=>{ if(shabbat && shabbat.toDateString()===e.shabbat.toDateString()) list.push(e.name); });
+  const list=[].concat(BK_NIFTAR_BASE), seen=new Set(list.map(bkBareName));
+  BK_NIFTAR_EXTRA.forEach(e=>{
+    if(!shabbat || shabbat.toDateString()!==e.shabbat.toDateString()) return;
+    const k=bkBareName(e.name); if(seen.has(k)) return; seen.add(k); list.push(e.name);
+  });
   return list;
 }
 /* the Rav's honour page (before the dedication page) - the owner's text,
@@ -7207,25 +7341,27 @@ function bkCoverHtml(date,slot,end){
   </div>`;
 }
 function bkDedicationHtml(shabbat){
-  const t=bkUI(), D=BK_DEDICATION;
+  const t=bkUI();
   /* each slot holds one or more people; the wording around it follows the
-     count (singular for one, plural for several) */
-  const niftar=bkNiftarList(shabbat), hatz=[].concat(D.hatzlacha);
-  const name=(n,zl)=>n?`<div class="bk-dd-name">${n}</div>`
-    :`<div class="bk-dd-name"><span class="bk-ded-blank"></span>${zl?` ${zl}`:''}</div>`;
+     count (singular for one, plural for several). Merged lists (app +
+     booklet, de-duplicated - see BK_NIFTAR_BASE/BK_HATZLACHA_BASE) are shown
+     as a grid of small individual boxes, one name per box, rather than the
+     single stacked column the page used to hold (owner's redesign request) */
+  const niftar=bkNiftarList(shabbat), hatz=[].concat(BK_HATZLACHA_BASE);
+  const nameBox=n=>`<div class="bk-dd-nbox${bkBareName(n).indexOf(BK_NAME_EMPH)===0?' bk-dd-emph':''}">${n}</div>`;
   return `<div class="bk-page bk-matter bk-ornp bk-dedic">${ornDedicationSvg()}
     <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
     <div class="bk-ol bk-dd-hdr"><span>${t.dedHdr[0]}</span><i></i><span>${t.dedHdr[1]}</span></div>
     <div class="bk-ol bk-dd-box bk-dd-box1">
       <div class="bk-dd-lead">${t.dedLead}</div>
       <div class="bk-dd-h">${t.dedNiftar}</div>
-      ${niftar.map(n=>name(n,t.dedZl)).join('')}
+      <div class="bk-dd-grid">${niftar.map(nameBox).join('')}</div>
       <div class="bk-dd-txt">${niftar.length>1?t.dedMeritPl:t.dedMerit}</div>
       <div class="bk-dd-tnz">${niftar.length>1?t.dedTnzbhPl:t.dedTnzbh}</div>
     </div>
     <div class="bk-ol bk-dd-box bk-dd-box2">
       <div class="bk-dd-h">${t.dedHatzlacha}</div>
-      ${hatz.map(n=>name(n,'')).join('')}
+      <div class="bk-dd-grid">${hatz.map(nameBox).join('')}</div>
       <div class="bk-dd-txt">${hatz.length>1?t.dedBlessPl:t.dedBless}</div>
       <div class="bk-dd-amen">${t.dedAmen}</div>
     </div>
@@ -7245,12 +7381,67 @@ function bkTocDays(toc,parasha){
   });
   return days;
 }
+/* the week-at-a-glance summary for the TOC page's own leftover space
+   (owner's request): one line per subject, the week's full study range,
+   computed from the exact same data/indices each section already uses to
+   render that day's own content - the first day's starting point to the
+   last day's ending point, via chokSourceLine/chokRefLabel (the reader's
+   own source-line builder), never guessed. Dropped by bkBuildPrint if it
+   still doesn't fit even once the TOC page is fully tightened. */
+function bkWeekSummary(date){
+  const slot=bkSlot(date); if(!slot) return '';
+  const rows=bkWeekRows(date).filter(r=>r.day!=='night');
+  if(!rows.length) return '';
+  /* per-day section lists (Torah/Nevi'im/Ketuvim/Mishnah/Gemara/Halacha/
+     Musar/Zohar/Chassidut each by its own weekday row), so a subject that
+     some days don't carry - Nevi'im/Ketuvim on Friday, which has Haftarah
+     instead - still spans from its own real first day to its own real last
+     day, not Sunday-to-Friday regardless of what Friday actually has */
+  const perRow=rows.map(r=>{ const hd=new HDate(r.date); return {hd, secs:chokSectionsFor(slot.key,r.day,hd)}; });
+  const spanOf=k=>{
+    let a=null,aHd=null,b=null,bHd=null;
+    for(const r of perRow){ const s=r.secs.find(x=>x.key===k); if(s){ a=s; aHd=r.hd; break; } }
+    for(let i=perRow.length-1;i>=0;i--){ const s=perRow[i].secs.find(x=>x.key===k); if(s){ b=s; bHd=perRow[i].hd; break; } }
+    if(!a && !b) return '';
+    const la=a?chokSourceLine(a,aHd):'', lb=b?chokSourceLine(b,bHd):'';
+    if(la && lb) return la===lb?la:la+' '+ckChrome('עַד')+' '+lb;
+    return la||lb;
+  };
+  const t=bkUI(), hd0=perRow[0].hd, hd1=perRow[perRow.length-1].hd, tr0=portionFor(hd0), tr1=portionFor(hd1);
+  const tehLine=tr0[0]===tr1[1]?ckChrome('פֶּרֶק')+' '+heNum(tr0[0]):
+    ckChrome('מִפֶּרֶק')+' '+heNum(tr0[0])+' '+ckChrome('עַד')+' '+ckChrome('פֶּרֶק')+' '+heNum(tr1[1]);
+  const row=(label,val)=>val?`<div class="bk-wk-row"><b>${label}</b> — ${val}</div>`:'';
+  const h=[
+    row(ckChrome('תּוֹרָה'), spanOf('torah')),
+    row(ckChrome('נְבִיאִים'), spanOf('neviim')),
+    row(ckChrome('כְּתוּבִים'), spanOf('ketuvim')),
+    row(ckChrome('תְּהִלִּים'), tehLine),
+    row(ckChrome('מִשְׁנָה'), spanOf('mishnah')),
+    row(ckChrome('גְּמָרָא'), spanOf('gemara')),
+    row(t.rambam, spanOf('halacha')),
+    row(ckChrome('מוּסָר'), spanOf('musar')),
+    row(ckChrome('זֹהַר'), spanOf('zohar')),
+    row(ckChrome('חֲסִידוּת'), spanOf('tanya')),
+  ].filter(Boolean).join('');
+  return h?`<div class="bk-wk-sum"><div class="bk-wk-h">${bkParashaLine(slot)}</div>${h}</div>`:'';
+}
+/* keep-with-text's own escalation (bkFixOverflow), reused here to decide
+   whether the week summary genuinely fits on the TOC page before keeping it */
+function bkPageFits(page,body){
+  for(const c of ['bk-tight','bk-tighter']){
+    if(body.scrollHeight<=body.clientHeight+1){ page.classList.remove('bk-tight','bk-tighter'); return true; }
+    page.classList.add(c);
+  }
+  const ok=body.scrollHeight<=body.clientHeight+1;
+  page.classList.remove('bk-tight','bk-tighter');
+  return ok;
+}
 /* The contents page: a book's list, not a table - per day a heading (name,
    parasha), then one dotted-leader line per subject with its page. A long
    list (a whole week) sets in two columns, as a printed sefer's contents
    do (three for a whole week), to stay within one page. Then Ben Ish Chai, listed for the full
    booklet's shape and still to be built (no page yet). */
-function bkTocHtml(days){
+function bkTocHtml(days,summary){
   const t=bkUI(), pg=n=>n?heNum(n):'';
   const row=(label,p,cls)=>`<div class="bk-toc-row${cls?' '+cls:''}"><span>${label}</span><b>${p}</b></div>`;
   let h='', lines=0;
@@ -7265,7 +7456,7 @@ function bkTocHtml(days){
   lines+=4;
   return bkMatterPage('bk-tocpage','',`<div class="bk-toc">
     <div class="bk-toc-h">${t.tocTitle}</div>${bkRuleHtml()}
-    <div class="bk-toc-list${lines>60?' bk-toc-3col':lines>30?' bk-toc-2col':''}">${h}</div>
+    <div class="bk-toc-list${lines>80?' bk-toc-4col':lines>60?' bk-toc-3col':lines>30?' bk-toc-2col':''}">${h}</div>${summary||''}
   </div>`);
 }
 function bkBackHtml(legal){
@@ -7339,7 +7530,14 @@ function bkBuildPrint(date){
   /* Ben Ish Chai closes the day: its own two-zone pages */
   const n=bkPaginateBic(host, bkBicParts(slot), {parasha:bkParashaLine(slot)}, n0, toc);
   const slotEl=host.querySelector('.bk-toc-slot');
-  slotEl.insertAdjacentHTML('afterend',bkTocHtml(bkTocDays(toc,bkParashaLine(slot)))); slotEl.remove();
+  const tocDays=bkTocDays(toc,bkParashaLine(slot)), summary=bkWeekSummary(date);
+  slotEl.insertAdjacentHTML('afterend',bkTocHtml(tocDays,summary)); slotEl.remove();
+  /* drop the summary outright if it still overflows the TOC page even once
+     fully tightened, rather than let it silently clip in print/PDF */
+  if(summary){
+    const tocPage=host.querySelector('.bk-tocpage'), tocBody=tocPage&&tocPage.querySelector('.bk-pbody');
+    if(tocPage && tocBody && !bkPageFits(tocPage,tocBody)) tocPage.outerHTML=bkTocHtml(tocDays,'');
+  }
   /* the Gemara scans' credit + HebrewBooks.org license: once, on the back */
   host.insertAdjacentHTML('beforeend',bkBackHtml(blocks.some(b=>b.img))+bkBlankHtml());
   bkBwDom(host);
