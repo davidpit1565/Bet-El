@@ -1729,20 +1729,28 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:2.5mm 4mm 0}
 .bk-toc-h{font-family:var(--font-sacred);font-weight:900;font-size:29px;color:var(--bk-gold-deep)}
 .bk-toc .bk-rule{width:46mm;margin:2mm auto 2.5mm}
-.bk-toc-list{align-self:stretch}
-.bk-toc-list.bk-toc-2col{column-count:2;column-gap:8mm}
-.bk-toc-list.bk-toc-3col{column-count:3;column-gap:6mm}
+/* the column split itself is built in JS (bkTocDistribute), by each day
+   block's own weight, not CSS column-count's native balancing - see the
+   long comment on bkTocDistribute for why (the TOC page's "serious empty
+   space" bug: equal-height column reservation plus an indivisible short
+   block, e.g. Leil Shishi). Each .bk-toc-col is just a plain flex item,
+   sized by its own content - columns are free to end at different
+   heights, same as a printed book's own contents page. */
+.bk-toc-list{align-self:stretch;display:flex;align-items:flex-start}
+.bk-toc-col{flex:1 1 0;min-width:0}
+.bk-toc-list.bk-toc-2col{gap:0 8mm}
+.bk-toc-list.bk-toc-3col{gap:0 6mm}
 /* a week with the new Shabbat block (an 8th day-group) runs a little past
    what 3 columns at full size holds on one page - a 4th, slightly smaller
    column (not a font shrink across the whole page) keeps the owner's
    one-page-per-week target without touching the 2-/3-column sizes every
    earlier, already-approved week still uses */
-.bk-toc-list.bk-toc-4col{column-count:4;column-gap:4mm}
+.bk-toc-list.bk-toc-4col{gap:0 4mm}
 .bk-toc-list.bk-toc-4col .bk-toc-day span{font-size:13px}
 .bk-toc-list.bk-toc-4col .bk-toc-day small{font-size:10px}
 .bk-toc-list.bk-toc-4col .bk-toc-row{font-size:11.5px;gap:1mm}
 .bk-toc-list.bk-toc-4col .bk-toc-row b{width:6mm}
-.bk-toc-dblk{break-inside:avoid;margin:0 0 2.2mm}
+.bk-toc-dblk{margin:0 0 2.2mm}
 .bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;margin:0 0 .6mm}
 .bk-toc-day span{font-family:var(--font-sacred);font-weight:700;font-size:15px;color:var(--bk-gold-deep)}
 .bk-toc-day small{font-family:var(--font-sacred);font-size:11.5px;color:var(--bk-muted)}
@@ -3759,7 +3767,7 @@ function ckDaf(s){
   const m=/^(\d+)([ab])$/.exec(s);
   return m?{daf:+m[1], amud:m[2]==='a'?'ע״א':'ע״ב'}:null;
 }
-function chokRefLabel(ref, sec){
+function chokRefLabel(ref, sec, opts){
   if(!ref) return '';
   // Talmud: "Makkot 23a:1-8" or "Makkot 23a:11-23b:7"
   let m=/^(.+?) (\d+[ab]):(\d+)(?:-(?:(\d+[ab]):)?(\d+))?$/.exec(ref);
@@ -3782,6 +3790,12 @@ function chokRefLabel(ref, sec){
     const c1=+m[2], v1=+m[3], c2=m[4]?+m[4]:c1, v2=m[5]?+m[5]:v1;
     const span = c1===c2 ? ckRange(v1,v2) : heNum(c1)+':'+heNum(v1)+' – '+heNum(c2)+':'+heNum(v2);
     if(sec==='mishnah'){
+      /* the booklet's own section header wants the tractate name alone
+         (opts.bare) - the chapter:mishnah range already prints separately
+         right below it (bkSectionBody's own per-chapter/per-mishnah
+         headings), so repeating it a second time up in the title read as
+         a duplicate (owner's call) */
+      if(opts&&opts.bare) return 'מַסֶּכֶת '+w;
       if(c1!==c2) return 'מַסֶּכֶת '+w+' · '+span;
       return 'מַסֶּכֶת '+w+' · פֶּרֶק '+heNum(c1)+' · '+(v1===v2?'מִשְׁנָה ':'מִשְׁנָיוֹת ')+ckRange(v1,v2);
     }
@@ -6048,6 +6062,17 @@ function ensureBkDaf(i){
    which the paginator may split between pieces, or inside one between
    words). */
 function bkP(x){ return `<span class="bk-p">${x}</span>`; }
+/* the Tehillim section's own big header, spelled out ("chapters X to Y")
+   rather than the reader's terser dash range - the booklet drops the
+   smaller sub-line this used to print separately underneath (owner's
+   call: one consolidated header instead of a title plus a sub-line).
+   Always the booklet's own pinned 5-chapters-a-day cycle (bkSections'
+   TEHILLIM_DIV), independent of the live S.division setting. */
+function bkTehillimRangeTxt(hd){
+  const r=portionFor(hd,'monthly');
+  return r[0]===r[1] ? ckChrome('פֶּרֶק')+' '+heNum(r[0])
+    : ckChrome('פְּרָקִים')+' '+heNum(r[0])+' '+ckChrome('עַד')+' '+heNum(r[1]);
+}
 function bkVerseNum(v,prev){
   return (!prev||prev.c!==v.c||prev.book!==v.book) ? heNum(v.c)+':'+heNum(v.v) : heNum(v.v);
 }
@@ -6154,8 +6179,13 @@ function bkBlocks(date,opt){
   const hdShown=night?new HDate(addDays(date,1)):hd;
   let musarDone=night;
   const hillHtml=night?'':bkHillulotHtml(hd);
+  /* the day card used to repeat the parasha name right here (bk-day-s) -
+     now redundant: the Torah section that always opens the day (torah/
+     tzeruf is always the first subject) carries the parasha name in its
+     own heading below (see the title-building switch further down), so
+     printing it a second time, right above it, read as a duplicate line
+     (owner's call) */
   B.push({t:'day', brk:opt.brk?1:0, label:dayLabel, tocSub:opt.week?localizeHebDateStr(hdShown.renderGematriya(true)).split(' ').slice(0,-1).join(' '):undefined, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
-    <div class="bk-day-s">${bkParashaLine(slot)}</div>
     <div class="bk-day-d">${localizeHebDateStr(hdShown.renderGematriya(true))}${night?' '+bkUI().evening:''}</div></div>`});
   /* part of the day's opening: it moves with the day and first subject
      headings and doesn't stop the header label from following them */
@@ -6169,19 +6199,40 @@ function bkBlocks(date,opt){
     let src=chokSourceLine(s,hd), title=s.he, label=s.he;
     /* The Halacha (Rambam) cartouche names the book, then the hilchot and
        chapter, right in the heading itself (owner's call) - and so does
-       every other subject whose reference is nameable in one line: Torah/
+       every other subject whose reference is nameable in one line:
        Nevi'im/Ketuvim/Haftarah (book · chapter:verse-range, via the same
-       chokSourceLine/chokRefLabel the reader itself uses), Mishnah
-       (tractate · chapter/mishnah-range - it used to print no source line
-       at all, which read as a bare "משנה"; chokRefLabel's own mishnah
-       branch already gives the exact tractate+range form the owner asked
-       for) and Chassidut/Tanya (its own letter/section label). None of
-       these get a separate `.bk-sec-src` line underneath any more - the
-       reference lives in the title, like Rambam's. Gemara stays as-is
-       (plain reference line, no real Gemara text yet - a separate future
-       project, per the owner). */
+       chokSourceLine/chokRefLabel the reader itself uses) and Chassidut/
+       Tanya (its own letter/section label). None of these get a separate
+       `.bk-sec-src` line underneath any more - the reference lives in the
+       title, like Rambam's. Gemara stays as-is (plain reference line, no
+       real Gemara text yet - a separate future project, per the owner).
+       Torah/Leil Shishi's tzeruf, Mishnah and Tehillim each get their own,
+       simpler heading (below) rather than this generic chapter:verse
+       embed - see each branch's own comment. */
     if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
-    else if(['torah','tzeruf','neviim','ketuvim','haftarah','mishnah','tanya'].includes(s.key)){ title=title+(src?' · '+src:''); src=''; }
+    else if(s.key==='torah'||s.key==='tzeruf'){
+      /* the parasha name, not the book+verse reference - every verse
+         already carries its own chapter:verse marker (bkVerseNum), and the
+         day card right above used to repeat the parasha name a second
+         time, which is why that line was dropped above (owner's call) */
+      title=title+' · '+bkParashaLine(slot); src='';
+    }
+    else if(s.key==='mishnah'){
+      /* the tractate name alone - the chapter:mishnah range already shows
+         right below, per chapter/per mishnah (bkSectionBody), so repeating
+         it in the title too read as a duplicate (owner's call, a partial
+         reversal of the embed above: the tractate name stays, the range
+         doesn't) */
+      const ref=(s.refs||[])[0], w=ref?chokRefLabel(ref,'mishnah',{bare:1}):'';
+      title=title+(w?' · '+w:''); src='';
+    }
+    else if(s.key==='tehillim'){
+      /* one consolidated header ("תְּהִלִּים · פְּרָקִים X עַד Y") instead of
+         a bare "תְּהִלִּים" title plus a separate chapter-range sub-line
+         underneath (owner's call) */
+      title=title+' · '+bkTehillimRangeTxt(hd); src='';
+    }
+    else if(['neviim','ketuvim','haftarah','tanya'].includes(s.key)){ title=title+(src?' · '+src:''); src=''; }
     B.push({t:'sec', label, dafSec:dafFull, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,slot,B);
     if(s.key==='halacha'){ bkMusarSection(hd,B); musarDone=true; }
@@ -6362,7 +6413,14 @@ function bkPaginateBic(host,parts,meta,no,toc){
     newPage(label);
     if(pi===0){
       const h=el(`<div class="bk-day bk-part"><div class="bk-day-t">${t.tocBic}</div><div class="bk-day-s">${meta.parasha}</div></div>`);
-      body.appendChild(h); toc.push({t:'day', label:t.tocBic, sub:meta.parasha, el:h});
+      /* the TOC row itself skips the parasha sub-label (sub:'' below, not
+         meta.parasha) - every other day row in the TOC already carries
+         that same week's parasha name (bkTocDays' own default), so Ben Ish
+         Chai repeating it again right there, under a row with no date of
+         its own to show instead, read as a cramped, out-of-place line
+         (owner's call: "its TOC row looks bad"). The real page (h, above)
+         keeps it - that's the one place it's said once. */
+      body.appendChild(h); toc.push({t:'day', label:t.tocBic, sub:'', el:h});
     }
     const sec=el(`<div class="bk-sec"><div class="bk-sec-t">${t.tocBicY[pt.ti]}</div>${pt.alt?`<div class="bk-sec-src">${t.parashaW||'פָּרָשַׁת'} ${pt.alt}</div>`:''}</div>`);
     body.appendChild(sec); toc.push({t:'sec', label:t.tocBicY[pt.ti], el:sec});
@@ -6426,7 +6484,10 @@ function bkShabbatReady(hd){ return !!CYC && ckCycReady(hd) && ckTanyaReady(hd) 
 function ensureBkShabbat(hd){ return Promise.all([ensureCycDay(hd), ensureTanyaDay(hd), ensureBkMusar(hd)]); }
 function bkShabbatSections(hd){
   const list=[];
-  const tev=chokTehillimVerses(hd); if(tev.length) list.push({key:'tehillim',he:'תְּהִלִּים',items:tev,kind:'tehillim',refs:[]});
+  /* pinned to the booklet's own 5-chapters-a-day cycle, same as every
+     weekday's Tehillim (bkSections' TEHILLIM_DIV) - this block was added
+     after that fix and had been left reading the live S.division instead */
+  const tev=chokTehillimVerses(hd,'monthly'); if(tev.length) list.push({key:'tehillim',he:'תְּהִלִּים',items:tev,kind:'tehillim',refs:[]});
   if(CYC&&CYC.daf){ const gi=ckCycleIndex(CYC.daf,hd), items=ckDafItems(gi); if(items.length) list.push({key:'gemara',he:'גְּמָרָא',kind:'daf',items,refs:[],dIdx:gi}); }
   if(CYC){
     const ri=ckRambamIndexes(hd); let rs=[]; ri.forEach(i=>rs=rs.concat(ckCycleSegs('rambam',i).map(t=>({t,i}))));
@@ -6459,6 +6520,7 @@ function bkShabbatBlocks(shabbatDate,B){
     let src=chokSourceLine(s,hd), title=s.he, label=s.he;
     if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
     else if(s.key==='tanya'){ title=title+(src?' · '+src:''); src=''; }
+    else if(s.key==='tehillim'){ title=title+' · '+bkTehillimRangeTxt(hd); src=''; }
     B.push({t:'sec', label, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,{key:null},B);
   });
@@ -6544,7 +6606,7 @@ function bkPageHtml(meta,no,label){
     <div class="bk-pf"><span>${heNum(no)}</span></div>
   </div>`;
 }
-const BK_MIN_LINES=6, BK_SUB_MIN_LINES=2, BK_PULL_LINES=3;
+const BK_MIN_LINES=6, BK_SUB_MIN_LINES=2, BK_PULL_LINES=3, BK_COMM_MIN_LINES=2;
 /* lines of text on a page body, from its top to its last element */
 function bkLinesAfterTop(body){
   const last=body.lastElementChild; if(!last) return 0;
@@ -6740,6 +6802,26 @@ function bkPaginate(host,blocks,meta){
            few words of its text */
         const lab=node.querySelector&&node.querySelector('.bk-ml');
         if(lab && lo>0 && lo<bkWordCount(lab)+4) lo=0;
+        /* a commentary excerpt (Rashi and the other bk-comm panels) never
+           leaves a single orphaned line at a page's foot while the rest of
+           the same piece carries on to the next page (owner's call: at
+           least BK_COMM_MIN_LINES, same idea - and the same .bk-cont
+           carry-over mechanism - as the section/chapter heading minimums
+           just above and pullBack()'s own day-boundary squeeze). Measure
+           the slice bkWordCount already found (`lo` words) by its actual
+           rendered height rather than guessing from the word count, since
+           Hebrew line-wrapping isn't a fixed words-per-line ratio; if it
+           would render under the minimum, treat it as unsplittable here
+           (lo=0) so the whole piece - not just its last sliver - moves on
+           to start the next page instead. */
+        if(lo>0 && b.cls==='bk-comm'){
+          const slice=bkKeepWords(node.cloneNode(true),0,lo);
+          add(slice);
+          const cs=getComputedStyle(slice), lh=parseFloat(cs.lineHeight)||parseFloat(cs.fontSize)*1.6||20;
+          const linesFit=slice.getBoundingClientRect().height/lh;
+          undo(slice);
+          if(linesFit<BK_COMM_MIN_LINES) lo=0;
+        }
         const fresh=!filled && !box.childNodes.length && !pend.length;
         if(lo===0 && fresh){ add(node); node=null; placed(); break; }   // cannot shrink further: let it be
         if(lo>0){ add(bkKeepWords(node.cloneNode(true),0,lo)); node=bkKeepWords(node.cloneNode(true),lo,Infinity); placed(); }
@@ -7279,8 +7361,19 @@ function bkMergeNames(a,b){
   (b||[]).forEach(n=>{ const k=bkBareName(n); if(!seen.has(k)){ seen.add(k); out.push(n); } });
   return out;
 }
-const BK_NIFTAR_BASE=bkMergeNames(MEMORIAL,BK_DEDICATION.niftar);
-const BK_HATZLACHA_BASE=bkMergeNames(HATZLACHA,BK_DEDICATION.hatzlacha);
+/* moves the one name starting with `prefix` (bare, nikud-stripped match) to
+   the front of the list, leaving every other name in its existing relative
+   order - a pure reordering, not a re-merge (owner's request: the
+   emphasized niftar name first in its grid, "אָלוֹן" first in the hatzlacha
+   grid, no other change) */
+function bkMoveFront(list,prefix){
+  const i=list.findIndex(n=>bkBareName(n).indexOf(prefix)===0);
+  if(i<=0) return list;
+  const out=list.slice(); const [n]=out.splice(i,1); out.unshift(n);
+  return out;
+}
+const BK_NIFTAR_BASE=bkMoveFront(bkMergeNames(MEMORIAL,BK_DEDICATION.niftar), bkBareName('גַּבְרִיאֵל מַמּוּסִי'));
+const BK_HATZLACHA_BASE=bkMoveFront(bkMergeNames(HATZLACHA,BK_DEDICATION.hatzlacha), bkBareName('אָלוֹן'));
 /* "גַּבְרִיאֵל מַמּוּסִי" is shown larger/bolder in the name grid (owner's
    earlier request, kept as a per-name style rather than a layout exception) */
 const BK_NAME_EMPH=bkBareName('גַּבְרִיאֵל מַמּוּסִי');
@@ -7455,22 +7548,62 @@ function bkPageFits(page,body){
    list (a whole week) sets in two columns, as a printed sefer's contents
    do (three for a whole week), to stay within one page. Then Ben Ish Chai, listed for the full
    booklet's shape and still to be built (no page yet). */
+/* Splits the day blocks across `n` columns by their own estimated weight
+   (the same "lines" proxy bkTocHtml already counted per block: item count
+   plus its 2-line heading), instead of leaving that to CSS column-count's
+   native balancing.
+   That native balancing was the TOC page's own "serious empty space" bug
+   (e.g. right under a short day-group like Leil Shishi, which carries only
+   one subject): CSS multi-column balance (column-fill:balance, the default
+   whenever a column container's height is auto) works by reserving every
+   column the SAME height - the tallest column's - then flowing content
+   into each; a `break-inside:avoid` block (bk-toc-dblk, so a day's own
+   subject list is never split mid-day) that doesn't fit in what's left of
+   a column is pushed whole to the next one, so a short block that happens
+   to land right after a tall one can end a column far short of that
+   reserved, shared height - visible as dead space at the column's foot,
+   worst when the short block (Leil Shishi) is the one left stranded there.
+   Building the columns ourselves sidesteps the reservation entirely: each
+   `.bk-toc-col` is a plain flex item sized by its OWN content, so columns
+   simply end at different heights (the leftover space collects, if
+   anywhere, in the last column - a normal, expected look for a book's own
+   contents page - rather than appearing as a gap under an arbitrary day). */
+function bkTocDistribute(blocks,n){
+  if(n<=1) return [blocks];
+  const total=blocks.reduce((a,b)=>a+b.w,0), target=total/n;
+  const cols=[[]]; let cum=0, boundary=target;
+  blocks.forEach(b=>{
+    if(cols.length<n && cols[cols.length-1].length && cum+b.w/2>boundary){ cols.push([]); boundary+=target; }
+    cols[cols.length-1].push(b); cum+=b.w;
+  });
+  return cols;
+}
+/* The contents page: a book's list, not a table - per day a heading (name,
+   parasha), then one dotted-leader line per subject with its page. A long
+   list (a whole week) sets in two columns, as a printed sefer's contents
+   do (three, or four for an 8-day-group week with the Shabbat block), to
+   stay within one page. Then Ben Ish Chai, listed for the full booklet's
+   shape and still to be built (no page yet). */
 function bkTocHtml(days,summary){
   const t=bkUI(), pg=n=>n?heNum(n):'';
   const row=(label,p,cls)=>`<div class="bk-toc-row${cls?' '+cls:''}"><span>${label}</span><b>${p}</b></div>`;
-  let h='', lines=0;
+  const blocks=[]; let lines=0;
   days.forEach(d=>{
-    h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${d.label}</span><small>${d.sub||''}</small></div>${d.items.map(i=>row(i.label,pg(i.pg))).join('')}</div>`;
-    lines+=d.items.length+2;
+    const w=d.items.length+2;
+    blocks.push({w, html:`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${d.label}</span><small>${d.sub||''}</small></div>${d.items.map(i=>row(i.label,pg(i.pg))).join('')}</div>`});
+    lines+=w;
   });
   /* "in preparation" is said once, beside the heading - where a day's parasha
      sits - so its two rows are plain one-line rows like every other */
-  if(!days.some(d=>d.label===t.tocBic))
-    h+=`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${t.tocBic}</span><small>${t.tocSoon}</small></div>${t.tocBicY.map(y=>row(y,'—','bk-toc-soon')).join('')}</div>`;
-  lines+=4;
+  if(!days.some(d=>d.label===t.tocBic)){
+    blocks.push({w:4, html:`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${t.tocBic}</span><small>${t.tocSoon}</small></div>${t.tocBicY.map(y=>row(y,'—','bk-toc-soon')).join('')}</div>`});
+    lines+=4;
+  }
+  const tier=lines>80?4:lines>60?3:lines>30?2:1;
+  const colsHtml=bkTocDistribute(blocks,tier).map(c=>`<div class="bk-toc-col">${c.map(b=>b.html).join('')}</div>`).join('');
   return bkMatterPage('bk-tocpage','',`<div class="bk-toc">
     <div class="bk-toc-h">${t.tocTitle}</div>${bkRuleHtml()}
-    <div class="bk-toc-list${lines>80?' bk-toc-4col':lines>60?' bk-toc-3col':lines>30?' bk-toc-2col':''}">${h}</div>${summary||''}
+    <div class="bk-toc-list${tier>1?' bk-toc-'+tier+'col':''}">${colsHtml}</div>${summary||''}
   </div>`);
 }
 function bkBackHtml(legal){
