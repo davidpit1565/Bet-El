@@ -7343,6 +7343,26 @@ function appUpdateVerGt(a,b){
   return false;
 }
 function appUpdateDismissed(){ return APP_UPDATE_INFO && localStorage.getItem('betel_update_dismissed_v')===APP_UPDATE_INFO.version; }
+function openAppStorePage(url){
+  const u=String(url||APP_STORE_URL);
+  const store=u.replace(/^https?:\/\//i,'itms-apps://');
+  try{ window.location.href=store; }catch(e){ try{ window.open(u,'_blank'); }catch(e2){} }
+}
+/* Drop a cached "new version" banner as soon as the running app is already that version or newer (the daily
+   App Store lookup alone left it on screen for up to a day after updating). */
+function pruneAppUpdate(){
+  try{
+    if(!APP_UPDATE_INFO) return;
+    const app=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+    if(!app||!app.getInfo) return;
+    app.getInfo().then(info=>{
+      if(APP_UPDATE_INFO && info && info.version && !appUpdateVerGt(APP_UPDATE_INFO.version, info.version)){
+        APP_UPDATE_INFO=null; try{ localStorage.removeItem('betel_update_info'); }catch(e){}
+        if(TAB==='home') render();
+      }
+    }).catch(()=>{});
+  }catch(e){}
+}
 function dismissAppUpdate(){ if(APP_UPDATE_INFO) localStorage.setItem('betel_update_dismissed_v',APP_UPDATE_INFO.version); if(TAB==='home') render(); }
 function checkAppUpdate(){
   if(!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()==='ios')) return; // App Store lookup is iOS-only
@@ -8489,6 +8509,14 @@ function renderHome(){
   if(htm) htm.onclick=()=>openTefillinMirror('home');
   const hud=document.getElementById('homeUpdateDismiss');
   if(hud) hud.onclick=(e)=>{ e.stopPropagation(); dismissAppUpdate(); };
+  /* The whole "new version" banner opens the App Store. A plain <a target=_blank> to apps.apple.com did nothing inside the
+     native WebView (the global link interceptor deliberately skips App Store links), so open it explicitly: the itms-apps
+     scheme goes straight to the App Store app. */
+  const hub=document.getElementById('homeUpdateBanner');
+  if(hub) hub.onclick=(e)=>{
+    if(e.target && e.target.id==='homeUpdateDismiss') return;
+    e.preventDefault(); e.stopPropagation(); openAppStorePage(APP_UPDATE_INFO&&APP_UPDATE_INFO.url);
+  };
   if(document.getElementById('homeBicCard') && !BIC_INDEX) ensureBicIndex().then(()=>{ if(TAB==='home') render(); });
   if(document.getElementById('homeTikkuneiCard') && !ZOHAR) ensureZoharData().then(()=>{ if(TAB==='home') render(); });
   /* (the tile itself is now always rendered; this note is about the data load below) It used to be absent whenever ckTodayLine() had nothing
@@ -15600,6 +15628,7 @@ function notifBootSync(){
 notifBootSync().then(()=>{
   try{checkNotification();}catch(e){}
   try{checkBicNotification();}catch(e){}
+  try{pruneAppUpdate();}catch(e){}
   try{checkAppUpdate();}catch(e){}
   try{checkMusarNotification();}catch(e){}
   if(TAB==='settings'||TAB==='home') render();
