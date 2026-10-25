@@ -17,8 +17,8 @@ const hook = 'window.go = go;';
 if (SRC.split(hook).length !== 2) throw new Error('hook');
 const EXPOSE = `window.__bk={bkWeekRows,bkWeekDafs,chokSlotFor,chokSectionsFor,bkSections,bkDate,ckCommFor,ckMusarIndexes,ckMusarSegs,MUSAR_WORKS,ckCycleIndex,ckCycleSegs,ckRambamIndexes,ckRambamTrack,ckTanyaDayEntry,chokMishnahYear,chokSourceLine,CK_COMM,BK_COMM_W,ckDafEntry,bkDafSides,ckMusarUI,get CYC(){return CYC},get MCYC(){return MCYC},get S(){return S}};`;
 const PATCHED = SRC.replace(hook, hook + EXPOSE);
-const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } : undefined;
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', proxy });
+// see booklet-check.mjs for why HTTPS_PROXY is never handed to the browser itself
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Jerusalem' });
 await ctx.addInitScript(({ iso }) => {
   localStorage.setItem('betel_onboard_v1', '1'); localStorage.setItem('betel_chok_pace_v1', '1');

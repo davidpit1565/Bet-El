@@ -19,8 +19,13 @@ const DAY = process.argv[2] || '2026-10-27';          // Tuesday, parashat Vayer
 const OUT = process.argv[3] || 'booklet-shots';
 mkdirSync(OUT, { recursive: true });
 
-const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } : undefined;
-const b = await chromium.launch({ executablePath: CHROME_PATH, proxy });
+// Do NOT hand HTTPS_PROXY to the browser itself: Chromium's proxy.bypass does not keep plain
+// http://localhost traffic off the proxy in this sandbox (it gets sent as an absolute-URI GET,
+// which the egress proxy answers with 405 since it only tunnels CONNECTs), which silently breaks
+// every localhost:8899 request including the very first page load. External hosts are already
+// routed through Node's own fetch via ctx.route() below, which honors HTTPS_PROXY on its own
+// (run with NODE_USE_ENV_PROXY=1 on Node >= 22.21 if it doesn't pick it up automatically).
+const b = await chromium.launch({ executablePath: CHROME_PATH });
 const errs = [];
 
 async function openCtx({ withDafProxy }) {
