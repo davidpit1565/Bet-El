@@ -1695,6 +1695,12 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    specific request - don't reintroduce a per-name size). */
 .bk-dd-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1.6mm 3mm;max-width:108mm}
 .bk-dd-nbox{font-family:var(--font-sacred);font-weight:800;font-size:11.5px;line-height:1.3;white-space:nowrap}
+/* the לעילוי נשמת (niftar) names specifically read too small at the shared
+   11.5px size - bumped up for that box alone (owner's request); the
+   להצלחה box2 names stay at the base size untouched, and every name
+   within box1 stays the same uniform size as every other (no reintroducing
+   a per-name size - see the comment above .bk-dd-grid). */
+.bk-dd-box1 .bk-dd-nbox{font-size:13.5px}
 .bk-dd-txt{font-family:var(--font-sacred);font-size:12.5px;line-height:1.65;max-width:96mm;text-wrap:balance}
 .bk-dd-tnz{font-family:var(--font-sacred);font-weight:700;font-size:14px;color:var(--bk-gold-deep)}
 .bk-dd-amen{font-family:var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
@@ -7565,10 +7571,25 @@ function bkTocDays(toc,parasha){
 /* the week-at-a-glance summary for the TOC page's own leftover space
    (owner's request): one line per subject, the week's full study range,
    computed from the exact same data/indices each section already uses to
-   render that day's own content - the first day's starting point to the
-   last day's ending point, via chokSourceLine/chokRefLabel (the reader's
-   own source-line builder), never guessed. Dropped by bkBuildPrint if it
-   still doesn't fit even once the TOC page is fully tightened. */
+   render that day's own content, never guessed. Dropped by bkBuildPrint
+   if it still doesn't fit even once the TOC page is fully tightened.
+   Every subject's range is built by walking EVERY day of the week (not
+   just comparing the first and last day's own already-grouped label, the
+   earlier version's bug: that silently dropped any book/tractate/gate a
+   crossing passed through in between and, for Musar especially, could
+   print a bare work name with no gate/segment number at all whenever the
+   week crossed from one gate into another). A crossing from one named
+   source (book/tractate/gate/Zohar section) into another is never
+   collapsed into one bare name - every group gets its own explicit
+   numeric range, and more than one group is joined with "; ". Rambam,
+   Musar and Zohar reuse their own existing per-day grouping functions
+   (ckRambamLabel/ckMusarSourceLabel/bkZoharRangeLabel) over the week's
+   FULL index list, which already group consecutive same-book/gate/part
+   runs correctly - the only fix needed there was to stop limiting them to
+   one day's 1-3 units. Nevi'im/Ketuvim/Mishnah (and the rare non-cycle
+   fallback for Halacha/Gemara/Zohar) aren't a single continuous index
+   cycle - they're ref strings tied to the parasha schedule - so those are
+   grouped from the week's own ordered ref list instead (bkRefRangeLabel). */
 function bkWeekSummary(date){
   const slot=bkSlot(date); if(!slot) return '';
   const rows=bkWeekRows(date).filter(r=>r.day!=='night');
@@ -7579,6 +7600,11 @@ function bkWeekSummary(date){
      instead - still spans from its own real first day to its own real last
      day, not Sunday-to-Friday regardless of what Friday actually has */
   const perRow=rows.map(r=>{ const hd=new HDate(r.date); return {hd, secs:chokSectionsFor(slot.key,r.day,hd)}; });
+  const collectRefs=k=>{ let o=[]; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key===k); if(s&&s.refs&&s.refs.length) o=o.concat(s.refs); }); return o; };
+  /* kept only for Chassidut/Tanya below - not part of this fix (the owner
+     didn't flag it, and it has no multi-part grouping function of its own
+     to reuse the way Rambam/Musar/Zohar do), so its old first-day-to-
+     last-day behavior is left exactly as it was. */
   const spanOf=k=>{
     let a=null,aHd=null,b=null,bHd=null;
     for(const r of perRow){ const s=r.secs.find(x=>x.key===k); if(s){ a=s; aHd=r.hd; break; } }
@@ -7591,20 +7617,161 @@ function bkWeekSummary(date){
   const t=bkUI(), hd0=perRow[0].hd, hd1=perRow[perRow.length-1].hd, tr0=portionFor(hd0), tr1=portionFor(hd1);
   const tehLine=tr0[0]===tr1[1]?ckChrome('פֶּרֶק')+' '+heNum(tr0[0]):
     ckChrome('מִפֶּרֶק')+' '+heNum(tr0[0])+' '+ckChrome('עַד')+' '+ckChrome('פֶּרֶק')+' '+heNum(tr1[1]);
+  /* Torah: the parasha name alone - it's already the complete reference for
+     the week, so no chapter/verse range is appended here (owner's call;
+     the old "Parashat X" line that used to sit below the whole block, as a
+     heading, is gone - this is the only place it's said now). */
+  const torahLine=bkParashaLine(slot);
+  const neviimLine=bkRefRangeLabel(collectRefs('neviim'),{prefix:n=>ckChrome('סֵפֶר')+' '+n+' ', unitWord:'פָּסוּק', unitWordPl:'פְּסוּקִים', withMem:true});
+  const ketuvimLine=bkRefRangeLabel(collectRefs('ketuvim'),{prefix:n=>ckChrome('סֵפֶר')+' '+n+' ', unitWord:'פָּסוּק', unitWordPl:'פְּסוּקִים', withMem:true});
+  const mishnahLine=bkRefRangeLabel(collectRefs('mishnah'),{prefix:n=>ckChrome('מַסֶּכֶת')+' '+n+', ', unitWord:'מִשְׁנָה', unitWordPl:'מִשְׁנָיוֹת', withMem:false});
+  let gemaraLine='';
+  { const idxs=[]; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='gemara'); if(s&&s.kind==='daf'&&s.dIdx!=null) idxs.push(s.dIdx); });
+    gemaraLine = idxs.length ? bkDafRangeLabel(idxs) : bkGemaraRefRangeLabel(collectRefs('gemara')); }
+  let halachaLine='';
+  { let idxs=[]; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='halacha'); if(s&&s.kind==='rambam'&&s.rIdx) idxs=idxs.concat(s.rIdx); });
+    halachaLine = idxs.length ? ckRambamLabel(idxs) : bkRefRangeLabel(collectRefs('halacha'),{prefix:n=>ckChrome('רַמְבַּ״ם')+' · '+n+', ', unitWord:'הֲלָכָה', unitWordPl:'הֲלָכוֹת', withMem:false}); }
+  let musarLine='';
+  { let idxs=[], work=null; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='musar'); if(s&&s.kind==='musarcyc'&&s.mIdx){ idxs=idxs.concat(s.mIdx); work=s.musarWork; } });
+    musarLine = idxs.length ? ckMusarSourceLabel(work,idxs) : ''; }
+  let zoharLine='';
+  { let idxs=[], refFallback=false; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='zohar'); if(!s) return;
+      if(CYC && s.kind==='text' && (!s.refs||!s.refs.length)) idxs.push(ckCycleIndex(CYC.zohar,r.hd)); else refFallback=true; });
+    zoharLine = idxs.length ? bkZoharRangeLabel(idxs) : (refFallback ? bkZoharRefRangeLabel(collectRefs('zohar')) : ''); }
   const row=(label,val)=>val?`<div class="bk-wk-row"><b>${label}</b> — ${val}</div>`:'';
   const h=[
-    row(ckChrome('תּוֹרָה'), spanOf('torah')),
-    row(ckChrome('נְבִיאִים'), spanOf('neviim')),
-    row(ckChrome('כְּתוּבִים'), spanOf('ketuvim')),
+    row(ckChrome('תּוֹרָה'), torahLine),
+    row(ckChrome('נְבִיאִים'), neviimLine),
+    row(ckChrome('כְּתוּבִים'), ketuvimLine),
     row(ckChrome('תְּהִלִּים'), tehLine),
-    row(ckChrome('מִשְׁנָה'), spanOf('mishnah')),
-    row(ckChrome('גְּמָרָא'), spanOf('gemara')),
-    row(t.rambam, spanOf('halacha')),
-    row(ckChrome('מוּסָר'), spanOf('musar')),
-    row(ckChrome('זֹהַר'), spanOf('zohar')),
+    row(ckChrome('מִשְׁנָה'), mishnahLine),
+    row(ckChrome('גְּמָרָא'), gemaraLine),
+    row(t.rambam, halachaLine),
+    row(ckChrome('מוּסָר'), musarLine),
+    row(ckChrome('זֹהַר'), zoharLine),
     row(ckChrome('חֲסִידוּת'), spanOf('tanya')),
   ].filter(Boolean).join('');
-  return h?`<div class="bk-wk-sum"><div class="bk-wk-h">${bkParashaLine(slot)}</div>${h}</div>`:'';
+  return h?`<div class="bk-wk-sum">${h}</div>`:'';
+}
+/* ---- week-summary range-building helpers (bkWeekSummary only) ---- */
+/* same-chapter: "Chapter C unit V1-V2"; cross-chapter: both sides get their
+   own full "chapter · unit" address instead of the reader's compact
+   colon-dash notation (chokRefLabel's own c1:v1 – c2:v2), since this is a
+   stand-alone summary line read without the day-by-day context around it.
+   withMem adds the "from" (מִ-) prefix on the opening chapter word - used
+   for a plain chapter+verse address (Nevi'im/Ketuvim); Mishnah/Halacha's
+   own two-part "chapter · unit-number" address reads naturally without it. */
+function bkChVerseRange(c1,v1,c2,v2,unitWord,unitWordPl,withMem){
+  if(c1===c2) return ckChrome('פֶּרֶק')+' '+heNum(c1)+' '+ckChrome(v1===v2?unitWord:unitWordPl)+' '+ckRange(v1,v2);
+  const pre=withMem?ckChrome('מִפֶּרֶק'):ckChrome('פֶּרֶק');
+  return pre+' '+heNum(c1)+' '+ckChrome(unitWord)+' '+heNum(v1)+' '+ckChrome('עַד')+' '+ckChrome('פֶּרֶק')+' '+heNum(c2)+' '+ckChrome(unitWord)+' '+heNum(v2);
+}
+/* groups an ordered list of "Book C:V-C2:V2" refs - exactly as stored in a
+   day's own sec.refs for every ref-driven subject (Nevi'im/Ketuvim/
+   Mishnah, and the non-cycle fallback for Halacha) - into per-book runs,
+   each carrying that book's own real start/end chapter:verse. Reuses the
+   same two-level-ref shape chokRefLabel's own regex parses, just kept
+   across the whole week's ordered refs instead of a single verse at a
+   time, so a book change anywhere in the week becomes its own group
+   rather than only comparing the week's first and last ref. */
+function bkRefGroups(refs){
+  const groups=[];
+  refs.forEach(ref=>{
+    const m=/^(.+?) (\d+):(\d+)(?:-(?:(\d+):)?(\d+))?$/.exec(ref);
+    if(!m) return;
+    const book=m[1], c1=+m[2], v1=+m[3], c2=m[4]?+m[4]:c1, v2=m[5]?+m[5]:v1;
+    const last=groups[groups.length-1];
+    if(last && last.book===book){ last.c2=c2; last.v2=v2; }
+    else groups.push({book,c1,v1,c2,v2});
+  });
+  return groups;
+}
+function bkRefRangeLabel(refs,opts){
+  const groups=bkRefGroups(refs); if(!groups.length) return '';
+  return groups.map(g=>opts.prefix(chokWorkName(g.book))+bkChVerseRange(g.c1,g.v1,g.c2,g.v2,opts.unitWord,opts.unitWordPl,opts.withMem)).join('; ');
+}
+/* Gemara's own non-cycle fallback refs ("Berakhot 35a:21-35b:8" - daf:line,
+   not chapter:verse) - grouped by tractate, ranged by daf number alone (the
+   booklet's Gemara line never names the amud/line, only the daf - see
+   bkDafRangeLabel, the real CYC.daf path this mirrors and which is used in
+   production; this fallback only matters if that cycle data is ever
+   missing). */
+function bkGemaraRefRangeLabel(refs){
+  const groups=[];
+  refs.forEach(ref=>{
+    const m=/^(.+?) (\d+)[ab]:\d+(?:-(?:(\d+)[ab]:)?\d+)?$/.exec(ref);
+    if(!m) return;
+    const book=m[1], d1=+m[2], d2=m[3]?+m[3]:d1;
+    const last=groups[groups.length-1];
+    if(last && last.book===book) last.d2=d2;
+    else groups.push({book,d1,d2});
+  });
+  const dafW=ckChrome('דַּף');
+  return groups.map(g=>ckChrome('מַסֶּכֶת')+' '+chokWorkName(g.book)+', '+(g.d1===g.d2?dafW+' '+heNum(g.d1):dafW+' '+heNum(g.d1)+' '+ckChrome('עַד')+' '+dafW+' '+heNum(g.d2))).join('; ');
+}
+/* the real Gemara path: CYC.daf's own global cycle. idxs are each day's own
+   dIdx, in day order - grouped by tractate exactly like ckRambamLabel
+   groups consecutive same-book chapters, just for daf numbers instead. */
+function bkDafRangeLabel(idxs){
+  if(!idxs.length) return '';
+  const groups=[];
+  idxs.forEach(i=>{
+    const e=ckDafEntry(i);
+    const last=groups[groups.length-1];
+    if(last && last.t===e.t) last.end=i;
+    else groups.push({t:e.t, start:i, end:i});
+  });
+  const dafW=ckChrome('דַּף');
+  return groups.map(g=>{
+    const d1=ckDafEntry(g.start).daf, d2=ckDafEntry(g.end).daf;
+    return ckChrome('מַסֶּכֶת')+' '+ckDafName(g.t)+', '+(d1===d2?dafW+' '+heNum(d1):dafW+' '+heNum(d1)+' '+ckChrome('עַד')+' '+dafW+' '+heNum(d2));
+  }).join('; ');
+}
+/* Zohar's own global cycle (CYC.zohar): idxs are each day's own
+   ckCycleIndex(CYC.zohar,hd), grouped by part+volume - the exact fields
+   and wording ckZoharLabel already uses for a single day (the same Zohar
+   Yomi reader the home screen's own Zohar tile opens), just ranged across
+   the week instead of shown for one daf at a time. A named-heading change
+   (Idra Rabba, Sifra DiTzniuta, a new volume...) is its own "part", so it
+   already becomes its own group/clause, same as a tractate or book change
+   elsewhere in this file. */
+function bkZoharRangeLabel(idxs){
+  if(!idxs.length) return '';
+  const groups=[];
+  idxs.forEach(i=>{
+    const e=CYC.zohar.order[i];
+    const last=groups[groups.length-1];
+    if(last && last.part===e.part && last.vol===e.vol) last.end=i;
+    else groups.push({part:e.part, vol:e.vol, start:i, end:i});
+  });
+  const heLang=!S.lang||S.lang==='he', dafW=ckChrome('דַּף');
+  const point=e=>dafW+' '+heNum(e.daf)+' '+e.side;
+  return groups.map(g=>{
+    const se=CYC.zohar.order[g.start], ee=CYC.zohar.order[g.end];
+    const volW=g.vol>1?' · '+ckChrome('חֵלֶק')+' '+((heLang?['','א׳','ב׳','ג׳']:['','I','II','III'])[g.vol]||g.vol):'';
+    const range=(se.daf===ee.daf&&se.side===ee.side)?point(se):point(se)+' '+ckChrome('עַד')+' '+point(ee);
+    return ckZoharPartName(g.part)+volW+' · '+range;
+  }).join('; ');
+}
+/* Zohar's non-cycle fallback: one-level "Zohar, Toldot 1"/"Zohar Chadash,
+   X 4" refs. Rare in practice (CYC.zohar covers production use) - kept
+   minimal, grouped by section name and ranged by page number. */
+function bkZoharRefRangeLabel(refs){
+  const groups=[];
+  refs.forEach(ref=>{
+    const m=/^(.+?) (\d+)(?:-(\d+))?$/.exec(ref);
+    if(!m) return;
+    const base=m[1], p1=+m[2], p2=m[3]?+m[3]:p1;
+    const last=groups[groups.length-1];
+    if(last && last.base===base) last.p2=p2;
+    else groups.push({base,p1,p2});
+  });
+  return groups.map(g=>{
+    const he=(CHOK&&CHOK.heNames&&CHOK.heNames[g.base])||'';
+    const name=(!he||ckBare(he)==='ספר הזהר')?g.base.replace(/^Zohar( Chadash)?,?\s*/,''):he;
+    const pre=/^Zohar Chadash/.test(g.base)?'זֹהַר חָדָשׁ · ':'זֹהַר · ';
+    return pre+name+' · '+ckRange(g.p1,g.p2);
+  }).join('; ');
 }
 /* keep-with-text's own escalation (bkFixOverflow), reused here to decide
    whether the week summary genuinely fits on the TOC page before keeping it */
