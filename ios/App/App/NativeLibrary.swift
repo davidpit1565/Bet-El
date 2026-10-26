@@ -21,11 +21,18 @@ struct NLItem {
 /// order is right and nothing is ever drawn reversed. Cell contents set their own semantic attribute.
 final class MirrorFlowLayout: UICollectionViewFlowLayout {
     var mirror = false { didSet { if mirror != oldValue { invalidateLayout() } } }
+    /// Items that must sit horizontally centered (a narrow card alone on its row).
+    var centered: ((IndexPath) -> Bool)?
 
     override var flipsHorizontallyInOppositeLayoutDirection: Bool { false }
 
     private func mirrored(_ a: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-        guard mirror, let w = collectionView?.bounds.width, let c = a.copy() as? UICollectionViewLayoutAttributes else { return a }
+        guard let w = collectionView?.bounds.width, let c = a.copy() as? UICollectionViewLayoutAttributes else { return a }
+        if a.representedElementCategory == .cell, centered?(a.indexPath) == true {
+            c.frame.origin.x = (w - a.frame.width) / 2
+            return c
+        }
+        guard mirror else { return a }
         c.frame.origin.x = w - a.frame.maxX
         return c
     }
