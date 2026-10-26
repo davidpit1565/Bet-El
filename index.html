@@ -6374,7 +6374,7 @@ function ckDayShort(d){ return (CHOK_DAY_SHORT_BY_LANG[S.lang]||CHOK_DAY_SHORT)[
 const CK_YEAR_MIN=5784, CK_YEAR_MAX=5830;
 function ckYear(){ return ckYearOf(CK); }
 function ckYearOf(cur){ return (cur&&cur.year)||ckCurYear(); }
-function ckYearHe(y){ return heNum(y%1000)+' לִפְרַט קָטָן'; }
+function ckYearHe(y){ return (!S.lang||S.lang==='he') ? heNum(y%1000)+' לִפְרַט קָטָן' : String(y); }   // other languages: the plain Hebrew year, no Hebrew "short count" suffix
 /* stepping past Friday goes on to the next week, and past Sunday back a week.
    Parameterized over an explicit {key,day,year} (rather than always reading
    the global CK) so a second, independent day-cursor - Zohar Yomi's own -
@@ -6506,7 +6506,7 @@ function renderChokExplainer(){
   app.innerHTML=`
   ${topbar('מה לומדים כל יום', CK_EXPLAINER_BACK)}
   <div class="view">
-    <p class="ck-explainer-intro">בְּכָל יוֹם לוֹמְדִים קֶטַע קָבוּעַ מִכָּל אֶחָד מִשְּׁמוֹנָה הַתְּחוּמִים הַבָּאִים:</p>
+    <p class="ck-explainer-intro">${ckChrome('בְּכָל יוֹם לוֹמְדִים קֶטַע קָבוּעַ מִכָּל אֶחָד מִשְּׁמוֹנָה הַתְּחוּמִים הַבָּאִים:')}</p>
     <div class="card">
       ${CK_EXPLAINER_ITEMS.map(it=>`
         <div class="ck-explainer-row">
@@ -10946,7 +10946,10 @@ function tanyaPartRange(part){
   TANYA_IDX.order.forEach((e,i)=>{ if(e.part===part){ if(first<0) first=i; last=i; } });
   return {first,last};
 }
-function tanyaPartTitle(p){ return (S.lang==='en' && p.en) ? p.en : p.he; }
+const TANYA_PART_NAMES={fr:{likkutei_amarim:'Likoutei Amarim',shaar_hayichud:'Chaar HaYihoud VéHaEmouna',igeret_hateshuva:'Iguéret HaTchouva',igeret_hakodesh:'Iguéret HaKodech',kuntres_acharon:'Kountrès Aharon'},
+  ru:{likkutei_amarim:'Ликутей Амарим',shaar_hayichud:'Шаар а-Йихуд ве-а-Эмуна',igeret_hateshuva:'Игерет а-Тшува',igeret_hakodesh:'Игерет а-Кодеш',kuntres_acharon:'Кунтрес Ахарон'},
+  ka:{likkutei_amarim:'ლიკუტეი ამარიმ',shaar_hayichud:'შაარ ჰაიიხუდ ვეჰაემუნა',igeret_hateshuva:'იგერეთ ჰათშუვა',igeret_hakodesh:'იგერეთ ჰაკოდეშ',kuntres_acharon:'კუნტრეს აჰარონ'}};
+function tanyaPartTitle(p){ const t=TANYA_PART_NAMES[S.lang]; return (t&&t[p.key]) ? t[p.key] : ((S.lang==='en' && p.en) ? p.en : p.he); }
 function renderLibraryTanyaParts(){
   const tanyaTitle=(S.lang==='en')?'Tanya':'תניא';
   if(!TANYA_IDX){
