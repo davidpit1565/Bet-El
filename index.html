@@ -381,6 +381,8 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .reader-head.compact .rt-pick{display:block}
 .reader-head.rh-auto .bic-collapse.rh-gone{display:none}
 html.has-native-topbar .reader-head.rh-empty{display:none}
+/* Chok LeYisrael / Ben Ish Chai: when the native header tucks away on scroll-down, the sticky head must not leave a bare strip behind either */
+html.has-native-topbar .reader-head.rh-tucked{padding-top:0;padding-bottom:0;background:transparent;border-color:transparent;box-shadow:none;pointer-events:none}
 .reader-head.rh-auto .bic-collapse .rh-hide{display:none}
 .reader-progress{height:3px;background:var(--line);border-radius:3px;margin-top:10px;overflow:hidden}
 .reader-progress i{display:block;height:100%;background:var(--gold-grad);width:0;transition:width .4s var(--ease)}
@@ -14991,13 +14993,13 @@ function nativeSettingsCategorySpec(catId){
           nsRow('fontScale','stepper',ckChrome('גדל הגופן'),ckChrome('הגדלה / הקטנה של הטקסט'),{value:Math.round(S.fontScale*100)+'%'}),
           nsRow('wake','toggle',ckChrome('מסך פעיל'),ckChrome('שומר על המסך דלוק בזמן התפלה'),{value:!!S.keepAwake}),
         ]},
+        {header:ckChrome('שפה'), rows:[
+          nsRow('lang','select',ckChrome('שפה'),ckChrome('שפת הממשק'),{value:S.lang||'he', options:[{value:'he',label:'עברית'},{value:'en',label:'English'},{value:'fr',label:'Français'},{value:'ru',label:'Русский'},{value:'ka',label:'ქართული'}]}),
+        ]},
         {header:ckChrome('הגדרות קריאה'), rows:[
           nsRow('nikud','toggle',ckChrome('ניקוד וטעמים'),ckChrome('הצגת ניקוד וטעמי המקרא בטקסט'),{value:S.nikud!==false}),
           nsRow('lineSp','select',ckChrome('ריווח שורות'),ckChrome('ריווח בין שורות הטקסט'),{value:S.lineSp||'normal', options:[{value:'tight',label:ckChrome('ריווח צפוף')},{value:'normal',label:ckChrome('ריווח רגיל')},{value:'loose',label:ckChrome('ריווח מרווח')}]}),
           nsRow('readFont','select',ckChrome('גופן הקריאה'),ckChrome('הגופן בטקסט התפילה והתהילים'),{value:S.readFont||'taamey', options:[{value:'taamey',label:ckChrome('גופן טעמי פרנק')},{value:'noto',label:ckChrome('גופן נוטו סריף')},{value:'david',label:ckChrome('גופן דוד')},{value:'frank',label:ckChrome('גופן פרנק רוהל')},{value:'heebo',label:ckChrome('גופן הימו ללא שריפים')}]}),
-        ]},
-        {header:ckChrome('שפה'), rows:[
-          nsRow('lang','select',ckChrome('שפה'),ckChrome('שפת הממשק'),{value:S.lang||'he', options:[{value:'he',label:'עברית'},{value:'en',label:'English'},{value:'fr',label:'Français'},{value:'ru',label:'Русский'},{value:'ka',label:'ქართული'}]}),
         ]},
       ];
       break;
@@ -15528,6 +15530,7 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
       try{ window.Capacitor.Plugins.NativeTopBar.setCollapsed({collapsed:hideBar}).catch(()=>{}); }catch(e){}
     }
     document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hideBar));
+    if(NATIVE_TOPBAR) document.querySelectorAll('.reader-head').forEach(h=>h.classList.toggle('rh-tucked',hideBar));
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
     const bicHead=document.querySelector('.bic-collapse');
@@ -15872,9 +15875,10 @@ window.shareQR = shareQR;
     window.__paintLiveCount = function(){
       const el = document.getElementById('liveCount');
       if(!el || window.__liveCount == null) return;
-      const changed = window.__lastPaintedLiveCount != null && window.__lastPaintedLiveCount !== window.__liveCount;
-      window.animateCountUp(el, window.__lastPaintedLiveCount || 0, window.__liveCount);
-      window.__lastPaintedLiveCount = window.__liveCount;
+      const changed = window.__lastPaintedLiveCount != null && window.__lastPaintedLiveCount !== Math.max(1, window.__liveCount);
+      const shown = Math.max(1, window.__liveCount);   // whoever is looking at this card is online, so never show 0 (a dev/TestFlight build doesn't register its own presence)
+      window.animateCountUp(el, window.__lastPaintedLiveCount || 0, shown);
+      window.__lastPaintedLiveCount = shown;
       if(changed){
         const card = el.closest('.stat-card');
         if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
