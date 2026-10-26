@@ -1784,23 +1784,36 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    doesn't fit even once the page is fully tightened (bkPageFits). It was
    dropped for every week after the previous round's TOC column fix, since
    it never fit Toldot's own 8-day-group Shabbat-block week even then. After
-   this round's investigation (real builds across ~2 dozen weeks spanning a
+   that round's investigation (real builds across ~2 dozen weeks spanning a
    full year, including double-parsha weeks) the only thing actually
    missing was headroom in the summary block's OWN spacing - the tier-4
-   TOC body itself never came close to overflowing on its own. Tightened
-   here just enough that Toldot's week (previously 14px over even at the
-   generic bk-tighter escalation, which has no effect here - see bkPageFits'
-   comment) now fits with several px of real margin to spare (measured via
-   the last child's actual bottom, not scrollHeight - .bk-pbody is a fixed-
-   height flex:1 box, so scrollHeight floors at clientHeight the moment
-   content fits and no longer reports true slack). Every real week tested
-   still fits comfortably; bkPageFits' own overflow check (now fed a
-   genuinely oversized summary in a test) still drops the block outright on
-   a week long enough to exceed even this tighter spacing - don't widen
-   these values without re-checking that fallback still fires. */
+   TOC body itself never came close to overflowing on its own.
+   Round 3 (owner's report, with the explicit instruction not to just
+   enlarge the letters): even after that tightening, a plain single column
+   of up to 10 short centered lines still left real slack below it on most
+   weeks (Toldot's own tier-4 page is the one real week that actually needs
+   every one of these px - every other week has more room to spare, not
+   less). A STATIC spacing bump can't fix that: whatever closes a short
+   week's slack either does nothing for Toldot or overflows it (a 2-column
+   layout was tried here first and measured WORSE on Toldot - several of
+   these lines are genuinely long, e.g. a cross-chapter Tehillim or Zohar
+   range, and halving the column width just wrapped them onto a 2nd line,
+   costing more height than the half-as-many-rows saved). So the fill is
+   computed per week instead, right here in bkBuildPrint, from the real
+   leftover height AFTER this block already rendered at its base spacing
+   (bkWkSumFill): it hands back exactly that slack as extra row spacing
+   (`--wk-extra`, a straight margin-bottom on every row - no font-size
+   change anywhere), capped so a very short week's row spacing never grows
+   enormous, and only ever spends 90% of the real gap (`scrollHeight` vs
+   `clientHeight` on the fixed-height `.bk-pbody`, read the same way
+   bkPageFits already does) so rounding never tips a week that fit into one
+   that doesn't - bkWkSumFill backs the whole thing out if it somehow still
+   does. bkPageFits' own outright-drop fallback is unchanged and still the
+   last resort for a week genuinely too long for this page at all. */
 .bk-wk-sum{align-self:stretch;margin-top:1mm;padding-top:.8mm;border-top:1px solid var(--bk-line)}
 .bk-wk-h{font-family:var(--font-sacred);font-weight:900;font-size:13.5px;color:var(--bk-gold-deep);text-align:center;margin-bottom:.8mm}
-.bk-wk-row{font-family:var(--font-sacred);font-size:10.5px;line-height:1.2;text-align:center}
+.bk-wk-row{font-family:var(--font-sacred);font-size:10.5px;line-height:1.2;text-align:center;margin-bottom:var(--wk-extra,0px)}
+.bk-wk-row:last-child{margin-bottom:0}
 .bk-wk-row b{font-weight:800;color:var(--bk-gold-deep)}
 .bk-back{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:3mm;max-width:104mm}
 .bk-back-t{font-family:var(--font-sacred);font-size:12px;line-height:1.75;color:var(--bk-ink)}
@@ -6222,7 +6235,7 @@ function bkBlocks(date,opt){
      own heading below (see the title-building switch further down), so
      printing it a second time, right above it, read as a duplicate line
      (owner's call) */
-  B.push({t:'day', brk:opt.brk?1:0, label:dayLabel, tocSub:opt.week?localizeHebDateStr(hdShown.renderGematriya(true)).split(' ').slice(0,-1).join(' '):undefined, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
+  B.push({t:'day', brk:opt.brk?1:0, label:dayLabel, night:night||undefined, tocSub:opt.week?localizeHebDateStr(hdShown.renderGematriya(true)).split(' ').slice(0,-1).join(' '):undefined, html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div>
     <div class="bk-day-d">${localizeHebDateStr(hdShown.renderGematriya(true))}${night?' '+bkUI().evening:''}</div></div>`});
   /* part of the day's opening: it moves with the day and first subject
      headings and doesn't stop the header label from following them */
@@ -6822,7 +6835,7 @@ function bkPaginate(host,blocks,meta){
       if(b.t==='rule' && !filled) return;             // a divider never opens a page
       const n=el(b.html);
       body.appendChild(n);
-      if(b.t==='day'||b.t==='sec') toc.push({t:b.t, label:b.label, sub:b.tocSub, el:n});
+      if(b.t==='day'||b.t==='sec') toc.push({t:b.t, label:b.label, sub:b.tocSub, el:n, night:b.night});
       if(over()){
         body.removeChild(n);
         if(b.t==='rule') return;
@@ -7563,7 +7576,7 @@ function bkTocDays(toc,parasha){
   const pgOf=e=>{ const p=e.el&&e.el.closest&&e.el.closest('.bk-page'); return p&&p.dataset.no?+p.dataset.no:null; };
   const days=[];
   toc.forEach(e=>{
-    if(e.t==='day') days.push({label:e.label, sub:e.sub!=null?e.sub:parasha, pg:pgOf(e), items:[]});
+    if(e.t==='day') days.push({label:e.label, sub:e.sub!=null?e.sub:parasha, pg:pgOf(e), items:[], night:!!e.night});
     else if(days.length) days[days.length-1].items.push({label:e.label, pg:pgOf(e)});
   });
   return days;
@@ -7784,6 +7797,32 @@ function bkPageFits(page,body){
   page.classList.remove('bk-tight','bk-tighter');
   return ok;
 }
+/* Spends the TOC page's own real leftover height (whatever bkPageFits
+   above would otherwise leave empty) as extra row spacing on the week
+   summary - never as a font-size change, per the owner's explicit call.
+   Reads the gap the same way bkPageFits does (scrollHeight vs the fixed-
+   height .bk-pbody's clientHeight; see the long comment on .bk-wk-sum for
+   why this has to be measured per week rather than hard-coded once), only
+   ever spends 90% of it so a rounding difference can never tip a page that
+   fit into one that doesn't, and caps the per-row share so a very short
+   week's rows don't end up stretched absurdly far apart. Backs the change
+   out entirely if the page still somehow overflows after it (seen in
+   testing only when a week's own content, not this block, was already the
+   one running long - bkPageFits' own fallback handles that page, not this
+   function). */
+function bkWkSumFill(tocBody){
+  const sum=tocBody.querySelector('.bk-wk-sum'); if(!sum) return;
+  const rows=sum.querySelectorAll('.bk-wk-row'); if(!rows.length) return;
+  // scrollHeight floors at clientHeight the instant content already fits
+  // (see bkPageFits' own comment), so the real slack has to come from how
+  // far the summary's own bottom sits above the body's bottom edge instead
+  const bodyR=tocBody.getBoundingClientRect(), sumR=sum.getBoundingClientRect();
+  const real=tocBody.clientHeight-(sumR.bottom-bodyR.top);
+  if(real<6) return;                                  // not worth spending
+  const perRow=Math.min(real*0.9/rows.length, 7);
+  sum.style.setProperty('--wk-extra', perRow.toFixed(2)+'px');
+  if(tocBody.scrollHeight>tocBody.clientHeight+1) sum.style.removeProperty('--wk-extra');
+}
 /* The contents page: a book's list, not a table - per day a heading (name,
    parasha), then one dotted-leader line per subject with its page. A long
    list (a whole week) sets in two columns, as a printed sefer's contents
@@ -7808,13 +7847,24 @@ function bkPageFits(page,body){
    `.bk-toc-col` is a plain flex item sized by its OWN content, so columns
    simply end at different heights (the leftover space collects, if
    anywhere, in the last column - a normal, expected look for a book's own
-   contents page - rather than appearing as a gap under an arbitrary day). */
+   contents page - rather than appearing as a gap under an arbitrary day).
+   Round 2 (owner's report): the column boundary could still land *between*
+   Leil Shishi and the Friday block right after it - a genuinely short block
+   (one subject only) ending its column while Friday's own, usually-taller
+   block opens the next one. That isn't the "normal, expected" leftover
+   space described above: it reads as a gap under Leil Shishi specifically,
+   because Friday would naturally have continued reading right there. Leil
+   Shishi's block carries `noBreakAfter` (set from `night` in bkTocHtml) so
+   this function simply never opens a new column right after it - Friday is
+   forced into the same column, immediately below it, same as every other
+   day's own subjects already read in sequence. */
 function bkTocDistribute(blocks,n){
   if(n<=1) return [blocks];
   const total=blocks.reduce((a,b)=>a+b.w,0), target=total/n;
   const cols=[[]]; let cum=0, boundary=target;
-  blocks.forEach(b=>{
-    if(cols.length<n && cols[cols.length-1].length && cum+b.w/2>boundary){ cols.push([]); boundary+=target; }
+  blocks.forEach((b,i)=>{
+    const locked=i>0 && blocks[i-1].noBreakAfter;
+    if(!locked && cols.length<n && cols[cols.length-1].length && cum+b.w/2>boundary){ cols.push([]); boundary+=target; }
     cols[cols.length-1].push(b); cum+=b.w;
   });
   return cols;
@@ -7831,7 +7881,7 @@ function bkTocHtml(days,summary){
   const blocks=[]; let lines=0;
   days.forEach(d=>{
     const w=d.items.length+2;
-    blocks.push({w, html:`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${d.label}</span><small>${d.sub||''}</small></div>${d.items.map(i=>row(i.label,pg(i.pg))).join('')}</div>`});
+    blocks.push({w, noBreakAfter:d.night, html:`<div class="bk-toc-dblk"><div class="bk-toc-day"><span>${d.label}</span><small>${d.sub||''}</small></div>${d.items.map(i=>row(i.label,pg(i.pg))).join('')}</div>`});
     lines+=w;
   });
   /* "in preparation" is said once, beside the heading - where a day's parasha
@@ -7925,6 +7975,7 @@ function bkBuildPrint(date){
   if(summary){
     const tocPage=host.querySelector('.bk-tocpage'), tocBody=tocPage&&tocPage.querySelector('.bk-pbody');
     if(tocPage && tocBody && !bkPageFits(tocPage,tocBody)) tocPage.outerHTML=bkTocHtml(tocDays,'');
+    else if(tocBody) bkWkSumFill(tocBody);
   }
   /* the Gemara scans' credit + HebrewBooks.org license: once, on the back */
   host.insertAdjacentHTML('beforeend',bkBackHtml(blocks.some(b=>b.img))+bkBlankHtml());
