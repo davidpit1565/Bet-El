@@ -2697,11 +2697,12 @@ function ensurePrayersTranslit(){
   if(PRAYERS_TRANSLIT.en) return Promise.resolve();
   if(prayersLoadPromise) return prayersLoadPromise;
   prayersLoadPromise = Promise.all([
-    cachedFetch(dataURL('data/prayers-en.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/prayers-fr.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/prayers-ru.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/prayers-ka.json')).then(r=>r.json()).catch(()=>({})),
-  ]).then(([en,fr,ru,ka])=>{ PRAYERS_TRANSLIT={en,fr,ru,ka}; });
+    cachedFetch(dataURL('data/prayers-en.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/prayers-fr.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/prayers-ru.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/prayers-ka.json')).then(r=>r.json()),
+  ]).then(([en,fr,ru,ka])=>{ PRAYERS_TRANSLIT={en,fr,ru,ka}; })
+    .catch(e=>{ prayersLoadPromise=null; throw e; });
   return prayersLoadPromise;
 }
 function openPrayer(prayerKey, fromGroup){
@@ -2767,7 +2768,18 @@ function animateCountUp(el, from, to, duration){
   setTimeout(()=>{ if(el.__cuTo === to) el.textContent = finalTxt; }, duration + 120);
 }
 window.animateCountUp = animateCountUp;
-let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
+/* Safe localStorage helpers: a corrupt/blocked value must never kill the whole boot (the script is one IIFE). */
+function lsJSON(key, def, ok){ try{ const v=JSON.parse(localStorage.getItem(key)); return (v!=null && (!ok||ok(v))) ? v : def; }catch(e){ return def; } }
+function backupApply(j){
+  if(!isObj(j)||j.app!=='betel-tehillim'||!isObj(j.data)) throw 0;
+  const ent=Object.entries(j.data).filter(([k,v])=>/^betel_[\w.-]{1,80}$/.test(k) && typeof v==='string' && v.length<2000000 && !/^betel_push_/.test(k));
+  ent.forEach(([k,v])=>{ if(/^[\[{]/.test(v)) JSON.parse(v); });   // JSON-looking values must parse, or nothing is written
+  ent.forEach(([k,v])=>localStorage.setItem(k,v));
+}
+function lsSet(key, val){ try{ localStorage.setItem(key, val); return true; }catch(e){ return false; } }
+function escHtml(t){ return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+let S = Object.assign({}, DEF, lsJSON('betel_settings', {}, isObj));
 /* "Pasuk Lefi HaShem" used to hold a single S.hebrewName string - now a
    S.hebrewNames list (several names, each shown in the order added) - a
    user with the old single name already saved gets it migrated into the
@@ -3161,7 +3173,7 @@ async function applyWakeLock(){
 const FALLBACK = (()=>{ let tz=''; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''; }catch(e){}
   return /Jerusalem|Tel_Aviv/.test(tz) ? { lat:31.7683, lon:35.2137, tz:'Asia/Jerusalem', name:'ירושלים', auto:false }
                                        : { lat:51.2194, lon:4.4025, tz:'Europe/Brussels', name:'אנטוורפן, בלגיה', auto:false }; })();
-let LOC = JSON.parse(localStorage.getItem('betel_loc')||'null') || Object.assign({},FALLBACK);
+let LOC = lsJSON('betel_loc', null, isObj) || Object.assign({},FALLBACK);
 function saveLoc(){ localStorage.setItem('betel_loc', JSON.stringify(LOC)); }
 function requestGPS(cb){
   if(!navigator.geolocation){ cb&&cb(false); return; }
@@ -3506,7 +3518,7 @@ function chaptersOf(range){ const a=[]; for(let i=range[0];i<=range[1];i++) a.pu
 const IN_CHAT = window.self !== window.top || /claude\.ai|chat/i.test(window.location.hostname);
 function progKey(){ return String(currentHDate().abs()); }
 if(!localStorage.getItem('betel_prog_fix_v1')){ localStorage.removeItem('betel_prog'); localStorage.setItem('betel_prog_fix_v1','1'); }
-let PROG = JSON.parse(localStorage.getItem('betel_prog')||'{}');
+let PROG = lsJSON('betel_prog', {}, isObj);
 function readSet(){ const k=progKey(); return new Set(PROG[k]||[]); }
 function markRead(ch){ if(IN_CHAT) return false; const k=progKey(); const set=new Set(PROG[k]||[]); if(set.has(ch))return false; set.add(ch); PROG[k]=[...set]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); const tot=(+localStorage.getItem('betel_total_read')||0)+1; localStorage.setItem('betel_total_read',String(tot)); return true; }
 function isRead(ch){ return readSet().has(ch); }
@@ -3533,7 +3545,7 @@ function nextPraise(){
 function setLast(ch){ localStorage.setItem('betel_last', String(ch)); }
 function getLast(){ const v=localStorage.getItem('betel_last'); return v?+v:null; }
 /* favorites */
-let FAV = new Set(JSON.parse(localStorage.getItem('betel_fav')||'[]'));
+let FAV = new Set(lsJSON('betel_fav', [], Array.isArray));
 function saveFav(){ localStorage.setItem('betel_fav', JSON.stringify([...FAV])); }
 
 /* ===== #5 STREAK ===== */
@@ -4124,7 +4136,7 @@ function dedLines(){ return dedList().map(d=>dedLabel(d.t)+' '+d.n); }
 function dedicationLine(){
   const L=dedLines(); return L.length?L.join(' · '):'';
 }
-function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div class="ded-line ${cls||''}"><div class="ded-multi">${L.map(x=>`<span>${x}</span>`).join('')}</div></div>`; }
+function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div class="ded-line ${cls||''}"><div class="ded-multi">${L.map(x=>`<span>${escHtml(x)}</span>`).join('')}</div></div>`; }
 
 /* ================= ROUTER ================= */
 const app = document.getElementById('app');
@@ -4312,7 +4324,7 @@ function ensureBicWeek(track,keys){
     const i18n=(lang==='he'||BIC_WEEK_I18N[i18nKey]!==undefined) ? null
       : cachedFetch(dataURL('data/chok-benishchai/'+track+'/'+u+'.'+lang+'.json'))
           .then(r=>r.ok?r.json():null).then(d=>{ BIC_WEEK_I18N[i18nKey]=d||null; })
-          .catch(()=>{ BIC_WEEK_I18N[i18nKey]=null; });
+          .catch(()=>{ delete BIC_WEEK_I18N[i18nKey]; });
     return Promise.all([base,i18n]);
   })));
 }
@@ -5433,7 +5445,7 @@ function ensureMusarBlock(work,b){
   const i18n=(lang==='he'||MCYC_BLOCK_I18N[i18nKey]!==undefined) ? null
     : cachedFetch(dataURL('data/chok-'+work+'/'+b+'.'+lang+'.json'))
         .then(r=>r.ok?r.json():null).then(d=>{ MCYC_BLOCK_I18N[i18nKey]=d||null; })
-        .catch(()=>{ MCYC_BLOCK_I18N[i18nKey]=null; });
+        .catch(()=>{ delete MCYC_BLOCK_I18N[i18nKey]; });
   return Promise.all([base,i18n]);
 }
 /* same 1-vs-3-a-day idea as ckRambamTrack, one shared choice across whichever
@@ -8335,7 +8347,7 @@ function renderHome(){
       ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     </div>`,
     banners:()=>`
-    ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>${ckChrome('יום היאהרצייט')} · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
+    ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>${ckChrome('יום היאהרצייט')} · <b>${todayYahr.map(y=>escHtml(y.name)).join(' · ')}</b></span></div>`:''}
     ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.moon2}<span>${ckChrome('ראש חדש')} · <b>אל תשכח להזכיר יעלה ויבא</b></span></div>`:''}
     ${isZmanTefilinNow()?`<div class="yahrzeit-strip" id="homeTefillinMirrorBanner" style="cursor:pointer">${I.tefillin}<span>${ckChrome('זמן תפלין')} · <b>${ckChrome('מראה לתפלין')}</b></span></div>`:''}
     ${hh?`<div class="yahrzeit-strip" id="homeHolidayHalachaBanner" style="cursor:pointer">${I.cal}<span>${holidayHalachaUI().title} · <b>${hh.name}</b> · ${holidayHalachaUI().inDays(hh.days)}</span></div>`:''}
@@ -8688,7 +8700,7 @@ function nameVersePickersHTML(){
   (S.hebrewNames||[]).forEach(n=>nameWords(n).forEach(w=>{
     const c=tehillimVerseCandidates(w); if(c.length<2) return;
     const cur=tehillimVersesByName(w)[0];
-    rows.push(`<div class="ded-add-row" style="margin:6px 0"><span class="ded-txt" style="flex:0 0 auto">${w}</span><select class="fld-select nv-sel" data-w="${w}" style="flex:1;min-width:0">${c.map(m=>`<option value="${m.key}"${cur&&cur.key===m.key?' selected':''}>${nameVerseLabel(m)}</option>`).join('')}</select></div>`);
+    rows.push(`<div class="ded-add-row" style="margin:6px 0"><span class="ded-txt" style="flex:0 0 auto">${escHtml(w)}</span><select class="fld-select nv-sel" data-w="${escHtml(w)}" style="flex:1;min-width:0">${c.map(m=>`<option value="${m.key}"${cur&&cur.key===m.key?' selected':''}>${nameVerseLabel(m)}</option>`).join('')}</select></div>`);
   }));
   return rows.length?`<div class="si-d" style="margin:10px 0 4px">${ckChrome('בחרו את הפסוק לכל שם')}</div>${rows.join('')}`:'';
 }
@@ -13228,7 +13240,7 @@ function smStreakData(){ try{return JSON.parse(localStorage.getItem('betel_sm_st
 function smMarkDone(key){
   const d=smStreakData(); const today=civilToday().toISOString().slice(0,10);
   if(d.last!==today){ d.count=(d.last && isYesterday(d.last))?d.count+1:1; d.best=Math.max(d.best,d.count); d.last=today; localStorage.setItem('betel_sm_streak',JSON.stringify(d)); }
-  const done=JSON.parse(localStorage.getItem('betel_sm_done')||'[]'); if(!done.includes(key)){ done.push(key); localStorage.setItem('betel_sm_done',JSON.stringify(done)); }
+  const done=lsJSON('betel_sm_done', [], Array.isArray); if(!done.includes(key)){ done.push(key); lsSet('betel_sm_done',JSON.stringify(done)); }
   bumpCombinedStreak();
 }
 function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
@@ -14131,7 +14143,7 @@ function settingsCategoryBody(catId, notifPerm){
       <h3>${ckChrome('פָּסוּק לְפִי הַשֵּׁם')}</h3>
       <div class="set-item col">
         <div class="si-d" style="margin-bottom:10px">${ckChrome('כתבו שם או כמה שמות עבריים, ובסוף כל עמידה יופיע לכל שם פסוק אחד מתהלים, המתחיל ומסתיים באותיות השם. הבחירה ברירת מחדל, וניתן להחליף כאן')}</div>
-        <div id="hebrewNamesList">${(S.hebrewNames||[]).map((n,i)=>`<div class="ded-row"><span class="ded-txt">${n}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||`<div class="si-d">${ckChrome('אין שמות עדין')}</div>`}</div>
+        <div id="hebrewNamesList">${(S.hebrewNames||[]).map((n,i)=>`<div class="ded-row"><span class="ded-txt">${escHtml(n)}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||`<div class="si-d">${ckChrome('אין שמות עדין')}</div>`}</div>
         ${nameVersePickersHTML()}
         <div class="ded-add">
           <div class="ded-add-row">
@@ -14167,7 +14179,7 @@ function settingsCategoryBody(catId, notifPerm){
     <div class="set-group">
       <h3>יאהרצייט · זכרון</h3>
       <div class="yahr-list" id="yahrList">
-        ${getYahrzeits().map((y,i)=>`<div class="yahr-row"><div><div>${y.name}</div><div class="yahr-hdate">${yahrzeitHebLabel(y)}</div></div><button class="icon-btn yahr-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין זכרונות עדין</div>'}
+        ${getYahrzeits().map((y,i)=>`<div class="yahr-row"><div><div>${escHtml(y.name)}</div><div class="yahr-hdate">${yahrzeitHebLabel(y)}</div></div><button class="icon-btn yahr-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין זכרונות עדין</div>'}
       </div>
       <div class="yahr-form">
         <input class="yahr-name-in" id="yahrName" placeholder="שם הנפטר / הנפטרת"/>
@@ -14310,7 +14322,7 @@ function wireSettingsCategory(catId){
         const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
         inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; const rd=new FileReader();
           rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='betel-tehillim'||!j.data) throw 0;
-            Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
+            backupApply(j); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
           }catch(e){ toast('קבץ גבוי לא תקין'); } };
           rd.readAsText(f); };
         inp.click();
@@ -15082,7 +15094,7 @@ window.NativeSettingsHost = {
   },
   importBackup(text){
     try{ const j=JSON.parse(text); if(j.app!=='betel-tehillim'||!j.data) throw 0;
-      Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
+      backupApply(j); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
     }catch(e){ toast('קבץ גבוי לא תקין'); }
   }
 };
