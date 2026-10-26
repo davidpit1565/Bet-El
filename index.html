@@ -3111,6 +3111,7 @@ function applyReadingPrefs(root){
 function tr(node){
   a11yIcons(node);
   applyReadingPrefs(node);
+  if(node===app){ try{ readerHeadBare(); }catch(e){} }   // synchronous: no flash of the empty strip
   if(node===app) setTimeout(()=>{ try{ readerHeadAuto(); }catch(e){} },0);   // after the translation pass below, so the picker's labels are in the app language
   if(S.lang==='he') return;
   const dict=I18N[S.lang]; if(!dict) return;
@@ -11293,6 +11294,14 @@ function readerHeadCompact(hide){
    and on iOS the native header shows "book · choice" with a round list button that opens the system sheet. Sources: the
    aliyot chips (Torah, Shnayim Mikra: "aliyah א ... haftarah") or the reader's own <select> (chapter, daf, part...).
    Readers whose lower block also carries a "back to today" button keep the old layout. Runs once per rendered header. */
+/* On iOS the native header replaces .reader-top (display:none), so a sticky .reader-head whose ONLY child is
+   .reader-top is just a bare solid strip under the header (e.g. Today's reading). Mark it rh-empty (hidden by CSS). */
+function readerHeadBare(){
+  if(!NATIVE_TOPBAR) return;
+  document.querySelectorAll('.reader-head:not(.rh-empty)').forEach(hd=>{
+    if(hd.children.length && Array.from(hd.children).every(c=>c.classList.contains('reader-top'))) hd.classList.add('rh-empty');
+  });
+}
 function readerHeadAuto(){
   if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
   const hd=document.querySelector('.reader-head'); if(!hd || hd.dataset.rhAuto) return;
