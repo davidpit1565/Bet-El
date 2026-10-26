@@ -1147,7 +1147,8 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .stat-card .sc-info{display:flex;flex-direction:column;min-width:0}
 .home-item>.stat-card{height:100%;margin:0}
 .home-item[data-home-item="visitors"],.home-item[data-home-item="live"]{align-self:start}
-.home-item[data-home-item="visitors"]{grid-column-start:1}   /* the two Firebase counters always start their own row, side by side */
+.home-item[data-home-item="visitors"]{grid-column-start:1}
+.home-item[data-home-item="live"] .stat-card.long{max-width:260px;margin-inline:auto}   /* alone on its row (counter hidden): a slim centered pill, not a full-width bar */   /* the two Firebase counters always start their own row, side by side */
 .home-item>.stat-card:not(.long){padding:12px 14px;min-height:0}
 .stat-card.long{padding:22px 26px;border-radius:26px;min-height:112px}
 .stat-card.long .sc-num{font-size:46px;line-height:1.05;letter-spacing:.5px}
@@ -7637,7 +7638,7 @@ const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
   {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},{id:'booklet',size:'s'},
-  {id:'tikkunei',size:'l'},...(SHOW_USER_COUNT?[{id:'visitors',size:'s'},{id:'live',size:'s'}]:[]),{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},...(SHOW_USER_COUNT?[]:[{id:'live',size:'s'}]),{id:'social',size:'s'},
+  {id:'tikkunei',size:'l'},...(SHOW_USER_COUNT?[{id:'visitors',size:'s'},{id:'live',size:'s'}]:[{id:'live',size:'m'}]),{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
