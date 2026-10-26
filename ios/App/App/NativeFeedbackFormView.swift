@@ -99,7 +99,7 @@ final class NativeFeedbackFormView: UIView {
         let padding = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 10))
         f.leftView = padding
         f.leftViewMode = .always
-        f.rightView = padding
+        f.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 10))   // a UIView can only live in one slot
         f.rightViewMode = .always
         if !heightSet {
             f.heightAnchor.constraint(equalToConstant: 44).isActive = true
