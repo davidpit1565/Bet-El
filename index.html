@@ -1745,9 +1745,19 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    Taamey Frank CLM already has every glyph this URL fallback needs */
 .bk-qr-url{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);direction:ltr}
 .bk-page.bk-blank::after{display:none}
-.bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:2.5mm 4mm 0}
-.bk-toc-h{font-family:var(--font-sacred);font-weight:900;font-size:29px;color:var(--bk-gold-deep)}
-.bk-toc .bk-rule{width:46mm;margin:2mm auto 2.5mm}
+/* No .bk-ph header on this page any more (bkTocPage, not bkMatterPage) - the
+   title below is the page's own heading, so .bk-toc carries the full top
+   padding itself now (was 2.5mm, sitting under the removed medal). The
+   title alone is enlarged (29px -> 34px): a plain, confident heading with
+   no frame or repeated brand badge, the way a printed sefer's own contents
+   page reads (the book's name is already on the cover; an internal index
+   page doesn't restate it). The reclaimed height comfortably covers the
+   increase (see the numbers in the commit message) with real headroom still
+   left for the list below, verified against Toldot's own worst-case 8-day/
+   tier-4 week. */
+.bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:6mm 4mm 0}
+.bk-toc-h{font-family:var(--font-sacred);font-weight:900;font-size:34px;color:var(--bk-gold-deep)}
+.bk-toc .bk-rule{width:52mm;margin:3mm auto 4mm}
 /* the column split itself is built in JS (bkTocDistribute), by each day
    block's own weight, not CSS column-count's native balancing - see the
    long comment on bkTocDistribute for why (the TOC page's "serious empty
@@ -1770,7 +1780,15 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-toc-list.bk-toc-4col .bk-toc-row{font-size:11.5px;gap:1mm}
 .bk-toc-list.bk-toc-4col .bk-toc-row b{width:6mm}
 .bk-toc-dblk{margin:0 0 2.2mm}
-.bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;margin:0 0 .6mm}
+/* a restrained hairline under each day's own heading - distinguishes one
+   day-group from the next (the research brief's "no heavy borders") by a
+   thin rule instead of a box; it draws inside the heading's own existing
+   bottom margin, so it adds no extra height and needs no extra vertical
+   budget. Left off at tier-4 (Toldot's own 8-day-group week, the one real
+   worst case) purely out of caution - that tier already runs the tightest
+   on page-fit, so the one tier that can't spare it skips it. */
+.bk-toc-day{display:flex;align-items:baseline;gap:2.5mm;margin:0 0 .6mm;padding-bottom:.5mm;border-bottom:1px solid rgba(162,128,63,.3)}
+.bk-toc-list.bk-toc-4col .bk-toc-day{padding-bottom:0;border-bottom:none}
 .bk-toc-day span{font-family:var(--font-sacred);font-weight:700;font-size:15px;color:var(--bk-gold-deep)}
 .bk-toc-day small{font-family:var(--font-sacred);font-size:11.5px;color:var(--bk-muted)}
 .bk-toc-row span{white-space:nowrap}
@@ -7512,6 +7530,23 @@ function bkMatterPage(cls,medalCls,inner){
     <div class="bk-strip bk-strip-foot"></div>
   </div>`;
 }
+/* the TOC page's own page frame - deliberately NOT bkMatterPage (owner's
+   request): every other matter page (back page included) keeps the gold
+   "HaTamid" medal/frame running-head bkMatterPage draws, but the owner
+   found that same framed title specifically at the top of the contents
+   page unprofessional - a decorative pill competing with the page's own
+   big "תֹּכֶן הָעִנְיָנִים" heading right under it, which already identifies the
+   page on its own (no reader needs the brand repeated here to know where
+   they are, the way a day page's running head needs the day/label). It is
+   simply dropped (no replacement running head) rather than re-drawn
+   plainer, reclaiming its full height for the page below - see bkTocHtml's
+   own comment for how that reclaimed space is spent. */
+function bkTocPage(inner){
+  return `<div class="bk-page bk-matter bk-tocpage">
+    <div class="bk-pbody">${inner}</div>
+    <div class="bk-strip bk-strip-foot"></div>
+  </div>`;
+}
 function bkQrHtml(){
   const t=bkUI(), q=bkImgSrc(BK_QR_KEY);
   return `<div class="bk-qr">${q?`<img src="${q}" alt=""/><div class="bk-qr-cap">${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>`;
@@ -7892,7 +7927,7 @@ function bkTocHtml(days,summary){
   }
   const tier=lines>80?4:lines>60?3:lines>30?2:1;
   const colsHtml=bkTocDistribute(blocks,tier).map(c=>`<div class="bk-toc-col">${c.map(b=>b.html).join('')}</div>`).join('');
-  return bkMatterPage('bk-tocpage','',`<div class="bk-toc">
+  return bkTocPage(`<div class="bk-toc">
     <div class="bk-toc-h">${t.tocTitle}</div>${bkRuleHtml()}
     <div class="bk-toc-list${tier>1?' bk-toc-'+tier+'col':''}">${colsHtml}</div>${summary||''}
   </div>`);
