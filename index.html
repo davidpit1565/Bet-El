@@ -7608,11 +7608,14 @@ const HOME_CATALOG={
   spacer7:{kind:'tile',label:'מקום ריק'},spacer8:{kind:'tile',label:'מקום ריק'},spacer9:{kind:'tile',label:'מקום ריק'},
   spacer10:{kind:'tile',label:'מקום ריק'},spacer11:{kind:'tile',label:'מקום ריק'},spacer12:{kind:'tile',label:'מקום ריק'},
 };
+/* The public "total users" counter is hidden (user decision): a client-side increment can't be verified, and the number kept looking inflated.
+   Flip to true to bring the tile (and the milestone celebration that reads it) back. "Online now" stays, full width. */
+const SHOW_USER_COUNT=false; window.__showUserCount=SHOW_USER_COUNT;   // the Firebase module (separate script) reads the window flag
 const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
   {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},{id:'booklet',size:'s'},
-  {id:'tikkunei',size:'l'},{id:'visitors',size:'s'},{id:'live',size:'s'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
+  {id:'tikkunei',size:'l'},...(SHOW_USER_COUNT?[{id:'visitors',size:'s'}]:[]),{id:'live',size:SHOW_USER_COUNT?'s':'m'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
@@ -15769,7 +15772,7 @@ window.shareQR = shareQR;
   let gotLiveSnapshot = false;
   const applyVisitCount = (n) => {
     if(typeof n !== 'number' || !(n >= 0)) return;
-    try{ window.ckMilestoneCheck(n); }catch(e){}
+    if(window.__showUserCount){ try{ window.ckMilestoneCheck(n); }catch(e){} }
     lastVisitCount = n; window.__paintVisitCount();
   };
   onSnapshot(visitsRef, (snap) => {
