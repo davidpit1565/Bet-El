@@ -86,10 +86,16 @@ class MainViewController: CAPBridgeViewController {
         // such installs out of the Firebase visit counter, live presence
         // and Analytics, so repeated test installs don't inflate the real
         // user numbers.
-        let hasReceipt = Bundle.main.appStoreReceiptURL
-            .map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        /* A development install has an embedded provisioning profile (Xcode run / ad-hoc) or runs in the simulator;
+           App Store AND TestFlight builds have neither. The old test ("is there a receipt file?") could call a
+           TestFlight build "dev", so it never showed up in the live count or the visit counter. */
+        #if targetEnvironment(simulator)
+        let isDevBuild = true
+        #else
+        let isDevBuild = Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil
+        #endif
         let devBuildScript = WKUserScript(
-            source: "window.__BETEL_DEV_BUILD = \(hasReceipt ? "false" : "true");",
+            source: "window.__BETEL_DEV_BUILD = \(isDevBuild ? "true" : "false");",
             injectionTime: .atDocumentStart, forMainFrameOnly: true)
         userContentController.addUserScript(devBuildScript)
 
