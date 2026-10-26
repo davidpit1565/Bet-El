@@ -151,7 +151,9 @@ const MILESTONE_TEXT = {
  * Fires when the public user counter (stats/visits.count) crosses a multiple of 100 (300, 400, 500, ...), once per
  * milestone for everyone - tracked in stats/announced so retries / duplicate triggers never send it twice.
  */
+const MILESTONES_ENABLED = false;   // user decision: no more "N users" announcements (the counter is hidden in the app)
 exports.milestonePush = onDocumentUpdated({ document: "stats/visits", region: "us-central1", timeoutSeconds: 540, memory: "512MiB", maxInstances: 1 }, async (event) => {
+  if (!MILESTONES_ENABLED) return;
   const before = (event.data.before.data() || {}).count || 0;
   const after = (event.data.after.data() || {}).count || 0;
   const tier = Math.floor(after / 100) * 100;
