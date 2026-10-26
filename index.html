@@ -2697,11 +2697,12 @@ function ensurePrayersTranslit(){
   if(PRAYERS_TRANSLIT.en) return Promise.resolve();
   if(prayersLoadPromise) return prayersLoadPromise;
   prayersLoadPromise = Promise.all([
-    cachedFetch(dataURL('data/prayers-en.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/prayers-fr.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/prayers-ru.json')).then(r=>r.json()).catch(()=>({})),
-    cachedFetch(dataURL('data/prayers-ka.json')).then(r=>r.json()).catch(()=>({})),
-  ]).then(([en,fr,ru,ka])=>{ PRAYERS_TRANSLIT={en,fr,ru,ka}; });
+    cachedFetch(dataURL('data/prayers-en.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/prayers-fr.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/prayers-ru.json')).then(r=>r.json()),
+    cachedFetch(dataURL('data/prayers-ka.json')).then(r=>r.json()),
+  ]).then(([en,fr,ru,ka])=>{ PRAYERS_TRANSLIT={en,fr,ru,ka}; })
+    .catch(e=>{ prayersLoadPromise=null; throw e; });
   return prayersLoadPromise;
 }
 function openPrayer(prayerKey, fromGroup){
@@ -2767,7 +2768,18 @@ function animateCountUp(el, from, to, duration){
   setTimeout(()=>{ if(el.__cuTo === to) el.textContent = finalTxt; }, duration + 120);
 }
 window.animateCountUp = animateCountUp;
-let S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('betel_settings')||'{}'));
+/* Safe localStorage helpers: a corrupt/blocked value must never kill the whole boot (the script is one IIFE). */
+function lsJSON(key, def, ok){ try{ const v=JSON.parse(localStorage.getItem(key)); return (v!=null && (!ok||ok(v))) ? v : def; }catch(e){ return def; } }
+function backupApply(j){
+  if(!isObj(j)||j.app!=='betel-tehillim'||!isObj(j.data)) throw 0;
+  const ent=Object.entries(j.data).filter(([k,v])=>/^betel_[\w.-]{1,80}$/.test(k) && typeof v==='string' && v.length<2000000 && !/^betel_push_/.test(k));
+  ent.forEach(([k,v])=>{ if(/^[\[{]/.test(v)) JSON.parse(v); });   // JSON-looking values must parse, or nothing is written
+  ent.forEach(([k,v])=>localStorage.setItem(k,v));
+}
+function lsSet(key, val){ try{ localStorage.setItem(key, val); return true; }catch(e){ return false; } }
+function escHtml(t){ return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+let S = Object.assign({}, DEF, lsJSON('betel_settings', {}, isObj));
 /* "Pasuk Lefi HaShem" used to hold a single S.hebrewName string - now a
    S.hebrewNames list (several names, each shown in the order added) - a
    user with the old single name already saved gets it migrated into the
@@ -3099,6 +3111,7 @@ function applyReadingPrefs(root){
 function tr(node){
   a11yIcons(node);
   applyReadingPrefs(node);
+  if(node===app){ try{ readerHeadBare(); }catch(e){} }   // synchronous: no flash of the empty strip
   if(node===app) setTimeout(()=>{ try{ readerHeadAuto(); }catch(e){} },0);   // after the translation pass below, so the picker's labels are in the app language
   if(S.lang==='he') return;
   const dict=I18N[S.lang]; if(!dict) return;
@@ -3161,7 +3174,7 @@ async function applyWakeLock(){
 const FALLBACK = (()=>{ let tz=''; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''; }catch(e){}
   return /Jerusalem|Tel_Aviv/.test(tz) ? { lat:31.7683, lon:35.2137, tz:'Asia/Jerusalem', name:'ירושלים', auto:false }
                                        : { lat:51.2194, lon:4.4025, tz:'Europe/Brussels', name:'אנטוורפן, בלגיה', auto:false }; })();
-let LOC = JSON.parse(localStorage.getItem('betel_loc')||'null') || Object.assign({},FALLBACK);
+let LOC = lsJSON('betel_loc', null, isObj) || Object.assign({},FALLBACK);
 function saveLoc(){ localStorage.setItem('betel_loc', JSON.stringify(LOC)); }
 function requestGPS(cb){
   if(!navigator.geolocation){ cb&&cb(false); return; }
@@ -3506,7 +3519,7 @@ function chaptersOf(range){ const a=[]; for(let i=range[0];i<=range[1];i++) a.pu
 const IN_CHAT = window.self !== window.top || /claude\.ai|chat/i.test(window.location.hostname);
 function progKey(){ return String(currentHDate().abs()); }
 if(!localStorage.getItem('betel_prog_fix_v1')){ localStorage.removeItem('betel_prog'); localStorage.setItem('betel_prog_fix_v1','1'); }
-let PROG = JSON.parse(localStorage.getItem('betel_prog')||'{}');
+let PROG = lsJSON('betel_prog', {}, isObj);
 function readSet(){ const k=progKey(); return new Set(PROG[k]||[]); }
 function markRead(ch){ if(IN_CHAT) return false; const k=progKey(); const set=new Set(PROG[k]||[]); if(set.has(ch))return false; set.add(ch); PROG[k]=[...set]; localStorage.setItem('betel_prog',JSON.stringify(PROG)); const tot=(+localStorage.getItem('betel_total_read')||0)+1; localStorage.setItem('betel_total_read',String(tot)); return true; }
 function isRead(ch){ return readSet().has(ch); }
@@ -3533,7 +3546,7 @@ function nextPraise(){
 function setLast(ch){ localStorage.setItem('betel_last', String(ch)); }
 function getLast(){ const v=localStorage.getItem('betel_last'); return v?+v:null; }
 /* favorites */
-let FAV = new Set(JSON.parse(localStorage.getItem('betel_fav')||'[]'));
+let FAV = new Set(lsJSON('betel_fav', [], Array.isArray));
 function saveFav(){ localStorage.setItem('betel_fav', JSON.stringify([...FAV])); }
 
 /* ===== #5 STREAK ===== */
@@ -4124,7 +4137,7 @@ function dedLines(){ return dedList().map(d=>dedLabel(d.t)+' '+d.n); }
 function dedicationLine(){
   const L=dedLines(); return L.length?L.join(' · '):'';
 }
-function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div class="ded-line ${cls||''}"><div class="ded-multi">${L.map(x=>`<span>${x}</span>`).join('')}</div></div>`; }
+function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div class="ded-line ${cls||''}"><div class="ded-multi">${L.map(x=>`<span>${escHtml(x)}</span>`).join('')}</div></div>`; }
 
 /* ================= ROUTER ================= */
 const app = document.getElementById('app');
@@ -4312,7 +4325,7 @@ function ensureBicWeek(track,keys){
     const i18n=(lang==='he'||BIC_WEEK_I18N[i18nKey]!==undefined) ? null
       : cachedFetch(dataURL('data/chok-benishchai/'+track+'/'+u+'.'+lang+'.json'))
           .then(r=>r.ok?r.json():null).then(d=>{ BIC_WEEK_I18N[i18nKey]=d||null; })
-          .catch(()=>{ BIC_WEEK_I18N[i18nKey]=null; });
+          .catch(()=>{ delete BIC_WEEK_I18N[i18nKey]; });
     return Promise.all([base,i18n]);
   })));
 }
@@ -5433,7 +5446,7 @@ function ensureMusarBlock(work,b){
   const i18n=(lang==='he'||MCYC_BLOCK_I18N[i18nKey]!==undefined) ? null
     : cachedFetch(dataURL('data/chok-'+work+'/'+b+'.'+lang+'.json'))
         .then(r=>r.ok?r.json():null).then(d=>{ MCYC_BLOCK_I18N[i18nKey]=d||null; })
-        .catch(()=>{ MCYC_BLOCK_I18N[i18nKey]=null; });
+        .catch(()=>{ delete MCYC_BLOCK_I18N[i18nKey]; });
   return Promise.all([base,i18n]);
 }
 /* same 1-vs-3-a-day idea as ckRambamTrack, one shared choice across whichever
@@ -6361,7 +6374,7 @@ function ckDayShort(d){ return (CHOK_DAY_SHORT_BY_LANG[S.lang]||CHOK_DAY_SHORT)[
 const CK_YEAR_MIN=5784, CK_YEAR_MAX=5830;
 function ckYear(){ return ckYearOf(CK); }
 function ckYearOf(cur){ return (cur&&cur.year)||ckCurYear(); }
-function ckYearHe(y){ return heNum(y%1000)+' לִפְרַט קָטָן'; }
+function ckYearHe(y){ return (!S.lang||S.lang==='he') ? heNum(y%1000)+' לִפְרַט קָטָן' : String(y); }   // other languages: the plain Hebrew year, no Hebrew "short count" suffix
 /* stepping past Friday goes on to the next week, and past Sunday back a week.
    Parameterized over an explicit {key,day,year} (rather than always reading
    the global CK) so a second, independent day-cursor - Zohar Yomi's own -
@@ -6493,7 +6506,7 @@ function renderChokExplainer(){
   app.innerHTML=`
   ${topbar('מה לומדים כל יום', CK_EXPLAINER_BACK)}
   <div class="view">
-    <p class="ck-explainer-intro">בְּכָל יוֹם לוֹמְדִים קֶטַע קָבוּעַ מִכָּל אֶחָד מִשְּׁמוֹנָה הַתְּחוּמִים הַבָּאִים:</p>
+    <p class="ck-explainer-intro">${ckChrome('בְּכָל יוֹם לוֹמְדִים קֶטַע קָבוּעַ מִכָּל אֶחָד מִשְּׁמוֹנָה הַתְּחוּמִים הַבָּאִים:')}</p>
     <div class="card">
       ${CK_EXPLAINER_ITEMS.map(it=>`
         <div class="ck-explainer-row">
@@ -7615,11 +7628,14 @@ const HOME_CATALOG={
   spacer7:{kind:'tile',label:'מקום ריק'},spacer8:{kind:'tile',label:'מקום ריק'},spacer9:{kind:'tile',label:'מקום ריק'},
   spacer10:{kind:'tile',label:'מקום ריק'},spacer11:{kind:'tile',label:'מקום ריק'},spacer12:{kind:'tile',label:'מקום ריק'},
 };
+/* The public "total users" counter is hidden (user decision): a client-side increment can't be verified, and the number kept looking inflated.
+   Flip to true to bring the tile (and the milestone celebration that reads it) back. "Online now" stays, full width. */
+const SHOW_USER_COUNT=false; window.__showUserCount=SHOW_USER_COUNT;   // the Firebase module (separate script) reads the window flag
 const HOME_DEFAULT_LAYOUT=[
   {id:'hero',size:'l'},{id:'banners',size:'l'},{id:'candleBand',size:'l'},{id:'dedication',size:'l'},
   {id:'chok',size:'m'},{id:'tehillim',size:'m'},{id:'zohar',size:'s'},{id:'shnayim',size:'s'},
   {id:'siddur',size:'s'},{id:'musar',size:'s'},{id:'benishchai',size:'s'},{id:'booklet',size:'s'},
-  {id:'tikkunei',size:'l'},{id:'visitors',size:'s'},{id:'live',size:'s'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
+  {id:'tikkunei',size:'l'},...(SHOW_USER_COUNT?[{id:'visitors',size:'s'}]:[]),{id:'live',size:SHOW_USER_COUNT?'s':'m'},{id:'hatzlacha',size:'l'},{id:'memorial',size:'l'},{id:'social',size:'s'},
 ];
 function homeDefaultLayout(){ return HOME_DEFAULT_LAYOUT.map(x=>({...x})); }
 function getHomeLayout(){
@@ -8355,7 +8371,7 @@ function renderHome(){
       ${nz?`<div class="zman-strip"><span class="dot"></span><span><b>${nz.label}</b> ${nz.t} · ${nz.time}</span></div>`:''}
     </div>`,
     banners:()=>`
-    ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>${ckChrome('יום היאהרצייט')} · <b>${todayYahr.map(y=>y.name).join(' · ')}</b></span></div>`:''}
+    ${todayYahr.length?`<div class="yahrzeit-strip">${I.heart}<span>${ckChrome('יום היאהרצייט')} · <b>${todayYahr.map(y=>escHtml(y.name)).join(' · ')}</b></span></div>`:''}
     ${isRoshChodeshToday(hd)?`<div class="yahrzeit-strip">${I.moon2}<span>${ckChrome('ראש חדש')} · <b>אל תשכח להזכיר יעלה ויבא</b></span></div>`:''}
     ${isZmanTefilinNow()?`<div class="yahrzeit-strip" id="homeTefillinMirrorBanner" style="cursor:pointer">${I.tefillin}<span>${ckChrome('זמן תפלין')} · <b>${ckChrome('מראה לתפלין')}</b></span></div>`:''}
     ${hh?`<div class="yahrzeit-strip" id="homeHolidayHalachaBanner" style="cursor:pointer">${I.cal}<span>${holidayHalachaUI().title} · <b>${hh.name}</b> · ${holidayHalachaUI().inDays(hh.days)}</span></div>`:''}
@@ -8716,7 +8732,7 @@ function nameVersePickersHTML(){
   (S.hebrewNames||[]).forEach(n=>nameWords(n).forEach(w=>{
     const c=tehillimVerseCandidates(w); if(c.length<2) return;
     const cur=tehillimVersesByName(w)[0];
-    rows.push(`<div class="ded-add-row" style="margin:6px 0"><span class="ded-txt" style="flex:0 0 auto">${w}</span><select class="fld-select nv-sel" data-w="${w}" style="flex:1;min-width:0">${c.map(m=>`<option value="${m.key}"${cur&&cur.key===m.key?' selected':''}>${nameVerseLabel(m)}</option>`).join('')}</select></div>`);
+    rows.push(`<div class="ded-add-row" style="margin:6px 0"><span class="ded-txt" style="flex:0 0 auto">${escHtml(w)}</span><select class="fld-select nv-sel" data-w="${escHtml(w)}" style="flex:1;min-width:0">${c.map(m=>`<option value="${m.key}"${cur&&cur.key===m.key?' selected':''}>${nameVerseLabel(m)}</option>`).join('')}</select></div>`);
   }));
   return rows.length?`<div class="si-d" style="margin:10px 0 4px">${ckChrome('בחרו את הפסוק לכל שם')}</div>${rows.join('')}`:'';
 }
@@ -9590,7 +9606,7 @@ let NATIVE_CAL_OK=null;
 function nativeCalPlugin(){ try{ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeCalendar; }catch(e){ return null; } }
 function ymdOf(g){ return g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0'); }
 function hdOfYmd(ymd){ const [y,m,d]=ymd.split('-').map(Number); return new HDate(new Date(y,m-1,d,12)); }
-let NATIVE_CAL_SHOWN=false;
+let NATIVE_CAL_SHOWN=true;   // true on purpose: after a web-view reload the native overlay can still be on screen, so the first other screen sends one hide()
 function nativeCalHide(){ if(!NATIVE_CAL_SHOWN) return; NATIVE_CAL_SHOWN=false; try{ nativeCalPlugin().hide(); }catch(e){} }
 function renderCalendarNative(){
   const NC=nativeCalPlugin();
@@ -10461,7 +10477,7 @@ function openLibraryCat(key){
 /* The Library category grid is a REAL native iOS screen in the app (NativeLibrary.swift: UICollectionView +
    glass cards); the HTML tiles below are the web/PWA fallback. Set false to force the HTML version. */
 const NATIVE_LIB_ENABLED=true;
-let NATIVE_LIB_SHOWN=false;
+let NATIVE_LIB_SHOWN=true;   // true on purpose: after a web-view reload the native grid can still be on screen over other screens, so the first non-Library render sends one hide()
 const LIB_CAT_COLORS={torah:'#c45a6e',neviim:'#4f7ea8',ketuvim:'#c98a3f',tehillim:'#d4af5f',mishnah:'#8a6fc9',gemara:'#966e46',rambam:'#969e46',benishchai:'#38a3a5',musar:'#9662a8',tikkuneiZohar:'#e0562e',zohar:'#e0562e',tanya:'#589b4b',brachot:'#8a9a3a',chokLeyisrael:'#6f83d6',shnayimMikra:'#3aa87c'};
 function nativeLibHide(){ if(!NATIVE_LIB_SHOWN) return; NATIVE_LIB_SHOWN=false; try{ window.Capacitor.Plugins.NativeLibrary.hide(); }catch(e){} }
 window.NativeLibraryHost={ open(key){ try{ openLibraryCat(key); }catch(e){} } };   // render() of the next tab hides the native screen
@@ -10958,7 +10974,10 @@ function tanyaPartRange(part){
   TANYA_IDX.order.forEach((e,i)=>{ if(e.part===part){ if(first<0) first=i; last=i; } });
   return {first,last};
 }
-function tanyaPartTitle(p){ return (S.lang==='en' && p.en) ? p.en : p.he; }
+const TANYA_PART_NAMES={fr:{likkutei_amarim:'Likoutei Amarim',shaar_hayichud:'Chaar HaYihoud VéHaEmouna',igeret_hateshuva:'Iguéret HaTchouva',igeret_hakodesh:'Iguéret HaKodech',kuntres_acharon:'Kountrès Aharon'},
+  ru:{likkutei_amarim:'Ликутей Амарим',shaar_hayichud:'Шаар а-Йихуд ве-а-Эмуна',igeret_hateshuva:'Игерет а-Тшува',igeret_hakodesh:'Игерет а-Кодеш',kuntres_acharon:'Кунтрес Ахарон'},
+  ka:{likkutei_amarim:'ლიკუტეი ამარიმ',shaar_hayichud:'შაარ ჰაიიხუდ ვეჰაემუნა',igeret_hateshuva:'იგერეთ ჰათშუვა',igeret_hakodesh:'იგერეთ ჰაკოდეშ',kuntres_acharon:'კუნტრეს აჰარონ'}};
+function tanyaPartTitle(p){ const t=TANYA_PART_NAMES[S.lang]; return (t&&t[p.key]) ? t[p.key] : ((S.lang==='en' && p.en) ? p.en : p.he); }
 function renderLibraryTanyaParts(){
   const tanyaTitle=(S.lang==='en')?'Tanya':'תניא';
   if(!TANYA_IDX){
@@ -11309,6 +11328,14 @@ function readerHeadCompact(hide){
    and on iOS the native header shows "book · choice" with a round list button that opens the system sheet. Sources: the
    aliyot chips (Torah, Shnayim Mikra: "aliyah א ... haftarah") or the reader's own <select> (chapter, daf, part...).
    Readers whose lower block also carries a "back to today" button keep the old layout. Runs once per rendered header. */
+/* On iOS the native header replaces .reader-top (display:none), so a sticky .reader-head whose ONLY child is
+   .reader-top is just a bare solid strip under the header (e.g. Today's reading). Mark it rh-empty (hidden by CSS). */
+function readerHeadBare(){
+  if(!NATIVE_TOPBAR) return;
+  document.querySelectorAll('.reader-head:not(.rh-empty)').forEach(hd=>{
+    if(hd.children.length && Array.from(hd.children).every(c=>c.classList.contains('reader-top'))) hd.classList.add('rh-empty');
+  });
+}
 function readerHeadAuto(){
   if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
   const hd=document.querySelector('.reader-head'); if(!hd || hd.dataset.rhAuto) return;
@@ -13256,7 +13283,7 @@ function smStreakData(){ try{return JSON.parse(localStorage.getItem('betel_sm_st
 function smMarkDone(key){
   const d=smStreakData(); const today=civilToday().toISOString().slice(0,10);
   if(d.last!==today){ d.count=(d.last && isYesterday(d.last))?d.count+1:1; d.best=Math.max(d.best,d.count); d.last=today; localStorage.setItem('betel_sm_streak',JSON.stringify(d)); }
-  const done=JSON.parse(localStorage.getItem('betel_sm_done')||'[]'); if(!done.includes(key)){ done.push(key); localStorage.setItem('betel_sm_done',JSON.stringify(done)); }
+  const done=lsJSON('betel_sm_done', [], Array.isArray); if(!done.includes(key)){ done.push(key); lsSet('betel_sm_done',JSON.stringify(done)); }
   bumpCombinedStreak();
 }
 function isYesterday(dateStr){ const d=new Date(dateStr), t=civilToday(); const diff=Math.round((t-d)/86400000); return diff===1; }
@@ -14159,7 +14186,7 @@ function settingsCategoryBody(catId, notifPerm){
       <h3>${ckChrome('פָּסוּק לְפִי הַשֵּׁם')}</h3>
       <div class="set-item col">
         <div class="si-d" style="margin-bottom:10px">${ckChrome('כתבו שם או כמה שמות עבריים, ובסוף כל עמידה יופיע לכל שם פסוק אחד מתהלים, המתחיל ומסתיים באותיות השם. הבחירה ברירת מחדל, וניתן להחליף כאן')}</div>
-        <div id="hebrewNamesList">${(S.hebrewNames||[]).map((n,i)=>`<div class="ded-row"><span class="ded-txt">${n}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||`<div class="si-d">${ckChrome('אין שמות עדין')}</div>`}</div>
+        <div id="hebrewNamesList">${(S.hebrewNames||[]).map((n,i)=>`<div class="ded-row"><span class="ded-txt">${escHtml(n)}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||`<div class="si-d">${ckChrome('אין שמות עדין')}</div>`}</div>
         ${nameVersePickersHTML()}
         <div class="ded-add">
           <div class="ded-add-row">
@@ -14195,7 +14222,7 @@ function settingsCategoryBody(catId, notifPerm){
     <div class="set-group">
       <h3>יאהרצייט · זכרון</h3>
       <div class="yahr-list" id="yahrList">
-        ${getYahrzeits().map((y,i)=>`<div class="yahr-row"><div><div>${y.name}</div><div class="yahr-hdate">${yahrzeitHebLabel(y)}</div></div><button class="icon-btn yahr-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין זכרונות עדין</div>'}
+        ${getYahrzeits().map((y,i)=>`<div class="yahr-row"><div><div>${escHtml(y.name)}</div><div class="yahr-hdate">${yahrzeitHebLabel(y)}</div></div><button class="icon-btn yahr-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין זכרונות עדין</div>'}
       </div>
       <div class="yahr-form">
         <input class="yahr-name-in" id="yahrName" placeholder="שם הנפטר / הנפטרת"/>
@@ -14338,7 +14365,7 @@ function wireSettingsCategory(catId){
         const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
         inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; const rd=new FileReader();
           rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='betel-tehillim'||!j.data) throw 0;
-            Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
+            backupApply(j); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
           }catch(e){ toast('קבץ גבוי לא תקין'); } };
           rd.readAsText(f); };
         inp.click();
@@ -15110,7 +15137,7 @@ window.NativeSettingsHost = {
   },
   importBackup(text){
     try{ const j=JSON.parse(text); if(j.app!=='betel-tehillim'||!j.data) throw 0;
-      Object.entries(j.data).forEach(([k,v])=>localStorage.setItem(k,v)); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
+      backupApply(j); toast('שחזר בהצלחה'); setTimeout(()=>location.reload(),700);
     }catch(e){ toast('קבץ גבוי לא תקין'); }
   }
 };
@@ -15777,7 +15804,7 @@ window.shareQR = shareQR;
   let gotLiveSnapshot = false;
   const applyVisitCount = (n) => {
     if(typeof n !== 'number' || !(n >= 0)) return;
-    try{ window.ckMilestoneCheck(n); }catch(e){}
+    if(window.__showUserCount){ try{ window.ckMilestoneCheck(n); }catch(e){} }
     lastVisitCount = n; window.__paintVisitCount();
   };
   onSnapshot(visitsRef, (snap) => {

@@ -90,8 +90,9 @@ final class NativeToastView: UIView {
             },
             completion: { [weak self] _ in
                 pillView.removeFromSuperview()
-                self?.pill = nil
-                self?.isHidden = true
+                guard let self = self, self.pill === pillView else { return }   // a newer toast may already own the container
+                self.pill = nil
+                self.isHidden = true
             }
         )
     }

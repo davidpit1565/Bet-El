@@ -527,13 +527,15 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
     private var dragLP: UILongPressGestureRecognizer!
 
     private var dragIndex: Int?
+    private let flowLayout: MirrorFlowLayout
     private var snapshot: UIView?
     private var dragOffset = CGPoint.zero
     private var link: CADisplayLink?
     private var resizeAccum: [String: CGFloat] = [:]
 
     override init(frame: CGRect) {
-        let layout = UICollectionViewFlowLayout()
+        let layout = MirrorFlowLayout()
+        flowLayout = layout
         layout.minimumLineSpacing = 12
         layout.minimumInteritemSpacing = 12
         layout.sectionInset = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
@@ -630,7 +632,8 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         overrideUserInterfaceStyle = isDark ? .dark : .light
         let attr: UISemanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
         semanticContentAttribute = attr
-        collectionView.semanticContentAttribute = attr
+        collectionView.semanticContentAttribute = .forceLeftToRight   // geometry is mirrored by MirrorFlowLayout
+        flowLayout.mirror = rtl
         self.rtl = rtl
         spacerPool = pool
         // never rebuild while a finger is dragging a cell
