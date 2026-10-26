@@ -32,6 +32,12 @@ in English as usual.
   pattern (a large per-language name table lives inside
   `data/chok-musar-cycles.json` itself, not inline in index.html, since
   that file is already lazy-loaded before any musar content renders).
+- **Tanya Yomi** (`ckTanyaDayEntry`, `data/tanya-schedule.json`) must show each day's EXACT portion, not the
+  whole chapter/letter: every schedule entry carries `seg` ([[unit, from, to], ...], 0-based inclusive) and
+  `hm`/`hd` (the day is looked up by its Hebrew date; on 29 of a 29-day Cheshvan/Kislev the 30th's portion is
+  added). Regenerate with `node scripts/build-tanya-schedule.mjs` (Sefaria's Tanya Yomi start segments; same
+  Kehot segmentation as `data/chok-tanya/`) - never strip `seg` back to a bare `orderIndex` (that bug showed one
+  letter for up to 11 days and the same text in consecutive weekly booklets).
 - Every musar work runs at the same fixed pace, `ckMusarTrack()` = 3
   units/day (not configurable per-work). Cycle length is computed
   automatically by `ckMusarDurationLabel()`.

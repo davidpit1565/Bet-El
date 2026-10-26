@@ -3611,8 +3611,8 @@ function chokSectionsFor(key,day,hdOverride,tehillimDivMode){
   }
   if(ckTanyaReady(hd)){
     const te=ckTanyaDayEntry(hd);
-    const items=ckTanyaSegs(te.orderIndex);
-    if(items.length) list.push({key:'tanya', he:'חֲסִידוּת', items, kind:'tanyacyc', refs:[], tIdx:te.orderIndex});
+    const items=ckTanyaDaySegs(te);
+    if(items.length) list.push({key:'tanya', he:'חֲסִידוּת', items, kind:'tanyacyc', refs:[], tIdx:te.orderIndex, te});
   }
   return list;
 }
@@ -3912,7 +3912,7 @@ function chokRefLabel(ref, sec, opts){
 }
 function chokSourceLine(sec,hd){
   if(sec.kind==='musarcyc') return ckMusarSourceLabel(sec.musarWork,sec.mIdx);
-  if(sec.kind==='tanyacyc') return ckTanyaLabel(sec.tIdx);
+  if(sec.kind==='tanyacyc') return sec.te ? ckTanyaDayLabel(sec.te) : ckTanyaLabel(sec.tIdx);
   if(CYC&&sec.key==='zohar'&&sec.kind==='text'&&!sec.refs.length) return ckZoharLabel(ckCycleIndex(CYC.zohar,hd||ckViewHDate()));
   if(CYC&&sec.kind==='rambam') return ckRambamLabel(sec.rIdx);
   if(CYC&&sec.kind==='daf'){
@@ -4390,31 +4390,60 @@ function ckTanyaCycleStartYear(hd){
   const cand=new HDate(19,9,y); // 19 Kislev of Hebrew year y
   return (hd.abs()>=cand.abs()) ? y : y-1;
 }
+/* Returns {orderIndex, seg:[[orderIndex,from,to],...]} - the day's EXACT
+   portion (0-based inclusive segment ranges, possibly spanning two units).
+   The schedule used to hold only the unit a day starts in, so a long letter
+   (e.g. Iggeret HaKodesh 26/27) was shown whole for 5-11 days running and
+   the same text turned up in two consecutive weeks - see
+   scripts/build-tanya-schedule.mjs. Days are looked up by their Hebrew date
+   (hm/hd), not by offset from 19 Kislev, so a year whose Cheshvan/Kislev
+   has only 29 days doesn't shift every later day; on 29 of such a month
+   the (missing) 30th's portion is learned too, as Chabad's calendar does.
+   The offset lookup stays as a fallback for an old cached schedule file. */
 function ckTanyaDayEntry(hd){
   hd=hd||ckViewHDate();
   const startY=ckTanyaCycleStartYear(hd);
   const startHd=new HDate(19,9,startY);
-  const dayOffset=hd.abs()-startHd.abs();
   const sched=startHd.isLeapYear() ? TANYA_SCHED.leap : TANYA_SCHED.regular;
-  const n=sched.dayCount;
-  const off=((dayOffset%n)+n)%n; // defensive wraparound, should always land in-range
-  return sched.order[off];
+  if(!sched._byDate && sched.order[0] && sched.order[0].hm){
+    sched._byDate={}; sched.order.forEach(e=>{ sched._byDate[e.hm+'/'+e.hd]=e; });
+  }
+  const m=hd.getMonth(), d=hd.getDate();
+  let e=sched._byDate && sched._byDate[m+'/'+d];
+  if(!e){
+    const n=sched.dayCount, dayOffset=hd.abs()-startHd.abs();
+    e=sched.order[((dayOffset%n)+n)%n];
+  }
+  let seg=e.seg ? e.seg.slice() : [[e.orderIndex,0,Infinity]];
+  const e30=(d===29 && hd.daysInMonth()===29 && sched._byDate) ? sched._byDate[m+'/30'] : null;
+  if(e30 && e30.seg) e30.seg.forEach(s=>{
+    const p=seg[seg.length-1];
+    if(p[0]===s[0] && p[2]+1===s[1]) seg[seg.length-1]=[p[0],p[1],s[2]]; else seg.push(s);
+  });
+  return {orderIndex:seg[0][0], seg, hebrewDateLabel:e.hebrewDateLabel};
 }
 function ckTanyaBlockOf(i){ return Math.floor(i/(TANYA_IDX.block||40)); }
-function ckTanyaSegs(i){
+function ckTanyaSegs(i,from,to){
   const b=CYC_BLOCK['tanya/'+ckTanyaBlockOf(i)]||{};
   const ref=TANYA_IDX.order[i].ref;
-  return b[ref]||[];
+  const all=b[ref]||[];
+  return (from==null) ? all : all.slice(from,(to==null||to===Infinity)?undefined:to+1);
+}
+/* the day's text: every segment of its portion, in order */
+function ckTanyaDaySegs(te){
+  const out=[]; te.seg.forEach(([i,a,z])=>{ out.push(...ckTanyaSegs(i,a,z)); });
+  return out;
 }
 function ckTanyaReady(hd){
   if(!TANYA_IDX||!TANYA_SCHED) return false;
   const e=ckTanyaDayEntry(hd);
-  return !!CYC_BLOCK['tanya/'+ckTanyaBlockOf(e.orderIndex)];
+  return e.seg.every(([i])=>!!CYC_BLOCK['tanya/'+ckTanyaBlockOf(i)]);
 }
 function ensureTanyaDay(hd){
   return ensureTanyaCycle().then(()=>{
     const e=ckTanyaDayEntry(hd);
-    return ensureCycBlock('tanya', ckTanyaBlockOf(e.orderIndex));
+    const blocks=[...new Set(e.seg.map(([i])=>ckTanyaBlockOf(i)))];
+    return Promise.all(blocks.map(b=>ensureCycBlock('tanya', b)));
   });
 }
 /* Hebrew citation word per unitLabel - Likkutei Amarim/Shaar HaYichud/
@@ -4440,6 +4469,36 @@ function ckTanyaLabel(orderIndex){
   if(e.subsectionHe) s+=' · '+e.subsectionHe;
   else s+=' · '+(TANYA_UNIT_WORD[e.unitLabel]||'פֶּרֶק')+' '+heNum(e.chapter);
   return s;
+}
+/* the day's source line: "Tanya · part · unit, paragraphs a-b" - the part
+   and the "Tanya" prefix are shown once, a unit learned only in part gets
+   its paragraph range, a second unit (a portion crossing into the next
+   letter/chapter) is appended after "; " without repeating its part.
+   Consecutive whole units of the same kind are grouped into one range
+   (19 Kislev: "Approbations 1-3", not "Approbation; Approbation; ..."). */
+function ckTanyaDayLabel(te){
+  const en=(S.lang==='en');
+  const groups=[];
+  te.seg.forEach(([i,a,z])=>{
+    const e=TANYA_IDX.order[i], last=Math.min(z,e.n-1), whole=(a===0&&last>=e.n-1);
+    const kind=e.part+'|'+(e.subsection||'')+'|'+e.unitLabel;
+    const g=groups[groups.length-1];
+    if(g && whole && g.whole && g.kind===kind && e.chapter!=null && g.c2!=null && e.chapter===g.c2+1){ g.c2=e.chapter; return; }
+    groups.push({e, kind, whole, a, last, c1:e.chapter, c2:e.chapter});
+  });
+  let prevPart=null;
+  const bits=groups.map(g=>{
+    const e=g.e;
+    const num = g.c1==null ? '' : ' '+ckRange(g.c1,g.c2);
+    const name = en&&e.partEn
+      ? (e.subsection ? e.subsection+num : (TANYA_UNIT_WORD_EN[e.unitLabel]||'chapter')+num)
+      : (e.subsectionHe ? e.subsectionHe+num : (TANYA_UNIT_WORD[e.unitLabel]||'פֶּרֶק')+num);
+    const rng=g.whole ? '' : ', '+(en?'para.':'אוֹת')+' '+ckRange(g.a+1,g.last+1);
+    const part=(e.part!==prevPart) ? (en&&e.partEn?e.partEn:e.partHe)+' · ' : '';
+    prevPart=e.part;
+    return part+name+rng;
+  });
+  return (en?'Tanya · ':'תַּנְיָא · ')+bits.join('; ');
 }
 /* code-assembled strings kept in their own small per-language table like
    CK_NOTIF, rather than run through tr()'s generic substring pass: a bare
@@ -6622,8 +6681,8 @@ function bkShabbatSections(hd,shabbatDate){
     if(zitems.length) list.push({key:'zohar',he:'זֹהַר',items:zitems,kind:'text',refs:[]});
   }
   if(ckTanyaReady(hd)){
-    const te=ckTanyaDayEntry(hd), items=ckTanyaSegs(te.orderIndex);
-    if(items.length) list.push({key:'tanya',he:'חֲסִידוּת',items,kind:'tanyacyc',refs:[],tIdx:te.orderIndex});
+    const te=ckTanyaDayEntry(hd), items=ckTanyaDaySegs(te);
+    if(items.length) list.push({key:'tanya',he:'חֲסִידוּת',items,kind:'tanyacyc',refs:[],tIdx:te.orderIndex,te});
   }
   return list;
 }
@@ -7717,6 +7776,16 @@ function bkWeekSummary(date){
   { let idxs=[], refFallback=false; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='zohar'); if(!s) return;
       if(CYC && s.kind==='text' && (!s.refs||!s.refs.length)) idxs.push(ckCycleIndex(CYC.zohar,r.hd)); else refFallback=true; });
     zoharLine = idxs.length ? bkZoharRangeLabel(idxs) : (refFallback ? bkZoharRefRangeLabel(collectRefs('zohar')) : ''); }
+  /* Tanya: the week's days are consecutive exact portions, so their segment
+     ranges are merged into one span and labelled once (ckTanyaDayLabel),
+     e.g. "Kuntres Acharon · ch. 2-3; ch. 4, para. 1-13" - not
+     "Tanya · X ... until Tanya · X ..." with the prefix twice. */
+  let tanyaLine='';
+  { const seg=[];
+    perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='tanya'); if(!s||!s.te) return;
+      s.te.seg.forEach(([i,a,z])=>{ const p=seg[seg.length-1];
+        if(p && p[0]===i && p[2]+1>=a) p[2]=Math.max(p[2],z); else if(!seg.some(q=>q[0]===i&&q[1]<=a&&q[2]>=z)) seg.push([i,a,z]); }); });
+    tanyaLine = seg.length ? ckTanyaDayLabel({seg}) : spanOf('tanya'); }
   const row=(label,val)=>val?`<div class="bk-wk-row"><b>${label}</b> — ${val}</div>`:'';
   const h=[
     row(ckChrome('תּוֹרָה'), torahLine),
@@ -7728,7 +7797,7 @@ function bkWeekSummary(date){
     row(t.rambam, halachaLine),
     row(ckChrome('מוּסָר'), musarLine),
     row(ckChrome('זֹהַר'), zoharLine),
-    row(ckChrome('חֲסִידוּת'), spanOf('tanya')),
+    row(ckChrome('חֲסִידוּת'), tanyaLine),
   ].filter(Boolean).join('');
   return h?`<div class="bk-wk-sum">${h}</div>`:'';
 }
