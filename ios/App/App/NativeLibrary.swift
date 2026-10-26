@@ -14,6 +14,36 @@ struct NLItem {
     let color: UIColor
 }
 
+/// Flow layout that never lets UIKit flip it for the device's language: UIKit mirrors a collection view
+/// (frames AND, when the forced direction differs from the device's, the cell contents) based on the
+/// device layout direction, which showed an English app on a Hebrew iPhone with mirrored text. Geometry is
+/// always laid out left-to-right and then mirrored here, by the APP's direction (`mirror`), so the card
+/// order is right and nothing is ever drawn reversed. Cell contents set their own semantic attribute.
+final class MirrorFlowLayout: UICollectionViewFlowLayout {
+    var mirror = false { didSet { if mirror != oldValue { invalidateLayout() } } }
+
+    override var flipsHorizontallyInOppositeLayoutDirection: Bool { false }
+
+    private func mirrored(_ a: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        guard mirror, let w = collectionView?.bounds.width, let c = a.copy() as? UICollectionViewLayoutAttributes else { return a }
+        c.frame.origin.x = w - a.frame.maxX
+        return c
+    }
+
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        let r = mirror ? CGRect(x: 0, y: rect.minY, width: max(rect.maxX, collectionView?.bounds.width ?? rect.width), height: rect.height) : rect
+        return super.layoutAttributesForElements(in: r)?.map { mirrored($0) }
+    }
+
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        super.layoutAttributesForItem(at: indexPath).map { mirrored($0) }
+    }
+
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        super.shouldInvalidateLayout(forBoundsChange: newBounds) || (mirror && newBounds.width != collectionView?.bounds.width)
+    }
+}
+
 final class NLCell: UICollectionViewCell {
     static let reuseId = "NLCell"
     private let glass: UIVisualEffectView
@@ -90,7 +120,7 @@ final class NLCell: UICollectionViewCell {
     }
 }
 
-final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionViewDelegate {
+final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var onSelect: ((String) -> Void)?
     var bottomInset: (() -> CGFloat)?
     var onCollapseChange: ((Bool) -> Void)?
@@ -98,23 +128,15 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
     private var items: [NLItem] = []
     private var rtl = true
     private let collapseTracker = ScrollCollapseTracker()
+    private let flowLayout: MirrorFlowLayout
 
     override init(frame: CGRect) {
-        // Re-evaluated on invalidate (see traitCollectionDidChange): card height scales with Dynamic Type, and the
-        // accessibility sizes switch to one full-width column so long titles are never clipped.
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout { _, env in
-            let big = env.traitCollection.preferredContentSizeCategory.isAccessibilityCategory
-            let cols = big ? 1 : 2
-            let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0 / CGFloat(cols)), heightDimension: .fractionalHeight(1)))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1), heightDimension: .absolute(A11y.scaled(92))), subitem: item, count: cols)
-            group.interItemSpacing = .fixed(12)
-            let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 12
-            section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16)
-            return section
-        })
+        let flow = MirrorFlowLayout()
+        flow.minimumLineSpacing = 12
+        flow.minimumInteritemSpacing = 12
+        flow.sectionInset = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
+        flowLayout = flow
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: flow)
         super.init(frame: frame)
         backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -155,7 +177,8 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
         overrideUserInterfaceStyle = isDark ? .dark : .light
         let attr: UISemanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
         semanticContentAttribute = attr
-        collectionView.semanticContentAttribute = attr
+        collectionView.semanticContentAttribute = .forceLeftToRight   // geometry is mirrored by MirrorFlowLayout
+        flowLayout.mirror = rtl
         self.rtl = rtl
         self.items = items
         collapseTracker.reset()
@@ -178,6 +201,15 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
     }
 
     // MARK: UICollectionView
+
+    /// Two columns; accessibility text sizes switch to one full-width column so long titles are never clipped.
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let big = traitCollection.preferredContentSizeCategory.isAccessibilityCategory
+        let cols: CGFloat = big ? 1 : 2
+        let w = collectionView.bounds.width - 32 - 12 * (cols - 1)
+        return CGSize(width: floor(w / cols), height: A11y.scaled(92))
+    }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { items.count }
 
