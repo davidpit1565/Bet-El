@@ -1746,18 +1746,35 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-qr-url{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);direction:ltr}
 .bk-page.bk-blank::after{display:none}
 /* No .bk-ph header on this page any more (bkTocPage, not bkMatterPage) - the
-   title below is the page's own heading, so .bk-toc carries the full top
-   padding itself now (was 2.5mm, sitting under the removed medal). The
-   title alone is enlarged (29px -> 34px): a plain, confident heading with
-   no frame or repeated brand badge, the way a printed sefer's own contents
-   page reads (the book's name is already on the cover; an internal index
-   page doesn't restate it). The reclaimed height comfortably covers the
-   increase (see the numbers in the commit message) with real headroom still
-   left for the list below, verified against Toldot's own worst-case 8-day/
-   tier-4 week. */
-.bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:6mm 4mm 0}
+   title below is the page's own heading. The title alone is enlarged (29px
+   -> 34px): a plain, confident heading with no frame or repeated brand
+   badge, the way a printed sefer's own contents page reads (the book's name
+   is already on the cover; an internal index page doesn't restate it).
+   Round 2 (owner's report, measured via the real print.pdf, not guessed):
+   the first cut of this redesign (6mm top padding, 3mm/4mm rule margins)
+   spent almost the ENTIRE ~13mm reclaimed from the removed medal right back
+   as pure top-of-page air - before any real content (the first TOC row)
+   appeared, a plain PyMuPDF geometry read of the printed page measured
+   ~107pt (>18% of the 595pt page height) of blank padding/margin, nearly
+   matching the old medal-header's own height, so the list never actually
+   moved up. .bk-toc's own `.bk-pbody` parent is NOT the culprit (it's a
+   plain flex column, flex-start, no fixed height or stale spacer left over
+   from the medal) - the padding/margin values themselves were simply too
+   generous for a page that no longer has a header to visually separate
+   from. Cut back near the pre-redesign values (2.5mm/2mm/2.5mm) while
+   keeping the bigger, plain title - this alone measured ~14pt higher list
+   start. The vertical room this frees is NOT wasted a second time: it
+   flows straight into bkWkSumFill()'s existing dynamic fill (see its own
+   comment) - that function already measures the TOC page's real leftover
+   height every time it renders and spends it as extra breathing room
+   between the week-summary's own rows, so less padding reserved up here
+   means more of the week-summary's slack budget gets genuinely spent on
+   readable content spacing instead of sitting empty. Re-verified against
+   Toldot's own worst-case 8-day/tier-4 week: 0 overflow, bigger --wk-extra
+   than before. */
+.bk-toc{align-self:stretch;display:flex;flex-direction:column;align-items:center;padding:2.5mm 4mm 0}
 .bk-toc-h{font-family:var(--font-sacred);font-weight:900;font-size:34px;color:var(--bk-gold-deep)}
-.bk-toc .bk-rule{width:52mm;margin:3mm auto 4mm}
+.bk-toc .bk-rule{width:52mm;margin:2mm auto 2.5mm}
 /* the column split itself is built in JS (bkTocDistribute), by each day
    block's own weight, not CSS column-count's native balancing - see the
    long comment on bkTocDistribute for why (the TOC page's "serious empty
@@ -7679,9 +7696,23 @@ function bkWeekSummary(date){
   let halachaLine='';
   { let idxs=[]; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='halacha'); if(s&&s.kind==='rambam'&&s.rIdx) idxs=idxs.concat(s.rIdx); });
     halachaLine = idxs.length ? ckRambamLabel(idxs) : bkRefRangeLabel(collectRefs('halacha'),{prefix:n=>ckChrome('רַמְבַּ״ם')+' · '+n+', ', unitWord:'הֲלָכָה', unitWordPl:'הֲלָכוֹת', withMem:false}); }
+  /* Musar: unlike the single `S.musarWork` the reader shows, the booklet's own
+     dedicated Musar section (bkMusarSection) carries ALL SIX MUSAR_WORKS every
+     day (BK_SKIP hides the reader's one-work 'musar' sec key from the day
+     content precisely because of this), so the week-summary row must do the
+     same - one ckMusarSourceLabel(...) range per work that actually had
+     content this week, joined like every other multi-source row. Built from
+     ckMusarIndexes(w.key,r.hd) per row+work (the same per-day lookup
+     bkMusarWorks uses), not from `secs`/BK_SKIP's single-work 'musar' key. */
   let musarLine='';
-  { let idxs=[], work=null; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='musar'); if(s&&s.kind==='musarcyc'&&s.mIdx){ idxs=idxs.concat(s.mIdx); work=s.musarWork; } });
-    musarLine = idxs.length ? ckMusarSourceLabel(work,idxs) : ''; }
+  { const byWork={};
+    perRow.forEach(r=>{ MUSAR_WORKS.forEach(w=>{
+      if(!MCYC[w.key]||!ckMusarReady(w.key,r.hd)) return;
+      const idxs=ckMusarIndexes(w.key,r.hd);
+      if(idxs&&idxs.length) (byWork[w.key]=byWork[w.key]||[]).push(...idxs);
+    }); });
+    musarLine = MUSAR_WORKS.filter(w=>byWork[w.key]&&byWork[w.key].length)
+      .map(w=>ckMusarSourceLabel(w.key,byWork[w.key])).join('; '); }
   let zoharLine='';
   { let idxs=[], refFallback=false; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='zohar'); if(!s) return;
       if(CYC && s.kind==='text' && (!s.refs||!s.refs.length)) idxs.push(ckCycleIndex(CYC.zohar,r.hd)); else refFallback=true; });
