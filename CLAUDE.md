@@ -177,17 +177,28 @@ in English as usual.
   capture's document clone, or a 65-page booklet takes 10+ minutes instead
   of ~75s - lazy-loaded from cdnjs via
   `loadScriptOnce`). Real page boxes are what allow the per-page header band
-  (parasha / medallion / day · subject). The Gemara is the real Vilna page
-  image from shas.org's Daf PDF API, rendered to an `<img>` with PDF.js;
-  shas.org has no CORS header, so the web build fetches the same-origin
-  `/shas-daf/<masechta>/<daf>/<amud>` Vercel rewrite (vercel.json) and
-  native uses CapacitorHttp; any failure falls back to the citation line.
-  Each fully-rendered amud gets a page of its own in print (`dafPage` in
-  `bkPaginate`): the scan (margins auto-trimmed, white paper multiplied to
-  the booklet ivory in `bkRenderPdfPage`) fills the body, only the header
-  band sits above it, narrowed to the scan's width via `--bk-daf-w`; the
-  Gemara section's title/divider are print-hidden (`dafSec`/`noPrint`
-  blocks); no credit line on the scan pages - see the license note below.
+  (parasha / medallion / day · subject).
+  **The Gemara prints as real text, no Rashi (owner-approved design,
+  2026-10, replacing the scanned shas.org Vilna page - that whole fetch/
+  PDF.js/scan-page pipeline is gone).** `bkSectionBody`'s `kind==='daf'`
+  branch reads the same per-amud segments as the live Daf Yomi reader
+  (`ckDafRec(dIdx).g[side]`, `data/chok-daf/`) into one
+  `.bk-text.bk-prose.bk-cols` two-column flow per amud - the Zohar/Tanya
+  path, so ink (true black in B&W) and the 17.5px body size come from the
+  shared cascade; never add a Gemara-specific colour/size rule. Each amud
+  opens with the "גְּמָרָא" cartouche (`.bk-sec`) and a `.bk-sub` line
+  "דַּף הַיּוֹמִי · מַסֶּכֶת X · דַּף N ע״א" (`ckDafLabel` + `CK_AMUD`; Shekalim/
+  Kinnim/Middot have no amud split: one sub-line, no amud, plus the
+  record's `src`). The first title is bkBlocks'/bkShabbatBlocks' own section
+  heading (no `.bk-sec-src`); every later amud repeats title + sub-line as
+  `t:'sec'` (`noToc:1` - one TOC row per day) + `t:'sub'` blocks - **that
+  classification is required**: it is what makes `keepMove()` keep the
+  amud-transition header with `BK_MIN_LINES` of text (filed as a plain
+  atom it gets stranded at a page foot with ~3 lines - reproduced on
+  Toldot). Weekdays and the Shabbat block both go through it. A day whose
+  daf record is missing falls back to the citation line (data/chok-daf
+  covers all 2,711 dapim, so this shouldn't happen). The `/shas-daf`
+  Vercel rewrite in vercel.json is now unused by the app.
   **The printed booklet is the whole Chok LeYisrael week** of the selected
   date, while the on-screen `.bk-sheet` still shows just that day:
   `bkWeekRows(date)` walks `CHOK_ROWS` (Sun-Thu, Leil Shishi, Fri), each
@@ -197,8 +208,7 @@ in English as usual.
   line shows Friday's, with "(בָּעֶרֶב)"); `bkWeekBlocks` concatenates
   `bkBlocks(date,{day,week:1,brk})` (each day after the first starts a
   page, no per-day Ben Ish Chai or license blocks); week-level
-  `bkWeekReady`/`ensureBookletWeek`/`bkWeekDafs`/`ensureBkWeekDafs`/
-  `bkWeekDafPending` gate the reader, print and PDF; the cover shows the
+  `bkWeekReady`/`ensureBookletWeek` gate the reader, print and PDF; the cover shows the
   full calendar week Sunday-Shabbat inclusive (`bkHebRange`; owner's call -
   even though printed days stop at Friday); TOC day subtitles are the day's Hebrew
   date. Ben Ish Chai closes the week once, per track via
@@ -264,8 +274,8 @@ in English as usual.
   the cascade - BIC font sizes changed, the page count moved), and (2) the
   colours inside generated pages (`bkBwDom`: fill/stroke/stop-color/style
   attributes). Never a CSS filter (html2canvas ignores filters; print would
-  rasterize). Daf scans and the QR are tinted to the mode's paper and
-  cached per mode (`bkDafKey` '|bw' suffix, `bkQrKey`). The earlier weekly
+  rasterize). The QR is tinted to the mode's paper and
+  cached per mode (`bkQrKey`). The earlier weekly
   colour-rotation idea (gold/blue/pink/green/orange/purple) is dropped.
   Page order: cover, rights/contact, the Rav's honour page (`bkRavHtml`,
   `BK_RAV` - owner's text verbatim), a Rabbi's own full memorial page when
@@ -366,17 +376,18 @@ in English as usual.
   names in `BK_DEDICATION` - the owner's confirmed names, verbatim, never
   "fix" them; empty = a blank line. And a
   back page (`bkBackHtml`, credits/distribution text + QR, the support
-  contact block (`BK_UI.contactH`/`contact`, info@bet-el.be), plus - whenever
-  the booklet carries a daf scan - the small-print legal block with
+  contact block (`BK_UI.contactH`/`contact`, info@bet-el.be), plus - only if
+  a booklet ever carries a daf scan again (none does since the Gemara
+  became text) - the small-print legal block with
   `BK_SHAS_CREDIT` and the full `BK_HB_LICENSE`). The QR is the
   App Store link from `appQrSrc()` (shared with `appQrImage()`); QR and logo
   are preloaded as data: URLs (`bkImgData`/`ensureBkMatter`) so print and
   html2canvas never wait on a cross-origin image, and print/PDF wait for
-  them like they wait for the daf (`bkPending`). After the dedication, a
+  them (`bkPending`). After the dedication, a
   contents page (`bkTocHtml`): by day - each day, then its subjects with the
   page each starts on (`bkPaginate` records each day/subject heading's DOM
-  node in `meta.toc`, or the first scan page for a print-hidden Gemara
-  title, and resolves it to its final page's `data-no` - a heading carried
+  node in `meta.toc` (a heading block with `noToc` - the Gemara's
+  repeated per-amud title - is skipped), and resolves it to its final page's `data-no` - a heading carried
   to the next page moves with its node, so the number is exact) - then the
   Ben Ish Chai year 1/2 entries as placeholders ("בְּהֲכָנָה", no content
   or page yet). The contents page is a book's list, never a table grid
@@ -402,8 +413,7 @@ in English as usual.
   never invented claims), dedication, contents, the day's pages (Musar
   inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
   numbered on from the cover (cover 1, rights 2, dedication 3, contents 4,
-  first day page 5). Every day page (incl. the Gemara scan pages, where it
-  narrows to the scan's width) opens with the running header band
+  first day page 5). Every day page opens with the running header band
   (`bkPageHtml` → `bkBandSvg`, after the reference's own running head): a
   light band between two small embossed lace ribbons (`ornLaceRibbon`), a
   filigree crest above and below the gold Stam "בית אל" in its centre
@@ -417,10 +427,10 @@ in English as usual.
   only; the Zohar is ONE flow with block paragraphs so it runs down the
   columns continuously; no rule between the columns - the owner wants the
   gap alone).
-  `BK_SHAS_CREDIT` and `BK_HB_LICENSE` are license requirements - never
-  drop them. In print they appear once, together, on the back page (owner's
-  decision, replacing a per-scan credit line); on screen the reader keeps
-  them beside each scan / at the end of the day (`noPrint` blocks).
+  `BK_SHAS_CREDIT` and `BK_HB_LICENSE` are license requirements of the
+  shas.org scans - never drop them if a scan is ever printed again. They
+  appeared once, together, on the back page; with the Gemara now text, no
+  booklet carries a scan, so neither prints.
   Interior richness (after the reference booklet's own reading pages):
   each subject title is a framed cartouche on tapered gold rules
   (`.bk-page .bk-sec-t` + ::before/::after; the "בֵּיאוּר" divider `.bk-bdiv`

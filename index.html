@@ -1509,11 +1509,6 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-cn{font-family:var(--font-sacred);font-size:.7em;font-weight:700;color:var(--bk-gold-deep);margin-inline-end:3px}
 .bk-comm b{font-weight:700}
 .bk-cite{font-family:var(--font-sacred);font-size:16px;text-align:center;padding:8px 0}
-.bk-cite.bk-loading{color:var(--bk-muted)}
-.bk-daf{margin:6px 0 10px;text-align:center}
-.bk-daf img{display:block;width:100%;height:auto;margin:0 auto;border:1px solid var(--bk-line);background:#fff}
-.bk-daf figcaption{margin-top:4px}
-.bk-daf-cite{font-family:var(--font-sacred);font-size:13px;color:var(--bk-gold-deep)}
 .bk-credit,.bk-license{font-family:Georgia,"Times New Roman",serif;font-size:9.5px;line-height:1.45;color:var(--bk-muted);text-align:center}
 .bk-license{text-align:justify;margin-top:6px}
 /* the page boxes: laid out at real A5 size (148x210mm - the printed
@@ -1610,27 +1605,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    .bk-text): the columns change the layout, never the text size. */
 .bk-page .bk-cols{column-count:2;column-gap:7mm;column-fill:balance}
 .bk-page .bk-cols.bk-prose .bk-p+.bk-p{margin-top:4px}
-.bk-page .bk-daf img{width:auto;max-width:100%;max-height:150mm}
 .bk-page .bk-credit,.bk-page .bk-license{font-size:7px}
-/* a Gemara page: the scanned Vilna amud IS the page. Only the fixed header
-   band stays above it; the band is narrowed to the scan's own drawn width
-   (bkPaginate sets --bk-daf-w) so band and scan share one column, and the
-   scan's white paper is multiplied into the booklet's ivory at render time
-   (bkRenderPdfPage) so it reads as the same sheet, framed by the band's
-   gold hairline. The shas.org credit and the HebrewBooks.org license are
-   printed once, on the back page (owner's decision), not on each scan. */
-.bk-page.bk-dafpage{padding:7mm 7mm 5mm}
-.bk-page.bk-dafpage::after{inset:3.5mm}
-.bk-dafpage .bk-ph,.bk-dafpage .bk-pf{width:var(--bk-daf-w,100%);margin-inline:auto}
-.bk-dafpage .bk-ph{margin-bottom:0}
-.bk-dafpage .bk-strip{margin-bottom:2mm}
-.bk-dafpage .bk-ph:not(.bk-band) .bk-ph-row{padding-bottom:2mm;border-bottom:1px solid var(--bk-line)}
-.bk-dafpage .bk-ph.bk-band{margin-bottom:1.5mm}
-.bk-dafpage .bk-pbody{display:flex;justify-content:center;align-items:flex-start}
-.bk-dafpage .bk-dafimg{display:block;border:none;border-bottom:1px solid var(--bk-line)}
-.bk-dafpage .bk-pf{padding-top:1mm;display:flex;align-items:center;gap:6px}
-.bk-dafpage .bk-pf span{flex:none}
-.bk-dafpage .bk-pf .bk-credit{flex:1;font-size:5.6px;line-height:1.3;text-align:left;margin:0}
 /* front and back matter (cover, dedication, back page) - the same page
    frame, header strip and medallion as the day pages, centred as a column */
 .bk-matter .bk-pbody{display:flex;flex-direction:column;align-items:center;text-align:center}
@@ -5800,7 +5775,7 @@ const BK_UI={
       backMade:['נוצר מתוך אפליקציית תמיד','כל הטקסטים על פי המקורות המובאים באפליקציה','כל הזכויות שמורות © התמיד'],
       backDist:'ניתן להפיץ חוברת זו לזיכוי הרבים, ובלבד שלא ייעשה בה כל שינוי בתוכן או בעריכה.',
       parasha:'פָּרָשַׁת', prevDay:'הַיּוֹם הַקּוֹדֵם', nextDay:'הַיּוֹם הַבָּא', today:'הַיּוֹם', notToday:'לֹא הַיּוֹם הַנּוֹכְחִי',
-      contents:'תֹּכֶן הַיּוֹם', empty:'אֵין לִמּוּד לַיּוֹם הַזֶּה', dafWait:'מַמְתִּין לְדַף הַגְּמָרָא…', loading:'טוֹעֵן…',
+      contents:'תֹּכֶן הַיּוֹם', empty:'אֵין לִמּוּד לַיּוֹם הַזֶּה', loading:'טוֹעֵן…',
       pdfMaking:'מֵכִין PDF…', pdfPage:'עַמּוּד', pdfOf:'מִתּוֹךְ', pdfFail:'שְׁגִיאָה בִּיצִירַת הַ-PDF', pdfSaved:'הַקֹּבֶץ נִשְׁמַר',
       license:'רִשְׁיוֹן דַּפֵּי הַגְּמָרָא'},
   en:{title:'Study Booklet', brand:'הַתָּמִיד', brandStam:'התמיד', open:'Open the booklet', print:'Print', pdf:'Download PDF',
@@ -5811,7 +5786,7 @@ const BK_UI={
       backMade:['Created with the Tamid app','All texts follow the sources cited in the app','All rights reserved © HaTamid'],
       backDist:'This booklet may be freely distributed for the merit of the public, provided nothing in its content or editing is changed.',
       parasha:'Parashat', prevDay:'Previous day', nextDay:'Next day', today:'Today', notToday:'Not today',
-      contents:"Today's contents", empty:'No study for this day', dafWait:'Waiting for the Gemara page…', loading:'Loading…',
+      contents:"Today's contents", empty:'No study for this day', loading:'Loading…',
       pdfMaking:'Preparing PDF…', pdfPage:'page', pdfOf:'of', pdfFail:'Could not create the PDF', pdfSaved:'File saved',
       license:'Gemara page license'},
 };
@@ -5832,8 +5807,6 @@ function bkDate(){ return BK_DATE||bkDefaultDate(); }
 function bkStepDate(from,dir){ let d=addDays(from,dir); if(d.getDay()===6) d=addDays(d,dir); return d; }
 function openBooklet(){
   BK_DATE=null; BK_ACTION=null;
-  // a daf that failed to load last time gets a fresh try
-  Object.keys(BK_DAF).forEach(k=>{ if(BK_DAF[k].state==='fail') delete BK_DAF[k]; });
   Object.keys(BK_IMG).forEach(k=>{ if(BK_IMG[k].state==='fail') delete BK_IMG[k]; });
   if(BK_FONT.state==='fail') BK_FONT.state=null;
   BK_MUSAR_FAIL=false; BK_BIC_FAIL=false;
@@ -5937,31 +5910,13 @@ function ensureBookletWeek(date){
   if(sd) tasks.push(ensureBkShabbat(new HDate(sd)));
   return Promise.all(tasks);
 }
-function bkWeekDafPending(date){ return bkWeekDafs(date).some(i=>bkDafPending(i)); }
-function ensureBkWeekDafs(date){ return Promise.all(bkWeekDafs(date).map(i=>ensureBkDaf(i))); }
 function bkParashaLine(slot){ return slot?bkUI().parasha+' '+parshaName(slot.key):''; }
 
-/* ---------- the daf: the real scanned Vilna page from shas.org ----------
-   The page shown is the same perpetual-cycle daf the reader shows (CYC.daf
-   via ckCycleIndex, see chokSectionsFor's gemara branch), fetched as a PDF
-   from shas.org's Daf PDF API and drawn to an <img> with PDF.js so it sits
-   in the page flow, prints, and survives html2canvas for the PDF export.
-   shas.org sends no CORS header, so the browser can't read it directly:
-   the web build goes through a same-origin Vercel rewrite (vercel.json,
-   /shas-daf/<masechta>/<daf>/<amud>), the native shells through
-   CapacitorHttp (a native request, not subject to CORS). Any failure (no
-   network, no proxy on a plain static server, an amud the tractate doesn't
-   have) falls back to the plain citation line - never a crash.
-   API keys use shas.org's own spelling; Kinnim, Tamid and Middot sit inside
-   the Meilah volume there, and this app's daf numbers for them are already
-   that volume's Vilna numbers, so their aliases map straight across. */
-const BK_SHAS_KEY={'Berakhot':'berachos','Shabbat':'shabbos','Eruvin':'eruvin','Pesachim':'pesachim','Shekalim':'shekalim',
-  'Yoma':'yoma','Sukkah':'sukkah','Beitzah':'beitzah','Rosh Hashanah':'rosh-hashanah','Taanit':'taanis','Megillah':'megillah',
-  'Moed Katan':'moed-katan','Chagigah':'chagigah','Yevamot':'yevamos','Ketubot':'kesubos','Nedarim':'nedarim','Nazir':'nazir',
-  'Sotah':'sotah','Gittin':'gittin','Kiddushin':'kiddushin','Bava Kamma':'bava-kamma','Bava Metzia':'bava-metzia',
-  'Bava Batra':'bava-basra','Sanhedrin':'sanhedrin','Makkot':'makkos','Shevuot':'shevuos','Avodah Zarah':'avodah-zarah',
-  'Horayot':'horayos','Zevachim':'zevachim','Menachot':'menachos','Chullin':'chullin','Bekhorot':'bechoros','Arakhin':'arachin',
-  'Temurah':'temurah','Keritot':'kereisos','Meilah':'meilah','Kinnim':'kinim','Tamid':'tamid','Middot':'middos','Niddah':'niddah'};
+/* The Gemara prints as real text (bkSectionBody's daf branch); the
+   scanned Vilna pages from shas.org it used to carry are gone, and with
+   them the shas.org fetch/PDF.js pipeline. The two notices below stay
+   defined for the back page's scan branch (bkBackHtml(hasScan)), which no
+   booklet takes any more. */
 /* Required by shas.org / HebrewBooks.org for free non-commercial
    redistribution: this credit (shas.org's own attribution wording,
    verbatim) and the full HebrewBooks.org Paragraph 1 license text. In the
@@ -5970,9 +5925,7 @@ const BK_SHAS_KEY={'Berakhot':'berachos','Shabbat':'shabbos','Eruvin':'eruvin','
    the end of the day. Do not shorten or drop either. */
 const BK_SHAS_CREDIT='Scanned Shas provided courtesy of shas.org (http://shas.org/dafviewer), hebrewbooks.org (https://www.hebrewbooks.org/shas) and Moznaim (הוצאת ח. וגשל); Redistributed free for non-commercial, educational use under the HebrewBooks License (https://web.archive.org/web/20101028043253/http://hebrewbooks.org/media/terms.html).';
 const BK_HB_LICENSE='1. Limited License: The Society for the Preservation of Hebrew Books hereby grants you a limited, nonexclusive right and license, solely for your personal use, to use the Site view, download, and print the Publications, subject to the following restrictions: (a) No commercial use: a Publication may be used for personal use (including educational use) and not for any commercial purpose; (b) No resale: you may not sell a copy of any Publication (or bundle any Publication with any other product that is sold for a fee), and you may not charge any fee for the use of any Publication; and (c) Local Law: you may not use any Publication in violation of applicable law. Subject to applicable law, you may distribute print or electronic copies of any Publication to any third party free of charge for personal use only and for use in accordance with the terms of this license. If you distribute copies of the Publications to any third party, you must retain any attribution notices that appear in such copies, and you must provide the third party with a complete copy of the limited license set out in this Paragraph 1 of these Terms of Use, including the restrictions on further distribution. Aside from the limited license granted under Paragraph 1 of these Terms of Use, you may not sell, license, or otherwise redistribute the Publications or any material that is provided on the Site and nothing contained herein shall be construed as conferring to you, by implication or otherwise, any license or right to use any copyright, patent, trademark, or other proprietary right of the Society or any third party.';
-const BK_DAF={};   // 'masechta/daf/amud[|bw]' -> {state:'loading'|'ok'|'fail', p, src, w, h}
-/* the scan is tinted to the booklet's paper, so each colour mode keeps its own */
-function bkDafKey(e,side){ return BK_SHAS_KEY[e.t]+'/'+e.daf+'/'+side+(BK_BW?'|bw':''); }
+
 
 /* ================= HILLULOT (yahrzeits of tzaddikim) =================
    Ported verbatim from main (the owner's calendar day-card feature,
@@ -6099,21 +6052,11 @@ function bkDafSides(i){
   const s=['a','b'].filter(x=>g[x]&&g[x].length);
   return s.length?s:['a','b'];
 }
-function bkDafFull(i){
-  const e=ckDafEntry(i); if(!BK_SHAS_KEY[e.t]) return false;
-  return bkDafSides(i).every(side=>{ const st=BK_DAF[bkDafKey(e,side)]; return !!st&&st.state==='ok'; });
-}
-function bkDafPending(i){
-  const e=ckDafEntry(i); if(!BK_SHAS_KEY[e.t]) return false;
-  return bkDafSides(i).some(side=>{ const st=BK_DAF[bkDafKey(e,side)]; return !st||st.state==='loading'; });
-}
 /* External libraries, fetched only when the booklet actually needs them -
    never at boot, and never as a static <script> tag (see
    scripts/check-blocking-resources.mjs). A failed load clears its promise
    so the next attempt retries instead of staying poisoned. */
 const BK_LIB={
-  pdfjs:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-  pdfjsWorker:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
   html2canvas:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
   jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
 };
@@ -6127,79 +6070,12 @@ function loadScriptOnce(src){
   }).catch(e=>{ delete scriptLoadPromises[src]; throw e; });
   return scriptLoadPromises[src];
 }
-function ensurePdfJs(){
-  return loadScriptOnce(BK_LIB.pdfjs).then(()=>{
-    const lib=window.pdfjsLib||window['pdfjs-dist/build/pdf'];
-    if(!lib) throw new Error('pdf.js missing');
-    lib.GlobalWorkerOptions.workerSrc=BK_LIB.pdfjsWorker;
-    return lib;
-  });
-}
-function bkNativeHttp(){
-  const C=window.Capacitor;
-  return (C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.CapacitorHttp) || null;
-}
-function bkFetchDafPdf(key,daf,amud){
-  const http=bkNativeHttp();
-  if(http){
-    const url='https://www.shas.org/daf-pdf/api/?masechta='+encodeURIComponent(key)+'&daf='+daf+'&amud='+amud;
-    return http.get({url, responseType:'arraybuffer'}).then(r=>{
-      if(r.status!==200) throw new Error('daf http '+r.status);
-      if(typeof r.data==='string'){ const bin=atob(r.data), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
-      return new Uint8Array(r.data);
-    });
-  }
-  return fetch('shas-daf/'+encodeURIComponent(key)+'/'+daf+'/'+amud).then(r=>{
-    if(!r.ok || !/pdf/i.test(r.headers.get('content-type')||'')) throw new Error('daf http '+r.status);
-    return r.arrayBuffer();
-  }).then(b=>new Uint8Array(b));
-}
-function bkRenderPdfPage(bytes){
-  return ensurePdfJs().then(lib=>lib.getDocument({data:bytes}).promise).then(pdf=>pdf.getPage(1)).then(pg=>{
-    const vp=pg.getViewport({scale:2});
-    const cv=document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
-    const ctx=cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
-    return pg.render({canvasContext:ctx, viewport:vp}).promise.then(()=>{
-      /* trim the scan's own blank paper margin, so the printed text block
-         (not the scan's white border) is what fills the booklet page and
-         lines up with its header band */
-      const W=cv.width, H=cv.height, px=ctx.getImageData(0,0,W,H).data;
-      const ink=(x,y)=>{ const i=(y*W+x)*4; return px[i]+px[i+1]+px[i+2]<540; };
-      let x0=W, x1=-1, y0=H, y1=-1;
-      for(let y=0;y<H;y+=2){ let n=0; for(let x=0;x<W;x+=2) if(ink(x,y)){ n++; if(x<x0)x0=x; if(x>x1)x1=x; } if(n>2){ if(y<y0)y0=y; y1=y; } }
-      let out=cv;
-      if(x1>x0 && y1>y0){
-        const pad=Math.round(W*0.012);
-        x0=Math.max(0,x0-pad); y0=Math.max(0,y0-pad); x1=Math.min(W,x1+pad); y1=Math.min(H,y1+pad);
-        out=document.createElement('canvas'); out.width=x1-x0; out.height=y1-y0;
-        out.getContext('2d').drawImage(cv,x0,y0,out.width,out.height,0,0,out.width,out.height);
-      }
-      /* tone the scan's white paper to the booklet's own ivory (ink stays
-         ink) so the Gemara page reads as the same sheet as its header band */
-      const oc=out.getContext('2d');
-      oc.globalCompositeOperation='multiply'; oc.fillStyle=bkPaperHex(); oc.fillRect(0,0,out.width,out.height);
-      oc.globalCompositeOperation='source-over';
-      return {src:out.toDataURL('image/jpeg',0.88), w:out.width, h:out.height};
-    });
-  });
-}
-function ensureBkDaf(i){
-  const e=ckDafEntry(i); if(!BK_SHAS_KEY[e.t]) return Promise.resolve();
-  return Promise.all(bkDafSides(i).map(side=>{
-    const k=bkDafKey(e,side);
-    if(BK_DAF[k]) return BK_DAF[k].p;
-    const st={state:'loading'}; BK_DAF[k]=st;
-    st.p=bkFetchDafPdf(BK_SHAS_KEY[e.t],e.daf,side).then(bkRenderPdfPage)
-      .then(r=>{ Object.assign(st,r); st.state='ok'; })
-      .catch(err=>{ st.state='fail'; console.warn('[booklet] daf page unavailable, showing the citation instead:',k,err&&err.message); });
-    return st.p;
-  }));
-}
+
 
 /* ---------- the day as a list of blocks ----------
    'day'/'sec'/'sub' headings, 'rule' (the divider - only BETWEEN subjects,
-   never between verses), 'atom' (anything unbreakable: a daf image, a
-   citation line) and 'flow' (a paragraph of inline pieces, each with its
+   never between verses), 'atom' (anything unbreakable: a citation line,
+   a framed block) and 'flow' (a paragraph of inline pieces, each with its
    number - Tehillim, Rambam and Mishnah run on as in a printed sefer (Rambam
    and the Zohar in two columns on the printed page, .bk-cols), while
    Torah / Neviim / Ketuvim give every verse a flow of its own, .bk-vline -
@@ -6270,13 +6146,32 @@ function bkSectionBody(s,slot,B){
     return;
   }
   if(s.kind==='daf'){
-    const e=ckDafEntry(s.dIdx);
-    bkDafSides(s.dIdx).forEach(side=>{
-      const cite=ckDafLabel(s.dIdx)+' · '+CK_AMUD[side];
-      const st=BK_SHAS_KEY[e.t]?BK_DAF[bkDafKey(e,side)]:null;
-      if(st&&st.state==='ok') B.push({t:'atom', img:1, daf:{src:st.src, w:st.w, h:st.h, amud:CK_AMUD[side]}, html:`<figure class="bk-daf"><img src="${st.src}" width="${st.w}" height="${st.h}" alt=""/><figcaption><div class="bk-daf-cite">${cite}</div><div class="bk-credit" dir="ltr">${BK_SHAS_CREDIT}</div></figcaption></figure>`});
-      else if(st&&st.state==='loading') B.push({t:'atom', html:`<div class="bk-cite bk-loading">${cite} · ${bkUI().loading}</div>`});
-      else B.push({t:'atom', html:`<div class="bk-cite">${cite}</div>`});
+    /* The Gemara prints as real text (owner-approved design, replacing the
+       scanned Vilna page): the same per-amud segments the live Daf Yomi
+       reader shows (ckDafRec(i).g[side], data/chok-daf/), no Rashi, as one
+       two-column prose flow per amud - the exact .bk-text.bk-prose.bk-cols
+       path the Zohar/Tanya use, so ink and size come from the shared
+       cascade. Each amud opens with the section title (the caller pushes
+       the first one) and a "דַּף הַיּוֹמִי · מַסֶּכֶת X · דַּף N ע״א" sub-line;
+       every amud after the first repeats BOTH, as real 'sec' + 'sub'
+       blocks - that classification is what makes bkPaginate's keepMove()
+       keep them with BK_MIN_LINES / BK_SUB_MIN_LINES of text (a heading
+       filed as a plain atom gets no such protection). Shekalim (Yerushalmi),
+       Kinnim and Middot have no amud split: one sub-line, no amud. */
+    const e=ckDafEntry(s.dIdx), rec=ckDafRec(s.dIdx), g=(rec&&rec.g)||{};
+    const sides=['a','b'].filter(x=>g[x]&&g[x].length);
+    const subTxt=side=>'דַּף הַיּוֹמִי · '+ckDafLabel(s.dIdx)+(e.whole?'':' '+CK_AMUD[side])+(rec&&rec.src?' · '+rec.src:'');
+    if(!sides.length){
+      /* text genuinely unavailable (should not happen - data/chok-daf
+         covers the whole Shas): the citation line alone, never a crash */
+      B.push({t:'atom', html:`<div class="bk-cite">${ckDafLabel(s.dIdx)}</div>`});
+      return;
+    }
+    const groups=e.whole ? [{side:'a', segs:sides.reduce((a,x)=>a.concat(g[x]),[])}] : sides.map(x=>({side:x, segs:g[x]}));
+    groups.forEach((gr,k)=>{
+      if(k) B.push({t:'sec', label:s.he, noToc:1, html:`<div class="bk-sec"><div class="bk-sec-t">${s.he}</div></div>`});
+      B.push({t:'sub', html:`<div class="bk-sub">${subTxt(gr.side)}</div>`});
+      B.push({t:'flow', cls:'bk-text bk-prose bk-cols', pieces:gr.segs.map(bkP)});
     });
     return;
   }
@@ -6335,11 +6230,7 @@ function bkBlocks(date,opt){
      headings and doesn't stop the header label from following them */
   if(hillHtml) B.push({t:'atom', head:1, html:hillHtml});
   secs.forEach((s,si)=>{
-    /* a Gemara whose amudim all rendered becomes whole scanned pages in
-       print: its divider and title stay on screen only (the header band
-       names the subject there) */
-    const dafFull=s.kind==='daf' && bkDafFull(s.dIdx);
-    if(si) B.push({t:'rule', noPrint:dafFull, html:`<div class="bk-rule"><span>${ORN}</span></div>`});
+    if(si) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
     let src=chokSourceLine(s,hd), title=s.he, label=s.he;
     /* The Halacha (Rambam) cartouche names the book, then the hilchot and
        chapter, right in the heading itself (owner's call) - and so does
@@ -6348,8 +6239,8 @@ function bkBlocks(date,opt){
        chokSourceLine/chokRefLabel the reader itself uses) and Chassidut/
        Tanya (its own letter/section label). None of these get a separate
        `.bk-sec-src` line underneath any more - the reference lives in the
-       title, like Rambam's. Gemara stays as-is (plain reference line, no
-       real Gemara text yet - a separate future project, per the owner).
+       title, like Rambam's. The Gemara's title is the bare "גְּמָרָא": its
+       reference is the per-amud sub-line bkSectionBody prints under it.
        Torah/Leil Shishi's tzeruf, Mishnah and Tehillim each get their own,
        simpler heading (below) rather than this generic chapter:verse
        embed - see each branch's own comment. */
@@ -6377,7 +6268,8 @@ function bkBlocks(date,opt){
       title=title+' · '+bkTehillimRangeTxt(hd); src='';
     }
     else if(['neviim','ketuvim','haftarah','tanya'].includes(s.key)){ title=title+(src?' · '+src:''); src=''; }
-    B.push({t:'sec', label, dafSec:dafFull, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
+    else if(s.kind==='daf') src='';
+    B.push({t:'sec', label, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,slot,B);
     if(s.key==='halacha'){ bkMusarSection(hd,B); musarDone=true; }
   });
@@ -6613,10 +6505,8 @@ function bkPaginateBic(host,parts,meta,no,toc){
    weekday schedule: Tehillim (portionFor), Rambam/Zohar/Gemara (CYC, by
    ckRambamIndexes/ckCycleIndex - the same cycles ensureCycDay already loads
    for any date), Musar (ckMusarIndexes) and Chassidut/Tanya
-   (ckTanyaDayEntry). Gemara reuses the plain-citation-only fallback
-   already built into bkSectionBody's 'daf' handling (no scanned image for
-   this one extra slot - "leave Gemara as-is" is the owner's own call
-   anyway).
+   (ckTanyaDayEntry). Gemara prints exactly as on a weekday - the real
+   Daf Yomi text through bkSectionBody's 'daf' branch.
    Mishnah DOES get its own Shabbat slot, but it's a new, purpose-built
    cycle rather than CHOK.schedule's parasha+weekday mishnah_cycle (which
    has no Shabbat entry at all, and no authentic external "Shabbat
@@ -6698,6 +6588,7 @@ function bkShabbatBlocks(shabbatDate,B){
     let src=chokSourceLine(s,hd), title=s.he, label=s.he;
     if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
     else if(s.key==='tanya'){ title=title+(src?' · '+src:''); src=''; }
+    else if(s.kind==='daf') src='';   // the per-amud sub-line carries it (bkSectionBody)
     else if(s.key==='tehillim'){ title=title+' · '+bkTehillimRangeTxt(hd); src=''; }
     else if(s.key==='mishnah'){
       /* same pattern as the weekday Mishnah header (bkBlocks): the tractate
@@ -6734,8 +6625,7 @@ function bkBlockHtml(b){
    goes: headings are kept with at least a couple of lines after them, a
    divider never opens a page, and a flow that doesn't fit is split between
    its pieces - or, for one piece longer than the space left, between words
-   (never inside a word, so nikud always stays on its letter). A scanned
-   Gemara amud takes a page of its own, drawn as large as the page allows. */
+   (never inside a word, so nikud always stays on its letter). */
 function bkTextNodes(root){ const out=[], w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())) out.push(n); return out; }
 function bkWordCount(node){ return bkTextNodes(node).reduce((a,t)=>a+((t.data.match(/\S+/g)||[]).length),0); }
 /* keep only words [from,to) of a cloned piece, dropping elements left empty */
@@ -6814,7 +6704,7 @@ function bkPaginate(host,blocks,meta){
      then has to open a new page, they move over with it instead of being
      stranded at the foot of the old one. `filled` = real content already
      on this page (a page holding only moved-over headings is still fresh). */
-  let page=null, body=null, no=meta.startNo||0, dayLbl='', secLbl='', filled=false, pend=[], needNew=false, tocDaf='';
+  let page=null, body=null, no=meta.startNo||0, dayLbl='', secLbl='', filled=false, pend=[];
   /* a hard, whole-build time budget for the subject-boundary squeeze below
      (see its own comment) - reading body.scrollHeight/clientHeight forces a
      layout flush whose cost grows with how much of the document is already
@@ -6859,30 +6749,12 @@ function bkPaginate(host,blocks,meta){
   };
   const over=()=>body.scrollHeight>body.clientHeight+1;
   const relabel=()=>{ const l=page.querySelector('.bk-ph-lbl'); if(l) l.innerHTML=lbl(); };
-  /* one scanned amud = one page: the image scaled to the whole body, the
-     header band and footer narrowed to the image's drawn width (the scans'
-     credit and license are on the back page, bkBackHtml) */
-  const dafPage=d=>{
-    if(filled||body.childNodes.length){ pend=[]; newPage(); }
-    page.classList.add('bk-dafpage');
-    if(tocDaf){ toc.push({t:'sec', label:tocDaf, el:page}); tocDaf=''; }
-    const l=page.querySelector('.bk-ph-lbl'); if(l) l.innerHTML=[dayLbl,secLbl+' '+d.amud].filter(Boolean).join(' · ');
-    const img=el(`<img class="bk-dafimg" src="${d.src}" alt=""/>`); body.appendChild(img);
-    const a=d.h/d.w;
-    for(let k=0;k<2;k++){        // the footer's wrap depends on the width it is given
-      const W=body.clientWidth, H=body.clientHeight;
-      const w=Math.floor(H/W>=a ? W : H/a);
-      img.style.width=w+'px'; img.style.height=Math.floor(w*a)+'px';
-      page.style.setProperty('--bk-daf-w', w+'px');
-    }
-    filled=true; needNew=true;
-  };
   /* a day must not end with a near-empty page (a line or two carried over):
      try setting the previous page a little tighter (.bk-tight) so the
      carried lines fit back on it; if they don't, nothing changes */
   const pullBack=()=>{
     const prev=page&&page.previousElementSibling;
-    if(!prev||!prev.classList.contains('bk-page')||/bk-dafpage|bk-matter/.test(prev.className)||page.classList.contains('bk-dafpage')) return;
+    if(!prev||!prev.classList.contains('bk-page')||prev.classList.contains('bk-matter')) return;
     if(body.querySelector('.bk-sec,.bk-day,.bk-sub,.bk-mn')||!body.lastElementChild) return;
     if(bkLinesAfterTop(body)>BK_PULL_LINES) return;
     const pbody=prev.querySelector('.bk-pbody'), moves=[];
@@ -6920,16 +6792,13 @@ function bkPaginate(host,blocks,meta){
     if(b.t==='day'){ dayLbl=b.label; secLbl=''; }
     if(b.t==='sec') secLbl=b.label;
     if(b.noPrint) return;
-    if(b.brk && (filled||body.childNodes.length)){ pullBack(); pend=[]; needNew=false; newPage(); }
-    if(b.dafSec){ pend=[]; tocDaf=b.label; return; }  // the scans' own pages name the subject
-    if(b.t==='atom' && b.daf){ dafPage(b.daf); return; }
-    if(needNew){ if(b.t==='rule') return; needNew=false; newPage(); }
+    if(b.brk && (filled||body.childNodes.length)){ pullBack(); pend=[]; newPage(); }
     const heading=(b.t==='day'||b.t==='sec'||b.t==='sub'||!!b.head);
     if(b.t!=='flow'){
       if(b.t==='rule' && !filled) return;             // a divider never opens a page
       const n=el(b.html);
       body.appendChild(n);
-      if(b.t==='day'||b.t==='sec') toc.push({t:b.t, label:b.label, sub:b.tocSub, el:n, night:b.night});
+      if((b.t==='day'||b.t==='sec') && !b.noToc) toc.push({t:b.t, label:b.label, sub:b.tocSub, el:n, night:b.night});
       if(over()){
         body.removeChild(n);
         if(b.t==='rule') return;
@@ -8137,7 +8006,7 @@ function bkBuildPrint(date){
 function bkFixOverflow(host){
   host.querySelectorAll('.bk-pbody').forEach(body=>{
     const page=body.closest('.bk-page');
-    if(!page||page.classList.contains('bk-dafpage')) return;
+    if(!page) return;
     for(const c of ['bk-tight','bk-tighter']){
       if(body.scrollHeight<=body.clientHeight+1) return;
       page.classList.add(c);
@@ -8212,7 +8081,6 @@ function renderBookletReader(){
   }
   const {slot,secs}=bkSections(date);
   if(!slot){ toast(t.empty); return go('bookletHome'); }
-  ensureBkWeekDafs(date);   // starts every day's daf fetch (cached), so the blocks below show "loading"
   ensureBkMatter();
   app.innerHTML=`
   <div class="reader view bk-view">
@@ -8248,23 +8116,14 @@ function renderBookletReader(){
   });
   settle();
   if(bkMatterPending()) ensureBkMatter().then(()=>{ if(same()) settle(); });
-  if(bkWeekDafPending(date)){
-    ensureBkWeekDafs(date).then(()=>{
-      if(!same()) return;
-      const sheet=app.querySelector('.bk-sheet');
-      if(sheet){ sheet.innerHTML=bkBlocks(date).map(bkBlockHtml).join(''); bkBwDom(sheet); }
-      settle();
-    });
-  }
 }
-/* Print and PDF both wait for the daf page (it changes the pagination),
-   and both use the same #bkPrint pages. */
+/* Print and PDF both wait for the front/back matter (font, logo, QR), and
+   both use the same #bkPrint pages. */
 function bkPending(date){
-  return bkWeekDafPending(date) || bkMatterPending();
+  return bkMatterPending();
 }
 function bkRun(action){
   const date=bkDate();
-  if(bkWeekDafPending(date)){ BK_ACTION=action; toast(bkUI().dafWait); return; }
   if(bkMatterPending()){ BK_ACTION=action; toast(bkUI().loading); return; }
   const host=document.getElementById('bkPrint');
   if(!host) return;

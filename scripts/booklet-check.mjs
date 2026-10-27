@@ -1,14 +1,12 @@
-// Study-booklet check: opens the booklet for a faked date, waits for the real
-// shas.org daf page to render, and captures the on-screen view, the
-// print-media view, Chrome's own print output (page.pdf - the same pipeline
+// Study-booklet check: opens the booklet for a faked date, waits for the
+// whole week to build, and captures the on-screen view, the print-media
+// view, Chrome's own print output (page.pdf - the same pipeline
 // window.print() uses), one PNG per printed A5 page (cover, dedication, the
-// day, back page) and the in-app "PDF" export. Also re-runs the day with
-// no daf proxy at all, to prove the plain-citation fallback doesn't throw.
+// days, back page) and the in-app "PDF" export. The Gemara prints as real
+// Daf Yomi text (two columns, a title + "דַּף הַיּוֹמִי" sub-line per amud).
+// Then steps through neighbouring days to prove nothing throws.
 //
-// Needs the local server on :8899 (npm run serve:local). The Vercel rewrite
-// /shas-daf/<masechta>/<daf>/<amud> (vercel.json) does not exist on that
-// plain static server, so it is emulated here with page.route, fetching the
-// same shas.org URL the rewrite points at.
+// Needs the local server on :8899 (npm run serve:local).
 //
 //   node scripts/booklet-check.mjs [YYYY-MM-DD] [outDir]
 import { chromium } from 'playwright';
@@ -28,15 +26,10 @@ mkdirSync(OUT, { recursive: true });
 const b = await chromium.launch({ executablePath: CHROME_PATH });
 const errs = [];
 
-async function openCtx({ withDafProxy }) {
-  // serviceWorkers:'block' - sw.js intercepts every same-origin GET (including the
-  // emulated /shas-daf/<masechta>/<daf>/<amud> proxy path) and re-issues it with the
-  // browser's own fetch() from INSIDE the service worker. That fetch never goes
-  // through Playwright's ctx.route() the way a page-initiated request does (observed:
-  // all 12 daf fetches failing with "bw daf http 404" even though the exact same
-  // route(...).fetch({url}) call succeeds, repeatedly, both alone and fired
-  // concurrently, the instant the service worker is kept out of the picture) - a false
-  // "no daf image rendered" failure unrelated to the page's own content. Blocking SW
+async function openCtx() {
+  // serviceWorkers:'block' - sw.js intercepts every same-origin GET and re-issues it
+  // with the browser's own fetch() from INSIDE the service worker, which never goes
+  // through Playwright's ctx.route() the way a page-initiated request does. Blocking SW
   // registration here only affects this check's own isolated context, never real users.
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, timezoneId: 'Asia/Jerusalem', acceptDownloads: true, serviceWorkers: 'block' });
   await ctx.addInitScript(({ iso }) => {
@@ -61,14 +54,6 @@ async function openCtx({ withDafProxy }) {
       try { await route.fulfill({ response: await route.fetch() }); } catch (e) { await route.abort(); }
     });
   }
-  if (withDafProxy) {
-    await ctx.route('**/shas-daf/**', async route => {
-      const m = /\/shas-daf\/([^/]+)\/(\d+)\/([ab])/.exec(route.request().url());
-      const url = `https://www.shas.org/daf-pdf/api/?masechta=${m[1]}&daf=${m[2]}&amud=${m[3]}`;
-      try { await route.fulfill({ response: await route.fetch({ url }) }); }
-      catch (e) { errs.push('PROXY EMULATION: ' + e.message); await route.abort(); }
-    });
-  }
   const p = await ctx.newPage();
   p.on('pageerror', e => errs.push('PAGEERROR: ' + String(e).slice(0, 500)));
   p.on('console', m => {
@@ -82,9 +67,9 @@ async function openCtx({ withDafProxy }) {
 }
 const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms, polling: 250 });
 
-// ---- 1. full path with the daf proxy ----
+// ---- 1. the full path ----
 {
-  const { ctx, p } = await openCtx({ withDafProxy: true });
+  const { ctx, p } = await openCtx();
   await p.evaluate(() => window.go('home'));
   await waitFor(p, () => !!document.getElementById('homeBookletCard'));
   await p.evaluate(() => document.getElementById('homeBookletCard').scrollIntoView({ block: 'center' }));
@@ -95,14 +80,14 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   await p.screenshot({ path: `${OUT}/1-booklet-home.png`, fullPage: true });
   await p.evaluate(() => document.getElementById('bkOpenBtn').click());
   await waitFor(p, () => !!document.querySelector('.bk-sheet'));
-  // the printed booklet is the whole week: wait for every day's daf
-  await waitFor(p, () => !document.querySelector('.bk-sheet .bk-loading') && !document.querySelector('#bkPrint .bk-loading') && document.querySelectorAll('#bkPrint .bk-page').length > 0, 300000);
+  // the printed booklet is the whole week: wait for its back page
+  await waitFor(p, () => !!document.querySelector('#bkPrint .bk-backpage'), 300000);
   await p.waitForTimeout(1500);
   const info = await p.evaluate(() => ({
     sections: [...document.querySelectorAll('.bk-sheet .bk-sec-t')].map(e => e.textContent),
     sources: [...document.querySelectorAll('.bk-sheet .bk-sec-src')].map(e => e.textContent),
-    dafImgs: document.querySelectorAll('.bk-sheet .bk-daf img').length,
-    printDafImgs: document.querySelectorAll('#bkPrint .bk-dafpage img').length,
+    // the Gemara: one two-column text flow per amud, each opened by a title + "דַּף הַיּוֹמִי" sub-line
+    amudHeads: [...document.querySelectorAll('#bkPrint .bk-sub')].filter(e => /^דַּף הַיּוֹמִי/.test(e.textContent.trim())).map(e => ({ t: e.textContent.trim(), title: !!(e.previousElementSibling && e.previousElementSibling.classList.contains('bk-sec')), flow: !!(e.nextElementSibling && e.nextElementSibling.matches('.bk-text.bk-prose.bk-cols')) })),
     days: [...document.querySelectorAll('#bkPrint .bk-day-t')].map(e => e.textContent),
     toc: [...document.querySelectorAll('#bkPrint .bk-toc-day span, #bkPrint .bk-toc-row span')].map(e => e.textContent),
     cites: [...document.querySelectorAll('.bk-sheet .bk-cite')].map(e => e.textContent),
@@ -118,13 +103,12 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
     cols: [...document.querySelectorAll('#bkPrint .bk-cols')].map(e => { const cs = getComputedStyle(e), pg = e.closest('.bk-page'); return { lbl: (pg.querySelector('.bk-ph-lbl') || {}).textContent, n: cs.columnCount, fs: cs.fontSize }; }),
     musarBooks: [...document.querySelectorAll('#bkPrint .bk-sec-t')].map(e => e.textContent).filter((v, i, a) => a.indexOf(v) === i),
     qrImgs: document.querySelectorAll('#bkPrint .bk-qr img, #bkPrint .bk-cv-qr img').length,
-    dafPages: [...document.querySelectorAll('#bkPrint .bk-dafpage')].map(pg => {
-      const im = pg.querySelector('.bk-dafimg'), b = pg.querySelector('.bk-pbody');
-      return { img: im ? [im.clientWidth, im.clientHeight] : null, body: [b.clientWidth, b.clientHeight], extra: b.children.length - 1 };
-    }),
   }));
   console.log(JSON.stringify(info, null, 1));
-  if (!info.dafImgs) errs.push('no daf image rendered with the proxy in place');
+  if (!info.amudHeads.length) errs.push('no Gemara amud header found');
+  const badAmud = info.amudHeads.filter(h => !h.title || !h.flow);
+  if (badAmud.length) errs.push('Gemara amud header without its title or text flow: ' + JSON.stringify(badAmud.slice(0, 3)));
+  if (!info.cols.some(c => /גְּמָרָא/.test(c.lbl))) errs.push('no two-column Gemara flow found');
   if (info.overflow) errs.push(info.overflow + ' page(s) overflow their body');
   if (!info.cover || !info.dedication || !info.back) errs.push('missing cover/dedication/back page');
   const badCols = info.cols.filter(c => c.n !== '2' || c.fs !== '17.5px');
@@ -136,8 +120,6 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   if (want.some((c, i) => o[i] !== c) || o[o.length - 2] !== 'bk-backpage' || o[o.length - 1] !== 'bk-blank' || o.slice(6, -2).some(c => c !== 'content'))
     errs.push('page order is ' + o.join(','));
   if (info.qrImgs !== 2) errs.push('expected the QR on the cover and the back page, got ' + info.qrImgs);
-  if (!info.dafPages.length || info.dafPages.length !== info.printDafImgs) errs.push('each scanned amud should get its own page');
-  if (info.dafPages.some(d => d.extra)) errs.push('a daf page carries something besides the scan');
   // the app scrolls <body>, not the window, so walk it one screen at a time
   for (let i = 0; i < 32; i++) {
     const more = await p.evaluate(i => {
@@ -170,16 +152,13 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   await ctx.close();
 }
 
-// ---- 2. no daf proxy (plain static server): citation fallback ----
+// ---- 2. neighbouring days ----
 {
-  const { ctx, p } = await openCtx({ withDafProxy: false });
+  const { ctx, p } = await openCtx();
   await p.evaluate(() => window.go('bookletHome'));
   await waitFor(p, () => !!document.getElementById('bkOpenBtn'));
   await p.evaluate(() => document.getElementById('bkOpenBtn').click());
-  await waitFor(p, () => !!document.querySelector('.bk-sheet') && !document.querySelector('.bk-sheet .bk-loading'), 60000);
-  const fb = await p.evaluate(() => ({ imgs: document.querySelectorAll('.bk-sheet .bk-daf img').length, cites: [...document.querySelectorAll('.bk-sheet .bk-cite')].map(e => e.textContent) }));
-  console.log('fallback:', JSON.stringify(fb));
-  if (fb.imgs || !fb.cites.length) errs.push('fallback: expected citation lines and no daf image');
+  await waitFor(p, () => !!document.querySelector('.bk-sheet'), 60000);
   // step through neighbouring days (prev/next) - no throw
   for (const id of ['bkNext', 'bkNext', 'bkPrev', 'bkToday']) {
     await p.evaluate(i => document.getElementById(i)?.click(), id);
