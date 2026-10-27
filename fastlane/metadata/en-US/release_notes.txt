@@ -1,8 +1,6 @@
-What's new in 2.0.5:
-• Daily Zohar: today's page shows on the Home screen and is available on Shabbat too
-• Idra Rabba now sits in its proper place in the Zohar cycle, with no skipped pages
-• Weekly study booklets appear automatically each week
-• Scheduled Musar and Ben Ish Chai reminders that arrive on time, even when the app is closed
-• Live Activity rolls over to the next time of day without getting stuck
-• More languages for Chok LeYisrael transliteration, and Pele Yoetz in French, Russian and Georgian
-• User-counter, spelling and stability fixes
+What's new in 2.0.6:
+• Library and Home screen display correctly in every language
+• Cleaner reading: no extra strip under the header
+• On the Home screen: "Users today" and "Online now"
+• Daily Tanya: each day shows its exact portion
+• Translation, display and stability fixes
