@@ -6,8 +6,11 @@
 // across page breaks, so a word cut at a break fails too). Also reports each
 // section's refs/cycle indices, per-verse commentary counts, stranded
 // headings, pages opening on a divider, overflow, duplicate source lines,
-// and that every amud of the Gemara opens with its own title + "דַּף הַיּוֹמִי"
-// sub-line. Exits 1 on any finding. Needs the local server on :8899 (npm run serve:local).
+// and that the Gemara's amud sub-lines ("דַּף הַיּוֹמִי" headers) are correctly
+// shaped: the day's FIRST amud is preceded by the "גְּמָרָא" cartouche, and
+// every later amud transition within the same day repeats ONLY the sub-line
+// (no repeated cartouche - owner's call, 2026-10-27). Exits 1 on any finding.
+// Needs the local server on :8899 (npm run serve:local).
 //
 //   node scripts/booklet-audit.mjs [YYYY-MM-DD] [out.json]
 import { chromium } from 'playwright';
@@ -48,7 +51,7 @@ const R = await p.evaluate(() => {
   const printed = content.map(pg => pg.querySelector('.bk-pbody').textContent).join(' ').replace(/\s+/g, ' ');
   const miss = [];
   const has = (sec, label, h) => { const t = txt(h); if (t && printed.indexOf(t) < 0) miss.push({ day: out.days.length ? out.days[out.days.length - 1].day : '', sec, label, t: t.slice(0, 80) }); return !!t; };
-  const out = { date: date0.toString(), days: [], miss, breaks: [], srcDup: [] };
+  const out = { date: date0.toString(), days: [], miss, breaks: [], srcDup: [], dafGroups: [] };
   rows.forEach(r => {
   const date = r.date, { slot, hd, secs } = A.bkSections(r.date, r.day);
   const day = { day: r.day, date: date.toString(), hd: hd.toString(), slot, secs: [], musar: [] };
@@ -67,6 +70,10 @@ const R = await p.evaluate(() => {
       });
     } else if (s.kind === 'daf') {
       const e = A.ckDafEntry(s.dIdx); o.daf = { idx: s.dIdx, t: e.t, daf: e.daf, sides: A.bkDafSides(s.dIdx), cycIdx: A.ckCycleIndex(A.CYC.daf, hd) };
+      // one amud-cartouche group per 'daf' subject: its own first amud gets
+      // the "גְּמָרָא" cartouche, any further amud in it (whole dapim never
+      // split, so this is only ever 0 or 1 further) does not
+      out.dafGroups.push(e.whole ? 1 : o.daf.sides.length);
       // the Gemara prints as text: every segment of every amud, word for word
       s.items.forEach((it, i) => { if (it.t) has(s.key, 'daf seg ' + (it.id || i), it.t); });
     } else {
@@ -106,13 +113,25 @@ const R = await p.evaluate(() => {
   });
   out.srcs = srcs;
   out.secTitles = [...document.querySelectorAll('#bkPrint .bk-sec-t')].map(e => e.textContent.trim());
-  // each amud of the Gemara: a 'גְּמָרָא' title directly followed by its own
-  // "דַּף הַיּוֹמִי · ..." sub-line (the amud-transition header)
+  // each amud of the Gemara is its own "דַּף הַיּוֹמִי · ..." sub-line; only the
+  // FIRST amud of each 'daf' subject (the day's opening) is directly preceded
+  // by the 'גְּמָרָא' cartouche ('.bk-sec') - every later amud transition in the
+  // same subject must NOT repeat it (owner's call, 2026-10-27)
   const amudHeads = [...document.querySelectorAll('#bkPrint .bk-sub')].filter(e => /^דַּף הַיּוֹמִי/.test(e.textContent.trim()));
   out.amudHeads = amudHeads.map(e => e.textContent.trim());
-  out.amudHeadBad = amudHeads.filter(e => { const t = e.previousElementSibling; return !t || !t.classList.contains('bk-sec'); }).map(e => e.textContent.trim());
-  const wantAmud = out.days.reduce((n, d) => n + d.secs.filter(x => x.daf).reduce((m, x) => m + (A.ckDafEntry(x.daf.idx).whole ? 1 : x.daf.sides.length), 0), 0);
+  const wantAmud = out.dafGroups.reduce((n, c) => n + c, 0);
+  out.amudHeadBad = [];
   if (amudHeads.length < wantAmud) out.amudHeadBad.push('expected at least ' + wantAmud + ' amud headers, found ' + amudHeads.length);
+  else {
+    // expand dafGroups into a per-head "should have a cartouche right before it" flag
+    const expectCartouche = out.dafGroups.flatMap(c => Array.from({ length: c }, (_, i) => i === 0));
+    amudHeads.forEach((e, i) => {
+      const hasCartouche = !!(e.previousElementSibling && e.previousElementSibling.classList.contains('bk-sec'));
+      const want = expectCartouche[i];
+      if (want === undefined) return; // extra head beyond what dafGroups predicted - already flagged above
+      if (hasCartouche !== want) out.amudHeadBad.push((want ? 'missing cartouche before ' : 'unexpected repeated cartouche before ') + e.textContent.trim());
+    });
+  }
   return out;
 });
 const OUT = process.argv[3] || 'booklet-audit.json';

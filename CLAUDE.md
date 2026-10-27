@@ -186,16 +186,22 @@ in English as usual.
   `.bk-text.bk-prose.bk-cols` two-column flow per amud - the Zohar/Tanya
   path, so ink (true black in B&W) and the 17.5px body size come from the
   shared cascade; never add a Gemara-specific colour/size rule. Each amud
-  opens with the "גְּמָרָא" cartouche (`.bk-sec`) and a `.bk-sub` line
-  "דַּף הַיּוֹמִי · מַסֶּכֶת X · דַּף N ע״א" (`ckDafLabel` + `CK_AMUD`; Shekalim/
-  Kinnim/Middot have no amud split: one sub-line, no amud, plus the
-  record's `src`). The first title is bkBlocks'/bkShabbatBlocks' own section
-  heading (no `.bk-sec-src`); every later amud repeats title + sub-line as
-  `t:'sec'` (`noToc:1` - one TOC row per day) + `t:'sub'` blocks - **that
-  classification is required**: it is what makes `keepMove()` keep the
-  amud-transition header with `BK_MIN_LINES` of text (filed as a plain
-  atom it gets stranded at a page foot with ~3 lines - reproduced on
-  Toldot). Weekdays and the Shabbat block both go through it. A day whose
+  opens with a `.bk-sub` line "דַּף הַיּוֹמִי · מַסֶּכֶת X · דַּף N ע״א"
+  (`ckDafLabel` + `CK_AMUD`; Shekalim/Kinnim/Middot have no amud split: one
+  sub-line, no amud, plus the record's `src`). The "גְּמָרָא" cartouche
+  (`.bk-sec`) prints ONLY ONCE PER DAY, at amud א's own opening - it is
+  bkBlocks'/bkShabbatBlocks' own section heading (no `.bk-sec-src`); it must
+  NOT repeat at a later amud transition the same day (owner's call,
+  2026-10-27: it read as a repeated title mid-day - e.g. amud ב should show
+  only "דף נ״ד עמוד ב׳", not the cartouche again). Every later amud instead
+  pushes ONLY a `t:'sub'` block, flagged `secMin:1` so `keepMove()` still
+  protects it with the FULL `BK_MIN_LINES` (not the weaker
+  `BK_SUB_MIN_LINES` a lone `sub` normally gets) - **this flag is required**:
+  without it a lone sub-line gets stranded at a page foot with only a couple
+  of lines under it (reproduced on Toldot's own daf נ״ב ע״ב / נ״ה ע״ב amud
+  transitions - verified both that `keepMove()` correctly pushes a too-short
+  `secMin` sub-header to a fresh page, and that the cartouche itself never
+  repeats). Weekdays and the Shabbat block both go through it. A day whose
   daf record is missing falls back to the citation line (data/chok-daf
   covers all 2,711 dapim, so this shouldn't happen). The `/shas-daf`
   Vercel rewrite in vercel.json is now unused by the app.

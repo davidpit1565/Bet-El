@@ -6152,12 +6152,20 @@ function bkSectionBody(s,slot,B){
        two-column prose flow per amud - the exact .bk-text.bk-prose.bk-cols
        path the Zohar/Tanya use, so ink and size come from the shared
        cascade. Each amud opens with the section title (the caller pushes
-       the first one) and a "דַּף הַיּוֹמִי · מַסֶּכֶת X · דַּף N ע״א" sub-line;
-       every amud after the first repeats BOTH, as real 'sec' + 'sub'
-       blocks - that classification is what makes bkPaginate's keepMove()
-       keep them with BK_MIN_LINES / BK_SUB_MIN_LINES of text (a heading
-       filed as a plain atom gets no such protection). Shekalim (Yerushalmi),
-       Kinnim and Middot have no amud split: one sub-line, no amud. */
+       the first one) and a "דַּף הַיּוֹמִי · מַסֶּכֶת X · דַּף N ע״א" sub-line.
+       The "גְּמָרָא" cartouche prints ONLY ONCE per day, at amud א's own
+       opening (owner's call, 2026-10-27: it read as a repeated title mid-day) -
+       every amud after the first repeats ONLY the sub-line, as a 'sub' block
+       flagged `secMin` so bkPaginate's keepMove() still protects it with the
+       full BK_MIN_LINES (not the usual, weaker BK_SUB_MIN_LINES a lone 'sub'
+       gets) - the same strength the hidden cartouche+sub-line pair used to
+       give this exact transition before the cartouche was dropped (verified
+       on Toldot's own amud transitions - Bechorot נ״ב ע״ב and נ״ה ע״ב, both a
+       few lines of text, which need the 6-line minimum to be pushed to the
+       next page; BK_SUB_MIN_LINES=2 alone would not have caught them). A
+       heading filed as a plain atom gets no such protection. Shekalim
+       (Yerushalmi), Kinnim and Middot have no amud split: one sub-line, no
+       amud. */
     const e=ckDafEntry(s.dIdx), rec=ckDafRec(s.dIdx), g=(rec&&rec.g)||{};
     const sides=['a','b'].filter(x=>g[x]&&g[x].length);
     const subTxt=side=>'דַּף הַיּוֹמִי · '+ckDafLabel(s.dIdx)+(e.whole?'':' '+CK_AMUD[side])+(rec&&rec.src?' · '+rec.src:'');
@@ -6169,8 +6177,7 @@ function bkSectionBody(s,slot,B){
     }
     const groups=e.whole ? [{side:'a', segs:sides.reduce((a,x)=>a.concat(g[x]),[])}] : sides.map(x=>({side:x, segs:g[x]}));
     groups.forEach((gr,k)=>{
-      if(k) B.push({t:'sec', label:s.he, noToc:1, html:`<div class="bk-sec"><div class="bk-sec-t">${s.he}</div></div>`});
-      B.push({t:'sub', html:`<div class="bk-sub">${subTxt(gr.side)}</div>`});
+      B.push({t:'sub', secMin:k?1:0, html:`<div class="bk-sub">${subTxt(gr.side)}</div>`});
       B.push({t:'flow', cls:'bk-text bk-prose bk-cols', pieces:gr.segs.map(bkP)});
     });
     return;
@@ -6721,13 +6728,19 @@ function bkPaginate(host,blocks,meta){
      able to cost unbounded time regardless of content shape. */
   let bkSqueezeBudgetMs=400;
   /* keep-with-text: the current section's heading run (sec/day) and the
-     current chapter heading run (sub), each with the last node of its run */
-  let secH=null, secHL=null, subH=null, subHL=null;
+     current chapter heading run (sub), each with the last node of its run.
+     subHMin is normally BK_SUB_MIN_LINES, but a 'sub' block flagged
+     `secMin` (a Gemara amud-transition sub-line standing in for what used
+     to be a cartouche+sub-line pair - see bkSectionBody's daf case) asks
+     for the full BK_MIN_LINES instead, so it keeps the same protection
+     strength even though no 'sec' sibling renders alongside it any more. */
+  let secH=null, secHL=null, subH=null, subHL=null, subHMin=BK_SUB_MIN_LINES;
   /* before a page break: if a heading run on this page has too few lines
-     under it (6 for a section, 2 for a chapter), take it and everything
-     after it off the page - returned, to open the next page */
+     under it (6 for a section, 2 for a chapter - or 6 for a secMin sub),
+     take it and everything after it off the page - returned, to open the
+     next page */
   const keepMove=()=>{
-    for(const [h,hl,min] of [[secH,secHL,BK_MIN_LINES],[subH,subHL,BK_SUB_MIN_LINES]]){
+    for(const [h,hl,min] of [[secH,secHL,BK_MIN_LINES],[subH,subHL,subHMin]]){
       if(!h || h.parentNode!==body || body.firstElementChild===h || bkLinesAfter(body,hl)>=min) continue;
       const mv=[]; for(let n=h;n;n=n.nextSibling) mv.push(n);
       mv.forEach(n=>body.removeChild(n));
@@ -6809,7 +6822,7 @@ function bkPaginate(host,blocks,meta){
          chapter heading (Tehillim, Mishnah...) only needs a couple - the
          text runs on rather than leaving the page foot empty */
       if(heading){
-        if(b.t==='sub'){ if(!pend.length||!subH) subH=n; subHL=n; }
+        if(b.t==='sub'){ if(!pend.length||!subH){ subH=n; subHMin=b.secMin?BK_MIN_LINES:BK_SUB_MIN_LINES; } subHL=n; }
         else { if(!pend.length||!secH||subH) secH=n; secHL=n; subH=null; }
         if(b.t==='sub' && secH && pend.length && pend.includes(secH)) secHL=n;
         pend.push(n); if(!filled) relabel();

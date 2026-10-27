@@ -86,8 +86,31 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   const info = await p.evaluate(() => ({
     sections: [...document.querySelectorAll('.bk-sheet .bk-sec-t')].map(e => e.textContent),
     sources: [...document.querySelectorAll('.bk-sheet .bk-sec-src')].map(e => e.textContent),
-    // the Gemara: one two-column text flow per amud, each opened by a title + "דַּף הַיּוֹמִי" sub-line
-    amudHeads: [...document.querySelectorAll('#bkPrint .bk-sub')].filter(e => /^דַּף הַיּוֹמִי/.test(e.textContent.trim())).map(e => ({ t: e.textContent.trim(), title: !!(e.previousElementSibling && e.previousElementSibling.classList.contains('bk-sec')), flow: !!(e.nextElementSibling && e.nextElementSibling.matches('.bk-text.bk-prose.bk-cols')) })),
+    // the Gemara: one two-column text flow per amud, each opened by its own "דַּף
+    // הַיּוֹמִי" sub-line; only the day's FIRST amud is preceded by the "גְּמָרָא"
+    // cartouche - every later amud transition that day repeats just the sub-line
+    // (owner's call, 2026-10-27). Walk day/sec/sub headers in document order to
+    // know, for each amud sub-line, whether a cartouche was expected right
+    // before it (one just opened, Gemara, and hasn't been consumed yet).
+    amudHeads: (() => {
+      const seq = [...document.querySelectorAll('#bkPrint .bk-day-t, #bkPrint .bk-sec-t, #bkPrint .bk-sub')];
+      let runOpen = false;
+      const out = [];
+      seq.forEach(e => {
+        if (e.classList.contains('bk-day-t')) { runOpen = false; return; }
+        if (e.classList.contains('bk-sec-t')) { runOpen = e.textContent.trim() === 'גְּמָרָא'; return; }
+        const isDafHead = /^דַּף הַיּוֹמִי/.test(e.textContent.trim());
+        if (!isDafHead) { runOpen = false; return; }
+        out.push({
+          t: e.textContent.trim(),
+          title: !!(e.previousElementSibling && e.previousElementSibling.classList.contains('bk-sec')),
+          expectCartouche: runOpen,
+          flow: !!(e.nextElementSibling && e.nextElementSibling.matches('.bk-text.bk-prose.bk-cols')),
+        });
+        runOpen = false;
+      });
+      return out;
+    })(),
     days: [...document.querySelectorAll('#bkPrint .bk-day-t')].map(e => e.textContent),
     toc: [...document.querySelectorAll('#bkPrint .bk-toc-day span, #bkPrint .bk-toc-row span')].map(e => e.textContent),
     cites: [...document.querySelectorAll('.bk-sheet .bk-cite')].map(e => e.textContent),
@@ -106,8 +129,8 @@ const waitFor = (p, fn, ms = 30000) => p.waitForFunction(fn, null, { timeout: ms
   }));
   console.log(JSON.stringify(info, null, 1));
   if (!info.amudHeads.length) errs.push('no Gemara amud header found');
-  const badAmud = info.amudHeads.filter(h => !h.title || !h.flow);
-  if (badAmud.length) errs.push('Gemara amud header without its title or text flow: ' + JSON.stringify(badAmud.slice(0, 3)));
+  const badAmud = info.amudHeads.filter(h => !h.flow || h.title !== h.expectCartouche);
+  if (badAmud.length) errs.push('Gemara amud header missing its text flow, or cartouche repeated/missing: ' + JSON.stringify(badAmud.slice(0, 3)));
   if (!info.cols.some(c => /גְּמָרָא/.test(c.lbl))) errs.push('no two-column Gemara flow found');
   if (info.overflow) errs.push(info.overflow + ' page(s) overflow their body');
   if (!info.cover || !info.dedication || !info.back) errs.push('missing cover/dedication/back page');
