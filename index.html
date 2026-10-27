@@ -6241,7 +6241,7 @@ const BK_YICHUD={
    (and keepMove's BK_MIN_LINES protection) and never stays alone at a foot. */
 function bkYichudHtml(day){
   const t=BK_YICHUD[day]; if(!t) return '';
-  return `<div class="bk-yichud"><span class="bk-yichud-l">יִחוּדִים</span>${t}</div>`;
+  return `<div class="bk-yichud">${t}</div>`;
 }
 function bkBlocks(date,opt){
   opt=opt||{};
