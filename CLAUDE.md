@@ -205,6 +205,18 @@ in English as usual.
   daf record is missing falls back to the citation line (data/chok-daf
   covers all 2,711 dapim, so this shouldn't happen). The `/shas-daf`
   Vercel rewrite in vercel.json is now unused by the app.
+  **Yichudim above Torah (owner-approved "Variant B", 2026-10-27)**: Sunday-
+  Thursday each print a short fixed kavanah (`BK_YICHUD[slot.day]`, the
+  owner's text verbatim, same every week) right above the day's Torah
+  cartouche - `bkYichudHtml()` -> `.bk-yichud`: a bold "יִחוּדִים" lead-in,
+  11.5px text, a `var(--bk-line)` hairline above and below, no box, ink and
+  font inherited from the page (true black in B&W). Pushed as a `head:1`
+  atom (the hillulot pattern), so `bkPaginate` treats it as part of the
+  Torah heading run and it moves with the cartouche under keepMove's
+  BK_MIN_LINES - never stranded at a page foot. **Leil Shishi deliberately
+  has none** (its yichud varies by parasha and needs research first) and
+  neither does Friday - no placeholder; add a `night` entry only once the
+  owner supplies per-parasha texts. Toldot stayed 205 pages with it.
   **The printed booklet is the whole Chok LeYisrael week** of the selected
   date, while the on-screen `.bk-sheet` still shows just that day:
   `bkWeekRows(date)` walks `CHOK_ROWS` (Sun-Thu, Leil Shishi, Fri), each

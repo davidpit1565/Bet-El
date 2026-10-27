@@ -1681,6 +1681,11 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-dd-amen{font-family:var(--font-sacred);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--bk-gold-deep)}
 .bk-dd-foot{top:182mm;font-family:var(--font-sacred);font-size:10px;line-height:1.45;color:var(--bk-muted)}
 .bk-dd-foot small{display:block;font-size:8.5px}
+/* weekday Yichud above the Torah portion (owner-approved Variant B): a thin
+   hairline above and below, no box, small quiet text - colour and font are
+   inherited from the page (no special-case ink) */
+.bk-yichud{margin:1px auto 7px;max-width:112mm;padding:3px 0 4px;border-top:1px solid var(--bk-line);border-bottom:1px solid var(--bk-line);font-family:var(--font-sacred);font-size:11.5px;line-height:1.4;text-align:center}
+.bk-yichud-l{font-weight:700;margin-inline-end:.3em}
 .bk-hill{margin:2mm auto 1mm;padding:1.6mm 4mm 1.4mm;border:1px solid var(--bk-line);border-radius:2mm;text-align:center;max-width:118mm}
 .bk-hill-h{display:flex;align-items:center;justify-content:center;gap:1.4mm;font-family:var(--font-sacred);font-weight:700;font-size:13px;color:var(--bk-gold-deep)}
 .bk-hill-h i{display:inline-flex;width:13px;height:13px}
@@ -6215,6 +6220,29 @@ function bkSectionBody(s,slot,B){
     return bkP(`<span class="bk-vn">${tag}</span>${t}`);
   })});
 }
+/* Yichudim (owner-approved "Variant B", 2026-10): a short fixed kavanah
+   printed above each weekday's Torah portion, tying that day's number of
+   Chok LeYisrael Torah verses to a letter of the filled-out Name (שם ב״ן).
+   The SAME text every week (not parasha-dependent) - Sunday-Thursday only.
+   Leil Shishi's yichud varies by parasha and needs separate research, so
+   it deliberately has NO entry here (and Friday none either); never add a
+   placeholder for it. Texts verbatim from the owner - never "fix" them. */
+const BK_YICHUD={
+  sun:'יְכַוֵּן בִּקְרִיאַת שִׁשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ו\' דְּמִלּוּי יו"ד דְּשֵׁם ב"ן לְהַשְׁאִיר בּוֹ הֶאָרָה הַמִּתּוֹסֶפֶת נְשָׁמָה מִשַּׁבָּת שֶׁעָבְרָה:',
+  mon:'יְכַוֵּן בִּקְרִיאַת אַרְבָּעָה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ד\' דְּמִלּוּי יו"ד דְּשֵׁם ב"ן לְהַשְׁאִיר בּוֹ הֶאָרָה הַמִּתּוֹסֶפֶת הָרוּחַ מִשַּׁבָּת שֶׁעָבְרָה:',
+  tue:'יְכַוֵּן בִּקְרִיאַת חֲמִשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ה\' דְּמִלּוּי ה"ה רִאשׁוֹנָה דְּשֵׁם ב"ן לְהַשְׁאִיר בּוֹ הֶאָרָה מִתּוֹסֶפֶת נֶפֶשׁ מִשַּׁבָּת שֶׁעָבְרָה:',
+  wed:'יְכַוֵּן בִּקְרִיאַת שִׁשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ו\' דְּמִלּוּי וו דְּשֵׁם ב"ן לִקְנוֹת הֶאָרַת נֶפֶשׁ יְתֵרָה מִשַּׁבָּת הַבָּאָה:',
+  thu:'יְכַוֵּן בִּקְרִיאַת חֲמִשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ה\' דְּמִלּוּי ה"ה אַחֲרוֹנָה דְּשֵׁם ב"ן לִקְנוֹת הֶאָרַת רוּחַ יְתֵרָה מִשַּׁבָּת הַבָּאָה:',
+};
+/* a hairline above and below, small text, no box and no cartouche; ink and
+   font come from the shared .bk-page cascade (true black in B&W). Pushed as
+   a `head:1` atom - like the hillulot frame - so bkPaginate treats it as part
+   of the Torah heading run that follows: it moves with the Torah cartouche
+   (and keepMove's BK_MIN_LINES protection) and never stays alone at a foot. */
+function bkYichudHtml(day){
+  const t=BK_YICHUD[day]; if(!t) return '';
+  return `<div class="bk-yichud"><span class="bk-yichud-l">יִחוּדִים</span>${t}</div>`;
+}
 function bkBlocks(date,opt){
   opt=opt||{};
   const {slot,hd,secs}=bkSections(date,opt.day);
@@ -6276,6 +6304,10 @@ function bkBlocks(date,opt){
     }
     else if(['neviim','ketuvim','haftarah','tanya'].includes(s.key)){ title=title+(src?' · '+src:''); src=''; }
     else if(s.kind==='daf') src='';
+    /* the weekday Yichud (Sun-Thu only - BK_YICHUD has no night/fri entry)
+       sits right above the day's Torah cartouche */
+    const yHtml=(s.key==='torah')?bkYichudHtml(slot.day):'';
+    if(yHtml) B.push({t:'atom', head:1, html:yHtml});
     B.push({t:'sec', label, html:`<div class="bk-sec"><div class="bk-sec-t">${title}</div>${src?`<div class="bk-sec-src">${src}</div>`:''}</div>`});
     bkSectionBody(s,slot,B);
     if(s.key==='halacha'){ bkMusarSection(hd,B); musarDone=true; }
