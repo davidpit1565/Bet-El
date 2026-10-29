@@ -7684,8 +7684,19 @@ function bkWeekSummary(date){
       const idxs=ckMusarIndexes(w.key,r.hd);
       if(idxs&&idxs.length) (byWork[w.key]=byWork[w.key]||[]).push(...idxs);
     }); });
+    /* owner's request: when the week touches several Musar works, each
+       work's own name should stand out from the gate/range text after it,
+       the same way every row's own subject label (תּוֹרָה/נְבִיאִים/...) is
+       already bolded by row() below via the plain <b> + .bk-wk-row b gold
+       styling - reused here verbatim rather than inventing new styling.
+       ckMusarSourceLabel always returns "<work name> · <rest>" (t[work] is
+       prefixed once, see its own comment), so the name is just the part up
+       to the first " · ". */
+    const tm=ckMusarUI();
     musarLine = MUSAR_WORKS.filter(w=>byWork[w.key]&&byWork[w.key].length)
-      .map(w=>ckMusarSourceLabel(w.key,byWork[w.key])).join('; '); }
+      .map(w=>{ const name=tm[w.key], lbl=ckMusarSourceLabel(w.key,byWork[w.key]);
+        return lbl.startsWith(name+' · ')?'<b>'+name+'</b> · '+lbl.slice(name.length+3):'<b>'+lbl+'</b>'; })
+      .join('; '); }
   let zoharLine='';
   { let idxs=[], refFallback=false; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='zohar'); if(!s) return;
       if(CYC && s.kind==='text' && (!s.refs||!s.refs.length)) idxs.push(ckCycleIndex(CYC.zohar,r.hd)); else refFallback=true; });
