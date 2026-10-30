@@ -7660,9 +7660,14 @@ function bkWeekSummary(date){
      the old "Parashat X" line that used to sit below the whole block, as a
      heading, is gone - this is the only place it's said now). */
   const torahLine=bkParashaLine(slot);
-  const neviimLine=bkRefRangeLabel(collectRefs('neviim'),{prefix:n=>ckChrome('סֵפֶר')+' '+n+' ', unitWord:'פָּסוּק', unitWordPl:'פְּסוּקִים', withMem:true});
-  const ketuvimLine=bkRefRangeLabel(collectRefs('ketuvim'),{prefix:n=>ckChrome('סֵפֶר')+' '+n+' ', unitWord:'פָּסוּק', unitWordPl:'פְּסוּקִים', withMem:true});
-  const mishnahLine=bkRefRangeLabel(collectRefs('mishnah'),{prefix:n=>ckChrome('מַסֶּכֶת')+' '+n+', ', unitWord:'מִשְׁנָה', unitWordPl:'מִשְׁנָיוֹת', withMem:false});
+  /* owner's request (same treatment as the Musar row below): when a week's
+     reading crosses from one book/tractate into another, each clause's
+     book/tractate name is wrapped in <b> (the existing .bk-wk-row b gold
+     styling), the chapter/verse/daf numbers after it stay plain. A
+     single-source week is left exactly as before (B is identity). */
+  const neviimLine=bkRefRangeLabel(collectRefs('neviim'),{prefix:(n,B)=>B(ckChrome('סֵפֶר')+' '+n)+' ', unitWord:'פָּסוּק', unitWordPl:'פְּסוּקִים', withMem:true});
+  const ketuvimLine=bkRefRangeLabel(collectRefs('ketuvim'),{prefix:(n,B)=>B(ckChrome('סֵפֶר')+' '+n)+' ', unitWord:'פָּסוּק', unitWordPl:'פְּסוּקִים', withMem:true});
+  const mishnahLine=bkRefRangeLabel(collectRefs('mishnah'),{prefix:(n,B)=>B(ckChrome('מַסֶּכֶת')+' '+n)+', ', unitWord:'מִשְׁנָה', unitWordPl:'מִשְׁנָיוֹת', withMem:false});
   let gemaraLine='';
   { const idxs=[]; perRow.forEach(r=>{ const s=r.secs.find(x=>x.key==='gemara'); if(s&&s.kind==='daf'&&s.dIdx!=null) idxs.push(s.dIdx); });
     gemaraLine = idxs.length ? bkDafRangeLabel(idxs) : bkGemaraRefRangeLabel(collectRefs('gemara')); }
@@ -7759,9 +7764,14 @@ function bkRefGroups(refs){
   });
   return groups;
 }
+/* opts.prefix(name,B): B wraps the book/tractate name in <b> only when the
+   week crosses into more than one source (identity otherwise); a prefix
+   that ignores B (the Halacha fallback) is unaffected. */
+const bkCrossBold=n=>n>1?s=>'<b>'+s+'</b>':s=>s;
 function bkRefRangeLabel(refs,opts){
   const groups=bkRefGroups(refs); if(!groups.length) return '';
-  return groups.map(g=>opts.prefix(chokWorkName(g.book))+bkChVerseRange(g.c1,g.v1,g.c2,g.v2,opts.unitWord,opts.unitWordPl,opts.withMem)).join('; ');
+  const B=bkCrossBold(groups.length);
+  return groups.map(g=>opts.prefix(chokWorkName(g.book),B)+bkChVerseRange(g.c1,g.v1,g.c2,g.v2,opts.unitWord,opts.unitWordPl,opts.withMem)).join('; ');
 }
 /* Gemara's own non-cycle fallback refs ("Berakhot 35a:21-35b:8" - daf:line,
    not chapter:verse) - grouped by tractate, ranged by daf number alone (the
@@ -7779,8 +7789,8 @@ function bkGemaraRefRangeLabel(refs){
     if(last && last.book===book) last.d2=d2;
     else groups.push({book,d1,d2});
   });
-  const dafW=ckChrome('דַּף');
-  return groups.map(g=>ckChrome('מַסֶּכֶת')+' '+chokWorkName(g.book)+', '+(g.d1===g.d2?dafW+' '+heNum(g.d1):dafW+' '+heNum(g.d1)+' '+ckChrome('עַד')+' '+dafW+' '+heNum(g.d2))).join('; ');
+  const dafW=ckChrome('דַּף'), B=bkCrossBold(groups.length);
+  return groups.map(g=>B(ckChrome('מַסֶּכֶת')+' '+chokWorkName(g.book))+', '+(g.d1===g.d2?dafW+' '+heNum(g.d1):dafW+' '+heNum(g.d1)+' '+ckChrome('עַד')+' '+dafW+' '+heNum(g.d2))).join('; ');
 }
 /* the real Gemara path: CYC.daf's own global cycle. idxs are each day's own
    dIdx, in day order - grouped by tractate exactly like ckRambamLabel
@@ -7794,10 +7804,10 @@ function bkDafRangeLabel(idxs){
     if(last && last.t===e.t) last.end=i;
     else groups.push({t:e.t, start:i, end:i});
   });
-  const dafW=ckChrome('דַּף');
+  const dafW=ckChrome('דַּף'), B=bkCrossBold(groups.length);
   return groups.map(g=>{
     const d1=ckDafEntry(g.start).daf, d2=ckDafEntry(g.end).daf;
-    return ckChrome('מַסֶּכֶת')+' '+ckDafName(g.t)+', '+(d1===d2?dafW+' '+heNum(d1):dafW+' '+heNum(d1)+' '+ckChrome('עַד')+' '+dafW+' '+heNum(d2));
+    return B(ckChrome('מַסֶּכֶת')+' '+ckDafName(g.t))+', '+(d1===d2?dafW+' '+heNum(d1):dafW+' '+heNum(d1)+' '+ckChrome('עַד')+' '+dafW+' '+heNum(d2));
   }).join('; ');
 }
 /* Zohar's own global cycle (CYC.zohar): idxs are each day's own
