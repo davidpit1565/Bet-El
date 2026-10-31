@@ -3491,6 +3491,9 @@ function zmanimList(dateObj){
 /* ---------- halachic hebrew date (sunset rollover) ---------- */
 function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
 function civilToday(){ const n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()); }
+/* The calendar's "today" is the CIVIL day (what the phone's own calendar highlights), not the Hebrew day rolled at nightfall:
+   after tzeit currentHDate() is already tomorrow's Hebrew date, which made the calendar open on the day after today. */
+function calTodayHD(){ return new HDate(civilToday()); }
 function currentHDate(){
   const now=new Date(); let base=civilToday();
   S.sunsetRoll=true; { try{ const tz=zmanimFor(base).tzeit(); if(tz && now>=tz) base=addDays(base,1); }catch(e){} }
@@ -4160,6 +4163,7 @@ function go(tab){
   if(TAB==='tefillinMirror' && tab!=='tefillinMirror') stopTefillinMirror();
   if(HOME_EDIT && tab!=='home'){ HOME_EDIT=false; try{ if(homeNativeEdit()) Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
   if(tab==='home'||tab==='calendar'||tab==='prayers'||tab==='settings'||tab==='search') SEARCH_NAV=false;
+  if(tab==='calendar' && TAB!=='calendar' && CAL) CAL.seedDay=null;   // opening the Calendar tab always starts on today
   TAB=tab;
   /* the full-screen AR compass overlay must cover the bottom nav completely,
      but .bottom-nav is a body-level sibling outside #app's own stacking
@@ -9530,7 +9534,7 @@ function calSetSelected(hd){
 /* Move the selected day by +/-1 (swipe on the day card or its arrows) - the displayed month follows. */
 function calStepDay(delta){
   if(!CAL) return;
-  const cur=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY):currentHDate();
+  const cur=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY):calTodayHD();
   const nx=new HDate(cur.abs()+delta);
   calSetSelected(nx);
   CAL.slide=delta;
@@ -9674,7 +9678,7 @@ function renderCalendarNative(){
   const NC=nativeCalPlugin();
   app.innerHTML=`${topbar('לוח עברי')}<div class="view"></div>`;
   tr(app);
-  const sel=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY):currentHDate();
+  const sel=(CAL.selHY!=null)?new HDate(CAL.selHD,CAL.selHM,CAL.selHY):calTodayHD();
   NATIVE_CAL_SHOWN=true;
   if(!HILLULOT) ensureHillulot().then(()=>{ if(NATIVE_CAL_SHOWN && TAB==='calendar') renderCalendarNative(); }).catch(()=>{});
   NC.show({
@@ -9684,7 +9688,9 @@ function renderCalendarNative(){
   }).catch(()=>{});
 }
 function renderCalendar(){
-  if(!CAL){ CAL={civil:false}; calSetSelected(currentHDate()); }
+  { const ty=ymdOf(civilToday());   // (re)seed to today when first opened, when the tab is entered from elsewhere, or on a new civil day
+    if(!CAL) CAL={civil:false};
+    if(CAL.seedDay!==ty){ calSetSelected(calTodayHD()); CAL.seedDay=ty; } }
   const NC=NATIVE_CAL_ENABLED?nativeCalPlugin():null;
   if(NC){
     if(NATIVE_CAL_OK===true){ renderCalendarNative(); return; }
@@ -9694,7 +9700,7 @@ function renderCalendar(){
       return;
     }
   }
-  const today=currentHDate();
+  const today=calTodayHD();
   let firstHD,lastHD,len,startDow,monthLabel,yearLabel;
   if(CAL.civil){
     len=new Date(CAL.gy,CAL.gm+1,0).getDate();
@@ -9779,7 +9785,7 @@ function renderCalendar(){
     </div>
     ${ornament()}
   </div>`;
-  document.getElementById('calToday').onclick=()=>{ calSetSelected(currentHDate()); renderCalendar(); };
+  document.getElementById('calToday').onclick=()=>{ calSetSelected(calTodayHD()); renderCalendar(); };
   wireCalJump();
   wireConverter();
   document.getElementById('calPrevM').onclick=calPrevMonth;
@@ -9844,7 +9850,7 @@ window.NativeCalendarHost={
     const events=(calMonthEvents(g,g)[hd.abs()]||[]).map(e=>T(e));
     const mRange=monthlyPortion(hd), wRange=weeklyPortion(hd);
     const zlist=zmanimList(g).filter(z=>ZMANIM_LIVE||ZMANIM_READY.includes(z.key));
-    const isToday=hd.abs()===currentHDate().abs(); let nextKey=null;
+    const isToday=hd.abs()===calTodayHD().abs(); let nextKey=null;
     if(isToday){ const nx=zlist.find(z=>z.date&&z.date>new Date()); if(nx) nextKey=nx.key; }
     const weekKey=currentWeekParshaKey(g);
     const st=shabbatTimes(hd), shabbat=[];
@@ -9932,7 +9938,7 @@ function renderDayDetail(hd, events){
   const g=hd.greg();
   const mRange=monthlyPortion(hd), wRange=weeklyPortion(hd);
   const zlist=zmanimList(g);
-  const now=new Date(); const isToday=hd.abs()===currentHDate().abs();
+  const now=new Date(); const isToday=hd.abs()===calTodayHD().abs();
   let nextKey=null;
   if(isToday){ const nx=zlist.find(z=>z.date&&z.date>now); if(nx)nextKey=nx.key; }
   /* The parasha itself only ever showed up here as one of `events` (a
