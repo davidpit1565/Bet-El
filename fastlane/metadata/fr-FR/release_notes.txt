@@ -1,6 +1,7 @@
 Nouveautés de la version 2.0.6 :
 • La bibliothèque et l’accueil s’affichent correctement dans toutes les langues
 • Lecture plus nette : plus de bandeau inutile sous l’en-tête
-• Sur l’accueil : « Utilisateurs aujourd’hui » et « En ligne »
+• Sur l’accueil : « Visites » et « En ligne »
+• Calendrier hébraïque : s’ouvre toujours sur aujourd’hui
 • Tanya quotidien : chaque jour affiche sa portion exacte
 • Corrections de traduction, d’affichage et de stabilité

@@ -1,6 +1,7 @@
 What's new in 2.0.6:
 • Library and Home screen display correctly in every language
 • Cleaner reading: no extra strip under the header
-• On the Home screen: "Users today" and "Online now"
+• On the Home screen: "Visits" and "Online now"
+• Hebrew calendar: always opens on today
 • Daily Tanya: each day shows its exact portion
 • Translation, display and stability fixes
