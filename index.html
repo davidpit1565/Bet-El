@@ -380,6 +380,8 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .rh-slim-btn span{overflow:hidden;text-overflow:ellipsis}
 .rh-slim-btn i{font-style:normal;font-size:11px;flex:none}
 .ck-lead{text-align:center;margin:2px 0 8px}
+.reader-head.rh-slim>.rh-slim-btn{width:100%;max-width:340px;margin:0 auto}
+html.has-native-topbar .reader-head.rh-slim{padding-top:6px;padding-bottom:6px}
 .ck-lead .sm-aliyah-tag{margin:0 auto}
 .rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
 .rh-sheet{width:100%;max-width:560px;max-height:80vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.35)}
@@ -7045,7 +7047,6 @@ function renderChokReader(){
           `<button class="ck-track-btn musar-work-btn ${((S.musarWork||'reshit')===w.key)?'on':''}" data-musar-work="${w.key}">${ckMusarUI()[w.key]}</button>`
         ).join('')}
       </div>`:''}
-      <div class="reader-progress"><i style="width:${pct}%"></i></div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
       <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${ckChrome((secs[CK.resumeTo.sec]||secs[0]).he)}</b></div>
@@ -11470,7 +11471,8 @@ function slimReaderHead(){
   btn.type='button'; btn.className='rh-slim-btn'; btn.setAttribute('aria-haspopup','dialog');
   btn.innerHTML='<span>'+label+'</span><i>▾</i>';
   const top=hd.querySelector('.reader-top');
-  if(top){ (titleEl||top.lastElementChild).before(btn); } else hd.prepend(btn);
+  /* iOS: the HTML .reader-top is hidden under the native bar, so the button must sit directly in the head or it disappears */
+  if(top && !(NATIVE_TOPBAR || document.documentElement.classList.contains('has-native-topbar'))){ (titleEl||top.lastElementChild).before(btn); } else hd.prepend(btn);
   const close=()=>{
     const w=document.querySelector('.rh-sheet-wrap'); if(!w) return;
     if(hd.isConnected) hd.appendChild(col);
