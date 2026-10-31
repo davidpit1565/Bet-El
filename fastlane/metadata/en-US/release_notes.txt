@@ -4,4 +4,5 @@ What's new in 2.0.6:
 • On the Home screen: "Visits" and "Online now"
 • Hebrew calendar: always opens on today
 • Daily Tanya: each day shows its exact portion
+• Chok LeYisrael: Yichudim before the Torah reading (Sunday to Thursday)
 • Translation, display and stability fixes
