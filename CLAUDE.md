@@ -431,7 +431,15 @@ in English as usual.
   never invented claims), dedication, contents, the day's pages (Musar
   inside them), the back page, a closing blank (`bkBlankHtml`). Pages are
   numbered on from the cover (cover 1, rights 2, dedication 3, contents 4,
-  first day page 5). Every day page opens with the running header band
+  first day page 5). There is no plain per-page hairline border any more
+  (user rule, 2026-10-31 - it used to be a `.bk-page::after` on every
+  non-ornament page): it stacked as a double frame with a section's own
+  border (e.g. Rambam's gold `.bk-sec-t`/commentary box), so it was removed
+  outright - only the cover/rights/rav/dedication's own ornamental SVG
+  frame (`.bk-ornp`) remains. The leading blank page that used to sit
+  between the cover and the rights page is also gone (same request) - the
+  rights page is page 2 again, matching the numbering above; the single
+  closing blank page at the very back is unaffected. Every day page opens with the running header band
   (`bkPageHtml` → `bkBandSvg`, after the reference's own running head): a
   light band between two small embossed lace ribbons (`ornLaceRibbon`), a
   filigree crest above and below the gold Stam "בית אל" in its centre

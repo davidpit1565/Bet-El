@@ -1540,7 +1540,10 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
      the Vayetze pagination hang, not just the subject-boundary squeeze that
      first exposed it. */
   contain:layout style}
-.bk-page::after{content:'';position:absolute;inset:4mm;border:1px solid var(--bk-line);pointer-events:none}
+/* No per-page hairline border (user rule, 2026-10-31): a frame around every
+   page doubled up with any section's own frame (e.g. Rambam's gold
+   .bk-sec-t border) and looked wrong stacked on top of it. Only the cover's
+   own ornamental SVG frame (bk-ornp) remains. */
 .bk-ph{flex:none;margin-bottom:3mm}
 .bk-strip{height:4px;border-top:2px solid var(--bk-gold);border-bottom:1px solid var(--bk-line);margin-bottom:2.5mm}
 .bk-ph-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -1616,7 +1619,6 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    ornament kit beside bkCoverHtml) under absolutely placed HTML for all
    text, the logo and the QR - modelled on the owner's reference booklet */
 .bk-page.bk-ornp{padding:0}
-.bk-page.bk-ornp::after{display:none}
 /* page 2: rights & contact */
 .bk-rt-band{top:56mm;height:25mm;justify-content:center;gap:.8mm}
 .bk-rt-h{font-family:var(--font-sacred);font-weight:900;font-size:21px;color:#6e5426;text-shadow:-.6px -.6px 0 #fffdf7,.8px 1px 0 rgba(98,74,34,.3)}
@@ -1724,7 +1726,6 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 /* same var(--font-ui) print-embedding failure as .bk-rt-c [dir=ltr] below -
    Taamey Frank CLM already has every glyph this URL fallback needs */
 .bk-qr-url{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);direction:ltr}
-.bk-page.bk-blank::after{display:none}
 /* No .bk-ph header on this page any more (bkTocPage, not bkMatterPage) - the
    title below is the page's own heading. The title alone is enlarged (29px
    -> 34px): a plain, confident heading with no frame or repeated brand
@@ -8032,7 +8033,7 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkBlankHtml()+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
+  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */
