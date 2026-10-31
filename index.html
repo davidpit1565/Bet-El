@@ -1417,6 +1417,8 @@ html.has-native-tabbar .search-box-tab{display:none}
 .ck-resume{display:flex;flex-direction:column;gap:8px;margin:0 0 10px;padding:10px 12px;border-radius:10px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
 .ck-resume-text{font-family:var(--font-sacred);font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ck-resume-text svg{width:15px;height:15px;flex:none;color:var(--gold,#b8963f)}
+.ck-yichud{margin:4px auto 10px;padding:7px 4px 8px;max-width:520px;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);font-family:var(--font-sacred);font-size:15px;line-height:1.7;text-align:center;color:var(--ink,inherit)}
+.ck-yichud-l{font-weight:700;color:var(--gold-deep,var(--gold));margin-inline-end:.35em}
 .ck-kavana{font-family:var(--font-sacred);font-size:13px;line-height:1.7;color:var(--muted);text-align:center;padding:6px 10px;margin:2px 0 4px}
 .ck-resume-btns{display:flex;gap:8px}
 .ck-resume-btn{flex:1;text-align:center;font-family:var(--font-sacred);font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
@@ -6336,6 +6338,21 @@ function renderChokUnit(){
    nothing (see ${s.key==='torah'&&CK_KAVANA?...} in renderChokReader) so
    nothing incorrect ever ships; the display slot itself is already wired. */
 const CK_KAVANA=null;
+/* Yichudim (owner text, verbatim - never "fix" it): a short fixed kavanah above each weekday's Torah portion, tying that day's
+   number of Chok LeYisrael Torah verses to a letter of the filled-out Name (שם ב"ן). Sunday-Thursday only; Leil Shishi (night) and
+   Friday have none (the yichud there varies by parasha and has not been written yet) - never add a placeholder for them.
+   Hebrew only, shown with its nikud in every language. Same text as the weekly booklet. */
+const CK_YICHUD={
+  sun:'יְכַוֵּן בִּקְרִיאַת שִׁשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ו\' דְּמִלּוּי יו"ד דְּשֵׁם ב"ן לְהַשְׁאִיר בּוֹ הֶאָרָה הַמִּתּוֹסֶפֶת נְשָׁמָה מִשַּׁבָּת שֶׁעָבְרָה:',
+  mon:'יְכַוֵּן בִּקְרִיאַת אַרְבָּעָה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ד\' דְּמִלּוּי יו"ד דְּשֵׁם ב"ן לְהַשְׁאִיר בּוֹ הֶאָרָה הַמִּתּוֹסֶפֶת הָרוּחַ מִשַּׁבָּת שֶׁעָבְרָה:',
+  tue:'יְכַוֵּן בִּקְרִיאַת חֲמִשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ה\' דְּמִלּוּי ה"ה רִאשׁוֹנָה דְּשֵׁם ב"ן לְהַשְׁאִיר בּוֹ הֶאָרָה מִתּוֹסֶפֶת נֶפֶשׁ מִשַּׁבָּת שֶׁעָבְרָה:',
+  wed:'יְכַוֵּן בִּקְרִיאַת שִׁשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ו\' דְּמִלּוּי וו דְּשֵׁם ב"ן לִקְנוֹת הֶאָרַת נֶפֶשׁ יְתֵרָה מִשַּׁבָּת הַבָּאָה:',
+  thu:'יְכַוֵּן בִּקְרִיאַת חֲמִשָּׁה פְּסוּקִים אֵלּוּ שֶׁהֵם כְּנֶגֶד ה\' דְּמִלּוּי ה"ה אַחֲרוֹנָה דְּשֵׁם ב"ן לִקְנוֹת הֶאָרַת רוּחַ יְתֵרָה מִשַּׁבָּת הַבָּאָה:',
+};
+function ckYichudHTML(secKey, day){
+  const t=(secKey==='torah') ? CK_YICHUD[day] : null;
+  return t ? `<div class="ck-yichud notranslate"><span class="ck-yichud-l">יִחוּדִים</span> ${t}</div>` : '';
+}
 /* Donation link - Beit-El's own site product page (itself backed by
    Stripe), so this app has zero payment code/keys of its own to manage. */
 const STRIPE_DONATE_URL='https://bet-el.be/product/truma/';
@@ -7012,6 +7029,7 @@ function renderChokReader(){
         <button class="ck-resume-btn" id="ckResumeNew">מֵהַתְחָלָה</button>
       </div>
     </div>`:''}
+    ${ckYichudHTML(s.key, CK.day)}
     <div class="sm-verses notranslate">${body}</div>
     <div class="reader-nav">
       <button class="rnav-btn" id="ckPrev" ${CK.sec>0?'':'disabled'}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
@@ -14586,7 +14604,8 @@ async function shareQR(){
 /* One link for everyone: get.html sends iPhone/iPad to the App Store and Android to Google Play (desktop sees both buttons). */
 const APP_SMART_URL = 'https://davidpit1565.github.io/Bet-El/get.html';
 const APP_STORE_URL = 'https://apps.apple.com/app/%D7%AA%D7%9E%D7%99%D7%93/id6807186847';
-const APP_REVIEW_URL = APP_STORE_URL+'?action=write-review';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.beitel.tehilim';
+const APP_REVIEW_URL = (typeof isAndroidApp==='function' && isAndroidApp()) ? PLAY_STORE_URL : APP_STORE_URL+'?action=write-review';
 
 /* ================= FEEDBACK / RATE US ================= */
 /* "Send" first tries a silent relay: a Firebase Cloud Function
@@ -14709,7 +14728,6 @@ function openFeedbackForm(opts){
    NATIVE_* flags in this file. */
 const NATIVE_MODAL = !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeModal);
 function openRateModal(){
-  localStorage.setItem('betel_rate_prompt_shown','1');
   const title=ckChrome('אָהַבְתָּ אֶת תמיד?');
   const body=ckChrome('דֵּרוּג וּבִיקוֹרֶת עוֹזְרִים לָנוּ לְהַמְשִׁיךְ לְשַׁפֵּר אֶת הָאַפְּלִיקַצְיָה.');
   const buttonText=ckChrome('דַּרְגוּ עַכְשָׁו');
@@ -14733,30 +14751,29 @@ function openRateModal(){
     <button class="btn btn-gold" id="rateGoBtn"><span>${buttonText}</span></button>
   </div>`;
   document.body.appendChild(ov);
-  ov.querySelector('#rateGoBtn').onclick=()=>{ window.open(APP_REVIEW_URL,'_blank'); ov.remove(); };
+  ov.querySelector('#rateGoBtn').onclick=()=>{ try{ localStorage.setItem('betel_rate_done','1'); }catch(e){} window.open(APP_REVIEW_URL,'_blank'); ov.remove(); };
   ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
   ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
 }
-/* Apple's own star-rating sheet (rate right inside the app, no App Store trip). iOS itself caps how often it
-   can appear (at most 3 times a year), so we only ask at most once a week and never in the first 3 days. */
-function maybeAskStoreReview(){
-  const n=nativeSys(); if(!n) return;
+/* Asking for a rating, spaced and capped so it is seen without nagging: from day 2, one ask every 7 days, at most 8 asks, never again
+   once the user tapped "rate now" in the HTML card. iOS alternates Apple's own star sheet (rate right inside the app; iOS itself
+   caps it at 3 per year, so it is often silently skipped) with our own card "Do you love Tamid?", which always shows and links to the
+   store's review page (on iOS it is the native glass card). Android and the web show our card (its link is the Play Store page on Android). */
+function maybeShowRatePrompt(){
   try{
+    if(localStorage.getItem('betel_rate_done')) return;
     const now=Date.now();
     let first=+localStorage.getItem('betel_first_launch_ts'); if(!first){ first=now; localStorage.setItem('betel_first_launch_ts',String(first)); return; }
-    if(now-first < 3*864e5) return;
-    const last=+localStorage.getItem('betel_store_review_ts')||0;
+    if(now-first < 2*864e5) return;
+    const asks=+localStorage.getItem('betel_rate_asks')||0;
+    if(asks>=8) return;
+    const last=+localStorage.getItem('betel_rate_last_ts')||0;
     if(now-last < 7*864e5) return;
-    localStorage.setItem('betel_store_review_ts',String(now));
-    setTimeout(()=>{ n.requestReview().catch(()=>{}); }, 4000);
+    localStorage.setItem('betel_rate_last_ts',String(now)); localStorage.setItem('betel_rate_asks',String(asks+1));
+    const n=nativeSys();
+    if(n && asks%2===0){ setTimeout(()=>{ n.requestReview().catch(()=>{}); }, 4000); return; }
+    setTimeout(()=>{ if(!document.querySelector('body > .overlay')) openRateModal(); }, 4000);
   }catch(e){}
-}
-function maybeShowRatePrompt(){
-  if(nativeSys()){ maybeAskStoreReview(); return; }
-  if(localStorage.getItem('betel_rate_prompt_shown')) return;
-  let firstTs=+localStorage.getItem('betel_first_launch_ts');
-  if(!firstTs){ firstTs=Date.now(); localStorage.setItem('betel_first_launch_ts', String(firstTs)); return; }
-  if(Date.now()-firstTs >= 24*60*60*1000) openRateModal();
 }
 async function appQrImage(){
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
