@@ -1612,8 +1612,20 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page .bk-sec{margin:4px 0 6px;display:flex;flex-direction:column;align-items:center}
 /* section titles as a framed cartouche on tapered gold rules - the printed
    sefer's own section plaque (the reference's "עיונים והערות") */
-.bk-page .bk-sec-t{position:relative;display:inline-block;padding:1px 15px 2px;border:1px solid var(--bk-gold);border-radius:5px;
-  background:linear-gradient(#fffdf7,#f3e7cb);box-shadow:0 0 0 2px var(--bk-paper),0 0 0 3px var(--bk-line)}
+/* Single frame only (user rule, 2026-10-31): this box-shadow used to add a
+   second, lighter ring (--bk-line, a gray) just outside the real border
+   (--bk-gold, near-black in B&W) on EVERY section cartouche throughout the
+   booklet (Torah/Rambam/Gemara/Nevi'im/... all share this one rule) - read
+   as a redundant double frame. Keep only the one border. */
+/* Vertical padding is NOT symmetric on purpose: the font's own line-box
+   metrics already carry more space below the glyphs than above (normal for
+   a nikud-vocalized face), so an equal 1px/1px declared padding measured
+   ~1.25px closer to the top in practice (owner's "not centered" catch,
+   2026-10-31) - 2px top/2px bottom closes that gap to <0.5px. Re-measure
+   with a real Range().getBoundingClientRect() on the text node (not just
+   eyeballing) if this font or size ever changes. */
+.bk-page .bk-sec-t{position:relative;display:inline-block;padding:2px 15px 2px;border:1px solid var(--bk-gold);border-radius:5px;
+  background:linear-gradient(#fffdf7,#f3e7cb)}
 .bk-page .bk-sec-t::before,.bk-page .bk-sec-t::after{content:'';position:absolute;top:50%;width:34mm;height:1.6px;margin-top:-.8px}
 .bk-page .bk-sec-t::before{right:calc(100% + 5px);background:linear-gradient(to left,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
 .bk-page .bk-sec-t::after{left:calc(100% + 5px);background:linear-gradient(to right,var(--bk-gold),rgba(162,128,63,.35) 70%,rgba(162,128,63,0))}
