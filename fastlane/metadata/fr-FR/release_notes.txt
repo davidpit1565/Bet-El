@@ -4,4 +4,5 @@ Nouveautés de la version 2.0.6 :
 • Sur l’accueil : « Visites » et « En ligne »
 • Calendrier hébraïque : s’ouvre toujours sur aujourd’hui
 • Tanya quotidien : chaque jour affiche sa portion exacte
+• Hok LeIsraël : Yihoudim avant la lecture de la Torah (dimanche à jeudi)
 • Corrections de traduction, d’affichage et de stabilité
