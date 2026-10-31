@@ -370,6 +370,24 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .ps-cell .check{position:absolute;top:5px;left:5px;width:15px;height:15px;color:var(--gold);opacity:0;transform:scale(.5);transition:.25s var(--ease)}
 .ps-cell.read .check{opacity:1;transform:scale(1)}
 
+
+/* ===== slim reader header: one tappable title; the old controls live in a bottom sheet ===== */
+.reader-head.rh-slim{padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:6px;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .25s,padding .25s;max-height:120px;overflow:hidden}
+.reader-head.rh-slim.rh-slim-hide{max-height:0;opacity:0;padding-top:0;padding-bottom:0;pointer-events:none;border-color:transparent;box-shadow:none}
+.reader-head.rh-slim>.bic-collapse{display:none}
+.reader-head.rh-slim .reader-title{display:none}
+.rh-slim-btn{flex:1;min-width:0;max-width:340px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:99px;padding:8px 16px;background:var(--gold);color:#241a05;font-family:var(--font-sacred);font-weight:700;font-size:16px;cursor:pointer;white-space:nowrap;overflow:hidden}
+.rh-slim-btn span{overflow:hidden;text-overflow:ellipsis}
+.rh-slim-btn i{font-style:normal;font-size:11px;flex:none}
+.ck-lead{text-align:center;margin:2px 0 8px}
+.ck-lead .sm-aliyah-tag{margin:0 auto}
+.rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.rh-sheet{width:100%;max-width:560px;max-height:80vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.35)}
+.rh-sheet-grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.rh-sheet .bic-collapse{max-height:none;opacity:1;transform:none;overflow:visible}
+.rh-sheet .rh-hide{display:block}
+.rh-sheet .ck-yichud{margin:10px auto}
+
 /* ================= READER ================= */
 .reader{padding-top:6px}
 .reader-head{position:sticky;top:0;z-index:20;background:var(--bg);   /* fully solid, see .topbar */
@@ -3118,7 +3136,7 @@ function tr(node){
   a11yIcons(node);
   applyReadingPrefs(node);
   if(node===app){ try{ readerHeadBare(); }catch(e){} }   // synchronous: no flash of the empty strip
-  if(node===app) setTimeout(()=>{ try{ readerHeadAuto(); }catch(e){} },0);   // after the translation pass below, so the picker's labels are in the app language
+  if(node===app) setTimeout(()=>{ try{ readerHeadAuto(); }catch(e){} try{ slimReaderHead(); }catch(e){} },0);   // after the translation pass below, so the picker's labels are in the app language
   if(S.lang==='he') return;
   const dict=I18N[S.lang]; if(!dict) return;
   const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
@@ -6352,7 +6370,7 @@ const CK_YICHUD={
 };
 function ckYichudHTML(secKey, day){
   const t=(secKey==='torah') ? CK_YICHUD[day] : null;
-  return t ? `<div class="ck-yichud notranslate"><span class="ck-yichud-l">יִחוּדִים</span> ${t}</div>` : '';
+  return t ? `<div class="ck-yichud notranslate">${t}</div>` : '';
 }
 /* Donation link - Beit-El's own site product page (itself backed by
    Stripe), so this app has zero payment code/keys of its own to manage. */
@@ -6987,7 +7005,7 @@ function renderChokReader(){
   syncNativeTopBar(parshaName(CK.key), ()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); });
   app.innerHTML=`
   <div class="reader view">
-    <div class="reader-head">
+    <div class="reader-head rh-slim-src" data-slim-label="${parshaName(CK.key)} · ${rowLabel}">
       <div class="reader-top">
         <button class="icon-btn" id="ckBack">${I.prev}</button>
         <div class="reader-title">${parshaName(CK.key)}</div>
@@ -7000,9 +7018,18 @@ function renderChokReader(){
         </div>
         <button class="sm-aliyah-chip ck-arrow" id="ckDayNext" ${ckStepDay(1)?'':'disabled'} aria-label="הַיּוֹם הַבָּא">${I.next}</button>
       </div>
-      <div class="sm-aliyah-tag ${_anim}">${rowLabel} · ${ckChrome(s.he)}${s.note?' · '+s.note:''}</div>
-      <div class="ck-viewdate">${localizeHebDateStr(ckViewHDate().renderGematriya(true))}</div>
-      ${srcLine?`<div class="ck-source">${srcLine}</div>`:''}
+      ${ckYichudHTML('torah', CK.day)}
+      <div class="ck-secnav-wrap">
+        <button class="sm-aliyah-chip ck-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
+        <div class="sm-aliyah-nav ck-secnav">
+          ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${ckChrome(sec.he)}</button>`).join('')}
+        </div>
+        <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
+      </div>
+      </div>
+    </div>
+    <div class="ck-lead">
+      <div class="sm-aliyah-tag ${_anim}">${ckChrome(s.he)}${s.note?' · '+s.note:''}${srcLine?' · '+srcLine:''}</div>
       ${s.key==='torah'&&CK_KAVANA?`<div class="ck-kavana">${CK_KAVANA}</div>`:''}
       ${s.key==='halacha'?`<div class="ck-track">
         <button class="ck-track-btn ${halachaChoice()==='rambam3'?'on':''}" data-halchoice="rambam3">${ckChrome('רַמְבַּ״ם')} · ${ckChrome('שָׁלֹשׁ שָׁנִים · פֶּרֶק לְיוֹם')}</button>
@@ -7014,14 +7041,6 @@ function renderChokReader(){
         ).join('')}
       </div>`:''}
       <div class="reader-progress"><i style="width:${pct}%"></i></div>
-      <div class="ck-secnav-wrap">
-        <button class="sm-aliyah-chip ck-arrow" id="ckSecPrev" ${CK.sec>0?'':'disabled'} aria-label="הַקּוֹדֵם">${I.prev}</button>
-        <div class="sm-aliyah-nav ck-secnav">
-          ${secs.map((sec,ix)=>`<button class="sm-aliyah-chip ck-secchip${ix===CK.sec?' on':''}" data-sec="${ix}">${ckChrome(sec.he)}</button>`).join('')}
-        </div>
-        <button class="sm-aliyah-chip ck-arrow" id="ckSecNext" ${CK.sec<secs.length-1?'':'disabled'} aria-label="הַבָּא">${I.next}</button>
-      </div>
-      </div>
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
       <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${ckChrome((secs[CK.resumeTo.sec]||secs[0]).he)}</b></div>
@@ -7030,8 +7049,7 @@ function renderChokReader(){
         <button class="ck-resume-btn" id="ckResumeNew">מֵהַתְחָלָה</button>
       </div>
     </div>`:''}
-    ${ckYichudHTML(s.key, CK.day)}
-    <div class="sm-verses notranslate">${body}</div>
+    <div class="sm-verses notranslate">${s.key==='torah'?ckYichudHTML('torah', CK.day):''}${body}</div>
     <div class="reader-nav">
       <button class="rnav-btn" id="ckPrev" ${CK.sec>0?'':'disabled'}>${I.prev}<span>${ckChrome('הַקּוֹדֵם')}</span></button>
       ${CK.sec<secs.length-1
@@ -11423,6 +11441,48 @@ function readerHeadBare(){
     if(hd.children.length && Array.from(hd.children).every(c=>c.classList.contains('reader-top'))) hd.classList.add('rh-empty');
   });
 }
+/* Slim reader header (user request): every reader whose header has a big controls block shows ONE tappable title
+   ("Parasha - Sunday"); tapping opens a bottom sheet that hosts the original controls (nodes are moved, so every handler
+   keeps working). Scrolling down hides the whole head (see set() in initNavScrollHide). */
+function slimReaderHead(){
+  document.querySelectorAll('.rh-sheet-wrap').forEach(w=>w.remove());
+  const hd=document.querySelector('.reader-head'); if(!hd||hd.classList.contains('rh-slim')) return;
+  const col=hd.querySelector('.bic-collapse'); if(!col) return;
+  const big=BIG_HEADER_TABS_LIST.indexOf(TAB)>=0 || col.querySelector('.ck-arrow') || hd.classList.contains('rh-slim-src');
+  if(!big) return;
+  if(hd.dataset.rhAuto || hd.classList.contains('rh-auto')) return;   // already a one-picker header
+  if(hd.classList.contains('rh-empty')) return;
+  hd.classList.add('rh-slim');
+  const titleEl=hd.querySelector('.reader-title');
+  let label=hd.dataset.slimLabel;
+  if(!label){
+    const sel=col.querySelector('select.fld-select');
+    const on=col.querySelector('.sm-aliyah-chip.on');
+    const choice=sel&&sel.selectedIndex>=0?sel.options[sel.selectedIndex].textContent.trim():(on?on.textContent.trim():'');
+    label=((titleEl&&titleEl.textContent.trim())||'')+(choice?' · '+choice:'');
+  }
+  const btn=document.createElement('button');
+  btn.type='button'; btn.className='rh-slim-btn'; btn.setAttribute('aria-haspopup','dialog');
+  btn.innerHTML='<span>'+label+'</span><i>▾</i>';
+  const top=hd.querySelector('.reader-top');
+  if(top){ (titleEl||top.lastElementChild).before(btn); } else hd.prepend(btn);
+  const close=()=>{
+    const w=document.querySelector('.rh-sheet-wrap'); if(!w) return;
+    if(hd.isConnected) hd.appendChild(col);
+    w.remove();
+  };
+  btn.onclick=()=>{
+    if(document.querySelector('.rh-sheet-wrap')) return;
+    const w=document.createElement('div'); w.className='rh-sheet-wrap';
+    const sh=document.createElement('div'); sh.className='rh-sheet';
+    sh.innerHTML='<div class="rh-sheet-grab"></div>';
+    sh.appendChild(col); w.appendChild(sh); document.body.appendChild(w);
+    w.onclick=e=>{ if(e.target===w) close(); };
+    /* a pick re-renders the screen (which drops the sheet); a pick that doesn't (e.g. a select) closes it */
+    sh.addEventListener('click',e=>{ if(e.target.closest('.sm-aliyah-chip,.ck-track-btn')) setTimeout(close,60); });
+    sh.addEventListener('change',()=>setTimeout(close,60));
+  };
+}
 function readerHeadAuto(){
   if(BIG_HEADER_TABS_LIST.indexOf(TAB)>=0) return;
   const hd=document.querySelector('.reader-head'); if(!hd || hd.dataset.rhAuto) return;
@@ -15615,9 +15675,10 @@ var TB_LAST=null;   // last header state sent to the native bar (reset on every 
     }
     document.querySelectorAll('.topbar').forEach(t=>t.classList.toggle('topbar-hidden',hideBar));
     if(NATIVE_TOPBAR) document.querySelectorAll('.reader-head').forEach(h=>h.classList.toggle('rh-tucked',hideBar));
+    document.querySelectorAll('.reader-head.rh-slim').forEach(h=>h.classList.toggle('rh-slim-hide',hide));
     const nav = document.querySelector('.bottom-nav'); if(!nav) return;
     const tools=document.getElementById('gTools');
-    const bicHead=document.querySelector('.bic-collapse');
+    const bicHead=document.querySelector('.reader-head:not(.rh-slim) .bic-collapse');
     nav.classList.toggle('nav-hidden', hide);
     if(tools){ tools.classList.toggle('nav-hidden', hideBar); if(hideBar) tools.classList.add('collapsed'); }
     try{ readerHeadCompact(hide); }catch(e){}
