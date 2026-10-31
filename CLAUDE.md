@@ -539,6 +539,21 @@ in English as usual.
   above about `bkPaginate` being one synchronous call, a different but
   related "the live app and the export pipeline don't always match"
   lesson).
+  **STANDING RULE (owner, 2026-10-31, restated after it recurred again):
+  a booklet mockup/example screenshot is NEVER a screenshot of the live
+  reader screen** - not even of the real `#bkPrint` pages if the capture
+  also shows any surrounding app chrome (the reader's header, back/print/
+  PDF/B&W buttons, nav arrows, the app's own beige/cream background behind
+  the page). Those are the ON-SCREEN APP, a completely different thing
+  from the printed booklet, and showing them reads as both "not the real
+  printed look" and "not black & white" (the app chrome is in color) even
+  when the actual page content is already correct. **Always generate the
+  mockup from the real export path**: `page.pdf({preferCSSPageSize:true,
+  printBackground:true})` (the same call the real booklet export uses,
+  with `@media print` already limiting the page to only `#bkPrint`), then
+  rasterize the resulting PDF pages directly (PyMuPDF `page.get_pixmap()`)
+  - never a `Page.screenshot()`/`elementHandle.screenshot()` of the live
+  DOM for anything shown to the owner as "what the booklet looks like".
   Root cause: `.bk-rv-name` (and 23 other `.bk-*` rules - day headings,
   section cartouches, verse numbers, the dedication/TOC/rights pages,
   the Shabbat greeting, etc.) listed `"Frank Ruhl Libre"` (an externally

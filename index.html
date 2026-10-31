@@ -1540,6 +1540,39 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
      the Vayetze pagination hang, not just the subject-boundary squeeze that
      first exposed it. */
   contain:layout style}
+/* Gutter margin (user request, 2026-10-31): text was sitting too close to
+   the spine to read comfortably once bound. Every reading page built by
+   bkPageHtml() (both the regular day pages and Ben Ish Chai) gets extra
+   padding on its INNER/gutter side while its OUTER/fore-edge side keeps the
+   base 10mm - `--bk-gutter` is the extra amount added to the gutter side
+   only (the base 10mm still applies there too, so the gutter side is
+   10mm+--bk-gutter and the outer side stays a plain 10mm).
+   In a right-to-left bound book the odd/even <-> recto/verso assignment is
+   the MIRROR of a Latin (LTR) book, not the same: page 1 opens as a single
+   right-hand leaf, but because the whole book is bound/turned in the
+   opposite direction, every ODD page from then on lands as the LEFT-hand
+   page of its spread and every EVEN page as the RIGHT-hand page (confirmed
+   empirically against a real two-page spread screenshot before shipping -
+   don't "fix" this back to the Latin odd=right assumption without
+   re-checking a real spread). A left-hand page's gutter (the edge at the
+   fold) is on its own RIGHT; a right-hand page's gutter is on its own LEFT -
+   that part of the geometry is language-independent. So: odd -> extra on
+   the right, even -> extra on the left. Plain physical padding-left/
+   padding-right is used rather than direction-aware logical properties
+   (padding-inline-*), which would flip based on this page's own
+   direction:rtl and undo the mirroring above.
+   5mm is the owner's confirmed amount (2026-10-31, chosen from a real
+   page-count comparison: 0mm=217pg, +3mm=224pg, +5mm=228pg, +7mm=230pg on
+   a full built week - +5mm was picked as most of the readability gain
+   for a moderate page-count cost). The owner has no printed copy on hand
+   to confirm which physical side is actually the gutter in the real bound
+   booklet - if a future printed copy shows the margin added to the WRONG
+   side, this is a one-line fix: swap which of .bk-pg-odd/.bk-pg-even gets
+   the extra amount (just swap which selector's rule has the `+ var(--bk-
+   gutter)`), nothing else needs to change. */
+.bk-page{--bk-gutter:5mm}
+.bk-page.bk-pg-odd{padding-right:calc(10mm + var(--bk-gutter));padding-left:10mm}
+.bk-page.bk-pg-even{padding-left:calc(10mm + var(--bk-gutter));padding-right:10mm}
 /* No per-page hairline border (user rule, 2026-10-31): a frame around every
    page doubled up with any section's own frame (e.g. Rambam's gold
    .bk-sec-t border) and looked wrong stacked on top of it. Only the cover's
@@ -6713,7 +6746,7 @@ function bkBandSvg(){
   </svg>`;
 }
 function bkPageHtml(meta,no,label){
-  return `<div class="bk-page">
+  return `<div class="bk-page ${no%2?'bk-pg-odd':'bk-pg-even'}">
     <div class="bk-ph bk-band">${bkBandSvg()}
       <div class="bk-ph-row"><span class="bk-ph-side">${meta.parasha}</span><i class="bk-band-t" role="img" aria-label="${bkUI().brand}">${ornTitleSvg(bkUI().brandStam,BK_FONT.url,1)}</i><span class="bk-ph-side bk-ph-lbl">${label}</span></div>
     </div>
