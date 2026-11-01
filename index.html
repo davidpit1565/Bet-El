@@ -11475,8 +11475,9 @@ function readerHeadBare(){
    ("Parasha - Sunday"); tapping opens a bottom sheet that hosts the original controls (nodes are moved, so every handler
    keeps working). Scrolling down hides the whole head (see set() in initNavScrollHide). */
 function slimReaderHead(){
-  document.querySelectorAll('.rh-sheet-wrap').forEach(w=>w.remove());
-  const hd=document.querySelector('.reader-head'); if(!hd||hd.classList.contains('rh-slim')) return;
+  const hd=document.querySelector('.reader-head');
+  document.querySelectorAll('.rh-sheet-wrap').forEach(w=>{ const c=w.querySelector('.bic-collapse'); if(c&&hd&&hd.isConnected&&hd.classList.contains('rh-slim')) hd.appendChild(c); w.remove(); });   // give the controls back before dropping a stale sheet
+  if(!hd||hd.classList.contains('rh-slim')) return;
   const col=hd.querySelector('.bic-collapse'); if(!col) return;
   const big=BIG_HEADER_TABS_LIST.indexOf(TAB)>=0 || col.querySelector('.ck-arrow') || hd.classList.contains('rh-slim-src');
   if(!big) return;
@@ -15578,7 +15579,7 @@ syncWidgetData();
     if(TAB==='home'){
       const q=document.querySelector('#homeChokCard .qd');
       if(q && q.textContent.trim()){ try{ homeNativePush(); }catch(e){} return; }
-      if(q) ensureChokIndex().then(()=>{ if(TAB==='home') render(); }).catch(()=>{});
+      if(q && !CHOK) ensureChokIndex().then(()=>{ if(TAB==='home') render(); }).catch(()=>{});
     }
     if(n<20) chokHeal(n+1);
   },1500);
