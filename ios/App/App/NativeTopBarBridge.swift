@@ -51,7 +51,23 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
                 return (iid, t, ($0["on"] as? Bool) ?? false)
             }
         }
+        // Optional title button + picker sheet (`titleSheet: {daysTitle, secsTitle, daysAction, secsAction, days:[{id,title,on}], secs:[...]}`).
+        func items(_ raw: Any?) -> [TitleSheetItem] {
+            (raw as? [[String: Any]] ?? []).compactMap {
+                guard let iid = $0["id"] as? String, let t = $0["title"] as? String else { return nil }
+                return TitleSheetItem(id: iid, title: t, on: ($0["on"] as? Bool) ?? false)
+            }
+        }
+        var sheet: TitleSheetSpec?
+        if let ts = call.getObject("titleSheet") {
+            sheet = TitleSheetSpec(
+                daysTitle: ts["daysTitle"] as? String ?? "", secsTitle: ts["secsTitle"] as? String ?? "",
+                daysAction: ts["daysAction"] as? String ?? "", secsAction: ts["secsAction"] as? String ?? "",
+                days: items(ts["days"]), secs: items(ts["secs"]), isRTL: isRTL, isDark: isDark)
+        }
         DispatchQueue.main.async {
+            NativeTopBarView.titleSheet = sheet
+            if sheet != nil { NotificationCenter.default.post(name: TitleSheetViewController.refreshNotification, object: nil) }
             NativeTopBarView.menus = menus
             NativeTopBarBridge.activeController?.configureTopBar(
                 title: title, hasBack: !backTo.isEmpty, isRTL: isRTL, isDark: isDark,
