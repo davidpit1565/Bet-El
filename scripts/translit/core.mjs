@@ -185,7 +185,7 @@ const NUMERAL_NEXT = new Set(['סעיפים', 'טפחים', 'ואילך', 'מק�
 // Core (Hebrew-side) options. A scheme may override them through `scheme.core`.
 //   shvaNaAfter: after which long-vowel classes a shva counts as VOCAL (na). Textbook rule = all of them;
 //   many readers (and the app's existing transliteration) pronounce it silent after some (omrim, amru).
-export const DEFAULT_OPTIONS = { shvaNaAfter: ['qamatz', 'tsere', 'cholam', 'shuruk', 'hirikYod'], gemAfterShvaNa: false };
+export const DEFAULT_OPTIONS = { strictDivine: false, qamatzHeuristic: true, identicalShvaNa: true, shvaNaAfter: ['qamatz', 'tsere', 'cholam', 'shuruk', 'hirikYod'], gemAfterShvaNa: false };
 
 // Parse one Hebrew word token (string from tokenize()).
 // ctx: { prev: stripped previous Hebrew word, next: stripped next Hebrew word, nextIsMaqaf }
@@ -216,7 +216,9 @@ export function parseWord(w, ctx = {}, copts = DEFAULT_OPTIONS) {
       }
     }
     const m = /^([ובכלמשה]*)(יהוה|יי)$/.exec(sk);
-    if (m && !geresh && !hasQuote) {
+    // strictDivine: a word merely ending in יי (לשוויי, עילויי) is not the Name - the first yod of the Name has no vowel but shva/hataf
+    const strictOk = !copts.strictDivine || m && !(letters[letters.length - 2] && /^(tsere|hirik|segol|patach|qamatz|cholam|qubutz)$/.test(letters[letters.length - 2].v || '') && m[2] === 'יי');
+    if (m && strictOk && !geresh && !hasQuote) {
       const pre = letters.slice(0, m[1].length);
       const sub = pre.length ? parseNormal(clAll.slice(0, pre.length), ctx) : { ph: [] };
       res.ph = sub.ph.concat([{ k: 'N', id: 'tetragrammaton' }]);
@@ -299,11 +301,11 @@ function parseNormal(clAll, ctx) {
       if (c.kat) { kind[i] = 'katan'; continue; }
       const nx = cl[i + 1];
       if (c.id === 'kaf' && nx && nx.ch === 'ל' && i + 2 === n && !nx.v) { // kol (also vechol, bechol ...)
-        let ok = true; for (let q = 0; q < i; q++) if (!PREFIXES.has(cl[q].ch)) ok = false;
+        let ok = true; if (copts.qamatzHeuristic !== false) for (let q = 0; q < i; q++) if (!PREFIXES.has(cl[q].ch)) ok = false;
         if (ok) { kind[i] = 'katan'; continue; }
       }
       if (nx && nx.v === 'shva' && role[i + 1] === 'C' && i + 1 < n - 1) {
-        kind[i] = qamatzKind(cl, i);
+        if (copts.qamatzHeuristic !== false) kind[i] = qamatzKind(cl, i); // option off: only explicit marks / kol (French)
       } else if (nx && nx.v === 'hqamatz') kind[i] = 'katan';
       else if (nx && nx.v === 'shva' && i + 1 === n - 1) kind[i] = null; // final shva nach, qamatz in closed final syllable: gadol
     }
@@ -337,7 +339,7 @@ function parseNormal(clAll, ctx) {
     else if (i === n - 1) na = false;
     else if (isLastTwoShva(i)) na = false;
     else if (c.dag && BGDKPT.has(c.id) ? chazakDagesh(cl, role, i) : c.dag && !BGDKPT.has(c.id)) na = true;
-    else if (cl[i + 1] && cl[i + 1].ch === c.ch && (cl[i + 1].v || role[i + 2] === 'mV')) na = true; // identical neighbours: hal-lu
+    else if (copts.identicalShvaNa !== false && cl[i + 1] && cl[i + 1].ch === c.ch && (cl[i + 1].v || role[i + 2] === 'mV')) na = true; // identical neighbours: hal-lu
     else if (prev && prev.v === 'shva' && role[i - 1] === 'C') na = !shvaNa[i - 1]; // two in a row: first silent, second vocal
     else if (prevIdx >= 0 && kind[prevIdx] === 'gadolNach') na = false;
     else if (leadClass && copts.shvaNaAfter.includes(leadClass)) na = true;

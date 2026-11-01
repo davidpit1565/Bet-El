@@ -7,6 +7,8 @@ Rule-based, no LLM, no network. Used for Shulchan Aruch HaRav
 core.mjs          language-neutral phonological parser (+ generic renderer, tokenizer, stats)
 en.mjs            English output scheme: tables + options (this is the template for new languages)
 test.mjs          68 hand-checked cases          -> node scripts/translit/test.mjs
+fr.mjs / test-fr.mjs   French (convention A, see FR-NOTES.md/spec-fr.json), 62 cases -> node scripts/translit/test-fr.mjs
+corpus-fr-compare.mjs  match vs corpus-fr.json; corpus-compare-fr-bulk.mjs: match vs torah-fr / chok-daf
 corpus-compare.mjs   word-by-word match vs the app's existing transliteration
 sweep.mjs         one-factor option sweep used for tuning
 ../build-sa-harav-translit.mjs   generator (+ stats report)
@@ -101,3 +103,13 @@ languages' tests.
 * Source defects (a missing vowel) get a default `a`; known ones are patched in `SOURCE_FIXES`.
 * Unvocalized loan-words (Yiddish/German) and numerals are consonant skeletons (`y"t`, `qrvb"tz`).
 * Ketiv/qere, stress, and the vav of הִוא are not modelled.
+
+## French (fr.mjs)
+Generated with `node scripts/build-sa-harav-translit.mjs --lang fr` (511 files, ~5.7 MB). Convention A of the app's existing French
+(kh, k = qof, ch, ts, é, ou, doubled dagesh chazak, gu/ss/ï rules, Adonaï). Core got four opt-in switches (defaults keep English
+output byte-identical): `qamatzHeuristic:false` (qamatz katan only when marked, kol/-kol endings, or before hataf-qamatz),
+`identicalShvaNa:false`, `strictDivine:true` (a word merely ending in yod-yod, e.g. לְשַׁוּוֹיֵי, is not the Name) and
+`shvaNaAfter:['shuruk']`. Match vs corpus-fr.json convention A: 98.6% (280/284; rest are source defects with a missing vowel);
+vs torah-fr 98.2% and chok-daf 99.9% (1.83M words, exact, case/punctuation-insensitive). Known weaknesses: unmarked qamatz katan
+before shva reads as `a` (khatma, as in the existing data), Aramaic bare yod/vav after yod/vav, `ha`+shva rule is positional
+(ouléhakétir vs existing ouléhaktir), Torah-style `véïm`/`la-Adonaï` are not reproduced, numerals/abbreviations stay skeletons.
