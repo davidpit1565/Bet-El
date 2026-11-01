@@ -6626,7 +6626,7 @@ function renderChokExplainer(){
   ${topbar('מה לומדים כל יום', CK_EXPLAINER_BACK)}
   <div class="view">
     <p class="ck-explainer-intro">${ckChrome('בְּכָל יוֹם לוֹמְדִים קֶטַע קָבוּעַ מִכָּל אֶחָד מִשְּׁמוֹנָה הַתְּחוּמִים הַבָּאִים:')}</p>
-    <div class="card">
+    <div class="card" style="backdrop-filter:none;-webkit-backdrop-filter:none;overflow:visible">
       ${CK_EXPLAINER_ITEMS.map(it=>`
         <div class="ck-explainer-row">
           <span class="ck-explainer-ico">${I[it.icon]}</span>
@@ -6635,6 +6635,8 @@ function renderChokExplainer(){
     </div>
   </div>`;
   tr(app);
+  /* iOS: this long static page was the one screen that stayed non-scrollable after forceScrollTop()'s overflow toggle - make sure the scroller is released */
+  [60,350,900].forEach(ms=>setTimeout(()=>{ if(TAB==='chokExplainer'){ document.body.style.overflowY=''; document.documentElement.style.overflowY=''; } },ms));
 }
 function renderChokList(){
   const key0=ckWeekKeyFor(chokDayDate());
