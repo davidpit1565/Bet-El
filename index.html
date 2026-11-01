@@ -2089,6 +2089,103 @@ html.glassy :is(.daily-mode-tag,.daily-tag){background-color:var(--gk-gold);back
   html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.ck-yr-btn,.today-btn,.dd-share-btn,.icon-btn,.cal-nav,.seg button,.stepper button,.toggle,.toggle::after,.pace-opt,.fld-select,.fld-input,.time-input){transition:none!important}
   html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.icon-btn,.pace-opt,.seg button):active{transform:none}
 }
+/* ===== GLASS SURFACES (Android + web/PWA only; gated by html.glassy, set by the foundation block) =====
+   Cards, tiles, rows, sheets, dialogs, toasts, headers, tools FAB, hero. Flat translucent gradients + 1px rim + inner top
+   highlight + layered soft shadow. NO backdrop-filter (see the Liquid Glass lesson above) - existing blurs on these selectors
+   are switched off here. Private --gs-* tokens read the foundation's --gl-* tokens with theme-aware fallbacks, so this works
+   before/without them. Without html.glassy none of this applies. */
+html.glassy{
+  --gs-bg:var(--gl-bg,linear-gradient(165deg,rgba(44,62,110,.58),rgba(24,36,70,.52)));
+  --gs-bg-strong:var(--gl-bg-strong,linear-gradient(165deg,#1d2b53,#141f3e));
+  --gs-rim:var(--gl-border,rgba(255,238,200,.15));
+  --gs-hi:var(--gl-hi,rgba(255,255,255,.16));
+  --gs-shadow:var(--gl-shadow,0 1px 2px rgba(0,0,0,.28),0 14px 30px -14px rgba(0,0,0,.65));
+  --gs-r:26px; --gs-r-md:22px; --gs-r-sm:18px;
+  --gs-sep:rgba(255,255,255,.08);
+}
+html.glassy[data-theme="light"]{
+  --gs-bg:var(--gl-bg,linear-gradient(165deg,rgba(255,255,255,.78),rgba(255,251,240,.6)));
+  --gs-bg-strong:var(--gl-bg-strong,linear-gradient(165deg,#fffdf6,#f8f1df));
+  --gs-rim:var(--gl-border,rgba(255,255,255,.85));
+  --gs-hi:var(--gl-hi,rgba(255,255,255,.95));
+  --gs-shadow:var(--gl-shadow,0 1px 2px rgba(80,60,20,.14),0 12px 28px -14px rgba(80,60,20,.42));
+  --gs-sep:rgba(110,85,30,.14);
+}
+/* the shared surface */
+html.glassy .card,html.glassy .q-tile,html.glassy .stat-card,html.glassy .prayer-row,html.glassy .set-item,
+html.glassy .sm-week-card,html.glassy .ps-cell,html.glassy .ical-card,html.glassy .res-item,html.glassy .dd-portion,
+html.glassy .yahrzeit-strip,html.glassy .home-hero-frame{
+  background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg);
+  border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),var(--gs-shadow);
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+html.glassy .card::after{background:linear-gradient(135deg,rgba(212,175,95,.07),transparent 42%);border-radius:inherit}
+html.glassy .card{border-radius:var(--gs-r)}
+html.glassy .q-tile,html.glassy .q-tile.round-card{border-radius:var(--gs-r-md)}
+html.glassy .stat-card,html.glassy .stat-card.long{border-radius:var(--gs-r-md)}
+html.glassy .stat-card{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),linear-gradient(155deg,transparent 50%,rgba(212,175,95,.13)),var(--gs-bg)}
+html.glassy .prayer-row,html.glassy .prayer-row.round-card{border-radius:var(--gs-r-md)}
+html.glassy .sm-week-card,html.glassy .yahrzeit-strip,html.glassy .ical-card{border-radius:var(--gs-r-md)}
+html.glassy .res-item,html.glassy .dd-portion{border-radius:var(--gs-r-sm)}
+html.glassy .q-tile .qi{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04)),var(--panel-2);box-shadow:inset 0 1px 0 var(--gs-hi)}
+/* hero: gold-tinted glass */
+html.glassy .home-hero-frame{border-radius:var(--gs-r);border-color:color-mix(in srgb,var(--gold) 42%,transparent);
+  background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),linear-gradient(160deg,rgba(212,175,95,.16),transparent 60%),var(--gs-bg)}
+/* states that must keep their gold accent over the neutral rim */
+html.glassy .q-tile.done{border-color:var(--gold);box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1px rgba(212,175,95,.3),0 8px 20px -10px rgba(212,175,95,.5)}
+html.glassy .prayer-row.week-row{border-color:var(--gold);box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1px rgba(212,175,95,.3),var(--gs-shadow)}
+html.glassy .ps-cell.read{border-color:color-mix(in srgb,var(--gold) 55%,transparent)}
+html.glassy .ps-cell{box-shadow:inset 0 1px 0 var(--gs-hi),0 4px 10px -6px rgba(0,0,0,.45)}
+html.glassy[data-theme="light"] .ps-cell{box-shadow:inset 0 1px 0 var(--gs-hi),0 4px 10px -6px rgba(80,60,20,.35)}
+@media (hover:hover) and (pointer:fine){
+  html.glassy .card:hover,html.glassy .q-tile:hover,html.glassy .set-item:hover,html.glassy .sm-week-card:hover,html.glassy .dd-portion:hover{
+    box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1px rgba(212,175,95,.4),var(--gs-shadow)}
+  html.glassy .ps-cell:hover{box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1.5px rgba(212,175,95,.5)}
+}
+/* settings: inset-grouped like iOS Settings (consecutive rows share one rounded block, hairline separators) */
+@supports selector(:has(a)){
+  html.glassy .set-item{margin-bottom:0;border-radius:0;border-width:0 0 1px;border-bottom-color:var(--gs-sep);box-shadow:none;background:var(--gs-bg)}
+  html.glassy .set-item:not(.set-item + .set-item){border-top-left-radius:var(--gs-r-md);border-top-right-radius:var(--gs-r-md);border-top-width:1px;border-top-color:var(--gs-rim);
+    box-shadow:inset 0 1px 0 var(--gs-hi)}
+  html.glassy .set-item:not(:has(+ .set-item)){border-bottom-left-radius:var(--gs-r-md);border-bottom-right-radius:var(--gs-r-md);margin-bottom:12px;border-bottom-width:1px;border-bottom-color:var(--gs-rim);
+    box-shadow:var(--gs-shadow)}
+  html.glassy .set-item:not(.set-item + .set-item):not(:has(+ .set-item)){box-shadow:inset 0 1px 0 var(--gs-hi),var(--gs-shadow)}
+  html.glassy .set-item{border-inline:1px solid var(--gs-rim)}
+}
+@supports not selector(:has(a)){ html.glassy .set-item{border-radius:var(--gs-r-sm);margin-bottom:8px} }
+/* reading text card: calm, nearly flat */
+html.glassy{--rd-card:rgba(255,255,255,.05);--rd-line:rgba(255,255,255,.12)}
+html.glassy[data-theme="light"]{--rd-card:rgba(255,255,255,.7);--rd-line:rgba(255,255,255,.9)}
+html.glassy .sm-verses,html.glassy .chapter,html.glassy .prayer-reader-text{border-radius:var(--gs-r-md);
+  box-shadow:inset 0 0 0 1px var(--rd-line),inset 0 1px 0 var(--gs-hi),0 10px 24px -16px rgba(0,0,0,.5)}
+html.glassy[data-theme="light"] .sm-verses,html.glassy[data-theme="light"] .chapter,html.glassy[data-theme="light"] .prayer-reader-text{
+  box-shadow:inset 0 0 0 1px rgba(110,85,30,.12),inset 0 1px 0 #fff,0 10px 24px -16px rgba(80,60,20,.4)}
+/* headers: soft solid-ish fill, hairline rim, no blur */
+html.glassy .topbar,html.glassy .reader-head{background:linear-gradient(180deg,rgba(255,255,255,.045),transparent 70%),var(--bg);
+  border-bottom:1px solid var(--gs-sep);box-shadow:0 8px 18px -14px rgba(0,0,0,.55)}
+html.glassy[data-theme="light"] .topbar,html.glassy[data-theme="light"] .reader-head{box-shadow:0 8px 18px -14px rgba(80,60,20,.4)}
+/* progress: gold glass track */
+html.glassy .reader-progress{height:5px;border-radius:999px;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 2px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.06)}
+html.glassy[data-theme="light"] .reader-progress{background:rgba(110,85,30,.14);box-shadow:inset 0 1px 2px rgba(80,60,20,.3),0 1px 0 rgba(255,255,255,.7)}
+html.glassy .reader-progress i{border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 8px rgba(212,175,95,.5)}
+/* tools FAB panel */
+html.glassy .reader-tools .rt-fab{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg-strong);border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),var(--gs-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
+html.glassy .reader-tools .rt-panel{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg-strong);border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),0 18px 36px -14px rgba(0,0,0,.7);backdrop-filter:none;-webkit-backdrop-filter:none}
+html.glassy[data-theme="light"] .reader-tools .rt-panel{box-shadow:inset 0 1px 0 #fff,0 18px 36px -14px rgba(80,60,20,.45)}
+/* dialogs, sheets, toasts */
+html.glassy .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;background:radial-gradient(120% 90% at 50% 40%,rgba(10,16,32,.62),rgba(4,8,18,.84))}
+html.glassy[data-theme="light"] .overlay{background:radial-gradient(120% 90% at 50% 40%,rgba(70,55,28,.38),rgba(40,30,12,.6))}
+html.glassy .modal{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 4px),var(--gs-bg-strong);border:1px solid var(--gs-rim);border-radius:30px;
+  box-shadow:inset 0 1px 0 var(--gs-hi),0 2px 4px rgba(0,0,0,.3),0 30px 70px -20px rgba(0,0,0,.8)}
+html.glassy[data-theme="light"] .modal{box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(80,60,20,.15),0 30px 70px -22px rgba(60,45,15,.55)}
+html.glassy .toast{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg-strong);border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),0 12px 28px -10px rgba(0,0,0,.6)}
+html.glassy .home-sheet-ov{background:radial-gradient(120% 90% at 50% 40%,rgba(10,16,32,.5),rgba(4,8,18,.78))}
+html.glassy .home-sheet{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 4px),var(--gs-bg-strong);border:1px solid var(--gs-rim);border-bottom:0;
+  border-radius:32px 32px 0 0;box-shadow:inset 0 1px 0 var(--gs-hi),0 -20px 50px -20px rgba(0,0,0,.7)}
+html.glassy .hs-row{border-bottom-color:var(--gs-sep)}
 </style>
 </head>
 <body>
