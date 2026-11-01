@@ -1,0 +1,3089 @@
+[
+{
+"he": "לְשׁוֹן",
+"fr": "léchon",
+"src": "data/chok-daf/0.fr.json @/7/g/a/28",
+"conv": "A",
+"tag": "c:vav>"
+},
+{
+"he": "זִכְרוֹנָם",
+"fr": "zikhronam",
+"src": "data/chok-benishchai/year1/Ha_Azinu.fr.json @/intro/0",
+"conv": "A",
+"tag": "c:vav>"
+},
+{
+"he": "גּוּפַאּ",
+"fr": "goufa",
+"src": "data/chok-daf/114.fr.json @/2293/g/b/3",
+"conv": "A",
+"tag": "c:א+dagesh>"
+},
+{
+"he": "גְּרָמָאּ",
+"fr": "guérama",
+"src": "data/chok-daf/112.fr.json @/2241/g/a/14",
+"conv": "A",
+"tag": "c:א+dagesh>"
+},
+{
+"he": "בְּאָׁמְרוֹ",
+"fr": "béamro",
+"src": "data/chok-leyisrael/Chayei-Sara.fr.json @/_comm/Genesis 24:30/ohc/0",
+"conv": "A",
+"tag": "c:א/sh>"
+},
+{
+"he": "שֶׁלֹּא",
+"fr": "chéllo",
+"src": "data/chok-daf/0.fr.json @/2/g/b/1",
+"conv": "A",
+"tag": "c:א>"
+},
+{
+"he": "שֶׁאֵין",
+"fr": "chéén",
+"src": "data/chok-daf/104.fr.json @/2082/g/b/0",
+"conv": "A",
+"tag": "c:א>"
+},
+{
+"he": "בְּהַהוּא",
+"fr": "béhahou",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/29",
+"conv": "A",
+"tag": "c:ב+dagesh>b"
+},
+{
+"he": "בְּפָסוּק",
+"fr": "béfassouk",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 16:1/ohc/1",
+"conv": "A",
+"tag": "c:ב+dagesh>b"
+},
+{
+"he": "רַבִּי",
+"fr": "Rabbi",
+"src": "data/chok-benishchai/year1/Emor.fr.json @/intro/0",
+"conv": "A",
+"tag": "c:ב+dagesh>bb"
+},
+{
+"he": "לְגַבֵּי",
+"fr": "légabbé",
+"src": "data/chok-daf/0.fr.json @/6/g/b/9",
+"conv": "A",
+"tag": "c:ב+dagesh>bb"
+},
+{
+"he": "וּבְגִין",
+"fr": "ouvéguin",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Achrei Mot 49/0",
+"conv": "A",
+"tag": "c:ב>v"
+},
+{
+"he": "בֵית",
+"fr": "vét",
+"src": "data/chok-daf/111.fr.json @/2232/g/a/6",
+"conv": "A",
+"tag": "c:ב>v"
+},
+{
+"he": "גּוֹ",
+"fr": "go",
+"src": "data/chok-daf/26.fr.json @/537/g/a/7",
+"conv": "A",
+"tag": "c:ג+dagesh>g"
+},
+{
+"he": "גַּם",
+"fr": "Gam",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 17:10/ohc/4",
+"conv": "A",
+"tag": "c:ג+dagesh>g"
+},
+{
+"he": "שֶׁגַּם",
+"fr": "chéggam",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:2/ohc/7",
+"conv": "A",
+"tag": "c:ג+dagesh>gg"
+},
+{
+"he": "שֶׁגָּמַר",
+"fr": "chéggamar",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:24/ohc/0",
+"conv": "A",
+"tag": "c:ג+dagesh>gg"
+},
+{
+"he": "מַגִּיעַ",
+"fr": "magguia",
+"src": "data/chok-daf/131.fr.json @/2627/g/a/0",
+"conv": "A",
+"tag": "c:ג+dagesh>ggu"
+},
+{
+"he": "וּבַגְּמָרָא",
+"fr": "ouvagguémara",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Mishnah Bava Batra 5:9/bart/0",
+"conv": "A",
+"tag": "c:ג+dagesh>ggu"
+},
+{
+"he": "גְּזֵרַת",
+"fr": "guézérat",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:2/ohc/10",
+"conv": "A",
+"tag": "c:ג+dagesh>gu"
+},
+{
+"he": "תִּרְגֵּם",
+"fr": "tirguém",
+"src": "data/chok-leyisrael/Balak.fr.json @/_comm/Micah 6:8/rashi/1",
+"conv": "A",
+"tag": "c:ג+dagesh>gu"
+},
+{
+"he": "הֲגַם",
+"fr": "hagam",
+"src": "data/chok-benishchai/year2/Metzora.fr.json @/days/0/3/paragraphs/0",
+"conv": "A",
+"tag": "c:ג>g"
+},
+{
+"he": "וַהֲגַם",
+"fr": "vahagam",
+"src": "data/chok-benishchai/year1/Mishpatim.fr.json @/days/0/1/paragraphs/0",
+"conv": "A",
+"tag": "c:ג>g"
+},
+{
+"he": "כְּנֶגֶד",
+"fr": "kénéguéd",
+"src": "data/chok-daf/0.fr.json @/4/g/b/35",
+"conv": "A",
+"tag": "c:ג>gu"
+},
+{
+"he": "דְּאֵין",
+"fr": "déén",
+"src": "data/chok-daf/0.fr.json @/15/g/b/9",
+"conv": "A",
+"tag": "c:ד+dagesh>d"
+},
+{
+"he": "דְּכוּלֵּי",
+"fr": "dékhoullé",
+"src": "data/chok-daf/0.fr.json @/15/g/b/8",
+"conv": "A",
+"tag": "c:ד+dagesh>d"
+},
+{
+"he": "קַדִּישָׁא",
+"fr": "kaddicha",
+"src": "data/chok-daf/0.fr.json @/7/g/b/15",
+"conv": "A",
+"tag": "c:ד+dagesh>dd"
+},
+{
+"he": "מִדִּבְרֵי",
+"fr": "middivré",
+"src": "data/chok-daf/0.fr.json @/12/g/a/18",
+"conv": "A",
+"tag": "c:ד+dagesh>dd"
+},
+{
+"he": "לְצַד",
+"fr": "létsad",
+"src": "data/chok-daf/10.fr.json @/215/g/b/6",
+"conv": "A",
+"tag": "c:ד>d"
+},
+{
+"he": "יַהֲבַהּ",
+"fr": "yahava",
+"src": "data/chok-daf/3.fr.json @/71/g/b/5",
+"conv": "A",
+"tag": "c:ה+dagesh>"
+},
+{
+"he": "אַסְבְּרַהּ",
+"fr": "asbéra",
+"src": "data/chok-daf/101.fr.json @/2033/g/b/9",
+"conv": "A",
+"tag": "c:ה+dagesh>"
+},
+{
+"he": "שֶׁאֵינָהּ",
+"fr": "chéénah",
+"src": "data/chok-daf/1.fr.json @/26/g/a/14",
+"conv": "A",
+"tag": "c:ה+dagesh>h"
+},
+{
+"he": "בְּאוֹתָהּ",
+"fr": "béotah",
+"src": "data/chok-daf/1.fr.json @/21/g/a/13",
+"conv": "A",
+"tag": "c:ה+dagesh>h"
+},
+{
+"he": "כְּמָה",
+"fr": "kéma",
+"src": "data/chok-daf/129.fr.json @/2584/g/b/11",
+"conv": "A",
+"tag": "c:ה>"
+},
+{
+"he": "מִמַּה",
+"fr": "mimma",
+"src": "data/chok-daf/110.fr.json @/2205/g/b/16",
+"conv": "A",
+"tag": "c:ה>"
+},
+{
+"he": "וְהָא",
+"fr": "véha",
+"src": "data/chok-daf/0.fr.json @/0/g/a/12",
+"conv": "A",
+"tag": "c:ה>h"
+},
+{
+"he": "וְּלְנָפְקָא",
+"fr": "vélnafka",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/73",
+"conv": "A",
+"tag": "c:ו+dagesh>v"
+},
+{
+"he": "וְּמְשַׁטְטֵי",
+"fr": "vémchatté",
+"src": "data/chok-zohar/21.fr.json @/843/2",
+"conv": "A",
+"tag": "c:ו+dagesh>v"
+},
+{
+"he": "כַּוָּנַת",
+"fr": "kavvanat",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 17:10/ohc/0",
+"conv": "A",
+"tag": "c:ו+dagesh>vv"
+},
+{
+"he": "שֶׁנִּתְכַּוֵּן",
+"fr": "chénnitkavvén",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 17:5/ohc/0",
+"conv": "A",
+"tag": "c:ו+dagesh>vv"
+},
+{
+"he": "וְאֵינוֹ",
+"fr": "vééno",
+"src": "data/chok-daf/0.fr.json @/3/g/a/6",
+"conv": "A",
+"tag": "c:ו>v"
+},
+{
+"he": "וְיָת",
+"fr": "véyat",
+"src": "data/chok-zohar/1.fr.json @/47/12",
+"conv": "A",
+"tag": "c:ו>v"
+},
+{
+"he": "זֶּה",
+"fr": "zé",
+"src": "data/chok-daf/95.fr.json @/1906/g/b/16",
+"conv": "A",
+"tag": "c:ז+dagesh>z"
+},
+{
+"he": "זּוֹ",
+"fr": "zo",
+"src": "data/chok-daf/13.fr.json @/270/g/b/11",
+"conv": "A",
+"tag": "c:ז+dagesh>z"
+},
+{
+"he": "שֶׁזֶּה",
+"fr": "chézzé",
+"src": "data/chok-daf/0.fr.json @/12/g/b/11",
+"conv": "A",
+"tag": "c:ז+dagesh>zz"
+},
+{
+"he": "שֶׁזֶּה",
+"fr": "chézzé",
+"src": "data/chok-daf/106.fr.json @/2127/g/b/1",
+"conv": "A",
+"tag": "c:ז+dagesh>zz"
+},
+{
+"he": "בִּזְמַן",
+"fr": "bizman",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/0/paragraphs/0",
+"conv": "A",
+"tag": "c:ז>z"
+},
+{
+"he": "בְּחִינַת",
+"fr": "békhinat",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:2/ohc/3",
+"conv": "A",
+"tag": "c:ח>kh"
+},
+{
+"he": "מֵחֲמַת",
+"fr": "mékhamat",
+"src": "data/chok-daf/0.fr.json @/6/g/b/6",
+"conv": "A",
+"tag": "c:ח>kh"
+},
+{
+"he": "טֹּבוּ",
+"fr": "tovou",
+"src": "data/chok-leyisrael/Balak.fr.json @/_comm/Numbers 24:5/ohc/0",
+"conv": "A",
+"tag": "c:ט+dagesh>t"
+},
+{
+"he": "טּוֹב",
+"fr": "tov",
+"src": "data/chok-daf/103.fr.json @/2078/g/a/7",
+"conv": "A",
+"tag": "c:ט+dagesh>t"
+},
+{
+"he": "מִטַּעַם",
+"fr": "mittaam",
+"src": "data/chok-daf/22.fr.json @/455/g/a/0",
+"conv": "A",
+"tag": "c:ט+dagesh>tt"
+},
+{
+"he": "הַטֻּמְאָה",
+"fr": "hattouma",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Mishnah Oholot 11:3-6/0",
+"conv": "A",
+"tag": "c:ט+dagesh>tt"
+},
+{
+"he": "טֻמְאַת",
+"fr": "toumat",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 16:7/ohc/3",
+"conv": "A",
+"tag": "c:ט>t"
+},
+{
+"he": "מִסִּטְרָא",
+"fr": "missitra",
+"src": "data/chok-benishchai/year1/Behar_Bechukotai.fr.json @/days/2/2/paragraphs/0",
+"conv": "A",
+"tag": "c:ט>t"
+},
+{
+"he": "יֵּשׁ",
+"fr": "yéch",
+"src": "data/chok-leyisrael/Bechukotai.fr.json @/_comm/Mishnah Negaim 10:5/bart/2",
+"conv": "A",
+"tag": "c:י+dagesh>y"
+},
+{
+"he": "יּוֹם",
+"fr": "yom",
+"src": "data/chok-leyisrael/Ki-Tisa.fr.json @/_comm/Exodus 31:16/ohc/17",
+"conv": "A",
+"tag": "c:י+dagesh>y"
+},
+{
+"he": "שֶׁיֵּשׁ",
+"fr": "chéyyéch",
+"src": "data/chok-daf/0.fr.json @/1/g/b/10",
+"conv": "A",
+"tag": "c:י+dagesh>yy"
+},
+{
+"he": "שֶׁיֵּשׁ",
+"fr": "chéyyéch",
+"src": "data/chok-daf/104.fr.json @/2089/g/b/23",
+"conv": "A",
+"tag": "c:י+dagesh>yy"
+},
+{
+"he": "יַת",
+"fr": "yat",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/259",
+"conv": "A",
+"tag": "c:י>y"
+},
+{
+"he": "מִמְּךָּ",
+"fr": "mimméka",
+"src": "data/chok-zohar/18.fr.json @/731/2",
+"conv": "A",
+"tag": "c:ך+dagesh>k"
+},
+{
+"he": "וַיֵּבְךְּ",
+"fr": "Vayyévk",
+"src": "data/chok-leyisrael/Miketz.fr.json @/_comm/Genesis 42:24/rashi/1",
+"conv": "A",
+"tag": "c:ך+dagesh>k"
+},
+{
+"he": "לְתוֹךְ",
+"fr": "létokh",
+"src": "data/chok-daf/1.fr.json @/34/g/a/2",
+"conv": "A",
+"tag": "c:ך>kh"
+},
+{
+"he": "בְּדֶרֶךְ",
+"fr": "bédérékh",
+"src": "data/chok-daf/107.fr.json @/2149/g/b/0",
+"conv": "A",
+"tag": "c:ך>kh"
+},
+{
+"he": "שֶׁכָּל",
+"fr": "chékkol",
+"src": "data/chok-daf/0.fr.json @/2/g/a/7",
+"conv": "A",
+"tag": "c:כ+dagesh>kk"
+},
+{
+"he": "שֶׁכְּבָר",
+"fr": "chékkévar",
+"src": "data/chok-daf/0.fr.json @/9/g/b/9",
+"conv": "A",
+"tag": "c:כ+dagesh>kk"
+},
+{
+"he": "כֹׁל",
+"fr": "khol",
+"src": "data/chok-leyisrael/Beshalach.fr.json @/_comm/Exodus 17:2/ohc/0",
+"conv": "A",
+"tag": "c:כ/sh>kh"
+},
+{
+"he": "וְכׁל",
+"fr": "vékhl",
+"src": "data/chok-leyisrael/Bo.fr.json @/_comm/Exodus 11:5/ohc/4",
+"conv": "A",
+"tag": "c:כ/sh>kh"
+},
+{
+"he": "לְּקוּדְשָׁא",
+"fr": "lékoudécha",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Achrei Mot 41/3",
+"conv": "A",
+"tag": "c:ל+dagesh>l"
+},
+{
+"he": "לְּהַלָּן",
+"fr": "léhallan",
+"src": "data/chok-daf/0.fr.json @/7/g/a/13",
+"conv": "A",
+"tag": "c:ל+dagesh>l"
+},
+{
+"he": "הֲלׂא",
+"fr": "hal",
+"src": "data/chok-daf/30.fr.json @/601/g/b/1",
+"conv": "A",
+"tag": "c:ל/sin>l"
+},
+{
+"he": "מַּעֲשֵׂר",
+"fr": "maassér",
+"src": "data/chok-leyisrael/Chayei-Sara.fr.json @/_comm/Mishnah Peah 7:6/bart/3",
+"conv": "A",
+"tag": "c:מ+dagesh>m"
+},
+{
+"he": "מַּטָּה",
+"fr": "matta",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 24/15",
+"conv": "A",
+"tag": "c:מ+dagesh>m"
+},
+{
+"he": "מִמָּקוֹם",
+"fr": "mimmakom",
+"src": "data/chok-daf/0.fr.json @/16/g/a/9",
+"conv": "A",
+"tag": "c:מ+dagesh>mm"
+},
+{
+"he": "וְאָמְרוֹ",
+"fr": "véamro",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:2/ohc/7",
+"conv": "A",
+"tag": "c:מ>m"
+},
+{
+"he": "נֹּאמַר",
+"fr": "nomar",
+"src": "data/chok-rambam/21.fr.json @/Mishneh Torah, The Order of Prayer 1/1",
+"conv": "A",
+"tag": "c:נ+dagesh>n"
+},
+{
+"he": "נִּתְחַכְּמָה",
+"fr": "nitkhakkéma",
+"src": "data/chok-zohar/12.fr.json @/511/2",
+"conv": "A",
+"tag": "c:נ+dagesh>n"
+},
+{
+"he": "בְּאִינּוּן",
+"fr": "béinnoun",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/2",
+"conv": "A",
+"tag": "c:נ+dagesh>nn"
+},
+{
+"he": "סֵּפֶר",
+"fr": "séfér",
+"src": "data/chok-leyisrael/Beshalach.fr.json @/_comm/Mishnah Gittin 2:3/bart/6",
+"conv": "A",
+"tag": "c:ס+dagesh>s"
+},
+{
+"he": "סְּתָם",
+"fr": "sétam",
+"src": "data/chok-rambam/16.fr.json @/Mishneh Torah, Sabbath 18/19",
+"conv": "A",
+"tag": "c:ס+dagesh>s"
+},
+{
+"he": "בְּמַסֶּכֶת",
+"fr": "bémassékhét",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 17:10/ohc/0",
+"conv": "A",
+"tag": "c:ס+dagesh>ss"
+},
+{
+"he": "הִסְפִּיק",
+"fr": "hispik",
+"src": "data/chok-daf/122.fr.json @/2442/g/a/5",
+"conv": "A",
+"tag": "c:ס>s"
+},
+{
+"he": "חָס",
+"fr": "khas",
+"src": "data/chok-benishchai/year1/Nitzavim.fr.json @/days/1/3/paragraphs/0",
+"conv": "A",
+"tag": "c:ס>s"
+},
+{
+"he": "בְּסוֹף",
+"fr": "béssof",
+"src": "data/chok-daf/1.fr.json @/32/g/a/13",
+"conv": "A",
+"tag": "c:ס>ss"
+},
+{
+"he": "בִּשְׁעַת",
+"fr": "bichat",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/3/1/paragraphs/0",
+"conv": "A",
+"tag": "c:ע>"
+},
+{
+"he": "בְּאֶמְצָעוּת",
+"fr": "béémtsaout",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:2/ohc/10",
+"conv": "A",
+"tag": "c:ע>"
+},
+{
+"he": "תּוֹסְףְּ",
+"fr": "tosp",
+"src": "data/chok-daf/35.fr.json @/714/g/a/9",
+"conv": "A",
+"tag": "c:ף+dagesh>p"
+},
+{
+"he": "אַל-תּוֹסְףְּ",
+"fr": "Al-tosp",
+"src": "data/chok-leyisrael/Bechukotai.fr.json @/Proverbs 30:3-7/3",
+"conv": "A",
+"tag": "c:ף+dagesh>p"
+},
+{
+"he": "אוּף",
+"fr": "ouf",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/16",
+"conv": "A",
+"tag": "c:ף>f"
+},
+{
+"he": "פֵּׂירוֹת",
+"fr": "pérot",
+"src": "data/chok-daf/26.fr.json @/539/g/b/8",
+"conv": "A",
+"tag": "c:פ+dagesh/sin>p"
+},
+{
+"he": "פָּסוּק",
+"fr": "passouk",
+"src": "data/chok-daf/111.fr.json @/2228/g/a/13",
+"conv": "A",
+"tag": "c:פ+dagesh>p"
+},
+{
+"he": "כְּלַפֵּי",
+"fr": "kélappé",
+"src": "data/chok-daf/0.fr.json @/17/g/a/7",
+"conv": "A",
+"tag": "c:פ+dagesh>pp"
+},
+{
+"he": "מִפָּסוּק",
+"fr": "mippassouk",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 17:3/ohc/4",
+"conv": "A",
+"tag": "c:פ+dagesh>pp"
+},
+{
+"he": "בִּפְנֵי",
+"fr": "bifné",
+"src": "data/chok-daf/0.fr.json @/1/g/b/16",
+"conv": "A",
+"tag": "c:פ>f"
+},
+{
+"he": "וְחוּץ",
+"fr": "vékhouts",
+"src": "data/chok-daf/104.fr.json @/2092/g/b/10",
+"conv": "A",
+"tag": "c:ץ>ts"
+},
+{
+"he": "שֶׁבְּאֶרֶץ",
+"fr": "chébbééréts",
+"src": "data/chok-daf/102.fr.json @/2046/g/b/5",
+"conv": "A",
+"tag": "c:ץ>ts"
+},
+{
+"he": "צְּרִיכִין",
+"fr": "tsérikhin",
+"src": "data/chok-zohar/16.fr.json @/640/10",
+"conv": "A",
+"tag": "c:צ+dagesh>ts"
+},
+{
+"he": "צֹּאן",
+"fr": "tson",
+"src": "data/chok-zohar/30.fr.json @/1228/8",
+"conv": "A",
+"tag": "c:צ+dagesh>ts"
+},
+{
+"he": "שֶׁצָּרִיךְ",
+"fr": "chétstsarikh",
+"src": "data/chok-daf/104.fr.json @/2094/g/b/2",
+"conv": "A",
+"tag": "c:צ+dagesh>tsts"
+},
+{
+"he": "מִצַּד",
+"fr": "mitstsad",
+"src": "data/chok-daf/108.fr.json @/2167/g/b/2",
+"conv": "A",
+"tag": "c:צ+dagesh>tsts"
+},
+{
+"he": "קִּיֵּים",
+"fr": "kiyyém",
+"src": "data/chok-zohar/10.fr.json @/424/2",
+"conv": "A",
+"tag": "c:ק+dagesh>k"
+},
+{
+"he": "קָּבַע",
+"fr": "kava",
+"src": "data/chok-rambam/18.fr.json @/Mishneh Torah, Sacrificial Procedure 16/8",
+"conv": "A",
+"tag": "c:ק+dagesh>k"
+},
+{
+"he": "שֶׁקּוֹרִין",
+"fr": "chékkorin",
+"src": "data/chok-daf/100.fr.json @/2008/g/a/15",
+"conv": "A",
+"tag": "c:ק+dagesh>kk"
+},
+{
+"he": "עִקַּר",
+"fr": "ikkar",
+"src": "data/chok-daf/95.fr.json @/1918/g/b/9",
+"conv": "A",
+"tag": "c:ק+dagesh>kk"
+},
+{
+"he": "קֳדָם",
+"fr": "kodam",
+"src": "data/chok-daf/10.fr.json @/217/g/a/4",
+"conv": "A",
+"tag": "c:ק>k"
+},
+{
+"he": "לְבַרָּא",
+"fr": "lévara",
+"src": "data/chok-daf/11.fr.json @/226/g/a/5",
+"conv": "A",
+"tag": "c:ר+dagesh>r"
+},
+{
+"he": "כׇרַּת",
+"fr": "khorat",
+"src": "data/chok-daf/59.fr.json @/1190/g/b/6",
+"conv": "A",
+"tag": "c:ר+dagesh>r"
+},
+{
+"he": "שֶּׁאֵין",
+"fr": "chéén",
+"src": "data/chok-daf/10.fr.json @/200/g/b/1",
+"conv": "A",
+"tag": "c:ש+dagesh/sh>ch"
+},
+{
+"he": "שֶּׁכָּתוּב",
+"fr": "chékkatouv",
+"src": "data/chok-daf/100.fr.json @/2008/g/a/2",
+"conv": "A",
+"tag": "c:ש+dagesh/sh>ch"
+},
+{
+"he": "מִשֶּׁל",
+"fr": "michchél",
+"src": "data/chok-daf/0.fr.json @/17/g/b/12",
+"conv": "A",
+"tag": "c:ש+dagesh/sh>chch"
+},
+{
+"he": "מִשְּׁנֵי",
+"fr": "michchéné",
+"src": "data/chok-daf/11.fr.json @/223/g/b/0",
+"conv": "A",
+"tag": "c:ש+dagesh/sh>chch"
+},
+{
+"he": "שְּׂאֹר",
+"fr": "séor",
+"src": "data/chok-daf/16.fr.json @/326/g/a/17",
+"conv": "A",
+"tag": "c:ש+dagesh/sin>s"
+},
+{
+"he": "שְּׂכָרוֹ",
+"fr": "sékharo",
+"src": "data/chok-daf/0.fr.json @/3/g/a/12",
+"conv": "A",
+"tag": "c:ש+dagesh/sin>s"
+},
+{
+"he": "הַשָּׂגַת",
+"fr": "hassagat",
+"src": "data/chok-leyisrael/Beha-alotcha.fr.json @/_comm/Numbers 12:6/ohc/7",
+"conv": "A",
+"tag": "c:ש+dagesh/sin>ss"
+},
+{
+"he": "תִשָּׂא",
+"fr": "tissa",
+"src": "data/chok-leyisrael/Bamidbar.fr.json @/_comm/Numbers 4:2/ohc/0",
+"conv": "A",
+"tag": "c:ש+dagesh/sin>ss"
+},
+{
+"he": "שֶּהָיָה",
+"fr": "chéhaya",
+"src": "data/chok-leyisrael/Tazria.fr.json @/_comm/Leviticus 12:2/ohc/5",
+"conv": "A",
+"tag": "c:ש+dagesh>ch"
+},
+{
+"he": "הַשְּרֵפָה",
+"fr": "hachchéréfa",
+"src": "data/chok-daf/23.fr.json @/460/g/a/4",
+"conv": "A",
+"tag": "c:ש+dagesh>chch"
+},
+{
+"he": "יִשָּרֵף",
+"fr": "yichcharéf",
+"src": "data/chok-daf/23.fr.json @/463/g/a/0",
+"conv": "A",
+"tag": "c:ש+dagesh>chch"
+},
+{
+"he": "שֶׁיִּשְׂרָאֵל",
+"fr": "chéyyisraél",
+"src": "data/chok-daf/119.fr.json @/2398/g/b/14",
+"conv": "A",
+"tag": "c:ש/sin>s"
+},
+{
+"he": "שְׂפַת",
+"fr": "séfat",
+"src": "data/chok-daf/11.fr.json @/231/g/a/20",
+"conv": "A",
+"tag": "c:ש/sin>s"
+},
+{
+"he": "הָעוֹשֶׂה",
+"fr": "haossé",
+"src": "data/chok-daf/0.fr.json @/10/g/b/8",
+"conv": "A",
+"tag": "c:ש/sin>ss"
+},
+{
+"he": "בְּמַעֲשֵׂה",
+"fr": "bémaassé",
+"src": "data/chok-daf/119.fr.json @/2390/g/a/14",
+"conv": "A",
+"tag": "c:ש/sin>ss"
+},
+{
+"he": "וְשוֹמֵר",
+"fr": "véchomér",
+"src": "data/chok-leyisrael/Beshalach.fr.json @/Zohar, Yitro 27/25",
+"conv": "A",
+"tag": "c:ש>ch"
+},
+{
+"he": "יִשָּׂשכָר",
+"fr": "yissachkhar",
+"src": "data/chok-leyisrael/Nasso.fr.json @/_comm/Numbers 7:18/ohc/0",
+"conv": "A",
+"tag": "c:ש>ch"
+},
+{
+"he": "תָּא",
+"fr": "Ta",
+"src": "data/chok-daf/0.fr.json @/10/g/a/12",
+"conv": "A",
+"tag": "c:ת+dagesh>t"
+},
+{
+"he": "דְאַתְּ",
+"fr": "déat",
+"src": "data/chok-daf/22.fr.json @/443/g/a/2",
+"conv": "A",
+"tag": "c:ת+dagesh>t"
+},
+{
+"he": "שֶׁתְּהֵא",
+"fr": "chéttéhé",
+"src": "data/chok-daf/0.fr.json @/3/g/b/20",
+"conv": "A",
+"tag": "c:ת+dagesh>tt"
+},
+{
+"he": "לְתַתָּא",
+"fr": "létatta",
+"src": "data/chok-daf/75.fr.json @/1510/g/b/20",
+"conv": "A",
+"tag": "c:ת+dagesh>tt"
+},
+{
+"he": "דְּהוֹאִיל",
+"fr": "déhoïl",
+"src": "data/chok-daf/33.fr.json @/675/g/a/4",
+"conv": "A",
+"tag": "f:ï"
+},
+{
+"he": "לְהָעִירְךָ",
+"fr": "léhaïrkha",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 17:14/ohc/3",
+"conv": "A",
+"tag": "f:ï"
+},
+{
+"he": "בְּלֹא",
+"fr": "bélo",
+"src": "data/chok-daf/104.fr.json @/2092/g/a/7",
+"conv": "A",
+"tag": "v:cholam>o"
+},
+{
+"he": "אָחֳרָא",
+"fr": "okhora",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/140",
+"conv": "A",
+"tag": "v:hqamatz>o"
+},
+{
+"he": "לְמֶהֱוֵי",
+"fr": "léméhévé",
+"src": "data/chok-daf/103.fr.json @/2079/g/b/16",
+"conv": "A",
+"tag": "v:hsegol>é"
+},
+{
+"he": "הֱיוֹת",
+"fr": "héyot",
+"src": "data/chok-daf/42.fr.json @/853/g/b/15",
+"conv": "A",
+"tag": "v:hsegol>é"
+},
+{
+"he": "וְכֻלְּהוּ",
+"fr": "vékhoulléhou",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/19",
+"conv": "A",
+"tag": "v:kubutz>ou"
+},
+{
+"he": "וְְְאַחַת",
+"fr": "véakhat",
+"src": "data/chok-daf/22.fr.json @/454/g/a/13",
+"conv": "A",
+"tag": "v:none>é"
+},
+{
+"he": "וְכָל",
+"fr": "Vékhol",
+"src": "data/chok-daf/0.fr.json @/2/g/b/2",
+"conv": "A",
+"tag": "v:qamatzkatan>o"
+},
+{
+"he": "בְּמַחְשֶׁבֶת",
+"fr": "bémakhchévét",
+"src": "data/chok-rambam/13.fr.json @/Mishneh Torah, Paschal Offering 4/0",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "בְּמַזַּל",
+"fr": "bémazzal",
+"src": "data/chok-rambam/19.fr.json @/Mishneh Torah, Sanctification of the New Month 11/7",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "וְחִשֵּׁב",
+"fr": "vékhichchév",
+"src": "data/chok-rambam/14.fr.json @/Mishneh Torah, Red Heifer 7/10",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "הָאֵיבָרִים",
+"fr": "haévarim",
+"src": "data/chok-rambam/12.fr.json @/Mishneh Torah, Other Sources of Defilement 2/10",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "שֶׁחָטָאנוּ",
+"fr": "chékhatanou",
+"src": "data/chok-rambam/21.fr.json @/Mishneh Torah, The Order of Prayer 3/3",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "כְּשֶׁיָּבוֹא",
+"fr": "kéchéyyavo",
+"src": "data/chok-rambam/0.fr.json @/Mishneh Torah, Appraisals and Devoted Property 6/30",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "הַמְחֻיָּב",
+"fr": "hamékhouyyav",
+"src": "data/chok-rambam/1.fr.json @/Mishneh Torah, Creditor and Debtor 2/0",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "עֲשָׂאָהוּ",
+"fr": "assaahou",
+"src": "data/chok-rambam/11.fr.json @/Mishneh Torah, Offerings for Unintentional Transgressions 9/10",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "שֶׁתָּבוֹא",
+"fr": "chéttavo",
+"src": "data/chok-rambam/0.fr.json @/Mishneh Torah, Borrowing and Deposit 1/8",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "וְתוֹסִיף",
+"fr": "vétossif",
+"src": "data/chok-rambam/16.fr.json @/Mishneh Torah, Sabbatical Year and the Jubilee 1/20",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "מִתְטַמְּאוֹת",
+"fr": "mittamméot",
+"src": "data/chok-rambam/10.fr.json @/Mishneh Torah, Mourning 2/5",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "שֶׁעֲשָׂאָהוּ",
+"fr": "chéassaahou",
+"src": "data/chok-rambam/1.fr.json @/Mishneh Torah, Creditor and Debtor 18/5",
+"conv": "A",
+"tag": "freq:data/chok-rambam"
+},
+{
+"he": "הֲדַרַן",
+"fr": "Hadaran",
+"src": "data/chok-daf/100.fr.json @/2013/g/a/9",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "דְּהָוֵה",
+"fr": "déhavé",
+"src": "data/chok-daf/102.fr.json @/2055/g/a/11",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "הָנִיחָא",
+"fr": "Hanikha",
+"src": "data/chok-daf/0.fr.json @/10/g/a/16",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "בִּפְלוּגְתָּא",
+"fr": "biflouguéta",
+"src": "data/chok-daf/103.fr.json @/2064/g/b/2",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "בֶּדֶק",
+"fr": "bédék",
+"src": "data/chok-daf/104.fr.json @/2093/g/b/6",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "מִבְּעֵי",
+"fr": "mibbéé",
+"src": "data/chok-daf/0.fr.json @/5/g/b/1",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "וְחַיָּיבִין",
+"fr": "vékhayyayvin",
+"src": "data/chok-daf/104.fr.json @/2083/g/b/15",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "נִתְכַּוֵּון",
+"fr": "nitkavvévn",
+"src": "data/chok-daf/12.fr.json @/249/g/b/4",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "וְהָוֵה",
+"fr": "véhavé",
+"src": "data/chok-daf/100.fr.json @/2006/g/a/4",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "טׇהֳרַת",
+"fr": "tohorat",
+"src": "data/chok-daf/115.fr.json @/2309/g/b/5",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "דִּלְמָא",
+"fr": "Dilma",
+"src": "data/chok-daf/0.fr.json @/16/g/b/12",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "בְּחוּלּוֹ",
+"fr": "békhoullo",
+"src": "data/chok-daf/100.fr.json @/2012/g/b/2",
+"conv": "A",
+"tag": "freq:data/chok-daf"
+},
+{
+"he": "לְקֳבֵל",
+"fr": "lékovél",
+"src": "data/chok-zohar/39.fr.json @/1579/4",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "תִּקּוּנָא",
+"fr": "Tikkouna",
+"src": "data/chok-zohar/11.fr.json @/479/9",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "וְאִתְקְרֵי",
+"fr": "véitkéré",
+"src": "data/chok-zohar/0.fr.json @/6/6",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "לְאִתְכְּלָלָא",
+"fr": "léitkélala",
+"src": "data/chok-zohar/0.fr.json @/22/10",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "תְלַת",
+"fr": "télat",
+"src": "data/chok-daf/22.fr.json @/449/g/a/7",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "נִשְׁמָתָּא",
+"fr": "nichmatta",
+"src": "data/chok-zohar/3.fr.json @/151/8",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "כְּחוּשְׁבַּן",
+"fr": "kékhouchéban",
+"src": "data/chok-zohar/1.fr.json @/72/6",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "בִּצְנִיעוּתָא",
+"fr": "bitsniouta",
+"src": "data/chok-zohar/32.fr.json @/1286/10",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "וְתַּמָּן",
+"fr": "vétamman",
+"src": "data/chok-zohar/36.fr.json @/1474/6",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "וְעֲבִיד",
+"fr": "véavid",
+"src": "data/chok-zohar/0.fr.json @/13/6",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "דְאֲחִיד",
+"fr": "déakhid",
+"src": "data/chok-zohar/39.fr.json @/1578/8",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "דַּאֲנָן",
+"fr": "daanan",
+"src": "data/chok-zohar/19.fr.json @/765/1",
+"conv": "A",
+"tag": "freq:data/chok-zohar"
+},
+{
+"he": "וְיָת",
+"fr": "Véyat",
+"src": "data/torah-fr.json @/Genesis/9/11/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "וּמַלִּיל",
+"fr": "Oumallil",
+"src": "data/torah-fr.json @/Genesis/33/7/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "לְמשֶׁה",
+"fr": "lémché",
+"src": "data/torah-fr.json @/Exodus/1/20/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "לְוָת",
+"fr": "lévat",
+"src": "data/torah-fr.json @/Exodus/1/10/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "וּנְטָלוּ",
+"fr": "Ounétalou",
+"src": "data/torah-fr.json @/Genesis/34/4/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "קוּדְשַׁיָּא",
+"fr": "koudéchayya",
+"src": "data/torah-fr.json @/Exodus/25/32/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "וְתַעְבֵּד",
+"fr": "Vétabéd",
+"src": "data/torah-fr.json @/Exodus/24/12/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "יָת",
+"fr": "Yat",
+"src": "data/torah-fr.json @/Genesis/8/12/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "פַקִּיד",
+"fr": "fakkid",
+"src": "data/chok-zohar/40.fr.json @/1609/7",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "וַאֲרֵי",
+"fr": "Vaaré",
+"src": "data/torah-fr.json @/Exodus/11/47/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "וּלְעֵלָּא",
+"fr": "ouléélla",
+"src": "data/torah-fr.json @/Exodus/29/13/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "קֻרְבָּנָא",
+"fr": "kourbana",
+"src": "data/torah-fr.json @/Exodus/28/8/1",
+"conv": "A",
+"tag": "freq:torah"
+},
+{
+"he": "בִּבְחִינַת",
+"fr": "bivkhinat",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 6/6",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "מִבְּחִינַת",
+"fr": "mibbékhinat",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 2/7",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "כַּנִּזְכָּר",
+"fr": "kannizkar",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/1/3/paragraphs/0",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "שֶׁלֹּא",
+"fr": "chéllo",
+"src": "data/chok-daf/22.fr.json @/451/g/a/3",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "הֶאָרָה",
+"fr": "héara",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 4/11",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "לְדָבְקָה",
+"fr": "lédavka",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 4/2",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "הַמְלוּבָּשׁ",
+"fr": "haméloubbach",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 2/5",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "בִּגְדוּלַּת",
+"fr": "bigdoullat",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 3/7",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "הַסִּטְרָא",
+"fr": "hassitra",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/intro/2",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "כְּמַאֲמַר",
+"fr": "kémaamar",
+"src": "data/chok-rambam/4.fr.json @/Mishneh Torah, Divorce 7/22",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "שֶׁנִּתְבָּאֵר",
+"fr": "chénnitbaér",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 17/3",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "הַמְלוּבֶּשֶׁת",
+"fr": "haméloubbéchét",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 6/1",
+"conv": "A",
+"tag": "freq:data/chok-tanya"
+},
+{
+"he": "שֶׁאִם",
+"fr": "chéim",
+"src": "data/chok-daf/0.fr.json @/7/g/b/16",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "וְאִי",
+"fr": "véi",
+"src": "data/chok-daf/0.fr.json @/0/g/b/10",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "כְּנֶגֶד",
+"fr": "kénéguéd",
+"src": "data/chok-daf/105.fr.json @/2105/g/a/21",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "כְּדֵי",
+"fr": "kédé",
+"src": "data/chok-daf/104.fr.json @/2098/g/b/10",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "כְּמִין",
+"fr": "kémin",
+"src": "data/chok-daf/1.fr.json @/21/g/a/15",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "מַאֲמַר",
+"fr": "maamar",
+"src": "data/chok-benishchai/year1/Miketz.fr.json @/intro/0",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "הֲדָא",
+"fr": "hada",
+"src": "data/chok-daf/128.fr.json @/2576/g/b/20",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "וְאָמְרוֹ",
+"fr": "Véamro",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 16:1/ohc/13",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "יִתְבָּאֵר",
+"fr": "yitbaér",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 16:1/ohc/4",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "לְבַל",
+"fr": "léval",
+"src": "data/chok-daf/130.fr.json @/2618/g/a/0",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "וְשֶׁל",
+"fr": "véchél",
+"src": "data/chok-daf/0.fr.json @/14/g/b/14",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "שֶׁיֶּשׁ",
+"fr": "chéyyéch",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Mishnah Bava Batra 3:8-4:4/1",
+"conv": "A",
+"tag": "freq:data/chok-leyisrael"
+},
+{
+"he": "אַחֵר",
+"fr": "akhér",
+"src": "data/chok-daf/0.fr.json @/6/g/b/14",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "נִסְמָךְ",
+"fr": "nismakh",
+"src": "data/chok-leyisrael/Eikev.fr.json @/_comm/Deuteronomy 9:10/ohc/0",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "הָכָא",
+"fr": "hakha",
+"src": "data/chok-daf/0.fr.json @/2/g/b/3",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "לְבַדָּהּ",
+"fr": "lévaddah",
+"src": "data/chok-daf/25.fr.json @/504/g/b/11",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "תִּגַּע",
+"fr": "tigga",
+"src": "data/chok-benishchai/year1/Tzav.fr.json @/days/1/6/paragraphs/0",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "לְמִדַּע",
+"fr": "lémidda",
+"src": "data/torah-fr.json @/Exodus/30/12/1",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "מִדְיָן",
+"fr": "midyan",
+"src": "data/chok-daf/109.fr.json @/2195/g/a/20",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "שׁוֹר",
+"fr": "chor",
+"src": "data/chok-benishchai/year1/Ki_Tavo.fr.json @/days/0/0/paragraphs/0",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "וְאַבְרָהָם",
+"fr": "Véavraham",
+"src": "data/chok-daf/0.fr.json @/4/g/b/7",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "הַטַּעַם",
+"fr": "hattaam",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/1",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "וְאִלְמָלֵא",
+"fr": "véilmalé",
+"src": "data/chok-daf/0.fr.json @/17/g/a/10",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "לְקַמָּן",
+"fr": "lékamman",
+"src": "data/chok-daf/3.fr.json @/65/g/b/6",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "בַּעֲלַהּ",
+"fr": "baala",
+"src": "data/chok-daf/129.fr.json @/2588/g/b/2",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "וּלְמֵהַךְ",
+"fr": "ouléméhakh",
+"src": "data/chok-leyisrael/Beshalach.fr.json @/Zohar, Beshalach 28/23",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "מַתְקְלֵיהּ",
+"fr": "matkéléh",
+"src": "data/torah-fr.json @/Genesis/23/21/1",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "נַפְתָּלִי",
+"fr": "naftali",
+"src": "data/chok-daf/126.fr.json @/2524/g/b/18",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "חָבִיּוֹת",
+"fr": "khaviyyot",
+"src": "data/chok-daf/101.fr.json @/2022/g/a/10",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "צֹאן",
+"fr": "tson",
+"src": "data/chok-benishchai/year1/Beha_alotcha.fr.json @/days/4/1/paragraphs/1",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "שָׁרָאן",
+"fr": "charan",
+"src": "data/chok-leyisrael/Balak.fr.json @/Zohar, Balak 15/18",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "וּמוֹדִים",
+"fr": "Oumodim",
+"src": "data/chok-daf/110.fr.json @/2214/g/a/1",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "לְכַהֲנָא",
+"fr": "lékhahana",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/17",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "בַּעֲלֵי",
+"fr": "baalé",
+"src": "data/chok-daf/104.fr.json @/2091/g/a/15",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "חָזֵי",
+"fr": "khazé",
+"src": "data/chok-daf/0.fr.json @/4/g/a/5",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "יִזְרָעֶנָּה",
+"fr": "yizraénna",
+"src": "data/chok-daf/81.fr.json @/1621/g/b/15",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "וּמַחְזִירוֹ",
+"fr": "oumakhziro",
+"src": "data/chok-daf/15.fr.json @/318/g/b/2",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "שְׁלָמָא",
+"fr": "chélama",
+"src": "data/chok-daf/0.fr.json @/4/g/a/14",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "לְסַפֵּר",
+"fr": "léssappér",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/_comm/Leviticus 18:4/ohc/2",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "לַצָּבָא",
+"fr": "latstsava",
+"src": "data/chok-daf/44.fr.json @/894/g/b/8",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "וְלִיכָּלֵל",
+"fr": "vélikkalél",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 35/3",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "וּנְתָנָהּ",
+"fr": "ounétanah",
+"src": "data/chok-daf/102.fr.json @/2057/g/b/4",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "כְּשֶׁאָמַר",
+"fr": "kéchéamar",
+"src": "data/chok-leyisrael/Balak.fr.json @/_comm/Numbers 22:5/ohc/3",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "בְּמִלְוֶה",
+"fr": "bémilvé",
+"src": "data/chok-daf/17.fr.json @/352/g/a/2",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "עַל",
+"fr": "al",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/1",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "עוֹר",
+"fr": "or",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/2/0/paragraphs/0",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "דְּיִפּוּק",
+"fr": "déyippouk",
+"src": "data/chok-leyisrael/Achrei-Mot.fr.json @/Zohar, Mishpatim 3/298",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "מִצַּד",
+"fr": "mitstsad",
+"src": "data/chok-benishchai/year1/Bamidbar.fr.json @/days/2/1/paragraphs/1",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "מוֹתָא",
+"fr": "mota",
+"src": "data/chok-daf/38.fr.json @/766/g/b/7",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "זֶה",
+"fr": "zé",
+"src": "data/chok-daf/0.fr.json @/0/g/b/18",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "לַחֲלוֹם",
+"fr": "lakhalom",
+"src": "data/chok-daf/2.fr.json @/53/g/a/15",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "לַצַּדִּיקִים",
+"fr": "latstsaddikim",
+"src": "data/chok-daf/0.fr.json @/2/g/a/13",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "מְקַדְּשִׁין",
+"fr": "mékaddéchin",
+"src": "data/chok-daf/1.fr.json @/28/g/b/9",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "וְלָדוּן",
+"fr": "véladoun",
+"src": "data/chok-daf/27.fr.json @/543/g/a/14",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "פַּרְסֵי",
+"fr": "parsé",
+"src": "data/chok-daf/100.fr.json @/2006/g/b/11",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "יָצְאוּ",
+"fr": "Yatsou",
+"src": "data/chok-daf/104.fr.json @/2099/g/b/5",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "זֵיתִים",
+"fr": "zétim",
+"src": "data/chok-daf/0.fr.json @/18/g/a/3",
+"conv": "A",
+"tag": "random:data/chok-zohar"
+},
+{
+"he": "יַשְׁוֶה",
+"fr": "yachvé",
+"src": "data/chok-leyisrael/Vaetchanan.fr.json @/_comm/Mishnah Beitzah 2:7/bart/0",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "שֶׁבַּקְּטַנּוֹת",
+"fr": "chébbakkétannot",
+"src": "data/chok-daf/54.fr.json @/1085/g/b/1",
+"conv": "A",
+"tag": "random:data/chok-leyisrael"
+},
+{
+"he": "בִּשְׁבִילוֹ",
+"fr": "bichvilo",
+"src": "data/chok-daf/31.fr.json @/625/g/b/5",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "לְדַבֵּר",
+"fr": "lédabbér",
+"src": "data/chok-daf/0.fr.json @/11/g/b/4",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "בָשָׂר",
+"fr": "vassar",
+"src": "data/chok-daf/20.fr.json @/404/g/b/3",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "כֵּן",
+"fr": "kén",
+"src": "data/chok-daf/0.fr.json @/0/g/a/4",
+"conv": "A",
+"tag": "random:torah"
+},
+{
+"he": "הַקְּדוּשָּׁה",
+"fr": "hakkédouchcha",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 1/14",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "בְּאֵין-סוֹף",
+"fr": "béén-sof",
+"src": "data/chok-tanya/0.fr.json @/Tanya, Part I; Likkutei Amarim 9/4",
+"conv": "A",
+"tag": "random:data/chok-tanya"
+},
+{
+"he": "אֲנוּסִין",
+"fr": "anoussin",
+"src": "data/chok-daf/112.fr.json @/2247/g/a/16",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "זֵיתָיו",
+"fr": "zétav",
+"src": "data/chok-daf/10.fr.json @/206/g/a/3",
+"conv": "A",
+"tag": "random:data/chok-daf"
+},
+{
+"he": "אוֹתָן",
+"fr": "otan",
+"src": "data/chok-daf/0.fr.json @/5/g/a/12",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "לְעוֹנַת",
+"fr": "léonat",
+"src": "data/chok-daf/127.fr.json @/2543/g/b/5",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "וּמִצְוָה",
+"fr": "oumitsva",
+"src": "data/chok-benishchai/year1/Ki_Teitzei.fr.json @/days/5/0/paragraphs/0",
+"conv": "A",
+"tag": "random:data/chok-rambam"
+},
+{
+"he": "יְיָ",
+"fr": "Adonaï",
+"src": "data/chok-daf/111.fr.json @/2227/g/b/6",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "יְהֹוָה",
+"fr": "Adonaï",
+"src": "data/chok-daf/22.fr.json @/448/g/a/8",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "ה׳",
+"fr": "Adonaï",
+"src": "data/chok-leyisrael/*.fr.json, data/chok-daf/*.fr.json (abbreviation, many occurrences)",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "לַה׳",
+"fr": "laAdonaï",
+"src": "data/chok-leyisrael/*.fr.json, data/chok-daf/*.fr.json (abbreviation, many occurrences)",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "וְגוֹ׳",
+"fr": "végomér",
+"src": "data/chok-leyisrael/*.fr.json, data/chok-daf/*.fr.json (abbreviation, many occurrences)",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "וְכוּ׳",
+"fr": "vékhouléi",
+"src": "data/chok-leyisrael/*.fr.json, data/chok-daf/*.fr.json (abbreviation, many occurrences)",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "כּוּ׳",
+"fr": "kouléi",
+"src": "data/chok-leyisrael/*.fr.json, data/chok-daf/*.fr.json (abbreviation, many occurrences)",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "מַתְנִי׳",
+"fr": "Michna",
+"src": "data/chok-leyisrael/*.fr.json, data/chok-daf/*.fr.json (abbreviation, many occurrences)",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "אֱלֹהִים",
+"fr": "élohim",
+"src": "data/chok-daf/0.fr.json @/3/g/a/14",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "אֱלֹהֵינוּ",
+"fr": "élohénou",
+"src": "data/chok-daf/0.fr.json @/4/g/a/21",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "יִשְׂרָאֵל",
+"fr": "yisraél",
+"src": "data/chok-daf/104.fr.json @/2082/g/b/4",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "מֹשֶׁה",
+"fr": "moché",
+"src": "data/chok-daf/104.fr.json @/2097/g/b/18",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "שַׁבָּת",
+"fr": "chabbat",
+"src": "data/chok-daf/106.fr.json @/2126/g/a/9",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "תּוֹרָה",
+"fr": "tora",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/0",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "הַשֵּׁם",
+"fr": "hachchém",
+"src": "data/chok-daf/106.fr.json @/2125/g/b/9",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "רִבִּי",
+"fr": "ribbi",
+"src": "data/chok-daf/22.fr.json @/443/g/a/1",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "אֲדֹנָי",
+"fr": "adonay",
+"src": "data/chok-benishchai/year1/Beshalach.fr.json @/days/3/0/paragraphs/0",
+"conv": "A",
+"tag": "special"
+},
+{
+"he": "מוֹרֵנוּ",
+"fr": "morenou",
+"src": "data/chok-benishchai/year1/Beshalach.fr.json @/days/1/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "תֵּבַת",
+"fr": "tebat",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/days/0/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "רַק",
+"fr": "raq",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/1",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "עַמּוּד",
+"fr": "ammoud",
+"src": "data/chok-benishchai/year1/Beha_alotcha.fr.json @/days/4/1/paragraphs/1",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "בְּעֵת",
+"fr": "beet",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/3/2/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "וְאַף",
+"fr": "veap",
+"src": "data/chok-benishchai/year1/Beha_alotcha.fr.json @/days/5/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "וְלָא",
+"fr": "vela",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "דִּסְבִירָא",
+"fr": "disbira",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/3/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "הַק",
+"fr": "haq'",
+"src": "data/chok-benishchai/year1/Beha_alotcha.fr.json @/days/4/1/paragraphs/1",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "וְכַנִּזְכָּר",
+"fr": "vekannizkar",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/3/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "אוֹתִיּוֹת",
+"fr": "otiyyot",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/intro/2",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "וְכוּ",
+"fr": "vekou'",
+"src": "data/chok-benishchai/year1/Beha_alotcha.fr.json @/intro/2",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "צֶמֶר",
+"fr": "tsemer",
+"src": "data/chok-benishchai/year1/Lech_Lecha.fr.json @/days/4/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "הַתְּפִלִּין",
+"fr": "hattepillin",
+"src": "data/chok-benishchai/year1/Chayei_Sara.fr.json @/days/0/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "אִם",
+"fr": "Im",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/1/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "תְּפִלַּת",
+"fr": "tepillat",
+"src": "data/chok-benishchai/year1/Beshalach.fr.json @/intro/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "רַבֵּינוּ",
+"fr": "rabbenou",
+"src": "data/chok-benishchai/year1/Bamidbar.fr.json @/days/0/2/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "וְכָל",
+"fr": "vekol",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "אֵיזֶה",
+"fr": "ezeh",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/2/3/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "לְבָרֵךְ",
+"fr": "lebarek",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/4/3/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "כָּתַבְתִּי",
+"fr": "katabti",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/5/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "לוֹמַר",
+"fr": "lomar",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/2",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "וְאָז",
+"fr": "veaz",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/days/1/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "תֵּכֶף",
+"fr": "tekep",
+"src": "data/chok-benishchai/year1/Bereshit.fr.json @/days/2/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "עַרְבִית",
+"fr": "arbit",
+"src": "data/chok-benishchai/year1/Beshalach.fr.json @/intro/2",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "הָאָדָם",
+"fr": "haadam",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/2",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "אוֹתוֹ",
+"fr": "oto",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/1/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year1"
+},
+{
+"he": "הַשֻּׁלְחָן",
+"fr": "hachchulkhan",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/1/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "אֶלָּא",
+"fr": "ella",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/1",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "לִהְיוֹת",
+"fr": "lihyot",
+"src": "data/chok-benishchai/year1/Bamidbar.fr.json @/days/0/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "סְעוּדָה",
+"fr": "seouda",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/4/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "יָדָיו",
+"fr": "yadayv",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/3/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "וַאֲפִלּוּ",
+"fr": "vaapillou",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "דַּרְכָּם",
+"fr": "darkam",
+"src": "data/chok-benishchai/year1/Bamidbar.fr.json @/days/5/4/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "כְּגוֹן",
+"fr": "kegon",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/0/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "הַיַּיִן",
+"fr": "hayyayin",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/1/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "זֶה",
+"fr": "zeh",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "פָּסוּק",
+"fr": "pasouq",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "בִּשְׁעַת",
+"fr": "bichat",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/3/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "בְּכָל",
+"fr": "bekol",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "הַגּוֹי",
+"fr": "haggoy",
+"src": "data/chok-benishchai/year1/Bamidbar.fr.json @/days/1/4/paragraphs/1",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "עַיֵּן",
+"fr": "ayyen",
+"src": "data/chok-benishchai/year1/Beha_alotcha.fr.json @/days/4/1/paragraphs/1",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "כָּךְ",
+"fr": "kak",
+"src": "data/chok-benishchai/year1/Bamidbar.fr.json @/days/0/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "דְּלָא",
+"fr": "dela",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/days/0/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "רַבִּי",
+"fr": "rabbi",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/days/0/2/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "מְעַט",
+"fr": "meat",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/4/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "יַיִן",
+"fr": "yayin",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/days/1/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "לִתֵּן",
+"fr": "litten",
+"src": "data/chok-benishchai/year1/Balak.fr.json @/days/0/2/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "הַמִּנְהָג",
+"fr": "hamminhag",
+"src": "data/chok-benishchai/year1/Chayei_Sara.fr.json @/days/3/1/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "בַּהֲנָאָה",
+"fr": "bahanaa",
+"src": "data/chok-benishchai/year1/Behar_Bechukotai.fr.json @/days/5/0/paragraphs/0",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "נִמְצָא",
+"fr": "nimtsa",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.fr.json @/intro/1",
+"conv": "B",
+"tag": "bic:year2"
+},
+{
+"he": "אֲשֶׁר",
+"fr": "acher",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "לָן",
+"fr": "lan",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "קְטֹרֶת",
+"fr": "qetoret",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "אַתָּה",
+"fr": "Atta",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "רָעִים",
+"fr": "raim",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "זְכֹר",
+"fr": "zekor",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "וְשָׁם",
+"fr": "vecham",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "כְּאִלּוּ",
+"fr": "keillou",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "הָעָם",
+"fr": "haam",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "לְטוֹבָה",
+"fr": "letoba",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "בְּתוֹרָתְךָ",
+"fr": "betorateka",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "בֵּית",
+"fr": "bet",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "שְׁמֵיהּ",
+"fr": "chemeh",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "עוֹשֶׂה",
+"fr": "oseh",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "תּוֹרָתְךָ",
+"fr": "torateka",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "מוֹסְרִים",
+"fr": "moserim",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "יְהִי",
+"fr": "yehi",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "רַחֲמֶיךָ",
+"fr": "rakhameka",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "שְׁלֹשׁ",
+"fr": "cheloch",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "אֲשֶׁר",
+"fr": "acher",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "מִדָּה",
+"fr": "midda",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "וְעַתָּה",
+"fr": "Veatta",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "קְיָמֵהּ",
+"fr": "qeyameh",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "וּשְׁכִינְתֵּיהּ",
+"fr": "ouchekinetéh",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "עָלֵינוּ",
+"fr": "alénou",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "צְבָאוֹת",
+"fr": "tsebaot",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "צוּרִי",
+"fr": "tsouri",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "דְּבַר",
+"fr": "debar",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "מִמֶּנָּה",
+"fr": "mimmenna",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "מִלְּפָנֶיךָ",
+"fr": "millepanéka",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "דִּבְרֵי",
+"fr": "dibré",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "בְּנַחַת",
+"fr": "benakhat",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "מְחוּלִים",
+"fr": "mekhoulim",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "בּוֹשְׁנוּ",
+"fr": "bochenou",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "אִמְרֵי",
+"fr": "imré",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "דָּוִד",
+"fr": "david",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "עֲוֹנוֹת",
+"fr": "aonot",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "רַחֲמִים",
+"fr": "rakhamim",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "וּבְטוּבוֹ",
+"fr": "oubetoubo",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "שֶׁבַּשָּׁמַיִם",
+"fr": "chebbachchamayim",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "רִאשׁוֹן",
+"fr": "richon",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "וַיֹּאמֶר",
+"fr": "Vayyomer",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "כְּבוֹד",
+"fr": "kebod",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "שְׁמֶךָ",
+"fr": "chemeka",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "יִשְׂרָאֵל",
+"fr": "yisraél",
+"src": "data/prayers-fr.json",
+"conv": "C",
+"tag": "prayers-fr"
+},
+{
+"he": "בְּרֵאשִׁית",
+"fr": "Béréchit",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Bereshit"
+},
+{
+"he": "נֹחַ",
+"fr": "Noa'h",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Noach"
+},
+{
+"he": "לֶךְ־לְךָ",
+"fr": "Lekh Lékha",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Lech-Lecha"
+},
+{
+"he": "וַיֵּרָא",
+"fr": "Vayéra",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayera"
+},
+{
+"he": "חַיֵּי שָֹרָה",
+"fr": "'Hayé Sarah",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Chayei Sara"
+},
+{
+"he": "תּוֹלְדוֹת",
+"fr": "Toledot",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Toldot"
+},
+{
+"he": "וַיֵּצֵא",
+"fr": "Vayétsé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayetzei"
+},
+{
+"he": "וַיִּשְׁלַח",
+"fr": "Vayichla'h",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayishlach"
+},
+{
+"he": "וַיֵּשֶׁב",
+"fr": "Vayéchev",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayeshev"
+},
+{
+"he": "מִקֵּץ",
+"fr": "Mikets",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Miketz"
+},
+{
+"he": "וַיִּגַּשׁ",
+"fr": "Vayigach",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayigash"
+},
+{
+"he": "וַיְחִי",
+"fr": "Vaye'hi",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayechi"
+},
+{
+"he": "שְׁמוֹת",
+"fr": "Chemot",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Shemot"
+},
+{
+"he": "וָאֵרָא",
+"fr": "Vaéra",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vaera"
+},
+{
+"he": "בֹּא",
+"fr": "Bo",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Bo"
+},
+{
+"he": "בְּשַׁלַּח",
+"fr": "Bechala'h",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Beshalach"
+},
+{
+"he": "יִתְרוֹ",
+"fr": "Yitro",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Yitro"
+},
+{
+"he": "מִשְׁפָּטִים",
+"fr": "Michpatim",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Mishpatim"
+},
+{
+"he": "תְּרוּמָה",
+"fr": "Terouma",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Terumah"
+},
+{
+"he": "תְּצַוֶּה",
+"fr": "Tetsavé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Tetzaveh"
+},
+{
+"he": "כִּי תִשָּׂא",
+"fr": "Ki-Tissa",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Ki Tisa"
+},
+{
+"he": "וַיַּקְהֵל",
+"fr": "Vayakhel",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayakhel"
+},
+{
+"he": "פְקוּדֵי",
+"fr": "Pékoudé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Pekudei"
+},
+{
+"he": "וַיִּקְרָא",
+"fr": "Vayikra",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayikra"
+},
+{
+"he": "צַו",
+"fr": "Tsav",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Tzav"
+},
+{
+"he": "שְּׁמִינִי",
+"fr": "Chémini",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Shmini"
+},
+{
+"he": "תַזְרִיעַ",
+"fr": "Tazria",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Tazria"
+},
+{
+"he": "מְצֹרָע",
+"fr": "Metsora",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Metzora"
+},
+{
+"he": "אַחֲרֵי מוֹת",
+"fr": "A'haré Mot",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Achrei Mot"
+},
+{
+"he": "קְדֹשִׁים",
+"fr": "Kedochim",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Kedoshim"
+},
+{
+"he": "אֱמוֹר",
+"fr": "Emor",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Emor"
+},
+{
+"he": "בְּהַר",
+"fr": "Béhar",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Behar"
+},
+{
+"he": "בְּחֻקֹּתַי",
+"fr": "Bé'houkotaï",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Bechukotai"
+},
+{
+"he": "בְּמִדְבַּר",
+"fr": "Bamidbar",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Bamidbar"
+},
+{
+"he": "נָשׂא",
+"fr": "Nasso",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Nasso"
+},
+{
+"he": "בְּהַעֲלֹתְךָ",
+"fr": "Béhaalotékha",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Beha'alotcha"
+},
+{
+"he": "שְׁלַח־לְךָ",
+"fr": "Chéla'h Lekha",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Sh'lach"
+},
+{
+"he": "קֹרַח",
+"fr": "Kora'h",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Korach"
+},
+{
+"he": "חֻקַּת",
+"fr": "'Houkat",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Chukat"
+},
+{
+"he": "בָּלָק",
+"fr": "Balak",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Balak"
+},
+{
+"he": "פִּינְחָס",
+"fr": "Pin'has",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Pinchas"
+},
+{
+"he": "מַטּוֹת",
+"fr": "Matot",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Matot"
+},
+{
+"he": "מַסְעֵי",
+"fr": "Massé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Masei"
+},
+{
+"he": "דְּבָרִים",
+"fr": "Devarim",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Devarim"
+},
+{
+"he": "וָאֶתְחַנַּן",
+"fr": "Vaet'hanane",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vaetchanan"
+},
+{
+"he": "עֵקֶב",
+"fr": "Ekev",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Eikev"
+},
+{
+"he": "רְאֵה",
+"fr": "Réé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Re'eh"
+},
+{
+"he": "שׁוֹפְטִים",
+"fr": "Choftim",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Shoftim"
+},
+{
+"he": "כִּי־תֵצֵא",
+"fr": "Ki-Tetsé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Ki Teitzei"
+},
+{
+"he": "כִּי־תָבוֹא",
+"fr": "Ki-Tavo",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Ki Tavo"
+},
+{
+"he": "נִצָּבִים",
+"fr": "Nitsavim",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Nitzavim"
+},
+{
+"he": "וַיֵּלֶךְ",
+"fr": "Vayélèkh",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayeilech"
+},
+{
+"he": "הַאֲזִינוּ",
+"fr": "Haazinou",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Ha'azinu"
+},
+{
+"he": "וְזֹאת הַבְּרָכָה",
+"fr": "Vézot Haberakha",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vezot Haberakhah"
+},
+{
+"he": "וַיַּקְהֵל־פְקוּדֵי",
+"fr": "Vayakhel-Pékoudé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Vayakhel-Pekudei"
+},
+{
+"he": "תַזְרִיעַ־מְצֹרָע",
+"fr": "Tazria-Metsora",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Tazria-Metzora"
+},
+{
+"he": "אַחֲרֵי מוֹת־קְדֹשִׁים",
+"fr": "A'haré Mot-Kedochim",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Achrei Mot-Kedoshim"
+},
+{
+"he": "בְּהַר־בְּחֻקֹּתַי",
+"fr": "Béhar-Bé'houkotaï",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Behar-Bechukotai"
+},
+{
+"he": "חֻקַּת־בָּלָק",
+"fr": "'Houkat-Balak",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Chukat-Balak"
+},
+{
+"he": "מַטּוֹת־מַסְעֵי",
+"fr": "Matot-Massé",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Matot-Masei"
+},
+{
+"he": "נִצָּבִים־וַיֵּלֶךְ",
+"fr": "Nitsavim-Vayélèkh",
+"src": "index.html",
+"conv": "D",
+"tag": "PARSHA_FR_NAMES:Nitzavim-Vayeilech"
+}
+]

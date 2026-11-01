@@ -1,0 +1,1759 @@
+{
+ "lang": "fr",
+ "version": 1,
+ "generatedFrom": "word-aligned diff of vocalized Hebrew vs the French transliteration already shipped in data/ (5.47M aligned word tokens, 6 sources); see FR-NOTES.md",
+ "primaryConvention": "A",
+ "conventions": {
+  "A": "PRIMARY. Accented, French-reader style: tsere/segol/shva-na = é, kubutz/shuruk = ou, chet and khaf = kh, qof = k, shin = ch, bgdkpt distinguished (v/b, kh/k, f/p), dagesh chazak = doubled letter. Used by data/chok-rambam, chok-daf, chok-zohar, chok-tanya, chok-leyisrael (Hebrew+Aramaic quotes) and data/torah-fr.json: 98.8% of 5,465,829 aligned tokens are reproduced exactly by the rule set below.",
+  "B": "VARIANT (Ben Ish Chai, data/chok-benishchai/**/*.fr.json, ~225k tokens) and prayers-fr.json: no accents (e instead of é), qof = q, kaf/bet/pe do NOT distinguish dagesh (k, b, p), chet = kh, kubutz = u, no ss-rule, no gu-rule, furtive patach written as kha/ha, patach+yod+vav = ayv. See variants.B.",
+  "D": "UI display names only (PARSHA_FR_NAMES in index.html and a few I18N fr strings): hand-curated, chet = 'h with apostrophe, no gemination, mixed é/e. NOT derivable by rule; keep as specialWords lookups. See variants.D."
+ },
+ "normalisation": {
+  "input": "Strip cantillation (U+0591-U+05AF), meteg (U+05BD), paseq/sof-pasuk/nun-hafukha (U+05C0,U+05C3-U+05C6). Keep nikud, dagesh/mappiq (U+05BC), shin/sin dots, rafe (U+05BF, no effect). Maqaf U+05BE becomes ASCII hyphen and each part is transliterated as its own word (rules reset at the hyphen).",
+  "output": "lower-case; no punctuation changes (source punctuation , . : ; ? \" is passed through unchanged); words separated by single spaces."
+ },
+ "consonants": {
+  "aleph": {
+   "out": "",
+   "evidence": {
+    "count": 1983422,
+    "outputs": {
+     "": 1983422
+    },
+    "examples": [
+     [
+      "אֶלָּא",
+      "élla"
+     ],
+     [
+      "לֹא",
+      "lo"
+     ],
+     [
+      "אָמַר",
+      "amar"
+     ],
+     [
+      "אֶת",
+      "ét"
+     ],
+     [
+      "הוּא",
+      "hou"
+     ]
+    ]
+   },
+   "note": "Silent in every position; the vowel point on it (if any) is still written, with NO apostrophe/hyphen separator (haélohim, véassour, béévarav). After an a/o vowel an aleph or ayin carrying chirik gives ï (hoïl, haïchcha)."
+  },
+  "ayin": {
+   "out": "",
+   "evidence": {
+    "count": 633376,
+    "outputs": {
+     "": 633376
+    },
+    "examples": [
+     [
+      "עַל",
+      "al"
+     ],
+     [
+      "עַד",
+      "ad"
+     ],
+     [
+      "וְעַל",
+      "véal"
+     ],
+     [
+      "עָלָיו",
+      "alav"
+     ],
+     [
+      "שִׁמְעוֹן",
+      "chimon"
+     ]
+    ]
+   },
+   "note": "Silent like aleph, no apostrophe (yaatsim, maassér, haaréts). Furtive patach on final ayin: see rule furtive-patach."
+  },
+  "bet-dagesh": {
+   "out": "b",
+   "evidence": {
+    "count": 680359,
+    "outputs": {
+     "b": 489411,
+     "bb": 190948
+    },
+    "examples": [
+     [
+      "רַבִּי",
+      "rabbi"
+     ],
+     [
+      "בֵּין",
+      "bén"
+     ],
+     [
+      "בַּר",
+      "bar"
+     ],
+     [
+      "בּוֹ",
+      "bo"
+     ],
+     [
+      "בֶּן",
+      "bén"
+     ]
+    ]
+   },
+   "note": "Doubled bb when dagesh chazak (rule geminate)."
+  },
+  "bet-rafe": {
+   "out": "v",
+   "evidence": {
+    "count": 519380,
+    "outputs": {
+     "v": 519380
+    },
+    "examples": [
+     [
+      "רַב",
+      "rav"
+     ],
+     [
+      "אֲבָל",
+      "aval"
+     ],
+     [
+      "כְּתִיב",
+      "kétiv"
+     ],
+     [
+      "דָּבָר",
+      "davar"
+     ],
+     [
+      "דִּכְתִיב",
+      "dikhtiv"
+     ]
+    ]
+   }
+  },
+  "gimel": {
+   "out": "g",
+   "evidence": {
+    "count": 194337,
+    "outputs": {
+     "g": 109464,
+     "gu": 57189,
+     "gg": 14614,
+     "ggu": 13070
+    },
+    "examples": [
+     [
+      "בְּגִין",
+      "béguin"
+     ],
+     [
+      "כְּגוֹן",
+      "kégon"
+     ],
+     [
+      "גַּבֵּי",
+      "gabbé"
+     ],
+     [
+      "גַּב",
+      "gav"
+     ],
+     [
+      "וּבְגִין",
+      "ouvéguin"
+     ]
+    ]
+   },
+   "note": "gu before é or i (guémara, guimatriyya, hagguét) - rule g-before-front-vowel."
+  },
+  "dalet": {
+   "out": "d",
+   "evidence": {
+    "count": 776286,
+    "outputs": {
+     "d": 716334,
+     "dd": 59952
+    },
+    "examples": [
+     [
+      "עַד",
+      "ad"
+     ],
+     [
+      "אֶחָד",
+      "ékhad"
+     ],
+     [
+      "דָּא",
+      "da"
+     ],
+     [
+      "דְּלָא",
+      "déla"
+     ],
+     [
+      "יְהוּדָה",
+      "yéhouda"
+     ]
+    ]
+   }
+  },
+  "he": {
+   "out": "h",
+   "evidence": {
+    "count": 1406431,
+    "outputs": {
+     "h": 881743,
+     "": 524688
+    },
+    "examples": [
+     [
+      "הוּא",
+      "hou"
+     ],
+     [
+      "זֶה",
+      "zé"
+     ],
+     [
+      "הָיָה",
+      "haya"
+     ],
+     [
+      "יְהוּדָה",
+      "yéhouda"
+     ],
+     [
+      "הֲרֵי",
+      "haré"
+     ]
+    ]
+   },
+   "note": "Word-final he with no point is silent (tora, tsava). he-mappiq (dagesh in final he): see he-mappiq rule."
+  },
+  "he-mappiq": {
+   "out": "h",
+   "evidence": {
+    "count": 160696,
+    "outputs": {
+     "h": 145246,
+     "": 15450
+    },
+    "examples": [
+     [
+      "לֵיהּ",
+      "léh"
+     ],
+     [
+      "לָהּ",
+      "lah"
+     ],
+     [
+      "לֵיהּ:",
+      "léh:"
+     ],
+     [
+      "בָּהּ",
+      "bah"
+     ],
+     [
+      "בֵּיהּ",
+      "béh"
+     ]
+    ]
+   },
+   "note": "Final he with mappiq: written h after qamatz (bah, lah, otah: 59,338 vs 5 silent), silent after patach or tsere (la, ba, lé, noga, yata: 13,506 silent). This is by vowel, not by language."
+  },
+  "vav-consonant": {
+   "out": "v",
+   "evidence": {
+    "count": 561157,
+    "outputs": {
+     "v": 561157
+    },
+    "examples": [
+     [
+      "וְלֹא",
+      "vélo"
+     ],
+     [
+      "וְאִם",
+      "véim"
+     ],
+     [
+      "וְלָא",
+      "véla"
+     ],
+     [
+      "וְאֵין",
+      "véén"
+     ],
+     [
+      "וְכֵן",
+      "vékhén"
+     ]
+    ]
+   }
+  },
+  "vav-dagesh-consonant": {
+   "out": "vv",
+   "evidence": {
+    "count": 11958,
+    "outputs": {
+     "vv": 11936,
+     "v": 22
+    },
+    "examples": [
+     [
+      "נִתְכַּוֵּן",
+      "nitkavvén"
+     ],
+     [
+      "צִוָּה",
+      "tsivva"
+     ],
+     [
+      "כַּוָּנַת",
+      "kavvanat"
+     ],
+     [
+      "הַוָּלָד",
+      "havvalad"
+     ],
+     [
+      "נִתְכַּוֵּן",
+      "nitkavvén"
+     ]
+    ]
+   },
+   "note": "Only when it carries a vowel (rare)."
+  },
+  "zayin": {
+   "out": "z",
+   "evidence": {
+    "count": 204865,
+    "outputs": {
+     "z": 184402,
+     "zz": 20463
+    },
+    "examples": [
+     [
+      "זֶה",
+      "zé"
+     ],
+     [
+      "זוֹ",
+      "zo"
+     ],
+     [
+      "אֶלְעָזָר",
+      "élazar"
+     ],
+     [
+      "אֱלִיעֶזֶר",
+      "éliézér"
+     ],
+     [
+      "וְזֶה",
+      "vézé"
+     ]
+    ]
+   }
+  },
+  "chet": {
+   "out": "kh",
+   "evidence": {
+    "count": 458416,
+    "outputs": {
+     "kh": 458416
+    },
+    "examples": [
+     [
+      "אֶחָד",
+      "ékhad"
+     ],
+     [
+      "אַחַת",
+      "akhat"
+     ],
+     [
+      "אַחַר",
+      "akhar"
+     ],
+     [
+      "חַד",
+      "khad"
+     ],
+     [
+      "וְאַחַר",
+      "véakhar"
+     ]
+    ]
+   },
+   "note": "Always kh in convention A (458k tokens, 0 exceptions of note; chet and khaf are NOT distinguished). The reviewed UI spellings with 'h (Noa'h, 'Hayé Sarah, 'houkat) exist ONLY in the UI name table (convention D) and in 18 stray tokens of the data."
+  },
+  "tet": {
+   "out": "t",
+   "evidence": {
+    "count": 196429,
+    "outputs": {
+     "t": 165775,
+     "tt": 30654
+    },
+    "examples": [
+     [
+      "טַעְמָא",
+      "tama"
+     ],
+     [
+      "טוֹב",
+      "tov"
+     ],
+     [
+      "טָמֵא",
+      "tamé"
+     ],
+     [
+      "טַעַם",
+      "taam"
+     ],
+     [
+      "טֻמְאָה",
+      "touma"
+     ]
+    ]
+   }
+  },
+  "yod": {
+   "out": "y",
+   "evidence": {
+    "count": 2417184,
+    "outputs": {
+     "": 1734820,
+     "y": 563166,
+     "yy": 119198
+    },
+    "examples": [
+     [
+      "רַבִּי",
+      "rabbi"
+     ],
+     [
+      "לֵיהּ",
+      "léh"
+     ],
+     [
+      "אֵין",
+      "én"
+     ],
+     [
+      "הֲרֵי",
+      "haré"
+     ],
+     [
+      "בֵּין",
+      "bén"
+     ]
+    ]
+   },
+   "note": "Consonant yod with vowel or dagesh. Yod with no vowel after chirik/tsere/segol is a silent mater (rule matres); after patach it is y (ay); after qamatz before final vav it is silent (alav, yadav)."
+  },
+  "kaf-dagesh": {
+   "out": "k",
+   "evidence": {
+    "count": 331989,
+    "outputs": {
+     "k": 262528,
+     "kk": 69461
+    },
+    "examples": [
+     [
+      "כָּל",
+      "kol"
+     ],
+     [
+      "כִּי",
+      "ki"
+     ],
+     [
+      "כִּי",
+      "ki"
+     ],
+     [
+      "כָּךְ",
+      "kakh"
+     ],
+     [
+      "כׇּל",
+      "kol"
+     ]
+    ]
+   },
+   "note": "Doubled kk with dagesh chazak (mikkol)."
+  },
+  "kaf-rafe": {
+   "out": "kh",
+   "evidence": {
+    "count": 284872,
+    "outputs": {
+     "kh": 284872
+    },
+    "examples": [
+     [
+      "וְכֵן",
+      "vékhén"
+     ],
+     [
+      "וְכָל",
+      "vékhol"
+     ],
+     [
+      "הָכִי",
+      "hakhi"
+     ],
+     [
+      "בְּכָל",
+      "békhol"
+     ],
+     [
+      "הָכָא",
+      "hakha"
+     ]
+    ]
+   }
+  },
+  "khaf-sofit": {
+   "out": "kh",
+   "evidence": {
+    "count": 119403,
+    "outputs": {
+     "kh": 119379,
+     "k": 24
+    },
+    "examples": [
+     [
+      "בְּרִיךְ",
+      "bérikh"
+     ],
+     [
+      "כָּךְ",
+      "kakh"
+     ],
+     [
+      "צָרִיךְ",
+      "tsarikh"
+     ],
+     [
+      "לְךָ",
+      "lékha"
+     ],
+     [
+      "לָךְ",
+      "lakh"
+     ]
+    ]
+   },
+   "note": "Word-final ך, with or without shva: kh (baroukh, nimlakh, mélékh)."
+  },
+  "lamed": {
+   "out": "l",
+   "evidence": {
+    "count": 1502334,
+    "outputs": {
+     "l": 1324205,
+     "ll": 178129
+    },
+    "examples": [
+     [
+      "עַל",
+      "al"
+     ],
+     [
+      "לֹא",
+      "lo"
+     ],
+     [
+      "אֶלָּא",
+      "élla"
+     ],
+     [
+      "לָא",
+      "la"
+     ],
+     [
+      "לֵיהּ",
+      "léh"
+     ]
+    ]
+   }
+  },
+  "mem": {
+   "out": "m",
+   "evidence": {
+    "count": 1693898,
+    "outputs": {
+     "m": 1558154,
+     "mm": 135744
+    },
+    "examples": [
+     [
+      "אָמַר",
+      "amar"
+     ],
+     [
+      "אִם",
+      "im"
+     ],
+     [
+      "מִן",
+      "min"
+     ],
+     [
+      "אָמַר",
+      "Amar"
+     ],
+     [
+      "מַאי",
+      "may"
+     ]
+    ]
+   },
+   "note": "mem and final mem identical."
+  },
+  "nun": {
+   "out": "n",
+   "evidence": {
+    "count": 1255503,
+    "outputs": {
+     "n": 1154481,
+     "nn": 101022
+    },
+    "examples": [
+     [
+      "אֵין",
+      "én"
+     ],
+     [
+      "מִן",
+      "min"
+     ],
+     [
+      "בֵּין",
+      "bén"
+     ],
+     [
+      "וְאֵין",
+      "véén"
+     ],
+     [
+      "אֵינוֹ",
+      "éno"
+     ]
+    ]
+   },
+   "note": "nun and final nun identical."
+  },
+  "samech": {
+   "out": "s",
+   "evidence": {
+    "count": 205414,
+    "outputs": {
+     "ss": 108548,
+     "s": 96866
+    },
+    "examples": [
+     [
+      "יוֹסֵי",
+      "yossé"
+     ],
+     [
+      "אָסוּר",
+      "assour"
+     ],
+     [
+      "יוֹסֵף",
+      "yosséf"
+     ],
+     [
+      "סָבַר:",
+      "savar:"
+     ],
+     [
+      "סָבַר",
+      "savar"
+     ]
+    ]
+   },
+   "note": "Becomes ss between two vowel sounds (rule ss-intervocalic); dagesh-chazak samech is ss."
+  },
+  "pe-dagesh": {
+   "out": "p",
+   "evidence": {
+    "count": 136269,
+    "outputs": {
+     "p": 88419,
+     "pp": 47850
+    },
+    "examples": [
+     [
+      "פִּי",
+      "pi"
+     ],
+     [
+      "מִפְּנֵי",
+      "mippéné"
+     ],
+     [
+      "פֵּרוּשׁ,",
+      "pérouch,"
+     ],
+     [
+      "פָּפָּא:",
+      "pappa:"
+     ],
+     [
+      "פֵּרוּשׁ",
+      "pérouch"
+     ]
+    ]
+   }
+  },
+  "pe-rafe": {
+   "out": "f",
+   "evidence": {
+    "count": 162994,
+    "outputs": {
+     "f": 162994
+    },
+    "examples": [
+     [
+      "אֲפִילּוּ",
+      "afillou"
+     ],
+     [
+      "לְפִי",
+      "léfi"
+     ],
+     [
+      "אֲפִלּוּ",
+      "afillou"
+     ],
+     [
+      "לִפְנֵי",
+      "lifné"
+     ],
+     [
+      "וַאֲפִלּוּ",
+      "vaafillou"
+     ]
+    ]
+   }
+  },
+  "pe-sofit": {
+   "out": "f",
+   "evidence": {
+    "count": 44678,
+    "outputs": {
+     "f": 44678
+    },
+    "examples": [
+     [
+      "אַף",
+      "af"
+     ],
+     [
+      "וְאַף",
+      "véaf"
+     ],
+     [
+      "יוֹסֵף",
+      "yosséf"
+     ],
+     [
+      "יוֹסֵף:",
+      "yosséf:"
+     ],
+     [
+      "סוֹף",
+      "sof"
+     ]
+    ]
+   }
+  },
+  "tsadi": {
+   "out": "ts",
+   "evidence": {
+    "count": 198987,
+    "outputs": {
+     "ts": 183512,
+     "tsts": 15475
+    },
+    "examples": [
+     [
+      "צָרִיךְ",
+      "tsarikh"
+     ],
+     [
+      "חוּץ",
+      "khouts"
+     ],
+     [
+      "הָאָרֶץ",
+      "haaréts"
+     ],
+     [
+      "עַצְמוֹ",
+      "atsmo"
+     ],
+     [
+      "יִצְחָק",
+      "yitskhak"
+     ]
+    ]
+   },
+   "note": "tsadi and final tsadi: ts. Doubled = tsts (khavatstsélét)."
+  },
+  "qof": {
+   "out": "k",
+   "evidence": {
+    "count": 397595,
+    "outputs": {
+     "k": 354043,
+     "kk": 43552
+    },
+    "examples": [
+     [
+      "קָא",
+      "ka"
+     ],
+     [
+      "קוּדְשָׁא",
+      "koudécha"
+     ],
+     [
+      "מָקוֹם",
+      "makom"
+     ],
+     [
+      "יַעֲקֹב",
+      "yaakov"
+     ],
+     [
+      "יִצְחָק",
+      "yitskhak"
+     ]
+    ]
+   },
+   "note": "k, never q or c, in convention A (379,504 tokens vs 0). Convention B uses q."
+  },
+  "resh": {
+   "out": "r",
+   "evidence": {
+    "count": 1282301,
+    "outputs": {
+     "r": 1282301
+    },
+    "examples": [
+     [
+      "אָמַר",
+      "amar"
+     ],
+     [
+      "רַבִּי",
+      "rabbi"
+     ],
+     [
+      "רַב",
+      "rav"
+     ],
+     [
+      "הֲרֵי",
+      "haré"
+     ],
+     [
+      "אָמַר",
+      "Amar"
+     ]
+    ]
+   },
+   "note": "Resh never takes dagesh chazak in output (63 dagesh-resh tokens stay single)."
+  },
+  "shin": {
+   "out": "ch",
+   "evidence": {
+    "count": 869848,
+    "outputs": {
+     "ch": 801095,
+     "chch": 68753
+    },
+    "examples": [
+     [
+      "שֶׁל",
+      "chél"
+     ],
+     [
+      "שֶׁלֹּא",
+      "chéllo"
+     ],
+     [
+      "מִשּׁוּם",
+      "michchoum"
+     ],
+     [
+      "שֶׁאֵין",
+      "chéén"
+     ],
+     [
+      "שֶׁהוּא",
+      "chéhou"
+     ]
+    ]
+   },
+   "note": "shin with dot or bare: ch; doubled chch (hachchém, yichchakéni)."
+  },
+  "sin": {
+   "out": "s",
+   "evidence": {
+    "count": 113273,
+    "outputs": {
+     "ss": 69494,
+     "s": 43779
+    },
+    "examples": [
+     [
+      "יִשְׂרָאֵל",
+      "yisraél"
+     ],
+     [
+      "לַעֲשׂוֹת",
+      "laassot"
+     ],
+     [
+      "יִשְׂרָאֵל",
+      "yisraél"
+     ],
+     [
+      "עָשָׂר",
+      "assar"
+     ],
+     [
+      "יִשְׂרָאֵל,",
+      "yisraél,"
+     ]
+    ]
+   },
+   "note": "Same as samech: ss when intervocalic (bassar, assa); doubled dagesh is ss."
+  },
+  "tav-dagesh": {
+   "out": "t",
+   "evidence": {
+    "count": 264269,
+    "outputs": {
+     "t": 183555,
+     "tt": 80714
+    },
+    "examples": [
+     [
+      "שְׁתֵּי",
+      "chété"
+     ],
+     [
+      "אַתָּה",
+      "atta"
+     ],
+     [
+      "תָּא",
+      "Ta"
+     ],
+     [
+      "תּוֹרָה",
+      "tora"
+     ],
+     [
+      "דִּכְתִּיב,",
+      "dikhtiv,"
+     ]
+    ]
+   },
+   "note": "Doubled tt after a vowel when dagesh chazak (hattora); tav with dagesh kal after shva-nach or word-initial stays single."
+  },
+  "tav-rafe": {
+   "out": "t",
+   "evidence": {
+    "count": 710634,
+    "outputs": {
+     "t": 710634
+    },
+    "examples": [
+     [
+      "אֶת",
+      "ét"
+     ],
+     [
+      "בֵּית",
+      "bét"
+     ],
+     [
+      "אַחַת",
+      "akhat"
+     ],
+     [
+      "אוֹתוֹ",
+      "oto"
+     ],
+     [
+      "כְּתִיב",
+      "kétiv"
+     ]
+    ]
+   },
+   "note": "No distinction th/t."
+  }
+ },
+ "vowels": {
+  "patach": {
+   "out": "a",
+   "evidence": {
+    "count": 1942887,
+    "outputs": {
+     "a": 1942887
+    },
+    "examples": [
+     [
+      "עַל",
+      "al"
+     ],
+     [
+      "אָמַר",
+      "amar"
+     ],
+     [
+      "רַבִּי",
+      "rabbi"
+     ],
+     [
+      "רַב",
+      "rav"
+     ],
+     [
+      "עַד",
+      "ad"
+     ]
+    ]
+   }
+  },
+  "qamatz": {
+   "out": "a",
+   "evidence": {
+    "count": 2717268,
+    "outputs": {
+     "a": 2717268
+    },
+    "examples": [
+     [
+      "אָמַר",
+      "amar"
+     ],
+     [
+      "אֶלָּא",
+      "élla"
+     ],
+     [
+      "לָא",
+      "la"
+     ],
+     [
+      "הָיָה",
+      "haya"
+     ],
+     [
+      "אֲבָל",
+      "aval"
+     ]
+    ]
+   },
+   "note": "Qamatz gadol = a."
+  },
+  "qamatz-katan": {
+   "out": "o",
+   "evidence": {
+    "count": 66931,
+    "outputs": {
+     "o": 66931
+    },
+    "examples": [
+     [
+      "כָּל",
+      "kol"
+     ],
+     [
+      "כׇּל",
+      "kol"
+     ],
+     [
+      "וְכָל",
+      "vékhol"
+     ],
+     [
+      "בְּכָל",
+      "békhol"
+     ],
+     [
+      "כָּל",
+      "kol"
+     ]
+    ]
+   },
+   "note": "o when marked explicitly (U+05C7), when qamatz is followed by chataf-qamatz (tohora, okhora, lokovél, hookhalin) and in the word kol: qamatz on kaf in a word ending in kaf+lamed (kol, vékhol, mikkol)."
+  },
+  "segol": {
+   "out": "é",
+   "evidence": {
+    "count": 877496,
+    "outputs": {
+     "é": 877496
+    },
+    "examples": [
+     [
+      "אֶת",
+      "ét"
+     ],
+     [
+      "אֶלָּא",
+      "élla"
+     ],
+     [
+      "זֶה",
+      "zé"
+     ],
+     [
+      "שֶׁל",
+      "chél"
+     ],
+     [
+      "שֶׁלֹּא",
+      "chéllo"
+     ]
+    ]
+   },
+   "note": "Always é, never e or è in the data bodies (877k)."
+  },
+  "tsere": {
+   "out": "é",
+   "evidence": {
+    "count": 1111645,
+    "outputs": {
+     "é": 1111645
+    },
+    "examples": [
+     [
+      "לֵיהּ",
+      "léh"
+     ],
+     [
+      "אֵין",
+      "én"
+     ],
+     [
+      "הֲרֵי",
+      "haré"
+     ],
+     [
+      "בֵּין",
+      "bén"
+     ],
+     [
+      "וְאֵין",
+      "véén"
+     ]
+    ]
+   },
+   "note": "é. Tsere+yod (mater) is also just é, never ei/ay/ée (226,607 vs 18 other)."
+  },
+  "chirik": {
+   "out": "i",
+   "evidence": {
+    "count": 1952614,
+    "outputs": {
+     "i": 1924350,
+     "ï": 28264
+    },
+    "examples": [
+     [
+      "רַבִּי",
+      "rabbi"
+     ],
+     [
+      "אִם",
+      "im"
+     ],
+     [
+      "מִן",
+      "min"
+     ],
+     [
+      "וְאִם",
+      "véim"
+     ],
+     [
+      "כִּי",
+      "ki"
+     ]
+    ]
+   },
+   "note": "Chirik malé (with mater yod) also i, never ii: yod is silent (rule matres)."
+  },
+  "cholam": {
+   "out": "o",
+   "evidence": {
+    "count": 230948,
+    "outputs": {
+     "o": 230948
+    },
+    "examples": [
+     [
+      "לֹא",
+      "lo"
+     ],
+     [
+      "וְלֹא",
+      "vélo"
+     ],
+     [
+      "שֶׁלֹּא",
+      "chéllo"
+     ],
+     [
+      "שֶׁלֹּא",
+      "chéllo"
+     ],
+     [
+      "יַעֲקֹב",
+      "yaakov"
+     ]
+    ]
+   },
+   "note": "cholam malé (vav-cholam) is also o."
+  },
+  "kubutz": {
+   "out": "ou",
+   "evidence": {
+    "count": 51830,
+    "outputs": {
+     "ou": 51830
+    },
+    "examples": [
+     [
+      "יְהוֹשֻׁעַ",
+      "yéhochoua"
+     ],
+     [
+      "כֻּלְּהוּ",
+      "koulléhou"
+     ],
+     [
+      "טֻמְאָה",
+      "touma"
+     ],
+     [
+      "מֻתָּר",
+      "mouttar"
+     ],
+     [
+      "וְכֻלְּהוּ",
+      "vékhoulléhou"
+     ]
+    ]
+   }
+  },
+  "shuruk": {
+   "out": "ou",
+   "evidence": {
+    "count": 754773,
+    "outputs": {
+     "ou": 754773
+    },
+    "examples": [
+     [
+      "הוּא",
+      "hou"
+     ],
+     [
+      "מִשּׁוּם",
+      "michchoum"
+     ],
+     [
+      "יְהוּדָה",
+      "yéhouda"
+     ],
+     [
+      "וְהוּא",
+      "véhou"
+     ],
+     [
+      "שֶׁהוּא",
+      "chéhou"
+     ]
+    ]
+   },
+   "note": "vav with dagesh and no vowel = ou (word-initial conjunction too: oumin, ouvéhaméla)."
+  },
+  "chataf-patach": {
+   "out": "a",
+   "evidence": {
+    "count": 353158,
+    "outputs": {
+     "a": 353158
+    },
+    "examples": [
+     [
+      "אֲבָל",
+      "aval"
+     ],
+     [
+      "הֲרֵי",
+      "haré"
+     ],
+     [
+      "אֲמַר",
+      "amar"
+     ],
+     [
+      "הֲוָה",
+      "hava"
+     ],
+     [
+      "אֲשֶׁר",
+      "achér"
+     ]
+    ]
+   }
+  },
+  "chataf-segol": {
+   "out": "é",
+   "evidence": {
+    "count": 40554,
+    "outputs": {
+     "é": 40554
+    },
+    "examples": [
+     [
+      "שֶׁנֶּאֱמַר",
+      "chénnéémar"
+     ],
+     [
+      "שֶׁנֶּאֱמַר:",
+      "chénnéémar:"
+     ],
+     [
+      "אֱלִיעֶזֶר",
+      "éliézér"
+     ],
+     [
+      "אֱלֹהִים",
+      "élohim"
+     ],
+     [
+      "נֶאֱמַר",
+      "néémar"
+     ]
+    ]
+   }
+  },
+  "chataf-qamatz": {
+   "out": "o",
+   "evidence": {
+    "count": 9605,
+    "outputs": {
+     "o": 9605
+    },
+    "examples": [
+     [
+      "קֳדָם",
+      "kodam"
+     ],
+     [
+      "לָקֳבֵל",
+      "lokovél"
+     ],
+     [
+      "אָחֳרָא",
+      "okhora"
+     ],
+     [
+      "אָחֳרָא,",
+      "okhora,"
+     ],
+     [
+      "חֳדָשִׁים",
+      "khodachim"
+     ]
+    ]
+   }
+  },
+  "shva-na": {
+   "out": "é",
+   "evidence": {
+    "count": 1699207,
+    "outputs": {
+     "é": 1699207
+    },
+    "examples": [
+     [
+      "וְלֹא",
+      "vélo"
+     ],
+     [
+      "וְאִם",
+      "véim"
+     ],
+     [
+      "וְלָא",
+      "véla"
+     ],
+     [
+      "וְאֵין",
+      "véén"
+     ],
+     [
+      "דְּלָא",
+      "déla"
+     ]
+    ]
+   },
+   "note": "Vocal shva = é (see rule shva-na-vs-nach for exactly when)."
+  },
+  "shva-nach": {
+   "out": "",
+   "evidence": {
+    "count": 1097079,
+    "outputs": {
+     "": 1097079
+    },
+    "examples": [
+     [
+      "בְּרִיךְ",
+      "bérikh"
+     ],
+     [
+      "יִשְׂרָאֵל",
+      "yisraél"
+     ],
+     [
+      "כָּךְ",
+      "kakh"
+     ],
+     [
+      "שִׁמְעוֹן",
+      "chimon"
+     ],
+     [
+      "צָרִיךְ",
+      "tsarikh"
+     ]
+    ]
+   },
+   "note": "Silent shva = nothing."
+  }
+ },
+ "rules": [
+  {
+   "id": "geminate",
+   "desc": "Dagesh chazak (dagesh in a letter that follows a vowel inside the word) doubles the letter output: bb, gg, dd, kk, ll, mm, nn, pp, ss, tt, tsts, chch, yy, zz, vv. NOT doubled: aleph, he, chet, ayin, resh; letters at word start; bgdkpt-tav dagesh kal (after a vowelless letter or word-initially); a bgdkpt letter in word-final position with dagesh.",
+   "evidence": {
+    "count": 1236206,
+    "examples": [
+     [
+      "רַבִּי",
+      "rabbi"
+     ],
+     [
+      "אֶלָּא",
+      "élla"
+     ],
+     [
+      "שֶׁלֹּא",
+      "chéllo"
+     ],
+     [
+      "מִשּׁוּם",
+      "michchoum"
+     ],
+     [
+      "רַבִּי",
+      "rabbi"
+     ]
+    ]
+   },
+   "confidence": "high"
+  },
+  {
+   "id": "g-before-front-vowel",
+   "desc": "gimel followed by é or i is written gu (guémara, guimatriyya, ségoulla); with dagesh chazak before é/i: g+gu (hagguét); before a/o/ou plain gg (haggadol, bémagga, aggav).",
+   "evidence": {
+    "count": 70259,
+    "examples": [
+     [
+      "בְּגִין",
+      "béguin"
+     ],
+     [
+      "וּבְגִין",
+      "ouvéguin"
+     ],
+     [
+      "כְּנֶגֶד",
+      "kénéguéd"
+     ],
+     [
+      "גֵּט",
+      "guét"
+     ],
+     [
+      "גְּדוֹלָה",
+      "guédola"
+     ]
+    ]
+   },
+   "confidence": "high"
+  },
+  {
+   "id": "ss-intervocalic",
+   "desc": "samech or sin (and doubled s) written ss when it sits between two vowel sounds, including when the following sound is a silent aleph/ayin carrying a vowel (bissaro, missava, vayyissou); a single s stays s at word start, after a consonant (shva-nach), or before a consonant.",
+   "evidence": {
+    "count": 178042,
+    "examples": [
+     [
+      "יוֹסֵי",
+      "yossé"
+     ],
+     [
+      "אָסוּר",
+      "assour"
+     ],
+     [
+      "לַעֲשׂוֹת",
+      "laassot"
+     ],
+     [
+      "יוֹסֵף",
+      "yosséf"
+     ],
+     [
+      "עָשָׂר",
+      "assar"
+     ]
+    ]
+   },
+   "confidence": "high"
+  },
+  {
+   "id": "diaeresis-i",
+   "desc": "chirik on an aleph/ayin directly after an a/o vowel is ï (hoïl, haïchcha, raïm). After é the majority is plain i (véim 10,950 vs véïm 170; téméin) - see openQuestions.",
+   "evidence": {
+    "count": 28264,
+    "examples": [
+     [
+      "הוֹאִיל",
+      "hoïl"
+     ],
+     [
+      "הָאִשָּׁה",
+      "haïchcha"
+     ],
+     [
+      "עִלָּאִין",
+      "illaïn"
+     ],
+     [
+      "אַרְבָּעִים",
+      "arbaïm"
+     ],
+     [
+      "הָעִיר",
+      "haïr"
+     ]
+    ]
+   },
+   "confidence": "medium"
+  },
+  {
+   "id": "matres",
+   "desc": "Yod without vowel after chirik/tsere/segol: silent (the vowel is already written). Yod after patach: y (ay: hammayim, kodamay). Yod after qamatz followed by word-final vav: silent, vav = v (alav, yadav, béévarav). Vav with dagesh and no vowel: ou. Vav with cholam and the previous letter has NO vowel: mater o (hoïl, gon); if the previous letter has a vowel (incl. shva), vav is consonant v + o (avon, mitsvot).",
+   "confidence": "high"
+  },
+  {
+   "id": "final-he",
+   "desc": "Word-final he without dagesh: silent whatever the vowel (tora, tsava, ma, haya). With mappiq: see he-mappiq.",
+   "confidence": "high"
+  },
+  {
+   "id": "furtive-patach",
+   "desc": "Patach on a final chet or ayin (furtive patach) is pronounced before the consonant: emit a, then the consonant (chet gives akh; ayin is silent so just a).",
+   "evidence": {
+    "examples": [
+     [
+      "רוּחַ",
+      "rouakh"
+     ],
+     [
+      "מִזְבֵּחַ",
+      "mizbéakh"
+     ],
+     [
+      "נֹחַ",
+      "noakh"
+     ],
+     [
+      "יוֹדֵעַ",
+      "yodéa"
+     ],
+     [
+      "יְהוֹשֻׁעַ",
+      "yéhochoua"
+     ]
+    ]
+   },
+   "confidence": "medium"
+  },
+  {
+   "id": "shva-na-vs-nach",
+   "desc": "Shva is vocal (é) iff: (1) it is on the first letter of the word; (2) it is on the first consonant after a word-initial vav-shuruk (ouvékhol, ouchéar, ouléfikhakh) and generally on the letter right after any vav-shuruk (koudécha, touméa); (3) the bearer has dagesh chazak (mippéné, chénnévou); (4) it is the second of two consecutive shvas inside a word (mittaltélin, nimtséou, yirméya); (5) the bearer follows an initial definite article/prefix-ha with patach (ha + shva letter: harébé, hamékabbél, léhakhézir, hachéta - preceded only by prefix letters ו ב ל כ מ ש ד). Otherwise silent (omrim, karban, notnin, amrou, hayta). Word-final shva is always silent, including the second of a final pair (at, bét). Measured on 4 sources: after chirik/patach/segol/qamatz without the above conditions the shva is silent in 99.99% of tokens (e.g. chirik: 111,487 silent vs 1 vocal).",
+   "evidence": {
+    "examples": [
+     [
+      "וְלֹא",
+      "vélo"
+     ],
+     [
+      "וּבְכָל",
+      "ouvékhol"
+     ],
+     [
+      "מִפְּנֵי",
+      "mippéné"
+     ],
+     [
+      "נִמְצְאוּ",
+      "nimtséou"
+     ],
+     [
+      "הַמְקַבֵּל",
+      "hamékabbél"
+     ],
+     [
+      "אוֹמְרִים",
+      "omrim"
+     ]
+    ]
+   },
+   "confidence": "high",
+   "residual": "yod-bearer after patach: הַיְנוּ -> haynou (Leyisrael) but הַיְינוּ -> hayéynou (Tanya/Daf) - the engine cannot tell them apart unless it sees the extra yod."
+  },
+  {
+   "id": "capitalisation",
+   "desc": "Data bodies are lower-case except the first word of a verse/sentence/paragraph (about 2-4% of tokens capitalised: 14,228 of 145,413 in Torah because each verse starts capitalised) and Adonaï. Proper names (yisraél, moché, avraham, yaakov, chabbat, élohim) are lower-case mid-sentence (yisraél 12,886 vs Yisraél 91).",
+   "confidence": "high"
+  },
+  {
+   "id": "separators",
+   "desc": "No apostrophes or hyphens are ever inserted between letters inside a word (haélohim, béhaalotékha); only maqaf becomes - (él-moché, baroukh-hou, ki-chillakhnou). Apostrophes occur only in convention D UI names.",
+   "confidence": "high"
+  },
+  {
+   "id": "he-mappiq",
+   "desc": "See consonants.he-mappiq.",
+   "confidence": "high"
+  }
+ ],
+ "specialWords": {
+  "יְיָ": "Adonaï",
+  "יְהֹוָה": "Adonaï",
+  "יְהוָה": "Adonaï",
+  "ה׳": "Adonaï",
+  "ה'": "Adonaï",
+  "אֲדֹנָי": "adonay (as a plain word; 244 vs 145 adoni)",
+  "לַה׳": "laAdonaï (prefix + Adonaï, no hyphen)",
+  "לַיְיָ": "laAdonaï",
+  "דַּיְיָ": "daAdonaï",
+  "וְגוֹ׳": "végomér (abbreviation expanded: ve-gomer)",
+  "וְכוּ׳": "vékhouléi (abbreviation expanded: ve-khoulei)",
+  "כּוּ׳": "kouléi",
+  "גְּמָ׳": "Guémara",
+  "מַתְנִי׳": "Michna",
+  "ר'": "Rabbi",
+  "אֱלֹהִים": "élohim (lower-case mid-sentence; Élohim 5 tokens)",
+  "יִשְׂרָאֵל": "yisraél (Israël is NOT used in data bodies; only in UI strings)",
+  "מֹשֶׁה": "moché",
+  "שַׁבָּת": "chabbat",
+  "תּוֹרָה": "tora (3,326 in data; the UI strings use Torah)",
+  "הַשֵּׁם": "hachchém (Hashem/Hachem in UI strings only)",
+  "רִבִּי": "ribbi"
+ },
+ "variants": {
+  "B": {
+   "scope": "data/chok-benishchai/**/*.fr.json (Ben Ish Chai halacha + biur transliteration), data/prayers-fr.json (mostly the same, with a few é accents on tsere: lipné)",
+   "matchRateOfPrototypeWithTheseOverrides": "93.3% year1, 95.3% year2 tokens (prototype with the overrides below; remainder = abbreviations, Adonai, patach-yod-vav, etc.)",
+   "overrides": {
+    "segol": "e",
+    "tsere": "e",
+    "shva-na": "e",
+    "kubutz": "u",
+    "shuruk": "ou",
+    "qof": "q",
+    "kaf-rafe": "k",
+    "khaf-sofit": "k",
+    "bet-rafe": "b",
+    "pe-rafe": "p",
+    "pe-sofit": "p",
+    "chet": "kh",
+    "gimel": "g (never gu)",
+    "samech/sin": "s (no ss rule; dagesh still doubles)",
+    "final-he": "silent only after qamatz (tora, beraka); written h after segol/patach/tsere (zeh, mah, harbeh)",
+    "patach+yod+vav": "ayv (alayv, yadayv)",
+    "furtive-patach": "kha / ha (lehannikha, roukha: consonant+a, not a+consonant)",
+    "shva after long vowel": "vocal e (omerim, yomrou) - in BIC the shva-na rule is \"after any long vowel\"",
+    "divine-name": "Adonai (no diaeresis)",
+    "hashem": "hachchem"
+   },
+   "note": "Capitals only for sentence starts and Adonai/Elohim; dagesh chazak doubles in the same way as A."
+  },
+  "D": {
+   "scope": "PARSHA_FR_NAMES (index.html line ~3405, 54 entries) + UI I18N fr transliterations (Roch 'Hodech, Hochaana Raba, Téhilim, Yom Kippour, Chnayim mikra...)",
+   "chet": "'h  (apostrophe + h): Noa'h, 'Hayé Sarah, Vayichla'h, Vaye'hi, Bechala'h, A'haré Mot, Bé'houkotaï, Kora'h, 'Houkat, Pin'has, Vaet'hanane. Word-initial: 'H (capital after apostrophe).",
+   "khaf": "kh (Lekh Lékha, Vayakhel, Béhaalotékha, Ekev, Vayélèkh)",
+   "shin": "ch",
+   "tsadi": "ts",
+   "qof": "k (Kedochim)",
+   "tav": "t",
+   "ayin/aleph": "silent, no apostrophe (Béhaalotékha, Haazinou, Vaéra)",
+   "vowels": "tsere é mostly (Béréchit, Vayétsé, Pékoudé) but e in several (Toledot, Terouma, Metsora, Kedochim, Tetsavé), segol e/é mixed (Emor, Réé), final è in Vayélèkh, kubutz/shuruk ou, yod final aï (Bé'houkotaï)",
+   "gemination": "NOT applied (Vayéra, Vayigach, Matot, Nitsavim) except by hand (Massé, Nasso, Ki-Tissa, Béhaalotékha)",
+   "composites": "Hyphenated, each part capitalised (Vayakhel-Pékoudé, Ki-Tissa)",
+   "recommendation": "Treat as a closed lookup table; do not route through the engine."
+  }
+ },
+ "openQuestions": [
+  "Which convention should the new book use? A is the overwhelming majority (98.8% reproducible, 5.4M tokens, used by Torah text and all Chok LeYisrael texts); B (Ben Ish Chai, prayers) differs in 12+ systematic points; D only for display names. Assumed A.",
+  "Chet: the user-reviewed UI spellings use 'h (Noa'h, 'Hayé Sarah, 'houkat) while ALL transliterated body text uses kh for both chet and khaf. If the reviewed convention is meant to apply to new body text, chet becomes 'h (e.g. 'hok instead of khok) - needs a decision; the data cannot decide it.",
+  "Diaeresis after é: véim (10,950) vs véïm (170) and béïra/arbéïn in Targum text; spec follows the majority (no ï after é).",
+  "Shva na/nach is derived from a purely positional rule set that matches 99.99% of the unambiguous cases but is not true Hebrew syllabification; residual cases (hayynou vs hayéynou, lilmoed words with yod-bearer) are unresolved.",
+  "Qamatz katan beyond explicit U+05C7, the kol rule and qamatz+chataf-qamatz is unresolved: the source text marks few qamatz-katan words, so the engine will read other unmarked ones as a; the data does not show how the existing transliteration decided them.",
+  "Abbreviations (ה', וגו', וכו', גמ', מתני', ר') and divine names are expanded by hand-written tables in the existing data (végomér, vékhouléi, Guémara, Michna, Adonaï); the spec lists the common ones in specialWords; unknown abbreviations are untested.",
+  "Hebrew vs Aramaic: mappiq-he needs no language switch (decided by the vowel: qamatz keeps h, patach/tsere silent), but after shuruk the data drops it (אֲבוּהּ -> avou, 401 tokens; אֲחוּהּ -> akhou) and after yod+patach too (לַיהּ -> lay, 59 tokens); the engine should treat shuruk and chirik-yod-patach like patach.",
+  "Irregular forms such as הַלּוֶֹה (hallo, 141 tokens) and גּוָֹון (gon) with cholam over a vowelled vav are not reproduced by the rules.",
+  "Capitalisation of proper names: data is lower-case except sentence-initial and Adonaï; UI strings capitalise names (Israël, Torah, Chabbat, Hashem). Decide which applies to a book body.",
+  "Whether the word Hashem/Hachem should be hachchém (mechanical, 626 tokens in data) or the UI Hashem (user-facing).",
+  "Ketiv/qere and non-Hebrew words in Hebrew letters (foreign names) were not sampled separately."
+ ]
+}
