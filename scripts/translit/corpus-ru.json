@@ -1,0 +1,2332 @@
+[
+ {
+  "he": "אֶת",
+  "ru": "ет",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אִם",
+  "ru": "им",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֶלָּא",
+  "ru": "елла",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאִם",
+  "ru": "веим",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אוֹ",
+  "ru": "о",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לֹא",
+  "ru": "ло",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְלֹא",
+  "ru": "вело",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דָּא",
+  "ru": "да",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עַל",
+  "ru": "ал",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עַד",
+  "ru": "ад",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָלָיו",
+  "ru": "алав",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְעַל",
+  "ru": "веал",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שִׁמְעוֹן",
+  "ru": "шимон",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אַרְבַּע",
+  "ru": "арба",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְעוֹלָם",
+  "ru": "леолам",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יָדַע",
+  "ru": "йада",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בֵּין",
+  "ru": "бен",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בּוֹ",
+  "ru": "бо",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בָּהּ",
+  "ru": "баг",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּרִיךְ",
+  "ru": "берих",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֲבָל",
+  "ru": "авал",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חַיָּב",
+  "ru": "хаййав",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דָּבָר",
+  "ru": "давар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּתִיב",
+  "ru": "кетив",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הֲרֵי",
+  "ru": "гаре",
+  "src": "data/chok-zohar/18.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֲשֶׁר",
+  "ru": "ашер",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁהֲרֵי",
+  "ru": "шегаре",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֲפִלּוּ",
+  "ru": "афиллу",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֳכָלִין",
+  "ru": "охалин",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חֳדָשִׁים",
+  "ru": "ходашим",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַקֳּדָשִׁים",
+  "ru": "гаккодашим",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "קֳדָשִׁים",
+  "ru": "кодашим",
+  "src": "data/chok-zohar/19.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֱלֹהִים",
+  "ru": "елогим",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לֶאֱכֹל",
+  "ru": "леехол",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "נֶאֱמָן",
+  "ru": "нееман",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֱלֹהֶיךָ",
+  "ru": "елогеха",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֶחָד",
+  "ru": "ехад",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אַחַת",
+  "ru": "ахат",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חַד",
+  "ru": "хад",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אַחַר",
+  "ru": "ахар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִן",
+  "ru": "мин",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פִּי",
+  "ru": "пи",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יִשְׂרָאֵל",
+  "ru": "йисраел",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִפְּנֵי",
+  "ru": "миппене",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁלֹּא",
+  "ru": "шелло",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מֹשֶׁה",
+  "ru": "моше",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַכֹּל",
+  "ru": "гаккол",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֹּלָּא",
+  "ru": "колла",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לוֹ",
+  "ru": "ло",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "זוֹ",
+  "ru": "зо",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵינוֹ",
+  "ru": "ено",
+  "src": "data/chok-zohar/33.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אוֹתוֹ",
+  "ru": "ото",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵלּוּ",
+  "ru": "еллу",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אִינּוּן",
+  "ru": "иннун",
+  "src": "data/chok-zohar/12.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "רִבִּי",
+  "ru": "рибби",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עִלָּאָה",
+  "ru": "иллаа",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּדֵי",
+  "ru": "кеде",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אָדָם",
+  "ru": "адам",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דְּלָא",
+  "ru": "дела",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דְּהָא",
+  "ru": "дега",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יוֹדֵעַ",
+  "ru": "йодеа",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יָדוּעַ",
+  "ru": "йадуа",
+  "src": "data/chok-tanya/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הִגִּיעַ",
+  "ru": "гиггиа",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "קָבוּעַ",
+  "ru": "кавуа",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "רוּחַ",
+  "ru": "руах",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַלּוֹקֵחַ",
+  "ru": "галлокеах",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַמִּזְבֵּחַ",
+  "ru": "гаммизбеах",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "נֹחַ",
+  "ru": "ноах",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דְּאוּקְמוּהַ",
+  "ru": "деукемуаг",
+  "src": "data/chok-zohar/40.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "תַּגְבִּיהַ",
+  "ru": "тагбиаг",
+  "src": "data/chok-zohar/21.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּדְאוּקְמוּהַ",
+  "ru": "кедукемуаг",
+  "src": "data/chok-zohar/39.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דֹּאוּקְמוּהַ",
+  "ru": "доукемуаг",
+  "src": "data/chok-zohar/40.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּגִין",
+  "ru": "бегин",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּגוֹן",
+  "ru": "кегон",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וּבְגִין",
+  "ru": "увегин",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "גָּדוֹל",
+  "ru": "гадол",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הָיָה",
+  "ru": "гайа",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁהוּא",
+  "ru": "шегу",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בָּהֶן",
+  "ru": "баген",
+  "src": "data/chok-zohar/33.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אִיהוּ",
+  "ru": "игу",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לֵיהּ",
+  "ru": "лег",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לָהּ",
+  "ru": "лаг",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בֵּיהּ",
+  "ru": "бег",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אוֹתָהּ",
+  "ru": "отаг",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "זְה",
+  "ru": "зе",
+  "src": "data/chok-zohar/15.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מַסְוְה",
+  "ru": "масве",
+  "src": "data/chok-zohar/33.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַזְּה",
+  "ru": "газзе",
+  "src": "data/chok-zohar/4.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "תֶחֱזְה",
+  "ru": "техез",
+  "src": "data/chok-zohar/15.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְנַעֲלֲה",
+  "ru": "венаала",
+  "src": "data/chok-zohar/8.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְהִנִּה",
+  "ru": "вегинни",
+  "src": "data/chok-zohar/11.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הִנִּה",
+  "ru": "гинни",
+  "src": "data/chok-zohar/24.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְדִיקְנִה",
+  "ru": "ведикни",
+  "src": "data/chok-zohar/16.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דְּהַוִה",
+  "ru": "дегави",
+  "src": "data/chok-zohar/26.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פַּרְעֹה",
+  "ru": "паро",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שְׁלֹמֹה",
+  "ru": "шеломо",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֹּה",
+  "ru": "ко",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פַרְעֹה",
+  "ru": "фаро",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יִקְרְחֻה",
+  "ru": "йикреху",
+  "src": "data/chok-zohar/30.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מַה",
+  "ru": "ма",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וּמַה",
+  "ru": "ума",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִמַּה",
+  "ru": "мимма",
+  "src": "data/chok-zohar/11.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּמַה",
+  "ru": "бема",
+  "src": "data/chok-zohar/17.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הֲוָה",
+  "ru": "гава",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הָיְתָה",
+  "ru": "гайта",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "טֻמְאָה",
+  "ru": "тума",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁהָיָה",
+  "ru": "шегайа",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "זֶה",
+  "ru": "зе",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יִהְיֶה",
+  "ru": "йигйе",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַזֶּה",
+  "ru": "газзе",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בָּזֶה",
+  "ru": "базе",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַרְבֵּה",
+  "ru": "гаребе",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְהִנֵּה",
+  "ru": "вегинне",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מַעֲשֵׂה",
+  "ru": "маасе",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הִנֵּה",
+  "ru": "гинне",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כָּךְ",
+  "ru": "ках",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כִּי",
+  "ru": "ки",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּמוֹ",
+  "ru": "кемо",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כַּד",
+  "ru": "кад",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְכֵן",
+  "ru": "вехен",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְפִיכָךְ",
+  "ru": "лефихах",
+  "src": "data/chok-zohar/39.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הָכִי",
+  "ru": "гахи",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְכַיּוֹצֵא",
+  "ru": "вехаййоце",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "צָרִיךְ",
+  "ru": "царих",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְךָ",
+  "ru": "леха",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּתוֹךְ",
+  "ru": "бетох",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בָּרוּךְ",
+  "ru": "барух",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מֻתָּר",
+  "ru": "муттар",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֻּלְּהוּ",
+  "ru": "куллегу",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֻּלָּן",
+  "ru": "куллан",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מְקֻדֶּשֶׁת",
+  "ru": "мекуддешет",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁל",
+  "ru": "шел",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לָא",
+  "ru": "ла",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְלָא",
+  "ru": "вела",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֶל",
+  "ru": "ел",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אָמַר",
+  "ru": "амар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מֵהֶן",
+  "ru": "меген",
+  "src": "data/chok-zohar/6.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָלְמָא",
+  "ru": "алма",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִי",
+  "ru": "ми",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יוֹם",
+  "ru": "йом",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עִם",
+  "ru": "им",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שָׁם",
+  "ru": "шам",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דְּבָרִים",
+  "ru": "деварим",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּנֵי",
+  "ru": "бене",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "נָשׁ",
+  "ru": "наш",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִמֶּנּוּ",
+  "ru": "мимменну",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁאֵינוֹ",
+  "ru": "шеено",
+  "src": "data/chok-zohar/36.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵין",
+  "ru": "ен",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁאֵין",
+  "ru": "шеен",
+  "src": "data/chok-zohar/16.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאֵין",
+  "ru": "веен",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הֵן",
+  "ru": "ген",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אַף",
+  "ru": "аф",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַהוּא",
+  "ru": "гагу",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאַחַר",
+  "ru": "веахар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאָמַר",
+  "ru": "веамар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פָּטוּר",
+  "ru": "патур",
+  "src": "data/chok-zohar/35.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פְּלוֹנִי",
+  "ru": "пелони",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פֵּרוֹת",
+  "ru": "перот",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פָּחוֹת",
+  "ru": "пахот",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וַאֲפִלּוּ",
+  "ru": "ваафиллу",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְפִי",
+  "ru": "лефи",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "סָפֵק",
+  "ru": "сафек",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לִפְנֵי",
+  "ru": "лифне",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאַף",
+  "ru": "веаф",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יוֹסֵף",
+  "ru": "йосеф",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "סוֹף",
+  "ru": "соф",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֶלֶף",
+  "ru": "елеф",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הָיוּ",
+  "ru": "гайу",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "קוּדְשָׁא",
+  "ru": "кудеша",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הָאָרֶץ",
+  "ru": "гаарец",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אָסוּר",
+  "ru": "асур",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "קַדִּישָׁא",
+  "ru": "каддиша",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מָקוֹם",
+  "ru": "маком",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "קֹדֶם",
+  "ru": "кодем",
+  "src": "data/chok-zohar/18.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יַעֲקֹב",
+  "ru": "йааков",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אַחֵר",
+  "ru": "ахер",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בַּר",
+  "ru": "бар",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "טָהוֹר",
+  "ru": "тагор",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אוֹמֵר",
+  "ru": "омер",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "סִטְרָא",
+  "ru": "ситра",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִסִּטְרָא",
+  "ru": "мисситра",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "סִטְרִין",
+  "ru": "ситрин",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יוֹסֵי",
+  "ru": "йосе",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁמָּא",
+  "ru": "шемма",
+  "src": "data/chok-zohar/19.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁיֵּשׁ",
+  "ru": "шеййеш",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁהִיא",
+  "ru": "шеги",
+  "src": "data/chok-zohar/39.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁהֵן",
+  "ru": "шеген",
+  "src": "data/chok-zohar/40.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יֵשׁ",
+  "ru": "йеш",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שְׁנֵי",
+  "ru": "шене",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁבֵּאַרְנוּ",
+  "ru": "шеббеарну",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שְׁתֵּי",
+  "ru": "шете",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְהוּא",
+  "ru": "вегу",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דְּאִיהוּ",
+  "ru": "деигу",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּהַהוּא",
+  "ru": "бегагу",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּלוּם",
+  "ru": "келум",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאֵינוֹ",
+  "ru": "веено",
+  "src": "data/chok-zohar/40.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאֶת",
+  "ru": "веет",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כְּדֵין",
+  "ru": "кеден",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לַעֲשׂוֹת",
+  "ru": "лаасот",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מַעֲשֵׂר",
+  "ru": "маасер",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָשָׂה",
+  "ru": "аса",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָשָׂר",
+  "ru": "асар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בֵּית",
+  "ru": "бет",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אוֹתָן",
+  "ru": "отан",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "תָּא",
+  "ru": "та",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַבַּיִת",
+  "ru": "габбайит",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "טָמֵא",
+  "ru": "таме",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "טוֹב",
+  "ru": "тов",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "גֵּט",
+  "ru": "гет",
+  "src": "data/chok-zohar/17.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חַטָּאת",
+  "ru": "хаттат",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֵּיצַד",
+  "ru": "кецад",
+  "src": "data/chok-rambam/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עַצְמוֹ",
+  "ru": "ацмо",
+  "src": "data/chok-zohar/14.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כַּיּוֹצֵא",
+  "ru": "каййоце",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יִצְחָק",
+  "ru": "йицхак",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֶרֶץ",
+  "ru": "ерец",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עֵץ",
+  "ru": "ец",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לָאָרֶץ",
+  "ru": "лаарец",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּאֶרֶץ",
+  "ru": "беерец",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חֲזֵי",
+  "ru": "хазе",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אִלֵּין",
+  "ru": "иллен",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֵּיוָן",
+  "ru": "кеван",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "כֵּן",
+  "ru": "кен",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לָאו",
+  "ru": "лав",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וַדַּאי",
+  "ru": "ваддай",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וַהֲרֵי",
+  "ru": "вагаре",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְאֶחָד",
+  "ru": "веехад",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בִּלְחוֹדוֹי",
+  "ru": "билходой",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יְדוֹי",
+  "ru": "йедой",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עֲלוֹי",
+  "ru": "алой",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עוֹבָדוֹי",
+  "ru": "овадой",
+  "src": "data/chok-zohar/1.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָלַי",
+  "ru": "алай",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חַי",
+  "ru": "хай",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַחַי",
+  "ru": "гахай",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵלַי",
+  "ru": "елай",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "שֶׁהָיוּ",
+  "ru": "шегайу",
+  "src": "data/chok-zohar/13.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חִיָּיא",
+  "ru": "хиййай",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְהָיוּ",
+  "ru": "вегайу",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "חַבְרַיָּיא",
+  "ru": "хавраййай",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הַאי",
+  "ru": "гай",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "בְּהַאי",
+  "ru": "бегай",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יוֹמָא",
+  "ru": "йома",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יָכוֹל",
+  "ru": "йахол",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הִיא",
+  "ru": "ги",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לִי",
+  "ru": "ли",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "דִּין",
+  "ru": "дин",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "הוֹאִיל",
+  "ru": "гоил",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָלֶיהָ",
+  "ru": "алега",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְפָנֶיךָ",
+  "ru": "лефанеха",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵלֶיךָ",
+  "ru": "елеха",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "עָלֶיךָ",
+  "ru": "алеха",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵינָהּ",
+  "ru": "енаг",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְעֵילָּא",
+  "ru": "леелла",
+  "src": "data/chok-zohar/12.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "מִנֵּיהּ",
+  "ru": "миннег",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יְדֵי",
+  "ru": "йеде",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֵלָיו",
+  "ru": "елав",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יָדָיו",
+  "ru": "йадав",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "לְפָנָיו",
+  "ru": "лефанав",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "פָּנָיו",
+  "ru": "панав",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "זְמַן",
+  "ru": "земан",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "רָזָא",
+  "ru": "раза",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "אֶלְעָזָר",
+  "ru": "елазар",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "וְזֶה",
+  "ru": "везе",
+  "src": "data/torah-ru.json",
+  "dialect": "A"
+ },
+ {
+  "he": "יְהֹוָה",
+  "ru": "Адонай",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "יְיָ",
+  "ru": "адонай",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "לַיְיָ",
+  "ru": "лаадонай",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "וַיְיָ",
+  "ru": "ваадонай",
+  "src": "data/chok-zohar/14.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "לַה",
+  "ru": "лаадонай",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "וְגוֹ",
+  "ru": "вегомер",
+  "src": "data/chok-zohar/12.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "וְכוּ",
+  "ru": "вехулеи",
+  "src": "data/chok-zohar/0.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "יֱהֹוִה",
+  "ru": "Елогим",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "אֲדֹנָי",
+  "ru": "адонай",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "הוּא",
+  "ru": "гу",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "אֱלֹהֵינוּ",
+  "ru": "елогену",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "כָּל",
+  "ru": "кол",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "יָהּ",
+  "ru": "йаг",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "מִצְרַיִם",
+  "ru": "мицрайим",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "אַבְרָהָם",
+  "ru": "аврагам",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "הַתּוֹרָה",
+  "ru": "гаттора",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "חַיִּים",
+  "ru": "хаййим",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "בָּרוּךְ",
+  "ru": "барух",
+  "src": "data/chok-tanya/0.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "אָמֵן",
+  "ru": "амен",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "מֶלֶךְ",
+  "ru": "мелех",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "וַיִּקְרָא",
+  "ru": "ваййикра",
+  "src": "data/chok-rambam/20.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "אָהֳלוֹ",
+  "ru": "оголо",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "טָהֳרָה",
+  "ru": "тогора",
+  "src": "data/chok-zohar/27.ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "לֵאמֹר",
+  "ru": "лемор",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "special word"
+ },
+ {
+  "he": "חָכְמָה",
+  "ru": "хохма",
+  "src": "data/torah-ru.json",
+  "dialect": "A",
+  "note": "qamatz-katan in torah-ru.json"
+ },
+ {
+  "he": "חָכְמָה",
+  "ru": "хахма",
+  "src": "data/chok-zohar/10.ru.json",
+  "dialect": "A",
+  "note": "zohar/tanya/rambam write qamatz gadol here"
+ },
+ {
+  "he": "צָרִיךְ",
+  "ru": "царик",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְכֵן",
+  "ru": "векен",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "כָּל",
+  "ru": "кол",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אֲבָל",
+  "ru": "абал",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אֲפִלּוּ",
+  "ru": "апиллу",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וַאֲפִלּוּ",
+  "ru": "ваапиллу",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אַךְ",
+  "ru": "ак",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "מַה",
+  "ru": "маг",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "עָלָיו",
+  "ru": "алайв",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לְבָרֵךְ",
+  "ru": "лебарек",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "טוֹב",
+  "ru": "тоб",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "דָּבָר",
+  "ru": "дабар",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בְּרָכָה",
+  "ru": "берака",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "יְבָרֵךְ",
+  "ru": "йебарек",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְכַנִּזְכָּר",
+  "ru": "веканнизкар",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְכַיּוֹצֵא",
+  "ru": "векаййоце",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "זֶה",
+  "ru": "зег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בָּזֶה",
+  "ru": "базег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְלָכֵן",
+  "ru": "велакен",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְכָל",
+  "ru": "векол",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְצָרִיךְ",
+  "ru": "вецарик",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "תְּפִלִּין",
+  "ru": "тепиллин",
+  "src": "data/chok-benishchai/year1/Beshalach.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "הַרְבֵּה",
+  "ru": "гарбег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בְּבֵית",
+  "ru": "бебет",
+  "src": "data/chok-benishchai/year1/Bamidbar.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בְּתוֹךְ",
+  "ru": "беток",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "שֶׁכָּתַב",
+  "ru": "шеккатаб",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בְּכָל",
+  "ru": "бекол",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "הַבְּרָכָה",
+  "ru": "габберака",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אֶפְשָׁר",
+  "ru": "епшар",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "שֶׁיִּהְיֶה",
+  "ru": "шеййигйег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וּכְמוֹ",
+  "ru": "укемо",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בְּרָכוֹת",
+  "ru": "беракот",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְכוּ",
+  "ru": "веку'",
+  "src": "data/chok-benishchai/year1/Beha_alotcha.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "בָּרוּךְ",
+  "ru": "барук",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "הָרַב",
+  "ru": "гараб",
+  "src": "data/chok-benishchai/year1/Bereshit.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "יִהְיֶה",
+  "ru": "йигйег",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "יָדָיו",
+  "ru": "йадайв",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְזֶה",
+  "ru": "везег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לְפָנָיו",
+  "ru": "лепанайв",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "תְּפִלַּת",
+  "ru": "тепиллат",
+  "src": "data/chok-benishchai/year1/Bamidbar.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "מִכָּל",
+  "ru": "миккол",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וּמַלְכוּת",
+  "ru": "умалкут",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "כָּךְ",
+  "ru": "как",
+  "src": "data/chok-benishchai/year1/Bamidbar.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לְכָךְ",
+  "ru": "лекак",
+  "src": "data/chok-benishchai/year1/Bamidbar.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לֶאֱכֹל",
+  "ru": "леекол",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אַף",
+  "ru": "ап",
+  "src": "data/chok-benishchai/year1/Beha_alotcha.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "חַיָּב",
+  "ru": "хаййаб",
+  "src": "data/chok-benishchai/year1/Chukat.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "יַעֲשֶׂה",
+  "ru": "йаасег",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "הַזֶּה",
+  "ru": "газзег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "רוֹצֶה",
+  "ru": "роцег",
+  "src": "data/chok-benishchai/year1/Behar_Bechukotai.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "דֶּרֶךְ",
+  "ru": "дерек",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "דְּבָרִים",
+  "ru": "дебарим",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "הִנֵּה",
+  "ru": "гиннег",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לְהַנִּיחַ",
+  "ru": "леганниха",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "חֲבֵרוֹ",
+  "ru": "хаберо",
+  "src": "data/chok-benishchai/year1/Behar_Bechukotai.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "חֲשִׁיב",
+  "ru": "хашиб",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לְכַתְּחִלָּה",
+  "ru": "лекаттехилла",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "רוּחַ",
+  "ru": "руха",
+  "src": "data/chok-benishchai/year1/Bereshit.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "כִּי",
+  "ru": "кий",
+  "src": "data/chok-benishchai/year2/Achrei_Mot.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "כָּתַב",
+  "ru": "катаб",
+  "src": "data/chok-benishchai/year1/Balak.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְיֵשׁ",
+  "ru": "вейеш",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "גַּם",
+  "ru": "гам",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "שַׁבָּת",
+  "ru": "шаббат",
+  "src": "data/chok-benishchai/year1/Bamidbar.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "מִשּׁוּם",
+  "ru": "мишшум",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "לוֹמַר",
+  "ru": "ломар",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "וְעַיֵּן",
+  "ru": "веаййен",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אוֹמְרִים",
+  "ru": "омерим",
+  "src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ru.json",
+  "dialect": "B"
+ },
+ {
+  "he": "אֶת",
+  "ru": "эт",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "עַל",
+  "ru": "аль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֱלֹהֵינוּ",
+  "ru": "элогену",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "כָּל",
+  "ru": "коль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "וְעַל",
+  "ru": "веаль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֵל",
+  "ru": "эль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "כָּל",
+  "ru": "коль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֶל",
+  "ru": "эль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "וְכָל",
+  "ru": "вехоль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֱלֹהֵי",
+  "ru": "элоге",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֵין",
+  "ru": "эн",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֶחָד",
+  "ru": "эхад",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אַל",
+  "ru": "аль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "לְכָל",
+  "ru": "лехоль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "וְאֶת",
+  "ru": "веэт",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "יַעֲקֹב",
+  "ru": "яаков",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "הָאֱלֹהִים",
+  "ru": "гаэлогим",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "הָאֵל",
+  "ru": "гаэль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֱלֹהִים",
+  "ru": "элогим",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "בְּכָל",
+  "ru": "бехоль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "וְאַל",
+  "ru": "веаль",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֱמֶת",
+  "ru": "эмет",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "יְהֹוָה",
+  "ru": "адонай",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "כִּי",
+  "ru": "ки",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אַתָּה",
+  "ru": "атта",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אָבִינוּ",
+  "ru": "авину",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "יִשְׂרָאֵל",
+  "ru": "исраел",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "עָלֵינוּ",
+  "ru": "алену",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אֲשֶׁר",
+  "ru": "ашер",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ },
+ {
+  "he": "אַתָּה",
+  "ru": "атта",
+  "src": "data/prayers-ru.json",
+  "dialect": "S"
+ }
+]
