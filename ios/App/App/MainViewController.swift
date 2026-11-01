@@ -447,6 +447,15 @@ class MainViewController: CAPBridgeViewController {
         topBar.onMenuSelect = { [weak self] actionId, itemId in
             self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onMenu && window.NativeTopBarHost.onMenu(\(self?.jsStringLiteral(actionId) ?? "null"), \(self?.jsStringLiteral(itemId) ?? "null"))", completionHandler: nil)
         }
+        topBar.onTitleSheet = { [weak self] in
+            guard let self = self, let spec = NativeTopBarView.titleSheet else { return }
+            let vc = TitleSheetViewController(spec: spec) { [weak self] actionId, itemId in
+                self?.webView?.evaluateJavaScript("window.NativeTopBarHost && window.NativeTopBarHost.onMenu && window.NativeTopBarHost.onMenu(\(self?.jsStringLiteral(actionId) ?? "null"), \(self?.jsStringLiteral(itemId) ?? "null"))", completionHandler: nil)
+            }
+            var top: UIViewController = self
+            while let p = top.presentedViewController { top = p }
+            top.present(vc, animated: true)
+        }
         topBar.onQuickAction = { [weak self] action in
             guard let self = self else { return }
             let js: String
