@@ -119,4 +119,4 @@ Goal: one scheme that reproduces the 8 community-reviewed names (ხაიე �
 `spec-ka.json -> recommended` contains the machine-readable form; `engineMaps` is the current baseline (A) so a
 module can ship `scheme: "current"` first and switch to `"recommended"` once approved. Worked check:
 חַיֵּי -> ხაიე, בְּרֵאשִׁית -> ბერეშით, וַיִּקְרָא -> ვაიკრა, נִצָּבִים -> ნიცავიმ, חֲנוּכָּה -> ხანუქა,
-תְּהִלִּים -> თეჰილიმ. Open questions are in `spec-ka.json -> openQuestions` (17 items).
+תְּהִלִּים -> თეჰილიმ. Open questions are in `spec-ka.json -> openQuestions` (18 items).
