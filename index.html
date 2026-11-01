@@ -32,6 +32,13 @@
 /* global safety net: nothing animates for users who asked for reduced motion (component rules above stay for their custom end states) */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}
 </style>
+<script>
+/* Glass gate: html.glassy = everything except the native iOS shell (real UIKit glass there). glassy-lite = no blur on weak devices. */
+(function(){try{var d=document.documentElement,C=window.Capacitor,ios=!!(C&&C.getPlatform&&C.getPlatform()==='ios');
+if(ios)return;d.classList.add('glassy');
+var n=navigator,low=(n.deviceMemory&&n.deviceMemory<=2)||(n.hardwareConcurrency&&n.hardwareConcurrency<=4)||(window.matchMedia&&matchMedia('(prefers-reduced-transparency: reduce)').matches);
+if(low)d.classList.add('glassy-lite');}catch(e){document.documentElement.classList.add('glassy');}})();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -1864,6 +1871,73 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
   transform:scale(.965);
 }
 
+/* GLASS-TOKENS:START */
+/* Liquid-Glass approximation for Android / web / PWA (gate: html.glassy, set in <head>; never on the native iOS shell,
+   which has real UIKit glass). Shared tokens - consumers use var(--gl-x, fallback) and must NOT redefine them.
+   --gl-border is a full shorthand ("1px solid <color>"); --gl-hi and --gl-shadow are box-shadow LISTS (compose with commas);
+   --gl-tint-gold is a colour. html.glassy-lite (low-end device / reduced transparency) zeroes --gl-blur and makes --gl-bg opaque-ish.
+   ONLY .bottom-nav may use backdrop-filter (Chrome renderer crash lesson) - everything else = gradients/borders/shadows. */
+:root,[data-theme="dark"]{
+  --gl-bg:rgba(24,36,68,.46);
+  --gl-bg-strong:rgba(20,31,60,.74);
+  --gl-border:1px solid rgba(255,255,255,.17);
+  --gl-hi:inset 0 1px 0 rgba(255,255,255,.30),inset 0 0 0 1px rgba(255,255,255,.04),inset 0 -10px 18px -12px rgba(255,255,255,.10);
+  --gl-shadow:0 14px 34px -12px rgba(0,0,0,.62),0 2px 8px -2px rgba(0,0,0,.32);
+  --gl-blur:18px;
+  --gl-radius-capsule:999px;
+  --gl-tint-gold:rgba(212,175,95,.32);
+}
+[data-theme="light"]{
+  --gl-bg:rgba(255,252,244,.56);
+  --gl-bg-strong:rgba(255,252,244,.84);
+  --gl-border:1px solid rgba(150,116,44,.26);
+  --gl-hi:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.35),inset 0 -10px 18px -12px rgba(255,255,255,.7);
+  --gl-shadow:0 14px 30px -14px rgba(110,80,25,.42),0 2px 6px -2px rgba(110,80,25,.16);
+  --gl-tint-gold:rgba(184,134,11,.24);
+}
+html.glassy-lite{--gl-blur:0px;--gl-bg:var(--gl-bg-strong)}
+/* GLASS-TOKENS:END */
+
+/* ===== GLASS BOTTOM NAV (html.glassy only): floating capsule like the iOS 26 tab bar ===== */
+html.glassy .bottom-nav{
+  left:0;right:0;margin:0 auto;
+  width:calc(100% - 32px);max-width:min(480px,calc(100% - 32px));
+  bottom:calc(10px + env(safe-area-inset-bottom));
+  padding:0 6px;border-radius:var(--gl-radius-capsule,999px);
+  background:var(--gl-bg,var(--panel));background-image:none;
+  border:var(--gl-border,1px solid var(--line-strong));border-top:var(--gl-border,1px solid var(--line-strong));
+  box-shadow:var(--gl-shadow,0 12px 34px -10px rgba(0,0,0,.35)),var(--gl-hi,inset 0 1px 0 rgba(255,255,255,.2));
+  -webkit-backdrop-filter:blur(var(--gl-blur,18px)) saturate(1.6);backdrop-filter:blur(var(--gl-blur,18px)) saturate(1.6);
+  will-change:opacity,transform;
+  transition:opacity .38s var(--ease),transform .42s cubic-bezier(.16,.85,.24,1),visibility .38s;
+}
+html.glassy-lite .bottom-nav{-webkit-backdrop-filter:none;backdrop-filter:none}
+html.glassy .bottom-nav.nav-hidden{
+  opacity:0;filter:none;transform:translateY(calc(100% + 28px + env(safe-area-inset-bottom)));pointer-events:none;
+  transition:opacity .26s var(--ease),transform .28s cubic-bezier(.4,0,.68,.06),visibility .28s;
+}
+html.glassy .nav-fade{height:calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));opacity:.8}
+html.glassy .nav-item{-webkit-tap-highlight-color:transparent;gap:4px;min-height:44px;color:var(--muted)}
+html.glassy .nav-item.on{color:var(--gold)}
+html.glassy .nav-item:active{transform:scale(.92)}
+html.glassy .nav-item svg{width:25px;height:25px}
+html.glassy .nav-item.on svg{filter:drop-shadow(0 2px 6px var(--gl-tint-gold,rgba(212,175,95,.5)))}
+/* the sliding "lens": positioned with transform only (placeNavPill / initNavDrag set translateX + width) */
+html.glassy .nav-pill{
+  left:0;top:6px;height:calc(var(--nav-h) - 12px);border-radius:var(--gl-radius-capsule,999px);
+  background:linear-gradient(180deg,var(--gl-tint-gold,rgba(212,175,95,.32)),rgba(212,175,95,.06) 120%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -6px 12px -8px rgba(255,255,255,.2),0 6px 16px -6px var(--gl-tint-gold,rgba(212,175,95,.5));
+  transition:transform .5s var(--spring),width .3s var(--ease),opacity .2s ease;
+  will-change:transform;
+}
+[data-theme="light"] html.glassy .nav-pill,html.glassy[data-theme="light"] .nav-pill{border-color:rgba(255,255,255,.7)}
+/* keep page content, toast and prefetch pill clear of the floating bar */
+html.glassy #app{padding-bottom:calc(var(--nav-h) + 48px + env(safe-area-inset-bottom))}
+html.glassy .toast{bottom:calc(var(--nav-h) + 30px + env(safe-area-inset-bottom))}
+html.glassy:not(.has-native-topbar) #dataPrefetchBar .dpb-t{bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom))}
+html.glassy.has-native-tabbar #app{padding-bottom:calc(var(--native-nav-h, 90px) + 20px)}
+
 /* ================= HOME CUSTOMIZATION (edit mode, grid, sheet, empty state) =================
    See "HOME CUSTOMIZATION" in the script. Tiles come in three sizes: s = half
    width/short (the default look), m = half width/tall, l = full width/tall. */
@@ -1935,6 +2009,212 @@ html.native-home #app>.view{display:none}   /* the real native home (NativeHome.
 @media (prefers-reduced-motion:reduce){.home-empty-logo{animation:none}}
 .home-empty-btn{border:1px solid var(--line-strong);background:var(--panel);color:var(--gold);padding:10px 22px;border-radius:999px;font:700 14px var(--font-ui)}
 .home-empty-hint{color:var(--muted);font-size:14px;text-align:center;max-width:260px}
+/* ================= GLASS CONTROLS (Android + web/PWA, gate: html.glassy) =================
+   Liquid-Glass look for buttons and small controls: translucent fill, 1px light rim, inner top
+   highlight, soft drop shadow, gold-tinted selected state, scale-down on press, 44px targets.
+   Flat gradients / borders / shadows ONLY - NO backdrop-filter (see the lesson at the top of the
+   "Liquid Glass" block). Consumes the shared tokens (--gl-bg, --gl-bg-strong, --gl-border,
+   --gl-tint-gold) with fallbacks, never defines them. Without html.glassy nothing here applies. */
+html.glassy{
+  --gk-fill:var(--gl-bg,rgba(255,255,255,.08));
+  --gk-fill2:var(--gl-bg-strong,rgba(255,255,255,.15));
+  --gk-rim:var(--gl-border,rgba(255,255,255,.20));
+  --gk-gold:var(--gl-tint-gold,rgba(212,175,95,.20));
+  --gk-hi:rgba(255,255,255,.34);
+  --gk-gloss:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.05) 48%,rgba(255,255,255,0) 100%);
+  --gk-shadow:0 5px 14px -7px rgba(0,0,0,.65);
+  --gk-track:rgba(150,155,175,.30);
+  --gk-on-text:#2a1e05;
+}
+html.glassy[data-theme="light"]{
+  --gk-fill:var(--gl-bg,rgba(255,255,255,.58));
+  --gk-fill2:var(--gl-bg-strong,rgba(255,255,255,.85));
+  --gk-rim:var(--gl-border,rgba(255,255,255,.85));
+  --gk-gold:var(--gl-tint-gold,rgba(184,134,11,.16));
+  --gk-hi:rgba(255,255,255,.95);
+  --gk-gloss:linear-gradient(180deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,.18) 50%,rgba(255,255,255,0) 100%);
+  --gk-shadow:0 5px 14px -8px rgba(80,60,20,.5);
+  --gk-track:rgba(120,100,60,.28);
+}
+/* --- shared glass capsule (unselected) --- */
+html.glassy :is(.btn-ghost,.rnav-btn,.icon-btn,.reader-tools .rt-fab,.cal-nav,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-yr-btn,.today-btn,.dd-share-btn,.ded-add-btn){
+  background-color:var(--gk-fill);
+  background-image:var(--gk-gloss);
+  border:1px solid var(--gk-rim);
+  box-shadow:inset 0 1px 0 var(--gk-hi),inset 0 -1px 0 rgba(0,0,0,.07),var(--gk-shadow);
+  transition:transform .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease);
+}
+html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-yr-btn,.today-btn,.dd-share-btn,.ded-add-btn){border-radius:999px}
+html.glassy :is(.icon-btn,.reader-tools .rt-fab,.cal-nav){border-radius:50%}
+/* 44px minimum tap targets */
+html.glassy :is(.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.today-btn,.dd-share-btn){min-height:44px}
+html.glassy :is(.ck-yr-btn,.sm-aliyah-chip.ck-arrow){min-height:44px;min-width:44px}
+html.glassy .ck-yr-btn{width:44px;height:44px}
+html.glassy :is(.icon-btn,.reader-tools .rt-fab){min-width:44px;min-height:44px}
+html.glassy .btn{min-height:48px}
+html.glassy .ck-track-btn,html.glassy .ck-resume-btn{display:inline-flex;align-items:center;justify-content:center;padding-inline:16px}
+html.glassy .ck-resume-btn{display:flex;flex:1}
+html.glassy .ck-comm-btn{display:inline-flex;align-items:center;justify-content:center}
+html.glassy .sm-aliyah-chip{padding-inline:15px}
+/* gold-tinted outline pills */
+html.glassy .ck-comm-btn{border-color:rgba(212,175,95,.55);background-color:var(--gk-gold)}
+html.glassy .today-btn{background-color:var(--gk-gold)}
+html.glassy .ck-today{border-radius:999px;border:1px solid rgba(212,175,95,.55);background-color:var(--gk-gold);background-image:var(--gk-gloss);
+  box-shadow:inset 0 1px 0 var(--gk-hi),var(--gk-shadow);min-height:48px;transition:transform .2s var(--ease)}
+/* --- selected / primary = gold glass, dark text (contrast > 4.5:1) --- */
+html.glassy :is(.chip.on,.sm-aliyah-chip.on,.ck-track-btn.on,.ck-resume-btn.primary,.rnav-btn.done,.ck-comm-btn.on,.btn-gold,.seg button.on){
+  background-color:transparent;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.08) 50%,rgba(255,255,255,0) 100%),var(--gold-grad);
+  color:var(--gk-on-text);
+  border-color:rgba(255,255,255,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),inset 0 -1px 0 rgba(120,80,0,.18),0 7px 16px -8px rgba(184,134,11,.75);
+}
+html.glassy .btn-gold{border:1px solid rgba(255,255,255,.5)}
+/* press feedback */
+html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.ck-yr-btn,.today-btn,.dd-share-btn,.icon-btn,.reader-tools .rt-fab,.cal-nav,.ded-add-btn):active{transform:scale(.96);transition-duration:.1s}
+html.glassy :is(.btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.icon-btn,.rnav-btn):focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* icon buttons: toggled-on states */
+html.glassy .icon-btn.fav-on,html.glassy .autoscroll-btn.on{color:var(--gold);background-color:var(--gk-gold);border-color:rgba(212,175,95,.6)}
+/* set-ios settings keep their category colour for primary buttons, only gain the gloss */
+html.glassy .set-ios .btn-gold{background-color:var(--cat);background-image:var(--gk-gloss);color:#fff;border-color:rgba(255,255,255,.35)}
+html.glassy .set-ios .btn-ghost{background-color:var(--gk-fill);background-image:var(--gk-gloss);color:var(--cat);border:1px solid var(--gk-rim);box-shadow:inset 0 1px 0 var(--gk-hi),var(--gk-shadow)}
+html.glassy .set-ios .ded-add-btn{background-color:transparent;background-image:none;border:1px dashed var(--cat);color:var(--cat);box-shadow:none}
+/* --- segmented control --- */
+html.glassy .seg{background-color:var(--gk-track);background-image:none;border:1px solid var(--gk-rim);border-radius:999px;padding:3px;gap:2px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
+html.glassy .seg button{border-radius:999px;min-height:38px;min-width:44px;transition:background-color .2s var(--ease),transform .15s var(--ease)}
+html.glassy .seg button:active{transform:scale(.96)}
+html.glassy .set-ios .seg button.on{background-color:var(--on,var(--cat));background-image:var(--gk-gloss);color:#fff;border-color:transparent}
+/* --- stepper --- */
+html.glassy .stepper{background-color:var(--gk-track);border:1px solid var(--gk-rim);border-radius:999px;padding:3px;gap:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
+html.glassy .stepper button{width:44px;height:38px;border-radius:999px;transition:background-color .15s var(--ease),transform .15s var(--ease)}
+html.glassy .stepper button:active{background-color:var(--gk-gold);transform:scale(.94)}
+/* --- switch: glass track, white glass thumb, gold when on --- */
+html.glassy .toggle{width:51px;height:31px;border:0;border-radius:999px;background-color:var(--gk-track);background-image:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.28),inset 0 0 0 1px var(--gk-rim);transition:background-color .25s var(--ease),box-shadow .25s var(--ease)}
+html.glassy .toggle::before{content:"";position:absolute;inset:-7px -4px}
+html.glassy .toggle::after{top:2px;right:2px;width:27px;height:27px;background:linear-gradient(180deg,#fff 0%,#ececf1 100%);
+  box-shadow:inset 0 1px 0 #fff,0 2px 5px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.08)}
+html.glassy .toggle.on{background-image:var(--gk-gloss),var(--gold-grad);box-shadow:inset 0 1px 2px rgba(120,80,0,.35),inset 0 0 0 1px rgba(255,255,255,.35)}
+html.glassy .toggle.on::after{right:calc(100% - 29px);background:linear-gradient(180deg,#fff 0%,#ececf1 100%)}
+html.glassy .toggle:active::after{width:31px}
+html.glassy .toggle.on:active::after{right:calc(100% - 33px)}
+html.glassy .set-ios .toggle.on{background-image:var(--gk-gloss)}
+/* --- fields --- */
+html.glassy :is(.fld-select,.fld-input,.time-input){background-color:var(--gk-fill);border:1px solid var(--gk-rim);border-radius:999px;min-height:44px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.14),inset 0 1px 0 var(--gk-hi);transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+html.glassy :is(.fld-input,.time-input){padding-inline:18px}
+html.glassy textarea.fld-input{border-radius:22px;padding:12px 16px}
+html.glassy :is(.fld-select,.fld-input,.time-input):focus{border-color:var(--gold);outline:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.14),0 0 0 3px rgba(212,175,95,.32)}
+html.glassy[data-theme="light"] :is(.fld-select,.fld-input,.time-input){background-color:rgba(255,255,255,.7);border-color:rgba(150,116,44,.3)}
+html.glassy[data-theme="light"] :is(.fld-select,.fld-input,.time-input):focus{border-color:#8a651c}
+/* --- pace wizard options --- */
+html.glassy .pace-opt{border:1px solid var(--gk-rim);border-radius:26px;background-color:var(--gk-fill);background-image:var(--gk-gloss);
+  box-shadow:inset 0 1px 0 var(--gk-hi),var(--gk-shadow);transition:transform .2s var(--ease),border-color .2s var(--ease)}
+html.glassy .pace-opt:active{border-color:var(--gold);transform:scale(.97)}
+/* --- tags / badges --- */
+html.glassy :is(.daily-mode-tag,.daily-tag){background-color:var(--gk-gold);background-image:var(--gk-gloss);border:1px solid rgba(212,175,95,.4);box-shadow:inset 0 1px 0 var(--gk-hi)}
+@media (prefers-reduced-motion: reduce){
+  html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.ck-yr-btn,.today-btn,.dd-share-btn,.icon-btn,.cal-nav,.seg button,.stepper button,.toggle,.toggle::after,.pace-opt,.fld-select,.fld-input,.time-input){transition:none!important}
+  html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.icon-btn,.pace-opt,.seg button):active{transform:none}
+}
+/* ===== GLASS SURFACES (Android + web/PWA only; gated by html.glassy, set by the foundation block) =====
+   Cards, tiles, rows, sheets, dialogs, toasts, headers, tools FAB, hero. Flat translucent gradients + 1px rim + inner top
+   highlight + layered soft shadow. NO backdrop-filter (see the Liquid Glass lesson above) - existing blurs on these selectors
+   are switched off here. Private --gs-* tokens read the foundation's --gl-* tokens with theme-aware fallbacks, so this works
+   before/without them. Without html.glassy none of this applies. */
+html.glassy{
+  --gs-bg:var(--gl-bg,linear-gradient(165deg,rgba(44,62,110,.58),rgba(24,36,70,.52)));
+  --gs-bg-strong:var(--gl-bg-strong,linear-gradient(165deg,#1d2b53,#141f3e));
+  --gs-rim:var(--gl-border,rgba(255,238,200,.15));
+  --gs-hi:var(--gl-hi,rgba(255,255,255,.16));
+  --gs-shadow:var(--gl-shadow,0 1px 2px rgba(0,0,0,.28),0 14px 30px -14px rgba(0,0,0,.65));
+  --gs-r:26px; --gs-r-md:22px; --gs-r-sm:18px;
+  --gs-sep:rgba(255,255,255,.08);
+}
+html.glassy[data-theme="light"]{
+  --gs-bg:var(--gl-bg,linear-gradient(165deg,rgba(255,255,255,.78),rgba(255,251,240,.6)));
+  --gs-bg-strong:var(--gl-bg-strong,linear-gradient(165deg,#fffdf6,#f8f1df));
+  --gs-rim:var(--gl-border,rgba(255,255,255,.85));
+  --gs-hi:var(--gl-hi,rgba(255,255,255,.95));
+  --gs-shadow:var(--gl-shadow,0 1px 2px rgba(80,60,20,.14),0 12px 28px -14px rgba(80,60,20,.42));
+  --gs-sep:rgba(110,85,30,.14);
+}
+/* the shared surface */
+html.glassy .card,html.glassy .q-tile,html.glassy .stat-card,html.glassy .prayer-row,html.glassy .set-item,
+html.glassy .sm-week-card,html.glassy .ps-cell,html.glassy .ical-card,html.glassy .res-item,html.glassy .dd-portion,
+html.glassy .yahrzeit-strip,html.glassy .home-hero-frame{
+  background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg);
+  border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),var(--gs-shadow);
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+html.glassy .card::after{background:linear-gradient(135deg,rgba(212,175,95,.07),transparent 42%);border-radius:inherit}
+html.glassy .card{border-radius:var(--gs-r)}
+html.glassy .q-tile,html.glassy .q-tile.round-card{border-radius:var(--gs-r-md)}
+html.glassy .stat-card,html.glassy .stat-card.long{border-radius:var(--gs-r-md)}
+html.glassy .stat-card{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),linear-gradient(155deg,transparent 50%,rgba(212,175,95,.13)),var(--gs-bg)}
+html.glassy .prayer-row,html.glassy .prayer-row.round-card{border-radius:var(--gs-r-md)}
+html.glassy .sm-week-card,html.glassy .yahrzeit-strip,html.glassy .ical-card{border-radius:var(--gs-r-md)}
+html.glassy .res-item,html.glassy .dd-portion{border-radius:var(--gs-r-sm)}
+html.glassy .q-tile .qi{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04)),var(--panel-2);box-shadow:inset 0 1px 0 var(--gs-hi)}
+/* hero: gold-tinted glass */
+html.glassy .home-hero-frame{border-radius:var(--gs-r);border-color:color-mix(in srgb,var(--gold) 42%,transparent);
+  background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),linear-gradient(160deg,rgba(212,175,95,.16),transparent 60%),var(--gs-bg)}
+/* states that must keep their gold accent over the neutral rim */
+html.glassy .q-tile.done{border-color:var(--gold);box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1px rgba(212,175,95,.3),0 8px 20px -10px rgba(212,175,95,.5)}
+html.glassy .prayer-row.week-row{border-color:var(--gold);box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1px rgba(212,175,95,.3),var(--gs-shadow)}
+html.glassy .ps-cell.read{border-color:color-mix(in srgb,var(--gold) 55%,transparent)}
+html.glassy .ps-cell{box-shadow:inset 0 1px 0 var(--gs-hi),0 4px 10px -6px rgba(0,0,0,.45)}
+html.glassy[data-theme="light"] .ps-cell{box-shadow:inset 0 1px 0 var(--gs-hi),0 4px 10px -6px rgba(80,60,20,.35)}
+@media (hover:hover) and (pointer:fine){
+  html.glassy .card:hover,html.glassy .q-tile:hover,html.glassy .set-item:hover,html.glassy .sm-week-card:hover,html.glassy .dd-portion:hover{
+    box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1px rgba(212,175,95,.4),var(--gs-shadow)}
+  html.glassy .ps-cell:hover{box-shadow:inset 0 1px 0 var(--gs-hi),0 0 0 1.5px rgba(212,175,95,.5)}
+}
+/* settings: inset-grouped like iOS Settings (consecutive rows share one rounded block, hairline separators) */
+@supports selector(:has(a)){
+  html.glassy .set-item{margin-bottom:0;border-radius:0;border-width:0 0 1px;border-bottom-color:var(--gs-sep);box-shadow:none;background:var(--gs-bg)}
+  html.glassy .set-item:not(.set-item + .set-item){border-top-left-radius:var(--gs-r-md);border-top-right-radius:var(--gs-r-md);border-top-width:1px;border-top-color:var(--gs-rim);
+    box-shadow:inset 0 1px 0 var(--gs-hi)}
+  html.glassy .set-item:not(:has(+ .set-item)){border-bottom-left-radius:var(--gs-r-md);border-bottom-right-radius:var(--gs-r-md);margin-bottom:12px;border-bottom-width:1px;border-bottom-color:var(--gs-rim);
+    box-shadow:var(--gs-shadow)}
+  html.glassy .set-item:not(.set-item + .set-item):not(:has(+ .set-item)){box-shadow:inset 0 1px 0 var(--gs-hi),var(--gs-shadow)}
+  html.glassy .set-item{border-inline:1px solid var(--gs-rim)}
+}
+@supports not selector(:has(a)){ html.glassy .set-item{border-radius:var(--gs-r-sm);margin-bottom:8px} }
+/* reading text card: calm, nearly flat */
+html.glassy{--rd-card:rgba(255,255,255,.05);--rd-line:rgba(255,255,255,.12)}
+html.glassy[data-theme="light"]{--rd-card:rgba(255,255,255,.7);--rd-line:rgba(255,255,255,.9)}
+html.glassy .sm-verses,html.glassy .chapter,html.glassy .prayer-reader-text{border-radius:var(--gs-r-md);
+  box-shadow:inset 0 0 0 1px var(--rd-line),inset 0 1px 0 var(--gs-hi),0 10px 24px -16px rgba(0,0,0,.5)}
+html.glassy[data-theme="light"] .sm-verses,html.glassy[data-theme="light"] .chapter,html.glassy[data-theme="light"] .prayer-reader-text{
+  box-shadow:inset 0 0 0 1px rgba(110,85,30,.12),inset 0 1px 0 #fff,0 10px 24px -16px rgba(80,60,20,.4)}
+/* headers: soft solid-ish fill, hairline rim, no blur */
+html.glassy .topbar,html.glassy .reader-head{background:linear-gradient(180deg,rgba(255,255,255,.045),transparent 70%),var(--bg);
+  border-bottom:1px solid var(--gs-sep);box-shadow:0 8px 18px -14px rgba(0,0,0,.55)}
+html.glassy[data-theme="light"] .topbar,html.glassy[data-theme="light"] .reader-head{box-shadow:0 8px 18px -14px rgba(80,60,20,.4)}
+/* progress: gold glass track */
+html.glassy .reader-progress{height:5px;border-radius:999px;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 2px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.06)}
+html.glassy[data-theme="light"] .reader-progress{background:rgba(110,85,30,.14);box-shadow:inset 0 1px 2px rgba(80,60,20,.3),0 1px 0 rgba(255,255,255,.7)}
+html.glassy .reader-progress i{border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 8px rgba(212,175,95,.5)}
+/* tools FAB panel */
+html.glassy .reader-tools .rt-fab{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg-strong);border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),var(--gs-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
+html.glassy .reader-tools .rt-panel{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg-strong);border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),0 18px 36px -14px rgba(0,0,0,.7);backdrop-filter:none;-webkit-backdrop-filter:none}
+html.glassy[data-theme="light"] .reader-tools .rt-panel{box-shadow:inset 0 1px 0 #fff,0 18px 36px -14px rgba(80,60,20,.45)}
+/* dialogs, sheets, toasts */
+html.glassy .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;background:radial-gradient(120% 90% at 50% 40%,rgba(10,16,32,.62),rgba(4,8,18,.84))}
+html.glassy[data-theme="light"] .overlay{background:radial-gradient(120% 90% at 50% 40%,rgba(70,55,28,.38),rgba(40,30,12,.6))}
+html.glassy .modal{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 4px),var(--gs-bg-strong);border:1px solid var(--gs-rim);border-radius:30px;
+  box-shadow:inset 0 1px 0 var(--gs-hi),0 2px 4px rgba(0,0,0,.3),0 30px 70px -20px rgba(0,0,0,.8)}
+html.glassy[data-theme="light"] .modal{box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(80,60,20,.15),0 30px 70px -22px rgba(60,45,15,.55)}
+html.glassy .toast{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 3px),var(--gs-bg-strong);border:1px solid var(--gs-rim);
+  box-shadow:inset 0 1px 0 var(--gs-hi),0 12px 28px -10px rgba(0,0,0,.6)}
+html.glassy .home-sheet-ov{background:radial-gradient(120% 90% at 50% 40%,rgba(10,16,32,.5),rgba(4,8,18,.78))}
+html.glassy .home-sheet{background:linear-gradient(180deg,var(--gs-hi) 0,transparent 4px),var(--gs-bg-strong);border:1px solid var(--gs-rim);border-bottom:0;
+  border-radius:32px 32px 0 0;box-shadow:inset 0 1px 0 var(--gs-hi),0 -20px 50px -20px rgba(0,0,0,.7)}
+html.glassy .hs-row{border-bottom-color:var(--gs-sep)}
 </style>
 </head>
 <body>
@@ -4234,8 +4514,13 @@ function placeNavPill(){
   let pill=nav.querySelector('.nav-pill');
   if(!pill){ pill=document.createElement('div'); pill.className='nav-pill'; nav.insertBefore(pill, nav.firstChild); }
   const navRect=nav.getBoundingClientRect(), onRect=on.getBoundingClientRect();
-  pill.style.left=(onRect.left-navRect.left+6)+'px';
-  pill.style.width=(onRect.width-12)+'px';
+  setPillBox(pill, onRect.left-navRect.left+6, onRect.width-12);
+}
+/* glassy: slide with transform only (left stays 0); otherwise the original left/width placement */
+function setPillBox(pill,x,w){
+  if(document.documentElement.classList.contains('glassy')){ pill.style.transform='translateX('+x+'px)'; }
+  else pill.style.left=x+'px';
+  pill.style.width=w+'px';
 }
 let autoScrollTimer=null;
 function stopAutoScroll(){
@@ -15673,8 +15958,7 @@ function nativeUiOwnsScreen(){
     const pill=nav.querySelector('.nav-pill'); if(!pill||!item) return;
     const navRect=nav.getBoundingClientRect(), r=item.getBoundingClientRect();
     pill.style.transition='none';
-    pill.style.left=(r.left-navRect.left+6)+'px';
-    pill.style.width=(r.width-12)+'px';
+    setPillBox(pill, r.left-navRect.left+6, r.width-12);
   };
   document.addEventListener('touchstart', e=>{
     const nav=e.target.closest && e.target.closest('.bottom-nav');
