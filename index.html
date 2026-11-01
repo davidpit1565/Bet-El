@@ -11267,7 +11267,7 @@ function renderLibraryTanyaReader(){
    with progress marks) and 'sahReader' (one siman, prev/next, mark learned).
    Storage: betel_sah_done {part:[n,...]}, betel_sah_pos {part,n}. */
 let SAH_INDEX=null, sahIndexPromise=null;
-const SAH_SIMAN={}, SAH_I18N={};
+const SAH_SIMAN={}, SAH_I18N={}, SAH_I18N_FAIL={};
 const SAH={part:'oc', n:1, q:''};
 const SAH_UI={
   he:{title:'שֻׁלְחָן עָרוּךְ הָרַב', oc:'אוֹרַח חַיִּים', siman:'סִימָן', simanim:'סִימָנִים', jumpPh:'מספר סימן או חיפוש', go:'פתח',
@@ -11302,7 +11302,7 @@ function ensureSahSiman(part,n){
   const i18n=(lang==='he'||SAH_I18N[ik]!==undefined) ? null
     : cachedFetch(dataURL('data/sa-harav/'+part+'/'+n+'.'+lang+'.json'))
         .then(r=>r.ok?r.json():null).then(d=>{ SAH_I18N[ik]=d||null; })
-        .catch(()=>{ delete SAH_I18N[ik]; });
+        .catch(()=>{ SAH_I18N[ik]=null; SAH_I18N_FAIL[ik]=1; setTimeout(()=>{ if(SAH_I18N_FAIL[ik]){ delete SAH_I18N_FAIL[ik]; delete SAH_I18N[ik]; } },30000); });   // network failure: show the Hebrew now (no re-fetch loop), retry in 30s
   return Promise.all([base,i18n]);
 }
 function sahPart(key){ return SAH_INDEX&&SAH_INDEX.parts&&(SAH_INDEX.parts.find(p=>p.key===key)||null); }
@@ -11410,6 +11410,7 @@ function renderSahReader(){
   const seifim=(d.s||[]).map((he,i)=>{
     const tx=d18&&d18.s&&typeof d18.s[i]==='string'&&d18.s[i].trim()?d18.s[i]:null;
     const dirAttr=(S.lang!=='he'&&!tx)?' dir="rtl" lang="he"':'';
+    if(!String(tx||he||'').trim()) return '';   // an empty seif in the source: no numbered blank row
     return `<div class="sm-verse-row ck-nonum"><div class="sm-he sah-text"${dirAttr}><span class="sm-vnum">${heNum(i+1)}</span> ${sahSafe(i===0?(tx||he).replace(/^\s*<b>[\s\S]*?<\/b>\s*(<br\s*\/?>)?/,''):(tx||he))}</div></div>`;   // the siman heading (with the seif count) is already the title above
   }).join('');
   const optLabel=s=>heNum(s.n)+' · '+sahPlain(s.t).slice(0,36);
