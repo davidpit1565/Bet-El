@@ -11410,7 +11410,7 @@ function renderSahReader(){
   const seifim=(d.s||[]).map((he,i)=>{
     const tx=d18&&d18.s&&typeof d18.s[i]==='string'&&d18.s[i].trim()?d18.s[i]:null;
     const dirAttr=(S.lang!=='he'&&!tx)?' dir="rtl" lang="he"':'';
-    return `<div class="sm-verse-row ck-nonum"><div class="sm-he sah-text"${dirAttr}><span class="sm-vnum">${heNum(i+1)}</span> ${sahSafe(tx||he)}</div></div>`;
+    return `<div class="sm-verse-row ck-nonum"><div class="sm-he sah-text"${dirAttr}><span class="sm-vnum">${heNum(i+1)}</span> ${sahSafe(i===0?(tx||he).replace(/^\s*<b>[\s\S]*?<\/b>\s*(<br\s*\/?>)?/,''):(tx||he))}</div></div>`;   // the siman heading (with the seif count) is already the title above
   }).join('');
   const optLabel=s=>heNum(s.n)+' · '+sahPlain(s.t).slice(0,36);
   const isDone=sahIsDone(p.key,n);
