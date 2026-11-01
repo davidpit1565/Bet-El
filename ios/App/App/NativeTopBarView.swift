@@ -41,11 +41,21 @@ final class NativeTopBarView: UIView {
     private var scaledConstraints: [(NSLayoutConstraint, CGFloat)] = []
 
     private let titleLabel = UILabel()
+    /// Glass title button (shown instead of the plain label when a `titleSheet` is present): tapping it opens `TitleSheetViewController`.
+    private let titleButton = UIButton(type: .system)
+    /// Spec for the picker sheet behind the title button; set by NativeTopBarBridge.configure before each configure() (nil = plain title).
+    static var titleSheet: TitleSheetSpec?
+    var onTitleSheet: (() -> Void)?
+    @objc private func titleSheetTapped() { onTitleSheet?() }
     private let backButton = UIButton(type: .system)
     private var backButtonWidthConstraint: NSLayoutConstraint?
     private let actionsStack = UIStackView()
     private var titleLeadingConstraint: NSLayoutConstraint!
     private var titleTrailingConstraint: NSLayoutConstraint!
+    private var titleButtonLeading: NSLayoutConstraint!
+    private var titleButtonTrailing: NSLayoutConstraint!
+    private var titleButtonText = ""
+    private var titleButtonSize: CGFloat = 0
 
     /// The bar's own height below the safe-area top inset - used by
     /// MainViewController to report --native-header-h to the web view.
@@ -76,6 +86,29 @@ final class NativeTopBarView: UIView {
         CATransaction.setDisableActions(true)
         fadeLayer.frame = bounds
         CATransaction.commit()
+        fitTitleButtonFont()
+    }
+
+    /// Long titles / long languages shrink the font instead of being cut off ("...").
+    private func fitTitleButtonFont() {
+        guard !titleButton.isHidden, var config = titleButton.configuration, !titleButtonText.isEmpty, titleButtonLeading != nil else { return }
+        let sideMargins = titleButtonLeading.constant + abs(titleButtonTrailing.constant)
+        let chrome: CGFloat = 18 + 16 + 8 + A11y.scaled(12) + 4
+        let avail = bounds.width - safeAreaInsets.left - safeAreaInsets.right - sideMargins - chrome
+        guard avail > 40 else { return }
+        var size = A11y.scaled(18)
+        let minSize: CGFloat = 11
+        while size > minSize {
+            let w = (titleButtonText as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: size, weight: .bold)]).width
+            if w <= avail { break }
+            size -= 0.5
+        }
+        guard abs(size - titleButtonSize) > 0.1 else { return }
+        titleButtonSize = size
+        var attrs = AttributeContainer()
+        attrs.font = UIFont.systemFont(ofSize: size, weight: .bold)
+        config.attributedTitle = AttributedString(titleButtonText, attributes: attrs)
+        titleButton.configuration = config
     }
 
     /// The header's opaque background - also used by the Search tab's docked field right under it.
@@ -134,6 +167,13 @@ final class NativeTopBarView: UIView {
         titleLabel.addInteraction(UIContextMenuInteraction(delegate: self))
         contentView.addSubview(titleLabel)
 
+        titleButton.translatesAutoresizingMaskIntoConstraints = false
+        titleButton.isHidden = true
+        titleButton.addTarget(self, action: #selector(titleSheetTapped), for: .touchUpInside)
+        titleButton.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        titleButton.addInteraction(UIContextMenuInteraction(delegate: self))
+        contentView.addSubview(titleButton)
+
         actionsStack.translatesAutoresizingMaskIntoConstraints = false
         actionsStack.axis = .horizontal
         actionsStack.spacing = 8
@@ -150,6 +190,11 @@ final class NativeTopBarView: UIView {
         titleLeadingConstraint = titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 40)
         titleTrailingConstraint = titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.trailingAnchor, constant: -40)
 
+        // The title button is tied to the bar's own margins (same values as the hidden label, kept in sync in setActions),
+        // not to the label - the label only measures its short text and used to squeeze the button.
+        titleButtonLeading = titleButton.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 56)
+        titleButtonTrailing = titleButton.trailingAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.trailingAnchor, constant: -56)
+
         NSLayoutConstraint.activate([
             backButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             backHeight,
@@ -163,6 +208,11 @@ final class NativeTopBarView: UIView {
             titleLeadingConstraint,
             titleTrailingConstraint,
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+
+            titleButton.centerXAnchor.constraint(equalTo: titleLabel.centerXAnchor),
+            titleButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            titleButtonLeading,
+            titleButtonTrailing,
         ])
     }
 
@@ -229,6 +279,8 @@ final class NativeTopBarView: UIView {
         let actionSideMargin: CGFloat = CGFloat(66 + actions.count * 46) + buttonSize - 38
         titleLeadingConstraint.constant = isRTL ? 56 : actionSideMargin
         titleTrailingConstraint.constant = isRTL ? -actionSideMargin : -56
+        titleButtonLeading.constant = titleLeadingConstraint.constant
+        titleButtonTrailing.constant = titleTrailingConstraint.constant
     }
 
     private var actionsLeadingConstraint: NSLayoutConstraint?
@@ -261,6 +313,7 @@ final class NativeTopBarView: UIView {
 
     func configure(title: String, hasBack: Bool, isRTL: Bool, homeLabel: String, settingsLabel: String, shareLabel: String, actions: [(id: String, icon: String, label: String)]) {
         titleLabel.text = title
+        updateTitleButton(title: title, isRTL: isRTL)
         backButton.isHidden = !hasBack
         let symbol = isRTL ? "chevron.right" : "chevron.left"
         NativeTopBarView.glassCircle(backButton, symbol: symbol, tint: goldColor)
@@ -273,6 +326,39 @@ final class NativeTopBarView: UIView {
         // backButton frame.
         backLeading(isRTL: isRTL)
         setActions(actions, isRTL: isRTL)
+    }
+
+    /// Real Liquid Glass capsule on iOS 26 (plain blur capsule before that) holding "title v"; only visible when a titleSheet exists.
+    private func updateTitleButton(title: String, isRTL: Bool) {
+        let has = NativeTopBarView.titleSheet != nil
+        titleButton.isHidden = !has
+        titleLabel.isHidden = has
+        guard has else { return }
+        var config: UIButton.Configuration
+        if #available(iOS 26.0, *) {
+            config = UIButton.Configuration.glass()
+        } else {
+            config = UIButton.Configuration.filled()
+            config.background.visualEffect = UIBlurEffect(style: .systemThinMaterial)
+            config.baseBackgroundColor = .clear
+        }
+        config.cornerStyle = .capsule
+        config.baseForegroundColor = goldColor
+        config.titleLineBreakMode = .byTruncatingTail
+        titleButtonText = title
+        titleButtonSize = 0
+        var attrs = AttributeContainer()
+        attrs.font = UIFont.systemFont(ofSize: A11y.scaled(18), weight: .bold)
+        config.attributedTitle = AttributedString(title, attributes: attrs)
+        config.image = UIImage(systemName: "chevron.down", withConfiguration: UIImage.SymbolConfiguration(pointSize: A11y.scaled(12), weight: .bold))
+        config.imagePlacement = .trailing
+        config.imagePadding = 8
+        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 16)
+        titleButton.configuration = config
+        setNeedsLayout()
+        titleButton.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
+        titleButton.accessibilityLabel = title
+        titleButton.accessibilityTraits = .button
     }
 
     private var leadingConstraint: NSLayoutConstraint?
@@ -312,4 +398,226 @@ extension NativeTopBarView: UIContextMenuInteractionDelegate {
             return UIMenu(title: "", children: [home, settings, share])
         }
     }
+}
+
+
+// MARK: - Title picker sheet
+
+struct TitleSheetItem { let id: String; let title: String; let on: Bool }
+
+/// What the Chok reader's title button shows: a swipeable row of days and wrapping category chips.
+/// A pick is reported back as (actionId, itemId) - the same `NativeTopBarHost.onMenu` path the round menu buttons used.
+struct TitleSheetSpec {
+    let daysTitle: String
+    let secsTitle: String
+    let daysAction: String
+    let secsAction: String
+    let days: [TitleSheetItem]
+    let secs: [TitleSheetItem]
+    var isRTL = true
+    var isDark = false
+}
+
+/// Lays chips out in wrapping rows (RTL-aware); its height follows the width it is given.
+final class ChipWrapView: UIView {
+    var rtl = true
+    var spacing: CGFloat = 8
+    private var heightConstraint: NSLayoutConstraint?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        heightConstraint = heightAnchor.constraint(equalToConstant: 10)
+        heightConstraint?.isActive = true
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let width = bounds.width
+        guard width > 0 else { return }
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for v in subviews {
+            let sz = v.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+            let w = min(sz.width, width)
+            if x > 0 && x + w > width { x = 0; y += rowH + spacing; rowH = 0 }
+            let fx = rtl ? width - x - w : x
+            v.frame = CGRect(x: fx, y: y, width: w, height: sz.height)
+            x += w + spacing
+            rowH = max(rowH, sz.height)
+        }
+        let total = y + rowH
+        if abs((heightConstraint?.constant ?? 0) - total) > 0.5 { heightConstraint?.constant = total }
+    }
+}
+
+final class TitleSheetViewController: UIViewController {
+    static let refreshNotification = Notification.Name("BetElTitleSheetRefresh")
+    private var spec: TitleSheetSpec
+    private let onPick: (String, String) -> Void
+    private let daysScroll = UIScrollView()
+    private var selectedDayChip: UIView?
+
+    init(spec: TitleSheetSpec, onPick: @escaping (String, String) -> Void) {
+        self.spec = spec
+        self.onPick = onPick
+        super.init(nibName: nil, bundle: nil)
+        modalPresentationStyle = .pageSheet
+        if let sheet = sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    private func chip(_ item: TitleSheetItem, action: String) -> UIButton {
+        var config: UIButton.Configuration
+        if #available(iOS 26.0, *) {
+            config = item.on ? UIButton.Configuration.prominentGlass() : UIButton.Configuration.glass()
+        } else {
+            config = item.on ? UIButton.Configuration.filled() : UIButton.Configuration.tinted()
+        }
+        config.cornerStyle = .capsule
+        if item.on {
+            // Selected = the app's gold with dark text (not system blue).
+            config.baseBackgroundColor = UIColor.betelGold
+            config.baseForegroundColor = UIColor(red: 0.051, green: 0.078, blue: 0.165, alpha: 1)
+            config.background.visualEffect = nil
+        } else {
+            config.baseForegroundColor = UIColor.betelGold
+        }
+        config.contentInsets = NSDirectionalEdgeInsets(top: 9, leading: 16, bottom: 9, trailing: 16)
+        var attrs = AttributeContainer()
+        attrs.font = UIFont.systemFont(ofSize: A11y.scaled(15), weight: item.on ? .bold : .semibold)
+        config.attributedTitle = AttributedString(item.title, attributes: attrs)
+        let b = UIButton(configuration: config)
+        b.semanticContentAttribute = spec.isRTL ? .forceRightToLeft : .forceLeftToRight
+        b.accessibilityTraits = item.on ? [.button, .selected] : .button
+        b.addAction(UIAction { [weak self] _ in
+            self?.onPick(action, item.id)   // sheet stays open; JS re-sends titleSheet and we refresh
+        }, for: .touchUpInside)
+        return b
+    }
+
+    private func heading(_ text: String) -> UILabel {
+        let l = UILabel()
+        l.text = text
+        l.font = UIFont.systemFont(ofSize: A11y.scaled(13), weight: .semibold)
+        l.textColor = .secondaryLabel
+        l.textAlignment = spec.isRTL ? .right : .left
+        l.semanticContentAttribute = spec.isRTL ? .forceRightToLeft : .forceLeftToRight
+        return l
+    }
+
+    private var outerScroll: UIScrollView?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshFromJS), name: TitleSheetViewController.refreshNotification, object: nil)
+        buildContent()
+    }
+
+    deinit { NotificationCenter.default.removeObserver(self) }
+
+    /// JS re-sent `titleSheet` (after a pick): rebuild the chips in place so the selection moves, keep scroll positions.
+    @objc private func refreshFromJS() {
+        guard let newSpec = NativeTopBarView.titleSheet else { return }
+        let dayX = daysScroll.contentOffset.x
+        let outerY = outerScroll?.contentOffset.y ?? 0
+        spec = newSpec
+        view.subviews.forEach { $0.removeFromSuperview() }
+        daysScroll.subviews.forEach { $0.removeFromSuperview() }
+        selectedDayChip = nil
+        buildContent()
+        view.layoutIfNeeded()
+        daysScroll.contentOffset = CGPoint(x: dayX, y: 0)
+        outerScroll?.contentOffset = CGPoint(x: 0, y: outerY)
+    }
+
+    private func buildContent() {
+        overrideUserInterfaceStyle = spec.isDark ? .dark : .light
+        view.backgroundColor = NativeTopBarView.background(isDark: spec.isDark)
+        view.semanticContentAttribute = spec.isRTL ? .forceRightToLeft : .forceLeftToRight
+
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.alwaysBounceVertical = true
+        outerScroll = scroll
+        view.addSubview(scroll)
+
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        scroll.addSubview(stack)
+
+        // Days: one horizontally swipeable row, no arrows.
+        daysScroll.showsHorizontalScrollIndicator = false
+        daysScroll.translatesAutoresizingMaskIntoConstraints = false
+        let daysStack = UIStackView()
+        daysStack.axis = .horizontal
+        daysStack.spacing = 8
+        daysStack.semanticContentAttribute = spec.isRTL ? .forceRightToLeft : .forceLeftToRight
+        daysStack.translatesAutoresizingMaskIntoConstraints = false
+        daysScroll.addSubview(daysStack)
+        for d in spec.days {
+            let c = chip(d, action: spec.daysAction)
+            if d.on { selectedDayChip = c }
+            daysStack.addArrangedSubview(c)
+        }
+        NSLayoutConstraint.activate([
+            daysStack.leadingAnchor.constraint(equalTo: daysScroll.contentLayoutGuide.leadingAnchor, constant: 20),
+            daysStack.trailingAnchor.constraint(equalTo: daysScroll.contentLayoutGuide.trailingAnchor, constant: -20),
+            daysStack.topAnchor.constraint(equalTo: daysScroll.contentLayoutGuide.topAnchor),
+            daysStack.bottomAnchor.constraint(equalTo: daysScroll.contentLayoutGuide.bottomAnchor),
+            daysStack.heightAnchor.constraint(equalTo: daysScroll.frameLayoutGuide.heightAnchor),
+            daysScroll.heightAnchor.constraint(equalToConstant: A11y.scaled(44)),
+        ])
+
+        // Categories: wrapping rows.
+        let wrap = ChipWrapView()
+        wrap.rtl = spec.isRTL
+        wrap.translatesAutoresizingMaskIntoConstraints = false
+        for s in spec.secs { wrap.addSubview(chip(s, action: spec.secsAction)) }
+
+        func padded(_ v: UIView) -> UIView {
+            let box = UIView()
+            v.translatesAutoresizingMaskIntoConstraints = false
+            box.addSubview(v)
+            NSLayoutConstraint.activate([
+                v.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 20),
+                v.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -20),
+                v.topAnchor.constraint(equalTo: box.topAnchor),
+                v.bottomAnchor.constraint(equalTo: box.bottomAnchor),
+            ])
+            return box
+        }
+        stack.addArrangedSubview(padded(heading(spec.daysTitle)))
+        stack.addArrangedSubview(daysScroll)
+        stack.setCustomSpacing(24, after: daysScroll)
+        stack.addArrangedSubview(padded(heading(spec.secsTitle)))
+        stack.addArrangedSubview(padded(wrap))
+
+        NSLayoutConstraint.activate([
+            scroll.topAnchor.constraint(equalTo: view.topAnchor, constant: 28),
+            scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 8),
+            stack.leadingAnchor.constraint(equalTo: scroll.frameLayoutGuide.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: scroll.frameLayoutGuide.trailingAnchor),
+            stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -24),
+        ])
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Bring the selected day to the middle of the row.
+        guard let chip = selectedDayChip, daysScroll.bounds.width > 0 else { return }
+        let target = chip.convert(chip.bounds, to: daysScroll)
+        let maxX = max(0, daysScroll.contentSize.width - daysScroll.bounds.width)
+        let x = min(max(0, target.midX - daysScroll.bounds.width / 2), maxX)
+        if abs(daysScroll.contentOffset.x - x) > 1 && !didCenter { daysScroll.contentOffset = CGPoint(x: x, y: 0) }
+        if daysScroll.contentSize.width > 0 { didCenter = true }
+    }
+    private var didCenter = false
 }
