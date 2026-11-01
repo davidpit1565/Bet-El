@@ -28,7 +28,7 @@ export const DEFAULTS = {
 const VOWEL = { a: 'ა', e: 'ე', i: 'ი', o: 'ო', u: 'უ' };
 const BASE = {
   aleph: '', bet: 'ბ', gimel: 'გ', dalet: 'დ', he: 'ჰ', vav: 'ვ', zayin: 'ზ', chet: 'ხ', tet: 'ტ', yod: 'ი',
-  kaf: 'ქ', lamed: 'ლ', mem: 'მ', nun: 'ნ', samekh: 'ს', ayin: '', pe: 'ფ', tsadi: 'ც', qof: 'კ', resh: 'რ',
+  kaf: 'ქ', lamed: 'ლ', mem: 'მ', nun: 'ნ', samekh: 'ს', ayin: 'ყ', pe: 'ფ', tsadi: 'ც', qof: 'კ', resh: 'რ',
   shin: 'შ', tav: 'თ',
 };
 const ABBREV = { 'וגו׳': "ვეგო'", 'וכו׳': "ვეხუ'", 'כו׳': "ხუ'" };
@@ -46,7 +46,7 @@ export function createScheme(over = {}) {
       if (p.mater && p.id === 'yod') return '';
       const id = p.id;
       if (p.unvoc) {
-        if (id === 'aleph' || id === 'ayin') return 'ა';
+        if (id === 'aleph') return 'ა'; if (id === 'ayin') return 'ყ';
         if (id === 'vav') return 'ვ';
       }
       if (id === 'shin') return p.sin ? 'ს' : 'შ';
