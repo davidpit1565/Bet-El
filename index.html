@@ -6411,13 +6411,22 @@ function ckParshiotOf(book){
 }
 /* Home tile: today's Chok LeYisrael line; on Shabbat (no portion of its own) the coming Sunday's, shown until it becomes "today". */
 function ckHomeLine(){
-  if(!CHOK) return null;
-  const t=ckTodayLine(); if(t) return t;
-  try{
-    const nx=chokSlotFor(addDays(chokDayDate(),1));
-    if(nx) return {key:nx.key, day:nx.day, text:'פרשת '+parshaName(nx.key)+' · '+chokRowLabel(nx.day,nx.dayIdx), next:true};
-  }catch(e){}
-  return null;
+  /* Last known line is cached per civil day + language, so the home tile shows it instantly on launch (the Chok index loads lazily
+     over the network on a cold start, which used to leave the tile without its "Parasha - Day" line for several seconds) */
+  const ckey=()=>new Date().toDateString()+'|'+(S.lang||'he');
+  if(!CHOK){
+    try{ const c=JSON.parse(localStorage.getItem('betel_ck_homeline')||'null'); if(c && c.k===ckey()) return c.v; }catch(e){}
+    return null;
+  }
+  let v=ckTodayLine();
+  if(!v){
+    try{
+      const nx=chokSlotFor(addDays(chokDayDate(),1));
+      if(nx) v={key:nx.key, day:nx.day, text:'פרשת '+parshaName(nx.key)+' · '+chokRowLabel(nx.day,nx.dayIdx), next:true};
+    }catch(e){}
+  }
+  if(v){ try{ localStorage.setItem('betel_ck_homeline',JSON.stringify({k:ckey(),v})); }catch(e){} }
+  return v||null;
 }
 function ckTodayLine(){
   const slot=chokSlotFor();
@@ -15560,6 +15569,9 @@ if(!localStorage.getItem('betel_onboard_v1')){ CK_PACE_AFTER_LANG='onboard'; CK_
 buildNav();
 render();
 syncWidgetData();
+(function chokPreload(n){   // warm the Chok index right after boot and retry on a flaky network (the home line needs it)
+  ensureChokIndex().then(()=>{ if(TAB==='home') render(); }).catch(()=>{ if(n<6) setTimeout(()=>chokPreload(n+1),2500*(n+1)); });
+})(0);
 maybeShowRatePrompt();
 (function androidLiveBoot(){
   if(!isAndroidApp()) return;
