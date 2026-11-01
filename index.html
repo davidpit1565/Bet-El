@@ -1440,14 +1440,14 @@ html.has-native-tabbar .search-box-tab{display:none}
 .ck-track{display:flex;gap:6px;justify-content:center;margin:0 0 8px;flex-wrap:wrap}
 .ck-track-btn{font-family:var(--font-sacred);font-size:14px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-track-btn.on{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
-.ck-resume{display:flex;flex-direction:column;gap:8px;margin:0 0 10px;padding:10px 12px;border-radius:10px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
-.ck-resume-text{font-family:var(--font-sacred);font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ck-resume{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;padding:6px 10px;border-radius:14px;border:1px solid var(--gold,#b8963f);background:var(--gold-soft,rgba(190,150,70,.10))}
+.ck-resume-text{font-family:var(--font-ui);font-weight:700;font-size:13px;min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ck-resume-text svg{width:15px;height:15px;flex:none;color:var(--gold,#b8963f)}
 .ck-yichud{margin:4px auto 10px;padding:7px 4px 8px;max-width:520px;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);font-family:var(--font-sacred);font-size:15px;line-height:1.7;text-align:center;color:var(--ink,inherit)}
 .ck-yichud-l{font-weight:700;color:var(--gold-deep,var(--gold));margin-inline-end:.35em}
 .ck-kavana{font-family:var(--font-sacred);font-size:13px;line-height:1.7;color:var(--muted);text-align:center;padding:6px 10px;margin:2px 0 4px}
-.ck-resume-btns{display:flex;gap:8px}
-.ck-resume-btn{flex:1;text-align:center;font-family:var(--font-sacred);font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.ck-resume-btns{display:flex;gap:6px;flex:none}
+.ck-resume-btn{flex:none;text-align:center;font-family:var(--font-ui);font-weight:700;font-size:12.5px;padding:4px 10px;white-space:nowrap;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .ck-resume-btn.primary{background:var(--gold,#b8963f);color:#fff;border-color:var(--gold,#b8963f)}
 .sm-aliyah-chip.ck-arrow{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:0}
 .sm-aliyah-chip.ck-arrow svg{width:18px;height:18px}
@@ -7104,6 +7104,20 @@ function renderChokReader(){
     S.musarWork=work; saveS();
     ensureMusarDay(work,ckViewHDate()).then(()=>{ if(TAB==='chokReader'){ renderChokReader(); tr(app); } });
   });
+  /* iOS: the header is the NATIVE bar - title "Parasha - Day" plus two real UIMenu buttons (days, categories), same mechanism as the other readers */
+  if(NATIVE_TOPBAR){
+    const nTitle=parshaName(CK.key)+' · '+rowLabel;
+    const acts=[
+      {id:'ckDays',icon:'calendar',label:rowLabel,menu:CHOK_ROWS.map(([d,i])=>({id:d,title:chokRowLabel(d,i),on:d===CK.day}))},
+      {id:'ckSecs',icon:'books.vertical',label:ckChrome(s.he),menu:secs.map((sec,ix)=>({id:String(ix),title:ckChrome(sec.he),on:ix===CK.sec}))}
+    ];
+    syncNativeTopBar(parshaName(CK.key), ()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); },
+      {title:nTitle, actions:acts, handlers:{}, menuHandlers:{
+        ckDays:d=>{ if(d===CK.day) return; CK_NAV_DIR=CHOK_ROWS.findIndex(([x])=>x===d)>CHOK_ROWS.findIndex(([x])=>x===CK.day)?1:-1; jump({key:CK.key,day:d,year:ckYear()}); },
+        ckSecs:id=>{ const ix=+id; if(ix===CK.sec) return; CK_NAV_DIR=ix>CK.sec?1:-1; goSec(ix); }
+      }});
+    const hd0=app.querySelector('.reader-head'); if(hd0) hd0.classList.add('rh-empty');   // the HTML head is redundant under the native bar (no leftover strip)
+  }
   const rg=document.getElementById('ckResumeGo'); if(rg) rg.onclick=ckResume;
   const rn=document.getElementById('ckResumeNew'); if(rn) rn.onclick=ckRestart;
   document.addEventListener('scroll', ckTrackScroll, {passive:true, capture:true});
@@ -8653,7 +8667,7 @@ function renderHome(){
      resolves an already-cached promise immediately, so .then() fires as a
      same-tick microtask - an infinite render loop with no delay, hanging
      the tab). */
-  if(!document.getElementById('homeChokCard') && !CHOK) ensureChokIndex().then(()=>{ if(TAB==='home') render(); });
+  if(!CHOK) ensureChokIndex().then(()=>{ if(TAB==='home') render(); }).catch(()=>{});   // the tile is always rendered now, so key on the data, not the element (the line under "Chok LeYisrael" stayed empty until a manual refresh)
   homeWireCustomize();
   setTimeout(homeNativePush,0);   // after render()'s own translation pass
 }
