@@ -383,6 +383,7 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .reader-head.rh-slim{background:transparent;border:0;box-shadow:none}   /* no solid band behind the title button */
 .reader-head.rh-slim>.rh-slim-btn{width:100%;max-width:340px;margin:0 auto;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 html.has-native-topbar .reader-head.rh-slim{padding-top:6px;padding-bottom:6px}
+html.has-native-topbar .reader-head.rh-slim.rh-slim-hide{padding-top:0;padding-bottom:0}
 .ck-lead .sm-aliyah-tag{margin:0 auto}
 .rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
 .rh-sheet{width:100%;max-width:560px;max-height:80vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.35)}
@@ -3727,6 +3728,7 @@ window.betelScrollTop=function(){
 function appBack(){
   try{
     if(HOME_EDIT) return false;
+    const rs=document.querySelector('.rh-sheet-wrap'); if(rs){ rs.click(); return true; }   // close the slim-header sheet first
     const dlg=document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov');
     if(dlg){ const x=dlg.querySelector('[data-close],[data-x],.close-x'); if(x) x.click(); else dlg.remove(); return true; }
     if(typeof TOPBAR_BACK_ACTION==='function'){ TOPBAR_BACK_ACTION(); return true; }
@@ -3738,6 +3740,7 @@ function appBack(){
 function canGoBack(){
   try{
     if(HOME_EDIT) return false;
+    if(document.querySelector('.rh-sheet-wrap')) return true;
     if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov')) return true;
     if(typeof TOPBAR_BACK_ACTION==='function') return true;
     return [...document.querySelectorAll('.tb-back')].some(b=>b.offsetParent!==null);
@@ -4808,7 +4811,7 @@ function renderZoharYomiReader(){
     <div class="reader-head">
       <div class="reader-top">
         <button class="icon-btn" id="zyBack">${I.prev}</button>
-        <div class="reader-title">זֹהַר הַיּוֹמִי</div>
+        <div class="reader-title">${ckChrome('זֹהַר הַיּוֹמִי')}</div>
       </div>
       <div class="bic-collapse">
         <div class="ck-daynav-wrap">
@@ -6925,7 +6928,7 @@ function renderBicReader(){
   syncNativeTopBar(title,backTab);
   app.innerHTML=`
   <div class="reader view">
-    <div class="reader-head">
+    <div class="reader-head" data-slim-label="${bicParshaName(p)} · ${yearLabel} · ${heNum(BIC.pos+1)}/${heNum(items.length)}">
       <div class="reader-top">
         <button class="icon-btn" id="bicBack">${I.prev}</button>
         <div class="reader-title">${title}</div>
@@ -7061,10 +7064,10 @@ function renderChokReader(){
       </div>`:''}
     </div>
     ${CK.showResume&&CK.resumeTo?`<div class="ck-resume">
-      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${ckChrome((secs[CK.resumeTo.sec]||secs[0]).he)}</b></div>
+      <div class="ck-resume-text">${I.bookmarkOn} ${ckChrome('עָצַרְתָּ בְּ')}<b>${ckChrome((secs[CK.resumeTo.sec]||secs[0]).he)}</b></div>
       <div class="ck-resume-btns">
-        <button class="ck-resume-btn primary" id="ckResumeGo">הַמְשֵׁךְ מִשָּׁם</button>
-        <button class="ck-resume-btn" id="ckResumeNew">מֵהַתְחָלָה</button>
+        <button class="ck-resume-btn primary" id="ckResumeGo">${ckChrome('הַמְשֵׁךְ מִשָּׁם')}</button>
+        <button class="ck-resume-btn" id="ckResumeNew">${ckChrome('מֵהַתְחָלָה')}</button>
       </div>
     </div>`:''}
     <div class="sm-verses notranslate">${s.key==='torah'?ckYichudHTML('torah', CK.day):''}${body}</div>
@@ -13415,9 +13418,9 @@ function drawSiddurReader(){
       ${p==='selichot'?`<div class="prayer-reader-subtitle">${PRAYERS_EXTRA.selichotEdotHamizrach.subtitle}</div>`:(p==='talitTefilin'||p==='tikunChatzot')?'':`<div class="prayer-reader-subtitle">נֻסָּח עֲדוֹת הַמִּזְרָח · ${hebDateStr(currentHDate())}</div>`}
     </div>
     ${SID.showResume&&SID.resumeTo?`<div class="ck-resume">
-      <div class="ck-resume-text">${I.bookmarkOn} עָצַרְתָּ בְּ<b>${ckChrome((secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he)}</b></div>
+      <div class="ck-resume-text">${I.bookmarkOn} ${ckChrome('עָצַרְתָּ בְּ')}<b>${ckChrome((secs.find(s=>s.key===SID.resumeTo.sec)||secs[0]).he)}</b></div>
       <div class="ck-resume-btns">
-        <button class="ck-resume-btn primary" id="sidResumeGo">הַמְשֵׁךְ מִשָּׁם</button>
+        <button class="ck-resume-btn primary" id="sidResumeGo">${ckChrome('הַמְשֵׁךְ מִשָּׁם')}</button>
         <button class="ck-resume-btn" id="sidResumeNew">מֵהַתְחָלָה</button>
       </div>
     </div>`:''}
