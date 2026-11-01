@@ -15573,6 +15573,16 @@ syncWidgetData();
 (function chokPreload(n){   // warm the Chok index right after boot and retry on a flaky network (the home line needs it)
   ensureChokIndex().then(()=>{ if(TAB==='home') render(); }).catch(()=>{ if(n<6) setTimeout(()=>chokPreload(n+1),2500*(n+1)); });
 })(0);
+(function chokHeal(n){   // self-heal: if the home tile still has no "Parasha - Day" line a moment after boot, load the index and repaint (also re-push the native home once the line exists)
+  setTimeout(()=>{
+    if(TAB==='home'){
+      const q=document.querySelector('#homeChokCard .qd');
+      if(q && q.textContent.trim()){ try{ homeNativePush(); }catch(e){} return; }
+      if(q) ensureChokIndex().then(()=>{ if(TAB==='home') render(); }).catch(()=>{});
+    }
+    if(n<20) chokHeal(n+1);
+  },1500);
+})(0);
 maybeShowRatePrompt();
 (function androidLiveBoot(){
   if(!isAndroidApp()) return;
