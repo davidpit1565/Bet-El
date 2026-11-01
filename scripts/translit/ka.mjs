@@ -39,7 +39,7 @@ export function createScheme(over = {}) {
   const scheme = {
     id: 'ka',
     options: o,
-    core: { shvaNaAfter: o.shvaNaAfter, gemAfterShvaNa: o.gemAfterShvaNa },
+    core: { shvaNaAfter: o.shvaNaAfter, gemAfterShvaNa: o.gemAfterShvaNa, aramaicAlef: true },
     names: o.divine,
     maqaf: '-',
     consonant(p) {
