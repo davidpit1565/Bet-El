@@ -11271,18 +11271,23 @@ const SAH_SIMAN={}, SAH_I18N={}, SAH_I18N_FAIL={};
 const SAH={part:'oc', n:1, q:''};
 const SAH_UI={
   he:{title:'שֻׁלְחָן עָרוּךְ הָרַב', oc:'אוֹרַח חַיִּים', siman:'סִימָן', simanim:'סִימָנִים', jumpPh:'מספר סימן או חיפוש', go:'פתח',
+    lost:'הסימן הזה אינו קיים בספר (כתבי היד אבדו בשריפה בליאדי, 1810)',
     none:'לא נמצא סימן מתאים', cont:'המשך מהיכן שעצרת', learned:'נלמדו', outOf:'מתוך', mark:'סמן כנלמד', marked:'נלמד ✓',
     prev:'סימן קודם', next:'סימן הבא', retry:'נסה שוב', err:'לא ניתן לטעון כעת', pick:'בחירת סימן', back:'חזרה'},
   en:{title:'Shulchan Aruch HaRav', oc:'Orach Chayim', siman:'Siman', simanim:'Simanim', jumpPh:'Siman number or search', go:'Open',
+    lost:'This siman does not exist in the book (the manuscripts were lost in the Liady fire of 1810)',
     none:'No matching siman', cont:'Continue where you stopped', learned:'learned', outOf:'of', mark:'Mark as learned', marked:'Learned ✓',
     prev:'Previous siman', next:'Next siman', retry:'Try again', err:'Cannot load right now', pick:'Choose siman', back:'Back'},
   fr:{title:'Choulhan Arouch HaRav', oc:"Orah 'Haïm", siman:'Siman', simanim:'Simanim', jumpPh:'Numéro de siman ou recherche', go:'Ouvrir',
+    lost:"Ce siman n'existe pas dans le livre (les manuscrits ont été perdus dans l'incendie de Liady, 1810)",
     none:'Aucun siman trouvé', cont:'Reprendre là où vous vous êtes arrêté', learned:'étudiés', outOf:'sur', mark:'Marquer comme étudié', marked:'Étudié ✓',
     prev:'Siman précédent', next:'Siman suivant', retry:'Réessayer', err:'Chargement impossible pour le moment', pick:'Choisir un siman', back:'Retour'},
   ru:{title:'Шулхан Арух а-Рав', oc:'Орах Хаим', siman:'Симан', simanim:'Симаним', jumpPh:'Номер симана или поиск', go:'Открыть',
+    lost:'Этого симана нет в книге (рукописи погибли при пожаре в Ляды, 1810)',
     none:'Симан не найден', cont:'Продолжить с места остановки', learned:'изучено', outOf:'из', mark:'Отметить как изученный', marked:'Изучено ✓',
     prev:'Предыдущий симан', next:'Следующий симан', retry:'Повторить', err:'Сейчас невозможно загрузить', pick:'Выбрать симан', back:'Назад'},
   ka:{title:'შულხან არუხ ჰარავ', oc:'ორახ ხაიმ', siman:'სიმანი', simanim:'სიმანიმ', jumpPh:'სიმანის ნომერი ან ძიება', go:'გახსნა',
+    lost:'ეს სიმანი წიგნში არ არსებობს (ხელნაწერები დაიკარგა ლიადის ხანძარში, 1810)',
     none:'შესაბამისი სიმანი ვერ მოიძებნა', cont:'გაგრძელება იქიდან, სადაც გაჩერდით', learned:'შესწავლილია', outOf:'-დან', mark:'შესწავლილად მონიშვნა', marked:'შესწავლილია ✓',
     prev:'წინა სიმანი', next:'შემდეგი სიმანი', retry:'თავიდან ცდა', err:'ამჟამად ჩატვირთვა შეუძლებელია', pick:'სიმანის არჩევა', back:'უკან'}
 };
@@ -11307,7 +11312,7 @@ function ensureSahSiman(part,n){
 }
 function sahPart(key){ return SAH_INDEX&&SAH_INDEX.parts&&(SAH_INDEX.parts.find(p=>p.key===key)||null); }
 function sahPartName(p){ const t=sahUI(); return t[p.key]||p.he; }
-function sahSafe(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&lt;(\/?)b&gt;/g,'<$1b>'); }
+function sahSafe(s){ return String(s==null?'':s).replace(/\s*\*+\s*/g,' ').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&lt;(\/?)b&gt;/g,'<$1b>'); }
 function sahPlain(s){ return String(s==null?'':s).replace(/<[^>]*>/g,''); }
 /* progress + bookmark (localStorage, always try/catch) */
 let SAH_DONE=null;
@@ -11368,7 +11373,8 @@ function renderSahList(){
       const ok=!v || (num ? r.dataset.n.indexOf(v)===0 : r.dataset.q.indexOf(bare)>=0);
       r.hidden=!ok; if(ok) shown++;
     });
-    document.getElementById('sahNone').hidden=shown>0;
+    const nn=document.getElementById('sahNone'); nn.hidden=shown>0;
+    nn.textContent=(num&&+v>=1&&+v<=700&&!rowEls.some(r=>r.dataset.n===v))?t.lost:t.none;   // a real siman number the book simply does not have
   };
   const go1=()=>{
     const v=q.value.trim(); if(!v) return;
