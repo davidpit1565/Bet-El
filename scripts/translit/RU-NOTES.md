@@ -57,3 +57,21 @@ Special words: יְהֹוָה/יְיָ -> Адонай, לַיְיָ -> лаад
 See `openQuestions` in `spec-ru.json` (profile choice for sa-harav, word-initial
 dagesh, qamatz katan source, shva na/nach validation, geresh letters ג׳ ז׳ צ׳ not in
 the data, abbreviations).
+
+## Implementation (ru.mjs) and results
+`node scripts/build-sa-harav-translit.mjs --lang ru` -> `data/sa-harav/oc/<n>.ru.json` (511 files, 7.0 MB), dialect A.
+* Corpus match (`node scripts/translit/corpus-compare-ru.mjs`): **274/287 = 95.5%** of dialect-A words
+  (`corpus-ru.json`). Remaining 13 diffs are source noise or unknowable: Zohar words with a missing mappiq
+  (`דְּאוּקְמוּהַ` ... -> `-уаг`), missing vowels (`זְה`, `הַזְּה`), shva na/nach noise (`הַרְבֵּה` гаребе,
+  `וְדִיקְנִה`), `חָכְמָה` хахма (corpus is inconsistent with torah's хохма), bare `לַה` (= ל+ה' in the
+  Zohar), `יֱהֹוִה` = Елогим (not implemented, 4 words in Torah).
+* Choices measured on that corpus: shva after qamatz/tsere/cholam is silent (`shvaNaAfter: [shuruk, hirikYod]`,
+  evidence in spec-ru.json: 785/362/181 silent vs 16/28/1 vocal); dagesh after a vocal shva does not double
+  (`שְׁתֵּי` = шете); `וְגוֹ`/`וְכוּ` (+ ASCII `'`) = вегомер / вехулеи; prefix + divine name = `лаадонай`.
+* Core change: new opt-in option `aramaicAlef` (default off, so English is byte-identical) - `-ָא` written as
+  qamatz on the last consonant + bare aleph (`בְּעָלְמָא` = беалма, 152x in sa-harav). English still reads it
+  as `beolma`; enabling the option in en.mjs would fix that.
+* Tests: `node scripts/translit/test-ru.mjs` (56 hand-checked cases). Spot-reader: `sample-ru.mjs <siman> [skip] [count]`.
+* Known weaknesses: numerals/abbreviations are kept as letters with their quotes (`й"т`, `г'`, `ткк"т`);
+  ה' as a numeral is only recognised through the NUMERAL_PREV/NEXT lists in core.mjs (else = Адонай);
+  qamatz katan vs gadol is heuristic; word-initial dagesh from the previous word is never doubled.

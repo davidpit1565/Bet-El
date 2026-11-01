@@ -147,7 +147,7 @@ function stripMarks(s) { return s.replace(/[^א-ת]/g, ''); }
 // Returns 'katan' | 'gadol' | 'gadolNach' for a qamatz that is followed by a shva-bearing letter
 // (caller guarantees cl[i].v==='qamatz', cl[i+1].v==='shva', and the shva letter is not the last).
 // gadolNach = long a with a SILENT shva (Aramaic alma / amrinan).
-function qamatzKind(cl, i) {
+function qamatzKind(cl, i, copts = DEFAULT_OPTIONS) {
   if (cl[i].kat) return 'katan';
   const L = cl.filter((c) => !c.quote);
   const idx = L.indexOf(cl[i]);
@@ -162,6 +162,8 @@ function qamatzKind(cl, i) {
   if (KATAN_LEX.has(stem)) return 'katan';
   // Aramaic endings: alma, tzarchana, amrinan -> long a, silent shva
   if ((last.ch === 'א' && last.v === 'qamatz') || skel.endsWith('ינן')) return 'gadolNach';
+  // option aramaicAlef: -ָא written as qamatz on the previous letter + bare final aleph (עָלְמָא alma, קָרְבָּא)
+  if (copts.aramaicAlef && last.ch === 'א' && !last.v && !last.dag && n >= 3 && L[n - 2].v === 'qamatz') return 'gadolNach';
   // second-person suffix -cha: yad-e-cha, devar-e-cha, tzidkat-e-cha (open syllable, vocal shva)
   if (after && idx + 2 === n - 1 && after.ch === 'ך' && after.v === 'qamatz') return 'gadol';
   // article ה with qamatz (ha-reshut, ha-yeta)
@@ -303,7 +305,7 @@ function parseNormal(clAll, ctx) {
         if (ok) { kind[i] = 'katan'; continue; }
       }
       if (nx && nx.v === 'shva' && role[i + 1] === 'C' && i + 1 < n - 1) {
-        kind[i] = qamatzKind(cl, i);
+        kind[i] = qamatzKind(cl, i, copts);
       } else if (nx && nx.v === 'hqamatz') kind[i] = 'katan';
       else if (nx && nx.v === 'shva' && i + 1 === n - 1) kind[i] = null; // final shva nach, qamatz in closed final syllable: gadol
     }

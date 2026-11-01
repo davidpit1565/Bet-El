@@ -7,6 +7,7 @@ Rule-based, no LLM, no network. Used for Shulchan Aruch HaRav
 core.mjs          language-neutral phonological parser (+ generic renderer, tokenizer, stats)
 en.mjs            English output scheme: tables + options (this is the template for new languages)
 test.mjs          68 hand-checked cases          -> node scripts/translit/test.mjs
+ru.mjs            Russian scheme (dialect A)     -> test-ru.mjs, corpus-compare-ru.mjs, RU-NOTES.md
 corpus-compare.mjs   word-by-word match vs the app's existing transliteration
 sweep.mjs         one-factor option sweep used for tuning
 ../build-sa-harav-translit.mjs   generator (+ stats report)
