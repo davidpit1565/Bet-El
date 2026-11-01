@@ -101,3 +101,6 @@ languages' tests.
 * Source defects (a missing vowel) get a default `a`; known ones are patched in `SOURCE_FIXES`.
 * Unvocalized loan-words (Yiddish/German) and numerals are consonant skeletons (`y"t`, `qrvb"tz`).
 * Ketiv/qere, stress, and the vav of הִוא are not modelled.
+
+## Georgian (ka.mjs)
+Implements the RECOMMENDED scheme of KA-NOTES.md (no doubling, ც/ქ/ფ/კ, collapsed yod, ადონაი/ჰაშემ). Tests: `node scripts/translit/test-ka.mjs`; hygiene: `node scripts/translit/check-ka.mjs`; generate: `node scripts/build-sa-harav-translit.mjs --lang ka`. Not reviewed by a native speaker.
