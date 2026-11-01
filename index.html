@@ -1906,6 +1906,115 @@ html.native-home #app>.view{display:none}   /* the real native home (NativeHome.
 @media (prefers-reduced-motion:reduce){.home-empty-logo{animation:none}}
 .home-empty-btn{border:1px solid var(--line-strong);background:var(--panel);color:var(--gold);padding:10px 22px;border-radius:999px;font:700 14px var(--font-ui)}
 .home-empty-hint{color:var(--muted);font-size:14px;text-align:center;max-width:260px}
+/* ================= GLASS CONTROLS (Android + web/PWA, gate: html.glassy) =================
+   Liquid-Glass look for buttons and small controls: translucent fill, 1px light rim, inner top
+   highlight, soft drop shadow, gold-tinted selected state, scale-down on press, 44px targets.
+   Flat gradients / borders / shadows ONLY - NO backdrop-filter (see the lesson at the top of the
+   "Liquid Glass" block). Consumes the shared tokens (--gl-bg, --gl-bg-strong, --gl-border,
+   --gl-tint-gold) with fallbacks, never defines them. Without html.glassy nothing here applies. */
+html.glassy{
+  --gk-fill:var(--gl-bg,rgba(255,255,255,.08));
+  --gk-fill2:var(--gl-bg-strong,rgba(255,255,255,.15));
+  --gk-rim:var(--gl-border,rgba(255,255,255,.20));
+  --gk-gold:var(--gl-tint-gold,rgba(212,175,95,.20));
+  --gk-hi:rgba(255,255,255,.34);
+  --gk-gloss:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.05) 48%,rgba(255,255,255,0) 100%);
+  --gk-shadow:0 5px 14px -7px rgba(0,0,0,.65);
+  --gk-track:rgba(150,155,175,.30);
+  --gk-on-text:#2a1e05;
+}
+html.glassy[data-theme="light"]{
+  --gk-fill:var(--gl-bg,rgba(255,255,255,.58));
+  --gk-fill2:var(--gl-bg-strong,rgba(255,255,255,.85));
+  --gk-rim:var(--gl-border,rgba(255,255,255,.85));
+  --gk-gold:var(--gl-tint-gold,rgba(184,134,11,.16));
+  --gk-hi:rgba(255,255,255,.95);
+  --gk-gloss:linear-gradient(180deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,.18) 50%,rgba(255,255,255,0) 100%);
+  --gk-shadow:0 5px 14px -8px rgba(80,60,20,.5);
+  --gk-track:rgba(120,100,60,.28);
+}
+/* --- shared glass capsule (unselected) --- */
+html.glassy :is(.btn-ghost,.rnav-btn,.icon-btn,.reader-tools .rt-fab,.cal-nav,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-yr-btn,.today-btn,.dd-share-btn,.ded-add-btn){
+  background-color:var(--gk-fill);
+  background-image:var(--gk-gloss);
+  border:1px solid var(--gk-rim);
+  box-shadow:inset 0 1px 0 var(--gk-hi),inset 0 -1px 0 rgba(0,0,0,.07),var(--gk-shadow);
+  transition:transform .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease);
+}
+html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-yr-btn,.today-btn,.dd-share-btn,.ded-add-btn){border-radius:999px}
+html.glassy :is(.icon-btn,.reader-tools .rt-fab,.cal-nav){border-radius:50%}
+/* 44px minimum tap targets */
+html.glassy :is(.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.today-btn,.dd-share-btn){min-height:44px}
+html.glassy :is(.ck-yr-btn,.sm-aliyah-chip.ck-arrow){min-height:44px;min-width:44px}
+html.glassy .ck-yr-btn{width:44px;height:44px}
+html.glassy :is(.icon-btn,.reader-tools .rt-fab){min-width:44px;min-height:44px}
+html.glassy .btn{min-height:48px}
+html.glassy .ck-track-btn,html.glassy .ck-resume-btn{display:inline-flex;align-items:center;justify-content:center;padding-inline:16px}
+html.glassy .ck-resume-btn{display:flex;flex:1}
+html.glassy .ck-comm-btn{display:inline-flex;align-items:center;justify-content:center}
+html.glassy .sm-aliyah-chip{padding-inline:15px}
+/* gold-tinted outline pills */
+html.glassy .ck-comm-btn{border-color:rgba(212,175,95,.55);background-color:var(--gk-gold)}
+html.glassy .today-btn{background-color:var(--gk-gold)}
+html.glassy .ck-today{border-radius:999px;border:1px solid rgba(212,175,95,.55);background-color:var(--gk-gold);background-image:var(--gk-gloss);
+  box-shadow:inset 0 1px 0 var(--gk-hi),var(--gk-shadow);min-height:48px;transition:transform .2s var(--ease)}
+/* --- selected / primary = gold glass, dark text (contrast > 4.5:1) --- */
+html.glassy :is(.chip.on,.sm-aliyah-chip.on,.ck-track-btn.on,.ck-resume-btn.primary,.rnav-btn.done,.ck-comm-btn.on,.btn-gold,.seg button.on){
+  background-color:transparent;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.08) 50%,rgba(255,255,255,0) 100%),var(--gold-grad);
+  color:var(--gk-on-text);
+  border-color:rgba(255,255,255,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),inset 0 -1px 0 rgba(120,80,0,.18),0 7px 16px -8px rgba(184,134,11,.75);
+}
+html.glassy .btn-gold{border:1px solid rgba(255,255,255,.5)}
+/* press feedback */
+html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.ck-yr-btn,.today-btn,.dd-share-btn,.icon-btn,.reader-tools .rt-fab,.cal-nav,.ded-add-btn):active{transform:scale(.96);transition-duration:.1s}
+html.glassy :is(.btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.icon-btn,.rnav-btn):focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* icon buttons: toggled-on states */
+html.glassy .icon-btn.fav-on,html.glassy .autoscroll-btn.on{color:var(--gold);background-color:var(--gk-gold);border-color:rgba(212,175,95,.6)}
+/* set-ios settings keep their category colour for primary buttons, only gain the gloss */
+html.glassy .set-ios .btn-gold{background-color:var(--cat);background-image:var(--gk-gloss);color:#fff;border-color:rgba(255,255,255,.35)}
+html.glassy .set-ios .btn-ghost{background-color:var(--gk-fill);background-image:var(--gk-gloss);color:var(--cat);border:1px solid var(--gk-rim);box-shadow:inset 0 1px 0 var(--gk-hi),var(--gk-shadow)}
+html.glassy .set-ios .ded-add-btn{background-color:transparent;background-image:none;border:1px dashed var(--cat);color:var(--cat);box-shadow:none}
+/* --- segmented control --- */
+html.glassy .seg{background-color:var(--gk-track);background-image:none;border:1px solid var(--gk-rim);border-radius:999px;padding:3px;gap:2px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
+html.glassy .seg button{border-radius:999px;min-height:38px;min-width:44px;transition:background-color .2s var(--ease),transform .15s var(--ease)}
+html.glassy .seg button:active{transform:scale(.96)}
+html.glassy .set-ios .seg button.on{background-color:var(--on,var(--cat));background-image:var(--gk-gloss);color:#fff;border-color:transparent}
+/* --- stepper --- */
+html.glassy .stepper{background-color:var(--gk-track);border:1px solid var(--gk-rim);border-radius:999px;padding:3px;gap:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
+html.glassy .stepper button{width:44px;height:38px;border-radius:999px;transition:background-color .15s var(--ease),transform .15s var(--ease)}
+html.glassy .stepper button:active{background-color:var(--gk-gold);transform:scale(.94)}
+/* --- switch: glass track, white glass thumb, gold when on --- */
+html.glassy .toggle{width:51px;height:31px;border:0;border-radius:999px;background-color:var(--gk-track);background-image:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.28),inset 0 0 0 1px var(--gk-rim);transition:background-color .25s var(--ease),box-shadow .25s var(--ease)}
+html.glassy .toggle::before{content:"";position:absolute;inset:-7px -4px}
+html.glassy .toggle::after{top:2px;right:2px;width:27px;height:27px;background:linear-gradient(180deg,#fff 0%,#ececf1 100%);
+  box-shadow:inset 0 1px 0 #fff,0 2px 5px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.08)}
+html.glassy .toggle.on{background-image:var(--gk-gloss),var(--gold-grad);box-shadow:inset 0 1px 2px rgba(120,80,0,.35),inset 0 0 0 1px rgba(255,255,255,.35)}
+html.glassy .toggle.on::after{right:calc(100% - 29px);background:linear-gradient(180deg,#fff 0%,#ececf1 100%)}
+html.glassy .toggle:active::after{width:31px}
+html.glassy .toggle.on:active::after{right:calc(100% - 33px)}
+html.glassy .set-ios .toggle.on{background-image:var(--gk-gloss)}
+/* --- fields --- */
+html.glassy :is(.fld-select,.fld-input,.time-input){background-color:var(--gk-fill);border:1px solid var(--gk-rim);border-radius:999px;min-height:44px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.14),inset 0 1px 0 var(--gk-hi);transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+html.glassy :is(.fld-input,.time-input){padding-inline:18px}
+html.glassy textarea.fld-input{border-radius:22px;padding:12px 16px}
+html.glassy :is(.fld-select,.fld-input,.time-input):focus{border-color:var(--gold);outline:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.14),0 0 0 3px rgba(212,175,95,.32)}
+html.glassy[data-theme="light"] :is(.fld-select,.fld-input,.time-input){background-color:rgba(255,255,255,.7);border-color:rgba(150,116,44,.3)}
+html.glassy[data-theme="light"] :is(.fld-select,.fld-input,.time-input):focus{border-color:#8a651c}
+/* --- pace wizard options --- */
+html.glassy .pace-opt{border:1px solid var(--gk-rim);border-radius:26px;background-color:var(--gk-fill);background-image:var(--gk-gloss);
+  box-shadow:inset 0 1px 0 var(--gk-hi),var(--gk-shadow);transition:transform .2s var(--ease),border-color .2s var(--ease)}
+html.glassy .pace-opt:active{border-color:var(--gold);transform:scale(.97)}
+/* --- tags / badges --- */
+html.glassy :is(.daily-mode-tag,.daily-tag){background-color:var(--gk-gold);background-image:var(--gk-gloss);border:1px solid rgba(212,175,95,.4);box-shadow:inset 0 1px 0 var(--gk-hi)}
+@media (prefers-reduced-motion: reduce){
+  html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.ck-yr-btn,.today-btn,.dd-share-btn,.icon-btn,.cal-nav,.seg button,.stepper button,.toggle,.toggle::after,.pace-opt,.fld-select,.fld-input,.time-input){transition:none!important}
+  html.glassy :is(.btn,.rnav-btn,.chip,.sm-aliyah-chip,.ck-track-btn,.ck-resume-btn,.ck-comm-btn,.ck-today,.icon-btn,.pace-opt,.seg button):active{transform:none}
+}
 </style>
 </head>
 <body>
