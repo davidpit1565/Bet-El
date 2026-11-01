@@ -52,6 +52,10 @@ final class NativeTopBarView: UIView {
     private let actionsStack = UIStackView()
     private var titleLeadingConstraint: NSLayoutConstraint!
     private var titleTrailingConstraint: NSLayoutConstraint!
+    private var titleButtonLeading: NSLayoutConstraint!
+    private var titleButtonTrailing: NSLayoutConstraint!
+    private var titleButtonText = ""
+    private var titleButtonSize: CGFloat = 0
 
     /// The bar's own height below the safe-area top inset - used by
     /// MainViewController to report --native-header-h to the web view.
@@ -82,6 +86,29 @@ final class NativeTopBarView: UIView {
         CATransaction.setDisableActions(true)
         fadeLayer.frame = bounds
         CATransaction.commit()
+        fitTitleButtonFont()
+    }
+
+    /// Long titles / long languages shrink the font instead of being cut off ("...").
+    private func fitTitleButtonFont() {
+        guard !titleButton.isHidden, var config = titleButton.configuration, !titleButtonText.isEmpty, titleButtonLeading != nil else { return }
+        let sideMargins = titleButtonLeading.constant + abs(titleButtonTrailing.constant)
+        let chrome: CGFloat = 18 + 16 + 8 + A11y.scaled(12) + 4
+        let avail = bounds.width - safeAreaInsets.left - safeAreaInsets.right - sideMargins - chrome
+        guard avail > 40 else { return }
+        var size = A11y.scaled(18)
+        let minSize: CGFloat = 11
+        while size > minSize {
+            let w = (titleButtonText as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: size, weight: .bold)]).width
+            if w <= avail { break }
+            size -= 0.5
+        }
+        guard abs(size - titleButtonSize) > 0.1 else { return }
+        titleButtonSize = size
+        var attrs = AttributeContainer()
+        attrs.font = UIFont.systemFont(ofSize: size, weight: .bold)
+        config.attributedTitle = AttributedString(titleButtonText, attributes: attrs)
+        titleButton.configuration = config
     }
 
     /// The header's opaque background - also used by the Search tab's docked field right under it.
@@ -163,6 +190,11 @@ final class NativeTopBarView: UIView {
         titleLeadingConstraint = titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 40)
         titleTrailingConstraint = titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.trailingAnchor, constant: -40)
 
+        // The title button is tied to the bar's own margins (same values as the hidden label, kept in sync in setActions),
+        // not to the label - the label only measures its short text and used to squeeze the button.
+        titleButtonLeading = titleButton.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 56)
+        titleButtonTrailing = titleButton.trailingAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.trailingAnchor, constant: -56)
+
         NSLayoutConstraint.activate([
             backButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             backHeight,
@@ -179,8 +211,8 @@ final class NativeTopBarView: UIView {
 
             titleButton.centerXAnchor.constraint(equalTo: titleLabel.centerXAnchor),
             titleButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            titleButton.leadingAnchor.constraint(greaterThanOrEqualTo: titleLabel.leadingAnchor),
-            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: titleLabel.trailingAnchor),
+            titleButtonLeading,
+            titleButtonTrailing,
         ])
     }
 
@@ -247,6 +279,8 @@ final class NativeTopBarView: UIView {
         let actionSideMargin: CGFloat = CGFloat(66 + actions.count * 46) + buttonSize - 38
         titleLeadingConstraint.constant = isRTL ? 56 : actionSideMargin
         titleTrailingConstraint.constant = isRTL ? -actionSideMargin : -56
+        titleButtonLeading.constant = titleLeadingConstraint.constant
+        titleButtonTrailing.constant = titleTrailingConstraint.constant
     }
 
     private var actionsLeadingConstraint: NSLayoutConstraint?
@@ -311,14 +345,17 @@ final class NativeTopBarView: UIView {
         config.cornerStyle = .capsule
         config.baseForegroundColor = goldColor
         config.titleLineBreakMode = .byTruncatingTail
+        titleButtonText = title
+        titleButtonSize = 0
         var attrs = AttributeContainer()
-        attrs.font = UIFont.systemFont(ofSize: A11y.scaled(15), weight: .bold)
+        attrs.font = UIFont.systemFont(ofSize: A11y.scaled(18), weight: .bold)
         config.attributedTitle = AttributedString(title, attributes: attrs)
-        config.image = UIImage(systemName: "chevron.down", withConfiguration: UIImage.SymbolConfiguration(pointSize: A11y.scaled(11), weight: .bold))
+        config.image = UIImage(systemName: "chevron.down", withConfiguration: UIImage.SymbolConfiguration(pointSize: A11y.scaled(12), weight: .bold))
         config.imagePlacement = .trailing
-        config.imagePadding = 6
-        config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 12)
+        config.imagePadding = 8
+        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 18, bottom: 8, trailing: 16)
         titleButton.configuration = config
+        setNeedsLayout()
         titleButton.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
         titleButton.accessibilityLabel = title
         titleButton.accessibilityTraits = .button
@@ -414,7 +451,8 @@ final class ChipWrapView: UIView {
 }
 
 final class TitleSheetViewController: UIViewController {
-    private let spec: TitleSheetSpec
+    static let refreshNotification = Notification.Name("BetElTitleSheetRefresh")
+    private var spec: TitleSheetSpec
     private let onPick: (String, String) -> Void
     private let daysScroll = UIScrollView()
     private var selectedDayChip: UIView?
@@ -439,7 +477,14 @@ final class TitleSheetViewController: UIViewController {
             config = item.on ? UIButton.Configuration.filled() : UIButton.Configuration.tinted()
         }
         config.cornerStyle = .capsule
-        config.baseForegroundColor = item.on ? nil : UIColor.betelGold
+        if item.on {
+            // Selected = the app's gold with dark text (not system blue).
+            config.baseBackgroundColor = UIColor.betelGold
+            config.baseForegroundColor = UIColor(red: 0.051, green: 0.078, blue: 0.165, alpha: 1)
+            config.background.visualEffect = nil
+        } else {
+            config.baseForegroundColor = UIColor.betelGold
+        }
         config.contentInsets = NSDirectionalEdgeInsets(top: 9, leading: 16, bottom: 9, trailing: 16)
         var attrs = AttributeContainer()
         attrs.font = UIFont.systemFont(ofSize: A11y.scaled(15), weight: item.on ? .bold : .semibold)
@@ -448,8 +493,7 @@ final class TitleSheetViewController: UIViewController {
         b.semanticContentAttribute = spec.isRTL ? .forceRightToLeft : .forceLeftToRight
         b.accessibilityTraits = item.on ? [.button, .selected] : .button
         b.addAction(UIAction { [weak self] _ in
-            self?.onPick(action, item.id)
-            self?.dismiss(animated: true)
+            self?.onPick(action, item.id)   // sheet stays open; JS re-sends titleSheet and we refresh
         }, for: .touchUpInside)
         return b
     }
@@ -464,8 +508,32 @@ final class TitleSheetViewController: UIViewController {
         return l
     }
 
+    private var outerScroll: UIScrollView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshFromJS), name: TitleSheetViewController.refreshNotification, object: nil)
+        buildContent()
+    }
+
+    deinit { NotificationCenter.default.removeObserver(self) }
+
+    /// JS re-sent `titleSheet` (after a pick): rebuild the chips in place so the selection moves, keep scroll positions.
+    @objc private func refreshFromJS() {
+        guard let newSpec = NativeTopBarView.titleSheet else { return }
+        let dayX = daysScroll.contentOffset.x
+        let outerY = outerScroll?.contentOffset.y ?? 0
+        spec = newSpec
+        view.subviews.forEach { $0.removeFromSuperview() }
+        daysScroll.subviews.forEach { $0.removeFromSuperview() }
+        selectedDayChip = nil
+        buildContent()
+        view.layoutIfNeeded()
+        daysScroll.contentOffset = CGPoint(x: dayX, y: 0)
+        outerScroll?.contentOffset = CGPoint(x: 0, y: outerY)
+    }
+
+    private func buildContent() {
         overrideUserInterfaceStyle = spec.isDark ? .dark : .light
         view.backgroundColor = NativeTopBarView.background(isDark: spec.isDark)
         view.semanticContentAttribute = spec.isRTL ? .forceRightToLeft : .forceLeftToRight
@@ -473,6 +541,7 @@ final class TitleSheetViewController: UIViewController {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.alwaysBounceVertical = true
+        outerScroll = scroll
         view.addSubview(scroll)
 
         let stack = UIStackView()

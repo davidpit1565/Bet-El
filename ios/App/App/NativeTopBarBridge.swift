@@ -67,6 +67,7 @@ public class NativeTopBarBridge: CAPPlugin, CAPBridgedPlugin {
         }
         DispatchQueue.main.async {
             NativeTopBarView.titleSheet = sheet
+            if sheet != nil { NotificationCenter.default.post(name: TitleSheetViewController.refreshNotification, object: nil) }
             NativeTopBarView.menus = menus
             NativeTopBarBridge.activeController?.configureTopBar(
                 title: title, hasBack: !backTo.isEmpty, isRTL: isRTL, isDark: isDark,
