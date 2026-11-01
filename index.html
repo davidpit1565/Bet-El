@@ -32,6 +32,13 @@
 /* global safety net: nothing animates for users who asked for reduced motion (component rules above stay for their custom end states) */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}
 </style>
+<script>
+/* Glass gate: html.glassy = everything except the native iOS shell (real UIKit glass there). glassy-lite = no blur on weak devices. */
+(function(){try{var d=document.documentElement,C=window.Capacitor,ios=!!(C&&C.getPlatform&&C.getPlatform()==='ios');
+if(ios)return;d.classList.add('glassy');
+var n=navigator,low=(n.deviceMemory&&n.deviceMemory<=2)||(n.hardwareConcurrency&&n.hardwareConcurrency<=4)||(window.matchMedia&&matchMedia('(prefers-reduced-transparency: reduce)').matches);
+if(low)d.classList.add('glassy-lite');}catch(e){document.documentElement.classList.add('glassy');}})();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -1834,6 +1841,73 @@ html.has-native-tabbar .btn-gold{
 html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-btn,.bic-arrow-btn,.ck-track-btn,.ck-resume-btn,.seg button):active{
   transform:scale(.965);
 }
+
+/* GLASS-TOKENS:START */
+/* Liquid-Glass approximation for Android / web / PWA (gate: html.glassy, set in <head>; never on the native iOS shell,
+   which has real UIKit glass). Shared tokens - consumers use var(--gl-x, fallback) and must NOT redefine them.
+   --gl-border is a full shorthand ("1px solid <color>"); --gl-hi and --gl-shadow are box-shadow LISTS (compose with commas);
+   --gl-tint-gold is a colour. html.glassy-lite (low-end device / reduced transparency) zeroes --gl-blur and makes --gl-bg opaque-ish.
+   ONLY .bottom-nav may use backdrop-filter (Chrome renderer crash lesson) - everything else = gradients/borders/shadows. */
+:root,[data-theme="dark"]{
+  --gl-bg:rgba(24,36,68,.46);
+  --gl-bg-strong:rgba(20,31,60,.74);
+  --gl-border:1px solid rgba(255,255,255,.17);
+  --gl-hi:inset 0 1px 0 rgba(255,255,255,.30),inset 0 0 0 1px rgba(255,255,255,.04),inset 0 -10px 18px -12px rgba(255,255,255,.10);
+  --gl-shadow:0 14px 34px -12px rgba(0,0,0,.62),0 2px 8px -2px rgba(0,0,0,.32);
+  --gl-blur:18px;
+  --gl-radius-capsule:999px;
+  --gl-tint-gold:rgba(212,175,95,.32);
+}
+[data-theme="light"]{
+  --gl-bg:rgba(255,252,244,.56);
+  --gl-bg-strong:rgba(255,252,244,.84);
+  --gl-border:1px solid rgba(150,116,44,.26);
+  --gl-hi:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.35),inset 0 -10px 18px -12px rgba(255,255,255,.7);
+  --gl-shadow:0 14px 30px -14px rgba(110,80,25,.42),0 2px 6px -2px rgba(110,80,25,.16);
+  --gl-tint-gold:rgba(184,134,11,.24);
+}
+html.glassy-lite{--gl-blur:0px;--gl-bg:var(--gl-bg-strong)}
+/* GLASS-TOKENS:END */
+
+/* ===== GLASS BOTTOM NAV (html.glassy only): floating capsule like the iOS 26 tab bar ===== */
+html.glassy .bottom-nav{
+  left:0;right:0;margin:0 auto;
+  width:calc(100% - 32px);max-width:min(480px,calc(100% - 32px));
+  bottom:calc(10px + env(safe-area-inset-bottom));
+  padding:0 6px;border-radius:var(--gl-radius-capsule,999px);
+  background:var(--gl-bg,var(--panel));background-image:none;
+  border:var(--gl-border,1px solid var(--line-strong));border-top:var(--gl-border,1px solid var(--line-strong));
+  box-shadow:var(--gl-shadow,0 12px 34px -10px rgba(0,0,0,.35)),var(--gl-hi,inset 0 1px 0 rgba(255,255,255,.2));
+  -webkit-backdrop-filter:blur(var(--gl-blur,18px)) saturate(1.6);backdrop-filter:blur(var(--gl-blur,18px)) saturate(1.6);
+  will-change:opacity,transform;
+  transition:opacity .38s var(--ease),transform .42s cubic-bezier(.16,.85,.24,1),visibility .38s;
+}
+html.glassy-lite .bottom-nav{-webkit-backdrop-filter:none;backdrop-filter:none}
+html.glassy .bottom-nav.nav-hidden{
+  opacity:0;filter:none;transform:translateY(calc(100% + 28px + env(safe-area-inset-bottom)));pointer-events:none;
+  transition:opacity .26s var(--ease),transform .28s cubic-bezier(.4,0,.68,.06),visibility .28s;
+}
+html.glassy .nav-fade{height:calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));opacity:.8}
+html.glassy .nav-item{-webkit-tap-highlight-color:transparent;gap:4px;min-height:44px;color:var(--muted)}
+html.glassy .nav-item.on{color:var(--gold)}
+html.glassy .nav-item:active{transform:scale(.92)}
+html.glassy .nav-item svg{width:25px;height:25px}
+html.glassy .nav-item.on svg{filter:drop-shadow(0 2px 6px var(--gl-tint-gold,rgba(212,175,95,.5)))}
+/* the sliding "lens": positioned with transform only (placeNavPill / initNavDrag set translateX + width) */
+html.glassy .nav-pill{
+  left:0;top:6px;height:calc(var(--nav-h) - 12px);border-radius:var(--gl-radius-capsule,999px);
+  background:linear-gradient(180deg,var(--gl-tint-gold,rgba(212,175,95,.32)),rgba(212,175,95,.06) 120%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -6px 12px -8px rgba(255,255,255,.2),0 6px 16px -6px var(--gl-tint-gold,rgba(212,175,95,.5));
+  transition:transform .5s var(--spring),width .3s var(--ease),opacity .2s ease;
+  will-change:transform;
+}
+[data-theme="light"] html.glassy .nav-pill,html.glassy[data-theme="light"] .nav-pill{border-color:rgba(255,255,255,.7)}
+/* keep page content, toast and prefetch pill clear of the floating bar */
+html.glassy #app{padding-bottom:calc(var(--nav-h) + 48px + env(safe-area-inset-bottom))}
+html.glassy .toast{bottom:calc(var(--nav-h) + 30px + env(safe-area-inset-bottom))}
+html.glassy:not(.has-native-topbar) #dataPrefetchBar .dpb-t{bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom))}
+html.glassy.has-native-tabbar #app{padding-bottom:calc(var(--native-nav-h, 90px) + 20px)}
 
 /* ================= HOME CUSTOMIZATION (edit mode, grid, sheet, empty state) =================
    See "HOME CUSTOMIZATION" in the script. Tiles come in three sizes: s = half
@@ -4190,8 +4264,13 @@ function placeNavPill(){
   let pill=nav.querySelector('.nav-pill');
   if(!pill){ pill=document.createElement('div'); pill.className='nav-pill'; nav.insertBefore(pill, nav.firstChild); }
   const navRect=nav.getBoundingClientRect(), onRect=on.getBoundingClientRect();
-  pill.style.left=(onRect.left-navRect.left+6)+'px';
-  pill.style.width=(onRect.width-12)+'px';
+  setPillBox(pill, onRect.left-navRect.left+6, onRect.width-12);
+}
+/* glassy: slide with transform only (left stays 0); otherwise the original left/width placement */
+function setPillBox(pill,x,w){
+  if(document.documentElement.classList.contains('glassy')){ pill.style.transform='translateX('+x+'px)'; }
+  else pill.style.left=x+'px';
+  pill.style.width=w+'px';
 }
 let autoScrollTimer=null;
 function stopAutoScroll(){
@@ -15546,8 +15625,7 @@ function nativeUiOwnsScreen(){
     const pill=nav.querySelector('.nav-pill'); if(!pill||!item) return;
     const navRect=nav.getBoundingClientRect(), r=item.getBoundingClientRect();
     pill.style.transition='none';
-    pill.style.left=(r.left-navRect.left+6)+'px';
-    pill.style.width=(r.width-12)+'px';
+    setPillBox(pill, r.left-navRect.left+6, r.width-12);
   };
   document.addEventListener('touchstart', e=>{
     const nav=e.target.closest && e.target.closest('.bottom-nav');
