@@ -16078,9 +16078,18 @@ window.shareQR = shareQR;
         if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
       }
     };
+    /* A presence entry is a Firebase push id, whose first 8 characters encode its creation time. onDisconnect().remove() sometimes never
+       fires (killed connection behind a proxy, a crashed shell), leaving an entry behind forever and inflating "online now". A real session
+       that has been open for more than 12 hours is not "online now" either, so older entries are simply not counted. */
+    const PUSH_CH = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+    const pushIdMs = (k) => { let t = 0; for(let i = 0; i < 8; i++){ const c = PUSH_CH.indexOf(String(k).charAt(i)); if(c < 0) return NaN; t = t * 64 + c; } return t; };
+    const PRESENCE_MAX_AGE = 12 * 3600 * 1000;
     onValue(presenceListRef, (snap) => {
       try {
-        window.__liveCount = typeof snap.numChildren === 'function' ? snap.numChildren() : Object.keys(snap.val() || {}).length;
+        const now = Date.now(); let n = 0;
+        if(typeof snap.forEach === 'function'){ snap.forEach((c) => { const t = pushIdMs(c.key); if(!(t > 0) || now - t < PRESENCE_MAX_AGE) n++; }); }
+        else n = Object.keys(snap.val() || {}).length;
+        window.__liveCount = n;
       } catch (err) {
         console.error('[betel presence] could not read snapshot:', err);
         window.__liveCount = 0;
@@ -16088,7 +16097,9 @@ window.shareQR = shareQR;
       window.__paintLiveCount();
     }, (err) => { console.error('[betel presence] read blocked, check Realtime Database rules:', err); });
     onValue(ref(rtdb, '.info/connected'), (snap) => {
-      if(snap.val() === true && !IS_DEV_BUILD){
+      /* automated browsers (tests, crawlers, link previews) must never appear as online users */
+      const AUTOMATED = navigator.webdriver || /bot|crawl|spider|slurp|preview|headless|lighthouse|facebookexternalhit|whatsapp|telegram|curl|python|node-fetch|monitor|pingdom|uptime/i.test(String(navigator.userAgent || '')) || /^(127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
+      if(snap.val() === true && !IS_DEV_BUILD && !AUTOMATED){
         const myRef = push(presenceListRef);
         onDisconnect(myRef).remove();
         set(myRef, true).catch((err) => { console.error('[betel presence] write blocked, check Realtime Database rules:', err); });
