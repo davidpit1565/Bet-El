@@ -3227,7 +3227,9 @@ function tr(node){
   node.querySelectorAll('input[placeholder]').forEach(i=>{ const p=i.placeholder.trim(); if(dict[p]) i.placeholder=dict[p]; });
   node.querySelectorAll('option').forEach(o=>{ const t=o.textContent.trim(); if(dict[t]) o.textContent=dict[t]; });
 }
+let CK_INDEX_RESET=()=>{ try{ CK_INDEX=null; }catch(e){} };   // the Chok search index (labels/keys) is built in the language in force; rebuild after a language change
 function applyLang(){
+  try{ CK_INDEX_RESET(); }catch(e){}
   const l=S.lang||'he';
   try{ cycLangSync(); }catch(e){}   // may run before the cycles block below has been declared (boot)
   document.documentElement.lang = {he:'he',ka:'ka',ru:'ru',fr:'fr'}[l]||'en';
@@ -4771,8 +4773,8 @@ function chokSectionsFor(key,day,hdOverride){
     const tv=chokTorahVerses(d.torah);
     add('torah','תּוֹרָה', tv, 'torah', null, d.torah, pk);
     if(day==='fri'){
-      const h=(d.haftarah_seph||[])[0];
-      if(h) add('haftarah','הַפְטָרָה', haftarahVerses(h), 'haftarah', null, d.haftarah, pk);
+      const hs=d.haftarah_seph||[];   // ALL the Sephardi segments (some haftarot are two pieces, e.g. Jeremiah 34:8-22 + 33:25-26), labelled from the same segments
+      if(hs.length) add('haftarah','הַפְטָרָה', haftarahVerses(hs), 'haftarah', null, hs.map(x=>x.k+' '+x.b+'-'+x.e), pk);
     } else {
       add('neviim','נְבִיאִים', chokVerseSegs(pk,d.neviim), 'verse', null, d.neviim, pk);
       add('ketuvim','כְּתוּבִים', chokVerseSegs(pk,d.ketuvim), 'verse', null, d.ketuvim, pk);
@@ -7066,11 +7068,12 @@ function renderChokReader(){
     flush();
     return out;
   };
-  const ramBody=items=>items.map((x,i)=>{
+  const ramBody=items=>{ let n=0; return items.map((x,i)=>{   // halacha numbers restart at 1 in every chapter (the 1-year track shows 3 chapters a day)
     const e=CYC.rambam.order[x.i];
-    const head=(i===0||items[i-1].i!==x.i)?`<div class="ck-teh-head">${ckRambamName(e.book)} · ${ckChrome('פֶּרֶק ')}${heNum(e.ch)}</div>`:'';
-    return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(i+1)}</span><div class="sm-he">${x.t}</div></div>`;
-  }).join('');
+    const first=(i===0||items[i-1].i!==x.i); if(first) n=0; n++;
+    const head=first?`<div class="ck-teh-head">${ckRambamName(e.book)} · ${ckChrome('פֶּרֶק ')}${heNum(e.ch)}</div>`:'';
+    return head+`<div class="sm-verse-row"><span class="sm-vnum">${heNum(n)}</span><div class="sm-he">${x.t}</div></div>`;
+  }).join(''); };
   const dafBody=items=>items.map(x=>
     x.head!==undefined
       ? `<div class="ck-teh-head">${x.head}</div>`
