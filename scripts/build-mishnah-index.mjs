@@ -30,8 +30,12 @@ let totalMishnayot = 0, skippedNoRef = 0;
 
 function parseRef(ref) {
   // "Mishnah Berakhot 1:1" or "Mishnah Bava Batra 2:3" (tractate names can have spaces)
-  const m = /^Mishnah (.+) (\d+):(\d+)$/.exec(ref);
-  if (!m) return null;
+  let m = /^Mishnah (.+) (\d+):(\d+)$/.exec(ref);
+  if (!m) {
+    // Pirkei Avot ships under its own key family: "Pirkei Avot 4:13"
+    const a = /^Pirkei Avot (\d+):(\d+)$/.exec(ref);
+    return a ? { masechet: 'Avot', ch: +a[1], n: +a[2] } : null;
+  }
   return { masechet: m[1], ch: +m[2], n: +m[3] };
 }
 
@@ -45,7 +49,7 @@ for (const key of parshiot) {
   const mrefs = d._mrefs || {};
   const labels = d._labels || {};
   for (const k of Object.keys(d)) {
-    if (!k.startsWith('Mishnah ')) continue;
+    if (!k.startsWith('Mishnah ') && !k.startsWith('Pirkei Avot ')) continue;
     const texts = d[k];
     const refs = mrefs[k] || [k];
     const labs = labels[k] || refs.map(() => null);
@@ -58,7 +62,7 @@ for (const key of parshiot) {
       if (!data[masechet]) data[masechet] = {};
       if (!data[masechet][ch]) data[masechet][ch] = {};
       if (data[masechet][ch][n]) continue; // already collected (weeks don't overlap, but be safe)
-      data[masechet][ch][n] = { label: labs[i] || null, text: texts[i] };
+      data[masechet][ch][n] = { label: labs[i] || null, text: String(texts[i]).replace(/<i data-overlay="Vilna Pages"[^>]*><\/i>/g, '') };
       totalMishnayot++;
     }
   }
