@@ -13861,8 +13861,9 @@ function siddurKriatShemaAlHamitaHTML(info){
   const K0 = SIDDUR.kriatShemaAlHamita;
   const K = Object.assign({}, K0, t||{});   // always a copy: the Tanach quotes below are overridden per language
   /* Tanach quotes in non-Hebrew languages: the Tehillim passages come from the language's own Tehillim transliteration
-     (same data the Tehillim reader uses); Shir HaShirim 3:7-8 and Birkat Kohanim have no transliteration source in the app
-     and stay Hebrew, but their "(3 times)" note is localised. */
+     (same data the Tehillim reader uses); Shir HaShirim 3:7-8 (hinehMitato, engine-transliterated, needs review) and Birkat Kohanim (yevarechecha, reused from
+     birkotHashachar) now come from PRAYERS_TRANSLIT.kriatShemaAlHamita via the merge above; the "(3 times)" note below only
+     matters for a Hebrew hinehMitato fallback. */
   if(lang){
     const pv=(ch,from,to,wordsOfLast)=>{
       const v=langText(ch); if(!v) return null;
@@ -13950,7 +13951,7 @@ function siddurSections(dateObj, info, prayer){
   // single synthetic section through siddurParasFromText gives it the same
   // paragraph/divider look as the rest of the Siddur reader.
   if(prayer==='selichot'){
-    push('selichot','סְלִיחוֹת', siddurParasFromText(PRAYERS_EXTRA.selichotEdotHamizrach.text));
+    push('selichot','סְלִיחוֹת', siddurParasFromText(PT('selichotEdotHamizrach')||PRAYERS_EXTRA.selichotEdotHamizrach.text));
     return list;
   }
   if(prayer==='shacharit'){
