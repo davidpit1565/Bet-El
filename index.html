@@ -2801,7 +2801,7 @@ function birkatHamazonDayText(hd, P){
   const isRealSukkot = (di.cholHaMoedChag==='sukkot') || (di.yaaleVeyavoChag==='sukkot');
   /* Translated/transliterated text (en/fr/ru/ka): same day logic, composed from the keyed parts of
      data/prayers-<lang>.json "birkatHamazonParts" (split from the full translated text, no new wording).
-     Shabbat Retzeh and the Shabbat HaRachaman are the keys retzeh / shabbatHar (a missing key is skipped). */
+     Shabbat-specific parts are intentionally not included (the app is not used on Shabbat; owner decision). */
   if(P){
     const out = [...P.intro];
     const one = (x)=>{ if(x) out.push(x); };
@@ -2811,13 +2811,11 @@ function birkatHamazonDayText(hd, P){
       if(di.isPurim) out.push(P.purim);
     }
     out.push(P.hakol, P.rachem);
-    if(di.isShabbat) one(P.retzeh);                        // Shabbat Retzeh (before Yaaleh veYavo, as in the Hebrew text)
     if(yaaleChag){
       const ph = (P.yaale[yaaleChag]||'').replace(/\s*\([^()]*:\s*([^()]*)\)\s*/g, (m,g)=> yaaleIsYomTovProper ? ' '+g.trim()+' ' : ' ').trim();
       out.push('[[NOTE]]'+P.yaaleNote, [P.yaaleHead, ph, P.yaaleTail].filter(Boolean).join(' '));
     }
     out.push(P.vetibneh, P.laad, ...P.harachaman);
-    if(di.isShabbat) one(P.shabbatHar);
     if(di.isRoshChodesh) one(P.roshChodeshHar);
     if(di.yaaleVeyavoChag==='roshHashana') one(P.roshHashanaHar);
     if(isRealSukkot) one(P.sukkotHar);
