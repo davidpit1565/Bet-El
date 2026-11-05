@@ -4,7 +4,8 @@
   "description": "Bet-El - daily study app: Chok LeYisrael, daily Tehillim, daily Zohar, Hebrew calendar and zmanim",
   "private": true,
   "scripts": {
-    "test": "npm run check:blocking",
+    "test": "npm run check:blocking && node scripts/check-rambam-cycle.mjs",
+    "check:rambam": "node scripts/check-rambam-cycle.mjs",
     "check:blocking": "node scripts/check-blocking-resources.mjs",
     "serve:local": "python3 -c \"from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler; ThreadingHTTPServer(('127.0.0.1', 8899), SimpleHTTPRequestHandler).serve_forever()\"",
     "test:sweep": "node scripts/regression-sweep.mjs",
