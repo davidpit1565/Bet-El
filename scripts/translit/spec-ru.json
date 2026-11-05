@@ -1,0 +1,2062 @@
+{
+ "lang": "ru",
+ "version": 1,
+ "description": "Russian (Cyrillic) phonetic transliteration convention actually used in the Bet-El app data. Default profile A = Sephardi/Edot-HaMizrach reading, strict 22-letter alphabet; profile B = Ben Ish Chai halacha bodies; profile S = prayers-ru.json patchwork. Everything below is derived from word-aligned (vocalized Hebrew, Russian) pairs; see RU-NOTES.md.",
+ "defaultProfile": "A",
+ "profiles": {
+  "A": {
+   "sources": {
+    "data/torah-ru.json": 75169,
+    "data/chok-zohar/*.ru.json": 301339,
+    "data/chok-tanya/*.ru.json": 40405,
+    "data/chok-rambam/*.ru.json": 571061
+   },
+   "unit": "aligned vocalized words",
+   "ruleModelAgreement": "95-99% word-exact with the rules below (torah 95.4%, tanya 95.9%, rambam 98.4%, zohar 97.4%, + qamatz-o leniency 1-2%; the rest = qamatz-katan, special words, word-initial dagesh, shva-nach doubts)"
+  },
+  "B": {
+   "sources": {
+    "data/chok-benishchai/{year1,year2}/*.ru.json (paragraphs+intro only)": 122407
+   },
+   "ruleModelAgreement": "~70% with A (see rules profile-B-vs-A)",
+   "overrides": "consonants.<x>.B, he-mater-final.B, rules[id=yod-mater].note"
+  },
+  "S": {
+   "sources": {
+    "data/prayers-ru.json": 6573
+   },
+   "ruleModelAgreement": "~64% with A overall",
+   "overrides": "not machine-specified; see rules[id=profile-S]"
+  }
+ },
+ "phonemeKeys": "Hebrew letter/point NAMES (aleph, bet-dagesh, bet-rafe, kaf-sofit, qamatz-katan, shva-na, shva-nach, ...). Hebrew-side classification (dagesh qal vs chazak, shva na/nach, qamatz gadol/katan, mater vs consonant) is the core engine's job; this file only says what Cyrillic each class prints.",
+ "consonants": {
+  "aleph": {
+   "ru": "",
+   "note": "never written; only the vowel it carries is. No apostrophe/ъ for hiatus (e.g. йааков, веарец). Evidence: 170k words.",
+   "evidence": {
+    "wordsSeen": 170214,
+    "agreeWithThisMapping": 0.996,
+    "examples": [
+     [
+      "אוֹ",
+      "о"
+     ],
+     [
+      "לֹא",
+      "ло"
+     ],
+     [
+      "אֶלָּא",
+      "елла"
+     ],
+     [
+      "וְלֹא",
+      "вело"
+     ],
+     [
+      "דָּא",
+      "да"
+     ]
+    ]
+   }
+  },
+  "ayin": {
+   "ru": "",
+   "note": "same as aleph (silent). Furtive patach under final ayin -> plain \"а\".",
+   "evidence": {
+    "wordsSeen": 21485,
+    "agreeWithThisMapping": 0.998,
+    "examples": [
+     [
+      "שִׁמְעוֹן",
+      "шимон"
+     ],
+     [
+      "אַרְבַּע",
+      "арба"
+     ],
+     [
+      "לְעוֹלָם",
+      "леолам"
+     ],
+     [
+      "יָדַע",
+      "йада"
+     ],
+     [
+      "עוֹשִׂין",
+      "осин"
+     ]
+    ]
+   }
+  },
+  "bet-dagesh": {
+   "ru": "б",
+   "evidence": {
+    "wordsSeen": 125106,
+    "agreeWithThisMapping": 0.978,
+    "examples": [
+     [
+      "בֵּין",
+      "бен"
+     ],
+     [
+      "בּוֹ",
+      "бо"
+     ],
+     [
+      "בָּהּ",
+      "баг"
+     ],
+     [
+      "בְּרִיךְ",
+      "берих"
+     ],
+     [
+      "בְּגִין",
+      "бегин"
+     ]
+    ]
+   }
+  },
+  "bet-rafe": {
+   "ru": "в",
+   "B": "б",
+   "note": "profile B (Ben Ish Chai bodies) writes б: 2256 б vs 143 в on single-bet words.",
+   "evidence": {
+    "wordsSeen": 86659,
+    "agreeWithThisMapping": 0.99,
+    "examples": [
+     [
+      "אֲבָל",
+      "авал"
+     ],
+     [
+      "חַיָּב",
+      "хаййав"
+     ],
+     [
+      "דָּבָר",
+      "давар"
+     ],
+     [
+      "כְּתִיב",
+      "кетив"
+     ],
+     [
+      "דְּבָרִים",
+      "деварим"
+     ]
+    ]
+   }
+  },
+  "gimel": {
+   "ru": "г",
+   "note": "plain г, no gh/ґ; he is ALSO г (see he).",
+   "evidence": {
+    "wordsSeen": 37190,
+    "agreeWithThisMapping": 0.97,
+    "examples": [
+     [
+      "בְּגִין",
+      "бегин"
+     ],
+     [
+      "כְּגוֹן",
+      "кегон"
+     ],
+     [
+      "וּבְגִין",
+      "увегин"
+     ],
+     [
+      "גָּדוֹל",
+      "гадол"
+     ],
+     [
+      "גַּבֵּי",
+      "габбе"
+     ]
+    ]
+   }
+  },
+  "dalet": {
+   "ru": "д",
+   "evidence": {
+    "wordsSeen": 138893,
+    "agreeWithThisMapping": 0.993,
+    "examples": [
+     [
+      "עַד",
+      "ад"
+     ],
+     [
+      "דָּא",
+      "да"
+     ],
+     [
+      "אֶחָד",
+      "ехад"
+     ],
+     [
+      "כְּדֵי",
+      "кеде"
+     ],
+     [
+      "אָדָם",
+      "адам"
+     ]
+    ]
+   }
+  },
+  "he": {
+   "ru": "г",
+   "note": "he consonant (initial, medial, with vowel) = г: гашшамайим, гаарец, елогим, гу. he with shva-nach mid-word is г in 389 of 416 words (yigye, vegye) and silent in 27 (ехйе -> ейе, vейе, мамаг).",
+   "evidence": {
+    "wordsSeen": 173558,
+    "agreeWithThisMapping": 0.984,
+    "examples": [
+     [
+      "הֲרֵי",
+      "гаре"
+     ],
+     [
+      "הָיָה",
+      "гайа"
+     ],
+     [
+      "שֶׁהוּא",
+      "шегу"
+     ],
+     [
+      "בָּהֶן",
+      "баген"
+     ],
+     [
+      "אִיהוּ",
+      "игу"
+     ]
+    ]
+   }
+  },
+  "he-mappiq": {
+   "ru": "г",
+   "note": "final he with mappiq (ָהּ) = аг/ог: лаг, баг, отаг, лериштаг; 98% agreement.",
+   "evidence": {
+    "wordsSeen": 26898,
+    "agreeWithThisMapping": 0.98,
+    "examples": [
+     [
+      "לֵיהּ",
+      "лег"
+     ],
+     [
+      "לָהּ",
+      "лаг"
+     ],
+     [
+      "בָּהּ",
+      "баг"
+     ],
+     [
+      "בֵּיהּ",
+      "бег"
+     ],
+     [
+      "אוֹתָהּ",
+      "отаг"
+     ]
+    ]
+   }
+  },
+  "he-mater-final": {
+   "ru": "",
+   "B": "г",
+   "note": "final silent he after qamatz/segol/tsere/cholam writes NOTHING (the vowel is already written): тора, зе, гине, моше. Profile B writes г after segol/tsere (зег 2246 vs зе 276, гарбег) but not after qamatz (а 6548).",
+   "evidence": {
+    "he-mater-final-after-qamatz": {
+     "wordsSeen": 74111,
+     "agreeWithThisMapping": 0.976,
+     "examples": [
+      [
+       "הָיָה",
+       "гайа"
+      ],
+      [
+       "הֲוָה",
+       "гава"
+      ],
+      [
+       "עִלָּאָה",
+       "иллаа"
+      ],
+      [
+       "הָיְתָה",
+       "гайта"
+      ],
+      [
+       "טֻמְאָה",
+       "тума"
+      ]
+     ]
+    },
+    "he-mater-final-after-segol": {
+     "wordsSeen": 23020,
+     "agreeWithThisMapping": 0.991,
+     "examples": [
+      [
+       "זֶה",
+       "зе"
+      ],
+      [
+       "מֹשֶׁה",
+       "моше"
+      ],
+      [
+       "יִהְיֶה",
+       "йигйе"
+      ],
+      [
+       "הַזֶּה",
+       "газзе"
+      ],
+      [
+       "בָּזֶה",
+       "базе"
+      ]
+     ]
+    },
+    "he-mater-final-after-tsere": {
+     "wordsSeen": 2273,
+     "agreeWithThisMapping": 0.994,
+     "examples": [
+      [
+       "הַרְבֵּה",
+       "гаребе"
+      ],
+      [
+       "וְהִנֵּה",
+       "вегинне"
+      ],
+      [
+       "מַעֲשֵׂה",
+       "маасе"
+      ],
+      [
+       "הִנֵּה",
+       "гинне"
+      ],
+      [
+       "עֶשְׂרֵה",
+       "есре"
+      ]
+     ]
+    },
+    "he-mater-final-after-cholam": {
+     "wordsSeen": 584,
+     "agreeWithThisMapping": 0.991,
+     "examples": [
+      [
+       "פַּרְעֹה",
+       "паро"
+      ],
+      [
+       "שְׁלֹמֹה",
+       "шеломо"
+      ],
+      [
+       "כֹּה",
+       "ко"
+      ],
+      [
+       "פַרְעֹה",
+       "фаро"
+      ],
+      [
+       "לְפַרְעֹה",
+       "лефаро"
+      ]
+     ]
+    }
+   }
+  },
+  "vav-consonant": {
+   "ru": "в",
+   "note": "vav with its own vowel (and prefix vav-shva) = в: ве-, ва-, ваййомер; vav+vav doubled = вв (хиввар).",
+   "evidence": {
+    "wordsSeen": 117582,
+    "agreeWithThisMapping": 0.957,
+    "examples": [
+     [
+      "וְאִם",
+      "веим"
+     ],
+     [
+      "וְלֹא",
+      "вело"
+     ],
+     [
+      "וְכֵן",
+      "вехен"
+     ],
+     [
+      "וְאֵין",
+      "веен"
+     ],
+     [
+      "וְלָא",
+      "вела"
+     ]
+    ]
+   }
+  },
+  "shuruk": {
+   "ru": "у",
+   "note": "vav with dagesh and no vowel = у, kubutz = у as well.",
+   "evidence": {
+    "wordsSeen": 130154,
+    "agreeWithThisMapping": 0.991,
+    "examples": [
+     [
+      "שֶׁהוּא",
+      "шегу"
+     ],
+     [
+      "אִיהוּ",
+      "игу"
+     ],
+     [
+      "אֵלּוּ",
+      "еллу"
+     ],
+     [
+      "הַהוּא",
+      "гагу"
+     ],
+     [
+      "אִינּוּן",
+      "иннун"
+     ]
+    ]
+   }
+  },
+  "cholam-male": {
+   "ru": "о",
+   "note": "vav with cholam after a vowel-less consonant = о (no в).",
+   "evidence": {
+    "wordsSeen": 158240,
+    "agreeWithThisMapping": 0.994,
+    "examples": [
+     [
+      "אוֹ",
+      "о"
+     ],
+     [
+      "לוֹ",
+      "ло"
+     ],
+     [
+      "בּוֹ",
+      "бо"
+     ],
+     [
+      "זוֹ",
+      "зо"
+     ],
+     [
+      "אֵינוֹ",
+      "ено"
+     ]
+    ]
+   }
+  },
+  "zayin": {
+   "ru": "з",
+   "evidence": {
+    "wordsSeen": 40044,
+    "agreeWithThisMapping": 0.997,
+    "examples": [
+     [
+      "זֶה",
+      "зе"
+     ],
+     [
+      "זוֹ",
+      "зо"
+     ],
+     [
+      "חֲזֵי",
+      "хазе"
+     ],
+     [
+      "הַזֶּה",
+      "газзе"
+     ],
+     [
+      "בָּזֶה",
+      "базе"
+     ]
+    ]
+   }
+  },
+  "chet": {
+   "ru": "х",
+   "note": "х, never кх/h/ch. Same letter as kaf-rafe.",
+   "evidence": {
+    "wordsSeen": 96852,
+    "agreeWithThisMapping": 0.992,
+    "examples": [
+     [
+      "אֶחָד",
+      "ехад"
+     ],
+     [
+      "חַיָּב",
+      "хаййав"
+     ],
+     [
+      "אַחַת",
+      "ахат"
+     ],
+     [
+      "חַד",
+      "хад"
+     ],
+     [
+      "אַחַר",
+      "ахар"
+     ]
+    ]
+   }
+  },
+  "tet": {
+   "ru": "т",
+   "evidence": {
+    "wordsSeen": 39340,
+    "agreeWithThisMapping": 0.99,
+    "examples": [
+     [
+      "טָהוֹר",
+      "тагор"
+     ],
+     [
+      "טֻמְאָה",
+      "тума"
+     ],
+     [
+      "פָּטוּר",
+      "патур"
+     ],
+     [
+      "טָמֵא",
+      "таме"
+     ],
+     [
+      "טוֹב",
+      "тов"
+     ]
+    ]
+   }
+  },
+  "yod-consonant": {
+   "ru": "й",
+   "note": "ALWAYS й + vowel (йа, йе, йи, йо, йу): never я/ю/ё/е-after-vowel. The letters я ю ё э ь ъ ч ж щ ы do not occur at all in profile A (inventory: абвгдезийклмнопрстуфхцш, 22 letters).",
+   "evidence": {
+    "wordsSeen": 109677,
+    "agreeWithThisMapping": 0.974,
+    "examples": [
+     [
+      "הָיָה",
+      "гайа"
+     ],
+     [
+      "יִשְׂרָאֵל",
+      "йисраел"
+     ],
+     [
+      "חַיָּב",
+      "хаййав"
+     ],
+     [
+      "יוֹם",
+      "йом"
+     ],
+     [
+      "יֵשׁ",
+      "йеш"
+     ]
+    ]
+   }
+  },
+  "kaf-dagesh": {
+   "ru": "к",
+   "evidence": {
+    "wordsSeen": 64594,
+    "agreeWithThisMapping": 0.865,
+    "examples": [
+     [
+      "כָּךְ",
+      "ках"
+     ],
+     [
+      "כִּי",
+      "ки"
+     ],
+     [
+      "כְּדֵי",
+      "кеде"
+     ],
+     [
+      "כְּמוֹ",
+      "кемо"
+     ],
+     [
+      "כַּד",
+      "кад"
+     ]
+    ]
+   }
+  },
+  "kaf-rafe": {
+   "ru": "х",
+   "B": "к",
+   "note": "profile B: к 5494 vs х 386 on single-kaf words.",
+   "evidence": {
+    "wordsSeen": 53845,
+    "agreeWithThisMapping": 0.884,
+    "examples": [
+     [
+      "וְכֵן",
+      "вехен"
+     ],
+     [
+      "לְפִיכָךְ",
+      "лефихах"
+     ],
+     [
+      "הָכִי",
+      "гахи"
+     ],
+     [
+      "וְכַיּוֹצֵא",
+      "вехаййоце"
+     ],
+     [
+      "יָכוֹל",
+      "йахол"
+     ]
+    ]
+   }
+  },
+  "kaf-sofit": {
+   "ru": "х",
+   "B": "к",
+   "note": "final khaf (ךְ / ךָ): мелех, ках, леха (A: 1009 х, 0 к); B: мелек, как.",
+   "evidence": {
+    "wordsSeen": 23239,
+    "agreeWithThisMapping": 0.997,
+    "examples": [
+     [
+      "כָּךְ",
+      "ках"
+     ],
+     [
+      "בְּרִיךְ",
+      "берих"
+     ],
+     [
+      "צָרִיךְ",
+      "царих"
+     ],
+     [
+      "לְפִיכָךְ",
+      "лефихах"
+     ],
+     [
+      "לְךָ",
+      "леха"
+     ]
+    ]
+   }
+  },
+  "lamed": {
+   "ru": "л",
+   "note": "always plain л - NEVER ль (профиль S / prayers-ru.json uses ль in 421 places: коль, аль, эль; A uses 0).",
+   "evidence": {
+    "wordsSeen": 267450,
+    "agreeWithThisMapping": 0.941,
+    "examples": [
+     [
+      "עַל",
+      "ал"
+     ],
+     [
+      "לֹא",
+      "ло"
+     ],
+     [
+      "אֶלָּא",
+      "елла"
+     ],
+     [
+      "לוֹ",
+      "ло"
+     ],
+     [
+      "וְלֹא",
+      "вело"
+     ]
+    ]
+   }
+  },
+  "mem": {
+   "ru": "м",
+   "evidence": {
+    "wordsSeen": 197586,
+    "agreeWithThisMapping": 0.993,
+    "examples": [
+     [
+      "מִן",
+      "мин"
+     ],
+     [
+      "אָמַר",
+      "амар"
+     ],
+     [
+      "מִפְּנֵי",
+      "миппене"
+     ],
+     [
+      "מַה",
+      "ма"
+     ],
+     [
+      "כְּמוֹ",
+      "кемо"
+     ]
+    ]
+   }
+  },
+  "mem-sofit": {
+   "ru": "м",
+   "evidence": {
+    "wordsSeen": 81748,
+    "agreeWithThisMapping": 0.997,
+    "examples": [
+     [
+      "אִם",
+      "им"
+     ],
+     [
+      "וְאִם",
+      "веим"
+     ],
+     [
+      "אָדָם",
+      "адам"
+     ],
+     [
+      "יוֹם",
+      "йом"
+     ],
+     [
+      "עִם",
+      "им"
+     ]
+    ]
+   }
+  },
+  "nun": {
+   "ru": "н",
+   "evidence": {
+    "wordsSeen": 121994,
+    "agreeWithThisMapping": 0.996,
+    "examples": [
+     [
+      "מִפְּנֵי",
+      "миппене"
+     ],
+     [
+      "אֵינוֹ",
+      "ено"
+     ],
+     [
+      "אִינּוּן",
+      "иннун"
+     ],
+     [
+      "בְּנֵי",
+      "бене"
+     ],
+     [
+      "נָשׁ",
+      "наш"
+     ]
+    ]
+   }
+  },
+  "nun-sofit": {
+   "ru": "н",
+   "evidence": {
+    "wordsSeen": 122208,
+    "agreeWithThisMapping": 0.996,
+    "examples": [
+     [
+      "מִן",
+      "мин"
+     ],
+     [
+      "אֵין",
+      "ен"
+     ],
+     [
+      "בֵּין",
+      "бен"
+     ],
+     [
+      "וְכֵן",
+      "вехен"
+     ],
+     [
+      "שֶׁאֵין",
+      "шеен"
+     ]
+    ]
+   }
+  },
+  "samekh": {
+   "ru": "с",
+   "evidence": {
+    "wordsSeen": 36891,
+    "agreeWithThisMapping": 0.994,
+    "examples": [
+     [
+      "אָסוּר",
+      "асур"
+     ],
+     [
+      "סָפֵק",
+      "сафек"
+     ],
+     [
+      "סִטְרָא",
+      "ситра"
+     ],
+     [
+      "מִסִּטְרָא",
+      "мисситра"
+     ],
+     [
+      "סִטְרִין",
+      "ситрин"
+     ]
+    ]
+   }
+  },
+  "pe-dagesh": {
+   "ru": "п",
+   "evidence": {
+    "wordsSeen": 26405,
+    "agreeWithThisMapping": 0.99,
+    "examples": [
+     [
+      "פִּי",
+      "пи"
+     ],
+     [
+      "מִפְּנֵי",
+      "миппене"
+     ],
+     [
+      "פָּטוּר",
+      "патур"
+     ],
+     [
+      "פְּלוֹנִי",
+      "пелони"
+     ],
+     [
+      "פֵּרוֹת",
+      "перот"
+     ]
+    ]
+   }
+  },
+  "pe-rafe": {
+   "ru": "ф",
+   "B": "п",
+   "note": "profile B: п 4232 vs ф 223.",
+   "evidence": {
+    "wordsSeen": 31287,
+    "agreeWithThisMapping": 0.998,
+    "examples": [
+     [
+      "אֲפִלּוּ",
+      "афиллу"
+     ],
+     [
+      "לְפִיכָךְ",
+      "лефихах"
+     ],
+     [
+      "וַאֲפִלּוּ",
+      "ваафиллу"
+     ],
+     [
+      "לְפִי",
+      "лефи"
+     ],
+     [
+      "סָפֵק",
+      "сафек"
+     ]
+    ]
+   }
+  },
+  "pe-sofit": {
+   "ru": "ф",
+   "evidence": {
+    "wordsSeen": 8589,
+    "agreeWithThisMapping": 1.0,
+    "examples": [
+     [
+      "אַף",
+      "аф"
+     ],
+     [
+      "וְאַף",
+      "веаф"
+     ],
+     [
+      "יוֹסֵף",
+      "йосеф"
+     ],
+     [
+      "סוֹף",
+      "соф"
+     ],
+     [
+      "אֶלֶף",
+      "елеф"
+     ]
+    ]
+   }
+  },
+  "tsadi": {
+   "ru": "ц",
+   "evidence": {
+    "wordsSeen": 34569,
+    "agreeWithThisMapping": 0.999,
+    "examples": [
+     [
+      "כֵּיצַד",
+      "кецад"
+     ],
+     [
+      "צָרִיךְ",
+      "царих"
+     ],
+     [
+      "וְכַיּוֹצֵא",
+      "вехаййоце"
+     ],
+     [
+      "עַצְמוֹ",
+      "ацмо"
+     ],
+     [
+      "כַּיּוֹצֵא",
+      "каййоце"
+     ]
+    ]
+   }
+  },
+  "tsadi-sofit": {
+   "ru": "ц",
+   "evidence": {
+    "wordsSeen": 5173,
+    "agreeWithThisMapping": 0.997,
+    "examples": [
+     [
+      "הָאָרֶץ",
+      "гаарец"
+     ],
+     [
+      "אֶרֶץ",
+      "ерец"
+     ],
+     [
+      "עֵץ",
+      "ец"
+     ],
+     [
+      "לָאָרֶץ",
+      "лаарец"
+     ],
+     [
+      "בְּאֶרֶץ",
+      "беерец"
+     ]
+    ]
+   }
+  },
+  "qof": {
+   "ru": "к",
+   "note": "к (same as kaf-dagesh); dagesh chazak -> кк.",
+   "evidence": {
+    "wordsSeen": 74709,
+    "agreeWithThisMapping": 0.992,
+    "examples": [
+     [
+      "קוּדְשָׁא",
+      "кудеша"
+     ],
+     [
+      "קַדִּישָׁא",
+      "каддиша"
+     ],
+     [
+      "מָקוֹם",
+      "маком"
+     ],
+     [
+      "קֹדֶם",
+      "кодем"
+     ],
+     [
+      "יַעֲקֹב",
+      "йааков"
+     ]
+    ]
+   }
+  },
+  "resh": {
+   "ru": "р",
+   "evidence": {
+    "wordsSeen": 212966,
+    "agreeWithThisMapping": 0.993,
+    "examples": [
+     [
+      "הֲרֵי",
+      "гаре"
+     ],
+     [
+      "אָמַר",
+      "амар"
+     ],
+     [
+      "יִשְׂרָאֵל",
+      "йисраел"
+     ],
+     [
+      "אֲשֶׁר",
+      "ашер"
+     ],
+     [
+      "בְּרִיךְ",
+      "берих"
+     ]
+    ]
+   }
+  },
+  "shin": {
+   "ru": "ш",
+   "evidence": {
+    "wordsSeen": 160661,
+    "agreeWithThisMapping": 0.994,
+    "examples": [
+     [
+      "שֶׁל",
+      "шел"
+     ],
+     [
+      "שֶׁלֹּא",
+      "шелло"
+     ],
+     [
+      "שֶׁאֵין",
+      "шеен"
+     ],
+     [
+      "שֶׁהוּא",
+      "шегу"
+     ],
+     [
+      "אֲשֶׁר",
+      "ашер"
+     ]
+    ]
+   }
+  },
+  "sin": {
+   "ru": "с",
+   "note": "sin dot = с (Исраэль -> йисраел, мисрад).",
+   "evidence": {
+    "wordsSeen": 22264,
+    "agreeWithThisMapping": 0.999,
+    "examples": [
+     [
+      "יִשְׂרָאֵל",
+      "йисраел"
+     ],
+     [
+      "לַעֲשׂוֹת",
+      "лаасот"
+     ],
+     [
+      "מַעֲשֵׂר",
+      "маасер"
+     ],
+     [
+      "עָשָׂה",
+      "аса"
+     ],
+     [
+      "עָשָׂר",
+      "асар"
+     ]
+    ]
+   }
+  },
+  "tav": {
+   "ru": "т",
+   "note": "tav with or without dagesh = т (never с/th). Dagesh chazak -> тт (атта, битт).",
+   "evidence": {
+    "wordsSeen": 175430,
+    "agreeWithThisMapping": 0.993,
+    "examples": [
+     [
+      "אֶת",
+      "ет"
+     ],
+     [
+      "אוֹתוֹ",
+      "ото"
+     ],
+     [
+      "אַחַת",
+      "ахат"
+     ],
+     [
+      "בֵּית",
+      "бет"
+     ],
+     [
+      "מֻתָּר",
+      "муттар"
+     ]
+    ]
+   }
+  }
+ },
+ "vowels": {
+  "patach": {
+   "ru": "а",
+   "evidence": {
+    "wordsSeen": 309286,
+    "agreeWithThisMapping": 0.993,
+    "examples": [
+     [
+      "עַל",
+      "ал"
+     ],
+     [
+      "עַד",
+      "ад"
+     ],
+     [
+      "אָמַר",
+      "амар"
+     ],
+     [
+      "אַף",
+      "аф"
+     ],
+     [
+      "חַיָּב",
+      "хаййав"
+     ]
+    ]
+   }
+  },
+  "qamatz": {
+   "ru": "а",
+   "note": "qamatz gadol = а. Qamatz katan = о (see qamatz-katan). Agreement 95.4% is entirely qamatz-katan words (кол).",
+   "evidence": {
+    "wordsSeen": 430534,
+    "agreeWithThisMapping": 0.954,
+    "examples": [
+     [
+      "אֶלָּא",
+      "елла"
+     ],
+     [
+      "אֲבָל",
+      "авал"
+     ],
+     [
+      "אָמַר",
+      "амар"
+     ],
+     [
+      "דָּא",
+      "да"
+     ],
+     [
+      "אֶחָד",
+      "ехад"
+     ]
+    ]
+   }
+  },
+  "qamatz-katan": {
+   "ru": "о",
+   "note": "Only detectable by the core (lexicon/syllable). Evidence: כָּל (every form) = кол in 100% of 7183+ occurrences in torah/zohar/tanya/rambam; qamatz before a letter with chataf-qamatz is katan = о (оголо, тогора, мимохорат, охора); корбан, мошзар, охло, дорхо. NOT uniform: חָכְמָה = хохма in torah-ru.json but хахма in zohar/tanya/rambam; vayyaqom-type (וַיָּקָם וַיָּמָת וַיָּשָׁב וַיָּרָץ) = ваййаком/ваййамот/ваййашов in torah-ru.json (102 words) but вайякам/вайямат with а in zohar (35 words).",
+   "evidence": {
+    "examples": [
+     [
+      "כָּל",
+      "кол"
+     ],
+     [
+      "וְכָל",
+      "вехол"
+     ],
+     [
+      "אָהֳלוֹ",
+      "оголо"
+     ],
+     [
+      "טָהֳרָה",
+      "тогора"
+     ],
+     [
+      "קָרְבָּנוֹ",
+      "корбано"
+     ]
+    ]
+   }
+  },
+  "segol": {
+   "ru": "е",
+   "evidence": {
+    "wordsSeen": 158715,
+    "agreeWithThisMapping": 0.993,
+    "examples": [
+     [
+      "אֶת",
+      "ет"
+     ],
+     [
+      "זֶה",
+      "зе"
+     ],
+     [
+      "אֶלָּא",
+      "елла"
+     ],
+     [
+      "שֶׁל",
+      "шел"
+     ],
+     [
+      "שֶׁלֹּא",
+      "шелло"
+     ]
+    ]
+   }
+  },
+  "tsere": {
+   "ru": "е",
+   "evidence": {
+    "wordsSeen": 202790,
+    "agreeWithThisMapping": 0.997,
+    "examples": [
+     [
+      "הֲרֵי",
+      "гаре"
+     ],
+     [
+      "אֵין",
+      "ен"
+     ],
+     [
+      "לֵיהּ",
+      "лег"
+     ],
+     [
+      "בֵּין",
+      "бен"
+     ],
+     [
+      "וְכֵן",
+      "вехен"
+     ]
+    ]
+   }
+  },
+  "chirik": {
+   "ru": "и",
+   "evidence": {
+    "wordsSeen": 334770,
+    "agreeWithThisMapping": 0.994,
+    "examples": [
+     [
+      "אִם",
+      "им"
+     ],
+     [
+      "וְאִם",
+      "веим"
+     ],
+     [
+      "מִן",
+      "мин"
+     ],
+     [
+      "פִּי",
+      "пи"
+     ],
+     [
+      "יִשְׂרָאֵל",
+      "йисраел"
+     ]
+    ]
+   }
+  },
+  "cholam": {
+   "ru": "о",
+   "evidence": {
+    "wordsSeen": 50813,
+    "agreeWithThisMapping": 0.963,
+    "examples": [
+     [
+      "לֹא",
+      "ло"
+     ],
+     [
+      "וְלֹא",
+      "вело"
+     ],
+     [
+      "שֶׁלֹּא",
+      "шелло"
+     ],
+     [
+      "מֹשֶׁה",
+      "моше"
+     ],
+     [
+      "הַכֹּל",
+      "гаккол"
+     ]
+    ]
+   }
+  },
+  "kubutz": {
+   "ru": "у",
+   "evidence": {
+    "wordsSeen": 14995,
+    "agreeWithThisMapping": 1.0,
+    "examples": [
+     [
+      "מֻתָּר",
+      "муттар"
+     ],
+     [
+      "טֻמְאָה",
+      "тума"
+     ],
+     [
+      "כֻּלְּהוּ",
+      "куллегу"
+     ],
+     [
+      "כֻּלָּן",
+      "куллан"
+     ],
+     [
+      "מְקֻדֶּשֶׁת",
+      "мекуддешет"
+     ]
+    ]
+   }
+  },
+  "chataf-patach": {
+   "ru": "а",
+   "note": "ваафилу, халаха, беарец.",
+   "evidence": {
+    "wordsSeen": 68076,
+    "agreeWithThisMapping": 0.997,
+    "examples": [
+     [
+      "הֲרֵי",
+      "гаре"
+     ],
+     [
+      "אֲבָל",
+      "авал"
+     ],
+     [
+      "אֲשֶׁר",
+      "ашер"
+     ],
+     [
+      "שֶׁהֲרֵי",
+      "шегаре"
+     ],
+     [
+      "אֲפִלּוּ",
+      "афиллу"
+     ]
+    ]
+   }
+  },
+  "chataf-segol": {
+   "ru": "е",
+   "note": "елогим, ехад, ел.",
+   "evidence": {
+    "wordsSeen": 5566,
+    "agreeWithThisMapping": 0.985,
+    "examples": [
+     [
+      "אֱלֹהִים",
+      "елогим"
+     ],
+     [
+      "לֶאֱכֹל",
+      "леехол"
+     ],
+     [
+      "נֶאֱמָן",
+      "нееман"
+     ],
+     [
+      "אֱלֹהֶיךָ",
+      "елогеха"
+     ],
+     [
+      "אֱלֹהֵינוּ",
+      "елогену"
+     ]
+    ]
+   }
+  },
+  "chataf-qamatz": {
+   "ru": "о",
+   "note": "аголо, тогора, мимохорат; agreement vs a naive \"а\" is 29% because the preceding qamatz is katan (о) too: write chataf-qamatz = о and the preceding qamatz = о.",
+   "evidence": {
+    "examples": [
+     [
+      "אָהֳלוֹ",
+      "оголо"
+     ],
+     [
+      "טָהֳרָה",
+      "тогора"
+     ],
+     [
+      "אָחֳרָא",
+      "охора"
+     ],
+     [
+      "לָקֳבֵל",
+      "локовел"
+     ],
+     [
+      "מִמָּחֳרָת",
+      "миммохорат"
+     ]
+    ]
+   }
+  },
+  "shva-na": {
+   "ru": "е",
+   "note": "Realised as е (never и/э/ъ). The Russian text agrees with true Hebrew syllabification; the core must decide na/nach.",
+   "evidence": {
+    "torah-ru.json shva counts (shva written е / left silent)": [
+     [
+      "word-initial incl. prefix ו ב ל כ מ ש and article ה",
+      "11073 е / 0 silent"
+     ],
+     [
+      "word-initial with dagesh (בְּ פְּ תְּ)",
+      "3274 е / 0"
+     ],
+     [
+      "2nd of two shvas (יִשְׁרְצוּ -> йишрецу)",
+      "297 е / 0"
+     ],
+     [
+      "under a dagesh-chazak letter (הַמְּ הַגְּ -> гаммеорот, гаггедолим)",
+      "1053 е after patach, 383 after chirik (миббесари), 15 after segol"
+     ],
+     [
+      "after short vowel patach/segol/chirik, closed syllable",
+      "silent: 4295 / 777 / 6822; е only 195 after patach (הַיְ: гайекум, гайеманит)"
+     ],
+     [
+      "after qamatz / cholam / tsere / kubutz (written long vowel)",
+      "silent 785/362/181/73; е only 16/28/1 (identical letters וְגָלְלוּ вегалелу, רֹצְצוּ)"
+     ],
+     [
+      "after shuruk or chirik-male (וּבְ וּשְׁ)",
+      "е in 1073, silent in 273 (the 273 are shvas after a quiescent aleph/ayin, e.g. מְלַאכְתּוֹ мелахто)"
+     ],
+     [
+      "word-final (ךְ שֶׁךְ) / final +dagesh (שְׁתְּ)",
+      "silent 1041 / 25"
+     ]
+    ],
+    "examples": [
+     [
+      "וְאֵת",
+      "веет"
+     ],
+     [
+      "בְּרֵאשִׁית",
+      "Берешит"
+     ],
+     [
+      "הַמְּאֹרֹת",
+      "гаммеорот"
+     ],
+     [
+      "וַיִּקְרָא",
+      "Ваййикра"
+     ],
+     [
+      "קֵדְמָה",
+      "кедма"
+     ],
+     [
+      "וְהָיְתָה",
+      "вегайта"
+     ],
+     [
+      "יָדְךָ",
+      "йадха"
+     ],
+     [
+      "וּבְנֵי",
+      "увене"
+     ]
+    ]
+   }
+  },
+  "shva-nach": {
+   "ru": "",
+   "note": "nothing is written; consonants cluster: яд-ха -> йадха, мишпахат, исраэль -> йисраел, берешит."
+  },
+  "furtive-patach": {
+   "ru": "а before the final ח/ע/ה",
+   "note": "ноах, руах, гароцеах, шама (ע: ганногеа, йегошуа). Profile B writes руха/ха-последним (641 ха vs 364 ах).",
+   "evidence": {
+    "chet": {
+     "wordsSeen": 4980,
+     "agreeWithThisMapping": 1.0,
+     "examples": [
+      [
+       "רוּחַ",
+       "руах"
+      ],
+      [
+       "הַלּוֹקֵחַ",
+       "галлокеах"
+      ],
+      [
+       "הַמִּזְבֵּחַ",
+       "гаммизбеах"
+      ],
+      [
+       "נֹחַ",
+       "ноах"
+      ],
+      [
+       "שָׁלִיחַ",
+       "шалиах"
+      ]
+     ]
+    },
+    "ayin": {
+     "wordsSeen": 3377,
+     "agreeWithThisMapping": 1.0,
+     "examples": [
+      [
+       "יוֹדֵעַ",
+       "йодеа"
+      ],
+      [
+       "יָדוּעַ",
+       "йадуа"
+      ],
+      [
+       "הִגִּיעַ",
+       "гиггиа"
+      ],
+      [
+       "קָבוּעַ",
+       "кавуа"
+      ],
+      [
+       "שֶׁיַּגִּיעַ",
+       "шеййаггиа"
+      ]
+     ]
+    }
+   }
+  }
+ },
+ "rules": [
+  {
+   "id": "alphabet",
+   "profile": "A",
+   "rule": "Output alphabet is exactly 22 Cyrillic letters а б в г д е з й и к л м н о п р с т у ф х ц ш plus hyphen. No ь ъ ы э ю я ё ж ч щ, no apostrophe/ъ for hiatus. All lower case except per capitalization rules.",
+   "evidence": "torah-ru.json char inventory (151k words) and zohar/tanya/rambam raw inventory: identical 22 letters.",
+   "confidence": "high"
+  },
+  {
+   "id": "gemination",
+   "profile": "A",
+   "rule": "Dagesh chazak doubles the Cyrillic consonant: гашшамайим, гаммайим, ваййомер, вайцавву, атта, шаббат, хаййим. Applies to every consonant with a Cyrillic letter (бб вв гг дд зз йй кк лл мм нн пп сс тт цц шш) and also yod/vav (йй, вв); NOT to aleph/ayin/he/chet/resh. Dagesh qal (begadkefat after shva or at word start or after a vowel-less cons.) does NOT double: мизбеах, ишто, берешит, увен.",
+   "evidence": {
+    "agreement": 0.991,
+    "words": 225478,
+    "examples": [
+     [
+      "אֶלָּא",
+      "елла"
+     ],
+     [
+      "שֶׁלֹּא",
+      "шелло"
+     ],
+     [
+      "מִפְּנֵי",
+      "миппене"
+     ],
+     [
+      "חַיָּב",
+      "хаййав"
+     ],
+     [
+      "אֵלּוּ",
+      "еллу"
+     ]
+    ]
+   },
+   "confidence": "high",
+   "note": "Profile B gemination rate ~93% (33189 expected, 30864 words contain any double letter) - noisy; S (prayers-ru.json) often omits it (шамаим, гамишпат, ихарету)."
+  },
+  {
+   "id": "gemination-word-initial",
+   "profile": "A",
+   "rule": "A dagesh on the first letter of a word that is a dagesh chazak by the previous word (e.g. לּוֹ לִּי נָּא זֹּאת) is doubled in torah-ru.json only ~42% of the time (121 doubled: лло, лли, нна, ззот; 166 single: ло, ли, на). Not predictable from the word alone.",
+   "confidence": "low",
+   "see": "openQuestions[0]"
+  },
+  {
+   "id": "maqaf",
+   "profile": "A",
+   "rule": "Maqaf -> \"-\" ; each part is transliterated as its own word (shva at the start of the second part = word-initial shva-na): ал-пене, вайги-ерев, ашер-ло.",
+   "evidence": "torah: 11474 maqafs vs 11765 hyphens in torah-ru.json",
+   "confidence": "high"
+  },
+  {
+   "id": "furtive-patach",
+   "profile": "A",
+   "rule": "Patach under final ח/ע/ה (after a vowel other than a, with no other vowel) is read BEFORE the consonant: ноах, руах, гароцеах, ганногеа, гаммизбеах.",
+   "evidence": {
+    "chet": "4979/4980",
+    "ayin": "3377/3377"
+   },
+   "confidence": "high"
+  },
+  {
+   "id": "yod-mater",
+   "profile": "A",
+   "rule": "Yod after chirik/tsere/segol with no vowel of its own is silent (the vowel is already written): йисраел, бене, елогеха, мицвотейха. Yod after patach/qamatz = й (ай): гаммайим, лай, ханай; after cholam = ой (гой); before final vav-shuruk the yod is й: вегайу; before final vav w/o vowel after qamatz the yod is silent and vav = в: алав, ехав, панав (ָיו -> ав, 978/978 in torah); ֵיהֶם -> егем (389/389).",
+   "evidence": {
+    "qamatz-yod final": {
+     "wordsSeen": 5654,
+     "agreeWithThisMapping": 0.994,
+     "examples": [
+      [
+       "הָיוּ",
+       "гайу"
+      ],
+      [
+       "שֶׁהָיוּ",
+       "шегайу"
+      ],
+      [
+       "חִיָּיא",
+       "хиййай"
+      ],
+      [
+       "וְהָיוּ",
+       "вегайу"
+      ],
+      [
+       "חַבְרַיָּיא",
+       "хавраййай"
+      ]
+     ]
+    },
+    "patach-yod final": {
+     "wordsSeen": 2002,
+     "agreeWithThisMapping": 1.0,
+     "examples": [
+      [
+       "עָלַי",
+       "алай"
+      ],
+      [
+       "חַי",
+       "хай"
+      ],
+      [
+       "הַחַי",
+       "гахай"
+      ],
+      [
+       "אֵלַי",
+       "елай"
+      ],
+      [
+       "אֵימָתַי",
+       "ематай"
+      ]
+     ]
+    },
+    "cholam-yod": {
+     "wordsSeen": 1985,
+     "agreeWithThisMapping": 0.998,
+     "examples": [
+      [
+       "בִּלְחוֹדוֹי",
+       "билходой"
+      ],
+      [
+       "יְדוֹי",
+       "йедой"
+      ],
+      [
+       "עֲלוֹי",
+       "алой"
+      ],
+      [
+       "עוֹבָדוֹי",
+       "овадой"
+      ],
+      [
+       "עֵינוֹי",
+       "еной"
+      ]
+     ]
+    },
+    "chirik": {
+     "wordsSeen": 182034,
+     "agreeWithThisMapping": 0.993,
+     "examples": [
+      [
+       "פִּי",
+       "пи"
+      ],
+      [
+       "בְּרִיךְ",
+       "берих"
+      ],
+      [
+       "בְּגִין",
+       "бегин"
+      ],
+      [
+       "כִּי",
+       "ки"
+      ],
+      [
+       "אִיהוּ",
+       "игу"
+      ]
+     ]
+    }
+   },
+   "confidence": "high",
+   "note": "Profile B writes ָיו as айв (1005 айв vs 0 ав): алайв, мицотайв, гораотайв."
+  },
+  {
+   "id": "vav-letters",
+   "profile": "A",
+   "rule": "Vav+dagesh (no vowel) = у; vav+cholam (after vowelless cons.) = о; vav with a vowel = в+vowel; vav-dagesh with vowel (ּוַ) = вв.",
+   "confidence": "high",
+   "evidence": {
+    "shuruk": {
+     "wordsSeen": 130154,
+     "agreeWithThisMapping": 0.991,
+     "examples": [
+      [
+       "שֶׁהוּא",
+       "шегу"
+      ],
+      [
+       "אִיהוּ",
+       "игу"
+      ],
+      [
+       "אֵלּוּ",
+       "еллу"
+      ],
+      [
+       "הַהוּא",
+       "гагу"
+      ],
+      [
+       "אִינּוּן",
+       "иннун"
+      ]
+     ]
+    },
+    "cholam-male": {
+     "wordsSeen": 158240,
+     "agreeWithThisMapping": 0.994,
+     "examples": [
+      [
+       "אוֹ",
+       "о"
+      ],
+      [
+       "לוֹ",
+       "ло"
+      ],
+      [
+       "בּוֹ",
+       "бо"
+      ],
+      [
+       "זוֹ",
+       "зо"
+      ],
+      [
+       "אֵינוֹ",
+       "ено"
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "id": "he-final",
+   "profile": "A",
+   "rule": "Final he without mappiq, after a vowel, is silent (the vowel letter is already written): тора, зе, гине, моше. With mappiq it is г: лаг, баг, отаг. Any he that is a real consonant (initial/medial/with a vowel, or in הוּא) is г: гу, гем, гаарец, гашем.",
+   "confidence": "high",
+   "evidence": {
+    "mater": {
+     "wordsSeen": 74111,
+     "agreeWithThisMapping": 0.976,
+     "examples": [
+      [
+       "הָיָה",
+       "гайа"
+      ],
+      [
+       "הֲוָה",
+       "гава"
+      ],
+      [
+       "עִלָּאָה",
+       "иллаа"
+      ],
+      [
+       "הָיְתָה",
+       "гайта"
+      ],
+      [
+       "טֻמְאָה",
+       "тума"
+      ]
+     ]
+    },
+    "mappiq": {
+     "wordsSeen": 26898,
+     "agreeWithThisMapping": 0.98,
+     "examples": [
+      [
+       "לֵיהּ",
+       "лег"
+      ],
+      [
+       "לָהּ",
+       "лаг"
+      ],
+      [
+       "בָּהּ",
+       "баг"
+      ],
+      [
+       "בֵּיהּ",
+       "бег"
+      ],
+      [
+       "אוֹתָהּ",
+       "отаг"
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "id": "pausal-tone-marks",
+   "profile": "A",
+   "rule": "Cantillation marks, meteg, sof-pasuk, paseq and the geresh/gershayim in abbreviations are ignored for the phonemes. Torah verse text carries NO punctuation at all in torah-ru.json; Zohar/Tanya/Rambam copy the source punctuation (, . : ( ) \" -) at the same positions.",
+   "confidence": "medium"
+  },
+  {
+   "id": "capitalization",
+   "profile": "A",
+   "rule": "The FIRST word of each verse/paragraph/unit is capitalised (torah-ru.json: 5846/5846 verses; zohar 17078/17780 units; tanya 1596/1623; rambam 15070/15131). Mid-sentence capitals: ONLY the divine name Адонай (tetragrammaton / יְיָ), and a few titles (Рабби, Раши, Гаширим). Proper names (аврагам, йааков, йицхак, моше, давид, мицрайим), елогим, тора, шаббат are lower-case. אֲדֹנָי (real Adonai) is lower-case адонай (15) except verse-initial.",
+   "confidence": "high"
+  },
+  {
+   "id": "abbreviations-and-numbers",
+   "profile": "A",
+   "rule": "Source abbreviations are expanded, not transliterated: וְגוֹ / וְגו -> вегомер ; וְכוּ / וכו -> вехулеи ; ה׳ / יי -> Адонай. Hebrew numeral ג׳ / כב inside references becomes arabic digits (3, 22). Book names in references are Russian-translated (Вайикра 22 9), not transliterated.",
+   "confidence": "medium"
+  },
+  {
+   "id": "profile-B-vs-A",
+   "profile": "B",
+   "rule": "Ben Ish Chai halacha bodies (data/chok-benishchai/*/*.ru.json, 122k words) are a different, noisier dialect: fricative begadkefat are written as stops (в->б: абал, дабар, тоб; х->к: как, мелек, беток, царик; ф->п: шопек, упаам), final he -> г (зег, марег, гарбег), ָיו -> айв, furtive ах -> ха (руха), gemination mostly kept (~93%), abbreviations end in apostrophe (гак', веку' 347x), word-for-word inconsistent within one paragraph (шеккатаб / шекатав, гиннег / гине, ейн / ен). Only 70-76% of B words equal the A-rule output, per-file spread tiny (0.63-0.76), i.e. uniform noise rather than sub-dialects.",
+   "confidence": "high"
+  },
+  {
+   "id": "profile-S",
+   "profile": "S",
+   "rule": "data/prayers-ru.json is a patchwork: older keys (omerKavanot, omerClosing, talitTefilin, tikunChatzot ...) follow A (84-100%), newer/Tanakh-quoting keys (kaveh, aleinuShemaLine, hannahPrayer, einKeElokeinu...) use ь я э ё ѓ: эль, аль, коль, исраэль, Элоѓейну, веэт, Адонай; elogim/элогим 157 vs 220 елогим; барух 21 vs барук 36; ал 405 vs аль 253.",
+   "confidence": "high"
+  }
+ ],
+ "specialWords": {
+  "יְהֹוָה": {
+   "ru": "Адонай",
+   "count": "1464/1464 torah-ru.json",
+   "note": "capital"
+  },
+  "יְיָ": {
+   "ru": "Адонай",
+   "count": "554 zohar, 311 rambam",
+   "note": "capital"
+  },
+  "יי": {
+   "ru": "Адонай",
+   "count": "25 zohar, 5 rambam"
+  },
+  "ה׳": {
+   "ru": "Адонай",
+   "count": "inferred from prefixed forms; bare ה׳ not aligned in the corpus"
+  },
+  "אֲדֹנָי": {
+   "ru": "адонай",
+   "count": "15 lower-case + 1 verse-initial Адонай in torah"
+  },
+  "יֱהֹוִה": {
+   "ru": "Елогим",
+   "count": "4/4 torah"
+  },
+  "לַיְיָ": {
+   "ru": "лаадонай",
+   "count": "72 zohar, 5 rambam",
+   "pattern": "prefix vowel + а + донай"
+  },
+  "וַיְיָ": {
+   "ru": "ваадонай",
+   "count": "24 zohar, 4 rambam"
+  },
+  "בַּיְיָ": {
+   "ru": "баадонай",
+   "count": "16 zohar"
+  },
+  "דַּיְיָ": {
+   "ru": "даадонай",
+   "count": "5 zohar"
+  },
+  "מֵיְיָ": {
+   "ru": "меадонай",
+   "count": "4 zohar"
+  },
+  "לַה": {
+   "ru": "лаадонай",
+   "count": "57 tanya, 11 rambam (ל + ה׳ abbreviation); בַּה -> баадонай 9 tanya; לָהּ with mappiq = лаг (1511 rambam)",
+   "note": "ambiguous with לָהּ, decided by the points (patach+no mappiq = Adonai)"
+  },
+  "יָהּ": {
+   "ru": "йаг",
+   "count": "16 zohar,4 rambam,1 torah"
+  },
+  "וְגוֹ": {
+   "ru": "вегомер",
+   "count": "249+85+10",
+   "variants": [
+    "וְגו"
+   ]
+  },
+  "וְכוּ": {
+   "ru": "вехулеи",
+   "count": "30+95+70",
+   "variants": [
+    "וכו"
+   ]
+  },
+  "הוּא": {
+   "ru": "гу",
+   "count": "290 torah (6 as Гу), 3585 zohar, 2528 rambam",
+   "note": "not special: regular he+shuruk"
+  },
+  "כָּל": {
+   "ru": "кол",
+   "count": "100% of 8000+ in A",
+   "note": "qamatz katan"
+  },
+  "אֱלֹהִים": {
+   "ru": "елогим",
+   "count": "226 lower + 1 verse-initial Елогим",
+   "note": "regular, lower-case; אֱלֹהֵינוּ -> елогену"
+  },
+  "יִשְׂרָאֵל": {
+   "ru": "йисраел",
+   "note": "regular; profile S: исраел"
+  },
+  "מִצְרַיִם": {
+   "ru": "мицрайим",
+   "note": "regular"
+  },
+  "שַׁבָּת": {
+   "ru": "шаббат",
+   "note": "regular, gemination (profile B: шабат 186 vs шаббат 1136)"
+  },
+  "תּוֹרָה": {
+   "ru": "тора",
+   "note": "regular; гаттора = הַתּוֹרָה"
+  },
+  "הַשֵּׁם": {
+   "ru": "гашшем",
+   "note": "regular (BIC 31x гашем, 9 Хашем, 85 Б-г are translated-text forms not transliteration)"
+  }
+ },
+ "corpus": "scripts/translit/corpus-ru.json (dialect field A/B/S; ru is lower-cased for non-torah sources because capitalisation is a separate rule)",
+ "openQuestions": [
+  "Which profile should the new text (Shulchan Aruch HaRav / sa-harav, a halacha text) follow: A (strict, 98-99% consistent, covers Torah/Zohar/Tanya/Rambam) or B (Ben Ish Chai halacha bodies, the closest genre)? Default A; needs owner decision.",
+  "Word-initial dagesh that is chazak because of the PREVIOUS word (לּוֹ לִּי נָּא זֹּאת בּוֹ): torah-ru.json doubles it in 121 words and does not in 166+ (begadkefat: 29 doubled vs 11075 single). The core cannot see it without the previous word; decide whether to implement dehiq/ve-hebdel context or never double word-initial dagesh.",
+  "Qamatz-katan: besides כָּל (100% о) and qamatz-before-chataf-qamatz, the sources disagree (חָכְמָה хохма in torah-ru.json vs хахма elsewhere; וַיָּקָם-type ваййаком in torah-ru.json vs вайякам in zohar). Sa-harav text has no U+05C7 marks, so a lexicon/rule list is required.",
+  "He with shva-nach mid-word (אֶהְיֶה, וֶהְיֵה, תַּהְפֻּכֹת, מַהְפֵּכַת, הִתְמַהְמֵהַּ): silent in 27 words (ейе, вейе, непах, тапухот), г in 389 (йигйе, бигйотам). Is there a rule? (all silent cases follow segol/patach+he+shva within 2 lexemes).",
+  "Shva na/nach follows real Hebrew grammar in the Russian text (Sephardi: кедма, гайта, йадха, веарбаа) - not \"after long vowel = na\". Needs the core engine's syllabifier; the table in vowels.shva-na gives the empirical per-context rates to validate against.",
+  "Capitalisation of אֲדֹנָי (lower) vs the tetragrammaton (Адонай): only 16 tokens in torah; zohar/tanya/rambam show no lower-case Адонай but their aligned tokens were lower-cased by the alignment script - re-verify on raw text before encoding.",
+  "Not attested at all in the data (profile A): geresh letters (ג׳ ז׳ צ׳ -> дж ж ч), ח/כ with dagesh, Aramaic-only vowel patterns beyond Zohar, rafe marks, yod+qamatz+aleph words (חִיָּיא gave хиййай), apostrophes. Decide manually.",
+  "Hebrew abbreviations with geresh/gershayim (ז\"ל, שו\"ת, בס\"ד, ע\"ג) are written za\"l/бс\"д in B and expanded or dropped in A - no verified rule.",
+  "Numbers/gematria letters: A converts to arabic digits (ג׳ -> 3, כב -> 22) in references; unclear for other uses.",
+  "Capitalised book/part references in Zohar/Tanya/Rambam are translated names (Вайикра, Танйа) rather than rule-based transliteration - exclude from the engine.",
+  "Aleph/ayin with a vowel after another vowel (hiatus) is never separated (йааков, беирато): confirmed 99.6-99.8%, but a few B words carry apostrophes - no rule."
+ ]
+}

@@ -1,0 +1,2403 @@
+[
+{
+"he": "נְתִיבוֹתֶיהָ",
+"ka": "ნეთივოთეჰა",
+"src": "data/prayers-ka.json[aleinuEitzChaim]",
+"system": "P"
+},
+{
+"he": "בֹּטֵחַ",
+"ka": "ბოთეხა",
+"src": "data/prayers-ka.json[pesukeiDezimra]",
+"system": "P"
+},
+{
+"he": "תַּפּוּחַ",
+"ka": "თაფფუხა",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "שְׁחִיטָתָן",
+"ka": "შეხითათან",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "אָנֹכִי",
+"ka": "ანოხი",
+"src": "data/prayers-ka.json[pesukeiDezimra]",
+"system": "P"
+},
+{
+"he": "נֶאֱחַז",
+"ka": "ნეეხაზ",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "שֶׁיְּחׇנֵּנוּ",
+"ka": "შეიიეხანნენუ",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "שֶׁנִּשְׁבַּעְתָּ",
+"ka": "შენნიშბათა",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "צוּרִישַׁדָּי",
+"ka": "წურიშადდაი",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "אִזְדַּמְּנַת",
+"ka": "იზდამმენათ",
+"src": "data/chok-leyisrael/Achrei-Mot.ka.json",
+"system": "A"
+},
+{
+"he": "יַעְטֶה",
+"ka": "იათე",
+"src": "data/prayers-ka.json[minchaOpening]",
+"system": "P"
+},
+{
+"he": "דְּמִדְּאוֹרָיְיתָא",
+"ka": "დემიდდეორაიითა",
+"src": "data/chok-daf/16.ka.json",
+"system": "A"
+},
+{
+"he": "בְּסִיַּעְתָּא",
+"ka": "ბესიიიათა",
+"src": "data/chok-benishchai/year1/Bereshit.ka.json",
+"system": "B"
+},
+{
+"he": "לַאֲכִילָה",
+"ka": "ლაახილა",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "שֹׂטְנַי",
+"ka": "სოტნაი",
+"src": "data/chok-leyisrael/Nitzavim.ka.json",
+"system": "A"
+},
+{
+"he": "וַיֹּאמֶר",
+"ka": "ვაიიომერ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "יַשְׂבִּיעֵךְ",
+"ka": "იასბიეხ",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "בְּאָדָם",
+"ka": "ბეადამ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁיִּהְיֶה",
+"ka": "შეიიიჰიეჰ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "לֶאֱחֹז",
+"ka": "ლეეხოზ",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "יֶהֱמָיוּן",
+"ka": "იეჰემაიუნ",
+"src": "data/chok-zohar/4.ka.json",
+"system": "A"
+},
+{
+"he": "עֻרְדְּעָנַיָּא",
+"ka": "ურდეანაიია",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בִּתְשׁוּבָה",
+"ka": "ბითშუბა",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "הַכְּנַעֲנִי",
+"ka": "ჰაქქენაანი",
+"src": "data/prayers-ka.json[talitTefilin]",
+"system": "P"
+},
+{
+"he": "אֶצְבְּעוֹתָיו",
+"ka": "ეწბეოთავ",
+"src": "data/chok-daf/25.ka.json",
+"system": "A"
+},
+{
+"he": "בְחַקְלָא",
+"ka": "ვეხაკლა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "הֶחֱזִיק",
+"ka": "ჰეხეზიკ",
+"src": "data/chok-leyisrael/Achrei-Mot.ka.json",
+"system": "A"
+},
+{
+"he": "חוֹבָתוֹ",
+"ka": "ხოვათო",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "לְהוֹצִיאוֹ",
+"ka": "ლეჰოწიო",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "וַיִּתְיַצֵּב",
+"ka": "ვაითიაწწევ",
+"src": "data/prayers-ka.json[tachanun]",
+"system": "P"
+},
+{
+"he": "כְּנֶגֶד",
+"ka": "კენეგედ",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "הַקֹּדֶשׁ",
+"ka": "ჰაკკოდეშ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "כְּגַוְונָא",
+"ka": "კეგავვნა",
+"src": "data/chok-leyisrael/Achrei-Mot.ka.json",
+"system": "A"
+},
+{
+"he": "לִשְׁמוֹר",
+"ka": "ლიშმორ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "דְסָגִידְנָא",
+"ka": "დესაგიდნა",
+"src": "data/prayers-ka.json[roshChodeshExtra]",
+"system": "P"
+},
+{
+"he": "וּמִתְחַבְּרָן",
+"ka": "უმითხაბბერან",
+"src": "data/chok-zohar/10.ka.json",
+"system": "A"
+},
+{
+"he": "מִצְטָרֵף",
+"ka": "მიწტარეფ",
+"src": "data/chok-daf/116.ka.json",
+"system": "A"
+},
+{
+"he": "הַכִּפּוּרִים",
+"ka": "ჰაკკიპპურიმ",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "לִנְטִילַת",
+"ka": "ლინთილათ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "וְהַמִּשְׁפָּטִים",
+"ka": "ვეჰამმიშპატიმ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "נֶעֱקַר",
+"ka": "ნეექარ",
+"src": "data/chok-benishchai/year2/Re_eh.ka.json",
+"system": "B"
+},
+{
+"he": "כַּפָּיו",
+"ka": "ქაფფაივ",
+"src": "data/chok-benishchai/year1/Tetzaveh.ka.json",
+"system": "B"
+},
+{
+"he": "זָהָב",
+"ka": "ზაჰავ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "מֵעַמּוּד",
+"ka": "მეამმუდ",
+"src": "data/chok-benishchai/year1/Tzav.ka.json",
+"system": "B"
+},
+{
+"he": "וּבְשׇׁכְבְּךָ",
+"ka": "უვეშოხბექა",
+"src": "data/prayers-ka.json[birkotKriatShema]",
+"system": "P"
+},
+{
+"he": "סְבָרָא",
+"ka": "სევარა",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "וּשְׁמַתּוֹת",
+"ka": "უშემათთოთ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "כְּנֵסִיּוֹת",
+"ka": "ხენესიიოთ",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "וַיֹּאמְרוּ",
+"ka": "ვაიიომრუ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְשֹׂנְאָי",
+"ka": "ვესონაი",
+"src": "data/prayers-ka.json[hallel]",
+"system": "P"
+},
+{
+"he": "דַּוְקָא",
+"ka": "დავქა",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "דְּמַטְרוֹנִיתָא",
+"ka": "დემატრონითა",
+"src": "data/chok-leyisrael/Beshalach.ka.json",
+"system": "A"
+},
+{
+"he": "אִתְּתֵהּ",
+"ka": "ითთეთე",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "זְכוּכִית",
+"ka": "ზექუქით",
+"src": "data/chok-benishchai/year1/Bo.ka.json",
+"system": "B"
+},
+{
+"he": "נָפְקִי",
+"ka": "ნაფკი",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "לְזַרְעֲיַתְהוֹן",
+"ka": "ლეზარაიათჰონ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "כּוֹנַנְתָּ",
+"ka": "კონანთა",
+"src": "data/chok-leyisrael/Shmini.ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁכָּךְ",
+"ka": "შექქაქ",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "וְהַאֲכַלְתִּיךָ",
+"ka": "ვეჰაახალთიხა",
+"src": "data/chok-daf/8.ka.json",
+"system": "A"
+},
+{
+"he": "עֲיָרֵינוּ",
+"ka": "აიარენუ",
+"src": "data/chok-benishchai/year1/Ki_Tisa.ka.json",
+"system": "B"
+},
+{
+"he": "וּלֳקָבְלַיְיהוּ",
+"ka": "ულოკავლაიიჰუ",
+"src": "data/chok-leyisrael/Beshalach.ka.json",
+"system": "A"
+},
+{
+"he": "אֲפִלּוּ",
+"ka": "აფილლუ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "וְכִדְרַבִּי",
+"ka": "ვეხიდრაბბი",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "תַּכְלִית",
+"ka": "თახლით",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "וּמַחֲשַׁבְתּוֹ",
+"ka": "უმახაშავთო",
+"src": "data/chok-rambam/16.ka.json",
+"system": "A"
+},
+{
+"he": "בְּתַחְתִּיּוֹת",
+"ka": "ბეთახთიიიოთ",
+"src": "data/chok-leyisrael/Tazria.ka.json",
+"system": "A"
+},
+{
+"he": "מִלְּהִשְׁתַּמֵּשׁ",
+"ka": "მილლეჰიშთამმეშ",
+"src": "data/chok-benishchai/year2/Miketz.ka.json",
+"system": "B"
+},
+{
+"he": "פְּלוּגְתָּא",
+"ka": "ფელუგეთთა",
+"src": "data/chok-benishchai/year1/Balak.ka.json",
+"system": "B"
+},
+{
+"he": "אֲדֹנָיו",
+"ka": "ადონავ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "שֶּׁאָמַר",
+"ka": "შეამარ",
+"src": "data/chok-benishchai/year1/Beshalach.ka.json",
+"system": "B"
+},
+{
+"he": "אוֹקְמוּהָ",
+"ka": "ოკმუჰა",
+"src": "data/chok-daf/112.ka.json",
+"system": "A"
+},
+{
+"he": "לַצַּדִּיק",
+"ka": "ლაწწადდიკ",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "תְּשַׁלַּח",
+"ka": "თეშალლახ",
+"src": "data/prayers-ka.json[pesukeiDezimra]",
+"system": "P"
+},
+{
+"he": "יְרוּשָׁלַיִם",
+"ka": "იერუშალაიიმ",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "וֵאלֹהֵי",
+"ka": "ვეელოჰე",
+"src": "data/prayers-ka.json[tikunChatzot]",
+"system": "P"
+},
+{
+"he": "קֳדָמֵיכוֹן",
+"ka": "კოდამეხონ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְאַנְדְּרוֹגִינוּס",
+"ka": "ვეანდეროგინუს",
+"src": "data/chok-leyisrael/Miketz.ka.json",
+"system": "A"
+},
+{
+"he": "מְיֻדָּעַי",
+"ka": "მეიუდდააი",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "וְהַמַּחְמִיר",
+"ka": "ვეჰამმახმირ",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "וָלַיְלָה",
+"ka": "ვალაილა",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "וּמְסַדֵּר",
+"ka": "უმესადდერ",
+"src": "data/prayers-ka.json[arvitBlessings]",
+"system": "P"
+},
+{
+"he": "וּלְנִכְסַת",
+"ka": "ულენიხსათ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "קְטוֹרֶת",
+"ka": "კეტორეთ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בַּמִּדְבָּר",
+"ka": "ბამმიდბარ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "הַסִּטְרָא",
+"ka": "ჰასსიტრა",
+"src": "data/chok-tanya/0.ka.json",
+"system": "A"
+},
+{
+"he": "וַאֲפִילּוּ",
+"ka": "ვააფილლუ",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "בִּלְחוֹדוֹי",
+"ka": "ბილხოდოი",
+"src": "data/chok-leyisrael/Achrei-Mot.ka.json",
+"system": "A"
+},
+{
+"he": "וּמִמַּעֲרָב",
+"ka": "უმიმმაარავ",
+"src": "data/chok-leyisrael/Beha-alotcha.ka.json",
+"system": "A"
+},
+{
+"he": "הָאַחֲרוֹנִים",
+"ka": "ჰაახარონიმ",
+"src": "data/chok-benishchai/year1/Beha_alotcha.ka.json",
+"system": "B"
+},
+{
+"he": "שֶׁנִּתְעָרְבוּ",
+"ka": "შენნითარვუ",
+"src": "data/chok-daf/15.ka.json",
+"system": "A"
+},
+{
+"he": "חֶרֶס",
+"ka": "ხერეს",
+"src": "data/chok-benishchai/year1/Bo.ka.json",
+"system": "B"
+},
+{
+"he": "הַסְּפָרַדִּים",
+"ka": "ჰასსეფარადდიმ",
+"src": "data/chok-benishchai/year1/Devarim.ka.json",
+"system": "B"
+},
+{
+"he": "אַבְנֵי",
+"ka": "ავნე",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "לְאִתְחֲזָאָה",
+"ka": "ლეითხაზაა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "אֵלִיָּהוּ",
+"ka": "ელიიიაჰუ",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "בִּירוּשָׁלַיִם",
+"ka": "ბირუშალაიიმ",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "לְחוּמְרָא",
+"ka": "ლეხუმერა",
+"src": "data/chok-benishchai/year1/Lech_Lecha.ka.json",
+"system": "B"
+},
+{
+"he": "יָקוּם",
+"ka": "იაქუმ",
+"src": "data/chok-benishchai/year1/Shemot.ka.json",
+"system": "B"
+},
+{
+"he": "בְּשַׂר",
+"ka": "ბესარ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "דִּמְכַסְיָין",
+"ka": "დიმქასიაინ",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "יִשְׂרָאֵל",
+"ka": "იისრაელ",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "הִדְפַּסְתִּי",
+"ka": "ჰიდფასთი",
+"src": "data/chok-benishchai/year1/Chukat.ka.json",
+"system": "B"
+},
+{
+"he": "רְאוּבֵן",
+"ka": "რეუბენ",
+"src": "data/chok-benishchai/year1/Shoftim.ka.json",
+"system": "B"
+},
+{
+"he": "לְכַתְּחִלָּה",
+"ka": "ლეხათთეხილლა",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "פְּקֻדֵיהֶם",
+"ka": "პეკუდეჰემ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "לְמַדְבְּחָא",
+"ka": "ლემადბეხა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "יִשָּׂשכָר",
+"ka": "იისსაშხარ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בַּעֲשִׂיַּית",
+"ka": "ბაასიიიაით",
+"src": "data/chok-daf/12.ka.json",
+"system": "A"
+},
+{
+"he": "לַאֲבֹתֶיךָ",
+"ka": "ლაავოთეხა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "עָשִׂיתָ",
+"ka": "ასითა",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "לְהִשְׁתַּמֵּשׁ",
+"ka": "ლეჰიშთამმეშ",
+"src": "data/chok-daf/11.ka.json",
+"system": "A"
+},
+{
+"he": "וּכְשֶׁתִּנָּצֵל",
+"ka": "უქეშეთთინნაწელ",
+"src": "data/prayers-ka.json[igeretHaramban]",
+"system": "P"
+},
+{
+"he": "אִשְׁתְּמוֹדְעוּן",
+"ka": "იშთემოდუნ",
+"src": "data/chok-leyisrael/Beshalach.ka.json",
+"system": "A"
+},
+{
+"he": "יִהְיֶה",
+"ka": "იიჰიეჰ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "צֶדֶק",
+"ka": "წედექ",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "בְהוֹן",
+"ka": "ვეჰონ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְּשָׁעָה",
+"ka": "ბეშაა",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "סְבָרַת",
+"ka": "სებარათ",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "אֱלֹהֶיךָ",
+"ka": "ელოჰექა",
+"src": "data/chok-benishchai/year1/Behar_Bechukotai.ka.json",
+"system": "B"
+},
+{
+"he": "תִּגְלַחַת",
+"ka": "თიგლახათ",
+"src": "data/chok-daf/100.ka.json",
+"system": "A"
+},
+{
+"he": "תִּשָּׁבַרְנָה",
+"ka": "თიშშავარნა",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "אַחֲסַנְתֵּיהּ",
+"ka": "ახასანთეჰ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "תּוֹרֵי",
+"ka": "თორე",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "לְאִשְׁתְּמוֹדְעָא",
+"ka": "ლეიშთემოდა",
+"src": "data/chok-leyisrael/Bamidbar.ka.json",
+"system": "A"
+},
+{
+"he": "נִפְלְאוֹתֶיךָ",
+"ka": "ნიფლეოთეხა",
+"src": "data/chok-daf/43.ka.json",
+"system": "A"
+},
+{
+"he": "לִפְלוֹנִי",
+"ka": "ლიფლონი",
+"src": "data/chok-daf/102.ka.json",
+"system": "A"
+},
+{
+"he": "לְדַקְדֵּק",
+"ka": "ლედაქდექ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "לַיְּהוּדִים",
+"ka": "ლაიიეჰუდიმ",
+"src": "data/chok-benishchai/year1/Tetzaveh.ka.json",
+"system": "B"
+},
+{
+"he": "שֶׁמֵּאַהֲבָתְךָ",
+"ka": "შემმეაჰავათექა",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "לְחַקְלָא",
+"ka": "ლეხაკლა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "לְהִתְעוֹלֵל",
+"ka": "ლეჰითოლელ",
+"src": "data/chok-leyisrael/Tazria.ka.json",
+"system": "A"
+},
+{
+"he": "וּבְוַדַּאי",
+"ka": "უბევადდაი",
+"src": "data/chok-benishchai/year1/Ki_Tisa.ka.json",
+"system": "B"
+},
+{
+"he": "עִמָּהֶם",
+"ka": "იმმაჰემ",
+"src": "data/prayers-ka.json[amidah19]",
+"system": "P"
+},
+{
+"he": "הָרִאשׁוֹנָה",
+"ka": "ჰარიშონა",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "קִטְמָא",
+"ka": "კიტმა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "חֲלוֹמוֹת",
+"ka": "ხალომოთ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "בְּאַרְבַּע",
+"ka": "ბეარბა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "נוֹהֲגִים",
+"ka": "ნოჰაგიმ",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "מְבַטְּלִים",
+"ka": "მებათთელიმ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "חוֹמֹתַיִךְ",
+"ka": "ხომოთაიიხ",
+"src": "data/prayers-ka.json[tikunChatzot]",
+"system": "P"
+},
+{
+"he": "הָעֶלְיוֹנִים",
+"ka": "ჰაელიონიმ",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "לֶאֱלִיפַז",
+"ka": "ლეელიფაზ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "שֵׁנִית",
+"ka": "შენით",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "וַתְּאַזְּרֵנִי",
+"ka": "ვათთეაზზერენი",
+"src": "data/chok-daf/2.ka.json",
+"system": "A"
+},
+{
+"he": "מֵעִלָּוֵי",
+"ka": "მეილლავე",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "כַּחֶרֶס",
+"ka": "ქახერეს",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "נְקִיִּים",
+"ka": "ნექიიიიმ",
+"src": "data/chok-benishchai/year2/Metzora.ka.json",
+"system": "B"
+},
+{
+"he": "שְׁלִיחוּתַיְיהוּ",
+"ka": "შელიხუთაიიჰუ",
+"src": "data/chok-tanya/2.ka.json",
+"system": "A"
+},
+{
+"he": "כְּדׇרְלָעֹמֶר",
+"ka": "კედორლაომერ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְתֵימַר",
+"ka": "ვეთემარ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "אֹפֶן",
+"ka": "ოფენ",
+"src": "data/chok-benishchai/year1/Emor.ka.json",
+"system": "B"
+},
+{
+"he": "מוֹרִיד",
+"ka": "მორიდ",
+"src": "data/chok-daf/2.ka.json",
+"system": "A"
+},
+{
+"he": "לַאֲבֹתֵיכֶם",
+"ka": "ლაავოთეხემ",
+"src": "data/prayers-ka.json[birkotKriatShema]",
+"system": "P"
+},
+{
+"he": "הַכֶּבֶשׂ",
+"ka": "ჰაქქევეშ",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "דְיַעֲקֹב",
+"ka": "დეიააკოვ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְכַיּוֹצֵא",
+"ka": "ვეხაიიოწე",
+"src": "data/chok-daf/11.ka.json",
+"system": "A"
+},
+{
+"he": "לִסְגֻלָּתוֹ",
+"ka": "ლისგულლათო",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "דְאַפְרָשׁוּתָא",
+"ka": "დეაფრაშუთა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "כִּבְיָכוֹל",
+"ka": "კივიახოლ",
+"src": "data/chok-daf/11.ka.json",
+"system": "A"
+},
+{
+"he": "נְבִיעוּ",
+"ka": "ნევიუ",
+"src": "data/chok-leyisrael/Emor.ka.json",
+"system": "A"
+},
+{
+"he": "מְטַלְטְלִין",
+"ka": "მეტალტელინ",
+"src": "data/chok-daf/10.ka.json",
+"system": "A"
+},
+{
+"he": "וַאֲפִלּוּ",
+"ka": "ვააფილლუ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "אֹרֶךְ",
+"ka": "ორეხ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "הַמִּקְדָּשׁ",
+"ka": "ჰამმიკდაშ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "דְאִתְיְיהִיב",
+"ka": "დეითიეიჰივ",
+"src": "data/chok-zohar/39.ka.json",
+"system": "A"
+},
+{
+"he": "הַמִּטַּלְטְלִין",
+"ka": "ჰამმიტტალტელინ",
+"src": "data/chok-daf/3.ka.json",
+"system": "A"
+},
+{
+"he": "מִצְרַיְמָה",
+"ka": "მიწრაიმა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בִּכְתֻבָּתָהּ",
+"ka": "ბიხთუბბათაჰ",
+"src": "data/chok-leyisrael/Bamidbar.ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁמְּקַדְּשִׁים",
+"ka": "შემმექადდეშიმ",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "שֶּׁכָּתַב",
+"ka": "შექქათაბ",
+"src": "data/chok-benishchai/year1/Beshalach.ka.json",
+"system": "B"
+},
+{
+"he": "שְׁמַע",
+"ka": "შემა",
+"src": "data/chok-benishchai/year1/Bo.ka.json",
+"system": "B"
+},
+{
+"he": "יְכוֹנְנֶהָ",
+"ka": "იეხონენეჰა",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "בִּמְקוֹמָהּ",
+"ka": "ბიმქომაჰ",
+"src": "data/chok-benishchai/year1/Beha_alotcha.ka.json",
+"system": "B"
+},
+{
+"he": "קָנְסוּ",
+"ka": "კანსუ",
+"src": "data/chok-daf/124.ka.json",
+"system": "A"
+},
+{
+"he": "מַקְדְּשָׁא",
+"ka": "მაკდეშა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "כֻּרְסְיָיא",
+"ka": "კურსეიაი",
+"src": "data/chok-leyisrael/Chayei-Sara.ka.json",
+"system": "A"
+},
+{
+"he": "דִּלְכַתְּחִלָּה",
+"ka": "დილქათთეხილლა",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "לָאָרֶץ",
+"ka": "ლაარეწ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "מְקֻדֶּשֶׁת",
+"ka": "მეკუდდეშეთ",
+"src": "data/chok-leyisrael/Beshalach.ka.json",
+"system": "A"
+},
+{
+"he": "הַמְלַמֵּד",
+"ka": "ჰამელამმედ",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁעֲשָׂאָהוּ",
+"ka": "შეასააჰუ",
+"src": "data/chok-rambam/1.ka.json",
+"system": "A"
+},
+{
+"he": "שֶּׁקִּבַּלְתִי",
+"ka": "შეკკიბბალთი",
+"src": "data/chok-tanya/2.ka.json",
+"system": "A"
+},
+{
+"he": "וּלְהַחֲזִירָהּ",
+"ka": "ულეჰახაზირაჰ",
+"src": "data/prayers-ka.json[birkotHashachar]",
+"system": "P"
+},
+{
+"he": "הַסָּפֵק",
+"ka": "ჰასსაფეკ",
+"src": "data/chok-daf/129.ka.json",
+"system": "A"
+},
+{
+"he": "הָקִיצוּ",
+"ka": "ჰაქიწუ",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "וַהֲווֹ",
+"ka": "ვაჰავო",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְּיִשְׂרָאֵל",
+"ka": "ბეიისრაელ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "לִימּוּד",
+"ka": "ლიმმუდ",
+"src": "data/chok-daf/28.ka.json",
+"system": "A"
+},
+{
+"he": "וּבִתְשׁוּבָתִי",
+"ka": "უბითშუბათი",
+"src": "data/chok-benishchai/year1/Tetzaveh.ka.json",
+"system": "B"
+},
+{
+"he": "דְיִשְׂרָאֵל",
+"ka": "დეიისრაელ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "הַמִּקְדָּשׁ",
+"ka": "ჰამმიქდაშ",
+"src": "data/prayers-ka.json[tikunChatzot]",
+"system": "P"
+},
+{
+"he": "שֶׁלֹּא",
+"ka": "შელლო",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "בְּיֵשַׁע",
+"ka": "ბეიეშა",
+"src": "data/chok-daf/37.ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁמִּתְנוֹעַנְעוֹת",
+"ka": "შემმითნოანოთ",
+"src": "data/chok-tanya/2.ka.json",
+"system": "A"
+},
+{
+"he": "אֱלֹהֵיכֶם",
+"ka": "ელოჰეხემ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "גִּינְתָא",
+"ka": "გინთა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וַיֵּלֶךְ",
+"ka": "ვაიელექ",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "הַמִּכְנָסַיִם",
+"ka": "ჰამმიქნასაიიმ",
+"src": "data/chok-benishchai/year1/Bo.ka.json",
+"system": "B"
+},
+{
+"he": "הִוא",
+"ka": "ჰივ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "מַטְבֵּעַ",
+"ka": "მათბეა",
+"src": "data/chok-benishchai/year1/Emor.ka.json",
+"system": "B"
+},
+{
+"he": "הַמְּלוּכָה",
+"ka": "ჰამმელუხა",
+"src": "data/prayers-ka.json[pesukeiDezimra]",
+"system": "P"
+},
+{
+"he": "וּבוֹאֵנוּ",
+"ka": "უვოენუ",
+"src": "data/prayers-ka.json[arvitBlessings]",
+"system": "P"
+},
+{
+"he": "שֶׁבִּרְכָתוֹ",
+"ka": "შებბირქათო",
+"src": "data/chok-benishchai/year1/Balak.ka.json",
+"system": "B"
+},
+{
+"he": "מַלְאֲכֵי",
+"ka": "მალახე",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בַּעֲווֹנוֹתֵינוּ",
+"ka": "ბაავონოთენუ",
+"src": "data/chok-benishchai/year1/Chukat.ka.json",
+"system": "B"
+},
+{
+"he": "שֶׁיַּחֲזֹר",
+"ka": "შეიიახაზორ",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "וְשַׁוְעָתִי",
+"ka": "ვეშავათი",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "וַיֹּאמֶר",
+"ka": "ვაიომერ",
+"src": "data/prayers-ka.json[talitTefilin]",
+"system": "P"
+},
+{
+"he": "הַפּוֹעֵל",
+"ka": "ჰაპპოელ",
+"src": "data/chok-daf/53.ka.json",
+"system": "A"
+},
+{
+"he": "פְּרָטִיּוּתֵיהֶם",
+"ka": "პერატიიიუთეჰემ",
+"src": "data/chok-tanya/2.ka.json",
+"system": "A"
+},
+{
+"he": "דְּצַדִּיקַיָּיא",
+"ka": "დეწადდიკაიიაი",
+"src": "data/chok-leyisrael/Chukat.ka.json",
+"system": "A"
+},
+{
+"he": "יְבַטְּלֶנּוּ",
+"ka": "იებათთელენნუ",
+"src": "data/chok-benishchai/year1/Tzav.ka.json",
+"system": "B"
+},
+{
+"he": "וְהִרְהוּרִים",
+"ka": "ვეჰირჰურიმ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "וְיֶחֱזִנֵּיהּ",
+"ka": "ვეიეხეზინნეჰ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְּשִׁנָּיו",
+"ka": "ბეშინნაივ",
+"src": "data/chok-benishchai/year1/Lech_Lecha.ka.json",
+"system": "B"
+},
+{
+"he": "כְּעֶבֶד",
+"ka": "ქეებედ",
+"src": "data/prayers-ka.json[igeretHaramban]",
+"system": "P"
+},
+{
+"he": "מֵאוֹצְרוֹתָיו",
+"ka": "მეოწროთავ",
+"src": "data/chok-daf/7.ka.json",
+"system": "A"
+},
+{
+"he": "מִמַּדְרֵגָה",
+"ka": "მიმმადრეგა",
+"src": "data/chok-tanya/0.ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁהַמֶּלֶךְ",
+"ka": "შეჰამმელეხ",
+"src": "data/chok-daf/21.ka.json",
+"system": "A"
+},
+{
+"he": "בְקִרְוָיךְ",
+"ka": "ვეკირვაიხ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְשִׁמְעוֹן",
+"ka": "ვეშიმონ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "עֲקֵדָתוֹ",
+"ka": "აქედათო",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "תִּפְאֶרֶת",
+"ka": "თიფერეთ",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "מֶלֶךְ",
+"ka": "მელექ",
+"src": "data/prayers-ka.json[shloshaEsreIkkarim]",
+"system": "P"
+},
+{
+"he": "לִרְשׁוּת",
+"ka": "ლირშუთ",
+"src": "data/chok-daf/1.ka.json",
+"system": "A"
+},
+{
+"he": "אֶלְיָסָף",
+"ka": "ელიასაფ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וּמַאֲוַיֵּנוּ",
+"ka": "უმაავაიიენუ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "יַעַזְבֵנוּ",
+"ka": "იააზვენუ",
+"src": "data/prayers-ka.json[roshChodeshExtra]",
+"system": "P"
+},
+{
+"he": "קְדֻשָּׁה",
+"ka": "ქედუშშა",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "מִדִּבְרֵיהֶם",
+"ka": "მიდდივრეჰემ",
+"src": "data/chok-daf/16.ka.json",
+"system": "A"
+},
+{
+"he": "דְּמִשְׁתַּדְּלֵי",
+"ka": "დემიშთადდელე",
+"src": "data/chok-leyisrael/Balak.ka.json",
+"system": "A"
+},
+{
+"he": "וַאֲנִי",
+"ka": "ვაანი",
+"src": "data/chok-benishchai/year1/Bamidbar.ka.json",
+"system": "B"
+},
+{
+"he": "וּבְיוֹמֵיכוֹן",
+"ka": "უბეიომექონ",
+"src": "data/prayers-ka.json[kaddishDerabbanan]",
+"system": "P"
+},
+{
+"he": "וְאִסְתַּלְּקוּתָא",
+"ka": "ვეისთალლეკუთა",
+"src": "data/chok-tanya/0.ka.json",
+"system": "A"
+},
+{
+"he": "אַרְבָּעָה",
+"ka": "არბაა",
+"src": "data/chok-benishchai/year1/Beshalach.ka.json",
+"system": "B"
+},
+{
+"he": "לְהַחֲיוֹת",
+"ka": "ლეჰახაიოთ",
+"src": "data/prayers-ka.json[amidah19]",
+"system": "P"
+},
+{
+"he": "לַעֲבוֹדָה",
+"ka": "ლააბოდა",
+"src": "data/prayers-ka.json[igeretHaramban]",
+"system": "P"
+},
+{
+"he": "יוֹדֵעַ",
+"ka": "იოდეა",
+"src": "data/prayers-ka.json[tikunChatzot]",
+"system": "P"
+},
+{
+"he": "לַאֲחוּהִי",
+"ka": "ლაახუჰი",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְאִסְתַּלַּק",
+"ka": "ვეისთალლაკ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְּאֶצְבְּעוֹתָיו",
+"ka": "ბეეწბეოთაივ",
+"src": "data/chok-benishchai/year1/Chukat.ka.json",
+"system": "B"
+},
+{
+"he": "אֵיזוֹ",
+"ka": "ეზო",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "וְתַרְוַויְיהוּ",
+"ka": "ვეთარვავიიჰუ",
+"src": "data/chok-daf/40.ka.json",
+"system": "A"
+},
+{
+"he": "מַפְּקָנוֹהִי",
+"ka": "მაპპეკანოჰი",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְּפַת",
+"ka": "ბეფათ",
+"src": "data/chok-benishchai/year1/Beha_alotcha.ka.json",
+"system": "B"
+},
+{
+"he": "כַּנִּזְכָּר",
+"ka": "ქანნიზქარ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "אֱלִיעֶזֶר",
+"ka": "ელიეზერ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וַיַּעֲבֹר",
+"ka": "ვაიაავორ",
+"src": "data/prayers-ka.json[tachanun]",
+"system": "P"
+},
+{
+"he": "גָּבוֹהַּ",
+"ka": "გაბოჰჰა",
+"src": "data/chok-benishchai/year1/Bo.ka.json",
+"system": "B"
+},
+{
+"he": "וַיַּעַשׂ",
+"ka": "ვაიიაას",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "יִצְחָק",
+"ka": "იიწხაკ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וּבְפָנַי",
+"ka": "უვეფანაი",
+"src": "data/chok-daf/40.ka.json",
+"system": "A"
+},
+{
+"he": "וּבַתַּחְתּוֹנִים",
+"ka": "უვათთახთონიმ",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "לְאִשְׁתְּמוֹדְעָא",
+"ka": "ლეიშთემოდეა",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "סְעֻדָּתוֹ",
+"ka": "სეუდდათო",
+"src": "data/chok-benishchai/year1/Beha_alotcha.ka.json",
+"system": "B"
+},
+{
+"he": "תַּעְטְרֶנּוּ",
+"ka": "თატერენნუ",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "לְיִשְׂרָאֵל",
+"ka": "ლეიისრაელ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "תְּסוֹבְבֶךָּ",
+"ka": "თესოვევეკკა",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "אֲחֵרִים",
+"ka": "ახერიმ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "אַנְטִיגְנוֹס",
+"ka": "ანტიგნოს",
+"src": "data/chok-daf/10.ka.json",
+"system": "A"
+},
+{
+"he": "וִיצַבַּע",
+"ka": "ვიწაბბა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בְּאַרְבַּע",
+"ka": "ბეარბა",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "וּמִקְצָתוֹ",
+"ka": "უმიკწათო",
+"src": "data/chok-daf/104.ka.json",
+"system": "A"
+},
+{
+"he": "מְקַבֶּלֶת",
+"ka": "მეკაბბელეთ",
+"src": "data/chok-daf/11.ka.json",
+"system": "A"
+},
+{
+"he": "עֵינַי",
+"ka": "ენაი",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "רְאוּבֵן",
+"ka": "რეუვენ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "לְאַחֲזָאָה",
+"ka": "ლეახაზაა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "יָארְצַיְט",
+"ka": "იარწაით",
+"src": "data/chok-benishchai/year1/Vayechi.ka.json",
+"system": "B"
+},
+{
+"he": "הֶחָמֵץ",
+"ka": "ჰეხამეწ",
+"src": "data/chok-benishchai/year1/Tzav.ka.json",
+"system": "B"
+},
+{
+"he": "מֻנָּח",
+"ka": "მუნნახ",
+"src": "data/chok-benishchai/year1/Balak.ka.json",
+"system": "B"
+},
+{
+"he": "בְּאֶמְצָעִיתָא",
+"ka": "ბეემწაითა",
+"src": "data/chok-leyisrael/Bamidbar.ka.json",
+"system": "A"
+},
+{
+"he": "מְטַפְטֵף",
+"ka": "მეთაფთეფ",
+"src": "data/chok-benishchai/year2/Metzora.ka.json",
+"system": "B"
+},
+{
+"he": "יְבָרֵכִנָּךְ",
+"ka": "იევარეხინნახ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "גְּנֵבָה",
+"ka": "გენევა",
+"src": "data/chok-leyisrael/Pekudei.ka.json",
+"system": "A"
+},
+{
+"he": "קׇדְשׁוֹ",
+"ka": "ქოდშო",
+"src": "data/prayers-ka.json[pesukeiDezimra]",
+"system": "P"
+},
+{
+"he": "בָּאֶמְצַע",
+"ka": "ბაემწა",
+"src": "data/chok-daf/0.ka.json",
+"system": "A"
+},
+{
+"he": "מִמְּצוּקוֹתֵיהֶם",
+"ka": "მიმმეწუკოთეჰემ",
+"src": "data/chok-leyisrael/Sh-lach.ka.json",
+"system": "A"
+},
+{
+"he": "עָלֶיהָ",
+"ka": "ალეჰა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "צַדִּיקַיָּא",
+"ka": "წადდიქაიია",
+"src": "data/prayers-ka.json[petichatEliyahu]",
+"system": "P"
+},
+{
+"he": "וְאָסַפְתָּ",
+"ka": "ვეასაფთა",
+"src": "data/prayers-ka.json[birkotKriatShema]",
+"system": "P"
+},
+{
+"he": "כִּדְמוּת",
+"ka": "კიდმუთ",
+"src": "data/chok-daf/101.ka.json",
+"system": "A"
+},
+{
+"he": "וִיקָרֵב",
+"ka": "ვიქარებ",
+"src": "data/prayers-ka.json[kaddishDerabbanan]",
+"system": "P"
+},
+{
+"he": "הַצִּיצִיּוֹת",
+"ka": "ჰაწწიწიიიოთ",
+"src": "data/chok-benishchai/year1/Bereshit.ka.json",
+"system": "B"
+},
+{
+"he": "יְרוּשָׁלַיִם",
+"ka": "იერუშალაიმ",
+"src": "data/prayers-ka.json[amidah19]",
+"system": "P"
+},
+{
+"he": "יִשְׂרָאֵל",
+"ka": "იისრაელ",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "תִּקְרֻבְתָּא",
+"ka": "თიკრუვთა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "יִשְׁמָעֵאל",
+"ka": "იიშმაელ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "מִלְּפָנֶיךָ",
+"ka": "მილლეფანეხა",
+"src": "data/prayers-ka.json[kriatShemaAlHamita]",
+"system": "P"
+},
+{
+"he": "כְּוָותֵיהּ",
+"ka": "კევავთეჰ",
+"src": "data/chok-daf/113.ka.json",
+"system": "A"
+},
+{
+"he": "מֵחׇרְבוֹתֵיהֶם",
+"ka": "მეხორვოთეჰემ",
+"src": "data/chok-leyisrael/Ki-Teitzei.ka.json",
+"system": "A"
+},
+{
+"he": "דְּמִתְקַבֵּל",
+"ka": "დემითკაბბელ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "גְּדוֹלָה",
+"ka": "გედოლა",
+"src": "data/chok-benishchai/year1/Balak.ka.json",
+"system": "B"
+},
+{
+"he": "סַבּוּנִי",
+"ka": "საბბუნი",
+"src": "data/prayers-ka.json[hallel]",
+"system": "P"
+},
+{
+"he": "בְּאֶצְבָּעוֹ",
+"ka": "ბეეწბაო",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "רְבִיעִת",
+"ka": "რევიით",
+"src": "data/prayers-ka.json[korbanot]",
+"system": "P"
+},
+{
+"he": "אֱלֹהֵי",
+"ka": "ელოჰე",
+"src": "data/prayers-ka.json[hataratNedarim]",
+"system": "P"
+},
+{
+"he": "וְחַדּוּ",
+"ka": "ვეხადდუ",
+"src": "data/chok-leyisrael/Pinchas.ka.json",
+"system": "A"
+},
+{
+"he": "וְאֵרַשְׂתִּיךְ",
+"ka": "ვეერასთიხ",
+"src": "data/prayers-ka.json[talitTefilin]",
+"system": "P"
+},
+{
+"he": "דְּאָמְרִינַן",
+"ka": "დეამერინან",
+"src": "data/chok-benishchai/year1/Balak.ka.json",
+"system": "B"
+},
+{
+"he": "וַיְדַבֵּר",
+"ka": "ვაიდაბბერ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "הָאָרֶץ",
+"ka": "ჰაარეწ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "בַּתְּחִלָּה",
+"ka": "ბათთეხილლა",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְיִשְׁתַּחֲווּ",
+"ka": "ვეიიშთახავუ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "יַחְדָּו",
+"ka": "იახდავ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "וְעַל",
+"ka": "ვეალ",
+"src": "data/chok-benishchai/year1/Achrei_Mot_Kedoshim.ka.json",
+"system": "B"
+},
+{
+"he": "בְּכִיס",
+"ka": "ბექის",
+"src": "data/chok-benishchai/year1/Chayei_Sara.ka.json",
+"system": "B"
+},
+{
+"he": "שְׂנֵאוּנִי",
+"ka": "სენეუნი",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "תֶּחֱרַשׁ",
+"ka": "თეხერაშ",
+"src": "data/chok-leyisrael/Re-eh.ka.json",
+"system": "A"
+},
+{
+"he": "בְּמַחְשֶׁבֶת",
+"ka": "ბემახშევეთ",
+"src": "data/chok-rambam/13.ka.json",
+"system": "A"
+},
+{
+"he": "שֶׁנִּתְגַּיֵּיר",
+"ka": "შენნითგაიიერ",
+"src": "data/chok-daf/20.ka.json",
+"system": "A"
+},
+{
+"he": "הַכְּנֶסֶת",
+"ka": "ჰაქქენესეთ",
+"src": "data/chok-benishchai/year1/Beha_alotcha.ka.json",
+"system": "B"
+},
+{
+"he": "וְתַעְבֵּד",
+"ka": "ვეთაბედ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "מְתוּשֶׁלַח",
+"ka": "მეთუშელახ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "כְּשֶׁהוֹלֵךְ",
+"ka": "ქეშეჰოლექ",
+"src": "data/chok-benishchai/year1/Beha_alotcha.ka.json",
+"system": "B"
+},
+{
+"he": "לוֹג",
+"ka": "ლოგ",
+"src": "data/chok-daf/106.ka.json",
+"system": "A"
+},
+{
+"he": "פְרַצְתָּנוּ",
+"ka": "ფერაწთანუ",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "בְּמִצְוֹתָיו",
+"ka": "ბემიწვოთაივ",
+"src": "data/prayers-ka.json[birkotHashachar]",
+"system": "P"
+},
+{
+"he": "מִסְתַּכְּלֵי",
+"ka": "მისთაკკელე",
+"src": "data/chok-leyisrael/Balak.ka.json",
+"system": "A"
+},
+{
+"he": "יִשְׁחַט",
+"ka": "იიშხატ",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "הוֹשִׁיעֵנוּ",
+"ka": "ჰოშიენუ",
+"src": "data/prayers-ka.json[pesukeiDezimra]",
+"system": "P"
+},
+{
+"he": "וְרֻבּוֹ",
+"ka": "ვერუბბო",
+"src": "data/chok-leyisrael/Balak.ka.json",
+"system": "A"
+},
+{
+"he": "בְּאֶמְצָעוּת",
+"ka": "ბეემწაუთ",
+"src": "data/chok-leyisrael/Bechukotai.ka.json",
+"system": "A"
+},
+{
+"he": "יְבִמְתּוֹ",
+"ka": "იევიმთო",
+"src": "data/torah-ka.json",
+"system": "A"
+},
+{
+"he": "צְרַפְתָּנוּ",
+"ka": "წერაფთანუ",
+"src": "index.html:window.TEHILLIM_KA",
+"system": "A"
+},
+{
+"he": "אֱלֹהִים",
+"ka": "ელოჰიმ",
+"src": "most frequent form in A files (n=1730)",
+"system": "A",
+"special": true
+},
+{
+"he": "יִשְׂרָאֵל",
+"ka": "ისრაელ",
+"src": "most frequent form in P files (n=25)",
+"system": "P",
+"special": true
+},
+{
+"he": "תּוֹרָה",
+"ka": "თორა",
+"src": "most frequent form in A files (n=1291)",
+"system": "A",
+"special": true
+},
+{
+"he": "שַׁבָּת",
+"ka": "შაბბათ",
+"src": "most frequent form in A files (n=1220)",
+"system": "A",
+"special": true
+},
+{
+"he": "הַשֵּׁם",
+"ka": "ჰაშშემ",
+"src": "most frequent form in A files (n=153)",
+"system": "A",
+"special": true
+},
+{
+"he": "הַשֵּׁם",
+"ka": "ჰაშშემ",
+"src": "most frequent form in P files (n=2)",
+"system": "P",
+"special": true
+},
+{
+"he": "אֲדֹנָי",
+"ka": "ადონაი",
+"src": "most frequent form in A files (n=133)",
+"system": "A",
+"special": true
+},
+{
+"he": "מֹשֶׁה",
+"ka": "მოშე",
+"src": "most frequent form in A files (n=1763)",
+"system": "A",
+"special": true
+},
+{
+"he": "מֹשֶׁה",
+"ka": "მოშეჰ",
+"src": "most frequent form in B files (n=31)",
+"system": "B",
+"special": true
+},
+{
+"he": "מֹשֶׁה",
+"ka": "მოშე",
+"src": "most frequent form in P files (n=5)",
+"system": "P",
+"special": true
+},
+{
+"he": "בָּרוּךְ",
+"ka": "ბარუხ",
+"src": "most frequent form in A files (n=1644)",
+"system": "A",
+"special": true
+},
+{
+"he": "בָּרוּךְ",
+"ka": "ბარუქ",
+"src": "most frequent form in B files (n=63)",
+"system": "B",
+"special": true
+},
+{
+"he": "בָּרוּךְ",
+"ka": "ბარუქ",
+"src": "most frequent form in P files (n=66)",
+"system": "P",
+"special": true
+},
+{
+"he": "אַתָּה",
+"ka": "ათთა",
+"src": "most frequent form in A files (n=1895)",
+"system": "A",
+"special": true
+},
+{
+"he": "אַתָּה",
+"ka": "ათთა",
+"src": "most frequent form in P files (n=75)",
+"system": "P",
+"special": true
+},
+{
+"he": "אָמֵן",
+"ka": "ამენ",
+"src": "most frequent form in A files (n=214)",
+"system": "A",
+"special": true
+},
+{
+"he": "יַעֲקֹב",
+"ka": "იააკოვ",
+"src": "most frequent form in A files (n=1748)",
+"system": "A",
+"special": true
+},
+{
+"he": "יַעֲקֹב",
+"ka": "იააქობ",
+"src": "most frequent form in B files (n=31)",
+"system": "B",
+"special": true
+},
+{
+"he": "יַעֲקֹב",
+"ka": "იააქოვ",
+"src": "most frequent form in P files (n=7)",
+"system": "P",
+"special": true
+},
+{
+"he": "אַבְרָהָם",
+"ka": "ავრაჰამ",
+"src": "most frequent form in A files (n=862)",
+"system": "A",
+"special": true
+},
+{
+"he": "אַבְרָהָם",
+"ka": "აბრაჰამ",
+"src": "most frequent form in B files (n=33)",
+"system": "B",
+"special": true
+},
+{
+"he": "דָּוִד",
+"ka": "დავიდ",
+"src": "most frequent form in A files (n=670)",
+"system": "A",
+"special": true
+},
+{
+"he": "דָּוִד",
+"ka": "დავიდ",
+"src": "most frequent form in P files (n=4)",
+"system": "P",
+"special": true
+},
+{
+"he": "יִצְחָק",
+"ka": "იიწხაქ",
+"src": "most frequent form in B files (n=10)",
+"system": "B",
+"special": true
+},
+{
+"he": "בְּרֵאשִׁית",
+"ka": "ბერეშით",
+"src": "most frequent form in A files (n=82)",
+"system": "A",
+"special": true
+},
+{
+"he": "שְׁמוֹת",
+"ka": "შემოთ",
+"src": "most frequent form in A files (n=65)",
+"system": "A",
+"special": true
+},
+{
+"he": "וַיִּקְרָא",
+"ka": "ვაიიიკრა",
+"src": "most frequent form in A files (n=257)",
+"system": "A",
+"special": true
+},
+{
+"he": "וְיִקְרָא",
+"ka": "ვეიიქრა",
+"src": "most frequent form in B files (n=7)",
+"system": "B",
+"special": true
+},
+{
+"he": "וַיִּקְרָא",
+"ka": "ვაიქრა",
+"src": "most frequent form in P files (n=5)",
+"system": "P",
+"special": true
+},
+{
+"he": "דְּבָרִים",
+"ka": "დევარიმ",
+"src": "most frequent form in A files (n=1656)",
+"system": "A",
+"special": true
+},
+{
+"he": "דְּבָרִים",
+"ka": "დებარიმ",
+"src": "most frequent form in B files (n=82)",
+"system": "B",
+"special": true
+},
+{
+"he": "דְּבָרִים",
+"ka": "დებარიმ",
+"src": "most frequent form in P files (n=7)",
+"system": "P",
+"special": true
+},
+{
+"he": "כָּל",
+"ka": "კოლ",
+"src": "most frequent form in A files (n=12154)",
+"system": "A",
+"special": true
+},
+{
+"he": "כָּל",
+"ka": "ქოლ",
+"src": "most frequent form in B files (n=731)",
+"system": "B",
+"special": true
+},
+{
+"he": "כָּל",
+"ka": "ქოლ",
+"src": "most frequent form in P files (n=50)",
+"system": "P",
+"special": true
+},
+{
+"he": "רַבִּי",
+"ka": "რაბბი",
+"src": "most frequent form in A files (n=21542)",
+"system": "A",
+"special": true
+},
+{
+"he": "רִבִּי",
+"ka": "რიბბი",
+"src": "most frequent form in P files (n=3)",
+"system": "P",
+"special": true
+},
+{
+"he": "אֱלֹהֵינוּ",
+"ka": "ელოჰენუ",
+"src": "most frequent form in A files (n=369)",
+"system": "A",
+"special": true
+},
+{
+"he": "עוֹלָם",
+"ka": "ოლამ",
+"src": "most frequent form in A files (n=476)",
+"system": "A",
+"special": true
+},
+{
+"he": "מֶלֶךְ",
+"ka": "მელეხ",
+"src": "most frequent form in A files (n=859)",
+"system": "A",
+"special": true
+},
+{
+"he": "פַּרְעֹה",
+"ka": "პარო",
+"src": "most frequent form in A files (n=361)",
+"system": "A",
+"special": true
+},
+{
+"he": "פַּרְעֹה",
+"ka": "ფარო",
+"src": "most frequent form in P files (n=2)",
+"system": "P",
+"special": true
+},
+{
+"he": "מִצְרַיִם",
+"ka": "მიწრაიიმ",
+"src": "most frequent form in A files (n=398)",
+"system": "A",
+"special": true
+},
+{
+"he": "מִצְרָיִם",
+"ka": "მიწრაიმ",
+"src": "most frequent form in P files (n=2)",
+"system": "P",
+"special": true
+},
+{
+"he": "הַקָּדוֹשׁ",
+"ka": "ჰაკკადოშ",
+"src": "most frequent form in A files (n=971)",
+"system": "A",
+"special": true
+},
+{
+"he": "הַקָּדוֹשׁ",
+"ka": "ჰაქქადოშ",
+"src": "most frequent form in B files (n=45)",
+"system": "B",
+"special": true
+},
+{
+"he": "הַקָּדוֹשׁ",
+"ka": "ჰაქქადოშ",
+"src": "most frequent form in P files (n=4)",
+"system": "P",
+"special": true
+},
+{
+"he": "שָׁלוֹם",
+"ka": "შალომ",
+"src": "most frequent form in A files (n=390)",
+"system": "A",
+"special": true
+},
+{
+"he": "שָׁלוֹם",
+"ka": "შალომ",
+"src": "most frequent form in P files (n=9)",
+"system": "P",
+"special": true
+},
+{
+"he": "כֹּהֵן",
+"ka": "კოჰენ",
+"src": "most frequent form in A files (n=1175)",
+"system": "A",
+"special": true
+},
+{
+"he": "כֹּהֵן",
+"ka": "ქოჰენ",
+"src": "most frequent form in B files (n=14)",
+"system": "B",
+"special": true
+},
+{
+"he": "כֹּהֵן",
+"ka": "ხოჰენ",
+"src": "most frequent form in P files (n=1)",
+"system": "P",
+"special": true
+},
+{
+"he": "לֵוִי",
+"ka": "ლევი",
+"src": "most frequent form in A files (n=449)",
+"system": "A",
+"special": true
+},
+{
+"he": "מִצְוָה",
+"ka": "მიწვა",
+"src": "most frequent form in A files (n=759)",
+"system": "A",
+"special": true
+},
+{
+"he": "חֲנוּכָּה",
+"ka": "ხანუკკა",
+"src": "most frequent form in A files (n=25)",
+"system": "A",
+"special": true
+},
+{
+"he": "פֶּסַח",
+"ka": "პესახ",
+"src": "most frequent form in A files (n=298)",
+"system": "A",
+"special": true
+},
+{
+"he": "פֶּסַח",
+"ka": "ფესახ",
+"src": "most frequent form in B files (n=37)",
+"system": "B",
+"special": true
+},
+{
+"he": "סוּכּוֹת",
+"ka": "სუკკოთ",
+"src": "most frequent form in A files (n=8)",
+"system": "A",
+"special": true
+},
+{
+"he": "רֹאשׁ",
+"ka": "როშ",
+"src": "most frequent form in A files (n=931)",
+"system": "A",
+"special": true
+},
+{
+"he": "מִשְׁנָה",
+"ka": "მიშნა",
+"src": "most frequent form in A files (n=46)",
+"system": "A",
+"special": true
+},
+{
+"he": "מִשָּׁנָה",
+"ka": "მიშშანა",
+"src": "most frequent form in B files (n=9)",
+"system": "B",
+"special": true
+},
+{
+"he": "מְשַׁנֶּה",
+"ka": "მეშანნე",
+"src": "most frequent form in P files (n=1)",
+"system": "P",
+"special": true
+},
+{
+"he": "יְהֹוָה",
+"ka": "ადონაი",
+"src": "data/torah-ka.json + 1921x overall",
+"system": "A",
+"special": true,
+"note": "non-phonetic: the Tetragrammaton is read as Adonai"
+},
+{
+"he": "יְיָ",
+"ka": "ადონაი",
+"src": "data/prayers-ka.json / chok-* (3105x)",
+"system": "A",
+"special": true,
+"note": "non-phonetic"
+},
+{
+"he": "בַּמִּדְבָּר",
+"ka": "ბამმიდბარ",
+"src": "data/chok-*/*.ka.json (141x)",
+"system": "A",
+"special": true
+}
+]
