@@ -3003,6 +3003,7 @@ function openPrayer(prayerKey, fromGroup){
   if(prayerKey==='birkatHamazon'){ try{ text = birkatHamazonDayText(); }catch(e){} }
   if(prayerKey==='birkatMeeinShalosh'){ try{ text = birkatMeeinShaloshDayText(); }catch(e){} }
   PR = { group: fromGroup||null, prayer: prayerKey, title: p.title, subtitle: p.subtitle, text: text };
+  PR_RETURN=null;   // a fresh open always starts at the top
   TAB = 'prayerReader';
   render();
   forceScrollTop();
@@ -4058,6 +4059,7 @@ function appBack(){
     if(typeof TOPBAR_BACK_ACTION==='function'){ TOPBAR_BACK_ACTION(); return true; }
     const btn=[...document.querySelectorAll('.tb-back')].find(b=>b.offsetParent!==null);
     if(btn){ btn.click(); return true; }
+    if(TAB==='kotelCompass'){ go(KOTEL_FROM); return true; }   // the HTML compass has no .tb-back (only its Close button): Android Back / edge swipe return to the reader that opened it
   }catch(e){}
   return false;
 }
@@ -4067,7 +4069,7 @@ function canGoBack(){
     if(document.querySelector('.rh-sheet-wrap')) return true;
     if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov')) return true;
     if(typeof TOPBAR_BACK_ACTION==='function') return true;
-    return [...document.querySelectorAll('.tb-back')].some(b=>b.offsetParent!==null);
+    return TAB==='kotelCompass' || [...document.querySelectorAll('.tb-back')].some(b=>b.offsetParent!==null);
   }catch(e){ return false; }
 }
 window.betelCanGoBack=canGoBack; window.betelAppBack=appBack;
@@ -5154,6 +5156,13 @@ function openZoharYomi(){ ZY_STATE=null; go('zoharYomi'); }
 function renderZoharYomiReader(){
   const isToday=!ZY_STATE;
   const viewDate=ZY_STATE||chokDayDate();
+  /* The slot lookup below needs the Chok index; with data blocked/slow it used to find no slot and bounce silently to Home.
+     Load the index first - a failed load rejects and the generic "Cannot load right now" + "Try again" state takes over. */
+  if(!CHOK){
+    app.innerHTML=`${topbar('זהר היומי','home')}<div class="view">${smSkeleton()}</div>`;
+    ensureChokIndex().then(()=>{ if(TAB==='zoharYomi'){ renderZoharYomiReader(); tr(app); } });
+    return;
+  }
   /* Shabbat has no Chok LeYisrael slot, but the Zohar cycle runs on the calendar date and has its own page every day
      (Shabbat included), so on Shabbat borrow Friday's slot only to load the data and still show Shabbat's own page. */
   const slot=chokSlotFor(viewDate)||(viewDate.getDay()===6?chokSlotFor(addDays(viewDate,-1)):null);
@@ -5719,7 +5728,8 @@ function ckDateFor(cur){
      for the one that really does. */
   if(ckWeekKeyFor(guess)===cur.key && new HDate(guess).getFullYear()===y){
     // no hint: if today itself sits in the preceding no-parasha week of this same key, that week is the one meant
-    if(!cur.sun){ try{ const prevWk=addDays(guess,-7), td=chokSlotFor(); if(td && td.key===cur.key && ckWeekKeyFor(prevWk)===cur.key && Math.abs(prevWk-chokDayDate())<Math.abs(guess-chokDayDate())) return prevWk; }catch(e){} }
+    // (compare WEEK SUNDAYS, not the target weekday against today - a Friday guess is nearer to a Sunday today in the wrong week)
+    if(!cur.sun){ try{ const tdd=chokDayDate(), tSun=addDays(tdd,-tdd.getDay()), prevWk=addDays(guess,-7); if(ckWeekKeyFor(tdd)===cur.key && ckWeekKeyFor(prevWk)===cur.key && Math.abs(addDays(prevWk,-di)-tSun)<Math.abs(addDays(guess,-di)-tSun)) return prevWk; }catch(e){} }
     return guess;
   }
   for(let w=1; w<=6; w++){
@@ -6716,7 +6726,7 @@ function ckWhenLine(kind,i){
   return w.delta===0?'נִלְמָד הַיּוֹם':'יִלָּמֵד בְּ'+localizeHebDateStr(w.hd.renderGematriya(true));
 }
 function ckOpenHit(e){
-  if(e.t==='chok') return openChok(e.key,e.day);
+  if(e.t==='chok') return openChok(e.key,e.day,null,chokSunFor(e.key));
   if(e.t==='teh') return openReader([e.ch],{start:e.ch});
   if(e.t==='prayer') return openPrayer(e.key);
   if(e.t==='sm'){ SM={key:e.key,mode:'aliyah',n:1}; return go('smReader'); }
@@ -7133,7 +7143,10 @@ function drawChokList(){
     </div>
     ${ornament()}
   </div>`;
-  app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openChok(key,r.dataset.day,CK.year,CK.sun));
+  /* every row needs the real Sunday of the week it shows: when the list is on today's week (same key, current year) that is today's
+     Sunday - without it ckDateFor trusted a year-guarded guess that, in a no-parasha holiday week, lands a year off */
+  const listSun=(today && today.key===key && y===ckCurYear()) ? today.sun : (CK.sun||null);
+  app.querySelectorAll('#app .prayer-row').forEach(r=>r.onclick=()=>openChok(key,r.dataset.day,CK.year,listSun));
   const p=document.getElementById('ckPrevWk'), n=document.getElementById('ckNextWk');
   if(p&&!p.disabled) p.onclick=()=>{ CK_NAV_DIR=-1; CK.key=CHOK.parshiot[i-1]; ensureChokWeek(CK.key).then(drawChokList); };
   if(n&&!n.disabled) n.onclick=()=>{ CK_NAV_DIR=1; CK.key=CHOK.parshiot[i+1]; ensureChokWeek(CK.key).then(drawChokList); };
@@ -7149,6 +7162,8 @@ function drawChokList(){
   CK.book=ckBookOf(key)||CK.book;
   tr(app);
 }
+/* the real Sunday for a week key when it is the week we are in (search / index entries carry only key+day) */
+function chokSunFor(key){ try{ const t=chokSlotFor(); return (t&&t.key===key)?t.sun:null; }catch(e){ return null; } }
 function openChok(key,day,year,sun){
   const bm=ckBmGet(key,day);
   CK={key,day,sec:0,year:year||null,sun:sun||null,resumeTo:bm,showResume:!!bm};
@@ -7458,7 +7473,9 @@ function renderChokReader(){
         const tag=(s.tags&&s.tags[ix])||(CK_NO_NUM[s.key]?'':heNum(ix+1));
         return `<div class="sm-verse-row${tag?'':' ck-nonum'}">${tag?`<span class="sm-vnum">${tag}</span>`:''}<div class="sm-he">${t}</div>${ckCommBar((s.ids&&s.ids[ix])||'',s.key)}</div>`;
       }).join('');
-  const srcLine=chokSourceLine(s);
+  let srcLine=chokSourceLine(s);
+  /* the Zohar label already opens with "Zohar" - the section tag in front of it says that, so drop the repeat ("Zohar · Zohar · ...") */
+  if(s.key==='zohar' && srcLine){ const zw=ckChrome(s.he)+' · '; if(srcLine.startsWith(zw)) srcLine=srcLine.slice(zw.length); }
   const _anim=ckAnimClass();
   syncNativeTopBar(parshaName(CK.key), ()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); });
   app.innerHTML=`
@@ -7522,7 +7539,7 @@ function renderChokReader(){
   app.querySelectorAll('.ck-daychip[data-jday]').forEach(b=>b.onclick=()=>{
     if(b.dataset.jday===CK.day) return;
     CK_NAV_DIR=CHOK_ROWS.findIndex(([d])=>d===b.dataset.jday) > CHOK_ROWS.findIndex(([d])=>d===CK.day) ? 1 : -1;
-    jump({key:CK.key, day:b.dataset.jday, year:ckYear()});
+    jump({key:CK.key, day:b.dataset.jday, year:ckYear(), sun:CK.sun||null});
   });
   const onChip=app.querySelector('.ck-daychip.on');
   if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
@@ -7563,7 +7580,7 @@ function renderChokReader(){
     const acts=[];
     syncNativeTopBar(parshaName(CK.key), ()=>{ try{ckTrackPosition();}catch(e){} go('chokList'); },
       {title:nTitle, actions:acts, titleSheet:tSheet, handlers:{}, menuHandlers:{
-        ckDays:d=>{ if(d===CK.day) return; CK_NAV_DIR=CHOK_ROWS.findIndex(([x])=>x===d)>CHOK_ROWS.findIndex(([x])=>x===CK.day)?1:-1; jump({key:CK.key,day:d,year:ckYear()}); },
+        ckDays:d=>{ if(d===CK.day) return; CK_NAV_DIR=CHOK_ROWS.findIndex(([x])=>x===d)>CHOK_ROWS.findIndex(([x])=>x===CK.day)?1:-1; jump({key:CK.key,day:d,year:ckYear(),sun:CK.sun||null}); },
         ckSecs:id=>{ const ix=+id; if(ix===CK.sec) return; CK_NAV_DIR=ix>CK.sec?1:-1; goSec(ix); }
       }});
     const hd0=app.querySelector('.reader-head'); if(hd0) hd0.classList.add('rh-empty');   // the HTML head is redundant under the native bar (no leftover strip)
@@ -10913,7 +10930,7 @@ function libSearchHits(q){
          Mikra above, day 0 (Sunday's portion) being the natural landing
          spot - same pattern as the Ben Ish Chai cross-hit just above. */
       if(CHOK && CHOK.parshiot && CHOK.parshiot.includes(k)){
-        hits.push({group:'חוֹק לְיִשְׂרָאֵל', label:parshaName(k), action:()=>openChok(k,0)});
+        hits.push({group:'חוֹק לְיִשְׂרָאֵל', label:parshaName(k), action:()=>openChok(k,0,null,chokSunFor(k))});
       }
     });
   }
@@ -12459,6 +12476,7 @@ function renderPrayerReader(){
     <div style="height:80px"></div>
   </div>`;
   app.querySelectorAll('[data-sidacc-btn]').forEach(b=>b.onclick=()=>siddurToggleAccordion(b));
+  if(PR_RETURN && PR_RETURN.prayer===PR.prayer){ const r=PR_RETURN; PR_RETURN=null; readerReturnApply(r.y,r.open); }
   tr(app);
 }
 
@@ -12473,7 +12491,7 @@ let SID = { prayer: null, resumeTo: null, showResume: false }; // 'shacharit' | 
    avoid. A plain raw scroll-position save/restore, independent of the
    bookmark/resume-banner system entirely, since this is a same-visit
    round trip, not a "come back later" resume. */
-let SID_RETURN_SCROLL = null;
+let SID_RETURN_SCROLL = null, SID_RETURN_OPEN = null;
 const SIDDUR_PRAYER_NAMES = {birkot:'ברכות השחר', talitTefilin:'סדר טלית ותפלין', shacharit:'שחרית', mincha:'מנחה', arvit:'ערבית', roshChodesh:'סדר ראש חדש', omer:'ספירת העמר', levana:'ברכת הלבנה', kriatShemaAlHamita:'קריאת שמע שעל המיטה', tikunChatzot:'תקון חצות', selichot:'סליחות'};
 /* home screen's own "current prayer" tile only - shown big/bold like a
    title rather than read as a sentence, so (per the nikud-on-request
@@ -14201,12 +14219,12 @@ function drawSiddurReader(){
     // Whichever of these is actually the live scrolling element varies by
     // platform/webview (forceScrollTop() below resets all three for the
     // same reason) - take the largest rather than guessing which one.
-    SID_RETURN_SCROLL=Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0);
+    SID_RETURN_SCROLL=readerScrollNow(); SID_RETURN_OPEN=readerOpenAccs();
     openTefillinMirror('siddurReader');
   };
   /* The Kotel compass sits next to the "..." tools button in EVERY siddur prayer (user request); Shacharit additionally gets the Tefillin Mirror. */
   const openCompassFromReader=()=>{
-    SID_RETURN_SCROLL=Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0);
+    SID_RETURN_SCROLL=readerScrollNow(); SID_RETURN_OPEN=readerOpenAccs();
     openKotel('siddurReader');
   };
   const mirrorAction = {
@@ -14258,8 +14276,8 @@ function drawSiddurReader(){
     // one, meant for the common "new screen should start at the top"
     // case) - this one screen needs the opposite, so the restore has to
     // wait until well after that loop gives up rather than racing it.
-    const y=SID_RETURN_SCROLL; SID_RETURN_SCROLL=null;
-    setTimeout(()=>{ document.documentElement.scrollTop=y; document.body.scrollTop=y; window.scrollTo(0,y); }, 260);
+    const y=SID_RETURN_SCROLL, op=SID_RETURN_OPEN; SID_RETURN_SCROLL=null; SID_RETURN_OPEN=null;
+    readerReturnApply(y,op);
   }
   wireToolsFab();
   tr(app);
@@ -14650,7 +14668,24 @@ function renderZoharReader(){
 /* ================= SETTINGS ================= */
 const COMPASS_RING=[[0,'N'],[45,'NE'],[90,'E'],[135,'SE'],[180,'S'],[225,'SW'],[270,'W'],[315,'NW']];
 let KOTEL_FROM='settings';
-function openKotel(from){ KOTEL_FROM=from||'settings'; go('kotelCompass'); }
+/* Same-visit round trip prayer reader -> compass -> back: go() rebuilds the reader from scratch and forceScrollTop() sends it to the
+   top, which used to lose the place (e.g. mid Kriat Shema). Save the real scroll position + which accordions were open before leaving,
+   put them back once after the re-render (readerReturnApply). Back paths (HTML back button, native header back, edge swipe) all end in
+   go(KOTEL_FROM), so the restore lives in the reader's render, not in any one back handler. */
+let PR_RETURN=null;
+function readerScrollNow(){ return Math.max(window.scrollY||0, document.documentElement.scrollTop||0, document.body.scrollTop||0); }
+function readerOpenAccs(){ return [...document.querySelectorAll('.siddur-accordion')].map((a,i)=>a.classList.contains('open')?i:-1).filter(i=>i>=0); }
+function readerReturnApply(y,openIdx){
+  const accs=document.querySelectorAll('.siddur-accordion'); (openIdx||[]).forEach(i=>{ if(accs[i]) accs[i].classList.add('open'); });
+  /* go()'s forceScrollTop() keeps forcing 0 for its first ~8 frames, so wait until it gives up (a second try covers a late translit re-render) */
+  const put=()=>{ document.documentElement.scrollTop=y; document.body.scrollTop=y; window.scrollTo(0,y); };
+  setTimeout(put,260); setTimeout(put,700);
+}
+function openKotel(from){
+  KOTEL_FROM=from||'settings';
+  if(from==='prayerReader' && TAB==='prayerReader' && PR && PR.prayer) PR_RETURN={prayer:PR.prayer, y:readerScrollNow(), open:readerOpenAccs()};
+  go('kotelCompass');
+}
 function renderKotelCompass(){
   syncNativeTopBar(ckChrome('כוון תפלה'), KOTEL_FROM);
   const hasLoc=LOC && LOC.lat!=null;
@@ -15852,7 +15887,8 @@ function confetti(n){
    Delivered BOTH as an OS notification (fireNotif; the real system one on
    iOS) and as an in-app celebration (NativeModal.presentCelebration on iOS,
    an HTML modal elsewhere), per the user's latest request. Only fires while
-   the live count is still within the first 10 users of that hundred (e.g. 300-309, 400-409): a device
+   the visit counter (stats/visits, total visits - not users) is still within MILESTONE_WINDOW visits past a
+   thousand (e.g. 1000-1024, 2000-2024); fires only every 1,000 visits: a device
    that only opens the app once the count has already moved well past a
    tier (e.g. opens at 350) would otherwise see a stale "300!" alert for a
    milestone that's no longer current. Guarded per device
@@ -15861,20 +15897,21 @@ function confetti(n){
    classic-script function declaration like this one attaches to window
    and is reachable from a <script type="module">, while the reverse (or
    sharing let/const) is not. */
+const MILESTONE_STEP=1000, MILESTONE_WINDOW=25;   // fire only on every 1,000th visit, and only while the counter is still within 25 visits past it
 const MILESTONE_UI={
-  he:{title:'בָּרוּךְ הַשֵּׁם — {n} מִשְׁתַּמְּשִׁים!', body:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת ה-{n} מִשְׁתַּמְּשִׁים! תּוֹדָה שֶׁאַתָּה חֵלֶק מֵהַקְּהִלָּה.', btn:'מַמָּשׁ מְרַגֵּשׁ!',
-      grandTitle:'בָּרוּךְ הַשֵּׁם — אֶלֶף מִשְׁתַּמְּשִׁים!', grandBody:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת הָאֶלֶף מִשְׁתַּמְּשִׁים — רֶגַע עָצוּם בְּזִכּוּי הָרַבִּים! תּוֹדָה עַל כָּל נֶפֶש שֶׁמִּצְטָרְפֶת לְלִמּוּד.'},
-  en:{title:'Thank G-d — {n} Users!', body:'Thank G-d, we’ve passed {n} users! Thank you for being part of the community.', btn:'How exciting!',
-      grandTitle:'Thank G-d — 1,000 Users!', grandBody:'Thank G-d, we’ve passed {n} users — a huge moment for the merit of the many! Thank you to every soul joining in study.'},
-  fr:{title:'Grâce à D.ieu — {n} utilisateurs !', body:'Grâce à D.ieu, nous avons dépassé {n} utilisateurs ! Merci de faire partie de la communauté.', btn:'Quelle joie !',
-      grandTitle:'Grâce à D.ieu — 1 000 utilisateurs !', grandBody:'Grâce à D.ieu, nous avons dépassé {n} utilisateurs — un moment immense pour le mérite du plus grand nombre ! Merci à chaque âme qui rejoint l’étude.'},
-  ru:{title:'Слава Богу — {n} пользователей!', body:'Слава Богу, мы превысили {n} пользователей! Спасибо, что вы часть этой общины.', btn:'Как это радостно!',
-      grandTitle:'Слава Богу — 1000 пользователей!', grandBody:'Слава Богу, мы превысили {n} пользователей — огромный момент для заслуги многих! Спасибо каждой душе, присоединяющейся к учёбе.'},
-  ka:{title:'მადლობა ღმერთს — {n} მომხმარებელი!', body:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს! გმადლობთ, რომ ამ საზოგადოების ნაწილი ხართ.', btn:'რა სასიხარულოა!',
-      grandTitle:'მადლობა ღმერთს — 1,000 მომხმარებელი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} მომხმარებელს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
+  he:{title:'בָּרוּךְ הַשֵּׁם — {n} כְּנִיסוֹת!', body:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת ה-{n} כְּנִיסוֹת! תּוֹדָה שֶׁאַתָּה חֵלֶק מֵהַקְּהִלָּה.', btn:'מַמָּשׁ מְרַגֵּשׁ!',
+      grandTitle:'בָּרוּךְ הַשֵּׁם — {n} כְּנִיסוֹת!', grandBody:'בָּרוּךְ הַשֵּׁם עָבַרְנוּ אֶת ה-{n} כְּנִיסוֹת — רֶגַע עָצוּם בְּזִכּוּי הָרַבִּים! תּוֹדָה עַל כָּל נֶפֶש שֶׁמִּצְטָרְפֶת לְלִמּוּד.'},
+  en:{title:'Thank G-d — {n} Visits!', body:'Thank G-d, we’ve passed {n} visits! Thank you for being part of the community.', btn:'How exciting!',
+      grandTitle:'Thank G-d — {n} Visits!', grandBody:'Thank G-d, we’ve passed {n} visits — a huge moment for the merit of the many! Thank you to every soul joining in study.'},
+  fr:{title:'Grâce à D.ieu — {n} visites !', body:'Grâce à D.ieu, nous avons dépassé {n} visites ! Merci de faire partie de la communauté.', btn:'Quelle joie !',
+      grandTitle:'Grâce à D.ieu — {n} visites !', grandBody:'Grâce à D.ieu, nous avons dépassé {n} visites — un moment immense pour le mérite du plus grand nombre ! Merci à chaque âme qui rejoint l’étude.'},
+  ru:{title:'Слава Богу — {n} посещений!', body:'Слава Богу, мы превысили {n} посещений! Спасибо, что вы часть этой общины.', btn:'Как это радостно!',
+      grandTitle:'Слава Богу — {n} посещений!', grandBody:'Слава Богу, мы превысили {n} посещений — огромный момент для заслуги многих! Спасибо каждой душе, присоединяющейся к учёбе.'},
+  ka:{title:'მადლობა ღმერთს — {n} ვიზიტი!', body:'მადლობა ღმერთს, გადავაბიჯეთ {n} ვიზიტს! გმადლობთ, რომ ამ საზოგადოების ნაწილი ხართ.', btn:'რა სასიხარულოა!',
+      grandTitle:'მადლობა ღმერთს — {n} ვიზიტი!', grandBody:'მადლობა ღმერთს, გადავაბიჯეთ {n} ვიზიტს — უდიდესი მომენტი მრავალთა დამსახურებისთვის! მადლობა ყველა სულს, ვინც სწავლას უერთდება.'},
 };
 function celebrateMilestone(count, tier){
-  const grand = tier>=1000;
+  const grand = true;   // every tier is now >= 1000 (title/body carry {n}, so one wording serves all)
   const t=MILESTONE_UI[S.lang]||MILESTONE_UI.he;
   const tierStr=tier.toLocaleString(civilDateLocale());
   const title = (grand?t.grandTitle:t.title).replace('{n}',tierStr);
@@ -15903,19 +15940,20 @@ function celebrateMilestone(count, tier){
   }catch(e){}
   return true;
 }
-/* the highest hundred-tier (300,400,500,...) this device has already
+/* the highest thousand-tier (1000,2000,3000,...) this device has already
    celebrated - checked on every snapshot, live crossing or not, so a
    device opening the app after the fact still gets shown whichever
    tiers it missed (just the latest one, not a backlog of every one) -
    but only while still inside that tier's own 10-user window (see the
    comment on celebrateMilestone above); outside it, the count will only
-   keep climbing, so this naturally waits for the next hundred instead of
+   keep climbing, so this naturally waits for the next thousand instead of
    ever firing a stale milestone. */
 function ckMilestoneCheck(count){
-  const tier=Math.floor(count/100)*100;
-  /* 10-user window (user's rule: e.g. 500 -> 510). Devices that are not open in that window are covered by the server
-     push (functions/index.js milestonePush), not by this local check. */
-  if(tier<300 || count>=tier+10) return;
+  const tier=Math.floor(count/MILESTONE_STEP)*MILESTONE_STEP;
+  /* short window past the boundary (e.g. 2000 -> 2024). Devices that are not open in that window are covered by the server
+     push (functions/index.js milestonePush), not by this local check. A stored tier from the old 100-step era (e.g. 1300)
+     is simply <= the current thousand-tier, so it never causes a burst; the next fire is at the next thousand. */
+  if(tier<MILESTONE_STEP || count>=tier+MILESTONE_WINDOW) return;
   const last=+(localStorage.getItem('betel_milestone_last')||0);
   if(tier>last){
     let fired=false;
