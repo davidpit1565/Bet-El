@@ -358,6 +358,14 @@ in English as usual.
   `startBackgroundDataPrefetch()` downloads only Hebrew base files plus the active UI language (`pfLangOf`), and re-runs on a
   language change.
 
+## Standing content rule (owner, David - 2026-11-07)
+- **Sacred texts are PHONETIC transliteration only, never meaning-translation, unless David approves otherwise.** This holds for Torah,
+  Nach (incl. Shir HaShirim), Tehillim, prayers, Mishnah, Zohar, Reshit Chokhmah and, in general, every book. Copy the sound (letters,
+  using the project's deterministic engine on vocalized Hebrew; Dicta Nakdan for vocalization), not the meaning. Where a book already has
+  a meaning translation (musar explanations, Ben Ish Chai biur, Sefaria's English...), do NOT add or replace translations on your own:
+  ALWAYS ask David first, and verify the result before claiming it is done. Rubrics/instructions inside prayers may be meaning-translated
+  (as they already are). Never invent or "fix" sacred text from memory.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
