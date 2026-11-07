@@ -37,22 +37,22 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Start local app server
+      - name: Run navigation regression sweep
         run: |
           npm run serve:local > /tmp/betel-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:8899/index.html > /dev/null; then
               echo "Local app server is ready."
-              exit 0
+              npm run test:sweep
+              exit $?
             fi
             sleep 1
           done
           cat /tmp/betel-server.log
           echo "Local app server did not start."
           exit 1
-
-      - name: Run navigation regression sweep
-        run: npm run test:sweep
 
       - name: Upload browser screenshots
         if: always()
