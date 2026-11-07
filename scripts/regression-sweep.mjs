@@ -8,17 +8,19 @@
 // (the plain single-threaded http.server module can stall under concurrent
 // requests - use ThreadingHTTPServer as above, not `python3 -m http.server`).
 //
+// Screenshots are written to artifacts/screenshots for CI upload.
 // Uses `window.go(...)`, one of the few functions the app's single wrapping
 // IIFE exposes on window (see index.html's `window.x = x;` block near the
 // end of the main script) - everything else in the app is only reachable by
 // clicking real DOM elements, not by calling internal functions from
-// page.evaluate(). Playwright's `chromium` is expected as a global package
-// (see `npm root -g` / `/opt/pw-browsers/`) - not a project devDependency.
+// page.evaluate(). Playwright uses its managed browser by default; set CHROME
+// only when a custom Chromium executable is required in a local environment.
+import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
-const CHROME_PATH = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-
-const b = await chromium.launch({ executablePath: CHROME_PATH });
+await mkdir('artifacts/screenshots', { recursive: true });
+const launchOptions = process.env.CHROME ? { executablePath: process.env.CHROME } : {};
+const b = await chromium.launch(launchOptions);
 const errs = [];
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
 await ctx.addInitScript(() => {
@@ -77,6 +79,8 @@ const steps = [
 for (const [label, fn] of steps) {
   await p.evaluate(fn);
   await p.waitForTimeout(300);
+  const screenshotName = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  await p.screenshot({ path: `artifacts/screenshots/${String(steps.indexOf(steps.find(s => s[0] === label)) + 1).padStart(2, '0')}-${screenshotName}.png`, fullPage: true });
   console.log('ok:', label);
 }
 
@@ -112,6 +116,7 @@ try {
     p2.evaluate(() => [...document.querySelectorAll('[data-pace-opt]')].length),
     timeout,
   ]);
+  await p2.screenshot({ path: 'artifacts/screenshots/fresh-user-pace-wizard.png', fullPage: true });
   console.log('ok: fresh-user pace wizard halacha step (' + halachaOpts + ' options)');
   if (halachaOpts < 2) errs.push('WIZARD: expected 2 halacha options, got ' + halachaOpts);
 } catch (e) {
