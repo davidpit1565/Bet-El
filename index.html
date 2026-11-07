@@ -3004,6 +3004,7 @@ function openPrayer(prayerKey, fromGroup){
   if(prayerKey==='birkatMeeinShalosh'){ try{ text = birkatMeeinShaloshDayText(); }catch(e){} }
   PR = { group: fromGroup||null, prayer: prayerKey, title: p.title, subtitle: p.subtitle, text: text };
   PR_RETURN=null;   // a fresh open always starts at the top
+  homeNavTrack('prayerReader');
   TAB = 'prayerReader';
   render();
   forceScrollTop();
@@ -4050,7 +4051,42 @@ window.betelScrollTop=function(){
 };
 /* Go "back" like the Android/Samsung back gesture: swipe in from either screen edge. Closes an open
    dialog/sheet first, else runs the screen's own back action (the same as its back arrow). */
-function appBack(){
+/* ---- Home-origin navigation: every screen opened straight from a Home tile/banner/shortcut returns to Home on Back ----
+   HOME_STACK is the chain of screens (tabs) entered since the user left Home through one of its own items; it is emptied by
+   Home itself and by any jump to a bottom-nav root (Library/Calendar/Settings/Search...). A "back" (BACK_INTENT: a back button
+   click, the native header back, edge swipe, Android Back) that would leave the FIRST screen of the chain goes to Home instead;
+   deeper screens still go up one level (their own go(backTo)), and a back that stays on the same tab is an in-screen step. */
+let HOME_STACK=[], BACK_INTENT=false, HOME_CLICK_AT=0;
+const HOME_NAV_ROOTS=['home','library','prayers','calendar','settings','search'];
+const BACK_BTN_SEL='.tb-back, .icon-btn[id$="Back"], #smBackToBooks';
+function homeNavTrack(tab){
+  if(tab==='home'){ HOME_STACK=[]; return tab; }
+  if(tab==='chokPace'||tab==='onboard') return tab;
+  const top=HOME_STACK[HOME_STACK.length-1];
+  if(BACK_INTENT){
+    if(!HOME_STACK.length || tab===TAB || top!==TAB) return tab;
+    if(HOME_STACK.length<=1){ HOME_STACK=[]; return 'home'; }
+    HOME_STACK.pop();
+    const i=HOME_STACK.lastIndexOf(tab);
+    if(i>=0) HOME_STACK.length=i+1; else HOME_STACK=[tab];
+    return tab;
+  }
+  const root=HOME_NAV_ROOTS.includes(tab);
+  if(HOME_CLICK_AT && Date.now()-HOME_CLICK_AT<(root?150:4000)){ HOME_STACK=[tab]; HOME_CLICK_AT=0; return tab; }
+  if(HOME_STACK.length){ if(root) HOME_STACK=[]; else if(tab!==top) HOME_STACK.push(tab); }
+  return tab;
+}
+function homeAtFirstLevel(){ return HOME_STACK.length>0 && TAB!=='home' && HOME_STACK[HOME_STACK.length-1]===TAB && HOME_STACK.length===1; }
+document.addEventListener('click',e=>{
+  try{
+    const t=e.target; if(!t||!t.closest) return;
+    if(t.closest(BACK_BTN_SEL)){ BACK_INTENT=true; setTimeout(()=>{ BACK_INTENT=false; },0); return; }
+    if(TAB==='home' && t.closest('#app')) HOME_CLICK_AT=Date.now();
+  }catch(_){}
+},true);
+function homeBackRun(fn){ BACK_INTENT=true; try{ return fn(); } finally{ BACK_INTENT=false; } }
+function appBack(){ return homeBackRun(appBack0); }
+function appBack0(){
   try{
     if(HOME_EDIT) return false;
     const rs=document.querySelector('.rh-sheet-wrap'); if(rs){ rs.click(); return true; }   // close the slim-header sheet first
@@ -4060,6 +4096,9 @@ function appBack(){
     const btn=[...document.querySelectorAll('.tb-back')].find(b=>b.offsetParent!==null);
     if(btn){ btn.click(); return true; }
     if(TAB==='kotelCompass'){ go(KOTEL_FROM); return true; }   // the HTML compass has no .tb-back (only its Close button): Android Back / edge swipe return to the reader that opened it
+    const rb=[...document.querySelectorAll(BACK_BTN_SEL)].find(b=>b.offsetParent!==null);   // reader headers use a plain .icon-btn#xxBack, not .tb-back
+    if(rb){ rb.click(); return true; }
+    if(homeAtFirstLevel()){ go('home'); return true; }   // a top-level screen opened from Home (Library/Calendar/Settings...) has no back button of its own
   }catch(e){}
   return false;
 }
@@ -4069,7 +4108,7 @@ function canGoBack(){
     if(document.querySelector('.rh-sheet-wrap')) return true;
     if(document.querySelector('.overlay, #homeSheet, #homeConfirm, .home-sheet-ov')) return true;
     if(typeof TOPBAR_BACK_ACTION==='function') return true;
-    return TAB==='kotelCompass' || [...document.querySelectorAll('.tb-back')].some(b=>b.offsetParent!==null);
+    return TAB==='kotelCompass' || homeAtFirstLevel() || [...document.querySelectorAll(BACK_BTN_SEL)].some(b=>b.offsetParent!==null);
   }catch(e){ return false; }
 }
 window.betelCanGoBack=canGoBack; window.betelAppBack=appBack;
@@ -4524,6 +4563,7 @@ function dedHTML(cls){ const L=dedLines(); if(!L.length) return ''; return `<div
 const app = document.getElementById('app');
 let TAB='home';
 function go(tab){
+  tab=homeNavTrack(tab);
   // Entering the Settings tab fresh from elsewhere always starts at the
   // category list (not wherever you last drilled into) - matches how
   // iOS's own Settings app resets to its root list when you leave the app
@@ -9480,7 +9520,7 @@ function openReader(chapters, opt){
   opt=opt||{};
   let idx=0; if(opt.start){ const p=chapters.indexOf(opt.start); if(p>=0) idx=p; }
   RD={ chapters:chapters.slice(), idx, daily:!!opt.daily, hd:opt.hd||currentHDate(), verse:(opt.verse!=null?opt.verse:null) };
-  TAB='reader'; try{ nativeCalHide(); }catch(e){}   // opened from the native calendar: it must step aside (render() isn't run on this path)
+  homeNavTrack('reader'); TAB='reader'; try{ nativeCalHide(); }catch(e){}   // opened from the native calendar: it must step aside (render() isn't run on this path)
   renderReader(); forceScrollTop();
 }
 function prayerBlock(which){
@@ -9508,7 +9548,7 @@ function chapterHTML(ch){
   </div>`;
 }
 function renderContinuous(chs,hd){
-  TAB='reader'; RD=null; stopAutoScroll();
+  homeNavTrack('reader'); TAB='reader'; RD=null; stopAutoScroll();
   syncNativeTopBar(ckChrome('קְרִיאַת הַיּוֹם'),'home');
   app.innerHTML=`
   <div class="reader view">
@@ -15967,6 +16007,7 @@ function ckMilestoneCheck(count){
 const ORN='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 4.2L18 4.8l-1.4 4.4L21 11l-4.4 1.8L18 17l-4.4-1.4L12 20l-1.6-4.4L6 17l1.4-4.2L3 11l4.4-1.8L6 4.8l4.4 1.4z" opacity=".85"/></svg>';
 function ornament(){ return `<div class="ornament">${ORN}</div>`; }
 function topbar(title, backTo, rightHtml, nativeOpts){
+  if(!backTo && homeAtFirstLevel()) backTo='home';   // a root screen (Library/Calendar/Settings...) opened from a Home item gets a back arrow to Home
   if(rightHtml && !nativeOpts){
     // Custom right-side actions aren't modeled natively (see NATIVE_TOPBAR
     // above) - keep the HTML bar for these and make sure the native one
@@ -16411,7 +16452,7 @@ function syncNativeTopBar(title, backTo, opts){
   if(!NATIVE_TOPBAR) return;
   opts = opts || {};
   if(!RH_INTERNAL){ RH_BASE={title,backTo,opts}; RH_COMPACT=false; }
-  TOPBAR_BACK_ACTION = (typeof backTo==='function') ? backTo : (backTo ? ()=>go(backTo) : null);
+  { const ba=(typeof backTo==='function') ? backTo : (backTo ? ()=>go(backTo) : null); TOPBAR_BACK_ACTION = ba ? ()=>homeBackRun(ba) : null; }
   TOPBAR_ACTION_HANDLERS = opts.handlers || {};
   TOPBAR_MENU_HANDLERS = opts.menuHandlers || {};
   try{
@@ -16446,7 +16487,7 @@ function hideNativeTopBar(){
   try{ window.Capacitor.Plugins.NativeTopBar.hide().catch(()=>{}); }catch(e){}
 }
 window.NativeTopBarHost = {
-  onBack(){ if(SEARCH_NAV && TAB===SEARCH_RESULT_TAB && TAB!=='search'){ SEARCH_RESULT_TAB=''; go('search'); return; } if(TOPBAR_BACK_ACTION) TOPBAR_BACK_ACTION(); },
+  onBack(){ homeBackRun(()=>{ if(SEARCH_NAV && TAB===SEARCH_RESULT_TAB && TAB!=='search'){ SEARCH_RESULT_TAB=''; go('search'); return; } if(TOPBAR_BACK_ACTION) TOPBAR_BACK_ACTION(); else if(homeAtFirstLevel()) go('home'); }); },
   onAction(id){ const h=TOPBAR_ACTION_HANDLERS[id]; if(h) h(); },
   onMenu(actionId,itemId){ const h=TOPBAR_MENU_HANDLERS[actionId]; if(h) h(itemId); },
 };
