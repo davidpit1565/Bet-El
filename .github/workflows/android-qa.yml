@@ -1,0 +1,124 @@
+name: Android and Web QA
+
+on:
+  push:
+    branches:
+      - automation/android-qa
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-regression:
+    name: Web regression and screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local app server
+        run: |
+          npm run serve:local > /tmp/betel-server.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8899/index.html > /dev/null; then
+              echo "Local app server is ready."
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/betel-server.log
+          echo "Local app server did not start."
+          exit 1
+
+      - name: Run navigation regression sweep
+        run: npm run test:sweep
+
+      - name: Upload browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: betel-web-qa-screenshots
+          path: artifacts/screenshots/
+          if-no-files-found: warn
+          retention-days: 14
+
+  android-emulator-smoke:
+    name: Android build and emulator smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Capacitor Android project assets
+        run: npm run cap:sync
+
+      - name: Build, install, and launch on Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            cd android
+            ./gradlew --no-daemon assembleDebug
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb shell monkey -p com.beitel.tehilim 1
+            sleep 15
+            adb shell pidof com.beitel.tehilim
+            mkdir -p ../artifacts
+            adb exec-out screencap -p > ../artifacts/android-emulator-home.png
+            adb logcat -d -s AndroidRuntime:E > ../artifacts/android-runtime-errors.log
+            if grep -q "FATAL EXCEPTION" ../artifacts/android-runtime-errors.log; then
+              cat ../artifacts/android-runtime-errors.log
+              exit 1
+            fi
+
+      - name: Upload Android smoke-test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: betel-android-emulator-smoke
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
