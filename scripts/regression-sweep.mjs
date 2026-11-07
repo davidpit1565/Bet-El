@@ -76,11 +76,11 @@ const steps = [
   ['musar work open', () => document.querySelector('[data-musarday]')?.click()],
 ];
 
-for (const [label, fn] of steps) {
+for (const [stepIndex, [label, fn]] of steps.entries()) {
   await p.evaluate(fn);
   await p.waitForTimeout(300);
   const screenshotName = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  await p.screenshot({ path: `artifacts/screenshots/${String(steps.indexOf(steps.find(s => s[0] === label)) + 1).padStart(2, '0')}-${screenshotName}.png`, fullPage: true });
+  await p.screenshot({ path: `artifacts/screenshots/${String(stepIndex + 1).padStart(2, '0')}-${screenshotName}.png`, fullPage: true });
   console.log('ok:', label);
 }
 
