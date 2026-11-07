@@ -1744,6 +1744,10 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-hill-s::before{content:'(';}
 .bk-hill-s::after{content:')';}
 .bk-hill-f{margin-top:.8mm;font-family:var(--font-sacred);font-size:10.5px;color:var(--bk-muted)}
+/* the day's own Mazal Tov line (bkMazalTovDayHtml) - deliberately NOT the
+   .bk-hill box styling (a framed, muted-toned box fits a memorial list;
+   a birthday blessing is its own short celebratory line instead). */
+.bk-mzt-day{margin:1.5mm auto 0;text-align:center;font-family:var(--font-sacred);font-weight:500;font-size:12px;color:var(--bk-muted);max-width:118mm}
 .bk-shabbat{margin:6mm 0 2mm;text-align:center}
 .bk-shabbat-t{font-family:var(--font-sacred);font-weight:900;font-size:24px;line-height:1.3;color:#6e5426;margin-top:2mm}
 .bk-bic-h .bk-bic-intro{margin:0 0 2mm}
@@ -1757,6 +1761,11 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
    honorific heading instead of just a thinned bold line. */
 .bk-rv-name{font-family:var(--font-sacred);font-weight:900;font-size:38px;line-height:1.2;color:#6e5426;text-shadow:-.8px -.8px 0 #fffdf7,1px 1.2px 0 rgba(98,74,34,.3)}
 .bk-rv-name span{display:block;font-size:16px;letter-spacing:.12em;margin-top:1mm}
+/* the Mazal Tov page (owner's call, 2026-11-07): bk-rv-name's weight/size/
+   drop-shadow suit the Rav's own dignified honour page and the Niftar Rav
+   memorial, but read as too heavy for a birthday blessing - a lighter
+   weight, smaller size and no shadow instead. */
+.bk-mazaltov .bk-rv-name{font-weight:700;font-size:30px;text-shadow:none}
 .bk-rv-role{font-family:var(--font-sacred);font-weight:700;font-size:13.5px;line-height:1.7;max-width:100mm;text-wrap:balance;color:var(--bk-ink)}
 .bk-rv-orn{width:62mm;margin:1mm 0}
 .bk-rv-orn .bk-rule{margin:0}
@@ -5840,8 +5849,48 @@ const BK_UI={
       contents:"Today's contents", empty:'No study for this day', loading:'Loading…',
       pdfMaking:'Preparing PDF…', pdfPage:'page', pdfOf:'of', pdfFail:'Could not create the PDF', pdfSaved:'File saved',
       license:'Gemara page license'},
+  /* French booklet (owner's request, 2026-11-03): unlike the `en:` block
+     above (which left most printed "chrome" strings in Hebrew - only the
+     reader's own button labels got real English), every string here that
+     can appear on a printed page is translated, since this is a real French
+     printed booklet, not just an English reading mode layered on the
+     Hebrew one. Four things are deliberately NOT translated here - no
+     French source exists for them and they are flagged to the owner
+     separately rather than invented: `brand`/`brandStam` (the stylised
+     Hebrew wordmark art on the cover/band - a logotype, not text),
+     BK_YICHUD (the weekday kavanah paragraphs), BK_RAV and
+     BK_NIFTAR_RAV_LIST (the Rav's own honour page and the memorial page
+     body text) - hillulot.json's names also stay Hebrew (proper nouns from
+     a Hebrew-only source). Everything else below is a careful translation
+     of the existing Hebrew wording, not a paraphrase - treat as a draft
+     for the owner to review before the first real French print run. */
+  fr:{title:"Livret d'étude", brand:'הַתָּמִיד', brandStam:'התמיד', open:'Ouvrir le livret', print:'Imprimer', pdf:'Télécharger le PDF',
+      qrCap:"Télécharger l'application", dedLead:'Ce livret est publié', dedNiftar:"Pour l'élévation de l'âme de", dedZl:'zal',
+      dedMerit:"Puisse le mérite de la Torah étudiée dans ce livret être au bénéfice de son âme", dedTnzbh:'Que son âme soit liée au faisceau de la vie',
+      dedHatzlacha:'et pour la réussite de', dedBless:'et pour la réussite de tous les membres de sa famille dans toutes leurs entreprises, pour de longs jours et de bonnes années', dedBlessPl:'et pour la réussite de tous les membres de leurs familles dans toutes leurs entreprises, pour de longs jours et de bonnes années', dedMeritPl:'Puisse le mérite de la Torah étudiée dans ce livret être au bénéfice de leurs âmes', dedTnzbhPl:'Que leurs âmes soient liées au faisceau de la vie',
+      dedAmen:"Amen, qu'il en soit ainsi", dedHdr:['En mémoire éternelle',"Dans le Temple de l'Éternel"], hillH:"Pour l'élévation de l'âme des Justes", hillF:'Que leur mérite nous protège, Amen', bicIntro:'Introduction', shabbat:'Chabbat Chalom ou Mévorakh !', shabbatHead:'Chabbat Kodech', bwOn:'Noir et blanc', bwOff:'Couleur', musar:'Moussar', rambam:'Rambam', evening:'(le soir)', weekOf:'Semaine', biurH:'Explication', tocTitle:'Table des matières', tocBic:"Ben Ich 'Haï", tocBicY:['Année 1','Année 2'], tocSoon:'En préparation', ring:'אין זה כי אם בית אלהים וזה שער השמים ◆ ויקרא את שם המקום ההוא בית אל ◆ ', contactH:'Pour questions et corrections :', contact:['דָּוִד פִּישְׁחַדְזִי','+32 484 10 50 07','info@bet-el.be'], dedFoot:"Quiconque fait mériter autrui ne commettra pas de faute", dedFootSrc:'(Avot 5, 18)', bsd:'בס״ד',
+      backMade:["Créé avec l'application Tamid",'Tous les textes suivent les sources citées dans l’application','Tous droits réservés © HaTamid'],
+      backDist:"Ce livret peut être distribué librement pour le mérite du public, à condition qu'aucun changement ne soit apporté à son contenu ou à sa mise en page.",
+      parasha:'Parachat', prevDay:'Jour précédent', nextDay:'Jour suivant', today:"Aujourd'hui", notToday:"Pas aujourd'hui",
+      contents:'Contenu du jour', empty:'Aucune étude pour ce jour', loading:'Chargement…',
+      pdfMaking:'Préparation du PDF…', pdfPage:'page', pdfOf:'sur', pdfFail:'Échec de création du PDF', pdfSaved:'Fichier enregistré',
+      license:'Licence des pages de Guémara'},
 };
 function bkUI(){ return BK_UI[S.lang]||BK_UI.he; }
+/* Language-aware subject cartouche name (owner's French booklet, 2026-11-03):
+   bkBlocks/bkShabbatBlocks used to seed every cartouche title from the raw
+   `s.he` field straight out of the Chok LeYisrael data, which is always
+   Hebrew regardless of S.lang - fine for the Hebrew/English booklets (the
+   `en:` BK_UI block never bothered translating this either), but a French
+   booklet can't have its study TEXT in French while every subject header
+   stays Hebrew. Keyed by the same s.key values bkBlocks/bkShabbatBlocks
+   already branch on; falls back to s.he itself in Hebrew or for any key
+   not listed here (so an unmapped key never prints blank). */
+const BK_SUBJECT_FR={torah:'Torah',tzeruf:'Torah',neviim:"Nevi'im",ketuvim:'Ketouvim',haftarah:'Haftara',mishnah:'Michna',tehillim:'Tehilim',gemara:'Guémara',musar:'Moussar',zohar:'Zohar',tanya:"'Hassidout"};
+function bkSubjectHe(s){
+  if(S.lang==='fr' && BK_SUBJECT_FR[s.key]) return BK_SUBJECT_FR[s.key];
+  return s.he;
+}
 /* Musar is its own per-book section in the full booklet (one header per
    work, the week's days listed underneath), not part of each day. */
 const BK_SKIP={musar:1};
@@ -6022,6 +6071,18 @@ function bkHillulotHtml(hd){
   return `<div class="bk-hill"><div class="bk-hill-h"><i>${I.candle}</i><span>${t.hillH}</span></div><ul>${
     list.map(x=>`<li><span class="bk-hill-n">${x.name}</span>${(x.note||x.year)?`<span class="bk-hill-s">${[x.note,x.year].filter(Boolean).join(' · ')}</span>`:''}</li>`).join('')
   }</ul><div class="bk-hill-f">${t.hillF}</div></div>`;
+}
+/* Combines the day's hillulot box and its Mazal Tov line (bkMazalTovDayHtml)
+   into ONE atom block. Required: every atom/head block's html string is
+   parsed via tmp.innerHTML + a single firstElementChild read (bkPaginate's
+   own `el()`), which silently drops anything after the first root element -
+   two sibling divs pushed as one block would lose the second one. Only
+   wraps when there is actually something to show, so an ordinary day with
+   neither still gets '' (no stray empty atom block). */
+function bkDayNoticesHtml(hd){
+  const hill=bkHillulotHtml(hd), mzt=bkMazalTovDayHtml(hd);
+  if(!hill && !mzt) return '';
+  return `<div>${hill}${mzt}</div>`;
 }
 
 /* ---------- black & white ----------
@@ -6298,7 +6359,13 @@ function bkBlocks(date,opt){
   /* Leil Shishi is the eve of Friday: its Hebrew date is Friday's */
   const hdShown=night?new HDate(addDays(date,1)):hd;
   let musarDone=night;
-  const hillHtml=night?'':bkHillulotHtml(hd);
+  /* a single wrapping div is required here, not two sibling divs - every
+     atom/head block's html string is parsed via tmp.innerHTML + a single
+     firstElementChild read (bkPaginate's own `el()`), which silently drops
+     anything after the first root element. Only wrap when there's actually
+     something to show - an unconditional wrapper would push a stray empty
+     atom block on every ordinary day. */
+  const hillHtml=night?'':bkDayNoticesHtml(hd);
   /* the day card used to repeat the parasha name right here (bk-day-s) -
      now redundant: the Torah section that always opens the day (torah/
      tzeruf is always the first subject) carries the parasha name in its
@@ -6312,7 +6379,7 @@ function bkBlocks(date,opt){
   if(hillHtml) B.push({t:'atom', head:1, html:hillHtml});
   secs.forEach((s,si)=>{
     if(si) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
-    let src=chokSourceLine(s,hd), title=s.he, label=s.he;
+    let src=chokSourceLine(s,hd), title=bkSubjectHe(s), label=bkSubjectHe(s);
     /* The Halacha (Rambam) cartouche names the book, then the hilchot and
        chapter, right in the heading itself (owner's call) - and so does
        every other subject whose reference is nameable in one line:
@@ -6664,13 +6731,13 @@ function bkShabbatSections(hd,shabbatDate){
 function bkShabbatBlocks(shabbatDate,B){
   const hd=new HDate(shabbatDate), secs=bkShabbatSections(hd,shabbatDate);
   if(!secs.length) return;
-  const dayLabel=bkUI().shabbatHead, hillHtml=bkHillulotHtml(hd);
+  const dayLabel=bkUI().shabbatHead, hillHtml=bkDayNoticesHtml(hd);
   B.push({t:'day', brk:1, label:dayLabel, tocSub:localizeHebDateStr(hd.renderGematriya(true)).split(' ').slice(0,-1).join(' '),
     html:`<div class="bk-day"><div class="bk-day-t">${dayLabel}</div><div class="bk-day-d">${localizeHebDateStr(hd.renderGematriya(true))}</div></div>`});
   if(hillHtml) B.push({t:'atom', head:1, html:hillHtml});
   secs.forEach((s,si)=>{
     if(si) B.push({t:'rule', html:`<div class="bk-rule"><span>${ORN}</span></div>`});
-    let src=chokSourceLine(s,hd), title=s.he, label=s.he;
+    let src=chokSourceLine(s,hd), title=bkSubjectHe(s), label=bkSubjectHe(s);
     if(s.kind==='rambam'){ label=bkUI().rambam; title=label+(src?' · '+src:''); src=''; }
     else if(s.key==='tanya'){ title=title+(src?' · '+src:''); src=''; }
     else if(s.kind==='daf') src='';   // the per-amud sub-line carries it (bkSectionBody)
@@ -7406,6 +7473,67 @@ function bkNiftarRavHtml(first){
   </div>`).join('');
 }
 
+/* Mazal Tov birthday blessing pages (owner's standing request, 2026-11-07):
+   same shape as BK_NIFTAR_RAV_LIST right above it (reuses bkRavHtml's own
+   ornRavSvg/.bk-rv-* markup - only the wording and occasion differ: a
+   recurring HEBREW birthday instead of a yahrzeit), placed right after the
+   Niftar Rav memorial page(s) and before the dedication page (see
+   bkBuildPrint). bkMazalTovFor(first) checks all 7 days of the printed
+   week the same way bkNiftarRavFor does - an ordinary week returns an
+   empty array (no page, never a blank one). Add a future birthday here
+   with its own hDay/hMonth (HMONTHS.<NAME>).
+   Confirmed by the owner (2026-11-07): יאיר פפיסמדוב's birthday is ח׳ כסלו. */
+const BK_MAZAL_TOV_LIST=[
+  { hDay:8, hMonth:HMONTHS.KISLEV, // יאיר פפיסמדוב's birthday (ח' כסלו)
+    hdr:'בְּרָכַּת מַזָּל טוֹב', lead:'לְרֶגֶל יוֹם הֻלַּדְתּוֹ',
+    to:'בְּאַהֲבָה וּבְחִבָּה לְ',
+    name:'יָאִיר פַּפִּיסְמֶדוֹב', title:'הי״ו',
+    role:'יְהִי רָצוֹן שֶׁיִּתְקַיֵּם בּוֹ מִקְרָא שֶׁכָּתוּב ״וַיִגְדַּל הַנַּעַר״ - בְּגוּף, בְּרוּחַ וּבְתוֹרָה.',
+    body:['מִשָּׁמַיִם יַשְׁפִּיעוּ עָלָיו שֶׁפַע בְּרָכָה וְהַצְלָחָה בְּכָל אֲשֶׁר יִפְנֶה, אֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת, בְּרִיאוּת אֵיתָנָה, וְלֵב שָׂמֵחַ וְטוֹב.',
+      'יְהִי רָצוֹן שֶׁיִּזְכֶּה לִגְדֹּל לְתוֹרָה, לְחֻפָּה וּלְמַעֲשִׂים טוֹבִים, מִתּוֹךְ נַחַת וְשִׂמְחָה לְכָל בְּנֵי מִשְׁפַּחְתּוֹ.'],
+    verse:'כִּי אֹרֶךְ יָמִים וּשְׁנוֹת חַיִּים וְשָׁלוֹם יוֹסִיפוּ לָךְ', src:'(מִשְׁלֵי ג, ב)'
+  }
+];
+function bkMazalTovFor(first){
+  const hits=[];
+  for(let i=0;i<7;i++){
+    const hd=new HDate(addDays(first,i));
+    for(const r of BK_MAZAL_TOV_LIST) if(r.hDay===hd.getDate()&&r.hMonth===hd.getMonth()&&!hits.includes(r)) hits.push(r);
+  }
+  return hits;
+}
+function bkMazalTovHtml(first){
+  const t=bkUI();
+  return bkMazalTovFor(first).map(R=>`<div class="bk-page bk-matter bk-ornp bk-rav bk-mazaltov">${ornRavSvg()}
+    <div class="bk-ol bk-dd-bsd">${t.bsd}</div>
+    <div class="bk-ol bk-rv-hdr">${R.hdr}</div>
+    <div class="bk-ol bk-rv-box">
+      <div class="bk-dd-lead">${R.lead}</div>
+      <div class="bk-rv-to">${R.to}</div>
+      <div class="bk-rv-name">${R.name}<span>${R.title}</span></div>
+      <div class="bk-rv-role">${R.role}</div>
+      <div class="bk-rv-orn">${bkRuleHtml()}</div>
+      ${R.body.map(p=>`<p class="bk-rv-p">${p}</p>`).join('')}
+      <div class="bk-rv-verse">״${R.verse}״</div>
+      <div class="bk-rv-src">${R.src}</div>
+    </div>
+  </div>`).join('');
+}
+/* a short inline line on the matching day itself (next to that day's own
+   hillulot box, bkHillulotHtml) - same recurring HEBREW-date technique,
+   but its own small celebratory line rather than folded into the mourning-
+   toned hillulot box. '' on an ordinary day (no line added). */
+function bkMazalTovDayHtml(hd){
+  const hits=BK_MAZAL_TOV_LIST.filter(r=>r.hDay===hd.getDate()&&r.hMonth===hd.getMonth());
+  if(!hits.length) return '';
+  /* the ornamental star SVG (ORN), not an emoji - emoji glyphs aren't in
+     Taamey Frank CLM and would fall back to a system font, exactly the
+     Type3/missing-glyph bug already fixed and documented as a hard rule
+     for anything printed. */
+  const star=`<i style="display:inline-flex;width:10px;height:10px;vertical-align:-1px">${ORN}</i>`;
+  return `<div class="bk-mzt-day">${hits.map(r=>star+' '+r.hdr+' לְ'+r.name+' לְיוֹם הֻלַּדְתּוֹ '+star).join(' · ')}</div>`;
+}
+
 /* ---------- front and back matter ----------
    The back page uses the day pages' frame, header strip and medallion; the
    cover and dedication are the ornament compositions above. The QR (the
@@ -8078,7 +8206,7 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
+  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkMazalTovHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */
