@@ -1,8 +1,10 @@
-What's new in 2.0.6:
-• Library and Home screen display correctly in every language
-• Cleaner reading: no extra strip under the header
-• On the Home screen: "Visits" and "Online now"
-• Hebrew calendar: always opens on today
-• Daily Tanya: each day shows its exact portion
-• Chok LeYisrael: Yichudim before the Torah reading (Sunday to Thursday)
+What's new in 2.0.8:
+• Daily Rambam now follows the official cycle (including introduction days)
+• Mishnah and Pirkei Avot in every language, with phonetic transliteration
+• Reshit Chokhmah in phonetic transliteration (French and Russian)
+• Fixed garbled characters in some texts
+• Automatic light/dark appearance following your device
+• Offline download: a subtle indicator and its own setting
+• Back from screens opened from Home returns to Home
+• Jerusalem candle lighting: 40 minutes before sunset
 • Translation, display and stability fixes
