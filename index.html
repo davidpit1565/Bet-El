@@ -378,7 +378,7 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 .reader-head.rh-slim>.bic-collapse{display:none}
 .reader-head.rh-slim .reader-title{display:none}
 .rh-slim-btn{flex:1;min-width:0;max-width:340px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:99px;padding:8px 16px;background:var(--gold);color:#241a05;font-family:var(--font-sacred);font-weight:700;font-size:16px;cursor:pointer;white-space:nowrap;overflow:hidden}
-.rh-slim-btn span{overflow:hidden;text-overflow:ellipsis}
+.rh-slim-btn span{overflow:hidden;text-overflow:ellipsis;white-space:normal;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .rh-slim-btn i{font-style:normal;font-size:11px;flex:none}
 .ck-lead{text-align:center;margin:2px 0 8px}
 .reader-head.rh-slim{background:transparent;border:0;box-shadow:none}   /* no solid band behind the title button */
@@ -403,7 +403,8 @@ html.has-native-topbar .reader-head.rh-slim.rh-slim-hide{padding-top:0;padding-b
 .reader-head{position:sticky;top:0;z-index:20;background:var(--bg);   /* fully solid, see .topbar */
   margin:0 -16px;padding:8px 16px 12px;padding-top:calc(8px + env(safe-area-inset-top))}
 .reader-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.reader-title{font-family:var(--font-sacred);font-size:20px;font-weight:700;text-align:center;flex:1}
+.reader-title{font-family:var(--font-sacred);font-size:20px;font-weight:700;text-align:center;flex:1;min-width:0}
+[dir="ltr"] .reader-top .reader-title{font-size:clamp(15px,4.3vw,20px);line-height:1.2;overflow-wrap:anywhere}
 .reader-head .rt-pick{display:none;flex:1;min-width:0;max-width:260px;margin:0 auto}
 .reader-head.compact .reader-title{display:none}
 .reader-head.compact .rt-pick{display:block}
@@ -7377,13 +7378,13 @@ function renderBicParshiot(){
 }
 let BIC={track:null, parasha:null, pos:0};
 function openBicReader(track,parashaKey,pos){
-  BIC={track, parasha:parashaKey, pos:pos||0};
+  BIC={track, parasha:parashaKey, pos:pos||0, from:(TAB==='bicHome'||TAB==='bicParshiot')?TAB:null};
   go('bicReader');
 }
 function renderBicReader(){
   stopAutoScroll();
   const track=BIC.track||bicTrack();
-  const backTab = BIC.parasha===currentParshaKey() ? 'bicHome' : 'bicParshiot';
+  const backTab = BIC.from || (BIC.parasha===currentParshaKey() ? 'bicHome' : 'bicParshiot');
   if(!BIC_INDEX || !BIC.parasha){
     app.innerHTML=`${topbar(ckBicUI().title,backTab)}<div class="view">${smSkeleton()}</div>`;
     ensureBicIndex().then(()=>{ if(TAB==='bicReader'){ renderBicReader(); tr(app); } });
