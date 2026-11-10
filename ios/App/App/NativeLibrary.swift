@@ -209,12 +209,13 @@ final class NativeLibraryView: UIView, UICollectionViewDataSource, UICollectionV
 
     // MARK: UICollectionView
 
-    /// One full-width row per book (user request), so long titles are never clipped.
+    /// Two columns; accessibility text sizes switch to one full-width column so long titles are never clipped.
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let cols: CGFloat = 1
+        let big = traitCollection.preferredContentSizeCategory.isAccessibilityCategory
+        let cols: CGFloat = big ? 1 : 2
         let w = collectionView.bounds.width - 32 - 12 * (cols - 1)
-        return CGSize(width: floor(w / cols), height: A11y.scaled(76))
+        return CGSize(width: floor(w / cols), height: A11y.scaled(92))
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { items.count }

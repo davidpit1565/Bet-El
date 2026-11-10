@@ -10731,10 +10731,10 @@ function renderPrayersGroup(){
   app.innerHTML = `
   ${topbar(PRAYER_GROUPS[group].he,'prayers')}
   <div class="view">
-    ${ready.length ? `<div class="prayers-list">
+    ${ready.length ? `<div class="quick-grid">
       ${ready.map(key => `
-        <div class="prayer-row round-card prayer-row-lib" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
-          <span class="prayer-row-title">${(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[key].title):(PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</span>
+        <div class="q-tile round-card" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
+          <div class="qt">${(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[key].title):(PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</div>
         </div>
       `).join('')}
     </div>` : `<div class="empty-note" style="padding:40px 20px;text-align:center">
@@ -11227,9 +11227,9 @@ function renderLibrary(){
   app.innerHTML=`
   ${topbar('עיון בספרים','prayers')}
   <div class="view">
-    <div class="prayers-list">
-      ${LIBRARY_CATS.map(c=>`<div class="prayer-row round-card prayer-row-lib" data-libcat="${c.key}" data-cat="${c.cssCat||c.key}">
-        <span class="prayer-row-title">${libCatTileLabel(c.key)}</span>
+    <div class="quick-grid">
+      ${LIBRARY_CATS.map(c=>`<div class="q-tile round-card" data-libcat="${c.key}" data-cat="${c.cssCat||c.key}">
+        <div class="qt">${libCatTileLabel(c.key)}</div>
       </div>`).join('')}
     </div>
     ${ornament()}
@@ -12648,14 +12648,14 @@ function drawSiddurHome(){
   app.innerHTML = `
   ${topbar('סדור','prayers')}
   <div class="view">
-    <div class="prayers-list">
+    <div class="quick-grid">
       ${tiles.map(p=> p==='tefillinMirror'
-        ? `<div class="prayer-row round-card prayer-row-lib" data-cat="siddur" data-tool="tefillinMirror"><span class="prayer-row-title">${ckChrome('מראה לתפלין')}</span></div>`
-        : `<div class="prayer-row round-card prayer-row-lib" data-cat="siddur" data-sidp="${p}">
-        <span class="prayer-row-title">${heTitle(SIDDUR_PRAYER_NAMES[p], SIDDUR_PRAYER_NAMES_NIKUD[p]||SIDDUR_PRAYER_NAMES[p])}</span>
+        ? `<div class="q-tile round-card" data-cat="siddur" data-tool="tefillinMirror"><div class="qt">${ckChrome('מראה לתפלין')}</div></div>`
+        : `<div class="q-tile round-card" data-cat="siddur" data-sidp="${p}">
+        <div class="qt">${heTitle(SIDDUR_PRAYER_NAMES[p], SIDDUR_PRAYER_NAMES_NIKUD[p]||SIDDUR_PRAYER_NAMES[p])}</div>
       </div>`).join('')}
-      ${PRAYER_GROUPS.brachot.keys.filter(k=>PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready).map(key=>`<div class="prayer-row round-card prayer-row-lib" data-cat="siddur" onclick="openPrayer('${key}','brachot')">
-        <span class="prayer-row-title">${(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[key].title):(PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</span>
+      ${PRAYER_GROUPS.brachot.keys.filter(k=>PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready).map(key=>`<div class="q-tile round-card" data-cat="brachot" onclick="openPrayer('${key}','brachot')">
+        <div class="qt">${(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[key].title):(PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</div>
       </div>`).join('')}
     </div>
     <div style="font-family:var(--font-ui);font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7">
