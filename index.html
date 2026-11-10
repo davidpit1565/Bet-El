@@ -1751,6 +1751,8 @@ html.has-native-tabbar .search-box-tab{display:none}
 .q-tile[data-cat="rambam"]{--cat-color:#969e46;background-image:linear-gradient(150deg,rgba(150,158,70,.22),var(--panel) 60%)}
 .q-tile[data-cat="tanya"]{--cat-color:#589b4b;background-image:linear-gradient(150deg,rgba(88,155,75,.22),var(--panel) 60%)}
 .q-tile[data-cat="sah"]{--cat-color:#b0527c;background-image:linear-gradient(150deg,rgba(176,82,124,.22),var(--panel) 60%)}
+.q-tile[data-cat="booklet"]{--cat-color:#d17a5a;background-image:linear-gradient(150deg,rgba(209,122,90,.24),var(--panel) 60%)}
+[data-theme="dark"] .q-tile[data-cat="booklet"]{background-image:linear-gradient(150deg,rgba(226,140,106,.4),var(--panel) 62%)}
 .q-tile[data-cat="brachot"]{--cat-color:#a34f97;background-image:linear-gradient(150deg,rgba(163,79,151,.22),var(--panel) 60%)}
 .q-tile[data-cat="siddur"]{--cat-color:#7a9a3f;background-image:linear-gradient(150deg,rgba(122,154,63,.22),var(--panel) 60%)}
 .q-tile[data-cat="more"]{--cat-color:#8c7a6b;background-image:linear-gradient(150deg,rgba(140,122,107,.22),var(--panel) 60%)}
@@ -10780,7 +10782,8 @@ let LIB = {};
 // cssCat lets a few of these reuse an existing q-tile[data-cat] color rule
 // under a different routing key (tikkuneiZohar needs its own key, distinct
 // from the free-browse "zohar" category, but the same orange styling).
-const LIBRARY_CATS = [
+const LIBRARY_CATS = [   // David's order (2026-11-11): Chok first, SAH right after Ben Ish Chai, the weekly booklet last, next to Shnayim Mikra
+  {key:'chokLeyisrael', label:'חוק לישראל', cssCat:'chok'},
   {key:'torah', label:'תורה'},
   {key:'neviim', label:'נביאים'},
   {key:'ketuvim', label:'כתובים'},
@@ -10789,13 +10792,13 @@ const LIBRARY_CATS = [
   {key:'gemara', label:'גמרא'},
   {key:'rambam', label:'רמב״ם'},
   {key:'benishchai'},
-  {key:'musar', label:'מוסר'},
-  {key:'tikkuneiZohar', label:'תיקוני הזהר', cssCat:'zohar'},
-  {key:'zohar', label:'זהר'},
-  {key:'tanya', label:'תניא'},
   {key:'sah', label:'שולחן ערוך הרב'},
-  {key:'chokLeyisrael', label:'חוק לישראל', cssCat:'chok'},
+  {key:'zohar', label:'זהר'},
+  {key:'tikkuneiZohar', label:'תיקוני הזהר', cssCat:'zohar'},
+  {key:'musar', label:'מוסר'},
+  {key:'tanya', label:'תניא'},
   {key:'shnayimMikra', label:'שנים מקרא ואחד תרגום', cssCat:'shnayim'},
+  {key:'booklet', label:'חוברת השבוע'},
 ];
 function libCatLabel(key){
   if(key==='benishchai') return (BIC_UI[S.lang]||BIC_UI.he).title;
@@ -10805,7 +10808,7 @@ function libCatLabel(key){
 /* Library screen's own big tile titles keep nikud (see heTitle()) -
    libCatLabel() above stays the plain tr()-translatable form used
    everywhere else (search groups, etc). */
-const LIBRARY_CATS_NIKUD = {torah:'תּוֹרָה', neviim:'נְבִיאִים', ketuvim:'כְּתוּבִים', tehillim:'תְּהִלִּים', mishnah:'מִשְׁנָה',
+const LIBRARY_CATS_NIKUD = {booklet:'חוֹבֶרֶת הַשָּׁבוּעַ', torah:'תּוֹרָה', neviim:'נְבִיאִים', ketuvim:'כְּתוּבִים', tehillim:'תְּהִלִּים', mishnah:'מִשְׁנָה',
   gemara:'גְּמָרָא', rambam:'רַמְבַּ״ם', musar:'מוּסָר', tikkuneiZohar:'תִּיקּוּנֵי הַזֹּהַר', zohar:'זֹהַר',
   tanya:'תַּנְיָא', sah:'שֻׁלְחָן עָרוּךְ הָרַב', brachot:'בִּרְכוֹת הָאֲכִילָה', chokLeyisrael:'חוֹק לְיִשְׂרָאֵל', shnayimMikra:'שְׁנַיִם מִקְרָא וְאֶחָד תַּרְגּוּם'};
 function libCatTileLabel(key){
@@ -11219,6 +11222,7 @@ function openLibraryCat(key){
   if(key==='shnayimMikra') return go('smList');
   if(key==='tanya') return go('libraryTanyaParts');
   if(key==='sah') return go('sahList');
+  if(key==='booklet') return openBooklet();
   if(key==='brachot'){ PR.group='brachot'; return go('prayersGroup'); }
   if(key==='mishnah') return go('libraryMishnahSedarim');
   if(key==='neviim' || key==='ketuvim'){ LIB.nkCat=key; return go('libraryNKBooks'); }
@@ -11227,7 +11231,7 @@ function openLibraryCat(key){
    glass cards); the HTML tiles below are the web/PWA fallback. Set false to force the HTML version. */
 const NATIVE_LIB_ENABLED=true;
 let NATIVE_LIB_SHOWN=true;   // true on purpose: after a web-view reload the native grid can still be on screen over other screens, so the first non-Library render sends one hide()
-const LIB_CAT_COLORS={library:'#4f7ea8',torah:'#c45a6e',neviim:'#4f7ea8',ketuvim:'#c98a3f',tehillim:'#d4af5f',mishnah:'#8a6fc9',gemara:'#966e46',rambam:'#969e46',benishchai:'#38a3a5',musar:'#9662a8',tikkuneiZohar:'#e0562e',zohar:'#e0562e',tanya:'#589b4b',sah:'#b0527c',brachot:'#8a9a3a',chokLeyisrael:'#6f83d6',shnayimMikra:'#3aa87c'};
+const LIB_CAT_COLORS={library:'#4f7ea8',booklet:'#d17a5a',torah:'#c45a6e',neviim:'#4f7ea8',ketuvim:'#c98a3f',tehillim:'#d4af5f',mishnah:'#8a6fc9',gemara:'#966e46',rambam:'#969e46',benishchai:'#38a3a5',musar:'#9662a8',tikkuneiZohar:'#e0562e',zohar:'#e0562e',tanya:'#589b4b',sah:'#b0527c',brachot:'#8a9a3a',chokLeyisrael:'#6f83d6',shnayimMikra:'#3aa87c'};
 function nativeLibHide(){ if(!NATIVE_LIB_SHOWN) return; NATIVE_LIB_SHOWN=false; try{ window.Capacitor.Plugins.NativeLibrary.hide(); }catch(e){} }
 window.NativeLibraryHost={ open(key){ try{ openLibraryCat(key); }catch(e){} } };   // render() of the next tab hides the native screen
 function renderLibrary(){
@@ -12676,11 +12680,12 @@ function drawSiddurHome(){
   // per the user's explicit ordering request (Selichot must come last,
   // after Tikun Chatzot, not right after Birkat HaLevana).
   tiles.push('tikunChatzot');
+  ['birkatHamazon','birkatMeeinShalosh','birkotHanehenin'].forEach(k=>{ if(PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready) tiles.push(k); });   // right after Tikkun Chatzot (David's order)
   // Selichot: same seasonal gate as the in-context Tachanun link
   // (siddurIsSelichotSeason) - Elul through Aseret Yemei Teshuva.
   if(siddurIsSelichotSeason(currentHDate())) tiles.push('selichot');
   // the former "Additional Prayers" group and the eating blessings now live in the Siddur too
-  ['hataratNedarim','pitumHaketoret','perekShira','igeretHaramban','tefilatHashela','tefilatHaderech','birkatHamazon','birkatMeeinShalosh','birkotHanehenin'].forEach(k=>{ if(PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready) tiles.push(k); });
+  ['hataratNedarim','pitumHaketoret','perekShira','igeretHaramban','tefilatHashela','tefilatHaderech'].forEach(k=>{ if(PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready) tiles.push(k); });
   const isExtra=k=>!!PRAYERS_EXTRA[k] && !SIDDUR_PRAYER_NAMES[k] && k!=='tefillinMirror';
   const extraTitle=k=>(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[k].title):(PRAYERS_EXTRA_TITLE_NIKUD[k]||PRAYERS_EXTRA[k].title);
   const extraGroup=k=>PRAYER_GROUPS.brachot.keys.includes(k)?'brachot':'more';
