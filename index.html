@@ -941,6 +941,8 @@ html:not(.has-native-topbar) #dataPrefetchBar{top:calc(env(safe-area-inset-top,0
 [data-lang="he"] .psalm-body{direction:rtl;unicode-bidi:bidi-override}
 /* clearer bottom nav */
 .bottom-nav{border-top:1px solid var(--line-strong)}
+.mirror-full{animation:none}
+.compass-full ~ .nav-fade,body:has(.compass-full) .nav-fade{display:none}
 .nav-fade{position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav-h) + 45px + env(safe-area-inset-bottom));
   z-index:39;pointer-events:none;background:linear-gradient(to top,var(--bg) 35%,transparent)}
 [data-theme="light"] .bottom-nav{background:#fbf6ea;box-shadow:0 -8px 24px -14px rgba(80,60,20,.35)}
@@ -4611,7 +4613,7 @@ function go(tab){
      outright instead, same as onboard/chokPace already do. The tefillin
      mirror is the same kind of full-screen "live sensor" overlay, so it
      gets the same treatment. */
-  if(tab==='kotelCompass'||tab==='tefillinMirror'){ const nav=document.querySelector('.bottom-nav'); if(nav) nav.remove(); if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setVisible({visible:false}).catch(()=>{}); }
+  if(tab==='kotelCompass'||tab==='tefillinMirror'){ const nav=document.querySelector('.bottom-nav'); if(nav) nav.remove(); const nfade=document.querySelector('.nav-fade'); if(nfade) nfade.remove(); if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setVisible({visible:false}).catch(()=>{}); }
   else if(tab!=='onboard' && tab!=='chokPace' && !document.querySelector('.bottom-nav')) buildNav();
   else if(NATIVE_TABBAR) window.Capacitor.Plugins.NativeTabBar.setActive({tab:navActiveTab(tab)}).catch(()=>{});
   render();
@@ -12715,7 +12717,7 @@ function drawSiddurHome(){
     ${ornament()}
   </div>`;
   app.querySelectorAll('[data-sidp]').forEach(t=>t.onclick=()=>openSiddurPrayer(t.dataset.sidp));
-  const tmTile=document.querySelector('[data-tool="tefillinMirror"]'); if(tmTile) tmTile.onclick=()=>openTefillinMirror('siddurHome');
+  const tmTile=document.querySelector('[data-tool="tefillinMirror"]'); if(tmTile){ tmTile.onclick=()=>openTefillinMirror('siddurHome'); try{ if(MirrorGuide.enabled) setTimeout(()=>MirrorGuide.preload(),1200); }catch(_){} }
   tr(app);
 }
 
@@ -14878,8 +14880,10 @@ const MirrorGuide={
       // The face model is all the guide needs to start; the (bigger) hair segmenter loads in the background and is picked
       // up by the loop as soon as it is ready. If it fails, the guide falls back to the skin-color hairline.
       this.landmarker=await make(vision.FaceLandmarker,'face_landmarker/face_landmarker/float16/1/face_landmarker.task',{numFaces:1});
-      make(vision.ImageSegmenter,'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite',{outputCategoryMask:true,outputConfidenceMasks:false})
-        .then(sg=>{ this.segmenter=sg; }).catch(()=>{ this.segmenter=null; });
+      setTimeout(()=>{   // after the face model is already drawing, so the two compiles do not stack up on the main thread
+        make(vision.ImageSegmenter,'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite',{outputCategoryMask:true,outputConfidenceMasks:false})
+          .then(sg=>{ this.segmenter=sg; }).catch(()=>{ this.segmenter=null; });
+      },1200);
     }).catch(e=>{ this.loading=null; throw e; });
     return this.loading;
   },
@@ -14938,8 +14942,33 @@ const MirrorGuide={
     this.running=true; this.errs=0; this.beat=performance.now();
     const id=this.runId=(this.runId||0)+1;   // toggling the guide off/on while the models load used to start two loops at once
     this.hint(ckChrome('טוען מדריך…'));
-    this.load().then(()=>{ if(this.running && this.runId===id) this.loop(id); })
-      .catch(()=>{ if(this.runId===id){ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); } });
+    // The camera preview comes first: compiling the wasm/models blocks the main thread, so it only starts once the
+    // video is actually playing (or after a short fallback), never in parallel with the camera starting up.
+    let begun=false;
+    const begin=()=>{
+      if(begun) return; begun=true;
+      if(!this.running || this.runId!==id) return;
+      this.load().then(()=>{ if(this.running && this.runId===id) this.loop(id); })
+        .catch(()=>{ if(this.runId===id){ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); } });
+    };
+    if(this.landmarker) begin();
+    else{
+      const later=()=>setTimeout(begin,350);
+      if(video && video.readyState>=3 && video.currentTime>0) later();
+      else{ if(video) video.addEventListener('playing',later,{once:true}); setTimeout(begin,2500); }
+    }
+  },
+  // Warm the HTTP cache with the library + model files (download only, no compile) - called when the Siddur screen
+  // shows the mirror tile and again when the mirror opens, so the first open does not wait on the network.
+  preload(){
+    if(this.preloaded) return; this.preloaded=true;
+    try{ if(navigator.connection && navigator.connection.saveData) return; }catch(_){}
+    const base='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@'+this.VER, models='https://storage.googleapis.com/mediapipe-models/';
+    const urls=[base+'/vision_bundle.mjs', base+'/wasm/vision_wasm_internal.js', base+'/wasm/vision_wasm_internal.wasm',
+      models+'face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+      models+'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite'];
+    const run=()=>urls.reduce((p,u)=>p.then(()=>fetch(u,{mode:'cors'}).then(r=>r.arrayBuffer()).catch(()=>{})),Promise.resolve());
+    if(window.requestIdleCallback) requestIdleCallback(run,{timeout:4000}); else setTimeout(run,1500);
   },
   stop(){
     this.running=false; this.video=null; this.runId=(this.runId||0)+1;
@@ -15093,7 +15122,8 @@ const MirrorGuide={
     // Hairline under the bayit's center: measured directly when nothing covers
     // it; when the bayit itself sits across it, from the hairline remembered
     // earlier this session (relative to face size), else just beside the bayit.
-    const hair0=hairAt(0);
+    // sample a few columns across the bayit's width and take the HIGHEST hairline: the bayit must never sit on the forehead
+    const hair0=(()=>{ let m=null; for(const d of [-boxW*0.4,0,boxW*0.4]){ const h=hairAt(d); if(h!=null && (m==null||h>m)) m=h; } return m; })();
     const covers = box && Math.abs(box.cs) < box.w/2 + pxPerCm*0.5;
     this.noBoxRun = box ? 0 : this.noBoxRun+1;
     if(!box && hair0!=null && this.noBoxRun>=8)
@@ -15106,7 +15136,12 @@ const MirrorGuide={
       const hs=[hairAt(box.cs-off), hairAt(box.cs+off)].filter(x=>x!=null);
       hair=hs.length? Math.max(...hs) : null;
     }
-    if(hair==null) hair=fh*1.05;
+    // Always bias upward. Low confidence (no segmenter yet, no hairline found, bayit covering it, remembered ratio)
+    // gets a bigger margin; the box is never lower than the top of the face mesh.
+    const confident = !!this.segmenter && hair0!=null && !covers;
+    if(hair==null){ hair=fh*1.1; }
+    hair += pxPerCm*(confident?0.5:1.2);
+    hair = Math.max(hair, fh*1.0);
 
     // Temporal smoothing so guides and numbers don't jitter frame to frame
     const cur={hair, cs:box?box.cs:null, bottom:box?box.bottom:null, w:box?box.w:null};
@@ -15266,7 +15301,7 @@ function mirrorInitHooks(){
 function renderTefillinMirror(){
   syncNativeTopBar(ckChrome('מראה לתפלין'), TEFILLIN_MIRROR_FROM);
   app.innerHTML=`
-  <div class="compass-full">
+  <div class="compass-full mirror-full">
     <div class="compass-fhead mirror-fhead">
       <button class="compass-close" id="mirrorClose">${ckChrome('סגור')}</button>
       <div class="compass-ftitle">${ckChrome('מראה לתפלין')}</div>
@@ -15284,7 +15319,12 @@ function renderTefillinMirror(){
       <div class="mirror-note" id="mirrorNote">${ckChrome('המראה משמשת לבדיקה אישית בלבד ואינה מצלמת או שומרת דבר')}</div>
     </div>
   </div>`;
-  document.getElementById('mirrorClose').onclick=()=>go(TEFILLIN_MIRROR_FROM);
+  document.getElementById('mirrorClose').onclick=()=>{
+    // instant: stop camera + loops synchronously and hide the overlay first, then navigate on the next tick
+    stopTefillinMirror();
+    const ov=document.querySelector('.compass-full'); if(ov) ov.style.display='none';
+    setTimeout(()=>go(TEFILLIN_MIRROR_FROM),0);
+  };
   const video=document.getElementById('mirrorVideo');
   document.getElementById('mirrorGuideBtn').onclick=e=>{
     MirrorGuide.enabled=!MirrorGuide.enabled;
@@ -15299,7 +15339,8 @@ function renderTefillinMirror(){
     return;
   }
   mirrorInitHooks();
-  if(MirrorGuide.enabled) MirrorGuide.load().catch(()=>{});   // fetch the models while the camera permission/stream starts, not after
+  MirrorGuide.preload();                         // only downloads the files (cheap); compiling them is deferred until the camera shows
+  if(MirrorGuide.enabled) MirrorGuide.hint(ckChrome('טוען מדריך…'));   // visible state from the first frame
   MCAM.fails=0; MCAM.lastTry=0; MCAM.denied=false;
   if(MCAM.timer) clearInterval(MCAM.timer);
   MCAM.timer=setInterval(mirrorWatchdog,1000);
