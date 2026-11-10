@@ -87,6 +87,13 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 @media (max-width:860px){.dl-in{grid-template-columns:1fr;text-align:center;gap:34px}.dl .badges{justify-content:center}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero h1 .w span{transform:none}.lead,.badges{opacity:1}}
 
+.hero{min-height:calc(100svh - 170px)!important}
+.hero-logo{width:84px;margin-bottom:6px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.45));animation:fade .8s .1s both}
+.eyebrow{font-size:clamp(18px,2.2vw,24px)!important;letter-spacing:.14em!important}
+.cue{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;letter-spacing:.2em;color:var(--soft);opacity:.8}
+.cue i{width:2px;height:26px;background:linear-gradient(var(--gold),transparent);animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(1);transform-origin:bottom;opacity:0}}
+
 .fan .lg{color:#f6f1e4!important}
 
 #c4cap{text-align:center!important;padding:0!important;transform:translate(-50%,-50%)!important;width:min(820px,92vw)}
@@ -139,11 +146,12 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
 <div id="prog"><i></i></div>
 <nav class="top"><b class="gold">תמיד</b></nav>
 <header class="hero" id="hero">
- <div class="eyebrow">אפליקציית הלימוד היומי</div>
+ <img class="hero-logo" alt="בית אל" src="img/logo.png"><div class="eyebrow">אפליקציית הלימוד היומי</div>
  <h1><span class="w"><span style="animation-delay:.05s">הלימוד</span></span> <span class="w"><span style="animation-delay:.18s">היומי</span></span> <span class="w"><span style="animation-delay:.31s">שלך,</span></span><br><span class="w"><span class="gold" style="animation-delay:.5s">תמיד</span></span> <span class="w"><span class="gold" style="animation-delay:.65s">איתך.</span></span></h1>
  <p class="lead">חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, בחמש שפות.</p>
  <div class="badges"><a class="sb apple" href="https://apps.apple.com/app/id6807186847" target="_blank" rel="noopener"><svg width="26" height="30" viewBox="0 0 24 28" fill="#fff"><path d="M19.6 14.9c0-3 2.5-4.4 2.6-4.5-1.4-2.1-3.7-2.4-4.5-2.4-1.9-.2-3.700 1.100-4.600 1.100-1 0-2.400-1.100-4-1.100-2 0-3.900 1.200-5 3-2.100 3.700-.5 9.200 1.500 12.200 1 1.500 2.200 3.100 3.800 3 1.500-.1 2.100-1 3.900-1s2.300 1 3.900.9c1.600 0 2.700-1.500 3.700-3 1.200-1.700 1.600-3.400 1.700-3.500-.1 0-3.200-1.200-3.200-4.700zM16.600 6c.8-1 1.400-2.400 1.200-3.800-1.200.1-2.700.8-3.500 1.800-.8.900-1.400 2.300-1.300 3.700 1.400.1 2.700-.7 3.600-1.700z"/></svg><span class="t"><small>Download on the</small><b>App Store</b></span></a>
 <a class="sb play" href="#cta"><svg width="28" height="30" viewBox="0 0 28 30"><path d="M2 1.300v27.400c0 .6.700 1 1.200.7L16 15 2 1c-.5-.3-.1-.5 0 .3z" fill="#00d7fe"/><path d="M16 15l4.300-4.300L3.200.6C2.700.3 2 .7 2 1.300L16 15z" fill="#00f076"/><path d="M16 15L2 28.700c0 .6.700 1 1.200.7l17.100-10.100L16 15z" fill="#ff3a44"/><path d="M20.300 10.700L16 15l4.300 4.300 5-2.900c1-.6 1-1.800 0-2.400l-5-2.900z" fill="#ffd500"/></svg><span class="t"><small>GET IT ON</small><b>Google Play</b></span><span class="soon">בקרוב</span></a></div>
+ <div class="cue" aria-hidden="true"><span>גללו</span><i></i></div>
 </header>
 
 <div class="pin-track" data-scene="1" style="height:1700vh"><div class="pin-stage">
@@ -227,8 +235,8 @@ function maxScroll(bottom,vh){return Math.max(0,bottom-(vh-NAVH)+14);}
 var RAILS={};function railSet(id,idx){var r=document.getElementById(id);if(!r)return;[].forEach.call(r.children,function(li,i){li.classList.toggle('on',i===idx);li.classList.toggle('done',i<idx);});}
 function setCap(st,h,p,text){if(st.cap===text)return;st.cap=text;h.style.opacity=0;if(p)p.style.opacity=0;setTimeout(function(){var a=text.split('|');h.textContent=a[0];if(p)p.textContent=a[1]||'\u00a0';h.style.opacity=1;if(p)p.style.opacity=1;},150);}
 /* Hebrew reads right to left: the next page arrives from the LEFT, the old one leaves to the RIGHT */
-function pageOut(grp,k,y){grp.style.transform='translate3d('+(k*560)+'px,'+(-(y||0))+'px,0) rotateY('+(k*26)+'deg)';grp.style.opacity=k>=1?0:1-k*1.2;}
-function pageIn(grp,k,y){grp.style.transform='translate3d('+((1-k)*-560)+'px,'+(-(y||0))+'px,0) rotateY('+((1-k)*-26)+'deg)';grp.style.opacity=k>0?clamp(k*1.6):0;}
+function pageOut(grp,k,y){grp.style.transform='translate3d('+(k*60)+'px,'+(-(y||0))+'px,0) scale('+(1-.025*k)+')';grp.style.opacity=k>=1?0:1-k;}
+function pageIn(grp,k,y){grp.style.transform='translate3d('+((1-k)*-60)+'px,'+(-(y||0))+'px,0) scale('+(.975+.025*k)+')';grp.style.opacity=k>0?k:0;}
 
 /* ================= scene 1 : boot -> home -> community -> daily Tehillim -> finish ================= */
 var scr1=$('scr1'),sc1=document.createElement('div');sc1.className='sc';scr1.appendChild(sc1);
@@ -252,13 +260,13 @@ function scene1(p){
   var vp=seg(p,.43,.5),vo=seg(p,.55,.6);var vk=spring(vp)*(1-vo);
   vis.style.opacity=clamp(vp*3)*(1-vo);vis.style.transform='translate(-50%,calc(-50% + '+((1-easeOut(vp))*160-vo*120)+'px)) scale('+(.9+.1*vk)+')';
   visNum.textContent=Math.round(1372*easeOut(seg(p,.44,.54))).toLocaleString('en-US');
-  var out=ease(seg(p,.58,.66));
+  var out=ease(seg(p,.56,.69));
   pageOut(home.grp,out,hs);
   pageIn(daily.grp,out,0);
   converge(daily,seg(p,.6,.72),'rain',9);
   /* scroll through the daily reading, press "I finished", celebrate */
   var maxD=maxScroll(daily.maxY,vh),ds=ease(seg(p,.7,.88))*maxD;
-  daily.grp.style.transform='translate3d('+((1-out)*-560)+'px,'+(-ds)+'px,0) rotateY('+((1-out)*-26)+'deg)';
+  daily.grp.style.transform='translate3d('+((1-out)*-60)+'px,'+(-ds)+'px,0) scale('+(.975+.025*out)+')';
   var press=seg(p,.88,.915),fin=daily.ps[finIdx];
   if(fin){var pr=Math.sin(press*Math.PI);fin.el.style.transform='scale('+(1-.07*pr)+')';fin.el.style.filter=press>0&&press<1?'brightness('+(1+.12*pr)+')':'none';}
   var cp=seg(p,.915,.98),ck=spring(cp);
@@ -279,21 +287,21 @@ function scene2(p){
   converge(calTop,seg(p,.02,.14),'edges',5);
   converge(calDet,seg(p,.16,.27),'burst',6,196,500);
   var calMax=maxScroll(1400,vh),cs=ease(seg(p,.28,.4))*calMax;
-  var oL=ease(seg(p,.42,.48)),oS=ease(seg(p,.74,.8));
-  var tr='translate3d('+(oL*560)+'px,'+(-cs)+'px,0) rotateY('+(oL*26)+'deg)';
-  calTop.grp.style.transform=tr;calTop.grp.style.opacity=oL>=1?0:1-oL*1.2;calDet.grp.style.transform=tr;calDet.grp.style.opacity=calTop.grp.style.opacity;
+  var oL=ease(seg(p,.4,.52)),oS=ease(seg(p,.72,.84));
+  var tr='translate3d('+(oL*60)+'px,'+(-cs)+'px,0) scale('+(1-.025*oL)+')';
+  calTop.grp.style.transform=tr;calTop.grp.style.opacity=oL>=1?0:1-oL;calDet.grp.style.transform=tr;calDet.grp.style.opacity=calTop.grp.style.opacity;
   var libMax=maxScroll(lib.maxY,vh),ls=ease(seg(p,.55,.7))*libMax;
-  lib.grp.style.transform='translate3d('+((1-oL)*-560+oS*560)+'px,'+(-ls)+'px,0) rotateY('+((1-oL)*-26+oS*26)+'deg)';lib.grp.style.opacity=oL>0&&oS<1?clamp(oL*1.6)*(1-oS*1.2):0;
+  lib.grp.style.transform='translate3d('+((1-oL)*-60+oS*60)+'px,'+(-ls)+'px,0) scale('+((.975+.025*oL)*(1-.025*oS))+')';lib.grp.style.opacity=oL>0&&oS<1?oL*(1-oS):0;
   converge(lib,seg(p,.46,.56),'zoom',12);
   var sdMax=maxScroll(siddur.maxY,vh),sds=ease(seg(p,.88,.99))*sdMax;
-  siddur.grp.style.transform='translate3d('+((1-oS)*-560)+'px,'+(-sds)+'px,0) rotateY('+((1-oS)*-26)+'deg)';siddur.grp.style.opacity=oS>0?clamp(oS*1.6):0;
+  siddur.grp.style.transform='translate3d('+((1-oS)*-60)+'px,'+(-sds)+'px,0) scale('+(.975+.025*oS)+')';siddur.grp.style.opacity=oS>0?oS:0;
   converge(siddur,seg(p,.76,.88),'spiral',14);
   var t=p<.16?'לוח עברי, כל יום|תאריכים, זמנים והילולות, לפי המקום שלך.':p<.42?'וכל פרט של היום|פרשת השבוע, הקריאה היומית וזמני היום, מכל נקודה אל מקומה.':p<.74?'ספרייה שלמה|חוק לישראל, תורה, נביאים, משנה, גמרא, שולחן ערוך הרב, זהר, מוסר ועוד, והחוברת השבועית בסוף.':'סידור לכל שעה|שחרית, מנחה, ערבית, ברכות ותפילות, בנוסח עדות המזרח.';
   setCap(st2,$('c2h'),$('c2p'),t);railSet('rail2',p<.16?0:p<.42?1:p<.74?2:3);
 }
 /* ================= scene 3 : compass + tefillin mirror (illustrated guide) ================= */
 var scr3=$('scr3'),sc3=document.createElement('div');sc3.className='sc';scr3.appendChild(sc3);
-var cw=document.createElement('div');cw.className='grp';var ci=new Image();ci.src=D.compassReal;ci.style.cssText='position:absolute;left:0;top:0;width:393px;height:852px;object-fit:cover;object-position:top';cw.appendChild(ci);sc3.appendChild(cw);var st3={};
+sc3.style.background='linear-gradient(180deg,#1b2644,#0e1530)';var comp=buildGroup(sc3,D.compassPieces,0);var st3={};
 var mw=document.createElement('div');mw.className='grp mirror';sc3.appendChild(mw);
 mw.innerHTML='<div class="mh"><span class="mb">\u203a</span><b>מראה לתפילין</b><span class="mb">\u22ef</span></div>'+
  '<div class="mstage"><svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
@@ -318,8 +326,8 @@ mw.innerHTML='<div class="mh"><span class="mb">\u203a</span><b>מראה לתפי
  '</svg><div class="mhint">הבית על קו השיער, במרכז</div></div>'+
  '<div class="mcard"><b>איך מניחים</b><span>הקצה התחתון של הבית נוגע בקו השיער, באמצע שבין העיניים.</span></div>';
 function scene3(p){fit(sc3,scr3);
-  var z=ease(seg(p,.04,.3));cw.style.opacity=clamp(z*2);
-  var o=ease(seg(p,.5,.62));cw.style.transform=o>0?'translate3d('+(o*560)+'px,0,0) rotateY('+(o*26)+'deg)':'scale('+(.9+.1*z)+')';cw.style.opacity=o>=1?0:(clamp(z*2)*(1-o*1.2));pageIn(mw,o,0);
+  converge(comp,seg(p,.04,.34),'zoom',11);
+  var o=ease(seg(p,.46,.66));pageOut(comp.grp,o,0);mw.style.background=o>0?'':'transparent';pageIn(mw,o,0);sc3.style.background=o>.5?'linear-gradient(180deg,#efe6d0,#e4d8bd)':'linear-gradient(180deg,#1b2644,#0e1530)';
   var ms=ease(seg(p,.62,.9));mw.querySelector('.mstage').style.transform='scale('+(1+.05*ms)+')';
   setCap(st3,$('c3h'),$('c3p'),p<.5?'כוון לירושלים|מצפן שמכוון אל הכותל, מכל מקום בעולם.':'מראה לתפילין|מדריך שמראה איפה הבית צריך להיות, לפני שמתחילים.');railSet('rail3',p<.5?0:1);}
 /* ================= scene 4 : five languages ================= */
@@ -327,7 +335,7 @@ var NM={he:'עברית',en:'English',fr:'Français',ru:'Русский',ka:'ქ�
 var fan=$('fan'),cap4=$('c4cap');(function(){var h=cap4.querySelector('h2');h.innerHTML=h.textContent.split(' ').map(function(w){return '<span class="w4" style="display:inline-block;will-change:transform">'+w+'</span>';}).join(' ');})();var order=['ka','ru','he','en','fr'],fp=[];   /* Hebrew in the middle, English + French on one side, Russian + Georgian on the other */
 order.forEach(function(l){var w=document.createElement('div');w.className='big-phone';w.innerHTML='<div class="phone" style="padding:8px"><div class="screen" style="background:#000"><img alt="'+NM[l]+'" src="'+D.langs[l]+'"></div></div><div class="lg">'+NM[l]+'</div>';fan.appendChild(w);fp.push(w);});
 function scene4(p){
-  var open=ease(seg(p,.04,.5)),lift=ease(seg(p,.56,.95));cap4.style.opacity=clamp(seg(p,.0,.08));var stg=document.querySelector('[data-scene="4"] .pin-stage'),sh=stg.clientHeight,sw2=stg.clientWidth,wide=sw2>=1000,rise=ease(seg(p,.05,.28));var x0=wide?sw2/2-330:sw2/2,y0=wide?sh/2:70;cap4.style.right='auto';cap4.style.insetInlineStart='auto';cap4.style.insetInlineEnd='auto';cap4.style.left=(x0+(sw2/2-x0)*rise)+'px';cap4.style.top=(y0+(62-y0)*rise)+'px';[].forEach.call(cap4.querySelectorAll('h2 .w4'),function(wd,wi){var k=ease(seg(rise,wi*.16,wi*.16+.6));wd.style.transform='translateY('+((1-k)*46)+'px)';wd.style.opacity=.25+.75*k;});cap4.style.width=(wide?(420+(500)*rise):Math.min(sw2*.92,820))+'px';cap4.querySelector('h2').style.fontSize=(wide?(54-12*rise):34)+'px';
+  var open=ease(seg(p,.04,.5)),lift=ease(seg(p,.56,.95));cap4.style.opacity=clamp(seg(p,.0,.03));var stg=document.querySelector('[data-scene="4"] .pin-stage'),sh=stg.clientHeight,sw2=stg.clientWidth,wide=sw2>=1000,rise=ease(seg(p,.16,.36));var x0=wide?sw2/2-330:sw2/2,y0=wide?sh/2:70;cap4.style.right='auto';cap4.style.insetInlineStart='auto';cap4.style.insetInlineEnd='auto';cap4.style.left=(x0+(sw2/2-x0)*rise)+'px';cap4.style.top=(y0+(62-y0)*rise)+'px';[].forEach.call(cap4.querySelectorAll('h2 .w4'),function(wd,wi){var k=ease(seg(rise,wi*.16,wi*.16+.6));wd.style.transform='translateY('+((rise-k)*80)+'px)';wd.style.opacity=1;});cap4.style.width=(wide?(420+(500)*rise):Math.min(sw2*.92,820))+'px';cap4.querySelector('h2').style.fontSize=(wide?(54-12*rise):34)+'px';
   fp.forEach(function(w,i){var c=i-2,ac=Math.abs(c),vw=Math.min(window.innerWidth,1000),gap=Math.min(vw*.2,250);
     var d=ease(seg(open,ac*.12,ac*.12+.7));
     /* first the outer phones fan out and hang a little DOWN; the next scroll lifts the same arc UP (the cards never close and reopen) */
