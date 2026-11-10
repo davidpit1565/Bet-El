@@ -11917,6 +11917,24 @@ function renderSahList(){
   const pos=sahGetPos(), posP=pos&&sahPart(pos.part), posS=posP&&posP.simanim.find(s=>s.n===pos.n);
   const rows=p.simanim.map(s=>`<div class="sah-row${done.includes(s.n)?' done':''}" data-n="${s.n}" data-q="${sahAttr(sahPlain(ckBare(s.t||'')).replace(/"/g,'')+' '+sahFold(S.lang!=='he'?sahTitleOf(s):''))}">
       <span class="sah-num">${heNum(s.n)}</span><span class="sah-ttl notranslate" dir="auto">${sahSafe(sahTitleOf(s))}</span>${done.includes(s.n)?'<span class="sah-chk">✓</span>':''}</div>`).join('');
+  if(homeNativePlugin()){   // iOS: plain `.prayer-row` rows so the generic native list (real Liquid Glass) can show the whole screen; the web/PWA/Android keeps the richer HTML below
+    const rowsN=p.simanim.map(s=>`<div class="prayer-row round-card prayer-row-lib${done.includes(s.n)?' done':''}" data-cat="sah" data-n="${s.n}"><span class="prayer-row-title notranslate" dir="auto">${heNum(s.n)} · ${sahSafe(sahTitleOf(s))}</span></div>`).join('');
+    const contN=(posS&&!(sahLoadDone()[pos.part]||[]).includes(pos.n))?`<div class="prayer-row round-card prayer-row-lib" data-cat="sah" id="sahCont"><span class="prayer-row-title">${t.cont} · ${t.siman} ${heNum(posS.n)}</span></div>`:'';
+    app.innerHTML=`${topbar(t.title,'library')}
+    <div class="view sah-view">${contN}<div class="prayer-row round-card prayer-row-lib" data-cat="sah" id="sahJumpRow"><span class="prayer-row-title">${t.jumpPh}</span></div><div class="prayers-list">${rowsN}</div></div>`;
+    app.querySelectorAll('.prayer-row[data-n]').forEach(r=>r.onclick=()=>openSah(p.key,+r.dataset.n));
+    const cN=document.getElementById('sahCont'); if(cN) cN.onclick=()=>openSah(posP.key,posS.n);
+    document.getElementById('sahJumpRow').onclick=()=>{   // a small HTML dialog (the native list hides itself while a body > .overlay is open)
+      const ov=document.createElement('div'); ov.className='overlay';
+      ov.innerHTML=`<div class="modal"><button class="close-x" data-close>${I.x}</button><input class="fld-input" id="sahQ2" type="text" inputmode="numeric" enterkeyhint="go" autocomplete="off" placeholder="${t.jumpPh}" style="width:100%;margin:6px 0 12px"/><button class="btn btn-gold" id="sahGo2" type="button"><span>${t.go}</span></button></div>`;
+      document.body.appendChild(ov);
+      const q2=ov.querySelector('#sahQ2'); setTimeout(()=>q2.focus(),60);
+      const go2=()=>{ const n=/^\d+$/.test(q2.value.trim())?+q2.value.trim():null; const v=q2.value.trim(), bare=ckBare(v), hit=n!=null?p.simanim.find(x=>x.n===n):(bare?p.simanim.find(x=>ckBare(sahPlain(sahTitleOf(x))).indexOf(bare)>=0):null); if(hit){ ov.remove(); openSah(p.key,hit.n); } else q2.select(); };
+      ov.querySelector('#sahGo2').onclick=go2; q2.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); go2(); } };
+      ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove()); ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+    };
+    tr(app); return;
+  }
   app.innerHTML=`${topbar(t.title,'library')}
   <div class="view sah-view">
     <div class="sah-hero">
