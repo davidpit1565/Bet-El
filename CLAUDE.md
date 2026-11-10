@@ -358,6 +358,9 @@ in English as usual.
   `startBackgroundDataPrefetch()` downloads only Hebrew base files plus the active UI language (`pfLangOf`), and re-runs on a
   language change.
 
+## Standing UI rule (owner, David - 2026-11-10)
+- **Every UI change made for the App Store build must be REAL iOS Liquid Glass automatically.** New or changed screens on iOS use the native glass components (UIKit/SwiftUI behind the existing native bridges, `UIGlassEffect`, `UIButton.Configuration.glass()`, the native list/home/library/settings screens) - never a web look-alike. The HTML version is only the web/PWA/Android/old-iOS fallback, where decorative blur/glass stays flat gradients (see the no-`backdrop-filter`-stacking lesson). If a screen cannot be shown natively yet (readers, screens with inputs), say so and propose how to convert it.
+
 ## Standing content rule (owner, David - 2026-11-07)
 - **Sacred texts are PHONETIC transliteration only, never meaning-translation, unless David approves otherwise.** This holds for Torah,
   Nach (incl. Shir HaShirim), Tehillim, prayers, Mishnah, Zohar, Reshit Chokhmah and, in general, every book. Copy the sound (letters,
