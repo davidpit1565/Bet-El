@@ -2925,6 +2925,10 @@ const PRAYER_GROUPS_NIKUD = {siddur:'סִדּוּר', brachot:'בִּרְכוֹ�
 // the entry, just don't let it show up a second time in the flat Tefilot
 // Nosafot list/search.
 const PRAYER_KEYS_HIDDEN = ['birkotHashachar', 'selichotEdotHamizrach'];
+/* Varied tile colours inside the Siddur / Additional Prayers screens, same palette as the Library's book tiles
+   (these are existing data-cat colour sets, so light/dark gradients and the native list colours come for free). */
+const PRAYER_TILE_PALETTE=['torah','neviim','ketuvim','mishnah','tanya','sah','musar','benishchai','rambam','zohar','gemara','tehillim'];
+function prayerTileCat(i){ return PRAYER_TILE_PALETTE[i%PRAYER_TILE_PALETTE.length]; }
 function prayerGroupKeys(group){
   const g=PRAYER_GROUPS[group];
   if(g.keys) return g.keys;
@@ -10732,8 +10736,8 @@ function renderPrayersGroup(){
   ${topbar(PRAYER_GROUPS[group].he,'prayers')}
   <div class="view">
     ${ready.length ? `<div class="quick-grid">
-      ${ready.map(key => `
-        <div class="q-tile round-card" data-cat="${group}" onclick="openPrayer('${key}','${group}')">
+      ${ready.map((key,ki) => `
+        <div class="q-tile round-card" data-cat="${prayerTileCat(ki+3)}" onclick="openPrayer('${key}','${group}')">
           <div class="qt">${(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[key].title):(PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</div>
         </div>
       `).join('')}
@@ -12649,12 +12653,12 @@ function drawSiddurHome(){
   ${topbar('סדור','prayers')}
   <div class="view">
     <div class="quick-grid">
-      ${tiles.map(p=> p==='tefillinMirror'
-        ? `<div class="q-tile round-card" data-cat="siddur" data-tool="tefillinMirror"><div class="qt">${ckChrome('מראה לתפלין')}</div></div>`
-        : `<div class="q-tile round-card" data-cat="siddur" data-sidp="${p}">
+      ${tiles.map((p,ti)=> p==='tefillinMirror'
+        ? `<div class="q-tile round-card" data-cat="${prayerTileCat(ti)}" data-tool="tefillinMirror"><div class="qt">${ckChrome('מראה לתפלין')}</div></div>`
+        : `<div class="q-tile round-card" data-cat="${prayerTileCat(ti)}" data-sidp="${p}">
         <div class="qt">${heTitle(SIDDUR_PRAYER_NAMES[p], SIDDUR_PRAYER_NAMES_NIKUD[p]||SIDDUR_PRAYER_NAMES[p])}</div>
       </div>`).join('')}
-      ${PRAYER_GROUPS.brachot.keys.filter(k=>PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready).map(key=>`<div class="q-tile round-card" data-cat="brachot" onclick="openPrayer('${key}','brachot')">
+      ${PRAYER_GROUPS.brachot.keys.filter(k=>PRAYERS_EXTRA[k]&&PRAYERS_EXTRA[k].ready).map((key,bi)=>`<div class="q-tile round-card" data-cat="${prayerTileCat(tiles.length+bi)}" onclick="openPrayer('${key}','brachot')">
         <div class="qt">${(S.lang&&S.lang!=='he')?ckChrome(PRAYERS_EXTRA[key].title):(PRAYERS_EXTRA_TITLE_NIKUD[key]||PRAYERS_EXTRA[key].title)}</div>
       </div>`).join('')}
     </div>
