@@ -140,24 +140,24 @@ async function broadcast(texts, data) {
 }
 
 const MILESTONE_TEXT = {
-  he: (n) => ({ title: `ברוך השם — ${n} משתמשים!`, body: `ברוך השם עברנו את ה-${n} משתמשים! תודה שאתה חלק מהקהילה. 🙏` }),
-  en: (n) => ({ title: `Thank G-d — ${n} Users!`, body: `Thank G-d, we’ve passed ${n} users! Thank you for being part of the community. 🙏` }),
-  fr: (n) => ({ title: `Grâce à D.ieu — ${n} utilisateurs !`, body: `Grâce à D.ieu, nous avons dépassé ${n} utilisateurs ! Merci de faire partie de la communauté. 🙏` }),
-  ru: (n) => ({ title: `Слава Богу — ${n} пользователей!`, body: `Слава Богу, мы превысили ${n} пользователей! Спасибо, что вы часть этой общины. 🙏` }),
-  ka: (n) => ({ title: `მადლობა ღმერთს — ${n} მომხმარებელი!`, body: `მადლობა ღმერთს, გადავაბიჯეთ ${n} მომხმარებელს! გმადლობთ, რომ ჩვენი საზოგადოების ნაწილი ხართ. 🙏` }),
+  he: (n) => ({ title: `ברוך השם — ${n} כניסות!`, body: `ברוך השם עברנו את ה-${n} כניסות! תודה שאתה חלק מהקהילה. 🙏` }),
+  en: (n) => ({ title: `Thank G-d — ${n} Visits!`, body: `Thank G-d, we’ve passed ${n} visits! Thank you for being part of the community. 🙏` }),
+  fr: (n) => ({ title: `Grâce à D.ieu — ${n} visites !`, body: `Grâce à D.ieu, nous avons dépassé ${n} visites ! Merci de faire partie de la communauté. 🙏` }),
+  ru: (n) => ({ title: `Слава Богу — ${n} посещений!`, body: `Слава Богу, мы превысили ${n} посещений! Спасибо, что вы часть этой общины. 🙏` }),
+  ka: (n) => ({ title: `მადლობა ღმერთს — ${n} ვიზიტი!`, body: `მადლობა ღმერთს, გადავაბიჯეთ ${n} ვიზიტს! გმადლობთ, რომ ჩვენი საზოგადოების ნაწილი ხართ. 🙏` }),
 };
 
 /**
- * Fires when the public user counter (stats/visits.count) crosses a multiple of 100 (300, 400, 500, ...), once per
+ * Fires when the public user counter (stats/visits.count) crosses a multiple of 1,000 (1,000, 2,000, 3,000, ...), once per
  * milestone for everyone - tracked in stats/announced so retries / duplicate triggers never send it twice.
  */
-const MILESTONES_ENABLED = false;   // user decision: no more "N users" announcements (the counter is hidden in the app)
+const MILESTONES_ENABLED = false;   // user decision: no more "N visits" announcements (the counter is hidden in the app)
 exports.milestonePush = onDocumentUpdated({ document: "stats/visits", region: "us-central1", timeoutSeconds: 540, memory: "512MiB", maxInstances: 1 }, async (event) => {
   if (!MILESTONES_ENABLED) return;
   const before = (event.data.before.data() || {}).count || 0;
   const after = (event.data.after.data() || {}).count || 0;
-  const tier = Math.floor(after / 100) * 100;
-  if (tier < 300 || Math.floor(before / 100) * 100 >= tier) return;
+  const tier = Math.floor(after / 1000) * 1000;
+  if (tier < 1000 || Math.floor(before / 1000) * 1000 >= tier) return;
   const ref = admin.firestore().doc("stats/announced");
   const first = await admin.firestore().runTransaction(async (tx) => {
     const d = (await tx.get(ref)).data() || {};
