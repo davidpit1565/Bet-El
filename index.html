@@ -1943,10 +1943,13 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
 .home-item>.home-hero-frame,.home-item>.yahrzeit-strip:first-child{margin-top:0}
 .home-item.hi-fixed:empty{display:none}
 .home-item.hi-fixed{margin:-4px 0}
-.q-tile.hi-l{min-height:112px;padding:18px 20px;gap:6px}   /* the prayer-now tile: no taller than the rest (David's rule) */
+.q-tile.hi-l{min-height:92px;padding:14px 18px;gap:4px}   /* the prayer-now tile: no taller than the rest (David's rule) */
 .q-tile.hi-l .qt{font-size:25px}
 .q-tile.hi-l .qd{font-size:15px}
-#homeGrid>.home-item:not(.hi-wide)>.q-tile{min-height:112px}   /* every half-width tile the same height */
+#homeGrid>.home-item:not(.hi-wide)>.q-tile{min-height:88px;padding:12px 15px;gap:3px}   /* every half-width tile the same height, slimmer (David: too thick) */
+#homeGrid>.home-item>.q-tile .qt{font-size:17px;line-height:1.2}
+#homeGrid>.home-item>.q-tile .qd{font-size:13px;line-height:1.3}
+#homeGrid>.home-item>.q-tile.hi-l .qt{font-size:21px}
 .home-zmanim{padding:14px 16px}
 .home-zmanim .hz-title{font-family:var(--font-sacred);font-weight:700;font-size:16px;color:var(--gold);margin-bottom:8px}
 /* edit mode (modelled on the iPhone's home-screen edit mode: a gentle wiggle, a small gray minus,
