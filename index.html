@@ -2,6 +2,7 @@
 <html lang="he" dir="rtl" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
 <title>תמיד</title>
 <meta name="theme-color" content="#080d19"/>
@@ -2391,6 +2392,8 @@ function dataPrefetchUI(force){
   if(!force && now-PF_LAST_UI<250) return;
   PF_LAST_UI = now;
   let bar = document.getElementById('dataPrefetchBar');
+  if(bar) bar.remove();
+  return;   /* owner request: the download runs silently, no progress line (settings row also hidden below) */
   if(PF.state!=='run' || !PF.total){
     if(bar){ bar.classList.add('done'); setTimeout(()=>{ if(PF.state!=='run' && bar.parentNode) bar.remove(); }, 600); }
     return;
@@ -2428,10 +2431,9 @@ function pfStateLabel(){
 function pfSettingsVisible(){ return !!(DATA_BASE && window.caches); }
 function pfCanRetry(){ return ['error','offline','paused','wifi'].indexOf(PF.state)>=0; }
 function pfSettingsHTML(){
-  if(!pfSettingsVisible()) return '';
+  if(!pfSettingsVisible() || (!pfCanRetry() && !pfWifiDetectable())) return '';
   return `<div class="set-group" id="offGroup">
       <h3>שימוש ללא אינטרנט</h3>
-      <div class="set-item"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t" id="offState">${pfStateLabel()||'שימוש ללא אינטרנט'}</div><div class="si-d" id="offDesc" role="status" aria-live="polite">${PF.total?pfNumText():''}</div></div></div></div>
       <div class="set-item" id="offRetry" style="cursor:pointer;${pfCanRetry()?'':'display:none'}"><div class="si-l"><span class="si-ico">${I.refresh}</span><div><div class="si-t">נסו שוב</div></div></div></div>
       ${pfWifiDetectable()?`<div class="set-item"><div class="si-l"><span class="si-ico">${I.globe}</span><div><div class="si-t">הורדה ב-Wi-Fi בלבד</div><div class="si-d">חוסך נתונים סלולריים. הלימוד הבסיסי מורד תמיד.</div></div></div>
         <div class="toggle ${pfWifiOnly()?'on':''}" id="tgOffWifi" role="switch" aria-checked="${pfWifiOnly()}"></div></div>`:''}
@@ -2451,7 +2453,6 @@ function pfWire(){
 }
 function pfNativeRows(){
   return [
-    nsRow('offStatus','row',ckChrome(pfStateLabel()||'שימוש ללא אינטרנט'), PF.total?pfNumText():''),
     ...(pfCanRetry()?[nsRow('offRetry','button',ckChrome('נסו שוב'),'')]:[]),
     ...(pfWifiDetectable()?[nsRow('offWifi','toggle',ckChrome('הורדה ב-Wi-Fi בלבד'),ckChrome('חוסך נתונים סלולריים. הלימוד הבסיסי מורד תמיד.'),{value:pfWifiOnly()})]:[]),
   ];
@@ -3087,7 +3088,7 @@ window.animateCountUp = animateCountUp;
 function lsJSON(key, def, ok){ try{ const v=JSON.parse(localStorage.getItem(key)); return (v!=null && (!ok||ok(v))) ? v : def; }catch(e){ return def; } }
 function backupApply(j){
   if(!isObj(j)||j.app!=='betel-tehillim'||!isObj(j.data)) throw 0;
-  const ent=Object.entries(j.data).filter(([k,v])=>/^betel_[\w.-]{1,80}$/.test(k) && typeof v==='string' && v.length<2000000 && !/^betel_push_/.test(k));
+  const ent=Object.entries(j.data).filter(([k,v])=>/^betel_[\w.-]{1,80}$/.test(k) && typeof v==='string' && v.length<2000000 && !/^betel_(push_|update_info)/.test(k));
   ent.forEach(([k,v])=>{ if(/^[\[{]/.test(v)) JSON.parse(v); });   // JSON-looking values must parse, or nothing is written
   ent.forEach(([k,v])=>localStorage.setItem(k,v));
 }
@@ -8007,8 +8008,9 @@ function appUpdateVerGt(a,b){
   return false;
 }
 function appUpdateDismissed(){ return APP_UPDATE_INFO && localStorage.getItem('betel_update_dismissed_v')===APP_UPDATE_INFO.version; }
+function appStoreSafeUrl(u){ u=String(u||''); return /^https:\/\/apps\.apple\.com\//i.test(u)?u:APP_STORE_URL; }   /* a poisoned backup/localStorage value must never become a javascript: link */
 function openAppStorePage(url){
-  const u=String(url||APP_STORE_URL);
+  const u=appStoreSafeUrl(url);
   const store=u.replace(/^https?:\/\//i,'itms-apps://');
   try{ window.location.href=store; }catch(e){ try{ window.open(u,'_blank'); }catch(e2){} }
 }
@@ -9065,7 +9067,7 @@ function renderHome(){
     ${isZmanTefilinNow()?`<div class="yahrzeit-strip" id="homeTefillinMirrorBanner" style="cursor:pointer">${I.tefillin}<span>${ckChrome('זמן תפלין')} · <b>${ckChrome('מראה לתפלין')}</b></span></div>`:''}
     ${hh?`<div class="yahrzeit-strip" id="homeHolidayHalachaBanner" style="cursor:pointer">${I.cal}<span>${holidayHalachaUI().title} · <b>${hh.name}</b> · ${holidayHalachaUI().inDays(hh.days)}</span></div>`:''}
     ${(APP_UPDATE_INFO && !appUpdateDismissed())?`<div class="yahrzeit-strip" id="homeUpdateBanner">${I.bell}<span>${ckChrome('גרסה חדשה זמינה')} · ${ckChrome('עדכנו לגרסה האחרונה ב-App Store')}</span>
-      <a href="${APP_UPDATE_INFO.url}" target="_blank" rel="noopener" style="margin-inline-start:auto;white-space:nowrap;font-weight:700;text-decoration:underline">${ckChrome('עדכן עכשיו')}</a>
+      <a href="${appStoreSafeUrl(APP_UPDATE_INFO.url)}" target="_blank" rel="noopener" style="margin-inline-start:auto;white-space:nowrap;font-weight:700;text-decoration:underline">${ckChrome('עדכן עכשיו')}</a>
       <span id="homeUpdateDismiss" style="cursor:pointer;padding-inline-start:8px;opacity:.7">✕</span>
     </div>`:''}
 `,
@@ -9164,7 +9166,7 @@ function renderHome(){
       if(!zl.length) return '';
       const nowD=new Date(), nxt=zl.find(z=>z.date&&z.date>nowD);
       return `<div class="card home-zmanim">
-        <div class="hz-title">${ckChrome('זמני היום')} · ${LOC.name}</div>
+        <div class="hz-title">${ckChrome('זמני היום')} · ${escHtml(LOC.name)}</div>
         <div class="zmanim-list">${zl.map(z=>`<div class="zman-row ${nxt&&z.key===nxt.key?'next':''}"><div class="zl"><span class="zname">${ckChrome(z.label)}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}</div>
       </div>`;
     },
@@ -10636,10 +10638,10 @@ function renderDayDetail(hd, events){
       <div class="dd-portion" style="flex:1" data-open="${wRange[0]},${wRange[1]}"><div class="lbl">${ckChrome('קְרִיאָה שְׁבוּעִית')}</div><div class="val">${heNum(wRange[0])}–${heNum(wRange[1])}</div></div>
     </div>
     ${hillulotHTML(hd)}
-    ${ZMANIM_LIVE?`<div class="loc-line">${I.loc}<span>${ckChrome(LOC.name)}</span></div>
+    ${ZMANIM_LIVE?`<div class="loc-line">${I.loc}<span>${escHtml(ckChrome(LOC.name))}</span></div>
     <div class="zmanim-list">
       ${zlist.map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${ckChrome(z.label)}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
-    </div>`:`<div class="loc-line">${I.loc}<span>${ckChrome(LOC.name)}</span></div>
+    </div>`:`<div class="loc-line">${I.loc}<span>${escHtml(ckChrome(LOC.name))}</span></div>
     <div class="zmanim-list">
       ${zlist.filter(z=>ZMANIM_READY.includes(z.key)).map(z=>`<div class="zman-row ${z.key===nextKey?'next':''}"><div class="zl"><span class="zname">${ckChrome(z.label)}</span></div><span class="ztime">${fmtTime(z.date)}</span></div>`).join('')}
     </div>
@@ -14813,7 +14815,7 @@ function renderKotelCompass(){
         <div class="compass-target-line">${ckChrome('כוון קדש הקדשים')}: ${hasLoc?Math.round(CompassState.bearing)+'°':'—'}</div>
         <div class="compass-turn-line ${aligned?'ok':''}" id="compassTurnLine">${knowsHeading?turn.text:(hasLoc?ckChrome('הכוון החי דורש אשור חישן'):'')}</div>
       </div>
-      ${hasLoc?`<div class="compass-loc-card">${LOC.name} <b>·</b> ${LOC.lat.toFixed(3)}°, ${LOC.lon.toFixed(3)}° <b>·</b> ${Math.round(CompassState.distKm)} ${ckChrome('ק״מ מירושלים')}</div>`:''}
+      ${hasLoc?`<div class="compass-loc-card">${escHtml(LOC.name)} <b>·</b> ${LOC.lat.toFixed(3)}°, ${LOC.lon.toFixed(3)}° <b>·</b> ${Math.round(CompassState.distKm)} ${ckChrome('ק״מ מירושלים')}</div>`:''}
       ${!hasLoc?`<button class="btn btn-gold" id="compassLocBtn">${I.loc}<span>${ckChrome('אפשרו גישה למקום')}</span></button>`:''}
       ${hasLoc && CompassState.needsOrientPerm && !CompassState.handler?`<button class="btn btn-ghost" id="compassOrientBtn">${I.compass}<span>${ckChrome('אפשרו חישן כוון')}</span></button>`:''}
       <div class="compass-note">${ckChrome('הכוון מחשב לפי המקום וחישן הכוון של המכשיר. שמעו לב: יתכן שתהיה סטיה קלה במצפן הטלפון - השמוש באחריותכם בלבד.')}</div>
@@ -15331,7 +15333,7 @@ function settingsCategoryBody(catId, notifPerm){
     <div class="set-group">
       <h3>הקדשת הקריאה</h3>
       <div class="set-item col">
-        <div id="dedItems">${dedList().map((d,i)=>`<div class="ded-row"><span class="ded-txt">${dedLabel(d.t)} ${d.n}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין הקדשות עדין</div>'}</div>
+        <div id="dedItems">${dedList().map((d,i)=>`<div class="ded-row"><span class="ded-txt">${dedLabel(d.t)} ${escHtml(d.n)}</span><button class="ded-del" data-i="${i}">${I.x}</button></div>`).join('')||'<div class="si-d">אין הקדשות עדין</div>'}</div>
         <div class="ded-add">
           <div class="ded-add-row">
             <select id="dedType" class="fld-select">
@@ -16158,7 +16160,7 @@ function nativeSettingsCategorySpec(catId){
           nsRow('lineSp','select',ckChrome('ריווח שורות'),ckChrome('ריווח בין שורות הטקסט'),{value:S.lineSp||'normal', options:[{value:'tight',label:ckChrome('ריווח צפוף')},{value:'normal',label:ckChrome('ריווח רגיל')},{value:'loose',label:ckChrome('ריווח מרווח')}]}),
           nsRow('readFont','select',ckChrome('גופן הקריאה'),ckChrome('הגופן בטקסט התפילה והתהילים'),{value:S.readFont||'taamey', options:[{value:'taamey',label:ckChrome('גופן טעמי פרנק')},{value:'noto',label:ckChrome('גופן נוטו סריף')},{value:'david',label:ckChrome('גופן דוד')},{value:'frank',label:ckChrome('גופן פרנק רוהל')},{value:'heebo',label:ckChrome('גופן הימו ללא שריפים')}]}),
         ]},
-        ...(pfSettingsVisible()?[{header:ckChrome('שימוש ללא אינטרנט'), rows:pfNativeRows()}]:[]),
+        ...((pfSettingsVisible() && pfNativeRows().length)?[{header:ckChrome('שימוש ללא אינטרנט'), rows:pfNativeRows()}]:[]),
       ];
       break;
     case 'notifications':
