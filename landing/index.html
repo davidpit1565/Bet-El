@@ -117,6 +117,17 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 .faq summary::-webkit-details-marker{display:none}.faq p{color:var(--soft);line-height:1.7;margin-top:10px;font-size:17px}
 .mirror .mstage img.mav{display:block;width:100%;height:100%;object-fit:cover}
 @media (max-width:760px){.nums{grid-template-columns:repeat(2,1fr)}.cards3,.cards2{grid-template-columns:1fr}.sec{padding-top:80px}}
+@media (max-width:760px){
+ .pin-stage{padding-top:112px;padding-bottom:34px}
+ .big-phone{width:min(310px,80vw,calc((100svh - 160px) * .4839))}
+ .fan .big-phone{width:min(210px,56vw,calc((100svh - 300px) * .4839))}
+ .fan .lg{display:none}
+ .langrow{display:flex!important}
+ .pin-cap{top:calc(env(safe-area-inset-top,0px) + 22px)}
+ .pin-cap h2{font-size:clamp(26px,7.4vw,34px)}.pin-cap p{font-size:15px}
+}
+.langrow{display:none;position:absolute;left:0;right:0;bottom:78px;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 14px;z-index:6}
+.langrow span{padding:5px 12px;border-radius:99px;border:1px solid rgba(230,200,116,.4);color:#f6efdc;font-size:14px;background:rgba(255,255,255,.06)}
 @keyframes cue{0%,100%{transform:translateY(-3px) rotate(45deg);opacity:.5}50%{transform:translateY(3px) rotate(45deg);opacity:1}}
 .totop{position:fixed;bottom:20px;inset-inline-start:20px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(230,200,116,.5);background:rgba(14,21,48,.78);color:#f6efdc;font-size:20px;cursor:pointer;z-index:40;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s}
 .totop.on{opacity:1;pointer-events:auto;transform:none}
@@ -171,7 +182,6 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
 .mirror .mhint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);white-space:nowrap;padding:8px 16px;border-radius:99px;background:rgba(10,16,38,.7);color:#f6f1e4;font-size:14px;font-weight:500}
 .mirror .mcard{margin-top:14px;padding:14px 16px;border-radius:20px;background:rgba(255,255,255,.6);box-shadow:0 6px 18px rgba(60,40,10,.1);text-align:right}
 .mirror .mcard b{display:block;font-family:var(--f-display);font-size:18px;color:#8a6414}.mirror .mcard span{font-size:14px;line-height:1.5}
-@media(max-width:700px){.fan .big-phone{width:min(36vw,calc((100svh - 260px) * .4839))!important}}
 </style></head><body>
 <div id="prog"><i></i></div>
 <nav class="top"><b class="gold">תמיד</b></nav>
@@ -199,9 +209,10 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
 <div class="pin-track" data-scene="4" style="height:800vh"><div class="pin-stage">
  <div class="pin-cap" id="c4cap" style="opacity:0"><h2>הלימוד שלך, בשפה שלך</h2><p>אותו לימוד, בכל לשון</p></div>
  <div class="fan" id="fan"></div>
+ <div class="langrow"><span>עברית</span><span>English</span><span>Français</span><span>Русский</span><span>ქართული</span></div>
  <div class="pin-bar"><i></i></div></div></div>
 
-<section class="sec nums" id="nums"><div class="num"><b data-n="150">0</b><span>מזמורי תהילים</span></div><div class="num"><b data-n="5">0</b><span>שפות</span></div><div class="num"><b data-n="0">0</b><span>פרסומות</span></div><div class="num"><b data-n="0">0</b><span>הרשמות</span></div></section>
+<section class="sec nums" id="nums"><div class="num"><b data-n="15">0</b><span>ספרים בספרייה</span></div><div class="num"><b data-n="5">0</b><span>שפות</span></div><div class="num"><b data-n="0">0</b><span>פרסומות</span></div><div class="num"><b data-n="0">0</b><span>הרשמות</span></div></section>
 
 <section class="sec" id="who"><div class="k">למי זה מתאים</div><h2 class="sh">לכל מי שרוצה קביעות.</h2>
  <div class="cards3">
@@ -370,7 +381,7 @@ var fan=$('fan'),cap4=$('c4cap');(function(){var h=cap4.querySelector('h2');h.in
 order.forEach(function(l){var w=document.createElement('div');w.className='big-phone';w.innerHTML='<div class="phone" style="padding:8px"><div class="island"></div><div class="screen lscr"><img alt="'+NM[l]+'" src="'+D.langs[l]+'"></div></div><div class="lg">'+NM[l]+'</div>';fan.appendChild(w);fp.push(w);});
 function scene4(p){
   var open=ease(seg(p,.04,.5)),lift=ease(seg(p,.56,.95));cap4.style.opacity=clamp(seg(p,.0,.03));var stg=document.querySelector('[data-scene="4"] .pin-stage'),sh=stg.clientHeight,sw2=stg.clientWidth,wide=sw2>=1000,ry=ease(seg(p,.14,.32)),rx=ease(seg(p,.30,.46));var x0=wide?sw2/2-330:sw2/2,y0=wide?sh/2:70,sc4=wide?(1-.24*ry):1;cap4.style.right='auto';cap4.style.insetInlineStart='auto';cap4.style.insetInlineEnd='auto';cap4.style.left=(x0+(sw2/2-x0)*rx)+'px';cap4.style.top=(y0+(70-y0)*ry)+'px';cap4.style.transform='translate(-50%,-50%) scale('+sc4+')';cap4.querySelector('h2').style.fontSize=(wide?54:34)+'px';
-  fp.forEach(function(w,i){var c=i-2,ac=Math.abs(c),vw=Math.min(window.innerWidth,1000),gap=Math.min(vw*.2,250);
+  var lr=document.querySelector('.langrow');if(lr)lr.style.opacity=clamp(seg(p,.22,.42));fp.forEach(function(w,i){var c=i-2,ac=Math.abs(c),vw=Math.min(window.innerWidth,1000),gap=vw<700?vw*.12:Math.min(vw*.2,250);
     var d=ease(seg(open,ac*.12,ac*.12+.7));
     /* first the outer phones fan out and hang a little DOWN; the next scroll lifts the same arc UP (the cards never close and reopen) */
     var arc=(1-lift)*1-lift*1;   /* +1 -> -1 */
