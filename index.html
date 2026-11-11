@@ -2812,7 +2812,7 @@ function birkatHamazonDayText(hd, P){
   let yaaleChag = null, yaaleIsYomTovProper = false;
   if(di.isCholHaMoed && di.cholHaMoedChag==='pesach'){ yaaleChag='pesach'; yaaleIsYomTovProper=false; }
   if(di.isCholHaMoed && di.cholHaMoedChag==='sukkot'){ yaaleChag='sukkot'; yaaleIsYomTovProper=false; }
-  if(di.yaaleVeyavoChag){ yaaleChag=di.yaaleVeyavoChag; yaaleIsYomTovProper=true; }
+  if(di.yaaleVeyavoChag){ yaaleChag=di.yaaleVeyavoChag; yaaleIsYomTovProper=(di.yaaleVeyavoChag!=='roshChodesh'); }   /* Rosh Chodesh is not a Yom Tov: no "yom shekulo tov" (it has its own HaRachaman for the month) */
   const isRealSukkot = (di.cholHaMoedChag==='sukkot') || (di.yaaleVeyavoChag==='sukkot');
   /* Translated/transliterated text (en/fr/ru/ka): same day logic, composed from the keyed parts of
      data/prayers-<lang>.json "birkatHamazonParts" (split from the full translated text, no new wording).
@@ -2887,7 +2887,7 @@ function birkatHamazonDayText(hd, P){
   // handled here).
   if(di.isShabbat) paragraphs.push('הָרַחֲמָן הוּא יַנְחִילֵֽנוּ עוֹלָם שֶׁכֻּלּוֹ שַׁבָּת וּמְנוּחָה לְחַיֵּי הָעוֹלָמִים:');
   if(di.isRoshChodesh) paragraphs.push('הָרַחֲמָן הוּא יְחַדֵּשׁ עָלֵינוּ אֶת הַחֹדֶשׁ הַזֶּה לְטוֹבָה וְלִבְרָכָה:');
-  if(isRealSukkot) paragraphs.push('הָרַחֲמָן הוּא יְזַכֵּנוּ לֵישֵׁב בְּסֻכַּת עוֹרוֹ שֶׁל לִוְיָתָן: הָרַחֲמָן הוּא יַשְׁפִּיעַ עָלֵינוּ שֶׁפַע קְדֻשָּׁה וְטָהֲרָה מִשִּׁבְעָה אוּשְׁפִּיזִין עִלָּאִין קַדִּישִׁין, זְכוּתָם תְּהֵא מָגֵן וְצִנָּה עָלֵינוּ:');
+  if(isRealSukkot) paragraphs.push('הָרַחֲמָן הוּא יְזַכֵּנוּ לֵישֵׁב בְּסֻכַּת עוֹרוֹ שֶׁל לִוְיָתָן: הָרַחֲמָן הוּא יָקִים לָנוּ אֶת סֻכַּת דָּוִד הַנּוֹפֶלֶת: הָרַחֲמָן הוּא יַשְׁפִּיעַ עָלֵינוּ שֶׁפַע קְדֻשָּׁה וְטָהֲרָה מִשִּׁבְעָה אוּשְׁפִּיזִין עִלָּאִין קַדִּישִׁין, זְכוּתָם תְּהֵא מָגֵן וְצִנָּה עָלֵינוּ:');
   if(yaaleChag && yaaleChag!=='roshChodesh') paragraphs.push('הָרַחֲמָן הוּא יַגִּיעֵנוּ לְמוֹעֲדִים אֲחֵרִים הַבָּאִים לִקְרָאתֵנוּ לְשָׁלוֹם:');
   if(yaaleIsYomTovProper) paragraphs.push('הָרַחֲמָן הוּא יַנְחִילֵֽנוּ יוֹם שֶׁכֻּלּוֹ טוֹב:');
   paragraphs.push('הָרַחֲמָן הוּא יִטַּע תּוֹרָתוֹ וְאַהֲבָתוֹ בְּלִבֵּנוּ וְתִהְיֶה יִרְאָתוֹ עַל פָּנֵינוּ לְבִלְתִּי נֶחֱטָא. וְיִהְיוּ כָל מַעֲשֵׂינוּ לְשֵׁם שָׁמָיִם.');
@@ -9800,14 +9800,16 @@ function siddurIsTalSeason(hd){
 }
 function siddurGregLeap(y){ return (y%4===0 && (y%100!==0 || y%400===0)); }
 /* Outside Israel, "וְתֵן טַל וּמָטָר" starts 60 days after Tekufat Tishrei,
-   which lands on the civil Dec 4 - except Dec 5 in the civil year right
-   before a civil leap year (2023, 2027, 2031...), since that leap day
-   shifts the count. Valid under this simple Dec-4/Dec-5 rule through
-   the year 2100 (the standard practical approximation cited by every
-   halachic calendar; after 2100 the Julian/Gregorian drift moves it a
-   day later). */
+   which lands on the NIGHT of civil Dec 4 - except the night of Dec 5 in
+   the civil year right before a civil leap year (2023, 2027, 2031...),
+   since that leap day shifts the count. The Hebrew day that starts that
+   night is the civil Dec 5 (Dec 6 before a leap year), which is what this
+   returns (HDate(civil date) = the Hebrew day that began the evening
+   before). Valid under this simple rule through the year 2100 (the
+   standard practical approximation cited by every halachic calendar;
+   after 2100 the Julian/Gregorian drift moves it a day later). */
 function siddurChulTalUmatarStart(gregYear){
-  return new Date(gregYear, 11, siddurGregLeap(gregYear+1) ? 5 : 4);
+  return new Date(gregYear, 11, siddurGregLeap(gregYear+1) ? 6 : 5);
 }
 /* "בָּֽרְכֵֽנוּ" (no rain request) vs. "בָּרֵךְ עָלֵֽינוּ ... וְתֵן טַל וּמָטָר"
    in the Amidah's 9th blessing (Birkat HaShanim) - a DIFFERENT switch-over
@@ -9833,18 +9835,74 @@ function siddurIsGeshemSeason(hd){
   }
   return abs>=sheelaAbs && abs<pesachAbs;
 }
+/* ---- Purim on the 14th or the 15th of Adar, by the user's location (LOC) ----
+   Cities that were walled in the days of Yehoshua bin Nun keep Purim on the 15th (Shushan Purim);
+   everywhere else it is the 14th (Mishna Megillah 1:1, Shulchan Aruch Orach Chaim 688:1-4).
+   List used by the app = the cities in common use in Israeli luchot. Extend it by adding a row
+   {name, lat, lon, r (km)}; r is the radius around the centre that counts as the city.
+   NEEDS A RABBI'S CONFIRMATION (which cities, and the radii - Jaffa/Tel Aviv in particular: only
+   old Jaffa is walled, so its radius is small and Tel Aviv keeps the 14th). Not listed on purpose
+   (no citation in hand): Sidon, Tyre, Damascus, Baghdad, Susa, Cairo/Fustat. */
+const PURIM_WALLED_CITIES = [
+  {name:'Jerusalem',          lat:31.7683, lon:35.2137, r:10},
+  {name:'Tiberias',           lat:32.7922, lon:35.5312, r:6},
+  {name:'Safed',              lat:32.9646, lon:35.4960, r:6},
+  {name:'Acre',               lat:32.9281, lon:35.0818, r:5},
+  {name:'Jaffa (old city)',   lat:32.0536, lon:34.7522, r:2},
+  {name:'Lod',                lat:31.9522, lon:34.8881, r:5},
+  {name:'Beit Shean',         lat:32.4974, lon:35.4989, r:5},
+  {name:'Hebron',             lat:31.5326, lon:35.0998, r:8},
+  {name:'Shechem (Nablus)',   lat:32.2211, lon:35.2544, r:8},
+  {name:'Gaza',               lat:31.5017, lon:34.4668, r:8},
+];
+function siddurPurimOn15Here(){
+  try{
+    const toRad=x=>x*Math.PI/180;
+    return PURIM_WALLED_CITIES.some(c=>{
+      const dLat=toRad(LOC.lat-c.lat), dLon=toRad(LOC.lon-c.lon);
+      const a=Math.sin(dLat/2)**2+Math.cos(toRad(c.lat))*Math.cos(toRad(LOC.lat))*Math.sin(dLon/2)**2;
+      return 2*6371*Math.asin(Math.sqrt(a)) <= c.r;
+    });
+  }catch(e){ return false; }
+}
 /* One function describing everything the Siddur's rendering needs to know
    about today, so the reader screens just check plain booleans/fields
    rather than re-deriving calendar logic themselves - mirrors
    isRoshChodeshToday's own HebrewCalendar.calendar+getDesc() pattern. */
+/* Shabbat and Yom Tov begin at SUNSET in the app (the Hebrew date itself still rolls at nightfall, tzeit):
+   between shkia and tzeit on the eve of Shabbat/Yom Tov, the Shabbat/Yom Tov-dependent flags (Retzei,
+   Ya'aleh VeYavo, Migdol, Tachanun skip, ...) come from tomorrow. Rosh Chodesh, Chanukah, Purim and the
+   Omer count keep the tzeit rule (today's values). Motzei Shabbat keeps Shabbat until tzeit as before. */
+function siddurSunsetOverlay(hd){
+  try{
+    const now=new Date(), z=zmanimFor(civilToday());
+    const ss=z.sunset(), tz=z.tzeit();
+    if(!(ss && tz && now>=ss && now<tz)) return null;
+    const tmr=siddurDayInfoCore(new HDate(hd.abs()+1));
+    if(!(tmr.isShabbat || tmr.isYomTov)) return null;
+    const today=siddurDayInfoCore(hd);
+    const o=Object.assign({}, tmr);
+    ['isRoshChodesh','isChanukah','chanukahDay','isPurim','isShushanPurim','isPurimKatan','omerDay','isFastDay','fastDayName','fastDayHe','isTalSeason','isGeshemSeason'].forEach(k=>{ o[k]=today[k]; });
+    if(today.isRoshChodesh && !o.yaaleVeyavoChag) o.yaaleVeyavoChag='roshChodesh';
+    if(!today.isRoshChodesh && o.yaaleVeyavoChag==='roshChodesh') o.yaaleVeyavoChag=null;
+    o.skipTachanun=true;
+    return o;
+  }catch(e){ return null; }
+}
 function siddurDayInfo(hd){
+  const cur=currentHDate();
+  if(!hd || hd.abs()===cur.abs()){ const o=siddurSunsetOverlay(cur); if(o) return o; }
+  return siddurDayInfoCore(hd);
+}
+function siddurDayInfoCore(hd){
   hd = hd || currentHDate();
   const info = {
     isRoshChodesh:false, isCholHaMoed:false, cholHaMoedChag:null,
     isFastDay:false, fastDayName:null, fastDayHe:null,
     isChanukah:false, chanukahDay:null,
-    isPurim:false,
-    isAseretYemeiTeshuva:false,
+    isPurim:false, isShushanPurim:false, isPurimKatan:false, isPesachSheni:false, isTuBav:false,
+    isErevPesach:false, isFriday:false,
+    isAseretYemeiTeshuva:false, isTishrei3to9:false,
     isElulTishreiLedavid:false,
     isHashemHuHaElokimDay:false,
     isNisan:false, isLagBaOmer:false, isErevYomKippur:false, isTuBishvat:false,
@@ -9868,7 +9926,8 @@ function siddurDayInfo(hd){
        app, that's Tishrei 3-9: Rosh Hashana itself (1-2 Tishrei) and Yom
        Kippur itself (10 Tishrei) are out of scope (major holidays, no
        phone use), so only the days *between* them ever render here. */
-    info.isAseretYemeiTeshuva = hd.getMonth()===HMONTHS.TISHREI && hd.getDate()>=3 && hd.getDate()<=9;
+    info.isAseretYemeiTeshuva = hd.getMonth()===HMONTHS.TISHREI && hd.getDate()>=1 && hd.getDate()<=9;   // 1-9 Tishrei (Oseh HaShalom incl. Rosh Hashana)
+    info.isTishrei3to9 = hd.getMonth()===HMONTHS.TISHREI && hd.getDate()>=3 && hd.getDate()<=9;   // weekday-only additions (Hashem Hu HaElokim, Mimaamakim in Pesukei D'Zimra)
     // "LeDavid Hashem Ori" (Psalm 27) after Shacharit's Aleinu, Rosh Chodesh
     // Elul through Hoshana Raba (Tishrei 21) - per custom, wider than
     // siddurIsSelichotSeason's own Elul+Tishrei<=9 range (that one's for the
@@ -9879,11 +9938,29 @@ function siddurDayInfo(hd){
     // והושענא רבה אומרים") - Aseret Yemei Teshuva (this app's own Tishrei
     // 3-9 window, see isAseretYemeiTeshuva above) OR Hoshana Raba (Tishrei
     // 21) alone, not the whole isElulTishreiLedavid range.
-    info.isHashemHuHaElokimDay = info.isAseretYemeiTeshuva || (hd.getMonth()===HMONTHS.TISHREI && hd.getDate()===21);
+    info.isHashemHuHaElokimDay = info.isTishrei3to9 || (hd.getMonth()===HMONTHS.TISHREI && hd.getDate()===21);
     info.isIsruChag = isIsruChagToday(hd, il);
     info.isTalSeason = siddurIsTalSeason(hd);
     info.isGeshemSeason = siddurIsGeshemSeason(hd);
     info.isShabbat = hd.greg().getDay()===6;
+    info.isFriday = hd.greg().getDay()===5;
+    // Purim by the user's location (siddurPurimOn15Here): the community's own day is "Purim"
+    // (Al HaNissim, Torah reading); the other of 14/15 Adar is an ordinary day, but Tachanun is
+    // omitted on both (isShushanPurim = the non-Purim day of the pair).
+    { const pm = hd.isLeapYear() ? HMONTHS.ADAR_II : HMONTHS.ADAR_I, pd = hd.getDate();
+      if(hd.getMonth()===pm && (pd===14 || pd===15)){
+        if(pd===(siddurPurimOn15Here()?15:14)) info.isPurim=true; else info.isShushanPurim=true;
+      } }
+    info.isErevPesach = hd.getMonth()===HMONTHS.NISAN && hd.getDate()===14;
+    // Chanukah by the Hebrew date itself (25 Kislev = day 1 ... day 8): hebcal's
+    // "Chanukah: N Candles" event is dated on the civil eve, one day early.
+    { const cd = hd.abs() - new HDate(25, HMONTHS.KISLEV, hd.getFullYear()).abs();
+      if(cd>=0 && cd<=7){ info.isChanukah=true; info.chanukahDay=cd+1; } }
+    // Days without Tachanun that hebcal doesn't flag for this feature: Purim Katan
+    // (14 Adar I, leap year), Pesach Sheni (14 Iyyar), Tu B'Av (15 Av).
+    info.isPurimKatan = hd.isLeapYear() && hd.getMonth()===HMONTHS.ADAR_I && hd.getDate()===14;
+    info.isPesachSheni = hd.getMonth()===HMONTHS.IYYAR && hd.getDate()===14;
+    info.isTuBav = hd.getMonth()===HMONTHS.AV && hd.getDate()===15;
     const g=hd.greg(); const s=new Date(g); s.setHours(0,0,0,0); const e=new Date(g); e.setHours(23,59,59,0);
     const evs=HebrewCalendar.calendar({start:s,end:e,il,location:hebLocation()});
     evs.forEach(ev=>{
@@ -9895,9 +9972,6 @@ function siddurDayInfo(hd){
       // though hebcal labels it "(Hoshana Raba)" rather than "(CH''M)".
       if(/^Sukkot.*\((CH''M|Hoshana Raba)\)/i.test(d)){ info.isCholHaMoed=true; info.cholHaMoedChag='sukkot'; }
       if(SIDDUR_FAST_DAYS[d]){ info.isFastDay=true; info.fastDayName=d; info.fastDayHe=SIDDUR_FAST_DAYS[d]; }
-      if((m=/^Chanukah: (\d+)/i.exec(d))){ info.isChanukah=true; info.chanukahDay=+m[1]; }
-      else if(/^Chanukah: 8th Day/i.test(d)){ info.isChanukah=true; info.chanukahDay=8; }
-      if(/^Purim$|^Shushan Purim$/i.test(d)) info.isPurim=true;
       if(/^Lag BaOmer$/i.test(d)) info.isLagBaOmer=true;
       if(/^Erev Yom Kippur$/i.test(d)) info.isErevYomKippur=true;
       if(/^Tu BiShvat$/i.test(d)) info.isTuBishvat=true;
@@ -9909,7 +9983,7 @@ function siddurDayInfo(hd){
          function. */
       if(/^Rosh Hashana( \d+)?$|^Rosh Hashana II$/i.test(d)){ info.isYomTov=true; info.isRoshHashana=true; info.yaaleVeyavoChag='roshHashana'; }
       if(/^Yom Kippur$/i.test(d)){ info.isYomTov=true; info.isYomKippur=true; } // no Yaale VeYavo (fast day, no meal)
-      if(/^Tish.a B.Av( \(observed\))?$/i.test(d)) info.isTishaBav=true; // hebcal's own desc uses a curly apostrophe (Tish’a B’Av) - matched loosely here
+      if(/^Tish.a B.Av( \(observed\))?$/i.test(d)) { info.isTishaBav=true; info.isFastDay=true; info.fastDayName="Tish'a B'Av"; info.fastDayHe='תִּשְׁעָה בְּאָב'; } // hebcal's own desc uses a curly apostrophe (Tish’a B’Av) - matched loosely here
       if(/^Sukkot (I|II)$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='sukkot'; }
       if(/^Shmini Atzeret$|^Simchat Torah$/i.test(d)){ info.isYomTov=true; info.yaaleVeyavoChag='shminiAtzeret'; }
       if((m=/^Pesach (I|II|VII|VIII)$/i.exec(d))){ info.isYomTov=true; info.yaaleVeyavoChag='pesach'; info.isPesachLastDays=(m[1]==='VII'||m[1]==='VIII'); }
@@ -9934,7 +10008,9 @@ function siddurDayInfo(hd){
      isErevRoshHashana is still exposed above so flipping this later is a
      one-line change. */
   info.skipTachanun = info.isRoshChodesh || info.isNisan || info.isLagBaOmer || info.isErevYomKippur
-    || info.isChanukah || info.isTuBishvat || info.isPurim || info.isIsruChag;
+    || info.isChanukah || info.isTuBishvat || info.isPurim || info.isShushanPurim || info.isIsruChag
+    || info.isPurimKatan || info.isPesachSheni || info.isTuBav
+    || info.isShabbat || info.isYomTov || info.isCholHaMoed || info.isTishaBav;
   /* Hallel: Rosh Chodesh + Chol HaMoed Pesach + Pesach's last days (VII/
      VIII) = half, NO blessing before or after (Edot HaMizrach/Sephardi
      practice per Shulchan Aruch - Ashkenazim differ and do bless it).
@@ -12844,6 +12920,8 @@ function siddurWeekdayTorahKey(dateObj){
    reading on the 4 fast days in the standard practice. */
 function siddurTorahReading(dateObj, info, opts){
   opts=opts||{};
+  // Tisha B'Av: only Mincha reads (Vayechal); Shacharit's own reading (Devarim 4:25-40) is not in the app.
+  if(info.isTishaBav && !opts.mincha) return null;
   if(info.isFastDay) return {label:ckChrome('תַּעֲנִית')+' · '+ckChrome(info.fastDayHe||''), refs:SIDDUR_TORAH_FAST_DAY};
   if(opts.mincha) return null;
   if(info.isChanukah && SIDDUR_TORAH_CHANUKAH[info.chanukahDay]) return {label:ckChrome('חֲנֻכָּה')+' · '+ckChrome('יוֹם')+' '+heNum(info.chanukahDay), refs:SIDDUR_TORAH_CHANUKAH[info.chanukahDay]};
@@ -12938,7 +13016,8 @@ function siddurBlessingParas(b, info, opts){
     // its own location-dependent date (siddurIsGeshemSeason), not the
     // Pesach/Shmini-Atzeret one every other seasonal blessing (Gevurot's
     // Tal/Geshem) uses - see siddurIsGeshemSeason's own comment.
-    const wantWinter = (b.n===9) ? info.isGeshemSeason : !info.isTalSeason;
+    // Barchenu already starts at Mincha of Erev Pesach (14 Nisan).
+    const wantWinter = (b.n===9) ? (info.isGeshemSeason && !(opts.mincha && info.isErevPesach)) : !info.isTalSeason;
     out.push({text: wantWinter ? b.season.winter : b.season.summer});
   }
   if(b.text2) out.push({text:b.text2});
@@ -12950,7 +13029,7 @@ function siddurBlessingParas(b, info, opts){
   // teshuvaInsert-first order as every other blessing, which is wrong only
   // for this one).
   if(!b.tail2) pushTeshuvaInsert();
-  if(b.faslInsert && info.isFastDay) out.push({text:b.faslInsert, insert:true, tag:ckChrome('עֲנֵנוּ')+' · '+ckChrome(info.fastDayHe||'')});
+  if(b.faslInsert && info.isFastDay && !opts.noFast) out.push({text:b.faslInsert, insert:true, tag:ckChrome('עֲנֵנוּ')+' · '+ckChrome(info.fastDayHe||'')});
   if(b.yaaleVeyavo && !opts.skipYaale && (info.isRoshChodesh || info.isCholHaMoed)){
     const y=b.yaaleVeyavo;
     const occ = info.isRoshChodesh ? y.roshChodesh : (info.cholHaMoedChag==='pesach' ? y.pesach : y.sukkot);
@@ -13130,7 +13209,8 @@ function siddurTalitTefilinHTML(){
 // (Friday night is excluded there too, but that's time-of-day dependent,
 // not date-dependent, so it's left for the person to know themselves).
 function siddurTikunChatzotSkipToday(info){
-  return !!(info.isYomTov || (info.isCholHaMoed && info.cholHaMoedChag==='pesach'));
+  // info.isShabbat is the Hebrew day, which already rolled at nightfall: it covers Friday night too.
+  return !!(info.isShabbat || info.isYomTov || (info.isCholHaMoed && info.cholHaMoedChag==='pesach'));
 }
 // Whether Tachanun is said at all on the Hebrew day `info` describes -
 // Shabbat, every Yom Tov, Chol HaMoed, plus everything already in
@@ -13177,7 +13257,7 @@ function siddurTikunChatzotHTML(info){
   // Chodesh, a house of mourning/a groom/a brit day, the Shmita year) are
   // personal-circumstance calls the app has no way to detect, so they're
   // left for the person to apply themselves.
-  const sayRachelToday = !(info.skipTachanun || info.omerDay || info.isAseretYemeiTeshuva);
+  const sayRachelToday = !((info.skipTachanun && !info.isTishaBav) || info.omerDay || info.isAseretYemeiTeshuva);
   let rachel = `<div class="siddur-section-title">${ckChrome('תִּקּוּן רָחֵל')}</div>`;
   rachel += siddurTehillimChapterHTML(137);
   rachel += siddurTehillimChapterHTML(79);
@@ -13376,7 +13456,7 @@ function siddurNameVerseHTML(){
   });
   return paras.join('');
 }
-function siddurAmidahClosingHTML(info){
+function siddurAmidahClosingHTML(info, service){
   let html = siddurParasFromText(`${PT('yihyuLeratzon')||SIDDUR.yihyuLeratzon}\n\n${PT('elokaiNetzor')||SIDDUR.elokaiNetzor}\n\n${PT('yihyuLeratzon')||SIDDUR.yihyuLeratzon}`, true);
   html += siddurNameVerseHTML();
   const oseShalom = info.isAseretYemeiTeshuva
@@ -13390,7 +13470,9 @@ function siddurAmidahClosingHTML(info){
   // (it resembles the weekday Amida's own middle blessings, which are
   // themselves skipped on Shabbat) - a gap found by this session's
   // siddur-audit workflow.
-  if(info.isAseretYemeiTeshuva && !info.isShabbat){
+  // Only at Shacharit and Mincha (never Arvit); not at Mincha of Friday or Erev Yom Kippur.
+  const sayAvinu = service==='shacharit' || (service==='mincha' && !info.isFriday && !info.isErevYomKippur);
+  if(info.isAseretYemeiTeshuva && !info.isShabbat && sayAvinu){
     html += `<div class="siddur-section-title">${ckChrome('אָבִינוּ מַלְכֵּנוּ')}</div>`;
     const trAvinu = PT('avinuMalkeinu');
     html += siddurParasFromText((trAvinu||SIDDUR.avinuMalkeinu).join('\n\n'), true);
@@ -13404,9 +13486,9 @@ function siddurAmidahHTML(info, opts){
   html += `<div class="prayer-para">${PT('openingLine')||SIDDUR.openingLine}</div>`;
   SIDDUR.amidah19.forEach(hb=>{
     if(skipBlessings && !skipBlessings.includes(hb.n)) return;
-    html += siddurBlessingHTML(siddurBlessingFor(hb.n), info, {skipYaale:opts.skipYaale});
+    html += siddurBlessingHTML(siddurBlessingFor(hb.n), info, {skipYaale:opts.skipYaale, noFast:opts.noFast, mincha:opts.mincha});
   });
-  html += siddurAmidahClosingHTML(info);
+  html += siddurAmidahClosingHTML(info, opts.service);
   return html;
 }
 function siddurMusafHTML(info){
@@ -13553,8 +13635,10 @@ function siddurToggleAccordion(btn){
    Aseret Yemei Teshuva) rather than duplicating the text here. */
 function siddurIsSelichotSeason(hd){
   const m=hd.getMonth(), d=hd.getDate();
+  if(hd.greg().getDay()===6) return false; // never on Shabbat
   if(m===HMONTHS.ELUL) return true;
-  if(m===HMONTHS.TISHREI && d<=9) return true; // through Aseret Yemei Teshuva (Erev Yom Kippur)
+  if(m===HMONTHS.TISHREI && d>=3 && d<=9) return true; // not on Rosh Hashana (1-2 Tishrei)
+  if(m===HMONTHS.TISHREI && d<=2) return false; // through Aseret Yemei Teshuva (Erev Yom Kippur)
   return false;
 }
 
@@ -13610,7 +13694,11 @@ function siddurPesukeiDezimraHTML(info){
   html += siddurTehillimChapterHTML(67);
   html += `<div class="siddur-section-title">${ckChrome('בָּרוּךְ שֶׁאָמַר')}</div>`;
   html += siddurParasFromText(pz.baruchSheamar, true);
-  html += siddurTehillimChapterHTML(100); // Mizmor LeToda
+  // Mizmor LeToda is not said on Shabbat, Yom Tov, Erev Pesach, Chol HaMoed Pesach, Erev Yom Kippur
+  // (no todah offering was brought on those days).
+  if(!(info.isShabbat || info.isYomTov || info.isErevPesach || info.isErevYomKippur || (info.isCholHaMoed && info.cholHaMoedChag==='pesach'))){
+    html += siddurTehillimChapterHTML(100); // Mizmor LeToda
+  }
   html += `<div class="prayer-para">${pz.yehiChevod}</div>`;
   html += `<div class="prayer-para">${pz.ashreiIntro}</div>`;
   html += siddurTehillimChapterHTML(145); // the Ashrei psalm itself
@@ -13629,7 +13717,7 @@ function siddurPesukeiDezimraHTML(info){
   // psalm, immediately after Yishtabach's blessing and right before the
   // Chatzi Kaddish that closes the section). A previous round placed it
   // earlier in the sequence by mistake; corrected here.
-  if(info.isAseretYemeiTeshuva) html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">${ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')}</span>${pz.aseretYemeiTeshuvaInsert}</div>`;
+  if(info.isTishrei3to9) html += `<div class="prayer-para siddur-insert"><span class="siddur-insert-tag">${ckChrome('עֲשֶׂרֶת יְמֵי תְּשׁוּבָה')}</span>${pz.aseretYemeiTeshuvaInsert}</div>`;
   // Pesukei D'Zimra's own closing Chatzi Kaddish + Barchu (Sefaria: Weekday
   // Shacharit > Pesukei D'Zimra ends with "ואומר החזן חצי קדיש" then
   // Barchu) - previously missing entirely, so Birkot Kriat Shema jumped
@@ -14077,7 +14165,7 @@ function siddurSections(dateObj, info, prayer){
     push('kaddishD','קַדִּישׁ דְּרַבָּנָן', siddurCollapseHTML(ckChrome('קַדִּישׁ דְּרַבָּנָן'), siddurParasFromText(PT('kaddishDerabbanan')||SIDDUR.kaddishDerabbanan, true)));
     push('pesukei','פְּסוּקֵי דְּזִמְרָה', siddurPesukeiDezimraHTML(info));
     push('shema','קְרִיאַת שְׁמַע', siddurBirkotShemaHTML());
-    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{service:'shacharit'}));
     push('tachanun','תַּחֲנוּן', siddurTachanunHTML(info, dateObj)+(siddurIsSelichotSeason(currentHDate())?`<div class="siddur-selichot-link" data-sidgo="selichot"><span>${ckChrome('סְלִיחוֹת לְעוֹנָה זוֹ - לִפְנֵי עֲלוֹת הַשַּׁחַר')}</span><span>${I.chev}</span></div>`:''));
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {skipYehalelu:true}));
     push('hallel','הַלֵּל', siddurHallelHTML(info));
@@ -14167,7 +14255,7 @@ function siddurSections(dateObj, info, prayer){
     push('ashrei','אַשְׁרֵי', siddurParasFromText(aul2.ashreiIntro.split('\n\n')[1], true)+siddurTehillimChapterHTML(145)+`<div class="prayer-para">${mo.tichonTefilati}</div>`);
     push('torah','קְרִיאַת הַתּוֹרָה', siddurTorahReadingHTML(dateObj, info, {mincha:true}));
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
-    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{service:'mincha', mincha:true}));
     // Full Tachanun/Vidui text (see siddurTachanunCoreHTML) - previously
     // just a one-line "said/not said today" strip with no actual text.
     // Mincha's own Vidui has no Monday/Thursday addition (unlike
@@ -14229,7 +14317,8 @@ function siddurSections(dateObj, info, prayer){
     push('opening','לְשֵׁם יִחוּד', opening);
     push('shema','קְרִיאַת שְׁמַע וּבִרְכוֹתֶיהָ', siddurArvitShemaHTML(info));
     push('kaddish1','קַדִּישׁ', siddurChatziKaddishHTML());
-    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{}));
+    // Arvit: `info` is already tonight's (next) Hebrew day, so a fast day's own flag must not add Aneinu yet.
+    push('amidah','עֲמִידָה', siddurAmidahHTML(info,{service:'arvit', noFast:true}));
     // Arvit has no chazan repetition, so the Kaddish right after the
     // (silent) Amida is the fuller Kaddish Titkabel, not a plain Chatzi
     // Kaddish - a correction per explicit user feedback (Chatzi Kaddish
