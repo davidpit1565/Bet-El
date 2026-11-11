@@ -98,11 +98,11 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 .dl{min-height:100svh;display:grid;place-items:center;position:relative;padding-block:70px;margin-inline:calc(50% - 50vw);padding-inline:max(16px,env(safe-area-inset-left,0px))}
 .dl-in{max-width:1100px;width:100%;display:grid;grid-template-columns:1.15fr .85fr;column-gap:56px;row-gap:30px;align-items:center}
 .dl-h{grid-column:1;grid-row:1}.qrc{grid-column:2;grid-row:1;justify-self:center}.dl-b{grid-column:1;grid-row:2}.qrcap{grid-column:2;grid-row:2;justify-self:center}
-.dl h2{font-size:clamp(52px,8.6vw,124px);font-weight:800}
+.dl h2{font-size:clamp(40px,5.2vw,76px);font-weight:800}
 .dl .badges{justify-content:flex-start;opacity:1;animation:none;margin-top:36px}
 .dl .sb{height:68px;min-width:210px}.dl .sb .t b{font-size:28px}.dl .sb.play .t b{font-size:26px}
-.qrc{justify-self:center;background:#fbf5e6;border-radius:34px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(230,200,116,.5),0 0 70px rgba(230,200,116,.18);width:min(420px,84vw);text-align:center;color:#2a2110}
-.qrc svg{display:block;width:100%;height:auto}.qrcap{font-family:var(--f-display);font-size:clamp(30px,3.4vw,42px);font-weight:700;color:#f1d98e;letter-spacing:.02em}
+.qrc{justify-self:center;background:#fbf5e6;border-radius:34px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(230,200,116,.5),0 0 70px rgba(230,200,116,.18);width:min(300px,84vw);text-align:center;color:#2a2110}
+.qrc svg{display:block;width:100%;height:auto}.qrcap{font-family:var(--f-display);font-size:clamp(22px,2vw,28px);font-weight:700;color:#f1d98e;letter-spacing:.02em}
 .foot{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-top:46px;font-size:14px}
 .foot a{color:var(--soft);text-decoration:none}.foot a:hover{color:var(--gold)}
 @media (max-width:860px){.dl-in{grid-template-columns:1fr;text-align:center;row-gap:30px}.dl-h,.qrc,.dl-b,.qrcap{grid-column:1}.dl-h{grid-row:1}.dl-b{grid-row:2}.qrc{grid-row:3}.qrcap{grid-row:4}.dl .badges{justify-content:center}}
@@ -234,7 +234,8 @@ nav.top.scrolled{backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filte
  .card h3,.bk-t h3{font-size:20px}
  .faq summary{font-size:17px}
  .num b{font-size:28px}.beatnums .num b{font-size:26px!important}.num span{font-size:14px}.beatnums .num span{font-size:13px}
- .qrcap{font-size:24px}.cue{font-size:15px}
+ .qrcap{font-size:20px}.cue{font-size:15px}
+ .qrc{width:min(200px,56vw);padding:16px;border-radius:24px}.dl h2{font-size:clamp(28px,8vw,32px)!important}.dl{min-height:0;padding-block:56px}
  .sb .t small,.dl .sb .t small{font-size:11px}.sb .soon{font-size:11px}
  .sf-col a,.sf-col button,.sf-col .sf-soon{font-size:15px}.sf-base{font-size:13px}
 }
@@ -253,11 +254,12 @@ nav.top.scrolled{backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filte
  @supports (height:1svh){.widpin{height:calc(var(--h,340) * 1svh)!important}}
  .widstage{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;padding-top:78px;padding-bottom:22px;overflow:hidden}
  .widstage .sub{display:none}.widstage .sh{margin-bottom:10px}
- .widrow{position:relative;display:block!important;flex:1;margin:6px 0 0!important;padding:0!important;overflow:visible!important}
- .widrow figure{position:absolute!important;left:50%;top:0;height:100%;width:auto!important;aspect-ratio:780/1695;flex:none!important;margin:0!important;opacity:0;transform:translateX(-50%) scale(.9);will-change:opacity,transform}
+ .widrow{position:relative;display:block!important;flex:1;margin:6px 0 0!important;padding:0!important;overflow:visible!important;max-width:none!important}
+ .widrow figure{position:absolute!important;left:50%;top:2%;height:94%;width:auto!important;aspect-ratio:780/1695;flex:none!important;margin:0!important;opacity:0;transform:translateX(-50%) scale(.9);will-change:opacity,transform}
  .widrow img{height:100%;width:auto}
 }
 .langrow span{transition:background .3s,border-color .3s,color .3s}.langrow span.on{background:rgba(230,200,116,.28);border-color:var(--gold);color:#fff}
+.widrow{max-width:calc(3 * (68svh * .4603) + 52px);margin-inline:auto}
 @keyframes cue{0%,100%{transform:translateY(-3px) rotate(45deg);opacity:.5}50%{transform:translateY(3px) rotate(45deg);opacity:1}}
 .totop{position:fixed;bottom:24px;inset-inline-end:20px;width:56px;height:56px;border-radius:50%;border:1.5px solid rgba(230,200,116,.75);background:rgba(14,21,48,.9);box-shadow:0 8px 24px rgba(0,0,0,.4);color:#f6efdc;font-size:26px;cursor:pointer;z-index:40;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s}
 .totop.on{opacity:1;pointer-events:auto;transform:none}

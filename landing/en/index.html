@@ -23,7 +23,7 @@
 :root{--bg:#060b18;--ink:#f6f1e4;--soft:#aab6d4;--gold:#e6c874;--gold-d:#b98a2e;--line:rgba(230,200,116,.22);
  --f-display:"Frank Ruhl Libre",Georgia,serif;--f-body:"Heebo",system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}html{scroll-behavior:auto;-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.6;direction:rtl;overflow-x:hidden;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.6;direction:ltr;overflow-x:hidden;overflow-x:clip}
 h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.08}p{margin:0}
 .gold{background:linear-gradient(180deg,#fff3cf,var(--gold) 55%,var(--gold-d));-webkit-background-clip:text;background-clip:text;color:transparent}
 #prog{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:3px;z-index:50}
@@ -98,11 +98,11 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 .dl{min-height:100svh;display:grid;place-items:center;position:relative;padding-block:70px;margin-inline:calc(50% - 50vw);padding-inline:max(16px,env(safe-area-inset-left,0px))}
 .dl-in{max-width:1100px;width:100%;display:grid;grid-template-columns:1.15fr .85fr;column-gap:56px;row-gap:30px;align-items:center}
 .dl-h{grid-column:1;grid-row:1}.qrc{grid-column:2;grid-row:1;justify-self:center}.dl-b{grid-column:1;grid-row:2}.qrcap{grid-column:2;grid-row:2;justify-self:center}
-.dl h2{font-size:clamp(52px,8.6vw,124px);font-weight:800}
+.dl h2{font-size:clamp(40px,5.2vw,76px);font-weight:800}
 .dl .badges{justify-content:flex-start;opacity:1;animation:none;margin-top:36px}
 .dl .sb{height:68px;min-width:210px}.dl .sb .t b{font-size:28px}.dl .sb.play .t b{font-size:26px}
-.qrc{justify-self:center;background:#fbf5e6;border-radius:34px;padding:36px;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(230,200,116,.5),0 0 70px rgba(230,200,116,.18);width:min(420px,84vw);text-align:center;color:#2a2110}
-.qrc svg{display:block;width:100%;height:auto}.qrcap{font-family:var(--f-display);font-size:clamp(30px,3.4vw,42px);font-weight:700;color:#f1d98e;letter-spacing:.02em}
+.qrc{justify-self:center;background:#fbf5e6;border-radius:34px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(230,200,116,.5),0 0 70px rgba(230,200,116,.18);width:min(300px,84vw);text-align:center;color:#2a2110}
+.qrc svg{display:block;width:100%;height:auto}.qrcap{font-family:var(--f-display);font-size:clamp(22px,2vw,28px);font-weight:700;color:#f1d98e;letter-spacing:.02em}
 .foot{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-top:46px;font-size:14px}
 .foot a{color:var(--soft);text-decoration:none}.foot a:hover{color:var(--gold)}
 @media (max-width:860px){.dl-in{grid-template-columns:1fr;text-align:center;row-gap:30px}.dl-h,.qrc,.dl-b,.qrcap{grid-column:1}.dl-h{grid-row:1}.dl-b{grid-row:2}.qrc{grid-row:3}.qrcap{grid-row:4}.dl .badges{justify-content:center}}
@@ -234,16 +234,32 @@ nav.top.scrolled{backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filte
  .card h3,.bk-t h3{font-size:20px}
  .faq summary{font-size:17px}
  .num b{font-size:28px}.beatnums .num b{font-size:26px!important}.num span{font-size:14px}.beatnums .num span{font-size:13px}
- .qrcap{font-size:24px}.cue{font-size:15px}
+ .qrcap{font-size:20px}.cue{font-size:15px}
+ .qrc{width:min(200px,56vw);padding:16px;border-radius:24px}.dl h2{font-size:clamp(28px,8vw,32px)!important}.dl{min-height:0;padding-block:56px}
  .sb .t small,.dl .sb .t small{font-size:11px}.sb .soon{font-size:11px}
  .sf-col a,.sf-col button,.sf-col .sf-soon{font-size:15px}.sf-base{font-size:13px}
 }
 }
 .doc-modal.framed .doc-card{background:#080d19;padding:0;overflow:hidden;color:#f6f1e4}.docframe{display:block;width:100%;height:calc(100vh - 90px);border:0}.doc-modal.framed .doc-x{background:rgba(255,255,255,.12);color:#fff;z-index:2}
 .navlang{color:#cfcbbd;font-size:15px;text-decoration:none;border:1px solid rgba(230,200,116,.35);padding:6px 14px;border-radius:99px;min-height:34px;display:inline-flex;align-items:center}.navlang:hover{color:#fff;border-color:var(--gold)}
-@media (max-width:760px){.navlang{padding:5px 11px;font-size:14px}}
+@media (max-width:760px){.navlang{padding:5px 11px;font-size:14px}.navcta{white-space:nowrap;padding:8px 14px}.navcta svg{display:none}}
+.navcta{white-space:nowrap}
+@media (max-width:400px){nav.top{gap:8px;padding:0 12px!important}.brand{gap:7px}.brand b{font-size:20px}.brand img{width:28px;height:28px}.navlang{padding:4px 9px;font-size:13px}.navcta{padding:8px 12px;font-size:13px}}
 .pin-track{height:calc(var(--h,100) * 1vh)}
 @supports (height:1svh){.pin-track{height:calc(var(--h,100) * 1svh)}}
+.widpin{height:auto!important;margin-inline:0!important}
+@media (max-width:760px){
+ .widsec{padding-top:0;padding-bottom:0}
+ .widpin{height:calc(var(--h,340) * 1vh)!important;margin-inline:0!important}
+ @supports (height:1svh){.widpin{height:calc(var(--h,340) * 1svh)!important}}
+ .widstage{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;padding-top:78px;padding-bottom:22px;overflow:hidden}
+ .widstage .sub{display:none}.widstage .sh{margin-bottom:10px}
+ .widrow{position:relative;display:block!important;flex:1;margin:6px 0 0!important;padding:0!important;overflow:visible!important;max-width:none!important}
+ .widrow figure{position:absolute!important;left:50%;top:2%;height:94%;width:auto!important;aspect-ratio:780/1695;flex:none!important;margin:0!important;opacity:0;transform:translateX(-50%) scale(.9);will-change:opacity,transform}
+ .widrow img{height:100%;width:auto}
+}
+.langrow span{transition:background .3s,border-color .3s,color .3s}.langrow span.on{background:rgba(230,200,116,.28);border-color:var(--gold);color:#fff}
+.widrow{max-width:calc(3 * (68svh * .4603) + 52px);margin-inline:auto}
 @keyframes cue{0%,100%{transform:translateY(-3px) rotate(45deg);opacity:.5}50%{transform:translateY(3px) rotate(45deg);opacity:1}}
 .totop{position:fixed;bottom:24px;inset-inline-end:20px;width:56px;height:56px;border-radius:50%;border:1.5px solid rgba(230,200,116,.75);background:rgba(14,21,48,.9);box-shadow:0 8px 24px rgba(0,0,0,.4);color:#f6efdc;font-size:26px;cursor:pointer;z-index:40;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s}
 .totop.on{opacity:1;pointer-events:auto;transform:none}
@@ -339,9 +355,9 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
  <div class="pin-bar"><i></i></div></div></div>
 
 
-<section class="sec" id="widgets"><div class="k">Widgets and Lock Screen</div><h2 class="sh">Even without opening the app.</h2>
+<section class="sec widsec" id="widgets"><div class="widpin pin-track" id="widpin" data-scene="6" style="--h:340"><div class="widstage"><div class="k">Widgets and Lock Screen</div><h2 class="sh">Even without opening the app.</h2>
  <p class="sub">The Hebrew date, daily times, Tehillim and Shabbat candle lighting on your Home Screen and Lock Screen, in three sizes and with a live countdown in the Dynamic Island.</p>
- <div class="widrow"><figure><img id="wid0" width="780" height="1695" alt="Home Screen widgets" loading="lazy"></figure><figure><img id="wid1" width="780" height="1695" alt="Widgets in small, medium and large" loading="lazy"></figure><figure><img id="wid2" width="780" height="1695" alt="Lock Screen with a live countdown" loading="lazy"></figure></div></section>
+ <div class="widrow"><figure><img id="wid0" width="780" height="1695" alt="Home Screen widgets" loading="lazy"></figure><figure><img id="wid1" width="780" height="1695" alt="Widgets in small, medium and large" loading="lazy"></figure><figure><img id="wid2" width="780" height="1695" alt="Lock Screen with a live countdown" loading="lazy"></figure></div></div><div class="pin-bar" style="display:none"><i></i></div></div></section>
 
 <section class="sec" id="booklet"><div class="bk"><div class="bk-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg></div>
  <div class="bk-t"><div class="k">The weekly booklet</div><h3 id="bkTitle">The booklet is coming soon</h3><p id="bkSub">Every week a new Shabbat booklet (in Hebrew), ready to print and read. It updates here and in the app automatically.</p></div>
@@ -532,9 +548,14 @@ function scene3(p){fit(sc3,scr3);
 var NM={he:'עברית',en:'English',fr:'Français',ru:'Русский',ka:'ქართული'};
 var fan=$('fan'),cap4=$('c4cap');(function(){var h=cap4.querySelector('h2');h.innerHTML=h.textContent.split(' ').map(function(w,i){return '<span class="w4" style="display:inline-block;will-change:transform">'+w+'</span>'+(i===1?'<br>':' ');}).join('');h.style.whiteSpace='nowrap';})();var order=['ka','ru','en','he','fr'],fp=[];   /* Hebrew in the middle, English + French on one side, Russian + Georgian on the other */
 order.forEach(function(l){var w=document.createElement('div');w.className='big-phone';w.innerHTML='<div class="phone" style="padding:8px"><div class="island"></div><div class="screen lscr"><img alt="'+NM[l]+'" src="'+D.langs[l]+'"></div></div><div class="lg">'+NM[l]+'</div>';fan.appendChild(w);fp.push(w);});
+var SEQ=[2,3,4,1,0];
 function scene4(p){
   var open=ease(seg(p,.04,.5)),lift=ease(seg(p,.56,.95));cap4.style.opacity=clamp(seg(p,.0,.03));var stg=document.querySelector('[data-scene="4"] .pin-stage'),sh=stg.clientHeight,sw2=stg.clientWidth,wide=sw2>=1000,ry=ease(seg(p,.14,.32)),rx=ease(seg(p,.30,.46));var x0=wide?sw2/2+330:sw2/2,y0=wide?sh/2:70,sc4=wide?(1-.24*ry):1;cap4.style.right='auto';cap4.style.insetInlineStart='auto';cap4.style.insetInlineEnd='auto';cap4.style.left=(x0+(sw2/2-x0)*rx)+'px';cap4.style.top=(y0+(70-y0)*ry)+'px';cap4.style.transform='translate(-50%,-50%) scale('+sc4+')';cap4.querySelector('p').style.opacity=sh<820?1-ease(seg(p,.46,.6)):1;cap4.querySelector('h2').style.fontSize=(wide?54:34)+'px';
-  var lr=document.querySelector('.langrow');if(lr)lr.style.opacity=clamp(seg(p,.22,.42));fp.forEach(function(w,i){var c=i-2,ac=Math.abs(c),vw=Math.min(window.innerWidth,1000),gap=vw<700?vw*.12:Math.min(vw*.2,250);
+  var lr=document.querySelector('.langrow');
+  if(window.innerWidth<760){if(lr)lr.style.opacity=clamp(seg(p,.02,.1));var f5=clamp(seg(p,.1,.94))*5;
+    fp.forEach(function(w,i){var j=SEQ.indexOf(i),x=f5-(j+.5);if(j===0&&x<0)x=0;if(j===4&&x>0)x=0;var o=clamp((.8-Math.abs(x))/.35);w.style.transform='translate3d(0,0,0) scale('+(.96+.04*o)+')';w.style.opacity=o;w.style.zIndex=o>.5?20:5;
+      if(lr&&o>.5){[].forEach.call(lr.children,function(c){c.classList.toggle('on',c.getAttribute('lang')===order[i]);});}});return;}
+  if(lr)lr.style.opacity=clamp(seg(p,.22,.42));fp.forEach(function(w,i){var c=i-2,ac=Math.abs(c),vw=Math.min(window.innerWidth,1000),gap=vw<700?vw*.12:Math.min(vw*.2,250);
     var d=ease(seg(open,ac*.12,ac*.12+.7));
     /* first the outer phones fan out and hang a little DOWN; the next scroll lifts the same arc UP (the cards never close and reopen) */
     var arc=(1-lift)*1-lift*1;   /* +1 -> -1 */
@@ -556,9 +577,11 @@ function sceneM(p){
   if(cap){if(cap!==stM.cap){var f=++flipN;setTimeout(function(){if(f!==flipN)return;var side=f%2,cp=$('c1h').parentNode,wide=window.innerWidth>=1000;cp.classList.toggle('flip',wide&&side===1);cp.classList.toggle('alt',!wide&&side===1);},150);}
    setCap(stM,$('c1h'),$('c1p'),cap);}
 }
+function scene6(p){var figs=[].slice.call(document.querySelectorAll('#widrow figure,.widrow figure'));var mob=window.innerWidth<760;
+  figs.forEach(function(f,i){if(!mob){f.style.opacity='';f.style.transform='';return;}var x=p*3-i-.5;if(i===0&&x<0)x=0;if(i===2&&x>0)x=0;var o=clamp((.78-Math.abs(x))/.4);f.style.opacity=o;f.style.transform='translateX(-50%) translateY('+(x*40)+'px) scale('+(.9+.1*o)+')';});}
 var numsGo=0;function scene5(p){[].forEach.call(document.querySelectorAll('.beat'),function(el,i){var a=ease(seg(p,i*.2,i*.2+.12));el.style.opacity=a;el.style.transform='translateY('+((1-a)*28)+'px)';});
   var n=ease(seg(p,.62,.76)),bn=document.getElementById('beatnums');bn.style.opacity=n;bn.style.transform='translateY('+((1-n)*24)+'px)';
-  if(n>.15&&!numsGo){numsGo=1;[].forEach.call(bn.querySelectorAll('b'),function(e){var t0=performance.now(),k=+e.dataset.n;(function f(t){var q=clamp((t-t0)/1100);e.textContent=Math.round(k*easeOut(q));if(q<1)requestAnimationFrame(f);})(t0);});}}var T=[].slice.call(document.querySelectorAll('.pin-track')).map(function(t){return {el:t,bar:t.querySelector('.pin-bar i'),fn:[null,sceneM,null,null,scene4,scene5][+t.dataset.scene]};});
+  if(n>.15&&!numsGo){numsGo=1;[].forEach.call(bn.querySelectorAll('b'),function(e){var t0=performance.now(),k=+e.dataset.n;(function f(t){var q=clamp((t-t0)/1100);e.textContent=Math.round(k*easeOut(q));if(q<1)requestAnimationFrame(f);})(t0);});}}var T=[].slice.call(document.querySelectorAll('.pin-track')).map(function(t){return {el:t,bar:t.querySelector('.pin-bar i'),fn:[null,sceneM,null,null,scene4,scene5,scene6][+t.dataset.scene]};});
 var STG=document.querySelector('.pin-stage');function prog(t){var r=t.getBoundingClientRect(),vh=STG?STG.clientHeight:window.innerHeight;return clamp(-r.top/Math.max(1,r.height-vh));}
 function tick(){T.forEach(function(o){var r=o.el.getBoundingClientRect();if(r.bottom<-300||r.top>window.innerHeight+300)return;var p=prog(o.el);o.bar.style.width=(p*100)+'%';o.fn(p);});}
 window.addEventListener('scroll',tick,{passive:true});window.addEventListener('resize',tick);tick();setTimeout(tick,300);setTimeout(tick,1200);
