@@ -37,42 +37,55 @@
 ### מה חדש (What's New)
 **עברית**
 ```
-מה חדש בגרסה 2.0.2:
-• שורת חיפוש חדשה בראש מסך החיפוש, נוחה ומהירה יותר
-• אבחון הודעות בהגדרות: מצב ההתראות במבט אחד ורישום מחדש בהקשה
-• שיפורי יציבות
+מה חדש בגרסה 2.0.8:
+• מחזור הרמב"ם היומי לפי הלוח הרשמי (כולל ימי המבוא)
+• משנה ופרקי אבות בכל השפות, עם תעתיק קולי
+• ראשית חכמה בתעתיק קולי בצרפתית וברוסית
+• תיקון תווים משובשים בטקסטים
+• מצב כהה/בהיר אוטומטי לפי המכשיר
+• הורדה לשימוש ללא אינטרנט: חיווי עדין והגדרה ייעודית
+• חזרה ממסכים שנפתחו מדף הבית מחזירה לדף הבית
+• הדלקת נרות בירושלים: 40 דקות לפני השקיעה
+• תיקוני תרגום, תצוגה ויציבות
 ```
 **English**
 ```
-What's new in 2.0.2:
-• A new search bar at the top of the Search screen, quicker and easier to use
-• Notification diagnostics in Settings: see the notification status at a glance and re-register with a tap
-• Stability improvements
+What's new in 2.0.8:
+• Daily Rambam now follows the official cycle (including introduction days)
+• Mishnah and Pirkei Avot in every language, with phonetic transliteration
+• Reshit Chokhmah in phonetic transliteration (French and Russian)
+• Fixed garbled characters in some texts
+• Automatic light/dark appearance following your device
+• Offline download: a subtle indicator and its own setting
+• Back from screens opened from Home returns to Home
+• Jerusalem candle lighting: 40 minutes before sunset
+• Translation, display and stability fixes
 ```
 **Français**
 ```
-Tamid est maintenant disponible en français :
-• Recherche dans toute la bibliothèque : un chapitre, une prière ou un livre, avec recherches récentes et suggestions
-• Livret d’étude hebdomadaire sur l’écran d’accueil, à côté du Ben Ich ‘Haï : renouvelé chaque semaine
-• Hiloulot des tsadikim dans le calendrier : « À la mémoire des tsadikim » du jour choisi
-• Widgets pour l’écran d’accueil, l’écran verrouillé et StandBy : date hébraïque et paracha, horaires, Tehilim, bougies de Chabbat, compte du Omer
-• Activité en direct : compte à rebours jusqu’au prochain horaire, dans la langue de l’application
-• Birkat HaMazon, Meeïn Chalosh et bénédictions avant de manger (rite séfarade oriental)
-• Bibliothèque correctement orientée en français et en anglais, recherche plus fiable
-• Design Liquid Glass (iOS 26), réglages et calendrier entièrement traduits
-• Corrections et améliorations de stabilité
+Nouveautés de la version 2.0.8 :
+• Rambam quotidien selon le cycle officiel (avec les jours d’introduction)
+• Michna et Pirké Avot dans toutes les langues, avec translittération phonétique
+• Réchit ’Hokhma en translittération phonétique (français et russe)
+• Correction de caractères illisibles dans certains textes
+• Apparence claire/sombre automatique selon l’appareil
+• Téléchargement hors ligne : indicateur discret et réglage dédié
+• Le retour depuis un écran ouvert depuis l’accueil ramène à l’accueil
+• Allumage des bougies à Jérusalem : 40 minutes avant le coucher du soleil
+• Corrections de traduction, d’affichage et de stabilité
 ```
 **Русский**
 ```
-Большое обновление:
-• Новые виджеты (главный экран, экран блокировки, StandBy): еврейская дата и недельная глава, точные времена, Теилим, свечи Шаббата и Йом-Това, счёт Омера, время до заката
-• Новый дизайн Liquid Glass (iOS 26)
-• Новая вкладка «Поиск»: глава, молитва или книга во всей библиотеке
-• Настройки полностью переведены: иврит, английский, французский, русский, грузинский
-• Зеркало для тфилин с точным указанием места
-• Отправка отзывов прямо из приложения
-• Браха меэйн шалош и благословения перед едой (нусах мизрах)
-• QR-код для обмена приложением, ссылки открываются внутри приложения, автоматическая геолокация и заголовок, скрывающийся при прокрутке
+Что нового в версии 2.0.8:
+• Ежедневный Рамбам по официальному циклу (включая вводные дни)
+• Мишна и Пиркей Авот на всех языках, с фонетической транскрипцией
+• Решит Хохма в фонетической транскрипции (французский и русский)
+• Исправлены искажённые символы в некоторых текстах
+• Автоматическая светлая/тёмная тема по настройкам устройства
+• Загрузка для работы без интернета: ненавязчивый индикатор и отдельная настройка
+• Возврат с экранов, открытых с главной, ведёт на главную
+• Зажигание свечей в Иерусалиме: за 40 минут до заката
+• Исправления перевода, отображения и стабильности
 ```
 **ქართული**
 ```

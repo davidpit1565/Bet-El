@@ -345,6 +345,30 @@ in English as usual.
   mirrored correctly, and translated labels read naturally (add exact I18N keys instead of relying on substring
   fallback, which produced e.g. "Calendar Gregorian").
 
+- **Daily Rambam cycle (official, not "n modulo 1006")**: `data/chok-cycles.json` `rambam.order` is in true Mishneh Torah order
+  (never sort titles alphabetically) and `rambam.cycle = {start, intro1, intro3, skip1, long3}` drives `ckRambamIndexes()`: each
+  cycle opens with intro days (12 on the 1-chapter track, 4 on the 3-chapter track) that return `[]` ("Introduction days of the
+  Rambam cycle - no daily chapter today", section kind `rambamintro`, never throw on an empty result), the 1-chapter track skips
+  order index 96, the 3-chapter track has one 4-chapter day. Block files `data/chok-rambam/*` are keyed by the order slice.
+  Rebuild with `scripts/build-rambam-cycle.mjs`; guard with `node scripts/check-rambam-cycle.mjs` (`npm run check:rambam`, part of
+  `npm test`; compares against Sefaria's calendars API when online). Keep the JS formula identical to that script.
+- **Misc rules**: Jerusalem candle lighting is 40 minutes before sunset (18 elsewhere, Hebcal default). While the offline download
+  runs, only a 2px hairline under the header shows (the old pill is gone; details stay in Settings > Offline use). The prayer-now
+  tile sits at the top of Home. Theme is `S.themeMode` ('auto' follows the device, 'light', 'dark'; an explicit toggle leaves auto).
+  `startBackgroundDataPrefetch()` downloads only Hebrew base files plus the active UI language (`pfLangOf`), and re-runs on a
+  language change.
+
+## Standing UI rule (owner, David - 2026-11-10)
+- **Every UI change made for the App Store build must be REAL iOS Liquid Glass automatically.** New or changed screens on iOS use the native glass components (UIKit/SwiftUI behind the existing native bridges, `UIGlassEffect`, `UIButton.Configuration.glass()`, the native list/home/library/settings screens) - never a web look-alike. The HTML version is only the web/PWA/Android/old-iOS fallback, where decorative blur/glass stays flat gradients (see the no-`backdrop-filter`-stacking lesson). If a screen cannot be shown natively yet (readers, screens with inputs), say so and propose how to convert it.
+
+## Standing content rule (owner, David - 2026-11-07)
+- **Sacred texts are PHONETIC transliteration only, never meaning-translation, unless David approves otherwise.** This holds for Torah,
+  Nach (incl. Shir HaShirim), Tehillim, prayers, Mishnah, Zohar, Reshit Chokhmah and, in general, every book. Copy the sound (letters,
+  using the project's deterministic engine on vocalized Hebrew; Dicta Nakdan for vocalization), not the meaning. Where a book already has
+  a meaning translation (musar explanations, Ben Ish Chai biur, Sefaria's English...), do NOT add or replace translations on your own:
+  ALWAYS ask David first, and verify the result before claiming it is done. Rubrics/instructions inside prayers may be meaning-translated
+  (as they already are). Never invent or "fix" sacred text from memory.
+
 ## Before every push (do all of these, in order)
 1. `node --check` on the extracted main `<script>` block (find its real
    start/end by locating the *actual* matching `<script>`/`</script>` pair
