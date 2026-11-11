@@ -1,7 +1,11 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>תמיד · הלימוד היומי שלך</title>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>תמיד · אפליקציית הלימוד היומי · חוק לישראל, תהילים, זהר וסידור</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="תמיד: אפליקציית הלימוד היומי. חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, בחמש שפות.">
+<meta name="description" content="תמיד: אפליקציית הלימוד היומי. חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, מצפן לירושלים ומראה לתפילין, בחמש שפות. בלי פרסומות ובלי הרשמה.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta property="og:title" content="תמיד · אפליקציית הלימוד היומי">
+<meta property="og:description" content="חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, בחמש שפות.">
 <meta property="og:title" content="תמיד · הלימוד היומי שלך">
 <meta property="og:description" content="חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, בחמש שפות.">
 <meta name="theme-color" content="#060b18">
@@ -94,6 +98,25 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 .cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;font:inherit;font-size:16px;font-weight:500;letter-spacing:.08em;color:#f6efdc;padding:9px 22px 7px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(230,200,116,.4);cursor:pointer;z-index:3;transition:background .2s,border-color .2s}
 .cue:hover{background:rgba(230,200,116,.18);border-color:rgba(230,200,116,.8)}
 .cue i{width:11px;height:11px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);animation:cue 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:no-preference){}
+
+.beat{position:absolute;inset-inline:0;top:50%;transform:translateY(-50%);text-align:center;font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5.4vw,70px);line-height:1.25;padding:0 24px;opacity:0;z-index:3}
+.sec{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:110px 24px 30px}
+.sec .k{color:var(--gold);letter-spacing:.14em;font-size:15px;font-weight:700;margin-bottom:10px}
+.sec .sh{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,4.6vw,56px);line-height:1.15;margin-bottom:34px}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-top:80px}
+.num{text-align:center;padding:26px 10px;border-radius:22px;background:rgba(255,255,255,.05);border:1px solid rgba(230,200,116,.22)}
+.num b{display:block;font-family:var(--f-display);font-size:clamp(40px,6vw,76px);font-weight:900;color:#f1d98e}
+.num span{color:var(--soft);font-size:17px}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.cards2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{padding:26px;border-radius:24px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(230,200,116,.2)}
+.card h3{font-family:var(--f-display);font-size:24px;color:#f6efdc;margin-bottom:8px}.card p{color:var(--soft);line-height:1.65;font-size:17px}
+.faq details{border-bottom:1px solid rgba(230,200,116,.22);padding:18px 4px}
+.faq summary{cursor:pointer;font-size:20px;font-weight:700;color:#f6efdc;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::after{content:"+";color:var(--gold);font-size:26px;line-height:1}.faq details[open] summary::after{content:"\u2212"}
+.faq summary::-webkit-details-marker{display:none}.faq p{color:var(--soft);line-height:1.7;margin-top:10px;font-size:17px}
+.mirror .mstage img.mav{display:block;width:100%;height:100%;object-fit:cover}
+@media (max-width:760px){.nums{grid-template-columns:repeat(2,1fr)}.cards3,.cards2{grid-template-columns:1fr}.sec{padding-top:80px}}
 @keyframes cue{0%,100%{transform:translateY(-3px) rotate(45deg);opacity:.5}50%{transform:translateY(3px) rotate(45deg);opacity:1}}
 .totop{position:fixed;bottom:20px;inset-inline-start:20px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(230,200,116,.5);background:rgba(14,21,48,.78);color:#f6efdc;font-size:20px;cursor:pointer;z-index:40;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s}
 .totop.on{opacity:1;pointer-events:auto;transform:none}
@@ -161,29 +184,50 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
  <button class="cue" id="cue" type="button"><span>גללו להמשך</span><i></i></button>
 </header>
 
-<div class="pin-track" data-scene="1" style="height:2200vh"><div class="pin-stage">
+<div class="pin-track" data-scene="5" style="height:300vh"><div class="pin-stage">
+ <div class="beat" id="b0">בבוקר, <span class="gold">הלימוד של היום</span> כבר מחכה.</div>
+ <div class="beat" id="b1">בצהריים, <span class="gold">התפילה והזמן הנכון</span>, בלחיצה.</div>
+ <div class="beat" id="b2">בערב, מסמנים <span class="gold">“סיימתי”</span>, והיום נסגר.</div>
+ <div class="pin-bar"><i></i></div></div></div>
+
+<div class="pin-track" data-scene="1" style="height:4000vh"><div class="pin-stage">
  <div class="pin-cap"><h2 id="c1h">יום חדש. לימוד חדש.</h2><p id="c1p">&nbsp;</p></div>
- <ol class="rail" id="rail1" data-t="1"><li data-p=".02">פתיחה</li><li data-p=".30">הבית</li><li data-p=".49">כניסות</li><li data-p=".80">תהילים יומי</li><li data-p=".90">סיימתי</li><li data-p=".96">כל הכבוד</li></ol>
  <div class="big-phone"><div class="phone"><div class="island"></div><div class="screen" id="scr1"></div></div></div>
  <div class="pin-bar"><i></i></div></div></div>
+<div hidden><h2 id="c0h"></h2><p id="c0p"></p><h2 id="c2h"></h2><p id="c2p"></p><h2 id="c3h"></h2><p id="c3p"></p></div>
 
-<div class="pin-track" data-scene="2" style="height:2700vh"><div class="pin-stage">
- <div class="pin-cap"><h2 id="c2h">לוח עברי, כל יום</h2><p id="c2p">&nbsp;</p></div>
- <ol class="rail" id="rail2" data-t="2"><li data-p=".08">לוח שנה</li><li data-p=".34">פרטי היום</li><li data-p=".66">ספרייה</li><li data-p=".94">סידור</li></ol>
- <div class="big-phone"><div class="phone"><div class="island"></div><div class="screen" id="scr2"></div></div></div>
- <div class="pin-bar"><i></i></div></div></div>
-
-<div class="pin-track" data-scene="3" style="height:1400vh"><div class="pin-stage">
- <div class="pin-cap"><h2 id="c3h">כוון לירושלים</h2><p id="c3p">&nbsp;</p></div>
- <ol class="rail" id="rail3" data-t="3"><li data-p=".22">מצפן</li><li data-p=".85">מראה לתפילין</li></ol>
- <div class="big-phone"><div class="phone"><div class="island"></div><div class="screen" id="scr3"></div></div></div>
- <div class="pin-bar"><i></i></div></div></div>
-
-<div class="pin-track" data-scene="4" style="height:1000vh"><div class="pin-stage">
+<div class="pin-track" data-scene="4" style="height:800vh"><div class="pin-stage">
  <div class="pin-cap" id="c4cap" style="opacity:0"><h2>הלימוד שלך, בשפה שלך</h2><p>אותו לימוד, בכל לשון</p></div>
  <div class="fan" id="fan"></div>
  <div class="pin-bar"><i></i></div></div></div>
 
+<section class="sec nums" id="nums"><div class="num"><b data-n="150">0</b><span>מזמורי תהילים</span></div><div class="num"><b data-n="5">0</b><span>שפות</span></div><div class="num"><b data-n="0">0</b><span>פרסומות</span></div><div class="num"><b data-n="0">0</b><span>הרשמות</span></div></section>
+
+<section class="sec" id="who"><div class="k">למי זה מתאים</div><h2 class="sh">לכל מי שרוצה קביעות.</h2>
+ <div class="cards3">
+  <div class="card"><h3>ללומד היומי</h3><p>חוק לישראל, תהילים, זהר ושניים מקרא, כל אחד לפי היום. פותחים, לומדים, מסמנים “סיימתי”.</p></div>
+  <div class="card"><h3>למשפחה ולקהילה</h3><p>כל אחד בשפה שלו: עברית, אנגלית, צרפתית, רוסית וגרוזינית, באותה אפליקציה.</p></div>
+  <div class="card"><h3>למי שבדרכים</h3><p>כיוון לירושלים, זמני היום לפי המיקום וסידור, גם כשאין בית כנסת בקרבת מקום.</p></div>
+ </div></section>
+
+<section class="sec" id="honest"><div class="k">מה חשוב לדעת עלינו</div><h2 class="sh">בלי פרסומות. בלי הרשמה. בלי הפתעות.</h2>
+ <div class="cards2">
+  <div class="card"><h3>הנתונים נשארים אצלך</h3><p>ההתקדמות נשמרת על המכשיר בלבד. האפליקציה לא אוספת שם, אימייל או טלפון, ומשתמשת רק באנליטיקס אנונימי כדי לשפר.</p></div>
+  <div class="card"><h3>תעתיק, לא תרגום</h3><p>בטקסטים הקדושים אנחנו מעתיקים את הצליל, לא את המשמעות. שום נוסח לא נכתב או “מתוקן” בלי בדיקה.</p></div>
+  <div class="card"><h3>לא פוסקים הלכה</h3><p>האפליקציה היא כלי ללימוד ולתפילה. לשאלות הלכתיות פנו לרב שלכם.</p></div>
+  <div class="card"><h3>תודה למקורות</h3><p>חלק מהטקסטים והלוחות מבוססים על Sefaria. תודה לכל מי שהנגיש אותם.</p></div>
+ </div></section>
+
+<section class="sec" id="faq"><div class="k">שאלות נפוצות</div><h2 class="sh">טוב לדעת.</h2>
+ <div class="faq">
+  <details><summary>מה יש באפליקציה?</summary><p>חוק לישראל, תהילים, זהר, שניים מקרא ואחד תרגום, משנה, מוסר, בן איש חי וסידור, לפי היום, עם לוח עברי וזמני היום.</p></details>
+  <details><summary>באילו שפות האפליקציה זמינה?</summary><p>עברית, אנגלית, צרפתית, רוסית וגרוזינית. את הטקסטים הקדושים מעתיקים בצלילם ולא מתרגמים.</p></details>
+  <details><summary>צריך אינטרנט כדי ללמוד?</summary><p>האפליקציה מורידה את התכנים ברקע, וכשההורדה מסתיימת אפשר ללמוד גם בלי חיבור לרשת.</p></details>
+  <details><summary>האם המראה לתפילין מקליטה אותי?</summary><p>לא. המצלמה רק מציגה תמונה חיה ומסמנת איפה הבית צריך להיות. שום תמונה או וידאו לא נשמרים ולא נשלחים.</p></details>
+  <details><summary>איך המצפן יודע לאן לכוון?</summary><p>הוא מחשב את הכיוון מהמיקום שלך אל ירושלים, על המכשיר עצמו. כמו בכל מצפן בטלפון, כדאי לכייל אותו מדי פעם.</p></details>
+  <details><summary>יש גרסה לאנדרואיד?</summary><p>האפליקציה זמינה ב-App Store, והגרסה ל-Google Play בדרך.</p></details>
+  <details><summary>האם זו פסיקת הלכה?</summary><p>לא. זה כלי עזר ללימוד ולתפילה. לשאלות הלכתיות פנו לרב שלכם.</p></details>
+ </div></section>
 <section class="dl" id="cta">
  <div class="dl-in" style="position:relative;z-index:1">
   <div><h2>הורידו.<br><span class="gold">והתחילו היום.</span></h2><div class="badges"><a class="sb apple" href="https://apps.apple.com/app/id6807186847" target="_blank" rel="noopener"><svg width="26" height="30" viewBox="0 0 24 28" fill="#fff"><path d="M19.6 14.9c0-3 2.5-4.4 2.6-4.5-1.4-2.1-3.7-2.4-4.5-2.4-1.9-.2-3.700 1.100-4.600 1.100-1 0-2.400-1.100-4-1.100-2 0-3.900 1.200-5 3-2.100 3.700-.5 9.200 1.500 12.200 1 1.500 2.200 3.100 3.800 3 1.500-.1 2.100-1 3.900-1s2.300 1 3.900.9c1.600 0 2.700-1.500 3.700-3 1.200-1.700 1.600-3.400 1.700-3.500-.1 0-3.200-1.200-3.200-4.700zM16.600 6c.8-1 1.400-2.400 1.200-3.800-1.200.1-2.700.8-3.500 1.800-.8.900-1.400 2.300-1.300 3.700 1.400.1 2.700-.7 3.600-1.700z"/></svg><span class="t"><small>Download on the</small><b>App Store</b></span></a>
@@ -252,7 +296,7 @@ var splash=document.createElement('div');splash.className='splash';splash.innerH
 var home=buildGroup(sc1,D.home.pieces,SAFE-12),daily=buildGroup(sc1,D.daily.pieces,SAFE);
 var navO1=mkNav(sc1);var st1={};
 /* big visits counter (no "online now" any more) */
-var vis=document.createElement('div');vis.className='visbig';vis.innerHTML='<div class="vb-ring"></div><b>0</b><span>כניסות</span>';sc1.appendChild(vis);var visNum=vis.querySelector('b');
+var vis=document.createElement('div');vis.className='visbig';vis.innerHTML='<div class="vb-ring"></div><b>0</b><span>כניסות</span>';sc1.appendChild(vis);var visNum=vis.querySelector('b');vis.style.display='none';
 /* "I finished" celebration card + sparkles */
 var cel=new Image();cel.src=D.celebrate.src;cel.className='celimg';cel.style.width=D.celebrate.w+'px';sc1.appendChild(cel);
 var sparks=[];for(var si=0;si<18;si++){var d=document.createElement('i');d.className='spk';sc1.appendChild(d);sparks.push(d);}
@@ -282,10 +326,10 @@ function scene1(p){
   daily.grp.style.opacity=cp>0?1-.55*clamp(cp*2):daily.grp.style.opacity;
   sparks.forEach(function(s,i){var a=i/sparks.length*6.283+rnd(i,2),r=60+cp*(140+rnd(i,3)*90);s.style.opacity=cp>0&&cp<1?(1-cp)*1:0;s.style.transform='translate('+(Math.cos(a)*r)+'px,'+(Math.sin(a)*r)+'px) scale('+(.4+rnd(i,5)*.9)+')';});
   var t=p<.05?'יום חדש. לימוד חדש.|תמיד פותחת איתך כל בוקר.':p<.26?'כל הלימוד, במקום אחד|חוק לישראל, תהילים, זהר, בן איש חי ועוד, מוכנים לפניך.':p<.42?'גוללים, והכל כבר שם|הלימוד של היום, התפילה הנכונה לשעה, ושאר הספרים.':p<.57?'קהילה שלמה לומדת איתך|וכל יום מצטרפים עוד.':p<.88?'התהילים היומי|גוללים בקריאה, פרק אחרי פרק.':p<.915?'וסיימנו|לוחצים, והמסך מחזיק את הרגע.':'כל הכבוד!|עוד יום של לימוד, ביד ובלב.';
-  setCap(st1,$('c1h'),$('c1p'),t);railSet('rail1',p<.05?0:p<.43?1:p<.58?2:p<.88?3:p<.915?4:5);
+  setCap(st1,$('c0h'),$('c0p'),t);railSet('rail1',p<.05?0:p<.43?1:p<.58?2:p<.88?3:p<.915?4:5);
 }
 /* ================= scene 2 : calendar -> library -> siddur (each one scrolls all the way down) ================= */
-var scr2=$('scr2'),sc2=document.createElement('div');sc2.className='sc';scr2.appendChild(sc2);
+var scr2=scr1,sc2=document.createElement('div');sc2.className='sc';scr2.appendChild(sc2);
 var calTop=buildGroup(sc2,D.calendar.top,SAFE-6),calDet=buildGroup(sc2,D.calendar.detail,SAFE-6);
 var libPieces=D.library.pieces.slice();
 var lib=buildGroup(sc2,libPieces,SAFE-6),siddur=buildGroup(sc2,D.siddur.pieces,SAFE-6);
@@ -308,34 +352,16 @@ function scene2(p){
   setCap(st2,$('c2h'),$('c2p'),t);railSet('rail2',p<.16?0:p<.42?1:p<.74?2:3);
 }
 /* ================= scene 3 : compass + tefillin mirror (illustrated guide) ================= */
-var scr3=$('scr3'),sc3=document.createElement('div');sc3.className='sc';scr3.appendChild(sc3);
-sc3.style.background='linear-gradient(180deg,#1b2644,#0e1530)';scr3.style.background=sc3.style.background;var comp=buildGroup(sc3,D.compassPieces,0);var st3={};
+var scr3=scr1,sc3=document.createElement('div');sc3.className='sc';scr3.appendChild(sc3);
+sc3.style.background='linear-gradient(180deg,#1b2644,#0e1530)';var comp=buildGroup(sc3,D.compassPieces,0);var st3={};
 var mw=document.createElement('div');mw.className='grp mirror';sc3.appendChild(mw);
 mw.innerHTML='<div class="mh"><span class="mb">\u203a</span><b>מראה לתפילין</b><span class="mb">\u22ef</span></div>'+
- '<div class="mstage"><svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
- '<defs><linearGradient id="bgm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26376c"/><stop offset="1" stop-color="#0a1024"/></linearGradient>'+
- '<radialGradient id="skin" cx=".42" cy=".34" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#ece6d6"/><stop offset="1" stop-color="#cfc7b3"/></radialGradient>'+
- '<linearGradient id="hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b4a55"/><stop offset="1" stop-color="#2d2c36"/></linearGradient>'+
- '<linearGradient id="tal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f3efe3"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#e6e0cf"/></linearGradient>'+
- '<radialGradient id="glow" cx=".5" cy=".38" r=".6"><stop offset="0" stop-color="rgba(230,200,116,.22)"/><stop offset="1" stop-color="rgba(230,200,116,0)"/></radialGradient>'+
- '<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".35"/></filter></defs>'+
- '<rect width="300" height="400" fill="url(#bgm)"/><rect width="300" height="400" fill="url(#glow)"/>'+
- '<g filter="url(#sh)"><path d="M10 400 C18 330 70 300 150 300 C230 300 282 330 290 400 Z" fill="url(#tal)"/>'+
- '<path d="M96 304 L112 400 M204 304 L188 400" stroke="#1d2f6b" stroke-width="5" stroke-linecap="round" opacity=".85"/><path d="M104 304 L118 400 M196 304 L182 400" stroke="#1d2f6b" stroke-width="2" stroke-linecap="round" opacity=".6"/></g>'+
- '<path d="M128 268 L128 312 C128 322 172 322 172 312 L172 268 Z" fill="#dcd5c1"/>'+
- '<ellipse cx="82" cy="176" rx="10" ry="18" fill="#e6dfcc"/><ellipse cx="218" cy="176" rx="10" ry="18" fill="#e6dfcc"/>'+
- '<ellipse cx="150" cy="170" rx="68" ry="88" fill="url(#skin)"/>'+
- '<path d="M80 156 C78 96 112 66 150 66 C188 66 222 96 220 156 C206 126 186 116 150 116 C114 116 94 126 80 156 Z" fill="url(#hair)"/>'+
- '<path d="M84 152 C100 124 120 116 150 116 C180 116 200 124 216 152" fill="none" stroke="#e6c874" stroke-width="2.6" stroke-dasharray="1.5 7" stroke-linecap="round"/>'+
- '<path d="M132 108 C112 112 94 126 84 150 M168 108 C188 112 206 126 216 150" fill="none" stroke="#14141b" stroke-width="5" stroke-linecap="round"/>'+
- '<path d="M82 160 C70 220 90 270 112 302 M218 160 C230 220 210 270 188 302" fill="none" stroke="#14141b" stroke-width="4.5" stroke-linecap="round" opacity=".9"/>'+
- '<g filter="url(#sh)"><rect x="127" y="82" width="46" height="34" rx="6" fill="#16161d"/><rect x="127" y="82" width="46" height="34" rx="6" fill="none" stroke="rgba(255,255,255,.18)"/><path d="M137 96 h8 v-6 m8 6 h8 v-6 m-24 12 h24" fill="none" stroke="#e6c874" stroke-width="1.6" stroke-linecap="round" opacity=".75"/></g>'+
- '<g fill="none" stroke="#e6c874" stroke-width="3.4" stroke-linecap="round"><path d="M114 80 v-12 h12 M186 80 v-12 h-12 M114 120 v12 h12 M186 120 v12 h-12"/></g>'+
- '</svg><div class="mhint">הבית על קו השיער, במרכז</div></div>'+
+ '<div class="mstage"><img class="mav" alt="" src="'+D.mirrorAvatar+'">'+
+ '<div class="mhint">הבית על קו השיער, במרכז</div></div>'+
  '<div class="mcard"><b>איך מניחים</b><span>הקצה התחתון של הבית נוגע בקו השיער, באמצע שבין העיניים.</span></div>';
 function scene3(p){fit(sc3,scr3);
   converge(comp,seg(p,.04,.34),'zoom',11);
-  var o=ease(seg(p,.46,.66));pageOut(comp.grp,o,0);mw.style.background=o>0?'':'transparent';pageIn(mw,o,0);sc3.style.background=o>.5?'linear-gradient(180deg,#efe6d0,#e4d8bd)':'linear-gradient(180deg,#1b2644,#0e1530)';scr3.style.background=sc3.style.background;
+  var o=ease(seg(p,.46,.66));pageOut(comp.grp,o,0);mw.style.background=o>0?'':'transparent';pageIn(mw,o,0);sc3.style.background=o>.5?'linear-gradient(180deg,#efe6d0,#e4d8bd)':'linear-gradient(180deg,#1b2644,#0e1530)';
   var ms=ease(seg(p,.62,.9));mw.querySelector('.mstage').style.transform='scale('+(1+.05*ms)+')';
   setCap(st3,$('c3h'),$('c3p'),p<.5?'כוון לירושלים|מצפן שמכוון אל הכותל, מכל מקום בעולם.':'מראה לתפילין|מדריך שמראה איפה הבית צריך להיות, לפני שמתחילים.');railSet('rail3',p<.5?0:1);}
 /* ================= scene 4 : five languages ================= */
@@ -352,7 +378,23 @@ function scene4(p){
     w.style.transform='translate3d('+x+'px,'+y+'px,'+z+'px) rotateZ('+rot+'deg) scale('+(ac===0?1:(.82+.18*d))+')';
     w.style.zIndex=10-ac;w.style.opacity=ac===0?1:clamp(d*2.2);});
 }
-var T=[].slice.call(document.querySelectorAll('.pin-track')).map(function(t){return {el:t,bar:t.querySelector('.pin-bar i'),fn:[null,scene1,scene2,scene3,scene4][+t.dataset.scene]};});
+
+/* ===== one phone for the whole story: home -> calendar/library/siddur -> compass/mirror ===== */
+var BM1=.24,BM2=.77,stM={},cream='';
+function sceneM(p){
+  var p1=clamp(p/BM1),p2=clamp((p-BM1)/(BM2-BM1)),p3=clamp((p-BM2)/(1-BM2));
+  var o2=ease(seg(p,BM1-.004,BM1+.018)),o3=ease(seg(p,BM2-.004,BM2+.018));
+  sc1.style.visibility=o2>=1?'hidden':'visible';sc2.style.visibility=(o2<=0||o3>=1)?'hidden':'visible';sc3.style.visibility=o3<=0?'hidden':'visible';
+  sc2.style.opacity=o2;sc3.style.opacity=o3;
+  if(o2<1)scene1(p1);if(o2>0&&o3<1)scene2(p2);if(o3>0)scene3(p3);
+  scr1.style.background=o3>=1?sc3.style.background:'';
+  var cap=p<BM1?st1.cap:p<BM2?st2.cap:st3.cap;if(cap)setCap(stM,$('c1h'),$('c1p'),cap);
+}
+function scene5(p){[].forEach.call(document.querySelectorAll('.beat'),function(el,i){var a=ease(seg(p,i*.31+.03,i*.31+.16)),b=i<2?ease(seg(p,i*.31+.27,i*.31+.34)):0;el.style.opacity=a*(1-b);el.style.transform='translateY(calc(-50% + '+((1-a)*34-b*30)+'px))';});}
+/* numbers count up once when they scroll into view */
+(function(){var els=[].slice.call(document.querySelectorAll('.num b'));if(!('IntersectionObserver' in window)){els.forEach(function(e){e.textContent=e.dataset.n;});return;}
+ var io=new IntersectionObserver(function(en){en.forEach(function(x){if(!x.isIntersecting)return;io.unobserve(x.target);var n=+x.target.dataset.n,t0=performance.now();(function f(t){var k=clamp((t-t0)/1200);x.target.textContent=Math.round(n*easeOut(k));if(k<1)requestAnimationFrame(f);})(t0);});},{threshold:.6});els.forEach(function(e){io.observe(e);});})();
+var T=[].slice.call(document.querySelectorAll('.pin-track')).map(function(t){return {el:t,bar:t.querySelector('.pin-bar i'),fn:[null,sceneM,null,null,scene4,scene5][+t.dataset.scene]};});
 function prog(t){var r=t.getBoundingClientRect(),vh=window.innerHeight;return clamp(-r.top/Math.max(1,r.height-vh));}
 function tick(){T.forEach(function(o){var r=o.el.getBoundingClientRect();if(r.bottom<-300||r.top>window.innerHeight+300)return;var p=prog(o.el);o.bar.style.width=(p*100)+'%';o.fn(p);});}
 window.addEventListener('scroll',tick,{passive:true});window.addEventListener('resize',tick);tick();setTimeout(tick,300);setTimeout(tick,1200);
