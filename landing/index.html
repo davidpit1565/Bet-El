@@ -20,7 +20,11 @@ h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.0
 .gold{background:linear-gradient(180deg,#fff3cf,var(--gold) 55%,var(--gold-d));-webkit-background-clip:text;background-clip:text;color:transparent}
 #prog{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:3px;z-index:50}
 #prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold),#fff3cf);box-shadow:0 0 12px var(--gold)}
-nav.top{position:relative;z-index:40;max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+nav.top{position:sticky!important;top:0;z-index:50!important;display:flex;align-items:center;gap:28px;padding:12px max(22px,calc(50vw - 560px));background:linear-gradient(180deg,rgba(8,12,28,.94),rgba(8,12,28,.62))}
+.navlinks{display:flex;gap:26px;margin-inline-start:auto;margin-inline-end:auto}.navlinks a{color:#d9d4c4;text-decoration:none;font-size:16px}.navlinks a:hover{color:var(--gold)}
+.navhide{transform:translateY(-110%)}nav.top{transition:transform .35s}
+.navcta{background:var(--gold);color:#1a1408;font-weight:700;padding:8px 20px;border-radius:99px;text-decoration:none;font-size:15px}
+@media (max-width:760px){.navlinks{display:none}nav.top{justify-content:space-between}}
 nav.top b{font-family:var(--f-display);font-size:26px}
 /* HERO */
 .hero{position:relative;max-width:1120px;margin:0 auto;min-height:calc(100svh - 70px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-block:40px 80px}
@@ -113,9 +117,9 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 .card h3{font-family:var(--f-display);font-size:24px;color:#f6efdc;margin-bottom:8px}.card p{color:var(--soft);line-height:1.65;font-size:17px}
 .faq details{border-bottom:1px solid rgba(230,200,116,.22);padding:18px 4px}
 .faq summary{cursor:pointer;font-size:20px;font-weight:700;color:#f6efdc;list-style:none;display:flex;justify-content:space-between;gap:12px}
-.faq summary::after{content:"+";color:var(--gold);font-size:26px;line-height:1}.faq details[open] summary::after{content:"\u2212"}
-.faq summary::-webkit-details-marker{display:none}.faq p{color:var(--soft);line-height:1.7;margin-top:10px;font-size:17px}
-.mirror .mstage img.mav{display:block;width:100%;height:100%;object-fit:cover}
+.faq summary::after{content:"+";color:var(--gold);font-size:28px;line-height:1;transition:transform .25s}.faq details[open] summary::after{transform:rotate(45deg)}
+.faq summary::-webkit-details-marker{display:none}.faq p,.faq .ans{color:var(--soft);line-height:1.7;margin-top:10px;font-size:17px}.faq ul{margin:8px 22px 0 0;padding:0;display:grid;gap:6px}.faq li b{color:#f1d98e}
+.mirror .mstage{background:linear-gradient(180deg,#26376c,#0a1024)}.mirror .mstage img.mav{display:block;width:100%;height:100%;object-fit:cover;opacity:0}.mirror .mhint{opacity:0}
 @media (max-width:760px){.nums{grid-template-columns:repeat(2,1fr)}.cards3,.cards2{grid-template-columns:1fr}.sec{padding-top:80px}}
 @media (max-width:760px){
  .pin-stage{padding-top:112px;padding-bottom:34px}
@@ -128,6 +132,25 @@ nav.top b{font-family:var(--f-display);font-size:26px}
 }
 .langrow{display:none;position:absolute;left:0;right:0;bottom:78px;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 14px;z-index:6}
 .langrow span{padding:5px 12px;border-radius:99px;border:1px solid rgba(230,200,116,.4);color:#f6efdc;font-size:14px;background:rgba(255,255,255,.06)}
+
+/*HP*/.hero-phone{display:none}.hero-phone .phone{height:100%}
+@media (min-width:1000px){
+ .hero{display:grid!important;grid-template-columns:1.15fr .85fr;align-items:center;text-align:start!important;gap:30px;max-width:1220px!important;padding-inline:24px!important}
+ .hero-text{display:flex;flex-direction:column;align-items:flex-start}
+ .hero h1{font-size:min(clamp(48px,6.2vw,92px),10svh)!important}
+ .hero .badges{justify-content:flex-start}
+ .hero-phone{display:block;justify-self:center;width:min(270px,(100svh - 220px)*.4839);aspect-ratio:9/18.6;animation:float 6s ease-in-out infinite;z-index:1}
+}
+@keyframes float{0%,100%{transform:translateY(-8px)}50%{transform:translateY(8px)}}
+.cue{background:none!important;border:0!important;padding:0!important;box-shadow:none!important;gap:6px;font-size:15px;font-weight:500;letter-spacing:.32em;color:#d9d4c4}
+.cue:hover{color:var(--gold)}
+.cue i{width:12px;height:12px}
+.warp{position:fixed;inset:0;z-index:80;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(circle at 50% 50%,rgba(230,200,116,.4),rgba(8,12,28,.97) 62%)}
+.warp.on{opacity:1;pointer-events:auto}.warp img{position:absolute;left:50%;top:50%;width:110px;margin:-55px 0 0 -55px;opacity:0}.warp.on img{animation:wspin 1.1s ease-in-out}
+@keyframes wspin{0%{transform:rotate(-200deg) scale(.2);opacity:0}45%{opacity:1}100%{transform:rotate(200deg) scale(1.6);opacity:0}}
+.pin-cap.flip{inset-inline-start:max(40px,5vw)!important;inset-inline-end:calc(50% + 230px)!important}
+.big-phone.ph{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+@media (max-width:760px){.pin-cap.alt{top:auto;bottom:22px}}
 @keyframes cue{0%,100%{transform:translateY(-3px) rotate(45deg);opacity:.5}50%{transform:translateY(3px) rotate(45deg);opacity:1}}
 .totop{position:fixed;bottom:20px;inset-inline-start:20px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(230,200,116,.5);background:rgba(14,21,48,.78);color:#f6efdc;font-size:20px;cursor:pointer;z-index:40;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s}
 .totop.on{opacity:1;pointer-events:auto;transform:none}
@@ -184,15 +207,19 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
 .mirror .mcard b{display:block;font-family:var(--f-display);font-size:18px;color:#8a6414}.mirror .mcard span{font-size:14px;line-height:1.5}
 </style></head><body>
 <div id="prog"><i></i></div>
-<nav class="top"><b class="gold">תמיד</b></nav>
+<nav class="top"><b class="gold">תמיד</b><div class="navlinks"><a href="#story">הסיפור</a><a href="#langs">שפות</a><a href="#who">למי זה מתאים</a><a href="#faq">שאלות</a></div><a class="navcta" href="#cta">הורדה</a></nav>
 <header class="hero" id="hero">
- <img class="hero-logo" alt="בית אל" src="img/logo.png"><div class="eyebrow">אפליקציית הלימוד היומי</div>
+ <div class="hero-text"><img class="hero-logo" alt="בית אל" src="img/logo.png"><div class="eyebrow">אפליקציית הלימוד היומי</div>
  <h1><span class="w"><span style="animation-delay:.05s">הלימוד</span></span> <span class="w"><span style="animation-delay:.18s">היומי</span></span> <span class="w"><span style="animation-delay:.31s">שלך,</span></span><br><span class="w"><span class="gold" style="animation-delay:.5s">תמיד</span></span> <span class="w"><span class="gold" style="animation-delay:.65s">איתך.</span></span></h1>
  <p class="lead">חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, בחמש שפות.</p>
  <div class="badges"><a class="sb apple" href="https://apps.apple.com/app/id6807186847" target="_blank" rel="noopener"><svg width="26" height="30" viewBox="0 0 24 28" fill="#fff"><path d="M19.6 14.9c0-3 2.5-4.4 2.6-4.5-1.4-2.1-3.7-2.4-4.5-2.4-1.9-.2-3.700 1.100-4.600 1.100-1 0-2.400-1.100-4-1.100-2 0-3.900 1.200-5 3-2.100 3.700-.5 9.200 1.500 12.200 1 1.500 2.200 3.100 3.800 3 1.500-.1 2.100-1 3.900-1s2.300 1 3.900.9c1.600 0 2.700-1.500 3.700-3 1.200-1.700 1.600-3.400 1.700-3.500-.1 0-3.200-1.200-3.200-4.700zM16.600 6c.8-1 1.400-2.400 1.200-3.800-1.200.1-2.700.8-3.500 1.800-.8.900-1.400 2.300-1.300 3.700 1.400.1 2.700-.7 3.600-1.700z"/></svg><span class="t"><small>Download on the</small><b>App Store</b></span></a>
 <a class="sb play" href="#cta"><svg width="28" height="30" viewBox="0 0 28 30"><path d="M2 1.300v27.400c0 .6.700 1 1.200.7L16 15 2 1c-.5-.3-.1-.5 0 .3z" fill="#00d7fe"/><path d="M16 15l4.300-4.300L3.200.6C2.700.3 2 .7 2 1.300L16 15z" fill="#00f076"/><path d="M16 15L2 28.700c0 .6.700 1 1.200.7l17.100-10.100L16 15z" fill="#ff3a44"/><path d="M20.300 10.700L16 15l4.300 4.300 5-2.900c1-.6 1-1.800 0-2.400l-5-2.900z" fill="#ffd500"/></svg><span class="t"><small>GET IT ON</small><b>Google Play</b></span><span class="soon">בקרוב</span></a></div>
+ </div>
+ <div class="hero-phone" aria-hidden="true"><div class="phone" style="padding:9px"><div class="island"></div><div class="screen lscr"><img alt="" id="heroShot"></div></div></div>
  <button class="cue" id="cue" type="button"><span>גללו להמשך</span><i></i></button>
 </header>
+
+<section class="sec nums" id="nums"><div class="num"><b data-n="15">0</b><span>ספרים בספרייה</span></div><div class="num"><b data-n="5">0</b><span>שפות</span></div><div class="num"><b data-n="0">0</b><span>פרסומות</span></div><div class="num"><b data-n="0">0</b><span>הרשמות</span></div></section>
 
 <div class="pin-track" data-scene="5" style="height:300vh"><div class="pin-stage">
  <div class="beat" id="b0">בבוקר, <span class="gold">הלימוד של היום</span> כבר מחכה.</div>
@@ -200,19 +227,18 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
  <div class="beat" id="b2">בערב, מסמנים <span class="gold">“סיימתי”</span>, והיום נסגר.</div>
  <div class="pin-bar"><i></i></div></div></div>
 
-<div class="pin-track" data-scene="1" style="height:4000vh"><div class="pin-stage">
+<div class="pin-track" id="story" data-scene="1" style="height:5200vh"><div class="pin-stage">
  <div class="pin-cap"><h2 id="c1h">יום חדש. לימוד חדש.</h2><p id="c1p">&nbsp;</p></div>
  <div class="big-phone"><div class="phone"><div class="island"></div><div class="screen" id="scr1"></div></div></div>
  <div class="pin-bar"><i></i></div></div></div>
 <div hidden><h2 id="c0h"></h2><p id="c0p"></p><h2 id="c2h"></h2><p id="c2p"></p><h2 id="c3h"></h2><p id="c3p"></p></div>
 
-<div class="pin-track" data-scene="4" style="height:800vh"><div class="pin-stage">
+<div class="pin-track" id="langs" data-scene="4" style="height:900vh"><div class="pin-stage">
  <div class="pin-cap" id="c4cap" style="opacity:0"><h2>הלימוד שלך, בשפה שלך</h2><p>אותו לימוד, בכל לשון</p></div>
  <div class="fan" id="fan"></div>
  <div class="langrow"><span>עברית</span><span>English</span><span>Français</span><span>Русский</span><span>ქართული</span></div>
  <div class="pin-bar"><i></i></div></div></div>
 
-<section class="sec nums" id="nums"><div class="num"><b data-n="15">0</b><span>ספרים בספרייה</span></div><div class="num"><b data-n="5">0</b><span>שפות</span></div><div class="num"><b data-n="0">0</b><span>פרסומות</span></div><div class="num"><b data-n="0">0</b><span>הרשמות</span></div></section>
 
 <section class="sec" id="who"><div class="k">למי זה מתאים</div><h2 class="sh">לכל מי שרוצה קביעות.</h2>
  <div class="cards3">
@@ -224,18 +250,26 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
 <section class="sec" id="honest"><div class="k">מה חשוב לדעת עלינו</div><h2 class="sh">בלי פרסומות. בלי הרשמה. בלי הפתעות.</h2>
  <div class="cards2">
   <div class="card"><h3>הנתונים נשארים אצלך</h3><p>ההתקדמות נשמרת על המכשיר בלבד. האפליקציה לא אוספת שם, אימייל או טלפון, ומשתמשת רק באנליטיקס אנונימי כדי לשפר.</p></div>
-  <div class="card"><h3>תעתיק, לא תרגום</h3><p>בטקסטים הקדושים אנחנו מעתיקים את הצליל, לא את המשמעות. שום נוסח לא נכתב או “מתוקן” בלי בדיקה.</p></div>
+  <div class="card"><h3>תעתיק, לא תרגום</h3><p>בתורה, בתהילים ובתפילות אנחנו מעתיקים את הצליל, לא את המשמעות. שום נוסח לא נכתב או “מתוקן” בלי בדיקה.</p></div>
   <div class="card"><h3>לא פוסקים הלכה</h3><p>האפליקציה היא כלי ללימוד ולתפילה. לשאלות הלכתיות פנו לרב שלכם.</p></div>
   <div class="card"><h3>תודה למקורות</h3><p>חלק מהטקסטים והלוחות מבוססים על Sefaria. תודה לכל מי שהנגיש אותם.</p></div>
  </div></section>
 
 <section class="sec" id="faq"><div class="k">שאלות נפוצות</div><h2 class="sh">טוב לדעת.</h2>
  <div class="faq">
-  <details><summary>מה יש באפליקציה?</summary><p>חוק לישראל, תהילים, זהר, שניים מקרא ואחד תרגום, משנה, מוסר, בן איש חי וסידור, לפי היום, עם לוח עברי וזמני היום.</p></details>
-  <details><summary>באילו שפות האפליקציה זמינה?</summary><p>עברית, אנגלית, צרפתית, רוסית וגרוזינית. את הטקסטים הקדושים מעתיקים בצלילם ולא מתרגמים.</p></details>
+  <details><summary>מה יש באפליקציה?</summary><div class="ans"><p>ספרייה שלמה ללימוד יומי, שמסודרת לפי היום:</p><ul>
+   <li><b>חוק לישראל</b>: סדר הלימוד היומי, עם פרשת השבוע, תהילים, הלכה ומוסר.</li>
+   <li><b>רמב״ם יומי</b>, פרק אחד או שלושה בכל יום.</li>
+   <li><b>זהר יומי</b> ותיקוני הזהר, <b>תניא</b>, <b>בן איש חי</b> ו<b>שולחן ערוך הרב</b>.</li>
+   <li><b>שנים מקרא ואחד תרגום</b>, תורה, נביאים וכתובים, משנה וגמרא.</li>
+   <li><b>מוסר</b>: שישה ספרי מוסר, שלושה פרקים בכל יום.</li>
+   <li><b>סידור, ברכות ותפילות</b>, מהבוקר ועד הלילה.</li>
+   <li><b>לוח עברי</b>, זמני היום, הילולות צדיקים וחוברת שבועית.</li>
+   <li>ובנוסף: <b>מצפן לירושלים</b> ו<b>מראה לתפילין</b>.</li></ul></div></details>
+  <details><summary>באילו שפות האפליקציה זמינה?</summary><p>עברית, אנגלית, צרפתית, רוסית וגרוזינית. בתורה, בתהילים, בתפילות ובזהר אנחנו מעתיקים את הצליל באותיות של השפה שלכם (תעתיק), ולא מתרגמים את המשמעות, כדי שתוכלו לקרוא בקול כמו שצריך.</p></details>
   <details><summary>צריך אינטרנט כדי ללמוד?</summary><p>האפליקציה מורידה את התכנים ברקע, וכשההורדה מסתיימת אפשר ללמוד גם בלי חיבור לרשת.</p></details>
   <details><summary>האם המראה לתפילין מקליטה אותי?</summary><p>לא. המצלמה רק מציגה תמונה חיה ומסמנת איפה הבית צריך להיות. שום תמונה או וידאו לא נשמרים ולא נשלחים.</p></details>
-  <details><summary>איך המצפן יודע לאן לכוון?</summary><p>הוא מחשב את הכיוון מהמיקום שלך אל ירושלים, על המכשיר עצמו. כמו בכל מצפן בטלפון, כדאי לכייל אותו מדי פעם.</p></details>
+  <details><summary>איך המצפן יודע לאן לכוון?</summary><p>הוא מחשב את הכיוון מהמיקום שלך אל ירושלים, על המכשיר עצמו, ולכן הוא לא צריך חיבור לאינטרנט, רק שהטלפון יזהה את המיקום שלך. הוא עובד גם בגרסת הדפדפן של האפליקציה, בטלפונים שיש בהם חיישן כיוון. כמו בכל מצפן בטלפון, כדאי לכייל אותו מדי פעם.</p></details>
   <details><summary>יש גרסה לאנדרואיד?</summary><p>האפליקציה זמינה ב-App Store, והגרסה ל-Google Play בדרך.</p></details>
   <details><summary>האם זו פסיקת הלכה?</summary><p>לא. זה כלי עזר ללימוד ולתפילה. לשאלות הלכתיות פנו לרב שלכם.</p></details>
  </div></section>
@@ -248,6 +282,7 @@ nav.top,.hero,.pin-track,.ideas,.dl,.final{position:relative;z-index:1}
  <div class="foot" style="position:absolute;bottom:22px;inset-inline:0;z-index:1"><button class="footup" id="footUp" type="button">↑ חזרה למעלה</button><button data-doc="privacy">מדיניות פרטיות</button><button data-doc="terms">תנאי שימוש</button><button data-doc="support">תמיכה</button></div>
 </section>
 <div class="doc-modal" id="docModal" hidden><div class="doc-card"><button class="doc-x" id="docX" aria-label="סגירה">×</button><div class="doc-body" id="docBody"></div></div></div>
+<div class="warp" id="warp" aria-hidden="true"><img alt="" id="warpImg"></div>
 <button class="totop" id="toTop" type="button" aria-label="חזרה למעלה">↑</button>
 <canvas id="bg" aria-hidden="true"></canvas>
 <script src="screens.js"></script>
@@ -373,7 +408,7 @@ mw.innerHTML='<div class="mh"><span class="mb">\u203a</span><b>מראה לתפי
 function scene3(p){fit(sc3,scr3);
   converge(comp,seg(p,.04,.34),'zoom',11);
   var o=ease(seg(p,.46,.66));pageOut(comp.grp,o,0);mw.style.background=o>0?'':'transparent';pageIn(mw,o,0);sc3.style.background=o>.5?'linear-gradient(180deg,#efe6d0,#e4d8bd)':'linear-gradient(180deg,#1b2644,#0e1530)';
-  var ms=ease(seg(p,.62,.9));mw.querySelector('.mstage').style.transform='scale('+(1+.05*ms)+')';
+  var ms=ease(seg(p,.62,.95)),ia=ease(seg(p,.72,.88));mw.querySelector('.mstage').style.transform='scale('+(1+.05*ms)+')';mw.querySelector('.mav').style.opacity=ia;mw.querySelector('.mhint').style.opacity=ease(seg(p,.84,.96));
   setCap(st3,$('c3h'),$('c3p'),p<.5?'כוון לירושלים|מצפן שמכוון אל הכותל, מכל מקום בעולם.':'מראה לתפילין|מדריך שמראה איפה הבית צריך להיות, לפני שמתחילים.');railSet('rail3',p<.5?0:1);}
 /* ================= scene 4 : five languages ================= */
 var NM={he:'עברית',en:'English',fr:'Français',ru:'Русский',ka:'ქართული'};
@@ -391,15 +426,17 @@ function scene4(p){
 }
 
 /* ===== one phone for the whole story: home -> calendar/library/siddur -> compass/mirror ===== */
-var BM1=.24,BM2=.77,stM={},cream='';
+var BM1=.29,BM2=.75,stM={},cream='',flipN=0,phEl=document.querySelector('[data-scene="1"] .big-phone');phEl.classList.add('ph');
 function sceneM(p){
-  var p1=clamp(p/BM1),p2=clamp((p-BM1)/(BM2-BM1)),p3=clamp((p-BM2)/(1-BM2));
+  var x1=clamp(p/BM1)*.87,p1=x1>=.43?x1+.13:x1,p2=clamp((p-BM1)/(BM2-BM1)),p3=clamp((p-BM2)/(1-BM2));
   var o2=ease(seg(p,BM1-.004,BM1+.018)),o3=ease(seg(p,BM2-.004,BM2+.018));
   sc1.style.visibility=o2>=1?'hidden':'visible';sc2.style.visibility=(o2<=0||o3>=1)?'hidden':'visible';sc3.style.visibility=o3<=0?'hidden':'visible';
   sc2.style.opacity=o2;sc3.style.opacity=o3;
-  if(o2<1)scene1(p1);if(o2>0&&o3<1)scene2(p2);if(o3>0)scene3(p3);
+  if(o2<1||!stM.i1){scene1(p1);stM.i1=1;}if((o2>0&&o3<1)||!stM.i2){scene2(p2);stM.i2=1;}if(o3>0||!stM.i3){scene3(p3);stM.i3=1;}
   scr1.style.background=o3>=1?sc3.style.background:'';
-  var cap=p<BM1?st1.cap:p<BM2?st2.cap:st3.cap;if(cap)setCap(stM,$('c1h'),$('c1p'),cap);
+  var cap=p<BM1?st1.cap:p<BM2?st2.cap:st3.cap;
+  if(cap){if(cap!==stM.cap){var f=++flipN;setTimeout(function(){if(f!==flipN)return;var side=f%2,cp=$('c1h').parentNode,wide=window.innerWidth>=1000;cp.classList.toggle('flip',wide&&side===1);cp.classList.toggle('alt',!wide&&side===1);phEl.style.transform=wide?'translateX('+(side?-1:1)*Math.min(110,window.innerWidth*.08)+'px)':'translateY('+(side?-62:0)+'px)';},150);}
+   setCap(stM,$('c1h'),$('c1p'),cap);}
 }
 function scene5(p){[].forEach.call(document.querySelectorAll('.beat'),function(el,i){var a=ease(seg(p,i*.31+.03,i*.31+.16)),b=i<2?ease(seg(p,i*.31+.27,i*.31+.34)):0;el.style.opacity=a*(1-b);el.style.transform='translateY(calc(-50% + '+((1-a)*34-b*30)+'px))';});}
 /* numbers count up once when they scroll into view */
@@ -425,10 +462,10 @@ aurora('bg');
 /* the progress rail is clickable: jump to that moment of the story */
 document.querySelectorAll('.rail').forEach(function(r){r.addEventListener('click',function(e){var li=e.target.closest('li');if(!li)return;var tr=document.querySelector('[data-scene="'+r.dataset.t+'"]');var y=tr.getBoundingClientRect().top+window.scrollY+(+li.dataset.p)*(tr.offsetHeight-window.innerHeight);window.scrollTo({top:y,behavior:'smooth'});});});
 
-(function(){var tt=$('toTop');function up(){window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});}
+(function(){var tt=$('toTop');function up(){if(reduce){window.scrollTo(0,0);return;}var w=$('warp');$('warpImg').src=LOGO;w.classList.add('on');setTimeout(function(){window.scrollTo(0,0);},520);setTimeout(function(){w.classList.remove('on');},1100);}
  tt.addEventListener('click',up);$('footUp').addEventListener('click',up);
- $('cue').addEventListener('click',function(){var t=document.querySelector('.pin-track');window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY,behavior:reduce?'auto':'smooth'});});
- function vis(){tt.classList.toggle('on',window.scrollY>window.innerHeight*.8);}window.addEventListener('scroll',vis,{passive:true});vis();})();
+ $('heroShot').src=D.langs.he;$('cue').addEventListener('click',function(){var t=document.querySelector('.pin-track');window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY,behavior:reduce?'auto':'smooth'});});
+ var who=$('who'),nv=document.querySelector('nav.top'),ly=0;function vis(){tt.classList.toggle('on',who.getBoundingClientRect().top<window.innerHeight*.6);var y=window.scrollY;nv.classList.toggle('navhide',y>240&&y>ly+4);if(y<ly-4||y<=240)nv.classList.remove('navhide');ly=y;}window.addEventListener('scroll',vis,{passive:true});vis();})();
 window.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&!t.dataset.rt){t.dataset.rt='1';setTimeout(function(){t.src=t.src.split('?')[0]+'?r='+Date.now();},700);}},true);
 /* policy pages open in a sheet on the page itself */
 (function(){var DOCS={"privacy": "<div><\/div>\n\n<div data-lang=\"he\" dir=\"rtl\">\n<h1>מדיניות פרטיות — תמיד<\/h1>\n<p>עודכן לאחרונה: 2026-10-18<\/p>\n<p>אפליקציית \"תמיד\" נועדה ללימוד יומי (חוק לישראל, תהילים, תיקוני הזוהר, שניים מקרא ואחד תרגום, בן איש חי ומוסר). האפליקציה <strong>אינה אוספת מידע אישי מזהה כגון שם, אימייל או טלפון<\/strong>. היא כן משתמשת בשירותי אנליטיקס אנונימיים ובאסימון דחיפה אופציונלי, כמפורט למטה.<\/p>\n<h2>מה נשמר, ואיפה<\/h2>\n<p>כל ההתקדמות האישית שלך (אילו ימים סומנו כהושלמו, הגדרות שפה/ערכת נושא, אילו ספרים נלמדים) נשמרת <strong>מקומית בלבד<\/strong> על המכשיר שלך, באמצעות localStorage של הדפדפן/האפליקציה. מידע זה אינו נשלח לשום שרת ואינו נגיש לנו.<\/p>\n<h2>אנליטיקס אנונימי<\/h2>\n<p>האפליקציה משתמשת ב-<strong>Firebase Analytics<\/strong> (Google) כדי לראות אילו מסכים ותכונות בשימוש, לצורך שיפור האפליקציה. בגרסת האינטרנט נטענים גם <strong>Vercel Web Analytics<\/strong> ו-<strong>Vercel Speed Insights<\/strong> — מדדי שימוש וביצועים אנונימיים בלבד (איזה עמוד נצפה, זמני טעינה), ללא שם, אימייל או מזהה אישי אחר. שירותי Vercel אינם פעילים בגרסאות הנייטיב (App Store/Google Play).<\/p>\n<h2>התראות<\/h2>\n<p>אם תפעיל תזכורת יומית בהגדרות, ההתראה נשלחת מקומית על ידי המכשיר שלך בלבד (Local Notification) — לא דרך שרת חיצוני.<\/p>\n<p>בנוסף, קיים אפשרות נפרדת (\"הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ\") להרשמה להתראות דחיפה (Push) עבור עדכוני תוכן. אם תפעיל אפשרות זו, המכשיר שלך מקבל אסימון דחיפה (FCM Token) ייחודי, הנשמר יחד עם סוג הדפדפן/מכשיר (User-Agent) ושפת הממשק שלך במסד הנתונים Firestore של Firebase, אך ורק כדי לאפשר שליחת הודעות אלה. מידע זה אינו כולל שם, אימייל או כל מזהה מזהה נוסף, ואינו משמש למטרה אחרת. ניתן לבטל את ההרשמה בכל עת דרך אותה הגדרה, ואז האסימון נמחק.<\/p>\n<h2>תוכן ונתונים חיצוניים<\/h2>\n<p>האפליקציה טוענת קבצי טקסט (JSON) סטטיים המצורפים אליה עצמה. מלבד שירותי האנליטיקס שלעיל, שני שירותי צד-שלישי נוספים בלבד נטענים:<\/p>\n<ul>\n  <li><strong>Google Fonts<\/strong> — לצורך תצוגה נכונה של הטקסט העברי. Google עשויה לראות את כתובת ה-IP של הבקשה, כמו בכל טעינת גופן מהאינטרנט.<\/li>\n  <li><strong>שירות יצירת קוד QR<\/strong> (api.qrserver.com) — משמש רק כשאתה משתף קישור מתוך האפליקציה (למשל שיתוף פרק תהילים); הקישור הציבורי עצמו נשלח ליצירת התמונה, ללא מידע אישי נוסף.<\/li>\n<\/ul>\n<h2>משוב שאתה שולח<\/h2>\n<p>אם תשלח משוב דרך \"דווח והצעות לשיפור\", נקלטים השם, כתובת האימייל, הנושא וההודעה שהקלדת — אך ורק כדי שנוכל לקרוא ולענות לך. הם נשלחים אלינו במייל ו/או נשמרים במסד נתונים של Firebase (Google), ואין בהם שימוש לפרסום או למעקב, ואינם משותפים עם אף גורם נוסף. אפשר לבקש מחיקה בפנייה ל-<span>info@bet-el.be<\/span>.<\/p>\n<h2>מצלמה, מיקום וחיישנים<\/h2>\n<p><strong>מיקום<\/strong> משמש לחישוב זמני היום ולמצפן, ומעובד על המכשיר; הוא משותף עם הווידג'טים של האפליקציה במכשיר בלבד. <strong>המצלמה<\/strong> (מראה לתפילין) מעובדת על המכשיר בלבד — אין שמירה ואין שליחה של תמונות. בשימוש הראשון נטענים מהאינטרנט קובצי מודל לזיהוי פנים (Google / jsDelivr).<\/p>\n<h2>מוני משתמשים ו\"מחוברים כעת\"<\/h2>\n<p>מסך הבית מציג את מספר המשתמשים הכולל ואת מספר המחוברים כעת. לשם כך נשמר ב-Firebase (Google) מונה כללי שגדל פעם אחת לכל התקנה, ובזמן שהאפליקציה פתוחה נוצרת רשומה אנונימית אקראית ב-Realtime Database שנמחקת כשהאפליקציה נסגרת. לא נשמרים שם, אימייל או מיקום. Google עשויה לראות את כתובת ה-IP, כמו בכל חיבור לשירות מקוון. ב-iOS מתבצעת בדיקה יומית מול Apple (iTunes) אם קיימת גרסה חדשה, ובשימוש הראשון במראה התפילין נטענים מודלי MediaPipe מ-jsDelivr ומ-Google. מלבד שם ואימייל שתמסור בעצמך בטופס המשוב, האפליקציה אינה אוספת מידע אישי מזהה.<\/p>\n<h2>ילדים<\/h2>\n<p>האפליקציה מתאימה לכלל הגילאים ואינה מיועדת במיוחד לילדים, אך אינה אוספת מידע מאף משתמש, כולל ילדים.<\/p>\n<h2>שינויים במדיניות זו<\/h2>\n<p>אם מדיניות הפרטיות תשתנה, העדכון יפורסם בעמוד זה עם תאריך עדכון חדש.<\/p>\n<h2>יצירת קשר<\/h2>\n<p>לשאלות בנוגע למדיניות זו ניתן לפנות במייל <span>info@bet-el.be<\/span>, או דרך <span>מאגר הפרויקט ב-GitHub<\/span>.<\/p>\n<\/div>\n\n", "terms": "<div><\/div>\n\n<div data-lang=\"he\" dir=\"rtl\">\n<h1>תנאי שימוש — תמיד<\/h1>\n<p>עודכן לאחרונה: 2026-08-27<\/p>\n<h2>1. קבלת התנאים<\/h2>\n<p>השימוש באפליקציית \"תמיד\" (\"האפליקציה\") מהווה הסכמה לתנאי שימוש אלו. אם אינך מסכים לתנאים, אנא הימנע משימוש באפליקציה.<\/p>\n<h2>2. תיאור השירות<\/h2>\n<p>האפליקציה היא כלי ללימוד יומי של תורה — חוק לישראל, תהילים, תיקוני הזוהר, שניים מקרא ואחד תרגום, בן איש חי ומוסר — ללא עלות, ללא פרסומות וללא רכישות בתוך האפליקציה. אין צורך ביצירת חשבון משתמש כלשהו.<\/p>\n<h2>3. אין ייעוץ הלכתי<\/h2>\n<p>האפליקציה נועדה לסייע ללימוד עצמי ואינה תחליף לפסיקת הלכה מוסמכת. בכל שאלה הלכתית מעשית יש לפנות לרב מוסמך. הנוסחים, החלוקות והתרגומים המוצגים באפליקציה נעשים במיטב היכולת אך אינם מהווים מקור הלכתי מחייב.<\/p>\n<h2>4. קניין רוחני<\/h2>\n<p>תוכן הלימוד (תורה, תהילים, זוהר, משנה, גמרא, הלכה ומוסר) מבוסס על מקורות תורניים מסורתיים. עיצוב האפליקציה, הקוד והממשק שייכים ליוצרי האפליקציה. אין להעתיק או להפיץ מחדש את קוד האפליקציה ללא רשות.<\/p>\n<h2>5. ללא אחריות<\/h2>\n<p>האפליקציה ניתנת לשימוש \"כפי שהיא\" (AS IS), ללא כל אחריות מפורשת או משתמעת, לרבות אחריות לדיוק מוחלט של הטקסטים, זמינות רציפה של השירות, או התאמה למטרה מסוימת.<\/p>\n<h2>6. הגבלת אחריות<\/h2>\n<p>יוצרי האפליקציה לא יישאו באחריות לכל נזק ישיר או עקיף הנובע משימוש באפליקציה, ככל שהדבר מותר על פי דין.<\/p>\n<h2>7. שינויים<\/h2>\n<p>יוצרי האפליקציה רשאים לעדכן את האפליקציה ואת תנאי שימוש אלו מעת לעת. המשך השימוש באפליקציה לאחר עדכון מהווה הסכמה לתנאים המעודכנים.<\/p>\n<h2>8. יצירת קשר<\/h2>\n<p>לשאלות בנוגע לתנאים אלו ניתן לפנות במייל <span>info@bet-el.be<\/span>, או דרך <span>מאגר הפרויקט ב-GitHub<\/span>.<\/p>\n<\/div>\n\n", "support": "<div><\/div>\n\n<div data-lang=\"he\" dir=\"rtl\">\n<h1>תמיכה — תמיד<\/h1>\n<p>עודכן לאחרונה: 2026-09-07<\/p>\n<div>\n<p>יש לכם שאלה, בקשה לתכונה חדשה, או נתקלתם בבעיה באפליקציה? נשמח לעזור:<\/p>\n<p>📧 <span>info@bet-el.be<\/span><\/p>\n<\/div>\n<h2>שאלות נפוצות<\/h2>\n<h2>האם צריך להירשם או ליצור חשבון?<\/h2>\n<p>לא. האפליקציה עובדת באופן מלא ללא כל חשבון משתמש, הרשמה או התחברות.<\/p>\n<h2>האם האפליקציה עולה כסף?<\/h2>\n<p>לא. האפליקציה חינמית לחלוטין, ללא פרסומות וללא רכישות בתוך האפליקציה.<\/p>\n<h2>האם צריך לאשר הרשאת מיקום?<\/h2>\n<p>לא חובה. הרשאת המיקום משמשת רק לחישוב זמני תפילה מדויקים וכיוון תפילה לפי המיקום שלכם. האפליקציה פועלת גם בלי הרשאה זו, לפי מיקום ברירת מחדל.<\/p>\n<h2>מצאתי טעות בתוכן או באג באפליקציה, למי לפנות?<\/h2>\n<p>נשמח מאוד שתדווחו לנו במייל <span>info@bet-el.be<\/span> עם תיאור הבעיה, ואם אפשר גם צילום מסך.<\/p>\n<\/div>\n\n"},m=$('docModal'),b=$('docBody');function open(k){b.innerHTML=DOCS[k]||'';m.hidden=false;m.scrollTop=0;document.body.style.overflow='hidden';}function close(){m.hidden=true;document.body.style.overflow='';}
