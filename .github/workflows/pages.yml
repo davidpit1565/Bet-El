@@ -29,6 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # publish only what the web app/landing need - never native projects, store metadata, scripts, docs or plist files
+      - run: rm -rf ios android fastlane scripts functions docs design design-system resources node_modules .github RELEASE-REPORT.md firebase.json firestore.rules package.json package-lock.json capacitor.config.json CLAUDE.md README.md vercel.json
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
