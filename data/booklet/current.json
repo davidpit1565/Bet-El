@@ -25,5 +25,14 @@
       "en": "Parashat Vayetze"
     },
     "pdf": "data/booklet/5787-vayetze.pdf"
+  },
+  {
+    "id": "5787-vayishlach",
+    "shabbat": "2026-11-28",
+    "title": {
+      "he": "פרשת וישלח",
+      "en": "Parashat Vayishlach"
+    },
+    "pdf": "data/booklet/5787-vayishlach.pdf"
   }
 ]
