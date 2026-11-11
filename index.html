@@ -2811,7 +2811,7 @@ function birkatHamazonDayText(hd, P){
   let yaaleChag = null, yaaleIsYomTovProper = false;
   if(di.isCholHaMoed && di.cholHaMoedChag==='pesach'){ yaaleChag='pesach'; yaaleIsYomTovProper=false; }
   if(di.isCholHaMoed && di.cholHaMoedChag==='sukkot'){ yaaleChag='sukkot'; yaaleIsYomTovProper=false; }
-  if(di.yaaleVeyavoChag){ yaaleChag=di.yaaleVeyavoChag; yaaleIsYomTovProper=true; }
+  if(di.yaaleVeyavoChag){ yaaleChag=di.yaaleVeyavoChag; yaaleIsYomTovProper=(di.yaaleVeyavoChag!=='roshChodesh'); }   /* Rosh Chodesh is not a Yom Tov: no "yom shekulo tov" (it has its own HaRachaman for the month) */
   const isRealSukkot = (di.cholHaMoedChag==='sukkot') || (di.yaaleVeyavoChag==='sukkot');
   /* Translated/transliterated text (en/fr/ru/ka): same day logic, composed from the keyed parts of
      data/prayers-<lang>.json "birkatHamazonParts" (split from the full translated text, no new wording).
