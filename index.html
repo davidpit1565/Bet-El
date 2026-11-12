@@ -17361,9 +17361,34 @@ window.shareQR = shareQR;
       try{ localStorage.setItem(KEY, String(Date.now())); }catch(e){}
       try { await updateDoc(visitsRef, { count: increment(1) }); }
       catch (e) { try { await setDoc(visitsRef, { count: 1 }); } catch (e2) {} }
+      logVisitStats();
+    };
+    /* Visit statistics (Firestore visitLog/<Israel day>): counts only, no ids. One document per Israel calendar day with a counter
+       per Israel hour (h00..h23), platform (ios/android/web), new vs returning device (new/ret), session count and total
+       seconds in the app (ses/secs) - read by visit-stats.html. Counted once per session, with the same guards as the counter. */
+    let logDay = null, logStart = 0;
+    const israelNow = () => { const p = {}; try{ new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).forEach(x => { p[x.type] = x.value; }); }catch(e){} return p.year ? { day: p.year + '-' + p.month + '-' + p.day, hour: p.hour === '24' ? '00' : p.hour } : null; };
+    const logVisitStats = async () => {
+      try{
+        const t = israelNow(); if(!t) return;
+        let plat = 'web'; try{ plat = (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()) || 'web'; }catch(e){}
+        if(plat !== 'ios' && plat !== 'android') plat = 'web';
+        let isNew = true; try{ isNew = !localStorage.getItem('betel_seen_before'); localStorage.setItem('betel_seen_before', '1'); }catch(e){}
+        const ref = doc(db, 'visitLog', t.day);
+        logDay = t.day; logStart = Date.now();
+        const key = 'h' + t.hour, kind = isNew ? 'new' : 'ret';
+        try { await updateDoc(ref, { total: increment(1), [key]: increment(1), [plat]: increment(1), [kind]: increment(1), ses: increment(1) }); }
+        catch (e) { try { await setDoc(ref, { total: 1, [key]: 1, [plat]: 1, [kind]: 1, ses: 1 }); } catch (e2) { try { await updateDoc(ref, { total: increment(1), [key]: increment(1), [plat]: increment(1), [kind]: increment(1), ses: increment(1) }); } catch (e3) {} } }
+      }catch(e){}
+    };
+    const logSeconds = () => {
+      if(!logDay || !logStart) return;
+      const n = Math.min(7200, Math.round((Date.now() - logStart) / 1000)); logStart = 0;
+      if(n < 3) return;
+      try{ updateDoc(doc(db, 'visitLog', logDay), { secs: increment(n) }).catch(() => {}); }catch(e){}
     };
     await countSession();
-    document.addEventListener('visibilitychange', () => { if(!document.hidden) countSession(); });
+    document.addEventListener('visibilitychange', () => { if(document.hidden){ logSeconds(); } else { countSession(); if(logDay && !logStart) logStart = Date.now(); } });
   })();
 
   // Live "currently online" presence (Realtime Database)
