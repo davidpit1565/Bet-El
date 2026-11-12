@@ -411,6 +411,8 @@ html.has-native-topbar .reader-head.rh-slim.rh-slim-hide{padding-top:0;padding-b
 .reader-head.compact .rt-pick{display:block}
 .reader-head.rh-auto .bic-collapse.rh-gone{display:none}
 html.has-native-topbar .reader-head.rh-empty{display:none}
+/* the native header already shows the prayer's name: drop the duplicate title + gold divider line under it (same idea as rh-empty) */
+html.has-native-topbar .prayer-reader-title,html.has-native-topbar .prayer-reader-divider{display:none}
 /* Chok LeYisrael / Ben Ish Chai: when the native header tucks away on scroll-down, the sticky head must not leave a bare strip behind either */
 html.has-native-topbar .reader-head.rh-tucked{padding-top:0;padding-bottom:0;background:transparent;border-color:transparent;box-shadow:none;pointer-events:none}
 .reader-head.rh-auto .bic-collapse .rh-hide{display:none}
@@ -1050,7 +1052,7 @@ html:not(.has-native-topbar) #dataPrefetchBar{top:calc(env(safe-area-inset-top,0
 /* share-day button on the day-detail card */
 .dd-share-btn{display:flex;align-items:center;gap:6px;margin:10px auto 0;background:var(--panel-2);
   border:1px solid var(--line-strong);border-radius:999px;padding:8px 16px;color:var(--ink-soft);
-  font-family:var(--font-ui);font-size:12.5px;cursor:pointer;width:fit-content}
+  font-family:var(--font-ui);font-size:12.5px;cursor:pointer;width:fit-content;max-width:calc(100% - 8px)}
 .dd-share-btn svg{width:14px;height:14px}
 .dd-share-btn:active{transform:scale(.95)}
 
@@ -1225,7 +1227,7 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-row-lib{padding:20px 18px}
 /* Library top rows (Books / Siddur): each its own colour, with the accent stripe on TOP (not on the side) - David's rule */
 .prayer-row-lib[data-cat]{position:relative;overflow:hidden}
-.prayer-row-lib[data-cat]::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--cat-color);opacity:.9}
+.prayer-row-lib[data-cat]::before{content:none}
 .prayer-row-lib[data-cat="library"]{--cat-color:#4f7ea8;background-image:linear-gradient(150deg,rgba(79,126,168,.26),var(--panel) 60%)}
 .prayer-row-lib[data-cat="siddur"]{--cat-color:#7a9a3f;background-image:linear-gradient(150deg,rgba(122,154,63,.26),var(--panel) 60%)}
 [data-theme="dark"] .prayer-row-lib[data-cat="library"]{background-image:linear-gradient(150deg,rgba(96,152,204,.4),var(--panel) 62%)}
@@ -1719,8 +1721,8 @@ html.has-native-tabbar .search-box-tab{display:none}
 
 
 .q-tile[data-cat]{position:relative;overflow:hidden}
-.q-tile[data-cat]::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;opacity:.9;
-  background:var(--cat-color)}
+/* the coloured accent strip along the top of each tile is gone (owner request): the tint gradient alone marks the category */
+.q-tile[data-cat]::before{content:none}
 .q-tile[data-cat="chok"]{--cat-color:#6f83d6;background-image:linear-gradient(150deg,rgba(111,131,214,.22),var(--panel) 60%)}
 .q-tile[data-cat="tehillim"]{--cat-color:var(--gold-grad);background-image:linear-gradient(150deg,rgba(212,175,95,.28),var(--panel) 60%)}
 .q-tile[data-cat="zohar"]{--cat-color:#e0562e;background-image:linear-gradient(150deg,rgba(224,86,46,.22),var(--panel) 60%)}
@@ -1950,6 +1952,7 @@ html.has-native-tabbar :is(.q-tile,.prayer-row,.btn,.icon-btn,.rnav-btn,.today-b
 .home-item.hi-fixed:empty{display:none}
 .home-item.hi-fixed{margin:-4px 0}
 .q-tile.hi-l{min-height:92px;padding:14px 18px;gap:4px}   /* the prayer-now tile: no taller than the rest (David's rule) */
+.q-tile.hi-l{width:100%;max-width:300px;margin-inline:auto}   /* a bit narrower than the full row and centered (David), like the slim online-now pill */
 .q-tile.hi-l .qt{font-size:25px}
 .q-tile.hi-l .qd{font-size:15px}
 #homeGrid>.home-item:not(.hi-wide)>.q-tile{min-height:88px;padding:12px 15px;gap:3px}   /* every half-width tile the same height, slimmer (David: too thick) */
@@ -9113,6 +9116,7 @@ function openBooklet(){
   openExternal(new URL(bookletURL(b.pdf), location.href).href);
 }
 function renderHome(){
+  hideNativeTopBar();   // Home has no header row: never leave a stale/empty native header strip above it
   setTimeout(()=>ensureBooklet(),1200);
   if(homeNativePlugin()) document.documentElement.classList.add('native-home');   // no flash of the HTML home before the native one shows
   const hd=currentHDate();

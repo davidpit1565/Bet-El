@@ -468,12 +468,15 @@ class MainViewController: CAPBridgeViewController {
             self.webView?.evaluateJavaScript(js, completionHandler: nil)
         }
         topBar.isHidden = false
+        topBarBottomConstraint.constant = topBar.contentHeight
         resetTopBarCollapse()
         reportHeightToWebView()
     }
 
     func setTopBarVisible(_ visible: Bool) {
         topBar.isHidden = !visible
+        // hidden header: the native lists anchored to its bottom start right under the status bar (no empty band on Home)
+        topBarBottomConstraint.constant = visible ? topBar.contentHeight : 0
         resetTopBarCollapse()
         reportHeightToWebView()
     }
