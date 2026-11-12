@@ -257,7 +257,17 @@ final class NCDayPage: UIView {
         config.baseForegroundColor = UIColor(white: 0.12, alpha: 1)
         let b = UIButton(configuration: config)
         b.addAction(UIAction { [weak self] _ in self?.onShare?() }, for: .touchUpInside)
-        return b
+        // a hair of inner padding: the glass capsule's edge otherwise sits flush with (and looks clipped by) the page / group edges
+        let holder = UIView()
+        b.translatesAutoresizingMaskIntoConstraints = false
+        holder.addSubview(b)
+        NSLayoutConstraint.activate([
+            b.topAnchor.constraint(equalTo: holder.topAnchor),
+            b.bottomAnchor.constraint(equalTo: holder.bottomAnchor),
+            b.leadingAnchor.constraint(equalTo: holder.leadingAnchor, constant: 3),
+            b.trailingAnchor.constraint(equalTo: holder.trailingAnchor, constant: -3),
+        ])
+        return holder
     }
 
     func configure(_ info: NCDayInfo?, shareTitle: String, rtl: Bool) {
