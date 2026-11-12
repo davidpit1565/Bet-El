@@ -113,6 +113,14 @@ jobs:
               cat ../artifacts/android-runtime-errors.log
               exit 1
             fi
+            # Home-screen widgets: the launcher's picker lists exactly the providers AppWidgetManager knows about.
+            adb shell dumpsys appwidget > ../artifacts/appwidget-dump.txt
+            for w in BetElMainWidget BetElZmanimWidget BetElCandleWidget BetElStreakWidget; do
+              grep -q "$w" ../artifacts/appwidget-dump.txt || { echo "Widget provider $w is not registered"; exit 1; }
+            done
+            # Applies every widget's RemoteViews like a launcher does (a rejected action = "Can't load widget" on a phone).
+            # Runs last: connected tests uninstall the app afterwards.
+            ./gradlew --no-daemon connectedDebugAndroidTest
 
       - name: Upload Android smoke-test artifacts
         if: always()

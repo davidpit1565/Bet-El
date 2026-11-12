@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -36,24 +35,32 @@ final class BetElWidgets {
         JSONObject d = BetElStore.read(c);
         long now = System.currentTimeMillis();
         for (int id : ids) {
-            RemoteViews rv;
-            if (provider == BetElMainWidget.class) rv = main(c, d, now);
-            else if (provider == BetElZmanimWidget.class) rv = zmanim(c, d, now);
-            else if (provider == BetElCandleWidget.class) rv = candle(c, d, now);
-            else rv = streak(c, d, now);
-            mgr.updateAppWidget(id, rv);
+            try {
+                mgr.updateAppWidget(id, build(c, provider, d, now));
+            } catch (Throwable t) {
+                // One broken widget must not stop the others (or the notification / alarm that follow).
+                android.util.Log.e("BetElWidgets", "update failed for " + provider.getSimpleName(), t);
+            }
         }
+    }
+
+    /** Builds the RemoteViews for one provider (package-private so the instrumented test can apply them). */
+    static RemoteViews build(Context c, Class<?> provider, JSONObject d, long now) {
+        if (provider == BetElMainWidget.class) return main(c, d, now);
+        if (provider == BetElZmanimWidget.class) return zmanim(c, d, now);
+        if (provider == BetElCandleWidget.class) return candle(c, d, now);
+        return streak(c, d, now);
     }
 
     // ---------- helpers ----------
     private static int color(Context c, int res) { return c.getResources().getColor(res, null); }
 
-    private static int gravity(JSONObject d) { return BetElStore.rtl(d) ? Gravity.RIGHT : Gravity.LEFT; }
-
-    private static void text(RemoteViews rv, int id, String s, int color, int gravity) {
+    /* No reflection-based setters (setInt "setGravity" etc.): a RemoteViews action naming a method that is not
+       @RemotableViewMethod throws while the launcher applies it, and the whole widget then shows "Can't load widget".
+       Text alignment comes from the layouts (textAlignment="textStart": Hebrew right, others left). */
+    private static void text(RemoteViews rv, int id, String s, int color) {
         rv.setTextViewText(id, s);
         rv.setTextColor(id, color);
-        rv.setInt(id, "setGravity", gravity);
     }
 
     private static PendingIntent link(Context c, String kind, int code) {
@@ -63,15 +70,17 @@ final class BetElWidgets {
     }
 
     /** System-driven countdown (keeps ticking with no process running); hidden if there is nothing to count to. */
-    private static void countdown(RemoteViews rv, int id, long end, long now, int color, int gravity) {
+    private static void countdown(RemoteViews rv, boolean rtl, long end, long now, int color) {
+        // Two Chronometers (left / right aligned in the layout) instead of switching gravity at runtime.
+        int show = rtl ? R.id.countdown_rtl : R.id.countdown, hide = rtl ? R.id.countdown : R.id.countdown_rtl;
+        rv.setViewVisibility(hide, View.GONE);
         if (end > now) {
-            rv.setViewVisibility(id, View.VISIBLE);
-            rv.setChronometer(id, SystemClock.elapsedRealtime() + (end - now), null, true);
-            rv.setChronometerCountDown(id, true);
-            rv.setTextColor(id, color);
-            rv.setInt(id, "setGravity", gravity);
+            rv.setViewVisibility(show, View.VISIBLE);
+            rv.setChronometer(show, SystemClock.elapsedRealtime() + (end - now), null, true);
+            rv.setChronometerCountDown(show, true);
+            rv.setTextColor(show, color);
         } else {
-            rv.setViewVisibility(id, View.GONE);
+            rv.setViewVisibility(show, View.GONE);
         }
     }
 
@@ -79,25 +88,25 @@ final class BetElWidgets {
     private static RemoteViews main(Context c, JSONObject d, long now) {
         RemoteViews rv = new RemoteViews(c.getPackageName(), R.layout.widget_main);
         String lang = BetElStore.lang(d);
-        int g = gravity(d);
         int ink = color(c, R.color.widget_ink), soft = color(c, R.color.widget_ink_soft);
         int gold = color(c, R.color.widget_gold), bright = color(c, R.color.widget_gold_bright);
         String heb = BetElStore.hebDate(d, now);
-        text(rv, R.id.tv_greg, BetElStore.gregLine(now, lang), soft, g);
-        text(rv, R.id.tv_heb, heb.isEmpty() ? "תמיד" : heb, bright, g);
+        text(rv, R.id.tv_greg, BetElStore.gregLine(now, lang), soft);
+        text(rv, R.id.tv_heb, heb.isEmpty() ? "תמיד" : heb, bright);
         String label = BetElStore.dayLabel(d, now);
         int omer = BetElStore.omerDay(d, now);
         if (label.isEmpty() && omer > 0) label = BetElStore.omerLine(omer, lang);
-        text(rv, R.id.tv_label, label, gold, g);
+        text(rv, R.id.tv_label, label, gold);
         rv.setViewVisibility(R.id.tv_label, label.isEmpty() ? View.GONE : View.VISIBLE);
         List<BetElStore.Z> up = BetElStore.upcoming(d, now, 1);
         if (up.isEmpty()) {
-            text(rv, R.id.tv_next, BetElStore.t("openApp", lang), soft, g);
+            text(rv, R.id.tv_next, BetElStore.t("openApp", lang), soft);
             rv.setViewVisibility(R.id.countdown, View.GONE);
+            rv.setViewVisibility(R.id.countdown_rtl, View.GONE);
         } else {
             BetElStore.Z z = up.get(0);
-            text(rv, R.id.tv_next, BetElStore.t(z.key, lang) + " · " + BetElStore.hm(z.t), soft, g);
-            countdown(rv, R.id.countdown, z.t, now, ink, g);
+            text(rv, R.id.tv_next, BetElStore.t(z.key, lang) + " · " + BetElStore.hm(z.t), soft);
+            countdown(rv, BetElStore.rtl(d), z.t, now, ink);
         }
         rv.setOnClickPendingIntent(R.id.root, link(c, "calendar", 11));
         return rv;
@@ -108,9 +117,8 @@ final class BetElWidgets {
         RemoteViews rv = new RemoteViews(c.getPackageName(), R.layout.widget_zmanim);
         String lang = BetElStore.lang(d);
         boolean rtl = BetElStore.rtl(d);
-        int g = gravity(d);
         int ink = color(c, R.color.widget_ink), soft = color(c, R.color.widget_ink_soft), bright = color(c, R.color.widget_gold_bright);
-        text(rv, R.id.tv_title, BetElStore.t("zmanimToday", lang), soft, g);
+        text(rv, R.id.tv_title, BetElStore.t("zmanimToday", lang), soft);
         rv.removeAllViews(R.id.rows);
         List<BetElStore.Z> today = BetElStore.today(d, now);
         List<BetElStore.Z> up = BetElStore.upcoming(d, now, 1);
@@ -125,7 +133,7 @@ final class BetElWidgets {
             rv.addView(R.id.rows, row);
         }
         if (today.isEmpty()) {
-            text(rv, R.id.tv_empty, BetElStore.t("openApp", lang), soft, g);
+            text(rv, R.id.tv_empty, BetElStore.t("openApp", lang), soft);
             rv.setViewVisibility(R.id.tv_empty, View.VISIBLE);
         } else {
             rv.setViewVisibility(R.id.tv_empty, View.GONE);
@@ -138,22 +146,22 @@ final class BetElWidgets {
     private static RemoteViews candle(Context c, JSONObject d, long now) {
         RemoteViews rv = new RemoteViews(c.getPackageName(), R.layout.widget_candle);
         String lang = BetElStore.lang(d);
-        int g = gravity(d);
         int ink = color(c, R.color.widget_ink), soft = color(c, R.color.widget_ink_soft);
         int gold = color(c, R.color.widget_gold), bright = color(c, R.color.widget_gold_bright);
         Object[] next = BetElStore.nextCandle(d, now);
         if (next == null) {
-            text(rv, R.id.tv_title, BetElStore.t("candleLighting", lang), soft, g);
-            text(rv, R.id.tv_time, "—", bright, g);
-            text(rv, R.id.tv_sub, BetElStore.t("noCandle", lang), gold, g);
+            text(rv, R.id.tv_title, BetElStore.t("candleLighting", lang), soft);
+            text(rv, R.id.tv_time, "—", bright);
+            text(rv, R.id.tv_sub, BetElStore.t("noCandle", lang), gold);
             rv.setViewVisibility(R.id.countdown, View.GONE);
+            rv.setViewVisibility(R.id.countdown_rtl, View.GONE);
         } else {
             long t = (Long) next[0];
             String l = (String) next[1];
-            text(rv, R.id.tv_title, l == null || l.isEmpty() ? BetElStore.t("candleLighting", lang) : l, soft, g);
-            text(rv, R.id.tv_time, BetElStore.hm(t), bright, g);
-            text(rv, R.id.tv_sub, BetElStore.t("candleIn", lang), gold, g);
-            countdown(rv, R.id.countdown, t, now, ink, g);
+            text(rv, R.id.tv_title, l == null || l.isEmpty() ? BetElStore.t("candleLighting", lang) : l, soft);
+            text(rv, R.id.tv_time, BetElStore.hm(t), bright);
+            text(rv, R.id.tv_sub, BetElStore.t("candleIn", lang), gold);
+            countdown(rv, BetElStore.rtl(d), t, now, ink);
         }
         rv.setOnClickPendingIntent(R.id.root, link(c, "calendar", 13));
         return rv;
@@ -163,12 +171,11 @@ final class BetElWidgets {
     private static RemoteViews streak(Context c, JSONObject d, long now) {
         RemoteViews rv = new RemoteViews(c.getPackageName(), R.layout.widget_streak);
         String lang = BetElStore.lang(d);
-        int g = gravity(d);
         int soft = color(c, R.color.widget_ink_soft), gold = color(c, R.color.widget_gold), bright = color(c, R.color.widget_gold_bright);
-        text(rv, R.id.tv_title, BetElStore.t("streakTitle", lang), soft, g);
-        text(rv, R.id.tv_count, String.valueOf(d.optInt("streakCount", 0)), bright, g);
-        text(rv, R.id.tv_sub, BetElStore.t("dayStreak", lang), gold, g);
-        text(rv, R.id.tv_best, BetElStore.t("best", lang) + " " + d.optInt("streakBest", 0), soft, g);
+        text(rv, R.id.tv_title, BetElStore.t("streakTitle", lang), soft);
+        text(rv, R.id.tv_count, String.valueOf(d.optInt("streakCount", 0)), bright);
+        text(rv, R.id.tv_sub, BetElStore.t("dayStreak", lang), gold);
+        text(rv, R.id.tv_best, BetElStore.t("best", lang) + " " + d.optInt("streakBest", 0), soft);
         rv.setOnClickPendingIntent(R.id.root, link(c, "tracker", 14));
         return rv;
     }
