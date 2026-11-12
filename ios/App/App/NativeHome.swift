@@ -331,7 +331,7 @@ final class NHCell: UICollectionViewCell {
         skyView.isHidden = !hasSky
         tintView.isHidden = hasSky
         if hasSky { skyView.apply(it.sky, rtl: rtl) }
-        accentView.isHidden = !(it.kind == "tile" || it.kind == "stat" || it.kind == "row")
+        accentView.isHidden = true   // the coloured strip along the top of each tile was removed (owner request); the tint gradient stays
         minusButton.isHidden = !(editing && it.removable)
         grip.isHidden = !(editing && it.resizable)
 
