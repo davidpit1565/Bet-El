@@ -32,6 +32,10 @@ h2{font-size:18px;margin:22px 0 8px}
 .split i{display:block;height:100%}
 .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--soft);font-size:14px;margin:6px 0 0}
 .note{color:var(--soft);font-size:14px;margin-top:20px}
+#countries{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+#countries button{font:inherit;font-size:14px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+#countries button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.crow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:15px}.card .crow b{flex:0 0 130px;font-weight:600;font-size:15px;line-height:1.3;color:var(--ink)}.crow i{display:block;height:12px;border-radius:6px;background:var(--bar)}.crow span{color:var(--soft);font-size:14px;min-width:34px}
 #err{color:#b3261e;margin:10px 0;overflow-wrap:anywhere}
 .btn{font:inherit;font-weight:700;padding:12px 22px;border-radius:99px;border:0;background:var(--ink);color:var(--bg);cursor:pointer}
 .lnk{font:inherit;background:none;border:0;color:var(--soft);text-decoration:underline;cursor:pointer;padding:0}
@@ -47,9 +51,10 @@ h2{font-size:18px;margin:22px 0 8px}
 <p style="margin:0 0 10px"><button type="button" id="out" class="lnk">התנתקות</button></p>
 <p class="sub">כל כניסה נספרת פעם אחת לכל שימוש (חצי שעה בלי פעילות פותחת כניסה חדשה). השעות לפי שעון ישראל.</p>
 <div class="ctl" role="group" aria-label="טווח"><button type="button" data-d="7" aria-pressed="true">7 ימים</button><button type="button" data-d="14" aria-pressed="false">14 ימים</button><button type="button" data-d="30" aria-pressed="false">30 ימים</button><button type="button" data-d="90" aria-pressed="false">90 ימים</button></div>
-<div class="grid" id="cards"></div>
+<h2 style="margin-top:0">מדינות (לפי אזור זמן של המכשיר)</h2><div id="countries" role="group" aria-label="סינון לפי מדינה"></div><div class="grid" id="cards"></div>
 <h2>כניסות לפי יום</h2><div class="chart" id="days"></div>
 <h2>כניסות לפי שעה ביום (שעון ישראל)</h2><div class="chart" id="hours"></div>
+<h2>כניסות לפי מדינה</h2><div class="card" id="clist"></div>
 <h2>פלטפורמה</h2><div class="split" id="plat"></div><div class="legend" id="platL"></div>
 <h2>מכשירים חדשים וחוזרים</h2><div class="split" id="nr"></div><div class="legend" id="nrL"></div>
 <p class="note">הנתונים מצטברים מרגע שהגרסה החדשה של האפליקציה יצאה. הכניסות שנספרו לפני כן (בערך 1,400) מופיעות רק במונה הכללי ולא כאן. זמן שימוש נמדד בשניות מרגע הפתיחה עד שהאפליקציה עוברת לרקע, ולכן הוא ממוצע משוער.</p>
@@ -64,6 +69,11 @@ var auth=getAuth(app),db=getFirestore(app);
 var $=function(i){return document.getElementById(i);},docs=[],range=7;
 function num(f,k){return +(f&&f[k])||0;}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+var ZONES={Asia_Jerusalem:'ישראל',Asia_Tel_Aviv:'ישראל',Asia_Hebron:'ישראל',Asia_Gaza:'ישראל',Europe_London:'בריטניה',Europe_Paris:'צרפת',Europe_Brussels:'בלגיה',Europe_Berlin:'גרמניה',Europe_Moscow:'רוסיה',Europe_Kiev:'אוקראינה',Europe_Kyiv:'אוקראינה',Asia_Tbilisi:'גאורגיה',Europe_Zurich:'שוויץ',Europe_Amsterdam:'הולנד',Europe_Madrid:'ספרד',Europe_Rome:'איטליה',Europe_Vienna:'אוסטריה',Europe_Warsaw:'פולין',Europe_Prague:'צ׳כיה',Europe_Budapest:'הונגריה',Europe_Athens:'יוון',Europe_Istanbul:'טורקיה',Asia_Istanbul:'טורקיה',Europe_Dublin:'אירלנד',Europe_Lisbon:'פורטוגל',Europe_Stockholm:'שוודיה',Europe_Oslo:'נורווגיה',Europe_Copenhagen:'דנמרק',Europe_Helsinki:'פינלנד',Europe_Bucharest:'רומניה',Europe_Sofia:'בולגריה',Europe_Belgrade:'סרביה',Europe_Luxembourg:'לוקסמבורג',Europe_Minsk:'בלארוס',Asia_Yerevan:'ארמניה',Asia_Baku:'אזרבייג׳ן',Asia_Almaty:'קזחסטן',Asia_Tashkent:'אוזבקיסטן',America_New_York:'ארה״ב',America_Chicago:'ארה״ב',America_Denver:'ארה״ב',America_Los_Angeles:'ארה״ב',America_Phoenix:'ארה״ב',America_Anchorage:'ארה״ב',America_Detroit:'ארה״ב',America_Boise:'ארה״ב',America_Indiana_Indianapolis:'ארה״ב',America_Kentucky_Louisville:'ארה״ב',Pacific_Honolulu:'ארה״ב',America_Toronto:'קנדה',America_Vancouver:'קנדה',America_Montreal:'קנדה',America_Edmonton:'קנדה',America_Halifax:'קנדה',America_Winnipeg:'קנדה',America_Mexico_City:'מקסיקו',America_Sao_Paulo:'ברזיל',America_Argentina_Buenos_Aires:'ארגנטינה',America_Bogota:'קולומביה',America_Lima:'פרו',America_Santiago:'צ׳ילה',America_Caracas:'ונצואלה',America_Montevideo:'אורוגוואי',America_Panama:'פנמה',Africa_Johannesburg:'דרום אפריקה',Africa_Casablanca:'מרוקו',Africa_Cairo:'מצרים',Africa_Tunis:'תוניסיה',Africa_Algiers:'אלג׳יריה',Africa_Lagos:'ניגריה',Africa_Nairobi:'קניה',Asia_Dubai:'איחוד האמירויות',Asia_Riyadh:'סעודיה',Asia_Kolkata:'הודו',Asia_Calcutta:'הודו',Asia_Tokyo:'יפן',Asia_Seoul:'דרום קוריאה',Asia_Shanghai:'סין',Asia_Hong_Kong:'הונג קונג',Asia_Singapore:'סינגפור',Asia_Bangkok:'תאילנד',Asia_Manila:'הפיליפינים',Asia_Jakarta:'אינדונזיה',Australia_Sydney:'אוסטרליה',Australia_Melbourne:'אוסטרליה',Australia_Brisbane:'אוסטרליה',Australia_Perth:'אוסטרליה',Australia_Adelaide:'אוסטרליה',Pacific_Auckland:'ניו זילנד'};
+function ctry(z){return ZONES[z]||z.replace(/_/g,' ');}
+var sel={};
+function tzOf(x){return (x.f&&x.f.tz)||{};}
 function show(loggedIn){$('login').hidden=loggedIn;if(!loggedIn)$('who').hidden=true;$('app').hidden=!loggedIn;}
 function msg(t){var el=$('err');el.hidden=!t;el.textContent=t||'';}
 async function load(user){
@@ -88,15 +98,26 @@ function split(el,leg,items){var t=items.reduce(function(a,x){return a+x.v;},0)|
   el.innerHTML=items.map(function(x){return '<i style="width:'+(x.v/t*100)+'%;background:'+x.c+'"></i>';}).join('');
   leg.innerHTML=items.map(function(x){return '<span><b style="color:'+x.c+'">●</b> '+esc(x.n)+': '+x.v+' ('+Math.round(x.v/t*100)+'%)</span>';}).join('');}
 function render(){
-  var d=docs.slice(-range),tot=0,secs=0,ses=0,hrs=[],i,plat={ios:0,android:0,web:0},nw=0,rt=0;
+  var d=docs.slice(-range),tot=0,secs=0,ses=0,hrs=[],i,plat={ios:0,android:0,web:0},nw=0,rt=0,byC={},dayV=[];
   for(i=0;i<24;i++)hrs.push(0);
-  d.forEach(function(x){tot+=num(x.f,'total');secs+=num(x.f,'secs');ses+=num(x.f,'ses');plat.ios+=num(x.f,'ios');plat.android+=num(x.f,'android');plat.web+=num(x.f,'web');nw+=num(x.f,'new');rt+=num(x.f,'ret');
-    for(i=0;i<24;i++)hrs[i]+=num(x.f,'h'+(i<10?'0':'')+i);});
+  d.forEach(function(x){var tz=tzOf(x);Object.keys(tz).forEach(function(z){var c=ctry(z);byC[c]=(byC[c]||0)+num(tz[z],'total');});});
+  var names=Object.keys(byC).sort(function(a,b){return byC[b]-byC[a];}),anySel=names.some(function(n){return sel[n];});
+  $('countries').innerHTML=['הכל'].concat(names).map(function(n,k){var on=k===0?!anySel:!!sel[n];return '<button type="button" data-c="'+(k===0?'':esc(n))+'" aria-pressed="'+on+'">'+esc(n)+(k?' ('+byC[n]+')':'')+'</button>';}).join('');
+  [].forEach.call($('countries').querySelectorAll('button'),function(b){b.addEventListener('click',function(){var c=b.dataset.c;if(!c){sel={};}else{sel[c]=!sel[c];}render();});});
+  d.forEach(function(x){
+    plat.ios+=num(x.f,'ios');plat.android+=num(x.f,'android');plat.web+=num(x.f,'web');nw+=num(x.f,'new');rt+=num(x.f,'ret');
+    var dt=0,tz=tzOf(x);
+    if(!anySel){dt=num(x.f,'total');secs+=num(x.f,'secs');ses+=num(x.f,'ses');for(i=0;i<24;i++)hrs[i]+=num(x.f,'h'+(i<10?'0':'')+i);}
+    else Object.keys(tz).forEach(function(z){if(!sel[ctry(z)])return;dt+=num(tz[z],'total');for(i=0;i<24;i++)hrs[i]+=num(tz[z],'h'+(i<10?'0':'')+i);});
+    tot+=dt;dayV.push({v:dt,l:x.day.slice(5),t:x.day});
+  });
   var peak=0;for(i=1;i<24;i++)if(hrs[i]>hrs[peak])peak=i;
   var avgMin=ses?Math.round(secs/ses/60*10)/10:0,days=d.length||1;
-  $('cards').innerHTML=[[tot,'כניסות בטווח'],[Math.round(tot/days*10)/10,'ממוצע ליום'],[tot?(peak<10?'0':'')+peak+':00':'-','שעת השיא'],[avgMin||'-','דקות לשימוש (ממוצע)']].map(function(c){return '<div class="card"><b>'+c[0]+'</b><span>'+c[1]+'</span></div>';}).join('');
-  bar($('days'),d.map(function(x){return {v:num(x.f,'total'),l:x.day.slice(5),t:x.day};}));
+  $('cards').innerHTML=[[tot,'כניסות בטווח'],[Math.round(tot/days*10)/10,'ממוצע ליום'],[tot?(peak<10?'0':'')+peak+':00':'-','שעת השיא'],[anySel?'-':(avgMin||'-'),'דקות לשימוש (ממוצע)']].map(function(c){return '<div class="card"><b>'+c[0]+'</b><span>'+c[1]+'</span></div>';}).join('');
+  bar($('days'),dayV);
   bar($('hours'),hrs.map(function(v,h){return {v:v,l:(h<10?'0':'')+h,t:(h<10?'0':'')+h+':00'};}),'h');
+  var mx=Math.max.apply(null,names.map(function(n){return byC[n];}).concat([1]));
+  $('clist').innerHTML=names.length?names.map(function(n){return '<div class="crow"><b>'+esc(n)+'</b><i style="width:'+Math.max(2,Math.round(byC[n]/mx*60))+'%"></i><span>'+byC[n]+'</span></div>';}).join(''):'<span style="color:var(--soft)">עדיין אין נתוני מדינות. הם נרשמים מהגרסה הזו של האפליקציה.</span>';
   split($('plat'),$('platL'),[{n:'iPhone',v:plat.ios,c:'#3c5aa6'},{n:'אנדרואיד',v:plat.android,c:'#2e9e6a'},{n:'אתר',v:plat.web,c:'#c99a3c'}]);
   split($('nr'),$('nrL'),[{n:'חדשים',v:nw,c:'#c99a3c'},{n:'חוזרים',v:rt,c:'#3c5aa6'}]);
 }
