@@ -2078,6 +2078,76 @@ html:not(.has-native-topbar):has(#app .hero-logo) #dataPrefetchBar{top:env(safe-
 /* Bet-El Ben Ish Chai tab chips: breathing room under the header; segmented labels may wrap (ka/ru) */
 .ck-track{margin-top:10px}
 .ical-seg button{white-space:normal;min-height:40px}
+
+/* ================= ANDROID / WEB POLISH (user request, 2026-11-12) =================
+   Plain-HTML fallback only (the iOS app uses the native UIKit screens). Everything here is paint: flat gradients, thin light
+   rims and soft shadows (the "tinted and layered" glass recipe) - NO backdrop-filter, see the Liquid Glass note above. */
+:root{--grp-card:rgba(255,255,255,.075);--grp-sep:rgba(255,255,255,.12);--grp-ctl:rgba(118,118,128,.30);--grp-thumb:#636366;--grp-thumb-ink:#fff;--rim:rgba(255,255,255,.16);--rim-soft:rgba(255,255,255,.07)}
+[data-theme="light"]{--grp-card:rgba(255,255,255,.88);--grp-sep:rgba(60,45,15,.16);--grp-ctl:rgba(118,118,128,.16);--grp-thumb:#fff;--grp-thumb-ink:#1c1a14;--rim:rgba(255,255,255,.9);--rim-soft:rgba(110,85,30,.10)}
+/* --- Settings: iOS inset-grouped lists --- */
+.set-ios{--ss:var(--grp-card);--sh:var(--grp-sep);--sctl:var(--grp-ctl);padding-bottom:24px}
+.set-large-title{font:800 34px/1.15 var(--font-ui);letter-spacing:.2px;margin:6px 6px 2px;color:var(--ink)}
+[dir="rtl"] .set-large-title{letter-spacing:0}
+#app:has(.set-large-title) .topbar .tb-title{visibility:hidden}
+.set-ios .set-group{margin-top:26px}
+.set-ios .set-group:first-of-type{margin-top:14px}
+.set-ios .set-group h3{font:600 13px/1.3 var(--font-ui);letter-spacing:.3px;color:var(--muted);margin:0 20px 8px;text-transform:none}
+html[lang="en"] .set-ios .set-group h3,html[lang="fr"] .set-ios .set-group h3,html[lang="ru"] .set-ios .set-group h3{text-transform:uppercase;font-size:12px;letter-spacing:.5px}
+.set-ios .set-group>.set-item{position:relative;min-height:52px;padding:10px 16px;gap:12px;border-bottom:0;
+  box-shadow:inset 0 0 0 .5px var(--rim-soft);background-image:none}
+.set-ios .set-group>.set-item:first-of-type{border-radius:14px 14px 0 0}
+.set-ios .set-group>.set-item:last-of-type{border-radius:0 0 14px 14px}
+.set-ios .set-group>.set-item:only-of-type{border-radius:14px}
+/* thin separator inset to the text column (starts after the icon tile) */
+.set-ios .set-group>.set-item:not(:last-of-type)::after{content:"";position:absolute;bottom:0;height:.5px;background:var(--sh);inset-inline-start:58px;inset-inline-end:0;pointer-events:none}
+.set-ios .set-group>.set-item:not(:has(.si-ico)):not(:last-of-type)::after{inset-inline-start:16px}
+.set-ios .set-item .si-ico{width:30px;height:30px;border-radius:7px;box-shadow:inset 0 .5px 0 rgba(255,255,255,.35),0 1px 2px rgba(0,0,0,.18)}
+.set-ios .set-item .si-ico svg{width:18px;height:18px}
+.set-ios .set-item .si-l{gap:14px}
+.set-ios .set-item .si-t{font-size:16.5px;font-weight:500;line-height:1.3}
+.set-ios .set-item .si-d{font-size:13px;line-height:1.35;margin-top:2px}
+.set-ios .set-item>svg{width:16px;height:16px;opacity:.55}
+.set-ios .set-item[data-cat],.set-ios a.set-item{min-height:58px}
+/* chevrons everywhere point "forward": left in RTL, right in LTR */
+.set-ios .set-item>svg{transform:rotate(90deg)}
+html[dir="ltr"] .set-ios .set-item>svg{transform:rotate(-90deg)}
+.set-ios .set-item.row-tap:active,.set-ios .set-item[data-cat]:active,.set-ios a.set-item:active{filter:none;background-color:rgba(128,128,140,.18)}
+@media (hover:hover) and (pointer:fine){.set-ios .set-item:hover{transform:none;box-shadow:inset 0 0 0 .5px var(--rim-soft)}}
+/* switches: 51x31, green when on (iOS); knob follows the reading direction */
+.set-ios .toggle{width:51px;height:31px;border:0;background:var(--grp-ctl)}
+.set-ios .toggle.on{background:#34c759}
+html[dir="ltr"] .toggle::after{right:auto;left:2px}
+html[dir="ltr"] .toggle.on::after{left:calc(100% - 25px);right:auto}
+html[dir="ltr"] .toggle:active::after{width:29px}
+html[dir="ltr"] .toggle.on:active::after{left:calc(100% - 31px);right:auto}
+html[dir="ltr"] .set-ios .toggle::after{left:2px;right:auto}
+html[dir="ltr"] .set-ios .toggle.on::after{left:calc(100% - 29px);right:auto}
+html[dir="ltr"] .set-ios .toggle:active::after{width:31px}
+html[dir="ltr"] .set-ios .toggle.on:active::after{left:calc(100% - 33px);right:auto}
+/* segmented control: grey track, raised thumb */
+.set-ios .seg{background:var(--grp-ctl);border-radius:9px;padding:2px;gap:0}
+.set-ios .seg button{border-radius:7px;font-size:13px;font-weight:500;color:var(--ink);padding-block:7px;min-height:32px}
+.set-ios .seg button.on{background:var(--grp-thumb);color:var(--grp-thumb-ink);font-weight:600;box-shadow:0 2px 5px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.08)}
+.set-ios .stepper{background:var(--grp-ctl);border-radius:9px;padding:2px;gap:0}
+.set-ios .stepper button{border-radius:7px;color:var(--ink)}
+.set-ios .stepper .v{font-family:var(--font-ui);font-weight:600;font-size:14px;min-width:48px}
+.set-ios .row-select-val{color:var(--muted);font-weight:500;font-size:15px;flex:0 0 auto;max-width:52%}
+.set-ios .row-select-val span{white-space:nowrap;overflow-wrap:normal;word-break:normal;overflow:hidden;text-overflow:ellipsis}
+.set-ios .set-item .si-l{flex:1 1 0}
+.set-ios .credit{margin-top:6px}
+
+/* --- Liquid Glass feel on the plain-HTML surfaces (paint only) --- */
+.bottom-nav{border:.5px solid var(--rim);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.06) 28%,rgba(255,255,255,0) 60%);
+  box-shadow:0 18px 40px -14px rgba(0,0,0,.5),0 3px 10px -3px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(0,0,0,.10)}
+[data-theme="light"] .bottom-nav{box-shadow:0 16px 36px -14px rgba(80,60,20,.45),0 3px 10px -3px rgba(80,60,20,.18),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(110,85,30,.10)}
+.topbar{border-bottom:0;box-shadow:0 .5px 0 var(--rim-soft),0 10px 16px -16px rgba(0,0,0,.55)}
+.card,.q-tile,.prayer-row,.sm-week-card,.res-item,.dd-portion{
+  box-shadow:var(--card-shadow),inset 0 1px 0 var(--rim),inset 0 0 0 .5px var(--rim-soft)}
+.icon-btn,.cal-nav{box-shadow:0 4px 12px -6px rgba(0,0,0,.45),inset 0 1px 0 var(--rim),inset 0 0 0 .5px var(--rim-soft)}
+.btn-ghost{box-shadow:inset 0 1px 0 var(--rim),inset 0 0 0 .5px var(--rim-soft)}
+.modal{background-image:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0) 40%);
+  box-shadow:0 36px 80px -24px rgba(0,0,0,.65),0 6px 18px -8px rgba(0,0,0,.3),inset 0 1px 0 var(--rim),inset 0 0 0 .5px var(--rim-soft)}
 </style>
 </head>
 <body>
@@ -3360,6 +3430,10 @@ Object.assign(I18N.en,{"פתיחה": "Open", "שתוף": "Share", "העתקה": 
 Object.assign(I18N.fr,{"פתיחה": "Ouvrir", "שתוף": "Partager", "העתקה": "Copier", "ביטול": "Annuler", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "Pour activer : Réglages iOS → Tamid → Notifications", "בטול": "Annuler", "הטקסט הועתק": "Texte copié", "שתוף פרק": "Partager le chapitre"});
 Object.assign(I18N.ru,{"פתיחה": "Открыть", "שתוף": "Поделиться", "העתקה": "Копировать", "ביטול": "Отмена", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "Чтобы включить: Настройки iOS → Tamid → Уведомления", "בטול": "Отмена", "הטקסט הועתק": "Текст скопирован", "שתוף פרק": "Поделиться главой"});
 Object.assign(I18N.ka,{"פתיחה": "გახსნა", "שתוף": "გაზიარება", "העתקה": "კოპირება", "ביטול": "გაუქმება", "כדי להפעיל: הגדרות iOS ← תמיד ← הודעות": "ჩასართავად: iOS პარამეტრები → Tamid → შეტყობინებები", "בטול": "გაუქმება", "הטקסט הועתק": "ტექსტი დაკოპირდა", "שתוף פרק": "თავის გაზიარება"});
+Object.assign(I18N.en,{"לא היה אפשר להעתיק": "Could not copy"});
+Object.assign(I18N.fr,{"לא היה אפשר להעתיק": "Copie impossible"});
+Object.assign(I18N.ru,{"לא היה אפשר להעתיק": "Не удалось скопировать"});
+Object.assign(I18N.ka,{"לא היה אפשר להעתיק": "კოპირება ვერ მოხერხდა"});
 Object.assign(I18N.en,{"עברי": "Hebrew", "לועזי": "Gregorian", "קפוץ": "Jump"});
 Object.assign(I18N.fr,{"עברי": "Hébraïque", "לועזי": "Grégorien", "קפוץ": "Aller"});
 Object.assign(I18N.ru,{"עברי": "Еврейский", "לועזי": "Григорианский", "קפוץ": "Перейти"});
@@ -15479,6 +15553,7 @@ function renderSettingsList(){
   app.innerHTML=`
   ${topbar(ckChrome('הגדרות'))}
   <div class="view set-ios">
+    <div class="set-large-title">${ckChrome('הגדרות')}</div>
     <div class="set-group">
       ${cats.map(c=>`<div class="set-item" data-cat="${c.id}" style="cursor:pointer;--cat:${c.color}"><div class="si-l"><span class="si-ico">${c.icon}</span><div><div class="si-t">${c.label}</div><div class="si-d">${c.sub}</div></div></div>${I.chev}</div>`).join('')}
     </div>
@@ -15851,13 +15926,18 @@ function settingsRowsTappable(root){
    that shares text (chapters, prayers, the day card, the app link, feedback) goes through here. */
 function copyText(text){
   const done=()=>{ nativeHaptic('notify','success'); toast('הַטֶּקְסְט הֹעֻתַּק'); };
+  const legacy=()=>{ try{ const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.focus(); ta.select(); const ok=document.execCommand('copy'); ta.remove(); if(ok) done(); else toast('לֹא הָיָה אֶפְשָׁר לְהַעְתִּיק'); }catch(e){ toast('לֹא הָיָה אֶפְשָׁר לְהַעְתִּיק'); } };
   try{
-    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(()=>{}); return; }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(legacy); return; }
   }catch(e){}
-  try{ const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); }catch(e){}
+  legacy();
 }
+/* Android's WebView has no navigator.share: the Android-only NativeShare plugin (NativeShareBridge.java) opens the system chooser. */
+function androidSharePlugin(){ try{ const C=window.Capacitor; return C&&C.getPlatform&&C.getPlatform()==='android'&&C.Plugins&&C.Plugins.NativeShare||null; }catch(e){ return null; } }
 function shareDirect(title, text){
   nativeHaptic('impact','light');
+  const an=androidSharePlugin();
+  if(an){ an.share({title, text}).catch(()=>copyText(text)); return; }
   if(navigator.share){ navigator.share({title, text}).catch(()=>{}); }
   else copyText(text);
 }
