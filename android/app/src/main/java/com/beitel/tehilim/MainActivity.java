@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(BetElWidgetBridge.class);
         registerPlugin(NativeLiveActivityBridge.class);
+        registerPlugin(NativeShareBridge.class);
         super.onCreate(savedInstanceState);
         applyFixedTextZoom();
     }

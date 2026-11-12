@@ -53,6 +53,7 @@ var capacitorNativeBridge = (function (core) {
     if (core.Capacitor.getPlatform() === 'android') {
         core.registerPlugin('BetElWidgetBridge');
         core.registerPlugin('NativeLiveActivity');
+        core.registerPlugin('NativeShare');   // system share sheet (Android WebView has no navigator.share)
     }
 
     // SplashScreen is a real plugin on both iOS and Android.
