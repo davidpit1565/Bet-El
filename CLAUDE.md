@@ -358,6 +358,9 @@ in English as usual.
   `startBackgroundDataPrefetch()` downloads only Hebrew base files plus the active UI language (`pfLangOf`), and re-runs on a
   language change.
 
+## Owner context (David, 2026-11-12)
+- **David is in Belgium (Europe/Brussels), NOT in Israel.** Never assume he is in Israel when explaining what he will see in the app, widgets, zmanim, notifications or the visit statistics (his own visits show up as Belgium, and times on his devices are Brussels local time). The app's Israel-time hour axis in visit-stats.html is Israel time, so a Brussels hour shows one hour later there.
+
 ## Standing UI rule (owner, David - 2026-11-10)
 - **Every UI change made for the App Store build must be REAL iOS Liquid Glass automatically.** New or changed screens on iOS use the native glass components (UIKit/SwiftUI behind the existing native bridges, `UIGlassEffect`, `UIButton.Configuration.glass()`, the native list/home/library/settings screens) - never a web look-alike. The HTML version is only the web/PWA/Android/old-iOS fallback, where decorative blur/glass stays flat gradients (see the no-`backdrop-filter`-stacking lesson). If a screen cannot be shown natively yet (readers, screens with inputs), say so and propose how to convert it.
 
