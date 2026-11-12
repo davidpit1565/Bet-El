@@ -359,6 +359,12 @@ in English as usual.
   language change.
 
 ## Owner context (David, 2026-11-12)
+- **App Store Connect credentials are NEVER stored in this repo (it is PUBLIC).** fastlane reads `ASC_KEY_ID`, `ASC_ISSUER_ID`
+  and `ASC_KEY_PATH` (path to the `AuthKey_<KEYID>.p8` file) from the environment. On David's Mac they are meant to live permanently in
+  `~/.zshrc` (and the `.p8` file in `~/.appstoreconnect/private_keys/`), set ONCE; every Claude Code session on that Mac then finds them.
+  The `.p8` key, its Key ID and the Issuer ID must never be committed, pasted into chat or printed. If a session cannot find them,
+  look in `~/.zshrc`, `~/.zprofile` and `~/.appstoreconnect/private_keys/` first (presence only, no values) and ask David only for what
+  is actually missing. One API key works for every app of the same developer account.
 - **David is in Belgium (Europe/Brussels), NOT in Israel.** Never assume he is in Israel when explaining what he will see in the app, widgets, zmanim, notifications or the visit statistics (his own visits show up as Belgium, and times on his devices are Brussels local time). The app's Israel-time hour axis in visit-stats.html is Israel time, so a Brussels hour shows one hour later there.
 
 ## Standing UI rule (owner, David - 2026-11-10)
