@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>סטטיסטיקת כניסות · תמיד</title>
+<style>
+/* Aggregate visit counters only (Firestore visitLog/<Israel day>, written by index.html logVisitStats). No personal data. */
+:root{--bg:#f6efdc;--card:#fffaf0;--ink:#1d2a4d;--soft:#6f6a5c;--gold:#a9822c;--bar:#c99a3c;--bar2:#3c5aa6;--line:rgba(120,95,40,.22)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1530;--card:#17224a;--ink:#f1ead6;--soft:#a9b0c8;--gold:#e6c874;--bar:#e6c874;--bar2:#7f9bff;--line:rgba(255,255,255,.14)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;padding:20px max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-size:28px;margin:0 0 4px}
+.sub{color:var(--soft);margin:0 0 18px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.ctl button{font:inherit;padding:8px 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;min-width:0}
+.card b{display:block;font-size:30px;line-height:1.1;color:var(--gold)}
+.card span{color:var(--soft);font-size:14px}
+h2{font-size:18px;margin:22px 0 8px}
+.chart{display:flex;align-items:flex-end;gap:3px;height:170px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 12px 28px;direction:ltr;overflow-x:auto}
+.col{flex:1 0 9px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative;min-width:9px}
+.col i{display:block;width:100%;background:var(--bar);border-radius:5px 5px 0 0;min-height:2px}
+.col.h i{background:var(--bar2)}
+.col em{position:absolute;bottom:-20px;font-style:normal;font-size:10px;color:var(--soft);white-space:nowrap}
+.col u{position:absolute;top:-2px;transform:translateY(-100%);font-size:10px;text-decoration:none;color:var(--soft)}
+.split{display:flex;height:16px;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.split i{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--soft);font-size:14px;margin:6px 0 0}
+.note{color:var(--soft);font-size:14px;margin-top:20px}
+#err{color:#b3261e;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>כניסות לאפליקציה</h1>
+<p class="sub">כל כניסה נספרת פעם אחת לכל שימוש (חצי שעה בלי פעילות פותחת כניסה חדשה). השעות לפי שעון ישראל.</p>
+<div class="ctl" role="group" aria-label="טווח"><button type="button" data-d="7" aria-pressed="true">7 ימים</button><button type="button" data-d="14" aria-pressed="false">14 ימים</button><button type="button" data-d="30" aria-pressed="false">30 ימים</button><button type="button" data-d="90" aria-pressed="false">90 ימים</button></div>
+<div id="err" hidden></div>
+<div class="grid" id="cards"></div>
+<h2>כניסות לפי יום</h2><div class="chart" id="days"></div>
+<h2>כניסות לפי שעה ביום (שעון ישראל)</h2><div class="chart" id="hours"></div>
+<h2>פלטפורמה</h2><div class="split" id="plat"></div><div class="legend" id="platL"></div>
+<h2>מכשירים חדשים וחוזרים</h2><div class="split" id="nr"></div><div class="legend" id="nrL"></div>
+<p class="note">הנתונים מצטברים מרגע שהגרסה החדשה של האפליקציה יצאה. הכניסות שנספרו לפני כן (בערך 1,400) מופיעות רק במונה הכללי ולא כאן. זמן שימוש נמדד בשניות מרגע הפתיחה עד שהאפליקציה עוברת לרקע, ולכן הוא ממוצע משוער.</p>
+</div>
+<script>
+(function(){
+var PID='bet-el-e6812',KEY='AIzaSyC-_4GaF_IMR_Xy5d6LEFAT_1lvygCcfRQ';
+var $=function(i){return document.getElementById(i);},docs=[],range=7;
+function num(f,k){return f&&f[k]&&f[k].integerValue?+f[k].integerValue:0;}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function load(){
+  var all=[],tok='';
+  (function page(){
+    fetch('https://firestore.googleapis.com/v1/projects/'+PID+'/databases/(default)/documents/visitLog?pageSize=300&key='+KEY+(tok?'&pageToken='+encodeURIComponent(tok):''),{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(j){(j.documents||[]).forEach(function(d){var id=d.name.split('/').pop();all.push({day:id,f:d.fields||{}});});
+      if(j.nextPageToken){tok=j.nextPageToken;page();}else{docs=all.sort(function(a,b){return a.day<b.day?-1:1;});render();}})
+    .catch(function(e){var el=$('err');el.hidden=false;el.textContent='לא הצלחתי לטעון את הנתונים ('+e.message+'). אם זה הפעם הראשונה, יש לפרסם את כללי Firestore המעודכנים.';});
+  })();
+}
+function bar(el,items,cls){var mx=Math.max.apply(null,items.map(function(x){return x.v;}).concat([1]));
+  el.innerHTML=items.map(function(x){return '<div class="col '+(cls||'')+'" title="'+esc(x.t)+': '+x.v+'"><u>'+(x.v||'')+'</u><i style="height:'+Math.round(x.v/mx*100)+'%"></i><em>'+esc(x.l)+'</em></div>';}).join('');}
+function split(el,leg,items){var t=items.reduce(function(a,x){return a+x.v;},0)||1;
+  el.innerHTML=items.map(function(x){return '<i style="width:'+(x.v/t*100)+'%;background:'+x.c+'"></i>';}).join('');
+  leg.innerHTML=items.map(function(x){return '<span><b style="color:'+x.c+'">●</b> '+esc(x.n)+': '+x.v+' ('+Math.round(x.v/t*100)+'%)</span>';}).join('');}
+function render(){
+  var d=docs.slice(-range),tot=0,secs=0,ses=0,hrs=[],i,plat={ios:0,android:0,web:0},nw=0,rt=0;
+  for(i=0;i<24;i++)hrs.push(0);
+  d.forEach(function(x){tot+=num(x.f,'total');secs+=num(x.f,'secs');ses+=num(x.f,'ses');plat.ios+=num(x.f,'ios');plat.android+=num(x.f,'android');plat.web+=num(x.f,'web');nw+=num(x.f,'new');rt+=num(x.f,'ret');
+    for(i=0;i<24;i++)hrs[i]+=num(x.f,'h'+(i<10?'0':'')+i);});
+  var peak=0;for(i=1;i<24;i++)if(hrs[i]>hrs[peak])peak=i;
+  var avgMin=ses?Math.round(secs/ses/60*10)/10:0,days=d.length||1;
+  $('cards').innerHTML=[[tot,'כניסות בטווח'],[Math.round(tot/days*10)/10,'ממוצע ליום'],[tot?(peak<10?'0':'')+peak+':00':'-','שעת השיא'],[avgMin||'-','דקות לשימוש (ממוצע)']].map(function(c){return '<div class="card"><b>'+c[0]+'</b><span>'+c[1]+'</span></div>';}).join('');
+  bar($('days'),d.map(function(x){return {v:num(x.f,'total'),l:x.day.slice(5),t:x.day};}));
+  bar($('hours'),hrs.map(function(v,h){return {v:v,l:(h<10?'0':'')+h,t:(h<10?'0':'')+h+':00'};}),'h');
+  split($('plat'),$('platL'),[{n:'iPhone',v:plat.ios,c:'#3c5aa6'},{n:'אנדרואיד',v:plat.android,c:'#2e9e6a'},{n:'אתר',v:plat.web,c:'#c99a3c'}]);
+  split($('nr'),$('nrL'),[{n:'חדשים',v:nw,c:'#c99a3c'},{n:'חוזרים',v:rt,c:'#3c5aa6'}]);
+}
+[].forEach.call(document.querySelectorAll('.ctl button'),function(b){b.addEventListener('click',function(){range=+b.dataset.d;[].forEach.call(document.querySelectorAll('.ctl button'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});render();});});
+load();
+})();
+</script>
+</body>
+</html>
