@@ -17377,8 +17377,16 @@ window.shareQR = shareQR;
         const ref = doc(db, 'visitLog', t.day);
         logDay = t.day; logStart = Date.now();
         const key = 'h' + t.hour, kind = isNew ? 'new' : 'ret';
-        try { await updateDoc(ref, { total: increment(1), [key]: increment(1), [plat]: increment(1), [kind]: increment(1), ses: increment(1) }); }
-        catch (e) { try { await setDoc(ref, { total: 1, [key]: 1, [plat]: 1, [kind]: 1, ses: 1 }); } catch (e2) { try { await updateDoc(ref, { total: increment(1), [key]: increment(1), [plat]: increment(1), [kind]: increment(1), ses: increment(1) }); } catch (e3) {} } }
+        /* Rough country: the device's time zone name (Asia/Jerusalem, America/New_York...), no IP and no location permission.
+           Stored as tz.<zone>.total and tz.<zone>.hHH counters; visit-stats.html maps zones to country names. */
+        let zone = ''; try{ zone = String(Intl.DateTimeFormat().resolvedOptions().timeZone || '').replace(/[^A-Za-z0-9]/g, '_').slice(0, 40); }catch(e){}
+        const withTz = !!zone;
+        const upd = { total: increment(1), [key]: increment(1), [plat]: increment(1), [kind]: increment(1), ses: increment(1) };
+        if(withTz){ upd['tz.' + zone + '.total'] = increment(1); upd['tz.' + zone + '.' + key] = increment(1); }
+        const first = { total: 1, [key]: 1, [plat]: 1, [kind]: 1, ses: 1 };
+        if(withTz){ first.tz = { [zone]: { total: 1, [key]: 1 } }; }
+        try { await updateDoc(ref, upd); }
+        catch (e) { try { await setDoc(ref, first); } catch (e2) { try { await updateDoc(ref, upd); } catch (e3) {} } }
       }catch(e){}
     };
     const logSeconds = () => {
