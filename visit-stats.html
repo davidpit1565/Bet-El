@@ -42,6 +42,7 @@ h2{font-size:18px;margin:22px 0 8px}
 <h1>כניסות לאפליקציה</h1>
 <div id="login" hidden><p class="sub">הדף פרטי. כדי לראות את הנתונים צריך להתחבר עם חשבון Google של הבעלים.</p><button type="button" id="go" class="btn">התחברות עם Google</button></div>
 <div id="err" hidden></div>
+<div id="who" class="card" hidden dir="ltr" style="margin-bottom:14px"><div style="color:var(--soft);font-size:14px">Signed in as</div><div id="whoMail" style="font-weight:700;overflow-wrap:anywhere"></div><div style="color:var(--soft);font-size:14px;margin-top:8px">UID (copy and send it)</div><code id="whoUid" style="display:block;font:15px/1.4 ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere;user-select:all;padding:8px 10px;margin-top:4px;border:1px solid var(--line);border-radius:10px"></code><button type="button" id="cp" class="btn" style="margin-top:10px;font-size:14px;padding:8px 16px">Copy UID</button></div>
 <div id="app" hidden>
 <p style="margin:0 0 10px"><button type="button" id="out" class="lnk">התנתקות</button></p>
 <p class="sub">כל כניסה נספרת פעם אחת לכל שימוש (חצי שעה בלי פעילות פותחת כניסה חדשה). השעות לפי שעון ישראל.</p>
@@ -63,7 +64,7 @@ var auth=getAuth(app),db=getFirestore(app);
 var $=function(i){return document.getElementById(i);},docs=[],range=7;
 function num(f,k){return +(f&&f[k])||0;}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function show(loggedIn){$('login').hidden=loggedIn;$('app').hidden=!loggedIn;}
+function show(loggedIn){$('login').hidden=loggedIn;if(!loggedIn)$('who').hidden=true;$('app').hidden=!loggedIn;}
 function msg(t){var el=$('err');el.hidden=!t;el.textContent=t||'';}
 async function load(user){
   msg('');
@@ -73,10 +74,12 @@ async function load(user){
     docs.sort(function(a,b){return a.day<b.day?-1:1;});
     render();
   }catch(e){
-    msg('אין לחשבון הזה הרשאה לצפות בנתונים. כדי לאפשר רק לך: שלח את המזהה הבא, והוא יוגדר בכללי Firestore: '+user.uid);
+    msg('אין לחשבון הזה הרשאה לצפות בנתונים. אם זה החשבון הנכון, יש לשלוח את המזהה שלמטה כדי שיוגדר בכללי Firestore.');
+    $('whoMail').textContent=user.email||'';$('whoUid').textContent=user.uid;$('who').hidden=false;
   }
 }
 $('go').addEventListener('click',function(){signInWithPopup(auth,new GoogleAuthProvider()).catch(function(e){msg('ההתחברות נכשלה ('+(e.code||e.message)+')');});});
+$('cp').addEventListener('click',function(){var t=$('whoUid').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){$('cp').textContent='Copied';},function(){var r=document.createRange();r.selectNodeContents($('whoUid'));var sel=getSelection();sel.removeAllRanges();sel.addRange(r);});});
 $('out').addEventListener('click',function(){signOut(auth);});
 onAuthStateChanged(auth,function(u){if(u){show(true);load(u);}else{show(false);docs=[];}});
 function bar(el,items,cls){var mx=Math.max.apply(null,items.map(function(x){return x.v;}).concat([1]));
