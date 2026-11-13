@@ -1,10 +1,12 @@
 Nouveautés de la version 2.0.8 :
+• Corrections du Siddour et premier affichage plus rapide
+• Défilement corrigé dans Birkot HaNehenin
+• Orthographe hébraïque corrigée sur la boussole
+• Le bouton à trois points des outils du lecteur fonctionne de nouveau
+• Bibliothèque, Réglages et Accueil repensés
+• Widgets et partage sur Android
+• Statistiques de visite privées
 • Rambam quotidien selon le cycle officiel (avec les jours d’introduction)
 • Michna et Pirké Avot dans toutes les langues, avec translittération phonétique
-• Réchit ’Hokhma en translittération phonétique (français et russe)
-• Correction de caractères illisibles dans certains textes
 • Apparence claire/sombre automatique selon l’appareil
-• Téléchargement hors ligne : indicateur discret et réglage dédié
-• Le retour depuis un écran ouvert depuis l’accueil ramène à l’accueil
-• Allumage des bougies à Jérusalem : 40 minutes avant le coucher du soleil
 • Corrections de traduction, d’affichage et de stabilité
