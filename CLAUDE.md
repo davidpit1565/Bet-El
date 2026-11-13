@@ -60,6 +60,17 @@ in English as usual.
   drops those entries from the cache when a device sees a new number. New files need no entry. Needs an app build the first
   time (the mechanism itself is JS); after that data fixes reach installed apps without a build. Web/PWA already refresh
   through the service worker.
+- **Offline storage tiers + compressed cache (app-size work, 2026-11):** `cachedFetch()` now stores text/JSON in Cache Storage as a
+  gzip body inside a synthetic Response (`x-betel-gz:1`, `x-betel-len`, `x-betel-raw`; `CompressionStream`/`DecompressionStream`, falls back
+  to plain when missing; old plain entries are still read and re-packed once by `cacheMaintain()`) and all data fetches use
+  `cache:'no-store'` (no second copy in the WebView HTTP cache). `data/manifest-tiers.json` (written by
+  `scripts/generate-data-manifest.mjs`, additive) lists the `optional` tier (page-scan images: NOT prefetched by default, read on demand
+  through `assetImgWire()`/`assetFetchBlob()` into the separate `betel-native-assets-v1` cache with a size-capped LRU, 150MB / 400MB in
+  "Everything offline" mode) and the `online` tier (PDFs: never cached, opened via the network link). Everything else is "essential" and
+  prefetched. Never render a data image as `<img src=dataURL(...)>` on native - use `data-apath` + `assetImgWire()`. `cacheMaintain()`
+  (idle, after each prefetch) prunes entries that left the manifest / other-language files (except `data/prayers-<lang>.json`, see
+  `PF_ALWAYS_RX`) / leftover images. Settings > General > Offline use has the mode selector (`S.offMode`), measured storage
+  (`cacheStatsRefresh()` + `navigator.storage.estimate()`) and "Free up space" (HTML + `nativeSettingsCategorySpec()` rows `offMode`/`offStorage`/`offFree`).
 - The Musar system (`MUSAR_WORKS`, `MUSAR_UI`, `ckMusarSourceLabel`) is
   designed to make adding a new work mostly declarative: add `{key:'x'}` to
   `MUSAR_WORKS` and an `x` entry to every language block of `MUSAR_UI`

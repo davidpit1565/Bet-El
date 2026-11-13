@@ -22,6 +22,8 @@ import { fileURLToPath } from 'url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dataDir = join(root, 'data');
 const out = [];
+const tierOptional = [], tierOnline = [];   // see manifest-tiers.json below
+let optionalBytes = 0, onlineBytes = 0;
 const sizes = [];   // parallel to `out` (same order) - bytes, for the app's 'downloading X of Y MB' indicator
 
 function walk(dir) {
@@ -29,11 +31,17 @@ function walk(dir) {
     const full = join(dir, name);
     const st = statSync(full);
     if (st.isDirectory()) { if (full !== join(dataDir, 'booklet')) walk(full); }   // the weekly booklet is replaced every week - never prefetched/cached
-    else if (name !== 'manifest.json' && name !== 'manifest-sizes.json') { out.push('data/' + relative(dataDir, full).split(/\\|\//).join('/')); sizes.push(st.size); }
+    else if (name !== 'manifest.json' && name !== 'manifest-sizes.json' && name !== 'manifest-tiers.json') { const rel = 'data/' + relative(dataDir, full).split(/\\|\//).join('/'); out.push(rel); sizes.push(st.size);
+      if (/\.(jpe?g|png|webp|gif)$/i.test(name)) { tierOptional.push(rel); optionalBytes += st.size; }   // page scans: fetched on demand, size-capped LRU, prefetched only in "Everything offline" mode
+      else if (/\.pdf$/i.test(name)) { tierOnline.push(rel); onlineBytes += st.size; }                     // PDFs: opened through the network link, never prefetched/cached
+    }
   }
 }
 walk(dataDir);
 
 writeFileSync(join(dataDir, 'manifest.json'), JSON.stringify(out));
 writeFileSync(join(dataDir, 'manifest-sizes.json'), JSON.stringify(sizes));
+// Tiers (additive, manifest.json / manifest-sizes.json are unchanged): everything NOT listed here is "essential" (all JSON text) and is
+// prefetched in the background. `optional` = heavy images, `online` = PDFs. Consumed by dataTiers() in index.html.
+writeFileSync(join(dataDir, 'manifest-tiers.json'), JSON.stringify({ v: 1, optional: tierOptional, online: tierOnline, optionalBytes, onlineBytes }));
 console.log(`data/manifest.json: ${out.length} files listed`);
