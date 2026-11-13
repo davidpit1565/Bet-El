@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Run by reactivecircus/android-emulator-runner. That action executes a multi-line `script:` one line at a time,
+# each in its own shell, so `cd`, loops and `if` blocks break. Keeping the steps in a file avoids that.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+cd android
+./gradlew --no-daemon assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb shell monkey -p com.beitel.tehilim 1
+sleep 15
+adb shell pidof com.beitel.tehilim
+mkdir -p ../artifacts
+adb exec-out screencap -p > ../artifacts/android-emulator-home.png
+adb logcat -d -s AndroidRuntime:E > ../artifacts/android-runtime-errors.log
+if grep -q "FATAL EXCEPTION" ../artifacts/android-runtime-errors.log; then
+  cat ../artifacts/android-runtime-errors.log
+  exit 1
+fi
+# Home-screen widgets: the launcher's picker lists exactly the providers AppWidgetManager knows about.
+adb shell dumpsys appwidget > ../artifacts/appwidget-dump.txt
+for w in BetElMainWidget BetElZmanimWidget BetElCandleWidget BetElStreakWidget; do
+  grep -q "$w" ../artifacts/appwidget-dump.txt || { echo "Widget provider $w is not registered"; exit 1; }
+done
+# Applies every widget's RemoteViews like a launcher does (a rejected action = "Can't load widget" on a phone).
+# Runs last: connected tests uninstall the app afterwards.
+./gradlew --no-daemon connectedDebugAndroidTest
