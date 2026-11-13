@@ -8,8 +8,13 @@ cd android
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell monkey -p com.beitel.tehilim 1
 sleep 15
-adb shell pidof com.beitel.tehilim
 mkdir -p ../artifacts
+if ! adb shell pidof com.beitel.tehilim; then
+  echo 'App is not running 15s after launch; logcat follows'
+  adb logcat -d | tail -n 200 | tee ../artifacts/android-logcat-tail.txt
+  adb exec-out screencap -p > ../artifacts/android-emulator-home.png || true
+  exit 1
+fi
 adb exec-out screencap -p > ../artifacts/android-emulator-home.png
 adb logcat -d -s AndroidRuntime:E > ../artifacts/android-runtime-errors.log
 if grep -q "FATAL EXCEPTION" ../artifacts/android-runtime-errors.log; then
