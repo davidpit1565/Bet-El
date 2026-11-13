@@ -17,7 +17,8 @@ if ! adb shell pidof com.beitel.tehilim; then
 fi
 adb exec-out screencap -p > ../artifacts/android-emulator-home.png
 adb logcat -d -s AndroidRuntime:E > ../artifacts/android-runtime-errors.log
-if grep -q "FATAL EXCEPTION" ../artifacts/android-runtime-errors.log; then
+# Only a crash of the app itself counts; other processes (settings, keyboard) die with DeadSystemException when the CI emulator itself is starved.
+if grep -A2 "FATAL EXCEPTION" ../artifacts/android-runtime-errors.log | grep -q "Process: com.beitel.tehilim"; then
   cat ../artifacts/android-runtime-errors.log
   exit 1
 fi
