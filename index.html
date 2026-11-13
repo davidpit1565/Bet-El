@@ -7482,7 +7482,11 @@ function bkNiftarRavHtml(first){
    week the same way bkNiftarRavFor does - an ordinary week returns an
    empty array (no page, never a blank one). Add a future birthday here
    with its own hDay/hMonth (HMONTHS.<NAME>).
-   Confirmed by the owner (2026-11-07): יאיר פפיסמדוב's birthday is ח׳ כסלו. */
+   Confirmed by the owner (2026-11-07): יאיר פפיסמדוב's birthday is ח׳ כסלו.
+   Confirmed by the owner (2026-11-12): אלון פפיסמדוב's birthday is כ"ד כסלו -
+   worded around זיכוי הרבים (he enables/supports this booklet reaching the
+   public) rather than stating that outright, and with no age mentioned, per
+   the owner's explicit instruction not to spell out either detail. */
 const BK_MAZAL_TOV_LIST=[
   { hDay:8, hMonth:HMONTHS.KISLEV, // יאיר פפיסמדוב's birthday (ח' כסלו)
     hdr:'בְּרָכַּת מַזָּל טוֹב', lead:'לְרֶגֶל יוֹם הֻלַּדְתּוֹ',
@@ -7492,6 +7496,15 @@ const BK_MAZAL_TOV_LIST=[
     body:['מִשָּׁמַיִם יַשְׁפִּיעוּ עָלָיו שֶׁפַע בְּרָכָה וְהַצְלָחָה בְּכָל אֲשֶׁר יִפְנֶה, אֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת, בְּרִיאוּת אֵיתָנָה, וְלֵב שָׂמֵחַ וְטוֹב.',
       'יְהִי רָצוֹן שֶׁיִּזְכֶּה לִגְדֹּל לְתוֹרָה, לְחֻפָּה וּלְמַעֲשִׂים טוֹבִים, מִתּוֹךְ נַחַת וְשִׂמְחָה לְכָל בְּנֵי מִשְׁפַּחְתּוֹ.'],
     verse:'כִּי אֹרֶךְ יָמִים וּשְׁנוֹת חַיִּים וְשָׁלוֹם יוֹסִיפוּ לָךְ', src:'(מִשְׁלֵי ג, ב)'
+  },
+  { hDay:24, hMonth:HMONTHS.KISLEV, // אלון פפיסמדוב's birthday (כ"ד כסלו)
+    hdr:'בְּרָכַּת מַזָּל טוֹב', lead:'לְרֶגֶל יוֹם הֻלַּדְתּוֹ',
+    to:'בְּאַהֲבָה וּבִידִידוּת לְ',
+    name:'אָלוֹן פַּפִּיסְמֶדוֹב', title:'הי״ו',
+    role:'יְהִי רָצוֹן שֶׁיִּרְאֶה בְּרָכָה וְהַצְלָחָה בְּכָל מַעֲשֵׂה יָדָיו, מִתּוֹךְ בְּרִיאוּת אֵיתָנָה וְשִׂמְחַת לֵב.',
+    body:['מִשָּׁמַיִם יַשְׁפִּיעוּ עָלָיו שֶׁפַע בְּרָכָה וְהַצְלָחָה בְּכָל אֲשֶׁר יִפְנֶה, אֹרֶךְ יָמִים וְשָׁנִים טוֹבוֹת מִתּוֹךְ בְּרִיאוּת אֵיתָנָה וְנַחַת מִכָּל יוֹצְאֵי חֲלָצָיו.',
+      'וּבְתוֹךְ שְׁאָר מַעֲשָׂיו הַטּוֹבִים, יְהִי רָצוֹן שֶׁיִּזְכֶּה גַּם לְהַמְשִׁיךְ וּלְזַכּוֹת אֶת הָרַבִּים, מִתּוֹךְ שִׂמְחָה וְשַׁלְוָה לוֹ וּלְכָל בְּנֵי בֵּיתוֹ.'],
+    verse:'עוֹד יְנוּבוּן בְּשֵׂיבָה, דְּשֵׁנִים וְרַעֲנַנִּים יִהְיוּ', src:'(תְּהִלִּים צב, טו)'
   }
 ];
 function bkMazalTovFor(first){
