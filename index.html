@@ -1636,6 +1636,8 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
 .bk-page .bk-sub{font-size:12.5px;margin:5px 0 2px}
 .bk-page .bk-rule{margin:7px 0 5px}
 .bk-page .bk-text{font-size:17.5px;line-height:1.36}
+.bk-page .bk-text.bk-chan-br{font-size:21px;font-weight:700;line-height:1.5}
+.bk-text.bk-chan-br+.bk-text.bk-chan-br{margin-top:3mm}
 .bk-page.bk-tight .bk-text{line-height:1.28}
 .bk-page.bk-tight .bk-comm{line-height:1.26}
 .bk-page.bk-tighter .bk-text{line-height:1.24}
@@ -1692,6 +1694,7 @@ input[type="date"],input[type="time"]{direction:ltr;text-align:center;unicode-bi
   text-shadow:-.6px -.6px 0 #fff,.8px 1px 0 rgba(98,74,34,.22)}
 .bk-cv-dates{top:134mm;font-family:"Taamey Frank CLM",var(--font-sacred)}
 .bk-cv-hd{font-weight:700;font-size:15.5px;color:#3a2e1a}
+.bk-cv-note{top:150mm;left:18mm;right:18mm;font-family:var(--font-sacred);font-size:9.5px;color:var(--bk-muted);letter-spacing:.02em}
 .bk-cv-qr{top:166mm;gap:1mm}
 .bk-cv-qr img{width:19mm;height:19mm;padding:1.4mm;background:#fffdf8;border:1px solid rgba(162,128,63,.6);border-radius:1.8mm;display:block}
 .bk-cv-qr div{font-family:var(--font-sacred);font-size:9px;color:var(--bk-muted);letter-spacing:.04em}
@@ -7547,6 +7550,64 @@ function bkMazalTovDayHtml(hd){
   return `<div class="bk-mzt-day">${hits.map(r=>star+' '+r.hdr+' לְ'+r.name+' לְיוֹם הֻלַּדְתּוֹ '+star).join(' · ')}</div>`;
 }
 
+/* ---------- Chanukah candle-lighting order (owner request, 2026-11-13) ----------
+   One reference page appended at the very END of any printed week that
+   touches a day of Chanukah (owner's explicit "add it at the end, not the
+   beginning") - after the day pages and Ben Ish Chai, before the back
+   matter/blank page. Gated by the app's own siddurDayInfo().isChanukah
+   (hebcal, already used elsewhere for Al HaNissim/Chanukah Torah readings)
+   checked across all 7 days of the printed week - not a hardcoded date, so
+   it fires correctly every year without edits. Built from the SAME generic
+   'day'/'sub'/'flow' blocks every day page uses (fed through the plain
+   bkPaginate, continuing its page numbering and folding into the shared
+   toc array), so it paginates across however many pages it needs, with the
+   normal page-break/keep-with-heading/overflow protection, and a real
+   contents-page entry + page number, same as the Ben Ish Chai part.
+   **Owner's explicit instruction (2026-11-13): נוסח עדות המזרח specifically**
+   - verified verbatim against Sefaria's own Siddur Edot HaMizrach, Hanukkah,
+   Menorah Lighting page (sefaria.org API, fetched live, not from memory):
+   the Leshem Yichud, the three blessings, הנרות הללו's own Edot HaMizrach
+   wording (not the Ashkenazi "ועל התשועות ועל הנפלאות ועל המלחמות" version),
+   and the full order that nusach actually prints after it - תהילים ל׳
+   ("מזמור שיר חנוכת הבית"), the nightly segulah (וִיהִי נֹעַם + תהילים צ״א
+   x7, the "x7" being the reader's own job, not reprinted 7 times here), and
+   all 6 stanzas of מעוז צור (not just the first, since this nusach's own
+   siddur prints the whole piyyut) - none of it trimmed to the Ashkenazi-only
+   custom. Tehillim ל/צ״א text itself is pulled live from window.TEHILLIM
+   (the exact same verified chapter data every Tehillim reading in the app
+   already uses) rather than retyped, so it can never drift from it. */
+function bkChanukahInWeek(first){
+  for(let i=0;i<7;i++){ if(siddurDayInfo(new HDate(addDays(first,i))).isChanukah) return true; }
+  return false;
+}
+function bkTehillimJoin(ch){ return ((window.TEHILLIM&&window.TEHILLIM[String(ch)])||[]).join(' '); }
+function bkChanukahBlocks(){
+  const B=[];
+  B.push({t:'day', brk:1, label:'חֲנֻכָּה', tocSub:'', html:`<div class="bk-day"><div class="bk-day-t">סֵדֶר הַדְלָקַת נֵרוֹת חֲנֻכָּה</div><div class="bk-day-d">נֻסַּח עֲדוֹת הַמִּזְרָח</div></div>`});
+  B.push({t:'sub', html:`<div class="bk-sub">לְשֵׁם יִחוּד</div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose', pieces:[bkP('לְשֵׁם יִחוּד קֻדְשָׁא בְּרִיךְ הוּא וּשְׁכִינְתֵּהּ, בִּדְחִילוּ וּרְחִימוּ, וּרְחִימוּ וּדְחִילוּ, לְיַחֲדָא שֵׁם יוֹ"ד קֵ"י בְּוָא"ו קֵ"י בְּיִחוּדָא שְׁלִים, בְּשֵׁם כָּל יִשְׂרָאֵל, הִנֵּה אֲנַחְנוּ בָּאִים לְקַיֵּם מִצְוַת הַדְלָקַת נֵרוֹת חֲנֻכָּה כְּמוֹ שֶׁתִּקְּנוּ לָנוּ רַבּוֹתֵינוּ זִכְרוֹנָם לִבְרָכָה, עִם כָּל הַמִּצְוֹת הַכְּלוּלוֹת בָּהּ, לְתַקֵּן אֶת שָׁרְשָׁהּ בְּמָקוֹם עֶלְיוֹן, לַעֲשׂוֹת נַחַת רוּחַ לְיוֹצְרֵנוּ וְלַעֲשׂוֹת רְצוֹן בּוֹרְאֵנוּ. וִיהִי נֹעַם אֲדֹנָי אֱלֹהֵינוּ עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנָה עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנֵהוּ.')]});
+  B.push({t:'sub', html:`<div class="bk-sub">הַבְּרָכוֹת</div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose bk-chan-br', pieces:[bkP('בָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ לְהַדְלִיק נֵר חֲנֻכָּה.')]});
+  B.push({t:'flow', cls:'bk-text bk-prose bk-chan-br', pieces:[bkP('בָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁעָשָׂה נִסִּים לַאֲבוֹתֵינוּ בַּיָּמִים הָהֵם בַּזְּמַן הַזֶּה.')]});
+  B.push({t:'flow', cls:'bk-text bk-prose bk-chan-br', pieces:[bkP('(בַּלַּיְלָה הָרִאשׁוֹן מְבָרֵךְ גַּם בְּרָכָה זוֹ:) בָּרוּךְ אַתָּה ה\' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁהֶחֱיָנוּ וְקִיְּמָנוּ וְהִגִּיעָנוּ לַזְּמַן הַזֶּה.')]});
+  B.push({t:'sub', html:`<div class="bk-sub">הַנֵּרוֹת הַלָּלוּ</div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose', pieces:[bkP('(אַחַר שֶׁיַּדְלִיק נֵר אֶחָד יֹאמַר:) הַנֵּרוֹת הַלָּלוּ אֲנַחְנוּ מַדְלִיקִין עַל הַנִּסִּים, וְעַל הַתְּשׁוּעוֹת, וְעַל הַנִּפְלָאוֹת, שֶׁעָשִׂיתָ לַאֲבוֹתֵינוּ עַל יְדֵי כֹּהֲנֶיךָ הַקְּדוֹשִׁים. וְכָל שְׁמוֹנַת יְמֵי חֲנֻכָּה הַנֵּרוֹת הַלָּלוּ קֹדֶשׁ, וְאֵין לָנוּ רְשׁוּת לְהִשְׁתַּמֵּשׁ בָּהֶם, אֶלָּא לִרְאוֹתָם בִּלְבָד כְּדֵי לְהוֹדוֹת לִשְׁמֶךָ עַל נִסֶּיךָ נִפְלְאוֹתֶיךָ וִישׁוּעוֹתֶיךָ.')]});
+  B.push({t:'sub', html:`<div class="bk-sub">מָעוֹז צוּר <small>(סִימָן: מָרְדְּכַי חָזָק)</small></div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose', pieces:[
+    bkP('מָעוֹז צוּר יְשׁוּעָתִי, לְךָ נָאֶה לְשַׁבֵּחַ. תִּכּוֹן בֵּית תְּפִלָּתִי, וְשָׁם תּוֹדָה נְזַבֵּחַ. לְעֵת תָּכִין מַטְבֵּחַ מִצָּר הַמְנַבֵּחַ. אָז אֶגְמוֹר בְּשִׁיר מִזְמוֹר חֲנֻכַּת הַמִּזְבֵּחַ.'),
+    bkP('רָעוֹת שָׂבְעָה נַפְשִׁי בְּיָגוֹן כֹּחִי כִלָּה חַיַּי מֵרְרוּ בְקֹשִׁי בְּשִׁעְבּוּד מַלְכוּת עֶגְלָה וּבְיָדוֹ הַגְּדוֹלָה הוֹצִיא אֶת הַסְּגֻלָּה חֵיל פַּרְעֹה וְכָל זַרְעוֹ יָרְדוּ כְּאֶבֶן בִּמְצוּלָה.'),
+    bkP('דְּבִיר קָדְשׁוֹ הֱבִיאַנִי וְגַם שָׁם לֹא שָׁקַטְתִּי וּבָא נוֹגֵשׂ וְהִגְלַנִי כִּי זָרִים עָבַדְתִּי וְיֵין רַעַל מָסַכְתִּי כִּמְעַט שֶׁעָבַרְתִּי קֵץ בָּבֶל זְרֻבָּבֶל לְקֵץ שִׁבְעִים נוֹשַׁעְתִּי.'),
+    bkP('כְּרוֹת קוֹמַת בְּרוֹשׁ בִּקֵּשׁ אֲגָגִי בֶּן הַמְּדָתָא וְנִהְיְתָה לוֹ לְפַח וּלְמוֹקֵשׁ וְגַאֲוָתוֹ נִשְׁבָּתָה רֹאשׁ יְמִינִי נִשֵּׂאתָ וְאוֹיֵב שְׁמוֹ מָחִיתָ רֹב בָּנָיו וְקִנְיָנָיו עַל הָעֵץ תָּלִיתָ.'),
+    bkP('יְוָנִים נִקְבְּצוּ עָלַי אֲזַי בִּימֵי חַשְׁמַנִּים וּפָרְצוּ חוֹמוֹת מִגְדָּלַי וְטִמְּאוּ כָּל הַשְּׁמָנִים וּמִנּוֹתַר קַנְקַנִּים נַעֲשָׂה נֵס לַשּׁוֹשַׁנִּים בְּנֵי בִינָה יְמֵי שְׁמוֹנָה קָבְעוּ שִׁיר וּרְנָנִים.'),
+    bkP('חֲשׂוֹף זְרוֹעַ קָדְשֶׁךָ וְקָרֵב קֵץ הַיְשׁוּעָה נְקֹם נִקְמַת עֲבָדֶיךָ מֵאֻמָּה הָרְשָׁעָה כִּי אָרְכָה לָנוּ הַשָּׁעָה וְאֵין קֵץ לִימֵי הָרָעָה דְּחֵה אַדְמוֹן בְּצֵל צַלְמוֹן הָקֵם לָנוּ רוֹעֶה שִׁבְעָה.')
+  ]});
+  B.push({t:'sub', html:`<div class="bk-sub">מִזְמוֹר שִׁיר חֲנֻכַּת הַבַּיִת (תְּהִלִּים ל׳)</div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose', pieces:[bkP(bkTehillimJoin(30))]});
+  B.push({t:'sub', html:`<div class="bk-sub">סְגֻלָּה לִשְׁמִירָה לוֹמַר כָּל לַיְלָה אַחַר הַדְלָקַת הַנֵּרוֹת (וִיהִי נֹעַם, וּמִזְמוֹר יוֹשֵׁב בְּסֵתֶר ז׳ פְּעָמִים)</div>`});
+  B.push({t:'flow', cls:'bk-text bk-prose', pieces:[bkP('וִיהִי נֹעַם אֲדֹנָי אֱלֹהֵינוּ עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנָה עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנֵהוּ. '+bkTehillimJoin(91))]});
+  return B;
+}
+
 /* ---------- front and back matter ----------
    The back page uses the day pages' frame, header strip and medallion; the
    cover and dedication are the ornament compositions above. The QR (the
@@ -7735,7 +7796,7 @@ function bkHebRange(a,b){
   const yr=Bp[Bp.length-1], am=A.slice(1,-1).join(' '), bm=Bp.slice(1,-1).join(' ');
   return am===bm ? A[0]+' – '+Bp[0]+' '+bm+' '+yr : A[0]+' '+am+' – '+Bp[0]+' '+bm+' '+yr;
 }
-function bkCoverHtml(date,slot,end){
+function bkCoverHtml(date,slot,end,hasChanukah){
   const t=bkUI(), hd=new HDate(date), q=bkImgSrc(BK_QR_KEY);
   /* the title's own double shadow/highlight copies (the `soft` arg off) sit at
      asymmetric offsets (a drop-shadow effect, not a mirrored pair) - fine for
@@ -7749,6 +7810,7 @@ function bkCoverHtml(date,slot,end){
     <div class="bk-ol bk-cv-title"><i class="bk-cv-name" role="img" aria-label="${t.brand}">${ornTitleSvg(t.brandStam,BK_FONT.url,1)}</i></div>
     <div class="bk-ol bk-cv-plq">${bkParashaLine(slot)}</div>
     <div class="bk-ol bk-cv-dates"><div class="bk-cv-hd">${end&&+end!==+date?bkHebRange(hd,new HDate(end)):localizeHebDateStr(hd.renderGematriya(true))}</div></div>
+    ${hasChanukah?`<div class="bk-ol bk-cv-note">וּבְסוֹף הַחוֹבֶרֶת — סֵדֶר הַדְלָקַת נֵרוֹת חֲנֻכָּה</div>`:''}
     <div class="bk-ol bk-cv-qr">${q?`<img src="${q}" alt=""/><div>${t.qrCap}</div>`:`<div class="bk-qr-url">${APP_STORE_URL}</div>`}</div>
   </div>`;
 }
@@ -8219,11 +8281,17 @@ function bkBuildPrint(date){
   /* the cover names the whole calendar week, Sunday through Shabbat
      inclusive (owner's call), though the printed days stop at Friday */
   const first=slot?addDays(date,-slot.dayIdx):date, last=slot?addDays(first,6):date;
-  host.innerHTML=bkCoverHtml(first,slot,last)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkMazalTovHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
+  const hasChanukah=bkChanukahInWeek(first);
+  host.innerHTML=bkCoverHtml(first,slot,last,hasChanukah)+bkRightsHtml()+bkRavHtml(last)+bkNiftarRavHtml(first)+bkMazalTovHtml(first)+bkDedicationHtml(last)+'<div class="bk-toc-slot"></div>';
   const blocks=bkWeekBlocks(date), toc=[];
   const n0=bkPaginate(host, blocks, {parasha:bkParashaLine(slot), startNo:host.querySelectorAll('.bk-page').length+1, toc});
   /* Ben Ish Chai closes the day: its own two-zone pages */
   const n=bkPaginateBic(host, bkBicParts(slot), {parasha:bkParashaLine(slot)}, n0, toc);
+  /* Chanukah candle-lighting order, only on a week that touches it - closes
+     the booklet after Ben Ish Chai (owner's explicit "at the end, not the
+     beginning"), still appended before the toc array is read below so its
+     own heading gets a real contents-page entry + page number like any day */
+  const n2=hasChanukah?bkPaginate(host, bkChanukahBlocks(), {parasha:bkParashaLine(slot), startNo:n, toc}):n;
   const slotEl=host.querySelector('.bk-toc-slot');
   const tocDays=bkTocDays(toc,bkParashaLine(slot)), summary=bkWeekSummary(date);
   slotEl.insertAdjacentHTML('afterend',bkTocHtml(tocDays,summary)); slotEl.remove();
@@ -8238,7 +8306,7 @@ function bkBuildPrint(date){
   host.insertAdjacentHTML('beforeend',bkBackHtml(blocks.some(b=>b.img))+bkBlankHtml());
   bkBwDom(host);
   bkFixOverflow(host);
-  return n+3;
+  return n2+3;
 }
 /* Last-resort overflow guard, run once after a whole build: the binary-search
    fit check above (bkPaginate) assumes a box only ever gets taller as more
