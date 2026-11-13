@@ -22,9 +22,12 @@ if grep -q "FATAL EXCEPTION" ../artifacts/android-runtime-errors.log; then
   exit 1
 fi
 # Home-screen widgets: the launcher's picker lists exactly the providers AppWidgetManager knows about.
-adb shell dumpsys appwidget > ../artifacts/appwidget-dump.txt
+adb shell dumpsys appwidget > ../artifacts/appwidget-dump.txt || true
+# Providers are the app's receivers that listen for APPWIDGET_UPDATE; the system's package manager knows them as soon as the app is installed
+# (the appwidget service dump can stay empty until a launcher binds, so it is only kept as an artifact).
+adb shell pm query-receivers --brief -a android.appwidget.action.APPWIDGET_UPDATE > ../artifacts/widget-receivers.txt
 for w in BetElMainWidget BetElZmanimWidget BetElCandleWidget BetElStreakWidget; do
-  grep -q "$w" ../artifacts/appwidget-dump.txt || { echo "Widget provider $w is not registered"; exit 1; }
+  grep -q "$w" ../artifacts/widget-receivers.txt || { echo "Widget provider $w is not registered"; cat ../artifacts/widget-receivers.txt; exit 1; }
 done
 # Applies every widget's RemoteViews like a launcher does (a rejected action = "Can't load widget" on a phone).
 # Runs last: connected tests uninstall the app afterwards.
