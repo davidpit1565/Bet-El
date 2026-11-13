@@ -3,6 +3,7 @@ What the Android build actually does (from the code, as of 2.0.3):
 - Reading progress, favourites, names, dedications, yahrzeits, settings: **only on the device** (localStorage) - not sent anywhere, so NOT "collected" in Play's terms.
 - Location (GPS, for zmanim): **used on the device only**, never sent to our servers.
 - Firebase (web SDK, project bet-el-e6812): Analytics (usage events), an anonymous visit counter and "online now" presence in Firestore/Realtime DB. Since the 2.0.3 fix, native shells (Android) are no longer treated as localhost dev, so these DO run on Android.
+- Anonymous visit statistics (Firestore stats/visits + visitLog/<Israel day>, disclosed in privacy.html since 2026-11-13): per session (app opened after 30 min idle) only aggregate counters - total visits, per-hour, platform, new/returning device (a local flag), sessions, seconds in app, and a rough country from the device time-zone NAME. No IP, GPS, device ID or account is stored; counters are not linked to a person. These count as App activity / Diagnostics-style usage data, aggregated and not linked to identity. Dev builds are not counted.
 - Feedback form: **name, email, subject and message** the user types (plus the device user-agent and language) are sent to Firestore `feedback` (optional, user-initiated).
 - Camera (tefillin mirror): on-device only, never uploaded.
 - iOS-only daily version check against Apple is not part of the Android build; web push tokens are not created on Android (verified: the Firebase Messaging plugin is excluded).
