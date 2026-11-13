@@ -544,7 +544,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         flowLayout.centered = { [weak self] ip in
             guard let self = self, ip.item < self.items.count else { return false }
             let it = self.items[ip.item]
-            return (it.kind == "stat" || it.kind == "tile") && it.wide
+            return it.kind == "stat" && it.wide
         }
         backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -693,7 +693,6 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
     private func width(of it: NHItem) -> CGFloat {
         let content = collectionView.bounds.width - 32
         if it.kind == "stat" && it.wide { return min(content, 260) }   // a lone "online now" card is a slim centered pill, not a full-width bar
-        if it.kind == "tile" && it.wide { return min(content, 300) }   // the prayer-now tile: a bit narrower and centered, like the online-now pill
         return it.wide ? content : floor((content - 12) / 2)
     }
 
@@ -708,7 +707,7 @@ final class NativeHomeView: UIView, UICollectionViewDataSource, UICollectionView
         let k = min(1.6, max(1, UIFont.preferredFont(forTextStyle: .body).pointSize / 17))
         func scaled(_ v: CGFloat) -> CGFloat { ceil(v * k) }
         switch it.kind {
-        case "tile": return scaled(it.wide ? 132 : (it.size == "m" ? 112 : 92))
+        case "tile": return scaled(it.wide ? 96 : (it.size == "m" ? 112 : 92))
         case "stat": return scaled(it.wide ? 72 : 68)
         case "spacer": return 92
         case "hero": return 118 + 24 + 34 + 22 + 22 + 36
