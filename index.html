@@ -406,6 +406,12 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 
 /* ===== slim reader header: one tappable title; the old controls live in a bottom sheet ===== */
 .reader-head.rh-slim{padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:6px;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .25s,padding .25s;max-height:120px;overflow:hidden}
+/* the quick-tools panel (.reader-tools .rt-panel) opens BELOW the slim head: overflow:hidden clipped it, so the three-dots button looked dead. Only clip while the head is collapsing/collapsed. */
+.reader-head.rh-slim:not(.rh-slim-hide){overflow:visible}
+/* tap-target audit: small controls (<40px) get an invisible 40px+ hit area; visuals and layout unchanged */
+.sm-mark-btn,.zh-mark-btn,.topbar .tb-back,.reader-tools .rt-panel button,.sm-aliyah-chip.ck-arrow,.ck-yr-btn,.ical-round,.close-x{position:relative}
+.sm-mark-btn::after,.zh-mark-btn::after,.topbar .tb-back::after,.reader-tools .rt-panel button::after,.sm-aliyah-chip.ck-arrow::after,.ck-yr-btn::after,.ical-round::after,.close-x::after{content:'';position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+.zh-mark-btn{position:absolute}
 .reader-head.rh-slim.rh-slim-hide{max-height:0;opacity:0;padding-top:0;padding-bottom:0;pointer-events:none;border-color:transparent;box-shadow:none}
 .reader-head.rh-slim>.bic-collapse{display:none}
 .reader-head.rh-slim .reader-title{display:none}
