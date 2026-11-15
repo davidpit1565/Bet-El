@@ -552,7 +552,7 @@ function scene2(p){
   fit(sc2,scr2);var vh=sc2.offsetHeight;setNav(navO2,seg(p,0,.05),vh);
   converge(calTop,seg(p,.02,.14),'edges',5);
   converge(calDet,seg(p,.16,.27),'burst',6,196,500);
-  var calMax=maxScroll(1400,vh),cs=ease(seg(p,.28,.4))*calMax;
+  var calMax=maxScroll(Math.max(calTop.maxY,calDet.maxY),vh),cs=ease(seg(p,.28,.4))*calMax;
   var oL=ease(seg(p,.4,.52)),oS=ease(seg(p,.72,.84));
   var tr='translate3d('+(oL*60)+'px,'+(-cs)+'px,0) scale('+(1-.025*oL)+')';
   calTop.grp.style.transform=tr;calTop.grp.style.opacity=oL>=1?0:1-oL;calDet.grp.style.transform=tr;calDet.grp.style.opacity=calTop.grp.style.opacity;
