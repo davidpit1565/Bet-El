@@ -426,6 +426,8 @@ html.has-native-topbar .reader-head.rh-slim.rh-slim-hide{padding-top:0;padding-b
 .ck-lead .sm-aliyah-tag{margin:0 auto}
 .rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
 .rh-sheet{width:100%;max-width:560px;max-height:80vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.35)}
+html.has-native-tabbar .rh-sheet-wrap{padding-bottom:calc(var(--native-nav-h, 90px) + 8px)}   /* the native tab bar floats over the web view: keep the sheet above it */
+html.has-native-tabbar .rh-sheet{border-radius:22px;max-height:70vh}
 .rh-sheet-grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
 .rh-sheet .bic-collapse{max-height:none;opacity:1;transform:none;overflow:visible}
 .rh-sheet .rh-hide{display:block}
@@ -4721,6 +4723,7 @@ function go(tab){
   if(HOME_EDIT && tab!=='home'){ HOME_EDIT=false; try{ if(homeNativeEdit()) Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
   if(tab==='home'||tab==='calendar'||tab==='prayers'||tab==='settings'||tab==='search') SEARCH_NAV=false;
   if(tab==='calendar' && TAB!=='calendar' && CAL) CAL.seedDay=null;   // opening the Calendar tab always starts on today
+  document.querySelectorAll('.rh-sheet-wrap').forEach(w=>w.remove());   // a slim-header sheet is body-level: it must never outlive the screen that opened it
   TAB=tab;
   /* the full-screen AR compass overlay must cover the bottom nav completely,
      but .bottom-nav is a body-level sibling outside #app's own stacking
@@ -12614,6 +12617,9 @@ function slimReaderHead(){
   const col=hd.querySelector('.bic-collapse'); if(!col) return;
   const big=BIG_HEADER_TABS_LIST.indexOf(TAB)>=0 || col.querySelector('.ck-arrow') || hd.classList.contains('rh-slim-src');
   if(!big) return;
+  /* The sheet hides the prev/next arrows (.rh-sheet .ck-arrow). A head whose only controls ARE those arrows (Zohar Yomi: date +
+     arrows) would open an empty, unusable sheet titled with the date - keep its header as is instead. */
+  if(!col.querySelector('select, .sm-aliyah-chip:not(.ck-arrow), .ck-track-btn, .ck-secnav, .ck-daynav')) return;
   if(hd.dataset.rhAuto || hd.classList.contains('rh-auto')) return;   // already a one-picker header
   if(hd.classList.contains('rh-empty')) return;
   hd.classList.add('rh-slim');
