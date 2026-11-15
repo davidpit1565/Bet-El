@@ -424,7 +424,7 @@ html.has-native-topbar.ios-native-safe-top .reader-head{padding-top:8px;top:var(
 html.has-native-topbar .reader-head.rh-slim{padding-top:6px;padding-bottom:6px}
 html.has-native-topbar .reader-head.rh-slim.rh-slim-hide{padding-top:0;padding-bottom:0}
 .ck-lead .sm-aliyah-tag{margin:0 auto}
-.rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
 .rh-sheet{width:100%;max-width:560px;max-height:80vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.35)}
 html.has-native-tabbar .rh-sheet-wrap{padding-bottom:calc(var(--native-nav-h, 90px) + 8px)}   /* the native tab bar floats over the web view: keep the sheet above it */
 html.has-native-tabbar .rh-sheet{border-radius:22px;max-height:70vh}
@@ -872,69 +872,87 @@ html:is([lang="ru"],[lang="ka"]) .set-ios .seg button{font-size:11.5px}
   background:radial-gradient(circle,rgba(212,175,95,.18),transparent 70%)}
 
 /* ================= MODALS / CELEBRATION ================= */
-.overlay{position:fixed;inset:0;z-index:60;background:var(--overlay);backdrop-filter:blur(6px);
-  display:grid;place-items:center;padding:24px;animation:fade .3s var(--ease)}
-.modal{background:var(--panel-solid);border:1px solid var(--line-strong);border-radius:24px;padding:28px 24px;
-  max-width:380px;width:100%;text-align:center;box-shadow:var(--card-shadow);position:relative;animation:pop .5s var(--ease)}
+/* One shared, FULLY OPAQUE dialog surface (.overlay > .modal) used by every in-app dialog: celebrations, milestone, feedback,
+   rate, QR, jump-to. History: the "special" praise card used `background:linear-gradient(..., rgba(gold,.16))`, whose last stop is
+   translucent and which left background-color transparent, so the page showed through the lower half of the card (worst on
+   Android, where the scrim was also light). Never put a translucent colour in the card's background layers: every layer below is
+   opaque; the gold edge is an opaque border-box layer behind a padding-box surface layer. No backdrop-filter anywhere here
+   (flat gradients/shadows only, see the Liquid Glass note). */
+:root,[data-theme="dark"]{
+  --scrim:rgba(3,6,14,.82);
+  --sheet-bg:#121c38; --sheet-top:#1a2750; --sheet-edge:linear-gradient(150deg,#f3e3af 0%,#b8860b 38%,#6e5214 62%,#e6c874 100%);
+  --sheet-shadow:0 28px 70px -18px rgba(0,0,0,.85),0 0 0 1px rgba(0,0,0,.35),0 0 46px -12px rgba(212,175,95,.35);
+  --emblem-bg:radial-gradient(circle at 50% 30%,#2b3a6b 0%,#18244a 70%);
+}
+[data-theme="light"]{
+  --scrim:rgba(28,20,6,.74);
+  --sheet-bg:#fbf6ea; --sheet-top:#fffdf6; --sheet-edge:linear-gradient(150deg,#e6c874 0%,#a9791f 40%,#7a5a14 62%,#d9b25f 100%);
+  --sheet-shadow:0 28px 64px -18px rgba(40,28,6,.6),0 0 0 1px rgba(60,40,6,.18),0 0 40px -14px rgba(184,134,11,.4);
+  --emblem-bg:radial-gradient(circle at 50% 30%,#fff7de 0%,#f4e6bd 75%);
+}
+.overlay{position:fixed;inset:0;z-index:60;background:var(--scrim);
+  display:flex;overflow-y:auto;overscroll-behavior:contain;
+  padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  animation:fade .25s var(--ease)}
+.overlay .modal{margin:auto;position:relative;width:100%;max-width:380px;box-sizing:border-box;text-align:center;
+  padding:34px 24px 26px;border-radius:28px;border:1.5px solid transparent;color:var(--ink);
+  background-color:var(--sheet-bg);
+  background-image:linear-gradient(180deg,var(--sheet-top) 0%,var(--sheet-bg) 55%),var(--sheet-edge);
+  background-origin:border-box;background-clip:padding-box,border-box;
+  box-shadow:var(--sheet-shadow);
+  animation:sheetIn .42s var(--ease) both}
+@keyframes sheetIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
-.modal h3{font-family:var(--font-sacred);font-size:26px;font-weight:700;margin-bottom:8px}
-.modal p{font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:20px}
-.modal .m-crown{color:var(--gold);margin-bottom:8px}.modal .m-crown svg{width:56px;height:56px;filter:drop-shadow(0 6px 14px rgba(212,175,95,.5))}
-.modal .close-x{position:absolute;top:14px;left:14px;background:none;border:none;color:var(--muted);cursor:pointer}
+.overlay .modal::before{content:none}
+.modal h3{font-family:var(--font-sacred);font-size:25px;line-height:1.25;font-weight:700;margin:0 0 10px;
+  overflow-wrap:break-word;word-break:normal;hyphens:manual}
+.modal p{font-size:15px;color:var(--ink-soft);line-height:1.65;margin:0 0 22px;overflow-wrap:break-word;hyphens:manual}
+.modal .m-orn{display:block;width:84px;height:2px;margin:0 auto 14px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--gold) 50%,transparent);opacity:.8}
+.modal .m-crown{display:inline-flex;align-items:center;justify-content:center;width:84px;height:84px;margin:0 0 14px;border-radius:50%;
+  color:var(--gold);border:1.5px solid transparent;
+  background-color:var(--sheet-bg);
+  background-image:var(--emblem-bg),var(--sheet-edge);background-origin:border-box;background-clip:padding-box,border-box;
+  box-shadow:0 10px 26px -10px rgba(184,134,11,.65),0 0 0 6px rgba(212,175,95,.10)}
+.modal .m-crown svg{width:40px;height:40px;max-width:none;max-height:none;filter:drop-shadow(0 3px 6px rgba(184,134,11,.45))}
+.modal .close-x{position:absolute;top:8px;inset-inline-end:8px;width:44px;height:44px;padding:0;border:0;border-radius:50%;
+  background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent;
+  transition:background .15s,color .15s}
 .modal .close-x svg{width:20px;height:20px}
-/* ---- special "Shefa" praise: upgraded, distinct look ---- */
-.modal.modal-special{background:linear-gradient(160deg,var(--panel-solid) 50%,rgba(212,175,95,.16));
-  border:1.5px solid rgba(212,175,95,.7);padding:34px 24px;
-  box-shadow:0 0 0 1px rgba(212,175,95,.3),0 24px 60px rgba(184,134,11,.4),var(--card-shadow);
-  animation:pop .5s var(--ease), shefaGlow 2.2s ease-in-out infinite;overflow:hidden}
-.modal.modal-special::before{content:'';position:absolute;inset:-2px;border-radius:24px;padding:2px;
-  background:conic-gradient(from 0deg,#b8860b,#e6c874,#fff8e0,#e6c874,#b8860b,#e6c874,#b8860b);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;animation:ringSpin 4s linear infinite;opacity:.85}
-@keyframes ringSpin{to{transform:rotate(360deg)}}
-@keyframes shefaGlow{0%,100%{box-shadow:0 0 0 1px rgba(212,175,95,.3),0 24px 60px rgba(184,134,11,.4)}50%{box-shadow:0 0 0 1px rgba(212,175,95,.65),0 24px 75px rgba(212,175,95,.65)}}
-.modal .m-crown-special{margin-bottom:12px;position:relative;display:inline-flex;align-items:center;justify-content:center;z-index:1}
-.modal .m-crown-special::before{content:'';position:absolute;width:110px;height:110px;
-  background:conic-gradient(from 0deg,transparent 0deg,rgba(230,200,116,.55) 8deg,transparent 16deg,
-    transparent 40deg,rgba(230,200,116,.55) 48deg,transparent 56deg,
-    transparent 80deg,rgba(230,200,116,.55) 88deg,transparent 96deg,
-    transparent 120deg,rgba(230,200,116,.55) 128deg,transparent 136deg,
-    transparent 160deg,rgba(230,200,116,.55) 168deg,transparent 176deg,
-    transparent 200deg,rgba(230,200,116,.55) 208deg,transparent 216deg,
-    transparent 240deg,rgba(230,200,116,.55) 248deg,transparent 256deg,
-    transparent 280deg,rgba(230,200,116,.55) 288deg,transparent 296deg,
-    transparent 320deg,rgba(230,200,116,.55) 328deg,transparent 336deg);
-  border-radius:50%;animation:raysSpin 6s linear infinite;z-index:-1}
-@keyframes raysSpin{to{transform:rotate(360deg)}}
-.modal .m-crown-special svg{width:76px;height:76px;filter:drop-shadow(0 8px 22px rgba(212,175,95,.8));
-  animation:iconPulse 1.6s ease-in-out infinite}
-@keyframes iconPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-.modal .special-title{font-size:34px;display:flex;align-items:center;justify-content:center;gap:10px;
-  background:linear-gradient(90deg,#b8860b,#fff8e0,#b8860b,#e6c874,#b8860b);
-  -webkit-background-clip:text;background-clip:text;color:transparent;background-size:300% auto;
-  animation:shineText 2.4s linear infinite}
+.modal .close-x:hover{background:rgba(128,128,128,.14);color:var(--ink)}
+.modal .close-x:active{background:rgba(128,128,128,.24)}
+.modal .close-x:focus-visible,.modal .btn:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px}
+.modal>.btn{width:auto;min-width:min(100%,220px);max-width:100%;min-height:48px;height:auto;padding:12px 30px;border-radius:999px;
+  font-size:16px;font-weight:700;line-height:1.2;text-align:center;white-space:normal;
+  transition:transform .12s var(--ease),box-shadow .2s}
+.modal>.btn:active{transform:scale(.97)}
+.modal .btn[disabled]{opacity:.5}
+/* special "Shefa" praise + the 1,000-visit tier: same opaque card, richer gold (static - no spinning rings, no pulsing) */
+.overlay .modal.modal-special{padding-top:36px;
+  box-shadow:var(--sheet-shadow),0 0 70px -10px rgba(212,175,95,.45)}
+.modal.modal-special .m-crown,.modal.modal-grand .m-crown{width:96px;height:96px;
+  box-shadow:0 12px 30px -10px rgba(184,134,11,.8),0 0 0 7px rgba(212,175,95,.12),0 0 0 14px rgba(212,175,95,.06)}
+.modal.modal-special .m-crown svg{width:46px;height:46px}
+.modal .special-title{font-size:28px;display:block;
+  background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.modal .special-title .sp-sparkle{display:inline-block;margin:0 2px;-webkit-text-fill-color:var(--gold);color:var(--gold);font-size:16px;vertical-align:middle;
+  animation:sparkleTwinkle 1.8s ease-in-out infinite}
+.modal .special-title .sp2{animation-delay:.25s}.modal .special-title .sp3{animation-delay:.5s}.modal .special-title .sp4{animation-delay:.75s}
+@keyframes sparkleTwinkle{0%,100%{opacity:.45;transform:scale(.88)}50%{opacity:1;transform:scale(1.12)}}
 @keyframes shineText{0%{background-position:0% center}100%{background-position:300% center}}
-.modal .special-title .sp-sparkle{-webkit-text-fill-color:var(--gold);color:var(--gold);font-size:20px;
-  animation:sparkleTwinkle 1.4s ease-in-out infinite}
-.modal .special-title .sp2{animation-delay:.25s}
-.modal .special-title .sp3{animation-delay:.5s}
-.modal .special-title .sp4{animation-delay:.75s}
-@keyframes sparkleTwinkle{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
-/* the 1,000-user "grand" tier: a bigger glow and a slow scale pulse on
-   top of everything modal-special already does */
-.modal.modal-grand{box-shadow:0 0 0 2px rgba(212,175,95,.55),0 30px 90px rgba(212,175,95,.6),var(--card-shadow);
-  animation:pop .5s var(--ease), shefaGlow 2.2s ease-in-out infinite, grandPulse 1.8s ease-in-out infinite}
-@keyframes grandPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-.modal.modal-grand .special-title{font-size:38px}
+.modal.modal-grand .special-title{font-size:30px}
+@media (max-width:380px){.overlay .modal{padding:30px 18px 22px;border-radius:24px}.modal h3{font-size:23px}.modal .special-title{font-size:25px}}
+@media (prefers-reduced-motion:reduce){.overlay,.overlay .modal,.modal .sp-sparkle{animation:none !important}}
+@media (forced-colors:active){.overlay .modal{border-color:CanvasText}}
 
 /* confetti */
-.confetti{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
+.confetti{position:fixed;inset:0;z-index:61;pointer-events:none;overflow:hidden}
 .confetti i{position:absolute;top:-12px;width:9px;height:14px;opacity:.9;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
 
 /* toast */
-.ctx-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
-.ctx-sheet{width:100%;max-width:420px;display:flex;flex-direction:column;gap:2px;border-radius:18px;overflow:hidden;background:var(--panel-solid);box-shadow:0 12px 40px rgba(0,0,0,.45);animation:ctxUp .2s ease-out}
+.ctx-ov{position:fixed;inset:0;z-index:9000;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+.ctx-sheet{width:100%;max-width:420px;display:flex;flex-direction:column;gap:2px;border-radius:18px;overflow:hidden;background:var(--panel-solid);border:1px solid var(--line-strong);box-shadow:0 12px 40px rgba(0,0,0,.45);animation:ctxUp .2s ease-out}
 .ctx-title{padding:12px 16px;font-size:13px;color:var(--muted);text-align:center;border-bottom:1px solid rgba(128,128,128,.18)}
 .ctx-sheet button{all:unset;box-sizing:border-box;padding:15px 16px;text-align:center;font-size:17px;color:var(--ink);cursor:pointer;border-bottom:1px solid rgba(128,128,128,.14)}
 .ctx-sheet button:active{background:rgba(128,128,128,.18)}
@@ -946,7 +964,7 @@ html:is([lang="ru"],[lang="ka"]) .set-ios .seg button{font-size:11.5px}
 @keyframes ptrSpin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:calc(var(--nav-h) + 20px);left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--panel-solid);border:1px solid var(--line-strong);color:var(--ink);padding:12px 20px;
-  border-radius:999px;font-size:14px;z-index:70;opacity:0;pointer-events:none;transition:.3s var(--ease);box-shadow:var(--card-shadow);white-space:nowrap}
+  border-radius:22px;font-size:14px;line-height:1.4;z-index:70;opacity:0;pointer-events:none;transition:.3s var(--ease);box-shadow:var(--card-shadow);width:max-content;max-width:calc(100vw - 32px);text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* background data prefetch bar - see startBackgroundDataPrefetch()/
@@ -2024,16 +2042,16 @@ html.native-home #app>.view{display:none}   /* the real native home (NativeHome.
   border:1px solid rgba(255,255,255,.22);background:rgba(50,50,56,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 6px 16px -8px rgba(0,0,0,.5)}
 .home-edit-bar svg{width:16px;height:16px}
 .home-grid.home-edit{padding-top:44px}
-.home-confirm-ov{position:fixed;inset:0;z-index:330;background:rgba(0,0,0,.35);display:grid;place-items:center;animation:fade .15s}
-.home-confirm{width:min(300px,84vw);border-radius:22px;padding:20px 18px 12px;text-align:center;background:rgba(235,235,240,.94);color:#111;
+.home-confirm-ov{position:fixed;inset:0;z-index:330;background:var(--scrim);display:grid;place-items:center;animation:fade .15s}
+.home-confirm{width:min(300px,84vw);border-radius:22px;padding:20px 18px 12px;text-align:center;background:#ebebf0;color:#111;
   box-shadow:0 20px 50px -12px rgba(0,0,0,.5)}
-[data-theme="dark"] .home-confirm{background:rgba(44,44,50,.95);color:#f2f2f7}
+[data-theme="dark"] .home-confirm{background:#2c2c32;color:#f2f2f7}
 .hc-title{font:700 17px var(--font-ui)}
 .hc-body{font:400 13px var(--font-ui);opacity:.7;margin:6px 0 14px;line-height:1.4}
 .hc-btns{display:flex;gap:8px}
 .hc-btns button{flex:1;height:42px;border-radius:14px;border:none;font:600 16px var(--font-ui);background:rgba(120,120,128,.18);color:inherit}
 .hc-btns .hc-danger{color:#ff453a}
-.home-sheet-ov{position:fixed;inset:0;z-index:320;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;animation:fade .2s}
+.home-sheet-ov{position:fixed;inset:0;z-index:320;background:var(--scrim);display:flex;align-items:flex-end;animation:fade .2s}
 .home-sheet{width:100%;max-height:78vh;overflow:auto;border-radius:28px 28px 0 0;background:var(--panel-solid);border:1px solid var(--line-strong);
   padding:16px 16px calc(var(--native-nav-h,0px) + 28px);box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)}
 .hs-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-sacred);font-size:20px;margin-bottom:10px}
@@ -3572,7 +3590,7 @@ const ARIA_ICON_RULES=[
   ['.ck-arrow[id$="Prev"], .ck-arrow[id$="PrevWk"]','הקודם'], ['.ck-arrow[id$="Next"], .ck-arrow[id$="NextWk"]','הבא'],
   ['#calPrevM','החודש הקודם'], ['#calNextM','החודש הבא'],
   ['.ck-yr-btn[data-yd="-1"]','השנה הקודמת'], ['.ck-yr-btn[data-yd="1"]','השנה הבאה'],
-  ['.hs-close','סגירה'],
+  ['.hs-close, .modal .close-x','סגירה'],
 ];
 /* Re-run after every render (tr() calls it): our own labels are tracked via data-aria-k so a language switch relabels
    them, while an explicit aria-label written in the markup is never overwritten. */
@@ -16388,10 +16406,11 @@ function celebrate(kind, subject){
     }catch(e){}
   }
   const ov=document.createElement('div'); ov.className='overlay';
-  ov.innerHTML=`<div class="modal${special?' modal-special':''}">
-    <button class="close-x" data-close>${I.x}</button>
+  ov.innerHTML=`<div class="modal${special?' modal-special':''}${grand?' modal-grand':''}" role="dialog" aria-modal="true">
+    <button class="close-x" data-close aria-label="${ariaT('סגירה')}">${I.x}</button>
     <div class="m-crown${special?' m-crown-special':''}">${special?I.flame:I.star}</div>
     <h3 class="gold-text${special?' special-title':''}">${special?`<span class="sp-sparkle sp1">✦</span><span class="sp-sparkle sp2">✦</span> ${prT} <span class="sp-sparkle sp3">✦</span><span class="sp-sparkle sp4">✦</span>`:(grand?grandTitle:prT)}</h3>
+    <span class="m-orn" aria-hidden="true"></span>
     <p>${grand?grandBody:prP}</p>
     <button class="btn btn-gold" data-close><span>${I.heart}</span><span>${ckChrome('אָמֵן')}</span></button>
   </div>`;
@@ -16464,7 +16483,7 @@ function celebrateMilestone(count, tier){
       confetti(60);
       const ov=document.createElement('div'); ov.className='overlay';
       ov.innerHTML=`<div class="modal"><button class="close-x" data-close>${I.x}</button><div class="m-crown">${I.star}</div>
-        <h3 class="gold-text"></h3><p></p><button class="btn btn-gold" data-close><span>${I.heart}</span><span class="ms-btn"></span></button></div>`;
+        <h3 class="gold-text"></h3><span class="m-orn" aria-hidden="true"></span><p></p><button class="btn btn-gold" data-close><span>${I.heart}</span><span class="ms-btn"></span></button></div>`;
       ov.querySelector('h3').textContent=title; ov.querySelector('p').textContent=body; ov.querySelector('.ms-btn').textContent=t.btn||'OK';
       document.body.appendChild(ov);
       ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>ov.remove());
