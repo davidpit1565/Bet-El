@@ -426,6 +426,8 @@ html.has-native-topbar .reader-head.rh-slim.rh-slim-hide{padding-top:0;padding-b
 .ck-lead .sm-aliyah-tag{margin:0 auto}
 .rh-sheet-wrap{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
 .rh-sheet{width:100%;max-width:560px;max-height:80vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.35)}
+html.has-native-tabbar .rh-sheet-wrap{padding-bottom:calc(var(--native-nav-h, 90px) + 8px)}   /* the native tab bar floats over the web view: keep the sheet above it */
+html.has-native-tabbar .rh-sheet{border-radius:22px;max-height:70vh}
 .rh-sheet-grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
 .rh-sheet .bic-collapse{max-height:none;opacity:1;transform:none;overflow:visible}
 .rh-sheet .rh-hide{display:block}
@@ -1364,6 +1366,11 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-ins{border-inline-start:3px solid var(--gold);padding-inline-start:12px;color:var(--gold)}
 .prayer-menorah-wrap{margin-bottom:16px;padding-bottom:12px;text-align:center}
 [data-theme="dark"] .prayer-menorah-wrap img{filter:invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.4)) !important}
+.prayer-section{display:flex;align-items:center;gap:12px;margin:26px 0 16px;color:var(--gold);font-weight:800;font-size:calc(17px * var(--fs-scale));letter-spacing:.2px}
+.prayer-section:first-child{margin-top:6px}
+.prayer-section::before,.prayer-section::after{content:'';flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold))}
+.prayer-section::after{background:linear-gradient(270deg,transparent,var(--gold))}
+.prayer-section span{flex:none;max-width:70%;text-align:center}
 .prayer-note{margin:4px 0 14px;font-size:14px;font-weight:700;color:var(--gold);text-align:center;
   font-family:var(--font-ui);letter-spacing:.2px}
 .prayer-para:last-child{border:none;margin-bottom:0}
@@ -3011,7 +3018,7 @@ function birkatHamazonDayText(hd, P){
    transliterations, so it stays plain there; this side-table supplies the
    nikud'd form shown on the big tile button (renderPrayersGroup) when the
    language is Hebrew (see heTitle()). */
-PRAYERS_EXTRA.zikrotIkkarim={title:'עשרת הזכירות · י״ג עיקרים',ready:true,get text(){ return PRAYERS_EXTRA.asaretZikrot.text+'\n\n'+PRAYERS_EXTRA.shloshaEsreIkkarim.text; }};   // one Siddur tile for both (David's request)
+PRAYERS_EXTRA.zikrotIkkarim={title:'עשרת הזכירות · י״ג עיקרים',ready:true,get text(){ return '[[SECTION:עֲשֶׂרֶת הַזְּכִירוֹת]]\n\n'+PRAYERS_EXTRA.asaretZikrot.text+'\n\n[[SECTION:שְׁלוֹשׁ עֶשְׂרֵה עִיקָּרִים]]\n\n'+PRAYERS_EXTRA.shloshaEsreIkkarim.text; }};   // one Siddur tile for both (David's request)
 const PRAYERS_EXTRA_TITLE_NIKUD = {zikrotIkkarim:'עֲשֶׂרֶת הַזְּכִירוֹת · י״ג עִקָּרִים',
   hataratNedarim:'סֵדֶר הַתָּרַת נְדָרִים וּקְלָלוֹת',
   igeretHaramban:'אִגֶּרֶת הָרַמְבַּ״ן',
@@ -3145,7 +3152,7 @@ function openPrayer(prayerKey, fromGroup){
       if(prayerKey==='birkatMeeinShalosh' && parts){ try{ tr = birkatMeeinShaloshDayText(null, parts); }catch(e){} }
       const hparts = PRAYERS_TRANSLIT[S.lang] && PRAYERS_TRANSLIT[S.lang].birkatHamazonParts;
       if(prayerKey==='birkatHamazon' && hparts){ try{ tr = birkatHamazonDayText(null, hparts); }catch(e){} }
-      if(prayerKey==='zikrotIkkarim'){ const T=PRAYERS_TRANSLIT[S.lang]||{}; if(T.asaretZikrot&&T.shloshaEsreIkkarim) tr=T.asaretZikrot+'\n\n'+T.shloshaEsreIkkarim; }
+      if(prayerKey==='zikrotIkkarim'){ const T=PRAYERS_TRANSLIT[S.lang]||{}; if(T.asaretZikrot&&T.shloshaEsreIkkarim) tr='[[SECTION:עֲשֶׂרֶת הַזְּכִירוֹת]]\n\n'+T.asaretZikrot+'\n\n[[SECTION:שְׁלוֹשׁ עֶשְׂרֵה עִיקָּרִים]]\n\n'+T.shloshaEsreIkkarim; }
       if(tr && PR.prayer===prayerKey){ PR.text = tr; if(TAB==='prayerReader') render(); }
     });
   }
@@ -4721,6 +4728,7 @@ function go(tab){
   if(HOME_EDIT && tab!=='home'){ HOME_EDIT=false; try{ if(homeNativeEdit()) Capacitor.Plugins.NativeHomeEdit.hide().catch(()=>{}); }catch(e){} const hb=document.getElementById('homeEditBar'); if(hb) hb.remove(); const hs=document.getElementById('homeSheet'); if(hs) hs.remove(); }
   if(tab==='home'||tab==='calendar'||tab==='prayers'||tab==='settings'||tab==='search') SEARCH_NAV=false;
   if(tab==='calendar' && TAB!=='calendar' && CAL) CAL.seedDay=null;   // opening the Calendar tab always starts on today
+  document.querySelectorAll('.rh-sheet-wrap').forEach(w=>w.remove());   // a slim-header sheet is body-level: it must never outlive the screen that opened it
   TAB=tab;
   /* the full-screen AR compass overlay must cover the bottom nav completely,
      but .bottom-nav is a body-level sibling outside #app's own stacking
@@ -9628,7 +9636,7 @@ function renderTehillim(){
       if(!p.ready) return;
       const paras=(p.text||'').split('\n\n');
       paras.forEach((para,pi)=>{
-        if(para.startsWith('[[NOTE]]')||para==='[[MENORAH]]') return;
+        if(para.startsWith('[[NOTE]]')||para.startsWith('[[SECTION:')||para==='[[MENORAH]]') return;
         if(stripNik(para).includes(nq)){ pOut.push({key,title:p.title,pi,text:para}); }
       });
     });
@@ -12614,6 +12622,9 @@ function slimReaderHead(){
   const col=hd.querySelector('.bic-collapse'); if(!col) return;
   const big=BIG_HEADER_TABS_LIST.indexOf(TAB)>=0 || col.querySelector('.ck-arrow') || hd.classList.contains('rh-slim-src');
   if(!big) return;
+  /* The sheet hides the prev/next arrows (.rh-sheet .ck-arrow). A head whose only controls ARE those arrows (Zohar Yomi: date +
+     arrows) would open an empty, unusable sheet titled with the date - keep its header as is instead. */
+  if(!col.querySelector('select, .sm-aliyah-chip:not(.ck-arrow), .ck-track-btn, .ck-secnav, .ck-daynav')) return;
   if(hd.dataset.rhAuto || hd.classList.contains('rh-auto')) return;   // already a one-picker header
   if(hd.classList.contains('rh-empty')) return;
   hd.classList.add('rh-slim');
@@ -12758,6 +12769,8 @@ function renderPrayerReader(){
   const fullText = lines.map(line => {
     if(line==='[[MENORAH]]') return `<div class="prayer-menorah-wrap">${menorahSVG()}</div>`;
     if(line.startsWith('[[NOTE]]')) return `<div class="prayer-note">${line.slice(8)}</div>`;
+    const sec=line.match(/^\[\[SECTION:([^\]]*)\]\]$/);
+    if(sec) return `<div class="prayer-section"><span>${ckChrome(sec[1])}</span></div>`;
     const alt=line.match(/^\[\[ALT:([^\]]*)\]\]([\s\S]*)$/);
     if(alt) return `<div class="prayer-alt"><span class="prayer-alt-lbl">${ckChrome(alt[1])}</span>${alt[2]}</div>`;
     if(line.startsWith('[[INS]]')) return `<div class="prayer-para prayer-ins">${line.slice(7)}</div>`;
@@ -17319,6 +17332,7 @@ function prayerShareText(key){
   const plain = (p.text||'').split('\n\n')
     .filter(l=>l!=='[[MENORAH]]')
     .map(l=>l.startsWith('[[NOTE]]')?l.slice(8):l)
+    .map(l=>{ const m=/^\[\[SECTION:([^\]]*)\]\]$/.exec(l); return m?('— '+m[1]+' —'):l; })
     .join('\n\n');
   return p.title + '\n\n' + plain + '\n\n— בית א״ל';
 }
