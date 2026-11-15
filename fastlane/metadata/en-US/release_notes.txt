@@ -1,10 +1,12 @@
 What's new in 2.0.8:
+• Siddur fixes and a faster first open
+• Fixed scrolling in Birkot HaNehenin
+• Corrected Hebrew spelling on the compass
+• The three-dots reader tools button works again
+• Redesigned Library, Settings and Home
+• Widgets and sharing on Android
+• Private visit statistics
 • Daily Rambam now follows the official cycle (including introduction days)
 • Mishnah and Pirkei Avot in every language, with phonetic transliteration
-• Reshit Chokhmah in phonetic transliteration (French and Russian)
-• Fixed garbled characters in some texts
 • Automatic light/dark appearance following your device
-• Offline download: a subtle indicator and its own setting
-• Back from screens opened from Home returns to Home
-• Jerusalem candle lighting: 40 minutes before sunset
 • Translation, display and stability fixes
