@@ -4,6 +4,7 @@ import SafariServices
 import StoreKit
 import CoreImage
 import Security
+import WebKit
 
 /// Small system helpers the web layer needs as REAL iOS components:
 /// - `openURL`: an in-app Safari sheet (SFSafariViewController) so links never leave the app
@@ -19,6 +20,8 @@ public class NativeSystemBridge: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "shareImage", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "qrImage", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestReview", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "clearWebCaches", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "storageUsage", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "keychainGet", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "keychainSet", returnType: CAPPluginReturnPromise),
     ]
@@ -27,6 +30,46 @@ public class NativeSystemBridge: CAPPlugin, CAPBridgedPlugin {
         var top: UIViewController? = bridge?.viewController
         while let p = top?.presentedViewController { top = p }
         return top
+    }
+
+    /// Drops the WebView's own HTTP disk/memory caches (re-downloadable: MediaPipe models, CDN scripts...). Never touches
+    /// localStorage, IndexedDB or Cache Storage, so reading offline keeps working.
+    @objc func clearWebCaches(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            URLCache.shared.removeAllCachedResponses()
+            let types: Set<String> = [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache, WKWebsiteDataTypeOfflineWebApplicationCache]
+            WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: Date(timeIntervalSince1970: 0)) {
+                call.resolve()
+            }
+        }
+    }
+
+    private func folderBytes(_ url: URL) -> Int64 {
+        guard let en = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.totalFileAllocatedSizeKey, .isRegularFileKey], options: []) else { return 0 }
+        var total: Int64 = 0
+        for case let f as URL in en {
+            let v = try? f.resourceValues(forKeys: [.totalFileAllocatedSizeKey, .isRegularFileKey])
+            if v?.isRegularFile == true { total += Int64(v?.totalFileAllocatedSize ?? 0) }
+        }
+        return total
+    }
+
+    /// Real on-disk size of the app: the bundle (what the App Store counts as "App") and the sandbox folders that make up
+    /// "Documents & Data" (Library/Caches, Library/WebKit = Cache Storage/IndexedDB/localStorage, Documents).
+    @objc func storageUsage(_ call: CAPPluginCall) {
+        DispatchQueue.global(qos: .utility).async {
+            let fm = FileManager.default
+            let lib = fm.urls(for: .libraryDirectory, in: .userDomainMask).first
+            let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first
+            let caches = fm.urls(for: .cachesDirectory, in: .userDomainMask).first
+            call.resolve([
+                "bundle": self.folderBytes(Bundle.main.bundleURL),
+                "documents": docs.map { self.folderBytes($0) } ?? 0,
+                "caches": caches.map { self.folderBytes($0) } ?? 0,
+                "webkit": lib.map { self.folderBytes($0.appendingPathComponent("WebKit")) } ?? 0,
+                "library": lib.map { self.folderBytes($0) } ?? 0
+            ])
+        }
     }
 
     @objc func openURL(_ call: CAPPluginCall) {
