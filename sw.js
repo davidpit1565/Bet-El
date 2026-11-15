@@ -1,4 +1,9 @@
-const CACHE = 'betel-tehilim-v11';
+const CACHE = 'betel-tehilim-v12';
+// Web/PWA only (never registered inside the native apps). Page-scan images / PDFs / the weekly booklet under data/ are NOT kept here (the browser HTTP cache
+// handles them), and the cache is trimmed to MAX_ENTRIES (oldest first) so it can never grow without bound.
+const MAX_ENTRIES = 500;
+const BIG_RX = /\/data\/.*\.(?:jpe?g|png|webp|gif|pdf)$|\/data\/booklet\//i;
+function trim(c){ return c.keys().then(ks => { const extra = ks.length - MAX_ENTRIES; if (extra <= 0) return; const old = ks.filter(r => !/\/(?:index\.html|manifest\.json|icon-\d+\.png)?$/.test(new URL(r.url).pathname)).slice(0, extra + 50); return Promise.all(old.map(r => c.delete(r))); }); }
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const NET_TIMEOUT = 4000;
 
@@ -47,12 +52,14 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  if (BIG_RX.test(new URL(req.url).pathname)) return;   // plain network / HTTP cache, nothing stored here
+
   e.respondWith(
     caches.match(req).then(cached => {
       const network = withTimeout(fetch(req), NET_TIMEOUT).then(res => {
         if (res.ok) {
           const resCopy = res.clone();
-          caches.open(CACHE).then(c => c.put(req, resCopy));
+          caches.open(CACHE).then(c => c.put(req, resCopy).then(() => trim(c)));
         }
         return res;
       }).catch(() => cached);

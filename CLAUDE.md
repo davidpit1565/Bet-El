@@ -456,6 +456,17 @@ in English as usual.
   itself for the duration of that round-trip (`suppressUntil` window in
   `initNavScrollHide`), not just filter by distance/threshold.
 
+- **Storage budget (offline-size work, iOS/Android):** the native bundle is tiny (`www/` ~4MB: index.html + 4 JS + fonts + 2 icons; `data/` is never bundled, no
+  service worker runs in the native shells - `sw.js` is web/PWA only, and now skips data images/PDFs/booklet and keeps <=500 entries). Everything big is runtime
+  storage: Cache Storage (`betel-native-data-v1` gzip text, `betel-native-assets-v1` Zohar page images, LRU 100MB / 400MB in "Everything" mode) plus the WebView's own HTTP
+  cache (data fetches use `cache:'no-store'` so it is NOT duplicated). Tiers (`pfTierOf`): essential = daily-core JSON (prefetched), **lazy** = `LAZY_RX`
+  (`data/chok-daf-c/` Steinsaltz/Rashi, `data/sa-harav/oc/`, `data/mishnah-translit/`; saved on first open by `cachedFetch`, LRU cap 120MB via `betel_lazy_lru`,
+  prefetched only in the "All texts"/"Everything" modes; today's + next daf-commentary block are warmed by `dafCommWarm()`), optional = page-scan images, online = PDFs.
+  Offline modes (`S.offMode`): `essential` (default) | `texts` | `all`. Keep `LAZY_RX` identical in index.html and `scripts/generate-data-manifest.mjs`. "Free up space"
+  (`pfFreeSpace`) drops lazy + images + other Cache buckets and (iOS) calls `NativeSystem.clearWebCaches`; `NativeSystem.storageUsage` reports real bundle/Library/Documents bytes.
+  Measuring in Playwright: never use `ctx.route()` while checking HTTP-cache duplication (interception ignores `no-store`); block hosts with `--host-resolver-rules` instead,
+  and emulate Android with `window.androidBridge` (a bare `window.Capacitor` stub gets overwritten by capacitor-core.js).
+
 ## Standing open items
 - **Firebase push notifications**: real push infrastructure now exists
   (FCM Web Push) - a Settings toggle ("הוֹדָעוֹת עַל תֹּכֶן חָדָשׁ") requests
