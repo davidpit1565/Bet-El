@@ -3243,6 +3243,8 @@ function resolveTheme(){
 }
 try{ const mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)'); const onThemeChange=()=>{ if(S.themeMode==='auto'){ applySettings(); try{ render(); }catch(e){} } };
   if(mq){ mq.addEventListener ? mq.addEventListener('change',onThemeChange) : (mq.addListener&&mq.addListener(onThemeChange)); } }catch(e){}
+/* 'auto' while the app was in the background: the WebView may not deliver the media-query change, so re-check on return. */
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && S.themeMode==='auto'){ const was=S.theme; resolveTheme(); if(S.theme!==was){ applySettings(); try{ render(); }catch(e){} } } });
 /* "Pasuk Lefi HaShem" used to hold a single S.hebrewName string - now a
    S.hebrewNames list (several names, each shown in the order added) - a
    user with the old single name already saved gets it migrated into the
@@ -3670,7 +3672,9 @@ function applySettings(){
   const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', S.theme==='dark'?'#080d19':'#efe6d2');
   // capacitor.config pins the native status bar to light text; flip it with the theme so it stays readable on the cream background.
   try{ const sb=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.StatusBar; if(sb) sb.setStyle({style:S.theme==='dark'?'DARK':'LIGHT'}).catch(()=>{}); }catch(e){}
+  try{ if(APPLIED_THEME!==S.theme){ APPLIED_THEME=S.theme; nativeThemeSync(); } }catch(e){}   // native header/tab bar/etc. follow every theme change (TDZ-safe before boot finished)
 }
+var APPLIED_THEME=null;
 /* Screen Wake Lock: released by the browser itself whenever the tab goes
    hidden, so a plain on/off flag isn't enough - re-acquired on every
    visibilitychange back to 'visible' while the setting is on (the
@@ -15067,7 +15071,7 @@ function openKotel(from){
   go('kotelCompass');
 }
 function renderKotelCompass(){
-  syncNativeTopBar(ckChrome('כיוון תפלה'), KOTEL_FROM);
+  syncNativeTopBar(ckChrome('כיוון תפלה'), KOTEL_FROM, {forceDark:true});
   const hasLoc=LOC && LOC.lat!=null;
   if(hasLoc) startCompass();
   const knowsHeading=hasLoc && CompassState.heading!=null;
@@ -15581,7 +15585,7 @@ function mirrorInitHooks(){
   window.addEventListener('orientationchange', onSize);
 }
 function renderTefillinMirror(){
-  syncNativeTopBar(ckChrome('מראה לתפלין'), TEFILLIN_MIRROR_FROM);
+  syncNativeTopBar(ckChrome('מראה לתפלין'), TEFILLIN_MIRROR_FROM, {forceDark:true});
   app.innerHTML=`
   <div class="compass-full mirror-full">
     <div class="compass-fhead mirror-fhead">
@@ -16969,7 +16973,7 @@ function syncNativeTopBar(title, backTo, opts){
   TOPBAR_ACTION_HANDLERS = opts.handlers || {};
   TOPBAR_MENU_HANDLERS = opts.menuHandlers || {};
   try{
-    window.Capacitor.Plugins.NativeTopBar.configure({
+    const payload={
       // Top-level tab screens (no back action) show no title: the tab bar
       // already names them, and the extra word read as clutter (by user
       // request). Inner screens keep their title beside the back button.
@@ -16983,17 +16987,42 @@ function syncNativeTopBar(title, backTo, opts){
       title: ckChrome(String(opts.title!=null ? opts.title : (backTo ? (title||'') : '')).replace(/<[^>]*>/g,'')),
       backTo: (typeof backTo==='function') ? '​' : (backTo||''), // zero-width space: "has a back action" without a real tab name Swift would otherwise try to display/log
       isRTL: document.documentElement.dir!=='ltr',
-      isDark: S.theme==='dark',
+      isDark: !!opts.forceDark || S.theme==='dark',   // forceDark: full-screen always-navy pages (compass, tefillin mirror) - a cream header over them read as a mix
+      forceDark: !!opts.forceDark,
       homeLabel: nativeTabBarLabel('דף הבית'),
       settingsLabel: nativeTabBarLabel('הגדרות'),
       shareLabel: nativeTabBarLabel('שתף'),
       actions: opts.actions || [],
       titleSheet: opts.titleSheet || null,
-    }).catch(()=>{});
+    };
+    LAST_TOPBAR_PAYLOAD=payload; TOPBAR_SHOWN=true;
+    try{ const sb=window.Capacitor.Plugins.StatusBar; if(sb) sb.setStyle({style:payload.isDark?'DARK':'LIGHT'}).catch(()=>{}); }catch(e){}
+    window.Capacitor.Plugins.NativeTopBar.configure(payload).catch(()=>{});
   }catch(e){}
+}
+/* Theme -> native chrome. The native header (and the status-bar strip + docked search field it owns), tab bar, tools FAB,
+   settings list and native home/library only learn the theme from the `isDark` JS sends WITH a configure call. A theme change
+   (Settings toggle, reader sun/moon, 'auto' following the device) used to repaint only the HTML, so the header kept the colour
+   of the last screen configure (dark navy header on a light page and vice versa). applySettings() now calls this on every
+   theme change: it re-sends the current header payload with a freshly resolved isDark and refreshes every other native surface. */
+let LAST_TOPBAR_PAYLOAD=null, TOPBAR_SHOWN=false;
+function nativeThemeSync(){
+  try{
+    const dark=S.theme==='dark';
+    if(NATIVE_TOPBAR && TOPBAR_SHOWN && LAST_TOPBAR_PAYLOAD){
+      LAST_TOPBAR_PAYLOAD.isDark=dark || !!LAST_TOPBAR_PAYLOAD.forceDark;
+      window.Capacitor.Plugins.NativeTopBar.configure(LAST_TOPBAR_PAYLOAD).catch(()=>{});
+    }
+  }catch(e){}
+  try{ syncNativeTabBar(); }catch(e){}
+  try{ syncNativeToolsFab(); }catch(e){}
+  try{ if(TAB==='settings') syncNativeSettings(); }catch(e){}
+  try{ if(TAB==='home') homeNativePush(); else if(TAB==='library') renderLibrary(); else if(TAB==='calendar') renderCalendarNative(); }catch(e){}
 }
 function hideNativeTopBar(){
   if(!NATIVE_TOPBAR) return;
+  TOPBAR_SHOWN=false;
+  try{ const sb=window.Capacitor.Plugins.StatusBar; if(sb) sb.setStyle({style:S.theme==='dark'?'DARK':'LIGHT'}).catch(()=>{}); }catch(e){}   // leaving a force-dark page: status bar text back to the theme
   TOPBAR_BACK_ACTION = null;
   TOPBAR_ACTION_HANDLERS = {};
   TOPBAR_MENU_HANDLERS = {};
