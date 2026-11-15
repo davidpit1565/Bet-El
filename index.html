@@ -1364,6 +1364,11 @@ input,select,button{max-width:100%;box-sizing:border-box}
 .prayer-ins{border-inline-start:3px solid var(--gold);padding-inline-start:12px;color:var(--gold)}
 .prayer-menorah-wrap{margin-bottom:16px;padding-bottom:12px;text-align:center}
 [data-theme="dark"] .prayer-menorah-wrap img{filter:invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.4)) !important}
+.prayer-section{display:flex;align-items:center;gap:12px;margin:26px 0 16px;color:var(--gold);font-weight:800;font-size:calc(17px * var(--fs-scale));letter-spacing:.2px}
+.prayer-section:first-child{margin-top:6px}
+.prayer-section::before,.prayer-section::after{content:'';flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold))}
+.prayer-section::after{background:linear-gradient(270deg,transparent,var(--gold))}
+.prayer-section span{flex:none;max-width:70%;text-align:center}
 .prayer-note{margin:4px 0 14px;font-size:14px;font-weight:700;color:var(--gold);text-align:center;
   font-family:var(--font-ui);letter-spacing:.2px}
 .prayer-para:last-child{border:none;margin-bottom:0}
@@ -3011,7 +3016,7 @@ function birkatHamazonDayText(hd, P){
    transliterations, so it stays plain there; this side-table supplies the
    nikud'd form shown on the big tile button (renderPrayersGroup) when the
    language is Hebrew (see heTitle()). */
-PRAYERS_EXTRA.zikrotIkkarim={title:'עשרת הזכירות · י״ג עיקרים',ready:true,get text(){ return PRAYERS_EXTRA.asaretZikrot.text+'\n\n'+PRAYERS_EXTRA.shloshaEsreIkkarim.text; }};   // one Siddur tile for both (David's request)
+PRAYERS_EXTRA.zikrotIkkarim={title:'עשרת הזכירות · י״ג עיקרים',ready:true,get text(){ return '[[SECTION:עֲשֶׂרֶת הַזְּכִירוֹת]]\n\n'+PRAYERS_EXTRA.asaretZikrot.text+'\n\n[[SECTION:שְׁלוֹשׁ עֶשְׂרֵה עִיקָּרִים]]\n\n'+PRAYERS_EXTRA.shloshaEsreIkkarim.text; }};   // one Siddur tile for both (David's request)
 const PRAYERS_EXTRA_TITLE_NIKUD = {zikrotIkkarim:'עֲשֶׂרֶת הַזְּכִירוֹת · י״ג עִקָּרִים',
   hataratNedarim:'סֵדֶר הַתָּרַת נְדָרִים וּקְלָלוֹת',
   igeretHaramban:'אִגֶּרֶת הָרַמְבַּ״ן',
@@ -3145,7 +3150,7 @@ function openPrayer(prayerKey, fromGroup){
       if(prayerKey==='birkatMeeinShalosh' && parts){ try{ tr = birkatMeeinShaloshDayText(null, parts); }catch(e){} }
       const hparts = PRAYERS_TRANSLIT[S.lang] && PRAYERS_TRANSLIT[S.lang].birkatHamazonParts;
       if(prayerKey==='birkatHamazon' && hparts){ try{ tr = birkatHamazonDayText(null, hparts); }catch(e){} }
-      if(prayerKey==='zikrotIkkarim'){ const T=PRAYERS_TRANSLIT[S.lang]||{}; if(T.asaretZikrot&&T.shloshaEsreIkkarim) tr=T.asaretZikrot+'\n\n'+T.shloshaEsreIkkarim; }
+      if(prayerKey==='zikrotIkkarim'){ const T=PRAYERS_TRANSLIT[S.lang]||{}; if(T.asaretZikrot&&T.shloshaEsreIkkarim) tr='[[SECTION:עֲשֶׂרֶת הַזְּכִירוֹת]]\n\n'+T.asaretZikrot+'\n\n[[SECTION:שְׁלוֹשׁ עֶשְׂרֵה עִיקָּרִים]]\n\n'+T.shloshaEsreIkkarim; }
       if(tr && PR.prayer===prayerKey){ PR.text = tr; if(TAB==='prayerReader') render(); }
     });
   }
@@ -9628,7 +9633,7 @@ function renderTehillim(){
       if(!p.ready) return;
       const paras=(p.text||'').split('\n\n');
       paras.forEach((para,pi)=>{
-        if(para.startsWith('[[NOTE]]')||para==='[[MENORAH]]') return;
+        if(para.startsWith('[[NOTE]]')||para.startsWith('[[SECTION:')||para==='[[MENORAH]]') return;
         if(stripNik(para).includes(nq)){ pOut.push({key,title:p.title,pi,text:para}); }
       });
     });
@@ -12758,6 +12763,8 @@ function renderPrayerReader(){
   const fullText = lines.map(line => {
     if(line==='[[MENORAH]]') return `<div class="prayer-menorah-wrap">${menorahSVG()}</div>`;
     if(line.startsWith('[[NOTE]]')) return `<div class="prayer-note">${line.slice(8)}</div>`;
+    const sec=line.match(/^\[\[SECTION:([^\]]*)\]\]$/);
+    if(sec) return `<div class="prayer-section"><span>${ckChrome(sec[1])}</span></div>`;
     const alt=line.match(/^\[\[ALT:([^\]]*)\]\]([\s\S]*)$/);
     if(alt) return `<div class="prayer-alt"><span class="prayer-alt-lbl">${ckChrome(alt[1])}</span>${alt[2]}</div>`;
     if(line.startsWith('[[INS]]')) return `<div class="prayer-para prayer-ins">${line.slice(7)}</div>`;
@@ -17319,6 +17326,7 @@ function prayerShareText(key){
   const plain = (p.text||'').split('\n\n')
     .filter(l=>l!=='[[MENORAH]]')
     .map(l=>l.startsWith('[[NOTE]]')?l.slice(8):l)
+    .map(l=>{ const m=/^\[\[SECTION:([^\]]*)\]\]$/.exec(l); return m?('— '+m[1]+' —'):l; })
     .join('\n\n');
   return p.title + '\n\n' + plain + '\n\n— בית א״ל';
 }
