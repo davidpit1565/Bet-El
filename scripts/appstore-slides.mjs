@@ -11,7 +11,7 @@ const LIGHT=process.argv[3]==='light'; const SFX=LIGHT?'-light':'';
 const TH=LIGHT
  ? {bg:'radial-gradient(120% 70% at 50% 0%,#fffaf0 0%,#f3e8d0 55%,#e6dac0 100%)',ink:'#22314e',soft:'#46557a',gold:'#8a6414',goldText:'linear-gradient(180deg,#a47a1c,#7a5812)',chip:'rgba(255,255,255,.7)',card:'rgba(255,252,244,.94)',cardInk:'#22314e',bezel:'#d9cdb2',ring:'rgba(138,100,20,.5)',shadow:'0 40px 90px rgba(80,60,20,.35)',glowA:.35}
  : {bg:'radial-gradient(120% 70% at 50% 0%,#1b2a5c 0%,#0b1226 55%,#05080f 100%)',ink:'#f6f1e4',soft:'#b8c2dc',gold:'#e6c874',goldText:'linear-gradient(180deg,#fff3cf,#e6c874 70%,#c9a24b)',chip:'rgba(255,255,255,.08)',card:'rgba(16,26,56,.94)',cardInk:'#f6f1e4',bezel:'#0a0f1f',ring:'rgba(230,200,116,.55)',shadow:'0 50px 120px rgba(0,0,0,.75)',glowA:.5};
-const ACC={srch:'#6f83d6',mazon:'#8a9a3a',chok:'#6f83d6',home:'#d4af5f',cal:'#d4af5f',teh:'#d4af5f',pray:'#8a9a3a',meein:'#8a9a3a',lib:'#c98a3f',set:'#6f83d6',lang:'#38a3a5',qr:'#d4af5f',wid:'#e0562e',hero:'#d4af5f'};
+const ACC={srch:'#6f83d6',mazon:'#d4af5f',chok:'#6f83d6',home:'#d4af5f',cal:'#d4af5f',teh:'#d4af5f',pray:'#d4af5f',meein:'#d4af5f',lib:'#c98a3f',set:'#6f83d6',lang:'#38a3a5',qr:'#d4af5f',wid:'#e0562e',hero:'#d4af5f'};
 /* ---- copy (he / en / fr / ru). `*word*` = accent colour ---- */
 const C={
 he:{hero:{h:'הלימוד היומי שלך, *בכל מקום*',s:'חוק לישראל · תהילים · זוהר · בן איש חי · מוסר · סידור',pills:['חוק לישראל','תהילים יומי','זוהר יומי','בן איש חי','מוסר','סידור וברכות']},
@@ -67,7 +67,7 @@ ru:{hero:{h:'Ваше ежедневное изучение – *везде*',s:
  lang:{e:'Пять языков',h:'Пять языков, *одно касание*',s:'עברית · English · Français · Русский · ქართული'},
  qr:{e:'Поделиться',h:'Поделитесь по *QR-коду*',s:'Красивый код для обмена приложением – работает и офлайн'}}};
 /* slide = [key, raw name, accent, zoom crop {y0,y1} of the raw image (or of zoom.raw) or null] */
-const SLIDES=[['home','01-home','home'],['chok','02-chok','chok',{y0:.375,y1:.6,iy0:.225}],['teh','04-tehillim','teh'],
+const SLIDES=[['home','01-home','home'],['chok','02-chok','chok',{y0:.265,y1:.49,iy0:.225}],['teh','04-tehillim','teh'],
  ['pray','10-brachot','mazon',{raw:'06-mazon',y0:.27,y1:.5,iy0:.165}],['cal','11-calendar-hill','cal',{y0:.345,y1:.57,iy0:.58,ipadOnly:true}],
  ['srch','09-search','srch'],['lib','08-library','lib'],['lang',null,'lang']];   // + 3 widget slides (appstore-widget-slides.mjs) = 10, Apple's max
 const b64=f=>fs.readFileSync(f).toString('base64');
@@ -111,7 +111,7 @@ for(const lang of langs){ const rtl=lang==='he';
       const ph=(f,st)=>frame(f,pw,st,ipad);
       body=headBlock+ph(f2,`${rtl?'left':'right'}:${ipad?40:40}px;top:${ipad?1000:1000}px`)+ph(f1,`${rtl?'right':'left'}:${ipad?40:40}px;top:${ipad?720:830}px`);
     } else if(key==='lang'){
-      const f1=find(lang,'01-home',ipad), f2=find(lang==='en'?'he':'en','01-home',ipad); if(!f1||!f2) continue;
+      const f1=find('en','01-home',ipad), f2=find('he','01-home',ipad); if(!f1||!f2) continue;   // English left, Hebrew right
       const pw=ipad?800:560;
       const ph=(f,s)=>`<div style="position:absolute;${s};width:${pw}px;border-radius:${ipad?56:84}px;overflow:hidden;border:14px solid ${TH.bezel};box-shadow:0 0 0 3px ${TH.ring},${TH.shadow}"><img src="data:image/png;base64,${b64(f)}" style="display:block;width:100%"/></div>`;
       body=headBlock+ph(f1,`left:${ipad?230:90}px;top:${ipad?900:1000}px;transform:rotate(-5deg)`)+ph(f2,`right:${ipad?230:90}px;top:${ipad?1080:1180}px;transform:rotate(5deg)`)
