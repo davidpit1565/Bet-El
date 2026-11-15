@@ -1,4 +1,4 @@
-const CACHE = 'betel-tehilim-v11';
+const CACHE = 'betel-tehilim-v12';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const NET_TIMEOUT = 4000;
 
@@ -25,7 +25,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE && !k.startsWith('betel-mirror-')).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

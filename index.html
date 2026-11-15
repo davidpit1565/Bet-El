@@ -722,7 +722,7 @@ a.set-item{text-decoration:none;color:inherit}
    the video speaks for itself with no icon needed above it. */
 .mirror-fhead{justify-content:center}
 .mirror-fhead .compass-close{position:absolute;inset-inline-start:16px;top:calc(16px + env(safe-area-inset-top))}
-.mirror-fhead .compass-ftitle{font-size:22px}
+.mirror-fhead .compass-ftitle{font-size:22px;padding-inline:92px;text-align:center;line-height:1.2}   /* long translated titles must not run under the Close button */
 .mirror-video{width:100%;max-width:420px;aspect-ratio:3/4;border-radius:28px;object-fit:cover;min-height:0;
   transform:scaleX(-1);background:#0a0e1a;box-shadow:0 10px 40px rgba(0,0,0,.4)}
 .mirror-note{font-size:12px;color:#a9b3c9;text-align:center;line-height:1.6;max-width:340px;margin-top:16px}
@@ -3743,7 +3743,7 @@ function stopTefillinMirror(){
   MCAM.tok++;                                   // cancels any getUserMedia / restart still in flight
   if(MCAM.timer){ clearInterval(MCAM.timer); MCAM.timer=null; }
   mirrorReleaseStream();
-  MirrorGuide.stop();
+  MirrorGuide.release();
 }
 function updateCompassNeedle(){
   const ticks=document.getElementById('compassTicks'); if(!ticks) return;
@@ -15122,6 +15122,54 @@ function renderKotelCompass(){
    as seen in the mirror (the video is flipped, so screen right is the
    user's own right). Frames are analyzed in memory only and never stored
    or sent anywhere. */
+/* Runs INSIDE a Web Worker (it is stringified into a Blob, so it must not reference anything outside itself).
+   Loads MediaPipe Tasks Vision from the persistent Cache Storage (filled on first use or by MirrorGuide.preload),
+   builds the face model first and the hair segmenter after it, then answers 'frame' messages with the landmarks.
+   CPU delegate on purpose: no WebGL context in a worker, no multi-second GPU-init hang, nothing to lose on iOS. */
+function mirrorWorkerMain(){
+  let cfg=null, landmarker=null, segmenter=null, stage='net';
+  const cacheGet=async url=>{
+    let c=null;
+    try{ c=await caches.open(cfg.cache); const hit=await c.match(url); if(hit) return hit; }catch(_){ c=null; }
+    const r=await fetch(url,{mode:'cors'});
+    if(!r.ok) throw new Error('http '+r.status);
+    if(c){ try{ c.put(url,r.clone()).catch(()=>{}); }catch(_){} }
+    return r;
+  };
+  const buf=async url=>(await cacheGet(url)).arrayBuffer();
+  const burl=async(url,type)=>URL.createObjectURL(new Blob([await buf(url)],{type}));
+  async function init(){
+    const [bundle,loader,wasm,face]=await Promise.all([burl(cfg.bundle,'text/javascript'),burl(cfg.loader,'text/javascript'),burl(cfg.wasm,'application/wasm'),buf(cfg.face)]);
+    stage='init';
+    self.exports={};
+    importScripts(bundle);
+    const vision=self.exports, files={wasmLoaderPath:loader, wasmBinaryPath:wasm};
+    landmarker=await vision.FaceLandmarker.createFromOptions(files,{baseOptions:{modelAssetBuffer:new Uint8Array(face),delegate:'CPU'},runningMode:'IMAGE',numFaces:1});
+    self.postMessage({t:'face'});
+    try{
+      const hb=await buf(cfg.hair).catch(()=>null);   // fetched only now, so it never competes with the face model for bandwidth; the hair model is a bonus
+      if(hb){ segmenter=await vision.ImageSegmenter.createFromOptions(files,{baseOptions:{modelAssetBuffer:new Uint8Array(hb),delegate:'CPU'},runningMode:'IMAGE',outputCategoryMask:true,outputConfidenceMasks:false}); self.postMessage({t:'hair'}); }
+    }catch(e){ segmenter=null; }
+  }
+  self.onmessage=e=>{
+    const m=e.data;
+    if(m.t==='init'){ cfg=m; init().catch(err=>self.postMessage({t:'err',net:stage==='net',msg:String(err&&err.message||err)})); return; }
+    if(m.t!=='frame') return;
+    const out={t:'res',id:m.id,lm:null,mask:null,fail:false}, tr=[];
+    try{
+      if(!landmarker) throw new Error('no model');
+      const r=landmarker.detect(m.bmp), lm=r&&r.faceLandmarks&&r.faceLandmarks[0];
+      if(lm){ const a=new Float32Array(lm.length*2); for(let i=0;i<lm.length;i++){ a[2*i]=lm[i].x; a[2*i+1]=lm[i].y; } out.lm=a; tr.push(a.buffer); }
+    }catch(err){ out.fail=true; }
+    if(m.seg && segmenter && !out.fail){
+      try{ segmenter.segment(m.bmp,res=>{ const mk=res&&res.categoryMask; if(mk){ const d=mk.getAsUint8Array().slice(); out.mask={data:d,w:mk.width,h:mk.height}; tr.push(d.buffer); } }); }
+      catch(err){ segmenter=null; }
+    }
+    try{ m.bmp.close(); }catch(_){}
+    self.postMessage(out,tr);
+  };
+  self.postMessage({t:'boot'});
+}
 const MirrorGuide={
   enabled:(()=>{ try{ return localStorage.getItem('betel_mirror_guide')!=='0'; }catch(_){ return true; } })(),
   landmarker:null, segmenter:null, loading:null, running:false, video:null, lastTs:-1,
@@ -15143,10 +15191,14 @@ const MirrorGuide={
       };
       // The face model is all the guide needs to start; the (bigger) hair segmenter loads in the background and is picked
       // up by the loop as soon as it is ready. If it fails, the guide falls back to the skin-color hairline.
-      this.landmarker=await make(vision.FaceLandmarker,'face_landmarker/face_landmarker/float16/1/face_landmarker.task',{numFaces:1});
+      const g=this.gen||0;   // the screen was left while this was still loading: discard what it builds, never draw late
+      const lmk=await make(vision.FaceLandmarker,'face_landmarker/face_landmarker/float16/1/face_landmarker.task',{numFaces:1});
+      if((this.gen||0)!==g){ try{ lmk.close(); }catch(_){} this.loading=null; return; }
+      this.landmarker=lmk;
       setTimeout(()=>{   // after the face model is already drawing, so the two compiles do not stack up on the main thread
+        if((this.gen||0)!==g) return;
         make(vision.ImageSegmenter,'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite',{outputCategoryMask:true,outputConfidenceMasks:false})
-          .then(sg=>{ this.segmenter=sg; }).catch(()=>{ this.segmenter=null; });
+          .then(sg=>{ if((this.gen||0)!==g){ try{ sg.close(); }catch(_){} } else this.segmenter=sg; }).catch(()=>{ this.segmenter=null; });
       },1200);
     }).catch(e=>{ this.loading=null; throw e; });
     return this.loading;
@@ -15200,38 +15252,95 @@ const MirrorGuide={
     const el=document.getElementById('mirrorHint'); if(!el) return;
     el.hidden=!text; el.textContent=text||''; el.classList.toggle('ok', !!ok);
   },
+  ready(){ return !!(this.landmarker || (this.wk && this.faceReady)); },
+  /* The models run in a Web Worker (see mirrorWorkerMain): downloading, compiling the ~9MB wasm and building the
+     face/hair models used to freeze the main thread for seconds (every tap, including Back, waited for it). The worker
+     is spawned the moment the screen opens, in parallel with the camera; frames are sent as ImageBitmaps and only the
+     landmarks (+ now and then the hair mask) come back. If a worker cannot be created or fails to initialise, the old
+     main-thread path (load()) is the fallback. */
+  files(){
+    const base='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@'+this.VER, models='https://storage.googleapis.com/mediapipe-models/';
+    let simd=true;
+    try{ simd=WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11])); }catch(_){}
+    const w=simd?'vision_wasm_internal':'vision_wasm_nosimd_internal';
+    return {cache:'betel-mirror-v1', bundle:base+'/vision_bundle.cjs', loader:base+'/wasm/'+w+'.js', wasm:base+'/wasm/'+w+'.wasm',
+      face:models+'face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+      hair:models+'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite'};
+  },
+  spawn(){
+    try{
+      if(typeof Worker==='undefined' || typeof createImageBitmap!=='function') return false;
+      clearTimeout(this.idleT);
+      const url=URL.createObjectURL(new Blob(['('+mirrorWorkerMain.toString()+')()'],{type:'text/javascript'}));
+      const w=new Worker(url);
+      w.onmessage=e=>{ if(w===this.wk) this.onWk(e.data); };
+      w.onerror=()=>{ URL.revokeObjectURL(url); if(w===this.wk) this.workerFail('init'); };
+      this.wk=w; this.faceReady=this.hairReady=false; this.pending=false; this.wkUrl=url;
+      w.postMessage(Object.assign({t:'init'}, this.files()));
+      clearTimeout(this.initT);
+      this.initT=setTimeout(()=>{ if(this.wk===w && !this.faceReady) this.workerFail('init'); },90000);
+      return true;
+    }catch(e){ return false; }
+  },
+  onWk(m){
+    if(m.t==='boot'){ try{ URL.revokeObjectURL(this.wkUrl); }catch(_){} return; }
+    if(m.t==='face'){ this.faceReady=true; clearTimeout(this.initT); return; }
+    if(m.t==='hair'){ this.hairReady=true; return; }
+    if(m.t==='err'){ this.workerFail(m.net?'net':'init'); return; }
+    if(m.t==='res'){
+      this.pending=false;
+      if(!this.running || m.id!==this.runId || TAB!=='tefillinMirror') return;
+      if(m.fail){ if(++this.errs>=6) this.workerFail('frame'); return; }
+      this.errs=0;
+      if(m.mask) this.hairMask=m.mask;
+      let lm=null;
+      if(m.lm){ lm=new Array(m.lm.length/2); for(let i=0;i<lm.length;i++) lm[i]={x:m.lm[2*i], y:m.lm[2*i+1]}; }
+      try{ this.analyze(this.video, lm); }catch(_){}
+    }
+  },
+  killWorker(){
+    clearTimeout(this.initT); clearTimeout(this.idleT);
+    if(this.wk){ try{ this.wk.terminate(); }catch(_){} try{ URL.revokeObjectURL(this.wkUrl); }catch(_){} }
+    this.wk=null; this.faceReady=this.hairReady=false; this.pending=false;
+  },
+  workerFail(kind){
+    this.killWorker();
+    if(kind==='net'){ if(this.running){ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); } return; }
+    this.useMain=true;                                  // worker unusable here: the old main-thread path takes over
+    if(this.running) this.warm();
+  },
+  // start whichever backend is not up yet (no waiting for the camera - both load in parallel)
+  warm(){
+    if(this.ready()) return;
+    if(!this.useMain && !this.wk && !this.spawn()) this.useMain=true;
+    if(this.useMain && !this.landmarker){
+      this.load().catch(()=>{ if(this.running){ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); } });
+    }
+  },
   start(video){
     this.video=video; this.smooth=null;
     if(this.running) return;
     this.running=true; this.errs=0; this.beat=performance.now();
     const id=this.runId=(this.runId||0)+1;   // toggling the guide off/on while the models load used to start two loops at once
-    this.hint(ckChrome('טוען מדריך…'));
-    // The camera preview comes first: compiling the wasm/models blocks the main thread, so it only starts once the
-    // video is actually playing (or after a short fallback), never in parallel with the camera starting up.
-    let begun=false;
-    const begin=()=>{
-      if(begun) return; begun=true;
-      if(!this.running || this.runId!==id) return;
-      this.load().then(()=>{ if(this.running && this.runId===id) this.loop(id); })
-        .catch(()=>{ if(this.runId===id){ this.running=false; this.hint(ckChrome('המדריך צריך חבור לאינטרנט בפעם הראשונה')); } });
-    };
-    if(this.landmarker) begin();
-    else{
-      const later=()=>setTimeout(begin,350);
-      if(video && video.readyState>=3 && video.currentTime>0) later();
-      else{ if(video) video.addEventListener('playing',later,{once:true}); setTimeout(begin,2500); }
-    }
+    if(!this.ready()) this.hint(ckChrome('טוען מדריך…'));
+    this.warm();
+    this.loop(id);   // cheap while nothing is ready yet: it only reschedules itself
   },
-  // Warm the HTTP cache with the library + model files (download only, no compile) - called when the Siddur screen
-  // shows the mirror tile and again when the mirror opens, so the first open does not wait on the network.
+  // Warm the persistent cache (Cache Storage, not the HTTP cache: it survives eviction and the worker reads from it) with
+  // the library + model files - download only, no compile. Called when the Siddur screen shows the mirror tile.
   preload(){
     if(this.preloaded) return; this.preloaded=true;
     try{ if(navigator.connection && navigator.connection.saveData) return; }catch(_){}
-    const base='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@'+this.VER, models='https://storage.googleapis.com/mediapipe-models/';
-    const urls=[base+'/vision_bundle.mjs', base+'/wasm/vision_wasm_internal.js', base+'/wasm/vision_wasm_internal.wasm',
-      models+'face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-      models+'image_segmenter/hair_segmenter/float32/latest/hair_segmenter.tflite'];
-    const run=()=>urls.reduce((p,u)=>p.then(()=>fetch(u,{mode:'cors'}).then(r=>r.blob()).catch(()=>{})),Promise.resolve());   // blob(): the bytes stay out of the JS heap (arrayBuffer() copied ~13MB on the main thread)
+    if(!window.caches) return;
+    const f=this.files(), urls=[f.bundle,f.loader,f.wasm,f.face,f.hair];
+    const run=async()=>{
+      try{
+        const c=await caches.open(f.cache);
+        for(const u of urls){
+          try{ if(await c.match(u)) continue; const r=await fetch(u,{mode:'cors'}); if(r.ok) await c.put(u,r); }catch(_){}   // streamed into the cache: the bytes never touch the JS heap
+        }
+      }catch(_){}
+    };
     if(window.requestIdleCallback) requestIdleCallback(run,{timeout:15000}); else setTimeout(run,3000);
   },
   stop(){
@@ -15239,6 +15348,14 @@ const MirrorGuide={
     const c=document.getElementById('mirrorGuide');
     if(c) c.getContext('2d').clearRect(0,0,c.width,c.height);
     this.hint('');
+  },
+  // The screen is being left: abort a load that is still in flight (the cache keeps what already arrived); a ready worker
+  // is kept for a minute so a quick reopen is instant, then freed.
+  release(){
+    this.stop();
+    this.gen=(this.gen||0)+1;
+    clearTimeout(this.idleT);
+    if(this.wk){ if(!this.faceReady) this.killWorker(); else this.idleT=setTimeout(()=>this.killWorker(),60000); }
   },
   // a fresh loop on the same (already loaded) models - used when the video element or camera stream was replaced
   restart(video){ this.stop(); this.start(video); },
@@ -15258,7 +15375,16 @@ const MirrorGuide={
     try{
       const v=this.video, now=performance.now();
       this.beat=now;                                  // heartbeat for the camera watchdog
-      if(this.landmarker && v && v.readyState>=2 && v.videoWidth && now-this.lastTs>=90){ // ~11 analyses/sec keeps the phone cool and the preview smooth
+      if(this.wk){
+        if(this.pending && now-this.sentAt>10000) this.workerFail('frame');
+        if(this.faceReady && !this.pending && v && v.readyState>=2 && v.videoWidth && now-this.lastTs>=90){
+          this.lastTs=now; this.frame++; this.pending=true; this.sentAt=now;
+          const seg=this.hairReady && this.frame%4===0, w=this.wk;
+          createImageBitmap(v).then(bmp=>{ if(w!==this.wk){ bmp.close(); return; } w.postMessage({t:'frame',id,bmp,seg},[bmp]); })
+            .catch(()=>{ this.pending=false; if(w===this.wk) this.workerFail('init'); });
+        }
+      }
+      else if(this.landmarker && v && v.readyState>=2 && v.videoWidth && now-this.lastTs>=90){ // ~11 analyses/sec keeps the phone cool and the preview smooth
         this.lastTs=now; this.frame++;
         // hair mask every few frames (it changes slowly); kept between frames. Its own try: a failing segmenter must
         // never take the face detection down with it - it is simply dropped (skin-color hairline fallback).
@@ -15544,7 +15670,7 @@ function mirrorWatchdog(){
   // the video is fine but the guide loop stopped ticking (or never started): start a fresh one on the same models
   if(MirrorGuide.enabled && idle<=2000){
     if(MirrorGuide.running && performance.now()-(MirrorGuide.beat||0)>2500) MirrorGuide.restart(v);
-    else if(!MirrorGuide.running && MirrorGuide.landmarker && !MirrorGuide.reiniting) MirrorGuide.start(v);
+    else if(!MirrorGuide.running && MirrorGuide.ready() && !MirrorGuide.reiniting) MirrorGuide.start(v);
   }
 }
 function mirrorWake(){
@@ -15603,8 +15729,7 @@ function renderTefillinMirror(){
     return;
   }
   mirrorInitHooks();
-  MirrorGuide.preload();                         // only downloads the files (cheap); compiling them is deferred until the camera shows
-  if(MirrorGuide.enabled) MirrorGuide.hint(ckChrome('טוען מדריך…'));   // visible state from the first frame
+  if(MirrorGuide.enabled){ MirrorGuide.hint(ckChrome('טוען מדריך…')); MirrorGuide.warm(); }   // visible state from the first frame; the worker loads in parallel with the camera, off the main thread
   MCAM.fails=0; MCAM.lastTry=0; MCAM.denied=false;
   if(MCAM.timer) clearInterval(MCAM.timer);
   MCAM.timer=setInterval(mirrorWatchdog,1000);
