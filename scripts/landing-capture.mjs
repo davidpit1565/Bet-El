@@ -61,19 +61,35 @@ async function mk(lang,h){
   await p.evaluate(()=>{const v=document.getElementById('visitCount'),l=document.getElementById('liveCount');if(v)v.textContent='1,372';if(l)l.textContent='7';});
   return p;
 }
-const TRANSP='html,body,#app{background:transparent!important} body::before,body::after{display:none!important}';
+/* Everything behind a piece must be invisible: page background AND the backgrounds/borders/shadows/pseudo-layers of every ancestor
+   (a translucent .ical-card or .day-detail behind a cell used to be baked into that cell's screenshot as a square slab -> halo).
+   Ancestors are tagged data-anc for the duration of one screenshot. The sticky topbar's own opaque fill is dropped too, so the
+   landing screen's background shows through exactly like for every other piece. */
+const TRANSP='html,body,#app{background:transparent!important} .reader-head{background:transparent!important;box-shadow:none!important;border-color:transparent!important;backdrop-filter:none!important} body::before,body::after{display:none!important} .topbar{background:transparent!important;box-shadow:none!important;border-color:transparent!important;backdrop-filter:none!important}'
+  +' [data-anc]{background:none!important;box-shadow:none!important;border-color:transparent!important;backdrop-filter:none!important;filter:none!important} [data-anc]::before,[data-anc]::after{background:none!important;box-shadow:none!important;border-color:transparent!important}';
 async function hideNav(p){
   await p.evaluate(()=>{[...document.querySelectorAll('body *')].forEach(e=>{const s=getComputedStyle(e);if(s.position==='fixed'){const r=e.getBoundingClientRect();if(r.width>300&&r.height<120&&r.bottom>window.innerHeight-130)e.setAttribute('data-navx','1');}});});
   await p.addStyleTag({content:'[data-navx]{visibility:hidden!important}'});
 }
-/* one entry per matching element: position in the 393px space + its own transparent screenshot */
+/* one entry per matching element: position in the 393px space + its own transparent screenshot.
+   The shot is padded by PAD css px on every side (clamped to the viewport) so the element's own box-shadow / glow is captured in
+   full instead of being cut off at the element box (a straight cut of a soft shadow read as a faint rectangle behind rounded tiles).
+   Everything that is not the element (siblings, ancestors' paint) is hidden during the shot, so the padding holds only the shadow.
+   x,y,w,h are the PADDED rect (that is what the landing places); ty = the element's own top, for callers that align on content. */
+const PAD=26;
 async function pieces(p,sel,css=''){
-  await p.addStyleTag({content:TRANSP+css});
+  await p.addStyleTag({content:TRANSP+css+' body.cap *{visibility:hidden!important} body.cap [data-tgt],body.cap [data-tgt] *{visibility:visible!important}'});
   const res=[];
   for(const h of await p.$$(sel)){
-    const r=await h.evaluate(e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y+window.scrollY,w:b.width,h:b.height};});
-    if(r.w<4||r.h<4) continue;
-    res.push({...r,png:await h.screenshot({omitBackground:true})});
+    const b=await h.evaluate(e=>{const r=e.getBoundingClientRect();return {w:r.width,h:r.height};});
+    if(b.w<4||b.h<4) continue;
+    await h.scrollIntoViewIfNeeded();
+    const r=await h.evaluate(e=>{const q=e.getBoundingClientRect();return {x:q.x,y:q.y,w:q.width,h:q.height,sy:window.scrollY,vw:innerWidth,vh:innerHeight};});
+    const x0=Math.max(0,r.x-PAD),y0=Math.max(0,r.y-PAD),x1=Math.min(r.vw,r.x+r.w+PAD),y1=Math.min(r.vh,r.y+r.h+PAD);
+    await h.evaluate(e=>{document.body.classList.add('cap');e.setAttribute('data-tgt','1');for(let a=e.parentElement;a;a=a.parentElement)a.setAttribute('data-anc','1');});
+    const png=await p.screenshot({omitBackground:true,clip:{x:x0,y:y0,width:x1-x0,height:y1-y0}});
+    await p.evaluate(()=>{document.body.classList.remove('cap');document.querySelectorAll('[data-anc],[data-tgt]').forEach(a=>{a.removeAttribute('data-anc');a.removeAttribute('data-tgt');});});
+    res.push({x:x0,y:y0+r.sy,w:x1-x0,h:y1-y0,ty:r.y+r.sy,png});
   }
   return res;
 }
@@ -84,19 +100,17 @@ async function captureAll(lang){
   /* HOME (tall viewport so nothing scrolls) */
   {const p=await mk(lang,2000); await hideNav(p);
    out.home={w:393,h:await p.evaluate(()=>document.documentElement.scrollHeight),pieces:await pieces(p,'[data-home-item]')}; tag('home '+out.home.pieces.length); await p.context().close();}
-  /* NAV BAR (fixed tab bar on a normal 852px viewport) */
+  /* NAV BAR: just the floating pill (.bottom-nav) with its own shadow - the full-width .nav-fade gradient behind it is NOT part of
+     the piece (it used to be, which put a square opaque band behind the pill) */
   {const p=await mk(lang,852);
-   await p.evaluate(()=>{let f=null;[...document.querySelectorAll('body *')].forEach(e=>{const s=getComputedStyle(e);if(s.position==='fixed'){const r=e.getBoundingClientRect();if(r.width>300&&r.height<120&&r.bottom>window.innerHeight-130&&!f)f=e;}});if(f)f.setAttribute('data-navy','1');});
-   /* hide the page itself: the bar is translucent and would otherwise carry a ghost of the tile behind it */
-   await p.addStyleTag({content:'html,body{background:transparent!important} #app{visibility:hidden!important}'});
-   const h=await p.$('[data-navy]'); if(!h) throw new Error('nav bar not found');
-   const r=await h.evaluate(e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y,w:b.width,h:b.height};});
-   out.nav={...r,png:await h.screenshot({omitBackground:true})}; tag('nav'); await p.context().close();}
+   await p.addStyleTag({content:'.nav-fade{display:none!important}'});
+   const nv=await pieces(p,'.bottom-nav'); if(!nv.length) throw new Error('nav bar not found');
+   out.nav=nv[0]; tag('nav'); await p.context().close();}
   /* CALENDAR: top (header, switch, month bar, grid card + every day cell) and the selected-day detail */
   {const p=await mk(lang,2300); await p.evaluate(()=>window.go('calendar')); await p.waitForTimeout(2200); await hideNav(p);
    const top=await pieces(p,'#app > .topbar, .ical-seg, .ical-head');
-   const grid=await pieces(p,'.ical-card','.cal-grid>*{visibility:hidden!important}');
-   await p.addStyleTag({content:'.cal-grid>*{visibility:visible!important}'});
+   const grid=await pieces(p,'.ical-card','.cal-grid>*{opacity:0!important}');
+   await p.addStyleTag({content:'.cal-grid>*{opacity:1!important}'});
    const cells=await pieces(p,'.cal-grid > *');
    const detail=await pieces(p,'.day-detail > *:not(.zmanim-soon)');
    out.calendar={w:393,h:900,top:[...top,...grid,...cells],detail}; tag(`calendar top ${top.length+grid.length+cells.length} detail ${detail.length}`); await p.context().close();}
@@ -141,7 +155,7 @@ for(const site of SITES){
   const r=(v)=>Math.round(v*1000)/1000;
   const conv=(arr)=>arr.map(({png,x,y,w,h})=>({x:r(x),y:r(y),w:r(w),h:r(h),src:save(png)}));
   /* compass pieces: the old page placed the group with no safe-area offset, so start the header at y=66 like before */
-  const cp=cap.compassPieces, dyC=66-cp[0].y;
+  const cp=cap.compassPieces, dyC=66-cp[0].ty;
   const D={
     home:{w:393,h:cap.home.h,pieces:conv(cap.home.pieces)},
     nav:(({png,x,y,w,h})=>({x:r(x),y:r(y),w:r(w),h:r(h),src:save(png)}))(cap.nav),
