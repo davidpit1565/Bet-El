@@ -354,10 +354,20 @@ html[dir=rtl] .soonbtn{direction:rtl}
  .hero .lead{margin-inline:auto}
  .hero-phone{display:block;width:210px;height:calc(210px * 18.6 / 9);margin:12px auto -190px;-webkit-mask-image:linear-gradient(180deg,#000 0,#000 42%,transparent 58%);mask-image:linear-gradient(180deg,#000 0,#000 42%,transparent 58%)}
 }
+
+/* OUR APPS */
+.appgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.appcard{display:flex;flex-direction:column;gap:14px;padding:28px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(230,200,116,.07),rgba(255,255,255,.015));text-decoration:none;color:inherit;transition:border-color .25s,transform .25s}
+.appcard:hover{border-color:var(--gold);transform:translateY(-3px)}
+.appcard img{width:76px;height:76px;border-radius:18px;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 12px 30px rgba(0,0,0,.4)}
+.appcard h3{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.15}
+.appcard p{color:var(--soft);font-size:17.5px;line-height:1.7}
+.appcard .go{margin-top:auto;color:var(--gold);font-weight:700;font-size:16px}
+@media (max-width:760px){.appgrid{grid-template-columns:1fr}.appcard{padding:22px}}
 </style></head><body>
 <div id="prog"><i></i></div>
 <a class="skip" href="#faq">דלגו לשאלות נפוצות</a>
-<nav class="top" id="topnav"><a class="brand" href="#hero"><img alt="" src="img/logo.png"><b>תמיד</b></a><div class="navlinks"><a href="#story">האפליקציה</a><a href="#langs">שפות</a><a href="#who">למי זה מתאים</a><a href="#faq">שאלות</a></div><a class="navfaq" href="#faq">שאלות</a><a class="navlang" href="en/" hreflang="en" lang="en">English</a><a class="navcta" href="#cta">הורידו חינם לאייפון<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13M6 12l6 6 6-6"/></svg></a></nav>
+<nav class="top" id="topnav"><a class="brand" href="#hero"><img alt="" src="img/logo.png"><b>תמיד</b></a><div class="navlinks"><a href="#story">האפליקציה</a><a href="#langs">שפות</a><a href="#who">למי זה מתאים</a><a href="#faq">שאלות</a><a href="#apps">האפליקציות שלנו</a></div><a class="navfaq" href="#faq">שאלות</a><a class="navlang" href="en/" hreflang="en" lang="en">English</a><a class="navcta" href="#cta">הורידו חינם לאייפון<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13M6 12l6 6 6-6"/></svg></a></nav>
 <main id="main">
 <header class="hero" id="hero">
  <div class="hero-text"><img class="hero-logo" alt="תמיד" src="img/logo.png"><div class="eyebrow">אפליקציית הלימוד היומי</div>
@@ -437,6 +447,7 @@ html[dir=rtl] .soonbtn{direction:rtl}
   <details><summary>יש גרסה לאנדרואיד?</summary><p>האפליקציה זמינה ב-<bdi>App Store</bdi>, והגרסה ל-<bdi>Google Play</bdi> בדרך.</p></details>
   <details><summary>האם זו פסיקת הלכה?</summary><p>לא. זה כלי עזר ללימוד ולתפילה. לשאלות הלכתיות פנו לרב שלכם.</p></details>
  </div></section>
+<section class="sec" id="apps"><div class="k">עוד מאיתנו</div><h2 class="sh">האפליקציות שלנו</h2><p class="sub">שתי אפליקציות נוספות, כל אחת עם דף משלה.</p><div class="appgrid"><a class="appcard" href="shabbat-waker/"><img src="img/sw/icon.webp" alt="" width="76" height="76" loading="lazy"><h3>Shabbat Waker</h3><p>שעון מעורר שמכיר את השבת: התראות שמצלצלות גם על שקט, והדלקת נרות וצאת שבת לפי המיקום.</p><span class="go">לדף האפליקציה</span></a><a class="appcard" href="ben-ish-chai/"><img src="img/bic/icon.webp" alt="" width="76" height="76" loading="lazy"><h3>הלכות הבן איש חי</h3><p>הלכה אחת ביום, לפי סדר הפרשות של הבן איש חי, בעברית פשוטה.</p><span class="go">לדף האפליקציה</span></a></div></section>
 <section class="dl" id="cta">
  <div class="dl-in" style="position:relative;z-index:1">
   <div class="dl-h"><h2>הורידו חינם<br><span class="gold">לאייפון</span></h2></div>
@@ -450,7 +461,7 @@ html[dir=rtl] .soonbtn{direction:rtl}
 <noscript><style>.pin-track{height:auto!important}.pin-stage{position:static!important;height:auto!important;padding:40px 0!important}#story,#langs,.warp,.totop{display:none!important}.beat,.beatnums{opacity:1!important}</style></noscript>
 <footer class="sf"><div class="sf-in">
  <div class="sf-brand"><div class="brand"><img alt="" src="img/logo.png"><b>תמיד</b></div><p>אפליקציית הלימוד היומי.<br>חוק לישראל, תהילים, זהר, משנה, מוסר וסידור, בחמש שפות.</p></div>
- <div class="sf-col"><h3 class="sfh">באתר</h3><a href="#story">האפליקציה</a><a href="#langs">שפות</a><a href="#who">למי זה מתאים</a><a href="#faq">שאלות נפוצות</a></div>
+ <div class="sf-col"><h3 class="sfh">באתר</h3><a href="#story">האפליקציה</a><a href="#langs">שפות</a><a href="#who">למי זה מתאים</a><a href="#faq">שאלות נפוצות</a><a href="#apps">האפליקציות שלנו</a></div>
  <div class="sf-col"><h3 class="sfh">מידע</h3><button data-doc="privacy">מדיניות פרטיות</button><button data-doc="terms">תנאי שימוש</button><button data-doc="support">תמיכה</button><a href="#booklet">החוברת השבועית</a></div>
  <div class="sf-col"><h3 class="sfh">הורדה</h3><a href="https://apps.apple.com/app/id6807186847" target="_blank" rel="noopener">App Store</a><a href="https://davidpit1565.github.io/Bet-El/" target="_blank" rel="noopener">גרסת דפדפן</a><button data-doc="tester" class="sf-soon">אנדרואיד · הצטרפו כבודקים</button></div>
 </div>

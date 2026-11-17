@@ -354,10 +354,20 @@ html[dir=rtl] .soonbtn{direction:rtl}
  .hero .lead{margin-inline:auto}
  .hero-phone{display:block;width:210px;height:calc(210px * 18.6 / 9);margin:12px auto -190px;-webkit-mask-image:linear-gradient(180deg,#000 0,#000 42%,transparent 58%);mask-image:linear-gradient(180deg,#000 0,#000 42%,transparent 58%)}
 }
+
+/* OUR APPS */
+.appgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.appcard{display:flex;flex-direction:column;gap:14px;padding:28px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(230,200,116,.07),rgba(255,255,255,.015));text-decoration:none;color:inherit;transition:border-color .25s,transform .25s}
+.appcard:hover{border-color:var(--gold);transform:translateY(-3px)}
+.appcard img{width:76px;height:76px;border-radius:18px;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 12px 30px rgba(0,0,0,.4)}
+.appcard h3{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.15}
+.appcard p{color:var(--soft);font-size:17.5px;line-height:1.7}
+.appcard .go{margin-top:auto;color:var(--gold);font-weight:700;font-size:16px}
+@media (max-width:760px){.appgrid{grid-template-columns:1fr}.appcard{padding:22px}}
 </style></head><body>
 <div id="prog"><i></i></div>
 <a class="skip" href="#faq">Skip to FAQ</a>
-<nav class="top" id="topnav"><a class="brand" href="#hero"><img alt="" src="img/logo.png"><b>Tamid</b></a><div class="navlinks"><a href="#story">The app</a><a href="#langs">Languages</a><a href="#who">Who it is for</a><a href="#faq">FAQ</a></div><a class="navfaq" href="#faq">FAQ</a><a class="navlang" href="../" hreflang="he" lang="he">עברית</a><a class="navcta" href="#cta">Get it free on iPhone<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13M6 12l6 6 6-6"/></svg></a></nav>
+<nav class="top" id="topnav"><a class="brand" href="#hero"><img alt="" src="img/logo.png"><b>Tamid</b></a><div class="navlinks"><a href="#story">The app</a><a href="#langs">Languages</a><a href="#who">Who it is for</a><a href="#faq">FAQ</a><a href="#apps">Our apps</a></div><a class="navfaq" href="#faq">FAQ</a><a class="navlang" href="../" hreflang="he" lang="he">עברית</a><a class="navcta" href="#cta">Get it free on iPhone<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13M6 12l6 6 6-6"/></svg></a></nav>
 <main id="main">
 <header class="hero" id="hero">
  <div class="hero-text"><img class="hero-logo" alt="Tamid" src="img/logo.png"><div class="eyebrow">The daily learning app</div>
@@ -437,6 +447,7 @@ html[dir=rtl] .soonbtn{direction:rtl}
   <details><summary>Is there an Android version?</summary><p>The app is available on the App Store, and the Google Play version is on its way.</p></details>
   <details><summary>Is this a halachic ruling?</summary><p>No. It is a tool for learning and prayer. For halachic questions, ask your rabbi.</p></details>
  </div></section>
+<section class="sec" id="apps"><div class="k">More from us</div><h2 class="sh">Our apps</h2><p class="sub">Two more apps, each with its own page.</p><div class="appgrid"><a class="appcard" href="../shabbat-waker/en/"><img src="../img/sw/icon.webp" alt="" width="76" height="76" loading="lazy"><h3>Shabbat Waker</h3><p>An alarm clock that knows Shabbat: alarms that ring even on silent, plus candle lighting and havdalah for your location.</p><span class="go">See the app</span></a><a class="appcard" href="../ben-ish-chai/?from=en" hreflang="he" lang="he"><img src="../img/bic/icon.webp" alt="" width="76" height="76" loading="lazy"><h3>הלכות הבן איש חי</h3><p>One halacha a day, in the order of the weekly portion. This page is in Hebrew only.</p><span class="go">See the app (Hebrew)</span></a></div></section>
 <section class="dl" id="cta">
  <div class="dl-in" style="position:relative;z-index:1">
   <div class="dl-h"><h2>Get it free<br><span class="gold">on iPhone</span></h2></div>
@@ -450,7 +461,7 @@ html[dir=rtl] .soonbtn{direction:rtl}
 <noscript><style>.pin-track{height:auto!important}.pin-stage{position:static!important;height:auto!important;padding:40px 0!important}#story,#langs,.warp,.totop{display:none!important}.beat,.beatnums{opacity:1!important}</style></noscript>
 <footer class="sf"><div class="sf-in">
  <div class="sf-brand"><div class="brand"><img alt="" src="img/logo.png"><b>Tamid</b></div><p>The daily learning app.<br>Chok LeYisrael, Tehillim, Zohar, Mishnah, Musar and the Siddur, in five languages.</p></div>
- <div class="sf-col"><h3 class="sfh">On this site</h3><a href="#story">The app</a><a href="#langs">Languages</a><a href="#who">Who it is for</a><a href="#faq">FAQ</a></div>
+ <div class="sf-col"><h3 class="sfh">On this site</h3><a href="#story">The app</a><a href="#langs">Languages</a><a href="#who">Who it is for</a><a href="#faq">FAQ</a><a href="#apps">Our apps</a></div>
  <div class="sf-col"><h3 class="sfh">Information</h3><button data-doc="privacy">Privacy policy</button><button data-doc="terms">Terms of use</button><button data-doc="support">Support</button><a href="#booklet">Weekly booklet</a></div>
  <div class="sf-col"><h3 class="sfh">Download</h3><a href="https://apps.apple.com/app/id6807186847" target="_blank" rel="noopener">App Store</a><a href="https://davidpit1565.github.io/Bet-El/" target="_blank" rel="noopener">Browser version</a><button data-doc="tester" class="sf-soon">Android · join as a tester</button></div>
 </div>
