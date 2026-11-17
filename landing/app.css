@@ -95,7 +95,10 @@ nav.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18p
 .hero-phone{display:none}
 .hero2 .hero-phone{display:block;--w:min(230px,62vw);margin:34px auto 0;position:relative}
 .hero-phone img{display:block;width:var(--w);height:auto;margin:0 auto;border-radius:calc(var(--w)*.11) calc(var(--w)*.11) 0 0;-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent);animation:hfloat 6s ease-in-out infinite;filter:drop-shadow(0 24px 40px var(--icon-glow))}
-.hero-phone.soft img{border-radius:0;-webkit-mask-image:radial-gradient(ellipse 70% 66% at 50% 46%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 70% 66% at 50% 46%,#000 58%,transparent 100%);filter:none}
+.hero2 .hero-phone.soft{--w:min(318px,88vw)}
+.hero-phone.soft img{border-radius:0;-webkit-mask-image:radial-gradient(ellipse 80% 74% at 50% 48%,#000 64%,transparent 100%);mask-image:radial-gradient(ellipse 80% 74% at 50% 48%,#000 64%,transparent 100%);filter:none;animation-name:hfloatb;animation-duration:5.2s}
+@keyframes hfloatb{0%,100%{transform:translateY(2px) rotate(-.4deg)}50%{transform:translateY(-14px) rotate(.4deg)}}
+@media (min-width:1000px){.hero2 .hero-phone.soft{--w:clamp(360px,34vw,450px)}}
 @keyframes hfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @media (min-width:1000px){
  .hero2{max-width:1120px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;text-align:start;padding-inline:24px}
@@ -120,7 +123,7 @@ nav.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18p
 .sf-col h3.sfh{font-size:15px}
 @media (max-width:900px){.cards3{grid-template-columns:1fr 1fr}.sf-in{grid-template-columns:1fr 1fr}.sf-brand{grid-column:1/-1}}
 @media (max-width:640px){.cards3,.cards2{grid-template-columns:1fr}.sf-in{grid-template-columns:1fr 1fr;gap:24px}}
-@media (prefers-reduced-motion:reduce){.hero-phone img{animation:none}}
+@media (prefers-reduced-motion:reduce){.hero-phone img,.hero-phone.soft img{animation:none}}
 
 .soonbtn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:18px;padding:8px 18px;border-radius:12px;border:1px dashed var(--acc);background:transparent;color:inherit;font:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:background .2s}
 .soonbtn:hover{background:var(--soft)}

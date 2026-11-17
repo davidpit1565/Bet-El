@@ -19,8 +19,9 @@
  d.querySelectorAll('[data-share]').forEach(function(el){el.addEventListener('click',share)});
  /* Ben Ish Chai is Hebrew only; when reached from an English page its back links return to the English pages. */
  if(b.hasAttribute('data-bic')){try{
-  var q=/[?&]from=en/.test(location.search),r=/\/en\//.test(d.referrer);if(q)sessionStorage.setItem('lp_en','1');
-  if(q||r||sessionStorage.getItem('lp_en')==='1'){d.querySelectorAll('a[data-en]').forEach(function(a){a.href=a.getAttribute('data-en')})}
+  var en=/[?&]from=en/.test(location.search)||/\/en\//.test(d.referrer);
+  if(en){d.querySelectorAll('a[data-en]').forEach(function(a){a.href=a.getAttribute('data-en')})}
+  try{sessionStorage.removeItem('lp_en')}catch(e){}
  }catch(e){}}
  /* scroll to top with the app icon spinning over a tinted backdrop (same logic as the Tamid page) */
  var w=d.getElementById('warp'),up=d.getElementById('toTop');
