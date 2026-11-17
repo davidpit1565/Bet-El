@@ -61,7 +61,7 @@ call fails — offline, not yet deployed, wrong/missing key, etc.), so
 there's no rush and no risk in deploying this whenever convenient.
 
 After deploying, submit the feedback form in the app once and confirm the
-email arrives at info@bet-el.be instead of opening the Mail app.
+email arrives at tamid.app@gmail.com instead of opening the Mail app.
 
 ---
 

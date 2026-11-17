@@ -12,7 +12,7 @@ admin.initializeApp();
 // see functions/README.md for the full one-time setup).
 const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
 
-const SUPPORT_EMAIL = "info@bet-el.be";
+const SUPPORT_EMAIL = "tamid.app@gmail.com";
 const MAX_FIELD_LENGTH = 500;
 
 /**
