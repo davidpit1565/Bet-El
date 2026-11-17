@@ -1,0 +1,38 @@
+/* Shared "family" components: app switcher, QR box, share button, toast. Colors come from the host page's own tokens. */
+.swbar{display:flex;align-items:center;justify-content:center;gap:14px;padding:16px 16px 0;flex-wrap:wrap}
+.swlabel{font-size:13.5px;color:var(--soft);letter-spacing:.04em}
+.swlist{display:flex;gap:6px;padding:6px;border:1px solid var(--line);border-radius:22px;background:var(--sw-bg,rgba(255,255,255,.04))}
+.swi{display:flex;flex-direction:column;align-items:center;gap:6px;width:108px;padding:9px 6px 8px;border-radius:16px;text-decoration:none;color:var(--soft);font-size:12.5px;line-height:1.2;text-align:center;border:1px solid transparent;transition:background .2s,border-color .2s,color .2s,transform .2s}
+.swi img{width:46px;height:46px;border-radius:11px;object-fit:cover;box-shadow:0 0 0 1px rgba(128,128,128,.28);opacity:.82;transition:opacity .2s,box-shadow .2s}
+.swi:hover{background:var(--sw-hov,rgba(255,255,255,.07));color:var(--ink);transform:translateY(-1px)}.swi:hover img{opacity:1}
+.swi[aria-current=page]{background:var(--sw-cur,rgba(255,255,255,.09));border-color:var(--acc,var(--gold));color:var(--ink);font-weight:700}
+.swi[aria-current=page] img{opacity:1;box-shadow:0 0 0 2px var(--acc,var(--gold)),0 6px 18px var(--sw-glow,rgba(230,200,116,.3))}
+.swi:focus-visible,.sharebtn:focus-visible{outline:2px solid var(--acc,var(--gold));outline-offset:2px}
+/* download row: badge + QR */
+.dlrow{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:30px;flex-wrap:wrap}
+.dlrow .badges{margin-top:0}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:7px}
+.qrbox img{display:block;width:116px;height:116px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px var(--line),0 8px 22px rgba(0,0,0,.18)}
+.qrbox span{font-size:13px;color:var(--soft)}
+@media (max-width:760px),(hover:none) and (pointer:coarse){.qrbox{display:none}}
+/* share */
+.sharebtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:99px;border:1px solid var(--line);background:var(--sh-bg,transparent);color:var(--ink);font:inherit;font-size:15px;cursor:pointer;transition:border-color .2s,background .2s}
+.sharebtn:hover{border-color:var(--acc,var(--gold));background:var(--sw-hov,rgba(255,255,255,.07))}
+.sharebtn svg{width:18px;height:18px;flex:none}
+.shrow{display:flex;justify-content:center;margin-top:18px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,10px);opacity:0;pointer-events:none;background:#0d1426;color:#fff;border:1px solid rgba(255,255,255,.18);padding:10px 20px;border-radius:99px;font-size:15px;z-index:120;transition:opacity .25s,transform .25s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:560px){.swi{width:98px}.swlist{gap:4px;padding:5px}.swlabel{flex-basis:100%;text-align:center}.swbar{gap:8px}}
+@media (prefers-reduced-motion:reduce){.toast,.swi{transition:none}}
+/* Tamid home: nav button + hero extras */
+.navapps{display:inline-flex;align-items:center;gap:9px;min-height:36px;padding:4px 14px 4px 6px;border-radius:99px;border:1px solid rgba(230,200,116,.55);background:linear-gradient(180deg,rgba(230,200,116,.2),rgba(230,200,116,.08));color:#f6f1e4;font-size:15px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .2s,border-color .2s}
+.navapps:hover{background:rgba(230,200,116,.28);border-color:#e6c874}
+.navapps .mi{display:inline-flex}.navapps .mi img{width:24px;height:24px;border-radius:7px;box-shadow:0 0 0 1.5px #0a0e22}.navapps .mi img+img{margin-inline-start:-8px}
+.herosw{padding:22px 0 0;justify-content:flex-start}
+.herosw .swlabel{color:var(--soft)}
+.herodl{justify-content:flex-start;margin-top:30px}.herodl .badges{margin-top:0}
+.herosh{justify-content:flex-start;margin-top:14px}
+.appcard .qrbox{margin-top:14px;align-self:flex-start}
+.appcard .qrbox img{width:104px;height:104px}
+@media (max-width:900px){.herosw,.herodl,.herosh{justify-content:center}}
+@media (max-width:760px){.navapps{padding:4px 6px}.navapps .nt{display:none}.navfaq{display:none}}
