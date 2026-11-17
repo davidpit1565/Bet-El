@@ -121,3 +121,19 @@ nav.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18p
 @media (max-width:900px){.cards3{grid-template-columns:1fr 1fr}.sf-in{grid-template-columns:1fr 1fr}.sf-brand{grid-column:1/-1}}
 @media (max-width:640px){.cards3,.cards2{grid-template-columns:1fr}.sf-in{grid-template-columns:1fr 1fr;gap:24px}}
 @media (prefers-reduced-motion:reduce){.hero-phone img{animation:none}}
+
+.soonbtn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:18px;padding:8px 18px;border-radius:12px;border:1px dashed var(--acc);background:transparent;color:inherit;font:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:background .2s}
+.soonbtn:hover{background:var(--soft)}
+.hero2 .soonbtn{align-self:flex-start}
+.sf-soon{background:none;border:0;padding:9px 0;font:inherit;font-size:15px;color:var(--soft);cursor:pointer;text-align:start}
+.sf-soon:hover{color:inherit}
+.tmodal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.55)}
+.tmodal[hidden]{display:none}
+.tpanel{position:relative;width:min(440px,100%);padding:28px 24px 24px;border-radius:18px;background:var(--bg);color:var(--ink);border:1px solid var(--line);box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.tpanel h2{margin:0 0 10px;font-size:22px}
+.tpanel p{margin:0 0 16px;line-height:1.7;color:var(--soft)}
+.tpanel label{display:block;margin-bottom:12px;font-size:14px}
+.tpanel input{display:block;width:100%;margin-top:6px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;font:inherit;font-size:16px}
+.tpanel button[type=submit]{width:100%;min-height:46px;margin-top:4px;border:0;border-radius:12px;background:var(--acc);color:var(--bg);font:inherit;font-weight:700;cursor:pointer}
+.tpanel small{display:block;margin-top:10px;color:var(--soft);font-size:12.5px}
+.tpanel .tx{position:absolute;top:10px;inset-inline-end:12px;width:36px;height:36px;border:0;background:none;color:inherit;font-size:24px;cursor:pointer}

@@ -73,4 +73,23 @@
   draw();
   if(!rm){raf=requestAnimationFrame(loop);d.addEventListener('visibilitychange',function(){cancelAnimationFrame(raf);if(!d.hidden)raf=requestAnimationFrame(loop)});}
  })();
+
+ /* Android testers dialog */
+ (function(){
+  var bs=d.querySelectorAll('[data-tester]');if(!bs.length)return;
+  var m,opener;
+  function build(){
+   m=d.createElement('div');m.className='tmodal';m.hidden=true;m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+   m.innerHTML='<div class="tpanel" dir="rtl"><button class="tx" type="button" aria-label="סגירה">&times;</button><h2>בודקים לאנדרואיד</h2><p>גרסת <bdi>Google Play</bdi> עדיין בדרך. כדי לפרסם אותה, גוגל דורשת קבוצה של בודקים שישתמשו באפליקציה כשבועיים ברצף. אם יש לכם טלפון אנדרואיד ואתם רוצים לעזור, השאירו שם וכתובת <bdi>Gmail</bdi>, ונחזור אליכם עם קישור להצטרפות.</p><form><label>שם<input name="name" autocomplete="name" required></label><label>כתובת <bdi>Gmail</bdi><input name="mail" type="email" autocomplete="email" required placeholder="name@gmail.com"></label><button type="submit">שלחו בקשה</button><small>הלחיצה פותחת הודעת אימייל מוכנה מהמכשיר שלכם, אלינו.</small></form></div>';
+   d.body.appendChild(m);
+   m.addEventListener('click',function(e){if(e.target===m||e.target.className==='tx')close();});
+   d.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden)close();});
+   var f=m.querySelector('form');
+   f.onsubmit=function(e){e.preventDefault();var n=f.elements.name.value.trim(),g=f.elements.mail.value.trim();
+    location.href='mailto:tamid.app@gmail.com?subject='+encodeURIComponent('בקשה להצטרפות כבודק באנדרואיד - הלכות הבן איש חי')+'&body='+encodeURIComponent('שם: '+n+'\nGmail: '+g+'\nאני רוצה להיות בודק לגרסת האנדרואיד של הלכות הבן איש חי.');};
+  }
+  function open(){if(!m)build();opener=d.activeElement;m.hidden=false;d.body.style.overflow='hidden';m.querySelector('input').focus();}
+  function close(){m.hidden=true;d.body.style.overflow='';if(opener&&opener.focus)opener.focus();}
+  [].forEach.call(bs,function(b){b.addEventListener('click',open);});
+ })();
 })();
